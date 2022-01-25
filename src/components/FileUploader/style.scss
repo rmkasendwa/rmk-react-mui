@@ -1,0 +1,98 @@
+.file-icon.file-icon-small:after {
+  content: '';
+  display: block;
+  width: 68px;
+  height: 90px;
+  position: absolute;
+  top: 15px;
+  left: 0;
+  background-image: url('./img/file-type-icons.png');
+  background-size: 816px;
+  background-repeat: no-repeat;
+  transform-origin: top left;
+  transform: scale(0.45);
+}
+.file-icon.file-icon-small.pdf:after {
+  background-position: 0px 0px;
+}
+.file-icon.file-icon-small.jpg:after {
+  background-position: -68px 0px;
+}
+.file-icon.file-icon-small.png:after {
+  background-position: -136px 0px;
+}
+.file-icon.file-icon-small.ppt:after {
+  background-position: -204px 0px;
+}
+.file-icon.file-icon-small.doc:after {
+  background-position: -272px 0px;
+}
+.file-icon.file-icon-small.zip:after {
+  background-position: -340px 0px;
+}
+.file-icon.file-icon-small.exe:after {
+  background-position: -408px 0px;
+}
+.file-icon.file-icon-small.wav:after {
+  background-position: -476px 0px;
+}
+.file-icon.file-icon-small.mpg:after {
+  background-position: -544px 0px;
+}
+.file-icon.file-icon-small.mp4:after {
+  background-position: -612px 0px;
+}
+.file-icon.file-icon-small.mov:after {
+  background-position: -680px 0px;
+}
+.file-icon.file-icon-small.html:after {
+  background-position: -748px 0px;
+}
+.file-icon.file-icon-small.xlsx:after {
+  background-position: 0px -90px;
+}
+.file-icon.file-icon-small.svg:after {
+  background-position: -68px -90px;
+}
+.file-icon.file-icon-small.docx:after {
+  background-position: -136px -90px;
+}
+.file-icon.file-icon-small.jar:after {
+  background-position: -204px -90px;
+}
+.file-icon.file-icon-small.json:after {
+  background-position: -272px -90px;
+}
+.file-icon.file-icon-small.csv:after {
+  background-position: -340px -90px;
+}
+.file-icon.file-icon-small.py:after {
+  background-position: -408px -90px;
+}
+.file-icon.file-icon-small.xml:after {
+  background-position: -476px -90px;
+}
+.file-icon.file-icon-small.mp3:after {
+  background-position: -544px -90px;
+}
+.file-icon.file-icon-small.css:after {
+  background-position: -612px -90px;
+}
+.file-icon.file-icon-small.js:after {
+  background-position: -680px -90px;
+}
+.file-icon.file-icon-small.txt:after {
+  background-position: -748px -90px;
+}
+.file-icon.file-icon-small.reg:after {
+  background-position: 0px -180px;
+}
+.file-icon.file-icon-small.psd:after {
+  background-position: -68px -180px;
+}
+.file-icon.file-icon-small.ink:after {
+  background-position: -136px -180px;
+}
+.file-icon.file-icon-small.inf:after {
+  background-position: -204px -180px;
+}
