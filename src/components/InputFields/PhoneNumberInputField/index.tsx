@@ -52,7 +52,6 @@ export const PhoneNumberInputField: FC<IPhoneNumberInputFieldProps> = ({
 
   const { countryCode } = useContext(GlobalConfigurationContext);
   regionalCode || (regionalCode = countryCode);
-  console.log({ regionalCode });
   const [selectedCountry, setSelectedCountry] = useState(flags[regionalCode]);
 
   const anchorRef = useRef(null);

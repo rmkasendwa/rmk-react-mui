@@ -19,7 +19,7 @@ const Template: ComponentStory<typeof PhoneNumberInputField> = ({
     <PhoneNumberInputField
       label="Phone Number"
       {...rest}
-      sx={{ width: 400, ...sx }}
+      sx={{ width: 500, ...sx }}
     />
   </Box>
 );
