@@ -1,6 +1,6 @@
 import { FC, createContext } from 'react';
 
-interface ILoadingContext {
+export interface ILoadingContext {
   load?: () => void;
   loading: boolean;
   loaded?: boolean;
