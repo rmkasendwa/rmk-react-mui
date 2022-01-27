@@ -1,16 +1,35 @@
 {
   "name": "@infinite-debugger/react-mui",
-  "version": "0.1.0",
-  "private": true,
+  "version": "0.1.0-alpha.3",
+  "description": "<h1 align=\"center\">infinite-debugger/react-mui</h1>",
+  "keywords": [
+    "react",
+    "react-component",
+    "mui",
+    "material-ui",
+    "material design"
+  ],
+  "homepage": "https://github.com/rmkasendwa/rmk-react-mui#readme",
+  "bugs": {
+    "url": "https://github.com/rmkasendwa/rmk-react-mui/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rmkasendwa/rmk-react-mui.git"
+  },
+  "license": "MIT",
+  "author": "Ronald M. Kasendwa",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
   "scripts": {
     "prebuild": "rm -rf lib",
     "build": "tsc && copy-and-watch src/**/*.{png,jpg,css,scss,sass,json} lib",
-    "postbuild": "cp package.json lib/package.json",
+    "postbuild": "cp ./{package.json,README.md,LICENSE} ./lib/",
     "build-storybook": "build-storybook -s public",
     "eslint": "eslint --fix",
     "format": "prettier --write \"./**/*.{js,jsx,ts,tsx,html,htm,json,css,scss,md}\"",
-    "postinstall": "npm run prepare",
-    "prepare": "husky install",
     "start": "concurrently --names \"Typescript,Assets\" -c \"blue.bold,magenta.bold\" \"tsc -w\" \"copy-and-watch --watch src/**/*.{png,jpg,css,scss,sass,json} lib\"",
     "storybook": "start-storybook -p 6006 -s public",
     "test": "react-scripts test --watchAll=false"
