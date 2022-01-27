@@ -1,15 +1,16 @@
+import '../src/scss/style.scss';
+
 import { Box, CssBaseline } from '@mui/material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { withThemes } from '@react-theming/storybook-addon';
 import { addDecorator } from '@storybook/react';
 import React from 'react';
+import { Provider as ReduxProvider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
 
 import { APIProvider, GlobalConfigurationProvider } from '../src/contexts';
-import { defaultTheme } from '../src/theme';
-import { Provider as ReduxProvider } from 'react-redux';
 import store from '../src/redux/store';
-import '../src/scss/style.scss';
+import { defaultTheme } from '../src/theme';
 
 const providerFn = ({ theme, children }) => {
   const serialTheme = JSON.parse(JSON.stringify(theme));

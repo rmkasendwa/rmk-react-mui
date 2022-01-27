@@ -1,7 +1,4 @@
 import { ListProps } from '@mui/material';
-import Avatar from '@mui/material/Avatar';
-import Badge from '@mui/material/Badge';
-import { grey } from '@mui/material/colors';
 import {
   Divider,
   List,
@@ -10,7 +7,10 @@ import {
   ListItemText,
   Typography,
 } from '@mui/material';
-import { Fragment, CSSProperties, FC } from 'react';
+import Avatar from '@mui/material/Avatar';
+import Badge from '@mui/material/Badge';
+import { grey } from '@mui/material/colors';
+import { CSSProperties, FC, Fragment } from 'react';
 
 interface INotificationsListProps extends ListProps {}
 

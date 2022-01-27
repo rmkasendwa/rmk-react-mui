@@ -27,8 +27,9 @@ export const DateInputField: FC<IDateInputFieldProps> = ({
   value = useFormikValue({ value, name });
 
   const smallScreen = useSmallScreen();
-  const [inputField, setInputField] =
-    useState<HTMLInputElement | null | undefined>(null);
+  const [inputField, setInputField] = useState<
+    HTMLInputElement | null | undefined
+  >(null);
 
   const datePickerProps: MobileDatePickerProps | DesktopDatePickerProps = {
     value: value ? new Date(value) : new Date(),

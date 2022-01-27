@@ -1,4 +1,4 @@
-import { alpha, createTheme, Palette } from '@mui/material';
+import { Palette, alpha, createTheme } from '@mui/material';
 import { grey } from '@mui/material/colors';
 
 // Mood Colors

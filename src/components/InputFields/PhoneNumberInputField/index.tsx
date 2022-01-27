@@ -1,3 +1,5 @@
+import './scss/style.scss';
+
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { Box, Button, InputAdornment, Typography } from '@mui/material';
 import {
@@ -8,14 +10,14 @@ import {
   useRef,
   useState,
 } from 'react';
+
 import { GlobalConfigurationContext } from '../../../contexts';
 import { useFormikValue } from '../../../hooks';
 import { ICountryCode } from '../../../interfaces';
 import { systemStandardPhoneNumberFormat } from '../../../utils/PhoneNumberUtil';
 import TextField, { ITextFieldProps } from '../TextField';
-import { countries, ICountry } from './countries';
+import { ICountry, countries } from './countries';
 import CountryList from './CountryList';
-import './scss/style.scss';
 
 interface IPhoneNumberInputFieldProps extends ITextFieldProps {
   value?: string;

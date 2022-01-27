@@ -1,0 +1,9 @@
+node_modules
+dist
+lib
+builds
+coverage
+sandbox
+temp
+__sandbox
+__testdata
