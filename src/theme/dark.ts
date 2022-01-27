@@ -1,6 +1,7 @@
 import { alpha, createTheme, darken, lighten } from '@mui/material';
 import createPalette from '@mui/material/styles/createPalette';
-import { getBaseTheme, WHITE_COLOR } from './base';
+
+import { WHITE_COLOR, getBaseTheme } from './base';
 import { lightThemePalatte } from './light';
 
 const palette = createPalette({

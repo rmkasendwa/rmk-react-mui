@@ -1,18 +1,18 @@
 import CloseIcon from '@mui/icons-material/Close';
 import SearchIcon from '@mui/icons-material/Search';
 import {
-  Box,
-  Container,
-  TextField,
-  Typography,
-  alpha,
-  useTheme,
   AppBar,
+  Box,
   Button,
+  Container,
   Grid,
   IconButton,
   Paper,
+  TextField,
   Toolbar,
+  Typography,
+  alpha,
+  useTheme,
 } from '@mui/material';
 import { FC, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -61,8 +61,9 @@ export const FullPageTable: FC<IFullPageTableProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredRows, setFilteredRows] = useState<any[]>([]);
   const [displayRows, setDisplayRows] = useState<any[]>([]);
-  const [tableWrapperDiv, setTableWrapperDiv] =
-    useState<HTMLDivElement | null>(null);
+  const [tableWrapperDiv, setTableWrapperDiv] = useState<HTMLDivElement | null>(
+    null
+  );
   const [showStickyToolBar, setShowStickyToolBar] = useState(false);
 
   const searchableColumnIds = useMemo(() => {
