@@ -15,8 +15,6 @@ interface IDropdownOption {
 }
 
 export interface IDataDropdownFieldProps extends ITextFieldProps {
-  emptyOptionLabel?: ReactNode;
-  disableEmptyOption?: boolean;
   getDropdownEntities?: IAPIFunction;
   getDropdownOptions?: (options: any[]) => IDropdownOption[];
   options?: IDropdownOption[];
@@ -32,8 +30,6 @@ const DEFAULT_NUMBER_OF_OPTIONS_TO_RENDER = Math.floor(
 
 export const DataDropdownField: FC<IDataDropdownFieldProps> = ({
   SelectProps,
-  emptyOptionLabel = 'Select',
-  disableEmptyOption = true,
   getDropdownEntities,
   getDropdownOptions,
   children,
@@ -44,11 +40,6 @@ export const DataDropdownField: FC<IDataDropdownFieldProps> = ({
   sortOptions = false,
   ...rest
 }) => {
-  if (rest.label) {
-    emptyOptionLabel = <>&nbsp;</>;
-    disableEmptyOption = true;
-  }
-
   value = useFormikValue({ value, name });
 
   const [dropdownAnchorEl, setDropdownAnchorEl] =

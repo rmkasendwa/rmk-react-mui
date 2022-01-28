@@ -22,9 +22,7 @@ const providerFn = ({ theme, children }) => {
           <ReduxProvider store={store}>
             <ThemeProvider theme={muiTheme}>
               <CssBaseline />
-              <Box minWidth={960} maxWidth={1200}>
-                {children}
-              </Box>
+              {children}
             </ThemeProvider>
           </ReduxProvider>
         </APIProvider>
@@ -48,4 +46,5 @@ export const parameters = {
       type: 'code',
     },
   },
+  layout: 'fullscreen',
 };

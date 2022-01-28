@@ -52,7 +52,6 @@ export const FullPageTable: FC<IFullPageTableProps> = ({
   labelPlural,
   tools,
   variant,
-  showBreadcrumbs,
   loading,
   errorMessage,
   load,
@@ -230,11 +229,7 @@ export const FullPageTable: FC<IFullPageTableProps> = ({
           <Container>{toolbar}</Container>
         </AppBar>
       )}
-      <PaddedContentArea
-        title={title}
-        tools={tools}
-        showBreadcrumbs={showBreadcrumbs}
-      >
+      <PaddedContentArea title={title} tools={tools}>
         <Paper sx={{ overflow: 'hidden' }}>
           <AppBar
             position="static"

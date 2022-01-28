@@ -11,7 +11,6 @@ import { Children, FC, ReactNode } from 'react';
 export interface IPaddedContentAreaProps extends ContainerProps {
   title?: string;
   tools?: ReactNode | ReactNode[];
-  showBreadcrumbs?: boolean;
 }
 
 export const PaddedContentArea: FC<IPaddedContentAreaProps> = ({
@@ -19,7 +18,6 @@ export const PaddedContentArea: FC<IPaddedContentAreaProps> = ({
   title,
   sx,
   tools,
-  showBreadcrumbs = false,
   ...rest
 }) => {
   const theme = useTheme();

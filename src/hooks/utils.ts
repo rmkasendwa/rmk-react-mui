@@ -80,9 +80,7 @@ export const useAPIService = <T>(defautValue: T, key?: string) => {
 };
 
 export const useCreate = <T>() => {
-  const { load, loading, loaded, record, ...rest } = useAPIService<T | null>(
-    null
-  );
+  const { load, loading, record, ...rest } = useAPIService<T | null>(null);
   const [created, setCreated] = useState(false);
 
   useEffect(() => {
