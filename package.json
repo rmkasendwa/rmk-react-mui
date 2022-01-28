@@ -25,14 +25,15 @@
   },
   "scripts": {
     "prebuild": "rm -rf lib",
-    "build": "tsc && copy-and-watch src/**/*.{png,jpg,css,scss,sass,json} lib",
-    "postbuild": "cp ./{package.json,README.md,LICENSE} ./lib/",
+    "build": "npm run tsc && copy-and-watch src/**/*.{png,jpg,css,scss,sass,json} lib",
+    "postbuild": "node ./scripts/postbuild",
     "build-storybook": "build-storybook -s public",
     "eslint": "eslint --fix",
     "format": "prettier --write \"./**/*.{js,jsx,ts,tsx,html,htm,json,css,scss,md}\"",
     "start": "concurrently --names \"Typescript,Assets\" -c \"blue.bold,magenta.bold\" \"tsc -w\" \"copy-and-watch --watch src/**/*.{png,jpg,css,scss,sass,json} lib\"",
     "storybook": "start-storybook -p 6006 -s public",
-    "test": "react-scripts test --watchAll=false"
+    "test": "react-scripts test --watchAll=false",
+    "tsc": "tsc"
   },
   "browserslist": {
     "production": [
@@ -115,6 +116,7 @@
     "eslint-plugin-react-hooks": "^4.3.0",
     "eslint-plugin-sort-keys-fix": "^1.1.2",
     "formik": "^2.2.9",
+    "fs-extra": "^10.0.0",
     "husky": "^7.0.4",
     "import-sort-style-module": "^6.0.0",
     "node-sass": "^7.0.1",
