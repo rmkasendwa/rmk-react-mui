@@ -9,6 +9,7 @@ export * from './FieldValueDisplay';
 export * from './FileUploader';
 export * from './FormWrapper';
 export * from './FullPageTable';
+export * from './ImageSelector';
 export * from './InputFields';
 export * from './LoadingScreen';
 export * from './NotFound';

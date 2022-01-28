@@ -20,3 +20,25 @@ export interface ILoadingProps {
   loading: boolean;
   errorMessage: string;
 }
+
+export interface IImage {
+  id?: string;
+  base64: string;
+  originalFile: File;
+}
+
+export interface IImageUploadOptions {
+  onProgress: (progress: number) => void;
+  onError: (err: Error) => void;
+  onSuccess: (payload: any) => void;
+  onComplete: () => void;
+}
+
+export interface IImageUploadController {
+  cancel: () => void;
+}
+
+export type IImageUploadFunction = (
+  imageFile: File,
+  options: IImageUploadOptions
+) => IImageUploadController;
