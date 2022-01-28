@@ -4,16 +4,13 @@ import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { FileUploader } from '../components';
 
 export default {
-  title: 'File Uploader',
+  title: 'Components/File Uploader',
   component: FileUploader,
-  parameters: {
-    layout: 'centered',
-  },
 } as ComponentMeta<typeof FileUploader>;
 
-const Template: ComponentStory<typeof FileUploader> = ({ ...rest }) => (
-  <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-    <FileUploader {...rest} />
+const Template: ComponentStory<typeof FileUploader> = () => (
+  <Box sx={{ maxWidth: 1200, p: 3, mx: 'auto' }}>
+    <FileUploader />
   </Box>
 );
 

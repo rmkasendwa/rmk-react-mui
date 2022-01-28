@@ -16,7 +16,7 @@ import NotificationsList from './NotificationsList';
 
 interface INotificationsToolProps {}
 
-const NotificationsTool: React.FC<INotificationsToolProps> = () => {
+export const NotificationsTool: React.FC<INotificationsToolProps> = () => {
   const anchorRef = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
 
