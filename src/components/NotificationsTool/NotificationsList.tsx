@@ -1,10 +1,10 @@
-import { ListProps } from '@mui/material';
 import {
   Divider,
   List,
   ListItem,
   ListItemAvatar,
   ListItemText,
+  ListProps,
   Typography,
 } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
@@ -94,8 +94,8 @@ const NotificationsList: FC<INotificationsListProps> = ({ sx, ...rest }) => {
                           fontSize: '0.75em',
                         }}
                       >
-                        Candidate "<strong>Ronald M. Kasendwa...</strong>"
-                        submitted their data.
+                        Candidate &ldquo;<strong>Ronald M. Kasendwa...</strong>
+                        &rdquo; submitted their data.
                       </Typography>
                     }
                     secondary={

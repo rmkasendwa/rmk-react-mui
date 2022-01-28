@@ -14,7 +14,7 @@ export interface ITextFieldProps
     Pick<TextFieldProps, 'variant'> {}
 
 export const TextField = forwardRef<HTMLDivElement, ITextFieldProps>(
-  (
+  function TextField(
     {
       label,
       required,
@@ -32,7 +32,7 @@ export const TextField = forwardRef<HTMLDivElement, ITextFieldProps>(
       ...rest
     },
     ref
-  ) => {
+  ) {
     const { loading, errorMessage } = useLoadingContext();
     const { values, handleBlur, handleChange, touched, errors } =
       (useFormikContext() as any) || {};

@@ -26,7 +26,6 @@ export const FormWrapper: FC<IFormWrapperProps> = ({
   children,
   title,
   tools,
-  showBreadcrumbs,
   initialValues = {},
   validationSchema,
   onSubmit,
@@ -36,11 +35,7 @@ export const FormWrapper: FC<IFormWrapperProps> = ({
   const { load, loading, errorMessage } = useLoadingContext();
 
   return (
-    <PaddedContentArea
-      title={title}
-      tools={tools}
-      showBreadcrumbs={showBreadcrumbs}
-    >
+    <PaddedContentArea title={title} tools={tools}>
       {errorMessage && (
         <Box sx={{ mb: 2 }}>
           <ErrorAlert message={errorMessage} retry={load} />
