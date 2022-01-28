@@ -1,6 +1,6 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 
-import { PhoneNumberInputField } from '../components';
+import { PhoneNumberInputField } from '../../components';
 
 export default {
   title: 'Components/Input Fields/Phone Number Input Field',
@@ -13,7 +13,13 @@ export default {
 const Template: ComponentStory<typeof PhoneNumberInputField> = ({
   required,
 }) => {
-  return <PhoneNumberInputField label="Phone Number" {...{ required }} />;
+  return (
+    <PhoneNumberInputField
+      label="Phone Number"
+      {...{ required }}
+      sx={{ minWidth: 300 }}
+    />
+  );
 };
 
 export const Default = Template.bind({});
