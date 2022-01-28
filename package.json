@@ -26,7 +26,7 @@
   "scripts": {
     "prebuild": "rm -rf lib",
     "build": "npm run tsc && copy-and-watch src/**/*.{png,jpg,css,scss,sass,json} lib",
-    "postbuild": "cp ./{package.json,README.md,LICENSE} ./lib/",
+    "postbuild": "scp ./{package.json,README.md,LICENSE} ./lib/",
     "build-storybook": "build-storybook -s public",
     "eslint": "eslint --fix",
     "format": "prettier --write \"./**/*.{js,jsx,ts,tsx,html,htm,json,css,scss,md}\"",
