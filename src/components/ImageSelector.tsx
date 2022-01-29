@@ -15,7 +15,7 @@ import {
 import Typography from '@mui/material/Typography';
 import { CSSProperties, FC, useEffect, useRef, useState } from 'react';
 
-import { IImage, IImageUploadFunction } from '../interfaces';
+import { IFileUploadFunction, IImage } from '../interfaces';
 
 interface IUploadableImage extends IImage {
   uploading?: boolean;
@@ -30,7 +30,7 @@ export interface IImageSelectorProps
   value?: IImage[];
   setFieldValue?: (value: IImage[]) => void;
   onChange?: any;
-  upload?: IImageUploadFunction;
+  upload?: IFileUploadFunction;
 }
 
 export const ImageSelector: FC<IImageSelectorProps> = ({
@@ -222,7 +222,7 @@ export const ImageSelector: FC<IImageSelectorProps> = ({
               index
             ) => {
               return (
-                <Grid item xs={3} key={index}>
+                <Grid item xs={4} sm={3} md={2} key={index}>
                   <Card
                     sx={{
                       borderRadius: 1,
@@ -297,13 +297,13 @@ export const ImageSelector: FC<IImageSelectorProps> = ({
               );
             }
           )}
-          <Grid item xs={3}>
+          <Grid item xs={4} sm={3} md={2}>
             <Button
               onClick={handleClick}
               sx={{
                 borderRadius: 1,
                 width: '100%',
-                height: 80,
+                height: `80px !important`,
                 bgcolor: '#fff',
                 color: '#BABCC1',
                 display: 'flex',

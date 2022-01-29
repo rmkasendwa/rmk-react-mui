@@ -2,7 +2,7 @@ import Box from '@mui/material/Box';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 
 import { ImageSelector } from '../components';
-import { IImageUploadFunction } from '../interfaces';
+import { IFileUploadFunction } from '../interfaces';
 
 export default {
   title: 'Components/Image Selector',
@@ -10,16 +10,15 @@ export default {
 } as ComponentMeta<typeof ImageSelector>;
 
 const Template: ComponentStory<typeof ImageSelector> = ({ ...rest }) => (
-  <Box sx={{ maxWidth: 640, p: 3, mx: 'auto' }}>
+  <Box sx={{ maxWidth: 1200, p: 3, mx: 'auto' }}>
     <ImageSelector {...rest} />
   </Box>
 );
 
-const upload: IImageUploadFunction = (
+const upload: IFileUploadFunction = (
   imageFile,
-  { onComplete, onError, onProgress, onSuccess }
+  { onComplete, onProgress, onSuccess }
 ) => {
-  console.log({ imageFile, onError });
   const DELAY = 10000;
   const STEPPER = 100;
   let countDown = DELAY;
@@ -40,11 +39,10 @@ const upload: IImageUploadFunction = (
   };
 };
 
-const uploadWithErrors: IImageUploadFunction = (
+const uploadWithErrors: IFileUploadFunction = (
   imageFile,
   { onComplete, onError, onProgress }
 ) => {
-  console.log({ imageFile, onError });
   const DELAY = 10000;
   const STEPPER = 100;
   let countDown = DELAY;
