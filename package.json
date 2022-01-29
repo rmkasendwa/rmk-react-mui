@@ -30,6 +30,8 @@
     "build-storybook": "build-storybook -s public",
     "eslint": "eslint --fix",
     "format": "prettier --write \"./**/*.{js,jsx,ts,tsx,html,htm,json,css,scss,md}\"",
+    "postinstall": "npm run prepare",
+    "prepare": "husky install",
     "start": "concurrently --names \"Typescript,Assets\" -c \"blue.bold,magenta.bold\" \"tsc -w\" \"copy-and-watch --watch src/**/*.{png,jpg,css,scss,sass,json} lib\"",
     "storybook": "start-storybook -p 6006 -s public",
     "test": "react-scripts test --watchAll=false",
