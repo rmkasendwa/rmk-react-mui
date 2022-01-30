@@ -8,7 +8,7 @@ import {
   MobileDatePickerProps,
 } from '@mui/lab';
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
-import { FC, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 
 import { DEFAULT_DATE_FORMAT } from '../../constants';
 import { useFormikValue, useSmallScreen } from '../../hooks';
@@ -31,23 +31,34 @@ export const DateInputField: FC<IDateInputFieldProps> = ({
     HTMLInputElement | null | undefined
   >(null);
 
+  const [selectedDateString, setSelectedDateString] = useState<string | number>(
+    ''
+  );
+
+  useEffect(() => {
+    setSelectedDateString(value ?? '');
+  }, [value]);
+
   const datePickerProps: MobileDatePickerProps | DesktopDatePickerProps = {
-    value: value ? new Date(value) : new Date(),
+    value: selectedDateString ? new Date(selectedDateString) : new Date(),
     onChange: (date: any) => {
-      if (onChange && inputField) {
+      if (inputField) {
         inputField.value = date ? date.toISOString() : '';
-        const event: any = new Event('change', { bubbles: true });
-        Object.defineProperty(event, 'target', {
-          writable: false,
-          value: inputField,
-        });
-        onChange(event);
+        setSelectedDateString(inputField.value);
+        if (onChange) {
+          const event: any = new Event('change', { bubbles: true });
+          Object.defineProperty(event, 'target', {
+            writable: false,
+            value: inputField,
+          });
+          onChange(event);
+        }
       }
     },
     renderInput: (params) => {
       if (params.inputProps) {
-        if (value) {
-          params.inputProps.value = new Date(params.inputProps.value).toString(
+        if (selectedDateString) {
+          params.inputProps.value = new Date(selectedDateString).toString(
             DEFAULT_DATE_FORMAT
           );
         } else {

@@ -1,4 +1,4 @@
-import { Palette, alpha, createTheme } from '@mui/material';
+import { Palette, alpha, createTheme, darken } from '@mui/material';
 import { grey } from '@mui/material/colors';
 
 // Mood Colors
@@ -32,6 +32,13 @@ export const getBaseTheme = (palette: Palette): any => {
           sizeMedium: {
             [baseTheme.breakpoints.down('sm')]: {
               height: 32,
+            },
+          },
+          containedInherit: {
+            backgroundColor: darken(palette.background.paper, 0.1),
+            '&:hover': {
+              backgroundColor: darken(palette.background.paper, 0.18),
+              boxShadow: 'none',
             },
           },
         },
