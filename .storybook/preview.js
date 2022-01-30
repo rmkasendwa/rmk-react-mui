@@ -12,7 +12,7 @@ import { APIProvider, GlobalConfigurationProvider } from '../src/contexts';
 import store from '../src/redux/store';
 import { darkTheme, defaultTheme } from '../src/theme';
 
-const providerFn = ({ theme, children }) => {
+const providerFn = ({ theme: { theme }, children }) => {
   const serialTheme = JSON.parse(JSON.stringify(theme));
   const muiTheme = createTheme(serialTheme);
 
@@ -41,7 +41,22 @@ const providerFn = ({ theme, children }) => {
   );
 };
 
-addDecorator(withThemes(null, [defaultTheme, darkTheme], { providerFn }));
+addDecorator(
+  withThemes(
+    null,
+    [
+      {
+        name: 'Light Theme',
+        theme: defaultTheme,
+      },
+      {
+        name: 'Dark Theme',
+        theme: darkTheme,
+      },
+    ],
+    { providerFn }
+  )
+);
 
 export const parameters = {
   actions: { argTypesRegex: '^on[A-Z].*' },

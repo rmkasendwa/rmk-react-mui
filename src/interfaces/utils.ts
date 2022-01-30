@@ -21,10 +21,18 @@ export interface ILoadingProps {
   errorMessage: string;
 }
 
-export interface IImage {
+export interface IFile {
   id?: string;
   base64: string;
   originalFile: File;
+}
+
+export interface IUploadableFile extends IFile {
+  uploading?: boolean;
+  uploadProgress?: number;
+  uploadError?: string;
+  cancelUpload?: () => void;
+  retryUpload?: () => void;
 }
 
 export interface IAsyncProcess {

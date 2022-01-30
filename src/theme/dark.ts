@@ -44,15 +44,5 @@ export const darkTheme = createTheme({
         },
       },
     },
-    MuiButton: {
-      styleOverrides: {
-        containedInherit: {
-          backgroundColor: palette.background.paper,
-          '&:hover': {
-            backgroundColor: darken(palette.background.paper, 0.3),
-          },
-        },
-      },
-    },
   },
 });
