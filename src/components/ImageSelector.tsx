@@ -15,15 +15,16 @@ import {
   useTheme,
 } from '@mui/material';
 import Typography from '@mui/material/Typography';
+import { useFormikContext } from 'formik';
 import { CSSProperties, FC, useEffect, useRef, useState } from 'react';
 
 import { IFile, IFileUploadFunction, IUploadableFile } from '../interfaces';
 import { ITextFieldProps } from './InputFields';
+import { useFormikValue } from '..';
 
 export interface IImageSelectorProps
-  extends Pick<ITextFieldProps, 'helperText' | 'error' | 'onChange'> {
+  extends Pick<ITextFieldProps, 'helperText' | 'error' | 'onChange' | 'name'> {
   value?: IFile[];
-  setFieldValue?: (value: IFile[]) => void;
   onChange?: any;
   upload?: IFileUploadFunction;
 }
@@ -31,10 +32,21 @@ export interface IImageSelectorProps
 export const ImageSelector: FC<IImageSelectorProps> = ({
   helperText,
   error,
-  setFieldValue,
+  onChange,
+  name,
   value,
   upload,
 }) => {
+  const { handleChange, touched, errors } = (useFormikContext() as any) || {};
+  value = useFormikValue({ value, name });
+
+  error ??
+    (error = (() => {
+      if (errors && touched && name && touched[name]) {
+        return Boolean(errors[name]);
+      }
+    })());
+
   const fileFieldRef = useRef<HTMLInputElement | null>(null);
   const [images, setImages] = useState<IUploadableFile[]>([]);
 
@@ -43,7 +55,7 @@ export const ImageSelector: FC<IImageSelectorProps> = ({
   };
   const handleClickImageRemoveButton = (index: number) => {
     images.splice(index, 1);
-    setFieldValue ? setFieldValue([...images]) : setImages([...images]);
+    setImages([...images]);
   };
 
   useEffect(() => {
@@ -162,7 +174,7 @@ export const ImageSelector: FC<IImageSelectorProps> = ({
                 })
               : newImages),
           ];
-          (setFieldValue || setImages)(nextImages);
+          setImages(nextImages);
         }
       };
       fileFieldNode.addEventListener('change', changeEventCallback);
@@ -170,7 +182,7 @@ export const ImageSelector: FC<IImageSelectorProps> = ({
         fileFieldNode.removeEventListener('change', changeEventCallback);
       };
     }
-  }, [images, setFieldValue, upload]);
+  }, [images, upload]);
 
   useEffect(() => {
     if (
@@ -182,8 +194,21 @@ export const ImageSelector: FC<IImageSelectorProps> = ({
     }
   }, [images, value]);
 
-  const theme = useTheme();
+  useEffect(() => {
+    if (onChange ?? handleChange) {
+      const event: any = new Event('change', { bubbles: true });
+      Object.defineProperty(event, 'target', {
+        writable: false,
+        value: {
+          name,
+          value: [...images],
+        },
+      });
+      (onChange ?? handleChange)(event);
+    }
+  }, [handleChange, images, name, onChange]);
 
+  const theme = useTheme();
   const alphaBGColor = alpha(theme.palette.text.primary, 0.3);
   const wrapperStyle: CSSProperties = {};
   error && (wrapperStyle.borderColor = theme.palette.error.main);
