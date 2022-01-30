@@ -10,25 +10,20 @@ import {
   FormHelperText,
   Grid,
   IconButton,
-  TextFieldProps,
+  alpha,
+  darken,
+  useTheme,
 } from '@mui/material';
 import Typography from '@mui/material/Typography';
 import { CSSProperties, FC, useEffect, useRef, useState } from 'react';
 
-import { IFileUploadFunction, IImage } from '../interfaces';
-
-interface IUploadableImage extends IImage {
-  uploading?: boolean;
-  uploadProgress?: number;
-  uploadError?: string;
-  cancelUpload?: () => void;
-  retryUpload?: () => void;
-}
+import { IFile, IFileUploadFunction, IUploadableFile } from '../interfaces';
+import { ITextFieldProps } from './InputFields';
 
 export interface IImageSelectorProps
-  extends Pick<TextFieldProps, 'helperText' | 'error'> {
-  value?: IImage[];
-  setFieldValue?: (value: IImage[]) => void;
+  extends Pick<ITextFieldProps, 'helperText' | 'error' | 'onChange'> {
+  value?: IFile[];
+  setFieldValue?: (value: IFile[]) => void;
   onChange?: any;
   upload?: IFileUploadFunction;
 }
@@ -41,7 +36,7 @@ export const ImageSelector: FC<IImageSelectorProps> = ({
   upload,
 }) => {
   const fileFieldRef = useRef<HTMLInputElement | null>(null);
-  const [images, setImages] = useState<IUploadableImage[]>([]);
+  const [images, setImages] = useState<IUploadableFile[]>([]);
 
   const handleClick = () => {
     fileFieldRef?.current?.click();
@@ -65,7 +60,7 @@ export const ImageSelector: FC<IImageSelectorProps> = ({
                 return !existingFileNames.includes(file.name + file.size);
               })
               .map((file) => {
-                return new Promise<IUploadableImage>((resolve, reject) => {
+                return new Promise<IUploadableFile>((resolve, reject) => {
                   const reader = new FileReader();
                   reader.readAsDataURL(file);
                   reader.onload = () =>
@@ -187,8 +182,11 @@ export const ImageSelector: FC<IImageSelectorProps> = ({
     }
   }, [images, value]);
 
+  const theme = useTheme();
+
+  const alphaBGColor = alpha(theme.palette.text.primary, 0.3);
   const wrapperStyle: CSSProperties = {};
-  error && (wrapperStyle.borderColor = '#f00');
+  error && (wrapperStyle.borderColor = theme.palette.error.main);
 
   return (
     <FormControl fullWidth error={error}>
@@ -196,7 +194,7 @@ export const ImageSelector: FC<IImageSelectorProps> = ({
         sx={{
           p: 1.5,
           borderRadius: 1,
-          bgcolor: '#F3F3F3',
+          bgcolor: darken(theme.palette.background.paper, 0.03),
           borderStyle: 'dashed',
           ...wrapperStyle,
         }}
@@ -254,11 +252,11 @@ export const ImageSelector: FC<IImageSelectorProps> = ({
                           cancelUpload && cancelUpload();
                         }}
                         sx={{
-                          bgcolor: 'rgba(0,0,0,0.4)',
+                          bgcolor: alphaBGColor,
                           '&:hover': {
-                            backgroundColor: 'rgba(0,0,0,0.4)',
+                            bgcolor: alphaBGColor,
                           },
-                          color: '#fff',
+                          color: theme.palette.background.paper,
                         }}
                         size="small"
                       >
@@ -268,11 +266,11 @@ export const ImageSelector: FC<IImageSelectorProps> = ({
                         <IconButton
                           onClick={retryUpload}
                           sx={{
-                            bgcolor: 'rgba(0,0,0,0.4)',
+                            bgcolor: alphaBGColor,
                             '&:hover': {
-                              backgroundColor: 'rgba(0,0,0,0.4)',
+                              bgcolor: alphaBGColor,
                             },
-                            color: '#fff',
+                            color: theme.palette.background.paper,
                           }}
                           size="small"
                         >
@@ -304,7 +302,7 @@ export const ImageSelector: FC<IImageSelectorProps> = ({
                 borderRadius: 1,
                 width: '100%',
                 height: `80px !important`,
-                bgcolor: '#fff',
+                bgcolor: theme.palette.background.paper,
                 color: '#BABCC1',
                 display: 'flex',
                 flexDirection: 'column',
@@ -312,7 +310,7 @@ export const ImageSelector: FC<IImageSelectorProps> = ({
                 alignItems: 'center',
                 border: 'none',
                 '&:hover': {
-                  backgroundColor: '#fff',
+                  bgcolor: theme.palette.background.paper,
                 },
               }}
             >
