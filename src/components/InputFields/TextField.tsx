@@ -25,10 +25,10 @@ export const TextField = forwardRef<HTMLDivElement, ITextFieldProps>(
       fullWidth,
       name,
       value,
-      onBlur: onBlurProp,
-      onChange: onChangeProp,
-      error: errorProp,
-      helperText: helperTextProp,
+      onBlur,
+      onChange,
+      error,
+      helperText,
       ...rest
     },
     ref
@@ -84,10 +84,10 @@ export const TextField = forwardRef<HTMLDivElement, ITextFieldProps>(
             return '';
           })()
         }
-        onChange={onChangeProp ?? handleChange}
-        onBlur={onBlurProp ?? handleBlur}
+        onChange={onChange ?? handleChange}
+        onBlur={onBlur ?? handleBlur}
         error={
-          errorProp ??
+          error ??
           (() => {
             if (errors && touched && name && touched[name]) {
               return Boolean(errors[name]);
@@ -95,7 +95,7 @@ export const TextField = forwardRef<HTMLDivElement, ITextFieldProps>(
           })()
         }
         helperText={
-          helperTextProp ??
+          helperText ??
           (() => {
             if (errors && touched && name && touched[name]) {
               return errors[name];
