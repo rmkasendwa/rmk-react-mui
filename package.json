@@ -1,7 +1,7 @@
 {
   "name": "@infinite-debugger/react-mui",
   "version": "0.1.0-alpha.4",
-  "description": "<h1 align=\"center\">infinite-debugger/react-mui</h1>",
+  "description": "RMK React MUI is a React UI library of utility components, hooks and contexts",
   "keywords": [
     "react",
     "react-component",

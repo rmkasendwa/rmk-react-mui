@@ -27,18 +27,18 @@ export interface IImage {
   originalFile: File;
 }
 
-export interface IImageUploadOptions {
+export interface IAsyncProcess {
   onProgress: (progress: number) => void;
   onError: (err: Error) => void;
   onSuccess: (payload: any) => void;
   onComplete: () => void;
 }
 
-export interface IImageUploadController {
+export interface IAsyncProcessController {
   cancel: () => void;
 }
 
-export type IImageUploadFunction = (
-  imageFile: File,
-  options: IImageUploadOptions
-) => IImageUploadController;
+export type IFileUploadFunction = (
+  file: File,
+  options: IAsyncProcess
+) => IAsyncProcessController;
