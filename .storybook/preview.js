@@ -4,6 +4,7 @@ import { CssBaseline } from '@mui/material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { withThemes } from '@react-theming/storybook-addon';
 import { addDecorator } from '@storybook/react';
+import { Formik } from 'formik';
 import React, { useEffect } from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
@@ -32,7 +33,7 @@ const providerFn = ({ theme: { theme }, children }) => {
           <ReduxProvider store={store}>
             <ThemeProvider theme={muiTheme}>
               <CssBaseline />
-              {children}
+              <Formik>{children}</Formik>
             </ThemeProvider>
           </ReduxProvider>
         </APIProvider>

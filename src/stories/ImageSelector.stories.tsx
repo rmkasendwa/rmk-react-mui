@@ -66,6 +66,12 @@ const uploadWithErrors: IFileUploadFunction = (
 
 export const Default = Template.bind({});
 
+export const WithFieldErrorMessage = Template.bind({});
+WithFieldErrorMessage.args = {
+  error: true,
+  helperText: 'This is an error message',
+};
+
 export const AutoUpload = Template.bind({});
 AutoUpload.args = {
   upload,
