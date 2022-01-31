@@ -6,7 +6,7 @@ import {
 import { useFormikContext } from 'formik';
 import { forwardRef } from 'react';
 
-import { useLoadingContext } from '../../hooks';
+import { useFormikValue, useLoadingContext } from '../../hooks';
 import ErrorSkeleton from '../ErrorSkeleton';
 
 export interface ITextFieldProps
@@ -34,8 +34,9 @@ export const TextField = forwardRef<HTMLDivElement, ITextFieldProps>(
     ref
   ) {
     const { loading, errorMessage } = useLoadingContext();
-    const { values, handleBlur, handleChange, touched, errors } =
+    const { handleBlur, handleChange, touched, errors } =
       (useFormikContext() as any) || {};
+    value = useFormikValue({ value, name });
 
     const labelSkeletonWidth = typeof label === 'string' ? label.length * 7 : 0;
 
@@ -75,15 +76,7 @@ export const TextField = forwardRef<HTMLDivElement, ITextFieldProps>(
           name,
         }}
         {...rest}
-        value={
-          value ??
-          (() => {
-            if (values && name && values[name] != null) {
-              return values[name];
-            }
-            return '';
-          })()
-        }
+        value={value}
         onChange={onChange ?? handleChange}
         onBlur={onBlur ?? handleBlur}
         error={

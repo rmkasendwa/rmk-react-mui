@@ -18,9 +18,9 @@ import Typography from '@mui/material/Typography';
 import { useFormikContext } from 'formik';
 import { CSSProperties, FC, useEffect, useRef, useState } from 'react';
 
+import { useFormikValue } from '../hooks';
 import { IFile, IFileUploadFunction, IUploadableFile } from '../interfaces';
 import { ITextFieldProps } from './InputFields';
-import { useFormikValue } from '..';
 
 export interface IImageSelectorProps
   extends Pick<ITextFieldProps, 'helperText' | 'error' | 'onChange' | 'name'> {

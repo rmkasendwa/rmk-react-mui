@@ -158,7 +158,6 @@ export const useFormikValue = ({
       if (values && name && values[name] != null) {
         return values[name];
       }
-      return '';
     })())
   );
 };
