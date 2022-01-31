@@ -16,10 +16,10 @@ import {
 } from '@mui/material';
 import Typography from '@mui/material/Typography';
 import { useFormikContext } from 'formik';
-import { CSSProperties, FC, useEffect, useRef, useState } from 'react';
+import { CSSProperties, FC, useState } from 'react';
 
-import { useFormikValue } from '../hooks';
-import { IFile, IFileUploadFunction, IUploadableFile } from '../interfaces';
+import { useFileUpload, useFormikValue } from '../hooks';
+import { IFile, IFileUploadFunction } from '../interfaces';
 import { ITextFieldProps } from './InputFields';
 
 export interface IImageSelectorProps
@@ -37,7 +37,7 @@ export const ImageSelector: FC<IImageSelectorProps> = ({
   value,
   upload,
 }) => {
-  const { handleChange, touched, errors } = (useFormikContext() as any) || {};
+  const { touched, errors } = (useFormikContext() as any) || {};
   value = useFormikValue({ value, name });
 
   error ??
@@ -47,166 +47,19 @@ export const ImageSelector: FC<IImageSelectorProps> = ({
       }
     })());
 
-  const fileFieldRef = useRef<HTMLInputElement | null>(null);
-  const [images, setImages] = useState<IUploadableFile[]>([]);
+  const [fileField, setFileField] = useState<HTMLInputElement | null>(null);
+  const { files: images, setFiles: setImages } = useFileUpload({
+    fileField,
+    upload,
+    name,
+    value,
+    onChange,
+  });
 
-  const handleClick = () => {
-    fileFieldRef?.current?.click();
-  };
   const handleClickImageRemoveButton = (index: number) => {
     images.splice(index, 1);
     setImages([...images]);
   };
-
-  useEffect(() => {
-    if (fileFieldRef.current) {
-      const fileFieldNode = fileFieldRef.current;
-      const changeEventCallback = async () => {
-        if (fileFieldNode.files && fileFieldNode.files.length > 0) {
-          const existingFileNames: string[] = images.map(
-            (image) => image.originalFile.name + image.originalFile.size
-          );
-          const newImages = await Promise.all(
-            [...fileFieldNode.files]
-              .filter((file) => {
-                return !existingFileNames.includes(file.name + file.size);
-              })
-              .map((file) => {
-                return new Promise<IUploadableFile>((resolve, reject) => {
-                  const reader = new FileReader();
-                  reader.readAsDataURL(file);
-                  reader.onload = () =>
-                    resolve({
-                      base64: reader.result as string,
-                      originalFile: file,
-                    });
-                  reader.onerror = (error) => reject(error);
-                });
-              })
-          );
-          fileFieldNode.value = '';
-          const nextImages = [
-            ...images,
-            ...(upload
-              ? newImages.map((newImage) => {
-                  const { originalFile } = newImage;
-                  const retryImageUpload = () => {
-                    setImages((prevImages) => {
-                      const stateImage = prevImages.find(
-                        ({ originalFile: stateImageFile }) =>
-                          stateImageFile === originalFile
-                      );
-                      if (stateImage) {
-                        stateImage.uploadError = '';
-                        delete stateImage.retryUpload;
-                        Object.assign(stateImage, uploadImageFile());
-                        return [...prevImages];
-                      }
-                      return prevImages;
-                    });
-                  };
-                  const uploadImageFile = () => {
-                    const { cancel } = upload(originalFile, {
-                      onProgress: (progress) => {
-                        setImages((prevImages) => {
-                          const stateImage = prevImages.find(
-                            ({ originalFile: stateImageFile }) =>
-                              stateImageFile === originalFile
-                          );
-                          if (stateImage) {
-                            stateImage.uploadProgress = progress;
-                            return [...prevImages];
-                          }
-                          return prevImages;
-                        });
-                      },
-                      onError: (err) => {
-                        setImages((prevImages) => {
-                          const stateImage = prevImages.find(
-                            ({ originalFile: stateImageFile }) =>
-                              stateImageFile === originalFile
-                          );
-                          if (stateImage) {
-                            stateImage.uploadError = err.message;
-                            stateImage.retryUpload = retryImageUpload;
-                            return [...prevImages];
-                          }
-                          return prevImages;
-                        });
-                      },
-                      onSuccess: (payload) => {
-                        if (payload.id) {
-                          setImages((prevImages) => {
-                            const stateImage = prevImages.find(
-                              ({ originalFile: stateImageFile }) =>
-                                stateImageFile === originalFile
-                            );
-                            if (stateImage) {
-                              stateImage.id = payload.id;
-                              return [...prevImages];
-                            }
-                            return prevImages;
-                          });
-                        }
-                      },
-                      onComplete: () => {
-                        setImages((prevImages) => {
-                          const stateImage = prevImages.find(
-                            ({ originalFile: stateImageFile }) =>
-                              stateImageFile === originalFile
-                          );
-                          if (stateImage) {
-                            stateImage.uploading = false;
-                            delete stateImage.cancelUpload;
-                            return [...prevImages];
-                          }
-                          return prevImages;
-                        });
-                      },
-                    });
-                    return {
-                      ...newImage,
-                      uploading: true,
-                      cancelUpload: cancel,
-                    };
-                  };
-                  return uploadImageFile();
-                })
-              : newImages),
-          ];
-          setImages(nextImages);
-        }
-      };
-      fileFieldNode.addEventListener('change', changeEventCallback);
-      return () => {
-        fileFieldNode.removeEventListener('change', changeEventCallback);
-      };
-    }
-  }, [images, upload]);
-
-  useEffect(() => {
-    if (
-      value &&
-      value.map(({ base64 }) => base64).join('') !==
-        images.map(({ base64 }) => base64).join('')
-    ) {
-      setImages(value);
-    }
-  }, [images, value]);
-
-  useEffect(() => {
-    if (onChange ?? handleChange) {
-      const event: any = new Event('change', { bubbles: true });
-      Object.defineProperty(event, 'target', {
-        writable: false,
-        value: {
-          name,
-          value: [...images],
-        },
-      });
-      (onChange ?? handleChange)(event);
-    }
-  }, [handleChange, images, name, onChange]);
 
   const theme = useTheme();
   const alphaBGColor = alpha(theme.palette.text.primary, 0.3);
@@ -226,7 +79,9 @@ export const ImageSelector: FC<IImageSelectorProps> = ({
       >
         <input
           type="file"
-          ref={fileFieldRef}
+          ref={(fileField) => {
+            setFileField(fileField);
+          }}
           multiple
           accept=".jpg,.png,.jpeg,.bmp"
           style={{ display: 'none' }}
@@ -322,7 +177,9 @@ export const ImageSelector: FC<IImageSelectorProps> = ({
           )}
           <Grid item xs={4} sm={3} md={2}>
             <Button
-              onClick={handleClick}
+              onClick={() => {
+                fileField?.click();
+              }}
               sx={{
                 borderRadius: 1,
                 width: '100%',
