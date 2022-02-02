@@ -27,7 +27,7 @@
     "prebuild": "rm -rf lib",
     "build": "npm run tsc && copy-and-watch src/**/*.{png,jpg,css,scss,sass,json} lib",
     "postbuild": "node ./scripts/postbuild",
-    "build-storybook": "build-storybook -s public",
+    "build-storybook": "build-storybook -s public -o docs",
     "eslint": "eslint --fix",
     "format": "prettier --write \"./**/*.{js,jsx,ts,tsx,html,htm,json,css,scss,md}\"",
     "postinstall": "npm run prepare",
