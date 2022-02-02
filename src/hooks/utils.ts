@@ -3,7 +3,7 @@ import { useFormikContext } from 'formik';
 import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { APIContext, LoadingContext } from '../contexts';
+import { APIContext, APIDataContext, LoadingContext } from '../contexts';
 import { IAPI, IAPIFunction } from '../interfaces';
 import { RootState } from '../redux';
 import { updateData } from '../redux/data/actions';
@@ -138,6 +138,10 @@ export const useRecords = <T>(recordFinder: IAPIFunction, key?: string) => {
     setRecords: setRecord,
     ...rest,
   };
+};
+
+export const useAPIDataContext = () => {
+  return useContext(APIDataContext);
 };
 
 export const useLoadingContext = () => {
