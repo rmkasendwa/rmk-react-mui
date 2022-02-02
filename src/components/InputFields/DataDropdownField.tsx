@@ -1,9 +1,28 @@
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { MenuItem } from '@mui/material';
-import { FC, ReactNode, useCallback, useEffect, useState } from 'react';
+import {
+  Box,
+  Card,
+  ClickAwayListener,
+  Grow,
+  MenuItem,
+  Popper,
+  Typography,
+  useTheme,
+} from '@mui/material';
+import { useFormikContext } from 'formik';
+import hash from 'object-hash';
+import {
+  FC,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 import { LoadingProvider } from '../../contexts';
-import { useAPIService, useFormikValue } from '../../hooks';
+import { useAPIDataContext, useAPIService, useFormikValue } from '../../hooks';
 import { IAPIFunction } from '../../interfaces';
 import ReloadIconButton from '../ReloadIconButton';
 import RetryErrorMessage from '../RetryErrorMessage';
@@ -15,16 +34,19 @@ interface IDropdownOption {
 }
 
 export interface IDataDropdownFieldProps extends ITextFieldProps {
+  disableEmptyOption?: boolean;
   getDropdownEntities?: IAPIFunction;
   getDropdownOptions?: (options: any[]) => IDropdownOption[];
   options?: IDropdownOption[];
   dataKey?: string;
   sortOptions?: boolean;
+  value?: string | string[];
+  selectedOption?: IDropdownOption;
 }
 
 const DROPDOWN_MENU_MAX_HEIGHT = 300;
 const DEFAULT_DROPDOWN_OPTION_HEIGHT = 36;
-const DEFAULT_NUMBER_OF_OPTIONS_TO_RENDER = Math.floor(
+const DEFAULT_NUMBER_OF_OPTIONS_TO_RENDER = Math.ceil(
   DROPDOWN_MENU_MAX_HEIGHT / DEFAULT_DROPDOWN_OPTION_HEIGHT
 );
 
@@ -32,40 +54,129 @@ export const DataDropdownField: FC<IDataDropdownFieldProps> = ({
   SelectProps,
   getDropdownEntities,
   getDropdownOptions,
-  children,
   name,
   value,
   dataKey,
   options: propOptions,
   sortOptions = false,
+  onChange,
+  onBlur,
+  error,
+  helperText,
   ...rest
 }) => {
   value = useFormikValue({ value, name });
+  const {
+    handleBlur: formikHandleBlur,
+    handleChange: formikHandleChange,
+    touched,
+    errors,
+  } = (useFormikContext() as any) || {};
 
-  const [dropdownAnchorEl, setDropdownAnchorEl] =
-    useState<HTMLDivElement | null>(null);
+  const { preferStale } = useAPIDataContext();
+
+  const theme = useTheme();
 
   const {
     load,
-    loading,
     loaded,
+    loading,
     record: dropdownEntities,
     errorMessage,
   } = useAPIService<any[]>([], dataKey);
 
+  const [limit, setLimit] = useState(DEFAULT_NUMBER_OF_OPTIONS_TO_RENDER);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [open, setOpen] = useState(false);
+  const anchorRef = useRef<HTMLInputElement>(null);
+  const isTouchedRef = useRef(false);
+
   const [options, setOptions] = useState<IDropdownOption[]>([]);
-  const [displayOptions, setDisplayOptions] = useState<IDropdownOption[]>([]);
+  const [selectedOptions, setSelectedOptions] = useState<IDropdownOption[]>([]);
+  const [missingOptionValues, setMissingOptionValues] = useState<
+    (string | number)[]
+  >([]);
 
-  const loadOptions = useCallback(async () => {
-    if (!children && !loading && !loaded && getDropdownEntities) {
-      load(getDropdownEntities);
+  const loadOptions = useCallback(
+    async (reloadOptions = false) => {
+      if (
+        !loading &&
+        (!loaded || reloadOptions) &&
+        (!preferStale || options.length <= 0 || reloadOptions) &&
+        getDropdownEntities
+      ) {
+        load(getDropdownEntities);
+      }
+    },
+    [getDropdownEntities, load, loaded, loading, options.length, preferStale]
+  );
+
+  const selectedOptionDisplayString = selectedOptions
+    .filter(({ label }) => {
+      return typeof label === 'string';
+    })
+    .map(({ label }) => label)
+    .join(', ');
+  const selectedOptionValue = useMemo(() => {
+    if (SelectProps?.multiple) {
+      return selectedOptions.map(({ value }) => value);
     }
-  }, [children, getDropdownEntities, load, loaded, loading]);
+    return selectedOptions[0]?.value;
+  }, [SelectProps?.multiple, selectedOptions]);
 
-  const valueString = Array.isArray(value) ? value.join(',') : value;
+  const handleBlur = () => {
+    if (onBlur || formikHandleBlur) {
+      const event: any = new Event('blur', { bubbles: true });
+      Object.defineProperty(event, 'target', {
+        writable: false,
+        value: {
+          name,
+          value: selectedOptionValue,
+        },
+      });
+      (onBlur || formikHandleBlur)(event);
+    }
+  };
+
+  const handleChange = useCallback(() => {
+    if (onChange || formikHandleChange) {
+      const event: any = new Event('change', { bubbles: true });
+      Object.defineProperty(event, 'target', {
+        writable: false,
+        value: {
+          name,
+          value: selectedOptionValue,
+        },
+      });
+      (onChange || formikHandleChange)(event);
+    }
+  }, [formikHandleChange, name, onChange, selectedOptionValue]);
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
   useEffect(() => {
-    valueString && !errorMessage && loadOptions();
-  }, [errorMessage, loadOptions, valueString]);
+    if (value) {
+      const fieldValues = Array.isArray(value) ? value : [value];
+      const optionValues = options.map(({ value }) => value);
+      setMissingOptionValues((prevMissingOptionValues) => {
+        const newMissingOptionValues = fieldValues.filter((value) => {
+          return !optionValues.includes(value);
+        });
+        if (hash(newMissingOptionValues) !== hash(prevMissingOptionValues)) {
+          return newMissingOptionValues;
+        }
+        return prevMissingOptionValues;
+      });
+    }
+  }, [errorMessage, loadOptions, options, value]);
+
+  useEffect(() => {
+    if (missingOptionValues.length > 0 && !errorMessage) {
+      loadOptions();
+    }
+  }, [errorMessage, loadOptions, missingOptionValues.length]);
 
   useEffect(() => {
     propOptions && setOptions(propOptions);
@@ -80,86 +191,49 @@ export const DataDropdownField: FC<IDataDropdownFieldProps> = ({
   }, [dropdownEntities, getDropdownOptions, setOptions]);
 
   useEffect(() => {
-    const displayOptionsCount = (() => {
-      if (value) {
-        const selectedOptions = (Array.isArray(value) ? value : [value])
-          .map((value) => {
-            return options.find(({ value: optionValue }) => {
-              return optionValue === value;
-            });
-          })
-          .filter((option) => option);
-        if (selectedOptions.length > 0) {
-          selectedOptions.forEach((selectedOption) => {
-            const selectedOptionIndex = options.indexOf(selectedOption!);
-            options.splice(selectedOptionIndex, 1);
-          });
-          selectedOptions.reverse().forEach((selectedOption) => {
-            options.unshift(selectedOption!);
-          });
-          return Math.max(
-            selectedOptions.length,
-            DEFAULT_NUMBER_OF_OPTIONS_TO_RENDER
-          );
-        }
-      }
-      return DEFAULT_NUMBER_OF_OPTIONS_TO_RENDER;
-    })();
-    const displayOptions = options.slice(0, displayOptionsCount);
     if (sortOptions) {
-      displayOptions.sort(({ label: aLabel }, { label: bLabel }) => {
+      options.sort(({ label: aLabel }, { label: bLabel }) => {
         if (typeof aLabel === 'string' && typeof bLabel === 'string') {
           return aLabel.localeCompare(bLabel);
         }
         return 0;
       });
     }
-    setDisplayOptions(displayOptions);
-  }, [options, sortOptions, value]);
+  }, [options, sortOptions]);
 
   useEffect(() => {
-    if (dropdownAnchorEl) {
-      const dropdownMenu = dropdownAnchorEl.querySelector('.MuiMenu-paper');
-      if (dropdownMenu) {
-        const dropdownList = dropdownMenu.querySelector('ul')!;
-        dropdownList.style.minHeight = `${
-          options.length * DEFAULT_DROPDOWN_OPTION_HEIGHT
-        }px`;
-        dropdownList.style.boxSizing = `border-box`;
-        const scrollCallback = () => {
-          const { scrollTop } = dropdownMenu;
-          const topOptionCount = Math.floor(
-            scrollTop / DEFAULT_DROPDOWN_OPTION_HEIGHT
-          );
-          setDisplayOptions(
-            options.slice(
-              0,
-              topOptionCount + DEFAULT_NUMBER_OF_OPTIONS_TO_RENDER
-            )
-          );
-        };
-        dropdownMenu.addEventListener('scroll', scrollCallback);
-        return () => {
-          dropdownMenu.removeEventListener('scroll', scrollCallback);
-        };
+    setSearchTerm(selectedOptionDisplayString);
+  }, [selectedOptionDisplayString]);
+  useEffect(() => {
+    if (isTouchedRef.current === true) {
+      handleChange();
+    }
+  }, [handleChange]);
+
+  useEffect(() => {
+    setSelectedOptions((prevSelectedOptions) => {
+      const fieldValues = Array.isArray(value) ? value : [value];
+      const newSelectedOptions = fieldValues
+        .map((value) => {
+          return options.find(
+            ({ value: optionValue }) => value === optionValue
+          )!;
+        })
+        .filter((option) => option);
+
+      if (hash(newSelectedOptions) !== hash(selectedOptions)) {
+        return newSelectedOptions;
       }
-    }
-  }, [dropdownAnchorEl, options]);
-
-  if (value && !children) {
-    const fieldValues = Array.isArray(value) ? value : [value];
-    const optionValues = options.map(({ value }) => value);
-    const missingOptions = fieldValues.filter((value) => {
-      return !optionValues.includes(value);
+      return prevSelectedOptions;
     });
+  }, [options, selectedOptions, value]);
 
-    if (loading && missingOptions.length > 0) {
-      return (
-        <LoadingProvider value={{ loading, errorMessage, loaded }}>
-          <TextField {...rest} />
-        </LoadingProvider>
-      );
-    }
+  if (value && loading && missingOptionValues.length > 0) {
+    return (
+      <LoadingProvider value={{ loading, errorMessage }}>
+        <TextField {...rest} />
+      </LoadingProvider>
+    );
   }
 
   const errorProps: Pick<ITextFieldProps, 'error' | 'helperText'> = {};
@@ -170,54 +244,176 @@ export const DataDropdownField: FC<IDataDropdownFieldProps> = ({
     );
   }
 
+  const filteredOptions = (() => {
+    if (searchTerm && searchTerm !== selectedOptionDisplayString) {
+      const searchFilterTerms = searchTerm
+        .split(',')
+        .map((string) => string.trim().toLowerCase());
+      return options.filter(({ label }) => {
+        return (
+          typeof label === 'string' &&
+          searchFilterTerms.some((searchFilterTerm) => {
+            return label.toLowerCase().match(searchFilterTerm);
+          })
+        );
+      });
+    }
+    return options;
+  })();
+
+  const displayOptions = filteredOptions.slice(0, limit);
+
   return (
-    <TextField
-      onFocus={loadOptions}
-      SelectProps={{
-        defaultValue: '',
-        displayEmpty: true,
-        IconComponent: ExpandMoreIcon,
-        ...SelectProps,
-        MenuProps: {
-          ref: (el) => {
-            setDropdownAnchorEl(el);
-          },
-          anchorOrigin: {
-            vertical: 'bottom',
-            horizontal: 'left',
-          },
-          transformOrigin: {
-            vertical: 'top',
-            horizontal: 'left',
-          },
-          sx: {
-            maxHeight: DROPDOWN_MENU_MAX_HEIGHT,
-          },
-        },
-      }}
-      {...{ name, value }}
-      {...rest}
-      {...errorProps}
-      select
-    >
-      {loading ? (
-        <MenuItem value="LOADING" disabled>
-          <ReloadIconButton {...{ load, loading }} sx={{ mx: 'auto' }} />
-        </MenuItem>
-      ) : null}
-      {children ||
-        displayOptions.map(({ value, label }) => {
+    <>
+      <TextField
+        onClick={() => {
+          setTimeout(() => setOpen(true), 200);
+          loadOptions();
+        }}
+        onBlur={() => {
+          isTouchedRef.current = true;
+          handleBlur();
+        }}
+        onChange={(event) => {
+          setSearchTerm(event.target.value);
+        }}
+        InputProps={{
+          ref: anchorRef,
+          endAdornment: <ExpandMoreIcon />,
+        }}
+        value={searchTerm}
+        error={
+          error ??
+          (() => {
+            if (errors && touched && name && touched[name]) {
+              return Boolean(errors[name]);
+            }
+          })()
+        }
+        helperText={
+          helperText ??
+          (() => {
+            if (errors && touched && name && touched[name]) {
+              return errors[name];
+            }
+          })()
+        }
+        {...rest}
+        {...errorProps}
+      />
+      <Popper
+        open={open}
+        anchorEl={anchorRef.current}
+        transition
+        placement="bottom-start"
+      >
+        {({ TransitionProps }) => {
           return (
-            <MenuItem
-              value={value}
-              key={value}
-              sx={{ minHeight: DEFAULT_DROPDOWN_OPTION_HEIGHT }}
-            >
-              {label}
-            </MenuItem>
+            <Grow {...TransitionProps}>
+              <Box>
+                <ClickAwayListener onClickAway={handleClose}>
+                  <Card>
+                    <Box
+                      onScroll={(event: any) => {
+                        const { scrollTop } = event.target;
+                        const topOptionCount = Math.floor(
+                          scrollTop / DEFAULT_DROPDOWN_OPTION_HEIGHT
+                        );
+                        setLimit(
+                          topOptionCount + DEFAULT_NUMBER_OF_OPTIONS_TO_RENDER
+                        );
+                      }}
+                      sx={{
+                        minWidth: anchorRef.current
+                          ? anchorRef.current.offsetWidth
+                          : 200,
+                        maxHeight: DROPDOWN_MENU_MAX_HEIGHT,
+                        boxSizing: 'border-box',
+                        overflowY: 'auto',
+                      }}
+                    >
+                      <Box
+                        component="ul"
+                        sx={{
+                          m: 0,
+                          p: 0,
+                          minHeight:
+                            filteredOptions.length *
+                            DEFAULT_DROPDOWN_OPTION_HEIGHT,
+                        }}
+                      >
+                        {displayOptions.length > 0 ? (
+                          displayOptions.map(({ value, label }) => {
+                            return (
+                              <MenuItem
+                                value={value}
+                                key={value}
+                                onClick={() => {
+                                  if (SelectProps?.multiple) {
+                                    setSelectedOptions((prevOptions) => {
+                                      const selectedOption = prevOptions.find(
+                                        ({ value: selectedOptionValue }) => {
+                                          return selectedOptionValue === value;
+                                        }
+                                      );
+                                      if (selectedOption) {
+                                        prevOptions.splice(
+                                          prevOptions.indexOf(selectedOption),
+                                          1
+                                        );
+                                      } else {
+                                        prevOptions.push({ value, label });
+                                      }
+                                      return [...prevOptions];
+                                    });
+                                  } else {
+                                    setSelectedOptions([{ value, label }]);
+                                    handleClose();
+                                  }
+                                }}
+                                selected={selectedOptions
+                                  .map(({ value }) => value)
+                                  .includes(value)}
+                                sx={{
+                                  minHeight: DEFAULT_DROPDOWN_OPTION_HEIGHT,
+                                }}
+                              >
+                                {label}
+                              </MenuItem>
+                            );
+                          })
+                        ) : (
+                          <MenuItem disabled>
+                            <Typography
+                              variant="body2"
+                              color={theme.palette.error.main}
+                            >
+                              No options found
+                            </Typography>
+                          </MenuItem>
+                        )}
+                      </Box>
+                    </Box>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        py: 1,
+                      }}
+                    >
+                      <ReloadIconButton
+                        load={() => loadOptions(true)}
+                        {...{ loading }}
+                      />
+                    </Box>
+                  </Card>
+                </ClickAwayListener>
+              </Box>
+            </Grow>
           );
-        })}
-    </TextField>
+        }}
+      </Popper>
+    </>
   );
 };
 
