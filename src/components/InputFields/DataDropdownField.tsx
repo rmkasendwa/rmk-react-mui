@@ -44,7 +44,7 @@ export interface IDataDropdownFieldProps extends ITextFieldProps {
   selectedOption?: IDropdownOption;
 }
 
-const DROPDOWN_MENU_MAX_HEIGHT = 300;
+const DROPDOWN_MENU_MAX_HEIGHT = 200;
 const DEFAULT_DROPDOWN_OPTION_HEIGHT = 36;
 const DEFAULT_NUMBER_OF_OPTIONS_TO_RENDER = Math.ceil(
   DROPDOWN_MENU_MAX_HEIGHT / DEFAULT_DROPDOWN_OPTION_HEIGHT
@@ -179,16 +179,16 @@ export const DataDropdownField: FC<IDataDropdownFieldProps> = ({
   }, [errorMessage, loadOptions, missingOptionValues.length]);
 
   useEffect(() => {
-    propOptions && setOptions(propOptions);
-  }, [propOptions, setOptions]);
-
-  useEffect(() => {
-    setOptions(
-      getDropdownOptions
-        ? getDropdownOptions(dropdownEntities)
-        : dropdownEntities
-    );
-  }, [dropdownEntities, getDropdownOptions, setOptions]);
+    if (propOptions) {
+      setOptions(propOptions);
+    } else {
+      setOptions(
+        getDropdownOptions
+          ? getDropdownOptions(dropdownEntities)
+          : dropdownEntities
+      );
+    }
+  }, [dropdownEntities, getDropdownOptions, propOptions, setOptions]);
 
   useEffect(() => {
     if (sortOptions) {
@@ -394,18 +394,20 @@ export const DataDropdownField: FC<IDataDropdownFieldProps> = ({
                         )}
                       </Box>
                     </Box>
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        py: 1,
-                      }}
-                    >
-                      <ReloadIconButton
-                        load={() => loadOptions(true)}
-                        {...{ loading }}
-                      />
-                    </Box>
+                    {getDropdownEntities && (
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          justifyContent: 'center',
+                          py: 1,
+                        }}
+                      >
+                        <ReloadIconButton
+                          load={() => loadOptions(true)}
+                          {...{ loading }}
+                        />
+                      </Box>
+                    )}
                   </Card>
                 </ClickAwayListener>
               </Box>

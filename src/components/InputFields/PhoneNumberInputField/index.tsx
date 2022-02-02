@@ -13,7 +13,7 @@ import {
 
 import { GlobalConfigurationContext } from '../../../contexts';
 import { useFormikValue } from '../../../hooks';
-import { ICountryCode } from '../../../interfaces';
+import { ICountryCode, IGlobalConfiguration } from '../../../interfaces';
 import { systemStandardPhoneNumberFormat } from '../../../utils/PhoneNumberUtil';
 import TextField, { ITextFieldProps } from '../TextField';
 import { ICountry, countries } from './countries';
@@ -22,6 +22,8 @@ import CountryList from './CountryList';
 interface IPhoneNumberInputFieldProps extends ITextFieldProps {
   value?: string;
   displaySelectedFlagLabel?: boolean;
+  displayPhoneNumberCountry?: boolean;
+  displayRegionalCodeOnEmptyFocus?: boolean;
   regionalCode?: ICountryCode;
 }
 
@@ -40,6 +42,8 @@ const flags = countries.reduce(
 
 export const PhoneNumberInputField: FC<IPhoneNumberInputFieldProps> = ({
   displaySelectedFlagLabel = true,
+  displayPhoneNumberCountry = false,
+  displayRegionalCodeOnEmptyFocus = false,
   label,
   placeholder,
   onFocus,
@@ -52,7 +56,9 @@ export const PhoneNumberInputField: FC<IPhoneNumberInputFieldProps> = ({
 }) => {
   value = useFormikValue({ value, name });
 
-  const { countryCode } = useContext(GlobalConfigurationContext);
+  const { countryCode }: IGlobalConfiguration = useContext(
+    GlobalConfigurationContext
+  );
   regionalCode || (regionalCode = countryCode);
   const [selectedCountry, setSelectedCountry] = useState(flags[regionalCode]);
 
@@ -92,8 +98,9 @@ export const PhoneNumberInputField: FC<IPhoneNumberInputFieldProps> = ({
       label={label}
       value={inputValue}
       onFocus={(event) => {
-        inputValue.length === 0 &&
+        if (displayRegionalCodeOnEmptyFocus && inputValue.length === 0) {
           setInputValue(`+${selectedCountry.countryCode}`);
+        }
         onFocus && onFocus(event);
       }}
       onBlur={(event) => {
@@ -110,7 +117,7 @@ export const PhoneNumberInputField: FC<IPhoneNumberInputFieldProps> = ({
       {...rest}
       {...{ name }}
       InputProps={{
-        startAdornment: (
+        startAdornment: displayPhoneNumberCountry ? (
           <InputAdornment position="start">
             <Button
               color="inherit"
@@ -155,7 +162,7 @@ export const PhoneNumberInputField: FC<IPhoneNumberInputFieldProps> = ({
               anchor={anchorRef.current}
             />
           </InputAdornment>
-        ),
+        ) : null,
       }}
       sx={{
         '&>.MuiInputBase-formControl': {
