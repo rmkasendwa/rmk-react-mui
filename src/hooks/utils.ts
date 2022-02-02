@@ -5,8 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { APIContext, APIDataContext, LoadingContext } from '../contexts';
 import { IAPI, IAPIFunction } from '../interfaces';
-import { RootState } from '../redux';
-import { updateData } from '../redux/data/actions';
+import { RootState, updateData } from '../redux';
 
 export const useAPIService = <T>(defautValue: T, key?: string) => {
   const data = useSelector((state: RootState) => {

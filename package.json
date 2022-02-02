@@ -1,6 +1,6 @@
 {
   "name": "@infinite-debugger/react-mui",
-  "version": "0.1.0-alpha.5",
+  "version": "0.1.0-alpha.6",
   "description": "RMK React MUI is a React UI library of utility components, hooks and contexts",
   "keywords": [
     "react",
@@ -140,7 +140,8 @@
     "@mui/lab": ">=5.0.0-alpha.66",
     "@mui/material": ">=5.3.1",
     "@mui/styles": ">=5.3.0",
-    "google-libphonenumber": "^3.2.26",
+    "formik": ">=2.2.9",
+    "google-libphonenumber": ">=3.2.26",
     "react": ">=17.0.2",
     "react-redux": ">=7.2.6",
     "redux-thunk": ">=2.4.1"
