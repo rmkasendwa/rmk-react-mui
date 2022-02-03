@@ -221,12 +221,12 @@ export const DataDropdownField: FC<IDataDropdownFieldProps> = ({
         })
         .filter((option) => option);
 
-      if (hash(newSelectedOptions) !== hash(selectedOptions)) {
+      if (hash(newSelectedOptions) !== hash(prevSelectedOptions)) {
         return newSelectedOptions;
       }
       return prevSelectedOptions;
     });
-  }, [options, selectedOptions, value]);
+  }, [options, value]);
 
   if (value && loading && missingOptionValues.length > 0) {
     return (

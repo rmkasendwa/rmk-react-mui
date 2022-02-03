@@ -1,4 +1,4 @@
-import { Skeleton, Typography } from '@mui/material';
+import { Skeleton, Typography, alpha, useTheme } from '@mui/material';
 import { FC, ReactNode } from 'react';
 
 import { useLoadingContext } from '../hooks';
@@ -15,6 +15,7 @@ export const FieldValueDisplay: FC<IFieldValueDisplayProps> = ({
   value,
 }) => {
   value || (value = '-');
+  const theme = useTheme();
 
   const { loading, errorMessage } = useLoadingContext();
   const labelSkeletonWidth = label.length * 7;
@@ -48,10 +49,14 @@ export const FieldValueDisplay: FC<IFieldValueDisplayProps> = ({
 
   return (
     <>
-      <FieldLabel sx={{ mb: 1 }}>{label}</FieldLabel>
+      <FieldLabel>{label}</FieldLabel>
       <Typography
         variant="body2"
-        sx={{ wordBreak: 'break-word', whiteSpace: 'pre-line' }}
+        sx={{
+          wordBreak: 'break-word',
+          whiteSpace: 'pre-line',
+          color: alpha(theme.palette.text.primary, 0.5),
+        }}
       >
         {value}
       </Typography>
