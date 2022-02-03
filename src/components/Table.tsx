@@ -1,13 +1,16 @@
-import { SxProps, Theme, alpha, useTheme } from '@mui/material';
 import {
   Table as MuiTable,
+  SxProps,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TablePagination,
   TableRow,
+  Theme,
   Typography,
+  alpha,
+  useTheme,
 } from '@mui/material';
 import { CSSProperties, FC, ReactNode, useEffect, useState } from 'react';
 
@@ -62,11 +65,12 @@ export interface ITableProps {
   labelPlural?: string;
   variant?: 'stripped' | 'plain';
   onClickRow?: (listItem: any, index: number) => void;
-  onChangePage: (pageIndex: number) => void;
+  onChangePage?: (pageIndex: number) => void;
   forEachDerivedColumn?: (
     config: IForEachDerivedColumnConfiguration
   ) => ReactNode | null | undefined;
   paging?: boolean;
+  showHeaderRow?: boolean;
 }
 
 export const Table: FC<ITableProps> = ({
@@ -81,6 +85,7 @@ export const Table: FC<ITableProps> = ({
   forEachDerivedColumn,
   variant = 'plain',
   paging = true,
+  showHeaderRow = true,
 }) => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
@@ -89,7 +94,7 @@ export const Table: FC<ITableProps> = ({
   }, [rowsPerPageProp]);
 
   const handleChangePage = (e: any, newPage: number) => {
-    onChangePage(newPage);
+    onChangePage && onChangePage(newPage);
   };
 
   const pageRows =
@@ -126,32 +131,34 @@ export const Table: FC<ITableProps> = ({
     <>
       <TableContainer sx={{ height: 'calc(100% - 52px)' }}>
         <MuiTable stickyHeader aria-label="sticky table">
-          <TableHead>
-            <TableRow sx={{ textTransform: 'uppercase' }}>
-              {columns.map((column) => {
-                const { id, align, style } = column;
-                return (
-                  <TableCell
-                    key={id}
-                    align={align}
-                    sx={{
-                      fontWeight: 'bold',
-                      px: 3,
-                      ...getColumnWidthStyles(column),
-                      ...(style || {}),
-                    }}
-                  >
-                    <Typography
-                      sx={{ fontWeight: 'bold', fontSize: 12 }}
-                      noWrap
+          {showHeaderRow ? (
+            <TableHead>
+              <TableRow sx={{ textTransform: 'uppercase' }}>
+                {columns.map((column) => {
+                  const { id, align, style } = column;
+                  return (
+                    <TableCell
+                      key={id}
+                      align={align}
+                      sx={{
+                        fontWeight: 'bold',
+                        px: 3,
+                        ...getColumnWidthStyles(column),
+                        ...(style || {}),
+                      }}
                     >
-                      {column.label}
-                    </Typography>
-                  </TableCell>
-                );
-              })}
-            </TableRow>
-          </TableHead>
+                      <Typography
+                        sx={{ fontWeight: 'bold', fontSize: 12 }}
+                        noWrap
+                      >
+                        {column.label}
+                      </Typography>
+                    </TableCell>
+                  );
+                })}
+              </TableRow>
+            </TableHead>
+          ) : null}
           <TableBody sx={bodyStyles}>
             {(() => {
               if (pageRows.length > 0) {

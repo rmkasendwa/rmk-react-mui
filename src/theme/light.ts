@@ -1,4 +1,4 @@
-import { createTheme } from '@mui/material/styles';
+import { createTheme } from '@mui/material';
 import createPalette from '@mui/material/styles/createPalette';
 
 import { getBaseTheme } from './base';
