@@ -9,10 +9,15 @@ export default {
   component: Table,
 } as ComponentMeta<typeof Table>;
 
-const Template: ComponentStory<typeof Table> = ({ showHeaderRow, paging }) => {
+const Template: ComponentStory<typeof Table> = ({
+  showHeaderRow,
+  paging,
+  HeaderRowProps,
+}) => {
   const props: any = {};
   showHeaderRow != null && (props.showHeaderRow = showHeaderRow);
   paging != null && (props.paging = paging);
+  HeaderRowProps != null && (props.HeaderRowProps = HeaderRowProps);
 
   return (
     <Box sx={{ maxWidth: 1200, p: 3, mx: 'auto' }}>
@@ -60,4 +65,21 @@ WithoutPaging.args = {
 export const WithoutHeaderRow = Template.bind({});
 WithoutHeaderRow.args = {
   showHeaderRow: false,
+};
+
+export const WithHeaderRowProps = Template.bind({});
+WithHeaderRowProps.args = {
+  HeaderRowProps: {
+    sx: {
+      textTransform: 'none',
+      '&>th': {
+        color: '#fff',
+        backgroundColor: '#333',
+        py: 0,
+      },
+      '&>th>p': {
+        lineHeight: '40px',
+      },
+    },
+  },
 };

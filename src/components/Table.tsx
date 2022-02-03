@@ -7,6 +7,7 @@ import {
   TableHead,
   TablePagination,
   TableRow,
+  TableRowProps,
   Theme,
   Typography,
   alpha,
@@ -71,6 +72,7 @@ export interface ITableProps {
   ) => ReactNode | null | undefined;
   paging?: boolean;
   showHeaderRow?: boolean;
+  HeaderRowProps?: TableRowProps;
 }
 
 export const Table: FC<ITableProps> = ({
@@ -86,7 +88,9 @@ export const Table: FC<ITableProps> = ({
   variant = 'plain',
   paging = true,
   showHeaderRow = true,
+  HeaderRowProps = {},
 }) => {
+  const { sx: headerRowPropsSx, ...restHeaderRowProps } = HeaderRowProps;
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
   useEffect(() => {
@@ -133,7 +137,10 @@ export const Table: FC<ITableProps> = ({
         <MuiTable stickyHeader aria-label="sticky table">
           {showHeaderRow ? (
             <TableHead>
-              <TableRow sx={{ textTransform: 'uppercase' }}>
+              <TableRow
+                {...restHeaderRowProps}
+                sx={{ textTransform: 'uppercase', ...headerRowPropsSx }}
+              >
                 {columns.map((column) => {
                   const { id, align, style } = column;
                   return (
@@ -144,7 +151,7 @@ export const Table: FC<ITableProps> = ({
                         fontWeight: 'bold',
                         px: 3,
                         ...getColumnWidthStyles(column),
-                        ...(style || {}),
+                        ...style,
                       }}
                     >
                       <Typography
@@ -195,7 +202,7 @@ export const Table: FC<ITableProps> = ({
                               py: 1.8,
                               px: 3,
                               ...getColumnWidthStyles(column),
-                              ...(style || {}),
+                              ...style,
                             }}
                           >
                             {value}
