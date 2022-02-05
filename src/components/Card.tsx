@@ -1,6 +1,8 @@
 import {
   CardContent,
+  CardContentProps,
   CardHeader,
+  CardHeaderProps,
   CardProps,
   Card as MuiCard,
   Skeleton,
@@ -12,16 +14,28 @@ import ErrorSkeleton from './ErrorSkeleton';
 
 export interface ICardProps extends Omit<CardProps, 'title'> {
   title?: ReactNode;
+  CardHeaderProps?: CardHeaderProps;
+  CardContentProps?: CardContentProps;
 }
 
-export const Card: FC<ICardProps> = ({ children, title, ...rest }) => {
+export const Card: FC<ICardProps> = ({
+  children,
+  title,
+  CardHeaderProps = {},
+  CardContentProps = {},
+  ...rest
+}) => {
   const { loading, errorMessage } = useLoadingContext();
   const smallScreen = useSmallScreen();
+
+  const { sx: sxCardHeaderProps, ...restCardHeaderProps } = CardHeaderProps;
+  const { sx: sxCardContentProps, ...restCardContentProps } = CardContentProps;
 
   return (
     <MuiCard {...rest}>
       {title && (
         <CardHeader
+          {...restCardHeaderProps}
           title={(() => {
             const titleSkeletonWidth =
               typeof title === 'string' ? title.length * 10 : 0;
@@ -42,10 +56,15 @@ export const Card: FC<ICardProps> = ({ children, title, ...rest }) => {
 
             return title;
           })()}
-          sx={{ px: smallScreen ? 2 : 3 }}
+          sx={{ px: smallScreen ? 2 : 3, ...sxCardHeaderProps }}
         />
       )}
-      <CardContent sx={{ p: smallScreen ? 2 : 3 }}>{children}</CardContent>
+      <CardContent
+        {...restCardContentProps}
+        sx={{ p: smallScreen ? 2 : 3, ...sxCardContentProps }}
+      >
+        {children}
+      </CardContent>
     </MuiCard>
   );
 };
