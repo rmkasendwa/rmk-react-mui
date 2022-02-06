@@ -64,6 +64,7 @@ export interface ITableProps {
   pageIndex?: number;
   totalRowCount?: number;
   labelPlural?: string;
+  lowercaseLabelPlural?: string;
   variant?: 'stripped' | 'plain';
   onClickRow?: (listItem: any, index: number) => void;
   onChangePage?: (pageIndex: number) => void;
@@ -80,7 +81,8 @@ export const Table: FC<ITableProps> = ({
   columns,
   rows,
   totalRowCount,
-  labelPlural = 'records',
+  labelPlural = 'Records',
+  lowercaseLabelPlural,
   rowsPerPage: rowsPerPageProp = 10,
   pageIndex = 0,
   onChangePage,
@@ -90,6 +92,8 @@ export const Table: FC<ITableProps> = ({
   showHeaderRow = true,
   HeaderRowProps = {},
 }) => {
+  lowercaseLabelPlural || (lowercaseLabelPlural = labelPlural.toLowerCase());
+
   const { sx: headerRowPropsSx, ...restHeaderRowProps } = HeaderRowProps;
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
@@ -131,9 +135,14 @@ export const Table: FC<ITableProps> = ({
       break;
   }
 
+  const tableContainerStyles: CSSProperties = {};
+  if (paging && pageRows.length > 0) {
+    tableContainerStyles.height = 'calc(100% - 52px)';
+  }
+
   return (
     <>
-      <TableContainer sx={{ height: 'calc(100% - 52px)' }}>
+      <TableContainer sx={tableContainerStyles}>
         <MuiTable stickyHeader aria-label="sticky table">
           {showHeaderRow ? (
             <TableHead>
@@ -217,7 +226,7 @@ export const Table: FC<ITableProps> = ({
                 <TableRow>
                   <TableCell colSpan={columns.length} align="center">
                     <Typography variant="body2">
-                      No {labelPlural.toLowerCase()} found
+                      No {lowercaseLabelPlural} found
                     </Typography>
                   </TableCell>
                 </TableRow>
