@@ -10,6 +10,7 @@ const ENCRYPTION_KEY =
   process.env.APP_NAME ||
   process.env.REACT_APP_NAME ||
   'A really trivial key';
+
 const StorageManager = {
   add(key: string, value: any, options?: boolean | IStorageManagerAddOptions) {
     const isSessionValue =
