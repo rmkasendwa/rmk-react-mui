@@ -1,31 +1,34 @@
 import axios from 'axios';
-import * as queryString from 'query-string';
 
 import { IRequestOptions, IUser } from '../../interfaces';
 import { SessionTimeoutError } from '../../utils/errors';
 import StorageManager from '../../utils/StorageManager';
 import { queueRequest } from './request-queue';
 
-interface IRequestHeaders {
-  Authorization?: string;
-}
-
 export const HOST_URL = window.location.origin;
 
 const FAILED_REQUEST_RETRY_STATUS_BLACKLIST: number[] = [400, 401, 404, 500];
 const MAX_REQUEST_RETRY_COUNT = 2;
-const requestHeaders: IRequestHeaders = {};
 
-const getAuthorizationToken = (authorization: string) =>
-  `Bearer ${authorization}`;
-const token: string | null = StorageManager.get('token');
-token && (requestHeaders.Authorization = getAuthorizationToken(token));
+export const defaultRequestHeaders: Record<string, string> = {};
+const cachedDefaultRequestHeaders: Record<string, string> | null =
+  StorageManager.get('defaultRequestHeaders');
+cachedDefaultRequestHeaders &&
+  Object.assign(defaultRequestHeaders, cachedDefaultRequestHeaders);
+
+export interface IHeaderController {
+  rotateHeaders?: (
+    responseHeaders: Record<string, string>,
+    requestHeaders: Record<string, string>
+  ) => Record<string, string>;
+}
+export const HeaderController: IHeaderController = {};
 
 const fetchData = async <T = any>(
   path: string,
   { headers = {}, label, ...options }: IRequestOptions
 ): Promise<T> => {
-  const defaultHeaders = { ...requestHeaders };
+  const defaultHeaders = { ...defaultRequestHeaders };
   const cancelTokenSource = axios.CancelToken.source();
   options.getRequestController &&
     options.getRequestController({
@@ -95,11 +98,16 @@ const fetchData = async <T = any>(
           });
           if (response) {
             if (!Array.isArray(response.data.errors)) {
-              if (response.headers.authorization) {
-                requestHeaders.Authorization = getAuthorizationToken(
-                  response.headers.authorization
+              if (HeaderController.rotateHeaders) {
+                const rotatedRequestHeaders = HeaderController.rotateHeaders(
+                  response.headers,
+                  defaultHeaders
                 );
-                StorageManager.add('token', response.headers.authorization);
+                Object.assign(defaultRequestHeaders, rotatedRequestHeaders);
+                StorageManager.add(
+                  'defaultRequestHeaders',
+                  defaultRequestHeaders
+                );
               }
               return resolve(response);
             } else if (
@@ -145,6 +153,14 @@ export const post = async (
   return fetchData(path, getRequestDefaultOptions(options));
 };
 
+export const put = async (
+  path: string,
+  { ...options }: IRequestOptions = {}
+): Promise<any> => {
+  options.method = 'PUT';
+  return fetchData(path, getRequestDefaultOptions(options));
+};
+
 export const patch = async (
   path: string,
   { ...options }: IRequestOptions = {}
@@ -166,33 +182,6 @@ export const login = async (
     label: 'Logging in',
   });
   return data;
-};
-
-export const loginWithAuthParams = async (
-  authParams: Record<string, string>,
-  loginUrl: string
-): Promise<IUser> => {
-  // Getting token
-  const { data: tokenData } = await post(loginUrl, {
-    data: queryString.stringify(authParams),
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    label: 'Logging in',
-  });
-  requestHeaders.Authorization = getAuthorizationToken(tokenData.token);
-  StorageManager.add('token', tokenData.token);
-
-  // Getting authorized user
-  const { data: userData } = await get('/api/v1/auth', {
-    label: 'Loading user account details',
-  });
-  const user: IUser = {
-    fullName: userData['user.name'],
-    email: userData['user.id'],
-    profilePictureUrl: userData['user.pic'],
-  };
-  return user;
 };
 
 export const logout = async () => {

@@ -1,5 +1,4 @@
 import { login, logout } from './api';
-import { loginWithAuthParams } from './api/adapter';
 import { IUser } from './interfaces';
 import StorageManager from './utils/StorageManager';
 
@@ -26,15 +25,6 @@ const Auth = {
   ): Promise<boolean> {
     clearLoggedInUserSession();
     const user = await loginFunction(username, password);
-    user && updateLoggedInUserSession(user);
-    return authenticated;
-  },
-  async loginWithAuthParams(
-    authParams: Record<string, string>,
-    loginUrl: string
-  ): Promise<boolean> {
-    clearLoggedInUserSession();
-    const user = await loginWithAuthParams(authParams, loginUrl);
     user && updateLoggedInUserSession(user);
     return authenticated;
   },

@@ -1,4 +1,4 @@
-import CryptoJS, { AES, MD5, PBKDF2, enc, lib, mode, pad } from 'crypto-js';
+import { AES, MD5, PBKDF2, enc, lib, mode, pad } from 'crypto-js';
 
 const { Hex, Utf8 } = enc;
 const { Pkcs7 } = pad;
@@ -65,15 +65,3 @@ export const encrypt = (
     return encrypt(message, password);
   }
 };
-
-declare global {
-  interface Window {
-    WordArray: any;
-    CryptoJS: any;
-    encrypt: any;
-  }
-}
-
-window.WordArray = WordArray;
-window.CryptoJS = CryptoJS;
-window.encrypt = encrypt;
