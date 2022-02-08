@@ -1,3 +1,4 @@
+import { Chip } from '@mui/material';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 
 import { FieldValueDisplay } from '../components';
@@ -19,7 +20,17 @@ const Template: ComponentStory<typeof FieldValueDisplay> = ({ value }) => {
 
 export const Default = Template.bind({});
 
-export const WithValue = Template.bind({});
-WithValue.args = {
+export const WithStringValue = Template.bind({});
+WithStringValue.args = {
   value: 'This is the value',
+};
+
+export const WithNumericValue = Template.bind({});
+WithNumericValue.args = {
+  value: 2000,
+};
+
+export const WithElementValue = Template.bind({});
+WithElementValue.args = {
+  value: <Chip label="Value" color="success" size="small" />,
 };
