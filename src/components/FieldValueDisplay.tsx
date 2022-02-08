@@ -50,16 +50,23 @@ export const FieldValueDisplay: FC<IFieldValueDisplayProps> = ({
   return (
     <>
       <FieldLabel>{label}</FieldLabel>
-      <Typography
-        variant="body2"
-        sx={{
-          wordBreak: 'break-word',
-          whiteSpace: 'pre-line',
-          color: alpha(theme.palette.text.primary, 0.5),
-        }}
-      >
-        {value}
-      </Typography>
+      {(() => {
+        if (['string', 'number'].includes(typeof value)) {
+          return (
+            <Typography
+              variant="body2"
+              sx={{
+                wordBreak: 'break-word',
+                whiteSpace: 'pre-line',
+                color: alpha(theme.palette.text.primary, 0.5),
+              }}
+            >
+              {value}
+            </Typography>
+          );
+        }
+        return value;
+      })()}
     </>
   );
 };
