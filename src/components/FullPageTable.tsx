@@ -68,7 +68,9 @@ export const FullPageTable: FC<IFullPageTableProps> = ({
   const searchableColumnIds = useMemo(() => {
     return columns.map(({ id }) => id);
   }, [columns]);
-  const searchableFieldLabels = columns.map(({ label }) => label.toLowerCase());
+  const searchableFieldLabels = columns
+    .filter((label) => typeof label === 'string')
+    .map(({ label }) => (label as string).toLowerCase());
   const searchFieldPlaceholder = `Search by ${searchableFieldLabels
     .slice(0, -1)
     .join(', ')}, or ${searchableFieldLabels.slice(-1)}`;

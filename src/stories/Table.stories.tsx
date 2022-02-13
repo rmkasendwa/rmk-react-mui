@@ -13,11 +13,15 @@ const Template: ComponentStory<typeof Table> = ({
   showHeaderRow,
   paging,
   HeaderRowProps,
+  columns,
+  rows,
 }) => {
   const props: any = {};
   showHeaderRow != null && (props.showHeaderRow = showHeaderRow);
   paging != null && (props.paging = paging);
   HeaderRowProps != null && (props.HeaderRowProps = HeaderRowProps);
+  columns != null && (props.columns = columns);
+  rows != null && (props.rows = rows);
 
   return (
     <Box sx={{ maxWidth: 1200, p: 3, mx: 'auto' }}>
@@ -82,4 +86,24 @@ WithHeaderRowProps.args = {
       },
     },
   },
+};
+
+export const ColumnTypes = Template.bind({});
+ColumnTypes.args = {
+  columns: [
+    { id: 'id', label: 'id', type: 'id' },
+    { id: 'amount', label: 'Currency', type: 'currency' },
+    { id: 'number', label: 'Number', type: 'number' },
+    { id: 'percent', label: 'Percent', type: 'percentage' },
+    { id: 'isHere', label: 'Boolean', type: 'boolean' },
+  ],
+  rows: Array.from({ length: 4 + Math.round(Math.random() * 100) }).map(() => {
+    return {
+      id: Math.round(Math.random() * 500),
+      amount: Math.round(Math.random() * 5000) * 500,
+      number: Math.round(Math.random() * 10000),
+      percent: Math.random() * 100,
+      isHere: Math.round(Math.random() * 10) % 2 === 0,
+    };
+  }),
 };

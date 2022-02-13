@@ -1,3 +1,5 @@
+import 'datejs';
+
 import {
   Table as MuiTable,
   SxProps,
@@ -13,23 +15,68 @@ import {
   alpha,
   useTheme,
 } from '@mui/material';
-import { CSSProperties, FC, ReactNode, useEffect, useState } from 'react';
+import hash from 'object-hash';
+import {
+  CSSProperties,
+  FC,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
+
+import { GlobalConfigurationContext } from '../contexts';
+import { formatDate } from '../utils/dates';
+import { addThousandCommas } from '../utils/numbers';
+
+export type ITableColumnEnumValue =
+  | {
+      id: string;
+      label: string;
+    }
+  | string;
 
 export interface ITableColumn {
   id: string;
-  label: string;
+  label: ReactNode;
   type?:
-    | 'date'
+    | 'boolean'
+    | 'checkbox'
     | 'currency'
-    | 'phoneNumber'
-    | 'percentage'
+    | 'currencyInput'
+    | 'date'
+    | 'dateInput'
     | 'dateTime'
-    | 'enum';
+    | 'dropdownInput'
+    | 'enum'
+    | 'id'
+    | 'input'
+    | 'number'
+    | 'numberInput'
+    | 'percentage'
+    | 'percentageInput'
+    | 'phoneNumber'
+    | 'phonenumberInput'
+    | 'rowAdder'
+    | 'time'
+    | 'tool';
   align?: 'left' | 'center' | 'right';
   width?: number;
   minWidth?: number;
   style?: CSSProperties;
   isDerivedColumn?: boolean;
+  noHeaderTextAfter?: boolean;
+  headerTextAfter?: ReactNode;
+  enumValues?: ITableColumnEnumValue[];
+  searchKeyMapper?: (displayingColumnValue: string) => any;
+  columnClassName?: string;
+  locked?: boolean;
+  defaultValue?: ReactNode;
+  postProcessor?: (
+    columnValue: ReactNode,
+    row: any,
+    column: ITableColumn
+  ) => ReactNode;
 }
 
 export interface IForEachDerivedColumnConfiguration {
@@ -40,22 +87,27 @@ export interface IForEachDerivedColumnConfiguration {
 const getColumnWidthStyles = ({
   width,
   minWidth,
-  type,
 }: ITableColumn): { width?: number; minWidth: number; maxWidth: number } => {
-  switch (type) {
-    case 'date':
-      width || (width = 130);
-      break;
-    case 'enum':
-      width || (width = 180);
-      break;
-  }
   return {
-    width: width,
+    width,
     minWidth: minWidth || width || 70,
     maxWidth: width || 180,
   };
 };
+
+const toolTypes = [
+  'tool',
+  'input',
+  'currencyInput',
+  'selectInput',
+  'dateInput',
+  'phoneInput',
+  'rowAdder',
+  'percentageInput',
+  'numberInput',
+  'fragment',
+  'checkbox',
+];
 
 export interface ITableProps {
   columns: Array<ITableColumn>;
@@ -74,11 +126,14 @@ export interface ITableProps {
   paging?: boolean;
   showHeaderRow?: boolean;
   HeaderRowProps?: TableRowProps;
+  currencyCode?: string;
+  decimalPlaces?: number;
+  labelTransform?: boolean;
 }
 
 export const Table: FC<ITableProps> = ({
   onClickRow,
-  columns,
+  columns: columnsProp,
   rows,
   totalRowCount,
   labelPlural = 'Records',
@@ -91,11 +146,179 @@ export const Table: FC<ITableProps> = ({
   paging = true,
   showHeaderRow = true,
   HeaderRowProps = {},
+  currencyCode,
+  decimalPlaces,
+  labelTransform,
 }) => {
   lowercaseLabelPlural || (lowercaseLabelPlural = labelPlural.toLowerCase());
 
   const { sx: headerRowPropsSx, ...restHeaderRowProps } = HeaderRowProps;
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [columns, setColumns] = useState<ITableColumn[]>([]);
+  const [formattedRows, setFormattedRows] = useState<Array<any>>([]);
+  const { currencyCode: defaultCurrencyCode } = useContext(
+    GlobalConfigurationContext
+  );
+  currencyCode || (currencyCode = defaultCurrencyCode);
+
+  useEffect(() => {
+    setColumns((prevColumns) => {
+      const nextColumns = columnsProp.map((column) => {
+        const nextColumn = { ...column };
+        switch (nextColumn.type) {
+          case 'date':
+          case 'time':
+            nextColumn.width || (nextColumn.width = 120);
+            break;
+          case 'enum':
+            nextColumn.width || (nextColumn.width = 150);
+            break;
+          case 'currency':
+          case 'percentage':
+          case 'number':
+            nextColumn.align = 'right';
+            if (!nextColumn.noHeaderTextAfter) {
+              switch (nextColumn.type) {
+                case 'currency':
+                  if (currencyCode) {
+                    nextColumn.headerTextAfter = ` (${currencyCode})`;
+                  }
+                  break;
+                case 'percentage':
+                  nextColumn.headerTextAfter = ' (%)';
+                  break;
+              }
+            }
+            break;
+          case 'boolean':
+            nextColumn.align = 'center';
+            nextColumn.enumValues = ['Yes', 'No'];
+            nextColumn.width || (nextColumn.width = 120);
+            nextColumn.searchKeyMapper ||
+              (nextColumn.searchKeyMapper = (searchValue) =>
+                searchValue === 'Yes');
+            break;
+          case 'id':
+            nextColumn.align = 'center';
+            nextColumn.width || (nextColumn.width = 100);
+            break;
+          case 'phoneNumber':
+            nextColumn.width || (nextColumn.width = 195);
+            nextColumn.columnClassName = 'phone-number-column';
+            break;
+          case 'currencyInput':
+            nextColumn.align = 'right';
+            if (currencyCode) {
+              nextColumn.headerTextAfter = ` (${currencyCode})`;
+            }
+            break;
+          case 'tool':
+          case 'checkbox':
+            nextColumn.locked = true;
+            nextColumn.align = 'center';
+            break;
+        }
+        return nextColumn;
+      });
+      if (hash(prevColumns) !== hash(nextColumns)) {
+        return nextColumns;
+      }
+      return prevColumns;
+    });
+  }, [columnsProp, currencyCode]);
+
+  useEffect(() => {
+    setFormattedRows((prevFormattedRows) => {
+      const allowedDataTypes = ['number', 'string', 'boolean'];
+      const nextFormattedRows = rows.map((row) => {
+        const nextRow = { ...row };
+        columns.forEach((column) => {
+          const { type, id, defaultValue, postProcessor } = column;
+          if (type && toolTypes.includes(type)) {
+            switch (type) {
+              case 'input':
+                // TODO: Implment this
+                break;
+              case 'currencyInput':
+                // TODO: Implment this
+                break;
+              case 'percentageInput':
+                // TODO: Implment this
+                break;
+              case 'numberInput':
+                // TODO: Implment this
+                break;
+              case 'dropdownInput':
+                // TODO: Implment this
+                break;
+              case 'dateInput':
+                // TODO: Implment this
+                break;
+              case 'phonenumberInput':
+                // TODO: Implment this
+                break;
+              case 'rowAdder':
+                // TODO: Implment this
+                break;
+              case 'checkbox':
+                // TODO: Implment this
+                break;
+            }
+          } else if (
+            nextRow[id] !== '' &&
+            allowedDataTypes.includes(typeof nextRow[id])
+          ) {
+            switch (type) {
+              case 'date':
+                nextRow[id] = formatDate(nextRow[id]);
+                break;
+              case 'dateTime':
+                nextRow[id] = formatDate(nextRow[id], true);
+                break;
+              case 'time':
+                const date = new Date(nextRow[id]);
+                nextRow[id] = isNaN(date.getTime())
+                  ? ''
+                  : date.toString('hh:mm tt');
+                break;
+              case 'currency':
+              case 'percentage':
+                nextRow[id] = parseFloat(nextRow[id]);
+                nextRow[id] = addThousandCommas(
+                  nextRow[id],
+                  decimalPlaces || true
+                );
+                break;
+              case 'number':
+                nextRow[id] = addThousandCommas(nextRow[id]);
+                break;
+              case 'phoneNumber':
+                // TODO: Implement this
+                break;
+              case 'enum':
+                if (labelTransform !== false) {
+                  nextRow[id] = String(nextRow[id]).toTitleCase(true);
+                }
+                break;
+              case 'boolean':
+                nextRow[id] = nextRow[id] ? 'Yes' : 'No';
+                break;
+            }
+          } else {
+            nextRow[id] = defaultValue || '&nbsp;';
+          }
+          if (postProcessor) {
+            nextRow[id] = postProcessor(nextRow[id], row, column);
+          }
+        });
+        return nextRow;
+      });
+      if (hash(nextFormattedRows) !== hash(prevFormattedRows)) {
+        return nextFormattedRows;
+      }
+      return prevFormattedRows;
+    });
+  }, [columns, decimalPlaces, labelTransform, rows]);
 
   useEffect(() => {
     setRowsPerPage(rowsPerPageProp);
@@ -107,8 +330,8 @@ export const Table: FC<ITableProps> = ({
 
   const pageRows =
     totalRowCount || !paging
-      ? rows
-      : rows.slice(
+      ? formattedRows
+      : formattedRows.slice(
           pageIndex * rowsPerPage,
           pageIndex * rowsPerPage + rowsPerPage
         );
@@ -152,6 +375,13 @@ export const Table: FC<ITableProps> = ({
               >
                 {columns.map((column) => {
                   const { id, align, style } = column;
+                  let label = column.label;
+                  column.headerTextAfter &&
+                    (label = (
+                      <>
+                        {label} {column.headerTextAfter}
+                      </>
+                    ));
                   return (
                     <TableCell
                       key={id}
@@ -167,7 +397,7 @@ export const Table: FC<ITableProps> = ({
                         sx={{ fontWeight: 'bold', fontSize: 12 }}
                         noWrap
                       >
-                        {column.label}
+                        {label}
                       </Typography>
                     </TableCell>
                   );
