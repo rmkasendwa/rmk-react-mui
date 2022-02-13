@@ -32,5 +32,5 @@ WithNumericValue.args = {
 
 export const WithElementValue = Template.bind({});
 WithElementValue.args = {
-  value: <Chip label="Value" color="success" size="small" />,
+  value: <Chip label="A reasonably long value" color="success" size="small" />,
 };
