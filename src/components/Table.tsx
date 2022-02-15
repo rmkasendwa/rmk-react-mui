@@ -1,7 +1,10 @@
 import 'datejs';
 
 import {
+  Grid,
   Table as MuiTable,
+  Pagination,
+  PaginationProps,
   SxProps,
   TableBody,
   TableCell,
@@ -15,11 +18,11 @@ import {
   alpha,
   useTheme,
 } from '@mui/material';
-import hash from 'object-hash';
 import {
   CSSProperties,
   FC,
   ReactNode,
+  isValidElement,
   useContext,
   useEffect,
   useState,
@@ -129,6 +132,8 @@ export interface ITableProps {
   currencyCode?: string;
   decimalPlaces?: number;
   labelTransform?: boolean;
+  paginationType?: 'default' | 'classic';
+  PaginationProps?: PaginationProps;
 }
 
 export const Table: FC<ITableProps> = ({
@@ -139,7 +144,7 @@ export const Table: FC<ITableProps> = ({
   labelPlural = 'Records',
   lowercaseLabelPlural,
   rowsPerPage: rowsPerPageProp = 10,
-  pageIndex = 0,
+  pageIndex: pageIndexProp = 0,
   onChangePage,
   forEachDerivedColumn,
   variant = 'plain',
@@ -149,10 +154,13 @@ export const Table: FC<ITableProps> = ({
   currencyCode,
   decimalPlaces,
   labelTransform,
+  paginationType = 'default',
+  PaginationProps = {},
 }) => {
   lowercaseLabelPlural || (lowercaseLabelPlural = labelPlural.toLowerCase());
 
   const { sx: headerRowPropsSx, ...restHeaderRowProps } = HeaderRowProps;
+  const [pageIndex, setPageIndex] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [columns, setColumns] = useState<ITableColumn[]>([]);
   const [formattedRows, setFormattedRows] = useState<Array<any>>([]);
@@ -162,7 +170,11 @@ export const Table: FC<ITableProps> = ({
   currencyCode || (currencyCode = defaultCurrencyCode);
 
   useEffect(() => {
-    setColumns((prevColumns) => {
+    setPageIndex(pageIndexProp);
+  }, [pageIndexProp]);
+
+  useEffect(() => {
+    setColumns(() => {
       const nextColumns = columnsProp.map((column) => {
         const nextColumn = { ...column };
         switch (nextColumn.type) {
@@ -220,15 +232,12 @@ export const Table: FC<ITableProps> = ({
         }
         return nextColumn;
       });
-      if (hash(prevColumns) !== hash(nextColumns)) {
-        return nextColumns;
-      }
-      return prevColumns;
+      return nextColumns;
     });
   }, [columnsProp, currencyCode]);
 
   useEffect(() => {
-    setFormattedRows((prevFormattedRows) => {
+    setFormattedRows(() => {
       const allowedDataTypes = ['number', 'string', 'boolean'];
       const nextFormattedRows = rows.map((row) => {
         const nextRow = { ...row };
@@ -265,8 +274,9 @@ export const Table: FC<ITableProps> = ({
                 break;
             }
           } else if (
-            nextRow[id] !== '' &&
-            allowedDataTypes.includes(typeof nextRow[id])
+            (isValidElement(nextRow[id]) ||
+              allowedDataTypes.includes(typeof nextRow[id])) &&
+            nextRow[id] !== ''
           ) {
             switch (type) {
               case 'date':
@@ -305,7 +315,7 @@ export const Table: FC<ITableProps> = ({
                 break;
             }
           } else {
-            nextRow[id] = defaultValue || '&nbsp;';
+            nextRow[id] = defaultValue || <>&nbsp;</>;
           }
           if (postProcessor) {
             nextRow[id] = postProcessor(nextRow[id], row, column);
@@ -313,10 +323,7 @@ export const Table: FC<ITableProps> = ({
         });
         return nextRow;
       });
-      if (hash(nextFormattedRows) !== hash(prevFormattedRows)) {
-        return nextFormattedRows;
-      }
-      return prevFormattedRows;
+      return nextFormattedRows;
     });
   }, [columns, decimalPlaces, labelTransform, rows]);
 
@@ -325,6 +332,7 @@ export const Table: FC<ITableProps> = ({
   }, [rowsPerPageProp]);
 
   const handleChangePage = (e: any, newPage: number) => {
+    setPageIndex(newPage);
     onChangePage && onChangePage(newPage);
   };
 
@@ -465,21 +473,61 @@ export const Table: FC<ITableProps> = ({
           </TableBody>
         </MuiTable>
       </TableContainer>
-      {paging && pageRows.length > 0 && (
-        <TablePagination
-          rowsPerPageOptions={[10, 25, 50, 100]}
-          component="div"
-          count={totalRowCount || rows.length}
-          rowsPerPage={rowsPerPage}
-          onRowsPerPageChange={(event) => {
-            setRowsPerPage(+event.target.value);
-          }}
-          page={pageIndex}
-          onPageChange={handleChangePage}
-          showFirstButton
-          showLastButton
-        />
-      )}
+      {(() => {
+        if (paging && pageRows.length > 0) {
+          if (paginationType === 'classic') {
+            return (
+              <Grid
+                container
+                spacing={3}
+                sx={{ height: 40, alignItems: 'center', pl: 3 }}
+              >
+                <Grid item>
+                  <Typography variant="body2" sx={{ lineHeight: '40px' }}>
+                    {rows.length} {labelPlural}
+                  </Typography>
+                </Grid>
+                <Grid item>
+                  <Typography variant="body2" sx={{ lineHeight: '40px' }}>
+                    Display {rowsPerPage} {lowercaseLabelPlural} per page
+                  </Typography>
+                </Grid>
+                <Grid item xs />
+                <Grid item>
+                  <Pagination
+                    count={Math.ceil(
+                      (totalRowCount || rows.length) / rowsPerPage
+                    )}
+                    page={pageIndex + 1}
+                    onChange={(e, pageNumber) => {
+                      handleChangePage(e, pageNumber - 1);
+                    }}
+                    shape="rounded"
+                    showFirstButton
+                    showLastButton
+                    {...PaginationProps}
+                  />
+                </Grid>
+              </Grid>
+            );
+          }
+          return (
+            <TablePagination
+              rowsPerPageOptions={[10, 25, 50, 100]}
+              component="div"
+              count={totalRowCount || rows.length}
+              rowsPerPage={rowsPerPage}
+              onRowsPerPageChange={(event) => {
+                setRowsPerPage(+event.target.value);
+              }}
+              page={pageIndex}
+              onPageChange={handleChangePage}
+              showFirstButton
+              showLastButton
+            />
+          );
+        }
+      })()}
     </>
   );
 };
