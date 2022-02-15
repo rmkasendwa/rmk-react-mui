@@ -1,4 +1,3 @@
-import { Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 
@@ -15,6 +14,7 @@ const Template: ComponentStory<typeof Table> = ({
   HeaderRowProps,
   columns,
   rows,
+  paginationType,
 }) => {
   const props: any = {};
   showHeaderRow != null && (props.showHeaderRow = showHeaderRow);
@@ -22,36 +22,30 @@ const Template: ComponentStory<typeof Table> = ({
   HeaderRowProps != null && (props.HeaderRowProps = HeaderRowProps);
   columns != null && (props.columns = columns);
   rows != null && (props.rows = rows);
+  paginationType != null && (props.paginationType = paginationType);
 
   return (
     <Box sx={{ maxWidth: 1200, p: 3, mx: 'auto' }}>
       <Table
         variant="stripped"
         columns={[
-          { id: 'accountNumber', label: 'Account Number' },
-          { id: 'name', label: 'Status' },
+          {
+            id: 'accountNumber',
+            label: 'Account Number',
+            type: 'id',
+            width: 160,
+          },
+          { id: 'name', label: 'Name' },
           {
             id: 'outstandingBalance',
             label: 'Balance',
-            align: 'right',
+            type: 'currency',
           },
         ]}
         rows={Array.from({ length: 3 }).map(() => ({
-          accountNumber: (
-            <Typography variant="body2" noWrap>
-              18728
-            </Typography>
-          ),
-          name: (
-            <Typography variant="body2" noWrap>
-              John Doe
-            </Typography>
-          ),
-          outstandingBalance: (
-            <Typography variant="body2" noWrap>
-              660,000.00
-            </Typography>
-          ),
+          accountNumber: '18728',
+          name: 'John Doe',
+          outstandingBalance: 660000,
         }))}
         {...props}
       />
@@ -106,4 +100,25 @@ ColumnTypes.args = {
       isHere: Math.round(Math.random() * 10) % 2 === 0,
     };
   }),
+};
+
+export const ClassicPagination = Template.bind({});
+ClassicPagination.args = {
+  columns: [
+    { id: 'id', label: 'id', type: 'id' },
+    { id: 'amount', label: 'Currency', type: 'currency' },
+    { id: 'number', label: 'Number', type: 'number' },
+    { id: 'percent', label: 'Percent', type: 'percentage' },
+    { id: 'isHere', label: 'Boolean', type: 'boolean' },
+  ],
+  rows: Array.from({ length: 4 + Math.round(Math.random() * 100) }).map(() => {
+    return {
+      id: Math.round(Math.random() * 500),
+      amount: Math.round(Math.random() * 5000) * 500,
+      number: Math.round(Math.random() * 10000),
+      percent: Math.random() * 100,
+      isHere: Math.round(Math.random() * 10) % 2 === 0,
+    };
+  }),
+  paginationType: 'classic',
 };
