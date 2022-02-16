@@ -11,6 +11,7 @@ export * from './FormWrapper';
 export * from './FullPageTable';
 export * from './ImageSelector';
 export * from './InputFields';
+export * from './KanbanBoard';
 export * from './LoadingScreen';
 export * from './NotFound';
 export * from './NotificationsTool';
