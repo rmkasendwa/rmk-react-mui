@@ -1,5 +1,6 @@
 import { Box, alpha, useTheme } from '@mui/material';
 import { FC, ReactNode } from 'react';
+import { useDrag } from 'react-dnd';
 
 export interface ICardProps {
   id: string | number;
@@ -7,10 +8,22 @@ export interface ICardProps {
   description: ReactNode;
 }
 
-const Card: FC<ICardProps> = ({ title, description }) => {
+const Card: FC<ICardProps> = ({ title, description, id }) => {
   const { palette } = useTheme();
+  const [, drag] = useDrag(() => ({
+    type: 'box',
+    collect: () => {
+      return { id };
+    },
+    end: (props, monitor) => {
+      const item = monitor.getItem();
+      const dropResult = monitor.getDropResult();
+      console.log({ props, item, dropResult });
+    },
+  }));
+
   return (
-    <Box>
+    <Box ref={drag}>
       <Box
         component="article"
         sx={{

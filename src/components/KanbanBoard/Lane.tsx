@@ -7,7 +7,8 @@ import {
   darken,
   useTheme,
 } from '@mui/material';
-import { FC, ReactNode } from 'react';
+import { FC, ReactNode, useState } from 'react';
+import { useDrop } from 'react-dnd';
 
 import Card, { ICardProps } from './Card';
 
@@ -19,7 +20,30 @@ export interface ILaneProps {
 }
 
 const Lane: FC<ILaneProps> = ({ title, showCardCount = false, cards }) => {
+  const [hasDropped, setHasDropped] = useState(false);
+  const [hasDroppedOnChild, setHasDroppedOnChild] = useState(false);
+  const [{ isOver, isOverCurrent }, drop] = useDrop(
+    () => ({
+      accept: 'box',
+      drop(_, monitor) {
+        const didDrop = monitor.didDrop();
+        if (didDrop) {
+          return;
+        }
+        setHasDropped(true);
+        setHasDroppedOnChild(didDrop);
+      },
+      collect: (monitor) => ({
+        isOver: monitor.isOver(),
+        isOverCurrent: monitor.isOver({ shallow: true }),
+      }),
+    }),
+    [false, setHasDropped, setHasDroppedOnChild]
+  );
+
+  console.log({ hasDropped, hasDroppedOnChild, isOver, isOverCurrent, drop });
   const { palette } = useTheme();
+
   return (
     <Box
       sx={{
@@ -30,6 +54,7 @@ const Lane: FC<ILaneProps> = ({ title, showCardCount = false, cards }) => {
       }}
     >
       <Box
+        ref={drop}
         component="section"
         sx={{
           backgroundColor: darken(
