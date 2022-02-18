@@ -1,14 +1,14 @@
 import 'datejs';
 
 import {
+  DatePickerProps,
   DesktopDatePicker,
-  DesktopDatePickerProps,
   LocalizationProvider,
   MobileDatePicker,
-  MobileDatePickerProps,
 } from '@mui/lab';
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
-import { FC, useEffect, useState } from 'react';
+import { useFormikContext } from 'formik';
+import { FC, useState } from 'react';
 
 import { DEFAULT_DATE_FORMAT } from '../../constants';
 import { useFormikValue, useSmallScreen } from '../../hooks';
@@ -22,54 +22,54 @@ export const DateInputField: FC<IDateInputFieldProps> = ({
   value,
   name,
   onChange,
+  onClick,
   ...rest
 }) => {
   value = useFormikValue({ value, name });
+  const { handleChange } = (useFormikContext() as any) || {};
 
   const smallScreen = useSmallScreen();
   const [inputField, setInputField] = useState<
     HTMLInputElement | null | undefined
   >(null);
 
-  const [selectedDateString, setSelectedDateString] = useState<string | number>(
-    ''
-  );
-
-  useEffect(() => {
-    setSelectedDateString(value ?? '');
-  }, [value]);
-
-  const datePickerProps: MobileDatePickerProps | DesktopDatePickerProps = {
-    value: selectedDateString ? new Date(selectedDateString) : new Date(),
+  const datePickerProps: DatePickerProps = {
+    value: value ? new Date(value) : new Date(),
     onChange: (date: any) => {
-      if (inputField) {
+      if (inputField && (!date || !isNaN(date.getTime()))) {
         inputField.value = date ? date.toISOString() : '';
-        setSelectedDateString(inputField.value);
-        if (onChange) {
-          const event: any = new Event('change', { bubbles: true });
-          Object.defineProperty(event, 'target', {
-            writable: false,
-            value: inputField,
-          });
-          onChange(event);
-        }
+        const event: any = new Event('change', { bubbles: true });
+        Object.defineProperty(event, 'target', {
+          writable: false,
+          value: inputField,
+        });
+        onChange && onChange(event);
+        handleChange && handleChange(event);
       }
     },
     renderInput: (params) => {
       if (params.inputProps) {
-        if (selectedDateString) {
-          params.inputProps.value = new Date(selectedDateString).toString(
+        if (value) {
+          params.inputProps.value = new Date(params.inputProps.value).toString(
             DEFAULT_DATE_FORMAT
           );
         } else {
           params.inputProps.value = '';
         }
+        delete params.inputProps.onFocus;
+        delete params.inputProps.onChange;
+        delete params.inputProps.onBlur;
       }
+      delete params.error;
       return (
         <TextField
           {...params}
           {...rest}
           {...{ name }}
+          onClick={(event) => {
+            inputField?.nextElementSibling?.querySelector('button')?.click();
+            onClick && onClick(event);
+          }}
           ref={(inputField) => {
             setInputField(inputField?.querySelector('input'));
           }}

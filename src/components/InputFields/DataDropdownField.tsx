@@ -382,7 +382,7 @@ export const DataDropdownField: FC<IDataDropdownFieldProps> = ({
                               </MenuItem>
                             );
                           })
-                        ) : (
+                        ) : loading ? null : (
                           <MenuItem disabled>
                             <Typography
                               variant="body2"
