@@ -8,7 +8,7 @@ import {
   useTheme,
 } from '@mui/material';
 import { FC, ReactNode, useState } from 'react';
-import { useDrop } from 'react-dnd';
+import { XYCoord, useDrop } from 'react-dnd';
 
 import Card, { ICardProps } from './Card';
 
@@ -20,29 +20,36 @@ export interface ILaneProps {
 }
 
 const Lane: FC<ILaneProps> = ({ title, showCardCount = false, cards }) => {
-  const [hasDropped, setHasDropped] = useState(false);
-  const [hasDroppedOnChild, setHasDroppedOnChild] = useState(false);
-  const [{ isOver, isOverCurrent }, drop] = useDrop(
-    () => ({
-      accept: 'box',
-      drop(_, monitor) {
-        const didDrop = monitor.didDrop();
-        if (didDrop) {
-          return;
-        }
-        setHasDropped(true);
-        setHasDroppedOnChild(didDrop);
-      },
-      collect: (monitor) => ({
-        isOver: monitor.isOver(),
-        isOverCurrent: monitor.isOver({ shallow: true }),
-      }),
-    }),
-    [false, setHasDropped, setHasDroppedOnChild]
-  );
-
-  console.log({ hasDropped, hasDroppedOnChild, isOver, isOverCurrent, drop });
   const { palette } = useTheme();
+  const [ghostCardProps, setGhostCardProps] = useState<ICardProps | null>(null);
+  const [clientOffset, setClientOffset] = useState<XYCoord | null>(null);
+
+  const [{ isOver, canDrop }, drop] = useDrop(() => ({
+    accept: 'card',
+    drop(item, monitor) {
+      const didDrop = monitor.didDrop();
+      if (didDrop) {
+        return;
+      }
+    },
+    collect: (monitor) => ({
+      isOver: monitor.isOver(),
+      canDrop: monitor.canDrop(),
+    }),
+    hover(item, monitor) {
+      const clientOffset = monitor.getSourceClientOffset()!;
+      setClientOffset(clientOffset);
+    },
+  }));
+
+  const handleDragStart = (props: ICardProps) => {
+    setGhostCardProps(props);
+  };
+
+  const handleDragEnd = () => {
+    setGhostCardProps(null);
+    setClientOffset(null);
+  };
 
   return (
     <Box
@@ -59,7 +66,13 @@ const Lane: FC<ILaneProps> = ({ title, showCardCount = false, cards }) => {
         sx={{
           backgroundColor: darken(
             palette.background.default,
-            palette.mode === 'dark' ? 0.9 : 0.1
+            canDrop && isOver
+              ? palette.mode === 'dark'
+                ? 0.4
+                : 0.2
+              : palette.mode === 'dark'
+              ? 0.9
+              : 0.1
           ),
           mr: 2,
           border: `1px solid ${alpha(palette.text.primary, 0.2)}`,
@@ -94,7 +107,7 @@ const Lane: FC<ILaneProps> = ({ title, showCardCount = false, cards }) => {
         <Box
           sx={{
             px: 1,
-            minWidth: 300,
+            width: 360,
             minHeight: 80,
             flex: '1 1 0%',
             overflow: 'hidden auto',
@@ -106,8 +119,30 @@ const Lane: FC<ILaneProps> = ({ title, showCardCount = false, cards }) => {
         >
           <Box>
             {cards.map(({ id, ...rest }) => {
-              return <Card key={id} {...{ id, ...rest }} />;
+              return (
+                <Card
+                  key={id}
+                  {...{ id, ...rest }}
+                  onDragStart={handleDragStart}
+                  onDragEnd={handleDragEnd}
+                />
+              );
             })}
+            {ghostCardProps && clientOffset && (
+              <Box
+                sx={{
+                  position: 'fixed',
+                  px: 1,
+                  width: 360,
+                  transform: `rotate(3deg)`,
+                  left: clientOffset.x,
+                  top: clientOffset.y,
+                  zIndex: 9999,
+                }}
+              >
+                <Card {...ghostCardProps} isGhost />
+              </Box>
+            )}
           </Box>
         </Box>
       </Box>
