@@ -7,26 +7,24 @@ import {
   darken,
   useTheme,
 } from '@mui/material';
-import { FC, ReactNode, useState } from 'react';
+import hash from 'object-hash';
+import { FC, useContext, useEffect, useState } from 'react';
 import { XYCoord, useDrop } from 'react-dnd';
 
 import Card, { ICardProps } from './Card';
+import { ILane, KanbanBoardContext } from './KanbanBoardContext';
 
-export interface ILaneProps {
-  id: string | number;
-  title: ReactNode;
-  cards: ICardProps[];
-  showCardCount?: boolean;
-}
+export interface ILaneProps extends ILane {}
 
-const Lane: FC<ILaneProps> = ({ title, showCardCount = false, cards }) => {
+const Lane: FC<ILaneProps> = ({ id, title, showCardCount = false, cards }) => {
   const { palette } = useTheme();
   const [ghostCardProps, setGhostCardProps] = useState<ICardProps | null>(null);
   const [clientOffset, setClientOffset] = useState<XYCoord | null>(null);
+  const { setActiveLaneId } = useContext(KanbanBoardContext);
 
   const [{ isOver, canDrop }, drop] = useDrop(() => ({
     accept: 'card',
-    drop(item, monitor) {
+    drop: (item, monitor) => {
       const didDrop = monitor.didDrop();
       if (didDrop) {
         return;
@@ -36,20 +34,31 @@ const Lane: FC<ILaneProps> = ({ title, showCardCount = false, cards }) => {
       isOver: monitor.isOver(),
       canDrop: monitor.canDrop(),
     }),
-    hover(item, monitor) {
+    hover: (item, monitor) => {
       const clientOffset = monitor.getSourceClientOffset()!;
       setClientOffset(clientOffset);
     },
   }));
 
   const handleDragStart = (props: ICardProps) => {
-    setGhostCardProps(props);
+    setGhostCardProps((prevProps) => {
+      if (hash(prevProps) !== hash(props)) {
+        return props;
+      }
+      return prevProps;
+    });
   };
 
   const handleDragEnd = () => {
     setGhostCardProps(null);
     setClientOffset(null);
   };
+
+  useEffect(() => {
+    if (isOver && canDrop && setActiveLaneId) {
+      setActiveLaneId(id);
+    }
+  }, [canDrop, id, isOver, setActiveLaneId]);
 
   return (
     <Box
@@ -118,13 +127,14 @@ const Lane: FC<ILaneProps> = ({ title, showCardCount = false, cards }) => {
           }}
         >
           <Box>
-            {cards.map(({ id, ...rest }) => {
+            {cards.map(({ id: cardId, ...rest }) => {
               return (
                 <Card
-                  key={id}
-                  {...{ id, ...rest }}
+                  key={cardId}
+                  {...{ id: cardId, ...rest }}
                   onDragStart={handleDragStart}
                   onDragEnd={handleDragEnd}
+                  laneId={id}
                 />
               );
             })}
@@ -138,6 +148,7 @@ const Lane: FC<ILaneProps> = ({ title, showCardCount = false, cards }) => {
                   left: clientOffset.x,
                   top: clientOffset.y,
                   zIndex: 9999,
+                  pointerEvents: 'none',
                 }}
               >
                 <Card {...ghostCardProps} isGhost />

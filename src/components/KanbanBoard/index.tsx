@@ -1,45 +1,27 @@
-import { Box } from '@mui/material';
 import { FC } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 
-import Lane, { ILaneProps } from './Lane';
+import DragAndDropContainer, {
+  IDragAndDropContainerProps,
+} from './DragAndDropContainer';
+import { ILane, KanbanBoardProvider } from './KanbanBoardContext';
 
-export interface IKanbanBoardProps {
-  lanes: ILaneProps[];
-  showCardCount?: boolean;
+export interface IKanbanBoardProps extends IDragAndDropContainerProps {
+  lanes: ILane[];
 }
 
-export const KanbanBoard: FC<IKanbanBoardProps> = ({
-  lanes,
-  showCardCount = false,
-}) => {
+export const KanbanBoard: FC<IKanbanBoardProps> = (props) => {
+  const { lanes } = props;
   return (
     <DndProvider backend={HTML5Backend}>
-      <Box
-        sx={{
-          overflowY: 'hidden',
-          p: 1,
-          display: 'flex',
-          flexDirection: 'row',
-          alignItems: 'flex-start',
-          height: '100%',
-          width: '100%',
-          position: 'absolute',
+      <KanbanBoardProvider
+        value={{
+          lanes,
         }}
       >
-        <Box
-          sx={{
-            whiteSpace: 'nowrap',
-            position: 'relative',
-            height: '100%',
-          }}
-        >
-          {lanes.map(({ id, ...rest }) => (
-            <Lane key={id} {...{ id, showCardCount, ...rest }} />
-          ))}
-        </Box>
-      </Box>
+        <DragAndDropContainer {...props} />
+      </KanbanBoardProvider>
     </DndProvider>
   );
 };
