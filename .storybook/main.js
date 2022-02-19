@@ -13,4 +13,12 @@ module.exports = {
   features: {
     emotionAlias: false,
   },
+  managerHead: (head, { configType }) => {
+    if (configType === 'PRODUCTION') {
+      return `
+        ${head}
+        <base href="/rmk-react-mui/">
+      `;
+    }
+  },
 };
