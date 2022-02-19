@@ -19,27 +19,26 @@ const lorem = new LoremIpsum({
   },
 });
 
-const Template: ComponentStory<typeof KanbanBoard> = ({}) => {
-  return (
-    <KanbanBoard
-      lanes={Array.from({ length: 6 }).map((_, laneIndex) => {
+const lanes = Array.from({ length: 6 }).map((_, laneIndex) => {
+  return {
+    id: laneIndex,
+    title: lorem.generateWords(3),
+    showCardCount: true,
+    cards: Array.from({ length: Math.round(Math.random() * 20) }).map(
+      (_, cardIndex) => {
         return {
-          id: laneIndex,
-          title: lorem.generateWords(3),
-          showCardCount: true,
-          cards: Array.from({ length: Math.round(Math.random() * 20) }).map(
-            (_, cardIndex) => {
-              return {
-                id: `${laneIndex}${cardIndex}`,
-                title: lorem.generateWords(5),
-                description: lorem.generateWords(40),
-              };
-            }
-          ),
+          id: `${laneIndex}${cardIndex}`,
+          laneId: laneIndex,
+          title: `${cardIndex + 1}. ${lorem.generateWords(5)}`,
+          description: lorem.generateWords(40),
         };
-      })}
-    />
-  );
+      }
+    ),
+  };
+});
+
+const Template: ComponentStory<typeof KanbanBoard> = ({}) => {
+  return <KanbanBoard lanes={lanes} />;
 };
 
 export const Default = Template.bind({});
