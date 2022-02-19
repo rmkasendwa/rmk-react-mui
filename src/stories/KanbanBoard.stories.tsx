@@ -22,15 +22,15 @@ const lorem = new LoremIpsum({
 const Template: ComponentStory<typeof KanbanBoard> = ({}) => {
   return (
     <KanbanBoard
-      lanes={Array.from({ length: 6 }).map((_, index) => {
+      lanes={Array.from({ length: 6 }).map((_, laneIndex) => {
         return {
-          id: index,
+          id: laneIndex,
           title: lorem.generateWords(3),
           showCardCount: true,
           cards: Array.from({ length: Math.round(Math.random() * 20) }).map(
-            (_, index) => {
+            (_, cardIndex) => {
               return {
-                id: index,
+                id: `${laneIndex}${cardIndex}`,
                 title: lorem.generateWords(5),
                 description: lorem.generateWords(40),
               };
