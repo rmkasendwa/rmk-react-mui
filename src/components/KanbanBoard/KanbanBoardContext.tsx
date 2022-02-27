@@ -28,15 +28,17 @@ export interface ILane {
   showCardCount?: boolean;
 }
 
+export interface IDropResult {
+  addedIndex?: number | null;
+  removedIndex?: number | null;
+  payload?: any;
+}
+
 export interface IKanbanBoardContext {
   lanes: ILaneProps[];
-  activeCard?: ICardIdentifier | null;
-  setActiveCard?: Dispatch<SetStateAction<ICardIdentifier | null>>;
-  movingCard?: ICardIdentifier | null;
-  setMovingCard?: Dispatch<SetStateAction<ICardIdentifier | null>>;
   moveCard?: (
-    movingCard: ICardIdentifier | null | undefined,
-    activeCard: ICardIdentifier | null | undefined
+    laneId: string | number | null,
+    { addedIndex, removedIndex }: IDropResult
   ) => void;
   activeLaneId?: string | number | null;
   setActiveLaneId?: Dispatch<SetStateAction<string | number | null>>;
@@ -58,48 +60,30 @@ export const KanbanBoardProvider: FC<IKanbanBoardProviderProps> = ({
   const [activeLaneId, setActiveLaneId] = useState<string | number | null>(
     null
   );
-  const [activeCard, setActiveCard] = useState<ICardIdentifier | null>(null);
-  const [movingCard, setMovingCard] = useState<ICardIdentifier | null>(null);
   const [lanes, setLanes] = useState<ILane[]>([]);
 
   const moveCard = useCallback(
     (
-      movingCard: ICardIdentifier | null | undefined,
-      activeCard: ICardIdentifier | null | undefined
+      laneId: string | number | null,
+      { addedIndex, removedIndex, payload }: IDropResult
     ) => {
-      console.log({ movingCard, activeCard, activeLaneId });
-      if (
-        movingCard &&
-        (activeCard ||
-          (activeLaneId != null && movingCard.laneId !== activeLaneId))
-      ) {
-        const movingLane = lanes.find(({ id }) => id === movingCard.laneId);
-        const activeLane = lanes.find(({ id }) => id === activeLaneId);
-        if (movingLane && activeLane) {
-          const movingCardIndex = movingLane.cards.findIndex(
-            ({ id }) => id === movingCard.id
-          );
-          if (activeCard) {
-            const activeCardIndex = activeLane.cards.findIndex(
-              ({ id }) => id === activeCard.id
-            );
-            activeLane.cards.splice(
-              activeCardIndex,
-              0,
-              ...movingLane.cards.splice(movingCardIndex, 1)
-            );
-          } else {
-            activeLane.cards.push(
-              ...movingLane.cards.splice(movingCardIndex, 1)
-            );
+      if (laneId != null && (removedIndex != null || addedIndex != null)) {
+        const lane = lanes.find((lane) => lane.id === laneId);
+        if (lane) {
+          const laneIndex = lanes.indexOf(lane);
+          const newLane = { ...lane };
+          if (removedIndex != null) {
+            payload = newLane.cards.splice(removedIndex, 1)[0];
           }
+          if (addedIndex != null) {
+            newLane.cards.splice(addedIndex, 0, payload);
+          }
+          lanes.splice(laneIndex, 1, newLane);
           setLanes([...lanes]);
         }
-        setActiveCard && setActiveCard(null);
-        setMovingCard && setMovingCard(null);
       }
     },
-    [activeLaneId, lanes]
+    [lanes]
   );
 
   useEffect(() => {
@@ -110,10 +94,6 @@ export const KanbanBoardProvider: FC<IKanbanBoardProviderProps> = ({
     <KanbanBoardContext.Provider
       value={{
         lanes,
-        activeCard,
-        setActiveCard,
-        movingCard,
-        setMovingCard,
         moveCard,
         activeLaneId,
         setActiveLaneId,

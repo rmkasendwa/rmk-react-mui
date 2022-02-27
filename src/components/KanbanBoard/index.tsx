@@ -1,6 +1,4 @@
 import { FC } from 'react';
-import { DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
 
 import DragAndDropContainer, {
   IDragAndDropContainerProps,
@@ -14,15 +12,13 @@ export interface IKanbanBoardProps extends IDragAndDropContainerProps {
 export const KanbanBoard: FC<IKanbanBoardProps> = (props) => {
   const { lanes } = props;
   return (
-    <DndProvider backend={HTML5Backend}>
-      <KanbanBoardProvider
-        value={{
-          lanes,
-        }}
-      >
-        <DragAndDropContainer {...props} />
-      </KanbanBoardProvider>
-    </DndProvider>
+    <KanbanBoardProvider
+      value={{
+        lanes,
+      }}
+    >
+      <DragAndDropContainer {...props} />
+    </KanbanBoardProvider>
   );
 };
 

@@ -7,58 +7,17 @@ import {
   darken,
   useTheme,
 } from '@mui/material';
-import hash from 'object-hash';
-import { FC, useContext, useEffect, useState } from 'react';
-import { XYCoord, useDrop } from 'react-dnd';
+import { FC, useContext } from 'react';
+import { Container, Draggable } from 'react-smooth-dnd';
 
-import Card, { ICardProps } from './Card';
+import Card from './Card';
 import { ILane, KanbanBoardContext } from './KanbanBoardContext';
 
 export interface ILaneProps extends ILane {}
 
 const Lane: FC<ILaneProps> = ({ id, title, showCardCount = false, cards }) => {
   const { palette } = useTheme();
-  const [ghostCardProps, setGhostCardProps] = useState<ICardProps | null>(null);
-  const [clientOffset, setClientOffset] = useState<XYCoord | null>(null);
-  const { setActiveLaneId } = useContext(KanbanBoardContext);
-
-  const [{ isOver, canDrop }, drop] = useDrop(() => ({
-    accept: 'card',
-    drop: (item, monitor) => {
-      const didDrop = monitor.didDrop();
-      if (didDrop) {
-        return;
-      }
-    },
-    collect: (monitor) => ({
-      isOver: monitor.isOver(),
-      canDrop: monitor.canDrop(),
-    }),
-    hover: (item, monitor) => {
-      const clientOffset = monitor.getSourceClientOffset()!;
-      setClientOffset(clientOffset);
-    },
-  }));
-
-  const handleDragStart = (props: ICardProps) => {
-    setGhostCardProps((prevProps) => {
-      if (hash(prevProps) !== hash(props)) {
-        return props;
-      }
-      return prevProps;
-    });
-  };
-
-  const handleDragEnd = () => {
-    setGhostCardProps(null);
-    setClientOffset(null);
-  };
-
-  useEffect(() => {
-    if (isOver && canDrop && setActiveLaneId) {
-      setActiveLaneId(id);
-    }
-  }, [canDrop, id, isOver, setActiveLaneId]);
+  const { setActiveLaneId, moveCard } = useContext(KanbanBoardContext);
 
   return (
     <Box
@@ -70,18 +29,11 @@ const Lane: FC<ILaneProps> = ({ id, title, showCardCount = false, cards }) => {
       }}
     >
       <Box
-        ref={drop}
         component="section"
         sx={{
           backgroundColor: darken(
             palette.background.default,
-            canDrop && isOver
-              ? palette.mode === 'dark'
-                ? 0.4
-                : 0.2
-              : palette.mode === 'dark'
-              ? 0.9
-              : 0.1
+            palette.mode === 'dark' ? 0.9 : 0.1
           ),
           mr: 2,
           border: `1px solid ${alpha(palette.text.primary, 0.2)}`,
@@ -126,35 +78,38 @@ const Lane: FC<ILaneProps> = ({ id, title, showCardCount = false, cards }) => {
             maxHeight: `calc(100% - 40px)`,
           }}
         >
-          <Box>
+          <Container
+            groupName="col"
+            // onDragStart={(e) => console.log('drag started', e)}
+            // onDragEnd={(e) => console.log('drag end', e)}
+            onDrop={({ addedIndex, removedIndex, payload }) => {
+              moveCard && moveCard(id, { addedIndex, removedIndex, payload });
+            }}
+            getChildPayload={(index) => cards[index]}
+            dragClass="card-ghost"
+            dropClass="card-ghost-drop"
+            onDragEnter={() => {
+              setActiveLaneId && setActiveLaneId(id);
+            }}
+            // onDragLeave={() => {
+            //   console.log('drag leave:', id);
+            // }}
+            // onDropReady={(p) => console.log('Drop ready: ', p)}
+            dropPlaceholder={{
+              animationDuration: 150,
+              showOnTop: true,
+              className: 'drop-preview',
+            }}
+            animationDuration={200}
+          >
             {cards.map(({ id: cardId, ...rest }) => {
               return (
-                <Card
-                  key={cardId}
-                  {...{ id: cardId, ...rest }}
-                  onDragStart={handleDragStart}
-                  onDragEnd={handleDragEnd}
-                  laneId={id}
-                />
+                <Draggable key={cardId}>
+                  <Card {...{ id: cardId, ...rest }} laneId={id} />
+                </Draggable>
               );
             })}
-            {ghostCardProps && clientOffset && (
-              <Box
-                sx={{
-                  position: 'fixed',
-                  px: 1,
-                  width: 360,
-                  transform: `rotate(3deg)`,
-                  left: clientOffset.x,
-                  top: clientOffset.y,
-                  zIndex: 9999,
-                  pointerEvents: 'none',
-                }}
-              >
-                <Card {...ghostCardProps} isGhost />
-              </Box>
-            )}
-          </Box>
+          </Container>
         </Box>
       </Box>
     </Box>

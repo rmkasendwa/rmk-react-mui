@@ -72,9 +72,8 @@
     "datejs": "^1.0.0-rc3",
     "object-hash": "^2.2.0",
     "query-string": "^7.1.0",
-    "react-dnd": "^15.1.1",
-    "react-dnd-html5-backend": "^15.1.2",
     "react-number-format": "^4.9.1",
+    "react-smooth-dnd": "^0.11.1",
     "underscore": "^1.13.2"
   },
   "devDependencies": {
@@ -128,6 +127,7 @@
     "prettier-plugin-import-sort": "0.0.7",
     "prettier-plugin-sort-json": "0.0.2",
     "react": "^17.0.2",
+    "react-dom": "^17.0.2",
     "react-redux": "^7.2.6",
     "react-scripts": "^5.0.0",
     "redux-thunk": "^2.4.1",
