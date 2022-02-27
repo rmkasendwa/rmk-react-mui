@@ -15,7 +15,6 @@ const Card: FC<ICardProps> = (props) => {
     border: `1px solid ${alpha(palette.text.primary, 0.2)}`,
     backgroundColor: palette.background.default,
     px: 2,
-    mb: 1,
     borderRadius: 1,
     p: 1,
     cursor: 'pointer',

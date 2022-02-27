@@ -39,6 +39,20 @@ const Lane: FC<ILaneProps> = ({ id, title, showCardCount = false, cards }) => {
           border: `1px solid ${alpha(palette.text.primary, 0.2)}`,
           borderRadius: 2,
           height: '100%',
+          '& .smooth-dnd-container': {
+            minHeight: `calc(100% - 40px)`,
+            px: 1,
+            width: 360,
+            flex: '1 1 0%',
+            overflow: 'hidden auto',
+            alignSelf: 'center',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            maxHeight: `calc(100% - 40px)`,
+          },
+          '& .smooth-dnd-container>.smooth-dnd-draggable-wrapper': {
+            mb: 1,
+          },
         }}
       >
         <Box component="header" sx={{ p: 1, cursor: 'grab' }}>
@@ -65,52 +79,32 @@ const Lane: FC<ILaneProps> = ({ id, title, showCardCount = false, cards }) => {
             </Grid>
           </Grid>
         </Box>
-        <Box
-          sx={{
-            px: 1,
-            width: 360,
-            minHeight: 80,
-            flex: '1 1 0%',
-            overflow: 'hidden auto',
-            alignSelf: 'center',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-            maxHeight: `calc(100% - 40px)`,
+        <Container
+          groupName="col"
+          onDrop={({ addedIndex, removedIndex, payload }) => {
+            moveCard && moveCard(id, { addedIndex, removedIndex, payload });
           }}
+          getChildPayload={(index) => cards[index]}
+          dragClass="card-ghost"
+          dropClass="card-ghost-drop"
+          onDragEnter={() => {
+            setActiveLaneId && setActiveLaneId(id);
+          }}
+          dropPlaceholder={{
+            animationDuration: 150,
+            showOnTop: true,
+            className: 'drop-preview',
+          }}
+          animationDuration={200}
         >
-          <Container
-            groupName="col"
-            // onDragStart={(e) => console.log('drag started', e)}
-            // onDragEnd={(e) => console.log('drag end', e)}
-            onDrop={({ addedIndex, removedIndex, payload }) => {
-              moveCard && moveCard(id, { addedIndex, removedIndex, payload });
-            }}
-            getChildPayload={(index) => cards[index]}
-            dragClass="card-ghost"
-            dropClass="card-ghost-drop"
-            onDragEnter={() => {
-              setActiveLaneId && setActiveLaneId(id);
-            }}
-            // onDragLeave={() => {
-            //   console.log('drag leave:', id);
-            // }}
-            // onDropReady={(p) => console.log('Drop ready: ', p)}
-            dropPlaceholder={{
-              animationDuration: 150,
-              showOnTop: true,
-              className: 'drop-preview',
-            }}
-            animationDuration={200}
-          >
-            {cards.map(({ id: cardId, ...rest }) => {
-              return (
-                <Draggable key={cardId}>
-                  <Card {...{ id: cardId, ...rest }} laneId={id} />
-                </Draggable>
-              );
-            })}
-          </Container>
-        </Box>
+          {cards.map(({ id: cardId, ...rest }) => {
+            return (
+              <Draggable key={cardId}>
+                <Card {...{ id: cardId, ...rest }} laneId={id} />
+              </Draggable>
+            );
+          })}
+        </Container>
       </Box>
     </Box>
   );
