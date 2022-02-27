@@ -25,7 +25,7 @@ jobs:
           node-version: 16.x
 
       - name: Install NPM Dependencies
-        run: npm install
+        run: npm install --legacy-peer-deps
 
       - name: Run Tests
         run: npm test
