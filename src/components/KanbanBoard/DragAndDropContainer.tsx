@@ -2,15 +2,16 @@ import { Box } from '@mui/material';
 import { FC, useContext } from 'react';
 import { Container } from 'react-smooth-dnd';
 
-import { KanbanBoardContext } from './KanbanBoardContext';
+import { ILane, KanbanBoardContext } from './KanbanBoardContext';
 import Lane from './Lane';
 
-export interface IDragAndDropContainerProps {
-  showCardCount?: boolean;
-}
+export interface IDragAndDropContainerProps
+  extends Pick<ILane, 'showCardCount' | 'loading' | 'errorMessage'> {}
 
 const DragAndDropContainer: FC<IDragAndDropContainerProps> = ({
   showCardCount = false,
+  loading = false,
+  errorMessage,
 }) => {
   const { lanes } = useContext(KanbanBoardContext);
 
@@ -42,7 +43,10 @@ const DragAndDropContainer: FC<IDragAndDropContainerProps> = ({
         }}
       >
         {lanes.map(({ id, ...rest }) => (
-          <Lane key={id} {...{ id, showCardCount, ...rest }} />
+          <Lane
+            key={id}
+            {...{ id, ...rest, showCardCount, loading, errorMessage }}
+          />
         ))}
       </Container>
     </Box>

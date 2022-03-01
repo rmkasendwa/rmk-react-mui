@@ -10,7 +10,6 @@ import {
   useTheme,
 } from '@mui/material';
 import { useFormikContext } from 'formik';
-import hash from 'object-hash';
 import {
   FC,
   ReactNode,
@@ -31,6 +30,7 @@ import TextField, { ITextFieldProps } from './TextField';
 interface IDropdownOption {
   value: string | number;
   label: ReactNode;
+  searchableLabel?: string;
 }
 
 export interface IDataDropdownFieldProps extends ITextFieldProps {
@@ -112,11 +112,12 @@ export const DataDropdownField: FC<IDataDropdownFieldProps> = ({
   );
 
   const selectedOptionDisplayString = selectedOptions
-    .filter(({ label }) => {
-      return typeof label === 'string';
+    .filter(({ label, searchableLabel }) => {
+      return typeof label === 'string' || searchableLabel;
     })
-    .map(({ label }) => label)
+    .map(({ label, searchableLabel }) => searchableLabel || label)
     .join(', ');
+
   const selectedOptionValue = useMemo(() => {
     if (SelectProps?.multiple) {
       return selectedOptions.map(({ value }) => value);
@@ -153,6 +154,7 @@ export const DataDropdownField: FC<IDataDropdownFieldProps> = ({
   }, [formikHandleChange, name, onChange, selectedOptionValue]);
 
   const handleClose = () => {
+    isTouchedRef.current = true;
     setOpen(false);
   };
 
@@ -160,15 +162,11 @@ export const DataDropdownField: FC<IDataDropdownFieldProps> = ({
     if (value) {
       const fieldValues = Array.isArray(value) ? value : [value];
       const optionValues = options.map(({ value }) => value);
-      setMissingOptionValues((prevMissingOptionValues) => {
-        const newMissingOptionValues = fieldValues.filter((value) => {
+      setMissingOptionValues(
+        fieldValues.filter((value) => {
           return !optionValues.includes(value);
-        });
-        if (hash(newMissingOptionValues) !== hash(prevMissingOptionValues)) {
-          return newMissingOptionValues;
-        }
-        return prevMissingOptionValues;
-      });
+        })
+      );
     }
   }, [errorMessage, loadOptions, options, value]);
 
@@ -180,7 +178,15 @@ export const DataDropdownField: FC<IDataDropdownFieldProps> = ({
 
   useEffect(() => {
     if (propOptions) {
-      setOptions(propOptions);
+      setOptions((prevPropOptions) => {
+        if (
+          prevPropOptions.map(({ value }) => value).join('') !==
+          propOptions.map(({ value }) => value).join('')
+        ) {
+          return propOptions;
+        }
+        return prevPropOptions;
+      });
     } else {
       setOptions(
         getDropdownOptions
@@ -204,29 +210,42 @@ export const DataDropdownField: FC<IDataDropdownFieldProps> = ({
   useEffect(() => {
     setSearchTerm(selectedOptionDisplayString);
   }, [selectedOptionDisplayString]);
+
   useEffect(() => {
     if (isTouchedRef.current === true) {
       handleChange();
     }
-  }, [handleChange]);
+  }, [handleChange, selectedOptions]);
 
   useEffect(() => {
-    setSelectedOptions((prevSelectedOptions) => {
-      const fieldValues = Array.isArray(value) ? value : [value];
-      const newSelectedOptions = fieldValues
+    const fieldValues = Array.isArray(value) ? value : [value];
+    setSelectedOptions(
+      fieldValues
         .map((value) => {
           return options.find(
             ({ value: optionValue }) => value === optionValue
           )!;
         })
-        .filter((option) => option);
-
-      if (hash(newSelectedOptions) !== hash(prevSelectedOptions)) {
-        return newSelectedOptions;
-      }
-      return prevSelectedOptions;
-    });
+        .filter((option) => option)
+    );
   }, [options, value]);
+
+  const filteredOptions = useMemo(() => {
+    if (searchTerm && searchTerm !== selectedOptionDisplayString) {
+      const searchFilterTerms = searchTerm
+        .split(',')
+        .map((string) => string.trim().toLowerCase());
+      return options.filter(({ label }) => {
+        return (
+          typeof label === 'string' &&
+          searchFilterTerms.some((searchFilterTerm) => {
+            return label.toLowerCase().match(searchFilterTerm);
+          })
+        );
+      });
+    }
+    return options;
+  }, [options, searchTerm, selectedOptionDisplayString]);
 
   if (value && loading && missingOptionValues.length > 0) {
     return (
@@ -244,68 +263,86 @@ export const DataDropdownField: FC<IDataDropdownFieldProps> = ({
     );
   }
 
-  const filteredOptions = (() => {
-    if (searchTerm && searchTerm !== selectedOptionDisplayString) {
-      const searchFilterTerms = searchTerm
-        .split(',')
-        .map((string) => string.trim().toLowerCase());
-      return options.filter(({ label }) => {
-        return (
-          typeof label === 'string' &&
-          searchFilterTerms.some((searchFilterTerm) => {
-            return label.toLowerCase().match(searchFilterTerm);
-          })
-        );
-      });
-    }
-    return options;
-  })();
-
   const displayOptions = filteredOptions.slice(0, limit);
+
+  const displayOverlay =
+    selectedOptions.length > 0 &&
+    !SelectProps?.multiple &&
+    !['string', 'number'].includes(typeof selectedOptions[0].label);
+
+  const textField = (
+    <TextField
+      onClick={() => {
+        setTimeout(() => setOpen(true), 200);
+        loadOptions();
+      }}
+      onBlur={() => {
+        isTouchedRef.current = true;
+        handleBlur();
+      }}
+      onChange={(event) => {
+        setSearchTerm(event.target.value);
+      }}
+      InputProps={{
+        ref: anchorRef,
+        endAdornment: <ExpandMoreIcon />,
+      }}
+      value={searchTerm}
+      error={
+        error ??
+        (() => {
+          if (errors && touched && name && touched[name]) {
+            return Boolean(errors[name]);
+          }
+        })()
+      }
+      helperText={
+        helperText ??
+        (() => {
+          if (errors && touched && name && touched[name]) {
+            return errors[name];
+          }
+        })()
+      }
+      {...rest}
+      {...errorProps}
+    />
+  );
 
   return (
     <>
-      <TextField
-        onClick={() => {
-          setTimeout(() => setOpen(true), 200);
-          loadOptions();
-        }}
-        onBlur={() => {
-          isTouchedRef.current = true;
-          handleBlur();
-        }}
-        onChange={(event) => {
-          setSearchTerm(event.target.value);
-        }}
-        InputProps={{
-          ref: anchorRef,
-          endAdornment: <ExpandMoreIcon />,
-        }}
-        value={searchTerm}
-        error={
-          error ??
-          (() => {
-            if (errors && touched && name && touched[name]) {
-              return Boolean(errors[name]);
-            }
-          })()
-        }
-        helperText={
-          helperText ??
-          (() => {
-            if (errors && touched && name && touched[name]) {
-              return errors[name];
-            }
-          })()
-        }
-        {...rest}
-        {...errorProps}
-      />
+      {displayOverlay ? (
+        <Box sx={{ position: 'relative', '& input': { visibility: 'hidden' } }}>
+          {textField}
+          <Box
+            sx={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              height: '100%',
+              width: '100%',
+              pointerEvents: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              pl: 1,
+            }}
+          >
+            {selectedOptions[0].label}
+          </Box>
+        </Box>
+      ) : (
+        textField
+      )}
       <Popper
         open={open}
         anchorEl={anchorRef.current}
         transition
         placement="bottom-start"
+        ref={(element) => {
+          if (element) {
+            element.style.zIndex = '1400';
+          }
+        }}
       >
         {({ TransitionProps }) => {
           return (
@@ -343,7 +380,8 @@ export const DataDropdownField: FC<IDataDropdownFieldProps> = ({
                         }}
                       >
                         {displayOptions.length > 0 ? (
-                          displayOptions.map(({ value, label }) => {
+                          displayOptions.map((option) => {
+                            const { value, label } = option;
                             return (
                               <MenuItem
                                 value={value}
@@ -362,12 +400,12 @@ export const DataDropdownField: FC<IDataDropdownFieldProps> = ({
                                           1
                                         );
                                       } else {
-                                        prevOptions.push({ value, label });
+                                        prevOptions.push(option);
                                       }
                                       return [...prevOptions];
                                     });
                                   } else {
-                                    setSelectedOptions([{ value, label }]);
+                                    setSelectedOptions([option]);
                                     handleClose();
                                   }
                                 }}
@@ -382,7 +420,7 @@ export const DataDropdownField: FC<IDataDropdownFieldProps> = ({
                               </MenuItem>
                             );
                           })
-                        ) : loading ? null : (
+                        ) : (
                           <MenuItem disabled>
                             <Typography
                               variant="body2"
