@@ -37,8 +37,8 @@ const lanes = Array.from({ length: 6 }).map((_, laneIndex) => {
   };
 });
 
-const Template: ComponentStory<typeof KanbanBoard> = ({}) => {
-  return <KanbanBoard lanes={lanes} />;
+const Template: ComponentStory<typeof KanbanBoard> = (props) => {
+  return <KanbanBoard lanes={lanes} showCardCount {...props} />;
 };
 
 export const Default = Template.bind({});

@@ -26,6 +26,8 @@ export interface ILane {
   title: ReactNode;
   cards: ICard[];
   showCardCount?: boolean;
+  loading?: boolean;
+  errorMessage?: string;
 }
 
 export interface IDropResult {

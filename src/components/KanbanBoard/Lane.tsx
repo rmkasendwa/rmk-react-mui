@@ -1,7 +1,10 @@
+import ErrorIcon from '@mui/icons-material/Error';
 import {
   Badge,
   Box,
+  CircularProgress,
   Grid,
+  Tooltip,
   Typography,
   alpha,
   darken,
@@ -15,7 +18,14 @@ import { ILane, KanbanBoardContext } from './KanbanBoardContext';
 
 export interface ILaneProps extends ILane {}
 
-const Lane: FC<ILaneProps> = ({ id, title, showCardCount = false, cards }) => {
+const Lane: FC<ILaneProps> = ({
+  id,
+  title,
+  showCardCount = false,
+  loading = false,
+  cards,
+  errorMessage,
+}) => {
   const { palette } = useTheme();
   const { setActiveLaneId, moveCard } = useContext(KanbanBoardContext);
 
@@ -77,6 +87,22 @@ const Lane: FC<ILaneProps> = ({ id, title, showCardCount = false, cards }) => {
                 {title}
               </Typography>
             </Grid>
+            {(() => {
+              if (errorMessage) {
+                return (
+                  <Tooltip title={errorMessage}>
+                    <ErrorIcon color="error" />
+                  </Tooltip>
+                );
+              }
+              if (loading) {
+                return (
+                  <Grid item>
+                    <CircularProgress size={16} color="inherit" />
+                  </Grid>
+                );
+              }
+            })()}
           </Grid>
         </Box>
         <Container
