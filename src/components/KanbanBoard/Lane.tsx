@@ -27,7 +27,7 @@ const Lane: FC<ILaneProps> = ({
   errorMessage,
 }) => {
   const { palette } = useTheme();
-  const { setActiveLaneId, moveCard } = useContext(KanbanBoardContext);
+  const { setActiveLaneId, onCardDrop } = useContext(KanbanBoardContext);
 
   return (
     <Box
@@ -65,7 +65,7 @@ const Lane: FC<ILaneProps> = ({
           },
         }}
       >
-        <Box component="header" sx={{ p: 1, cursor: 'grab' }}>
+        <Box component="header" className="column-drag-handle" sx={{ p: 1 }}>
           <Grid container spacing={1} alignItems="center">
             {showCardCount && cards.length > 0 ? (
               <Grid item>
@@ -108,7 +108,7 @@ const Lane: FC<ILaneProps> = ({
         <Container
           groupName="col"
           onDrop={({ addedIndex, removedIndex, payload }) => {
-            moveCard && moveCard(id, { addedIndex, removedIndex, payload });
+            onCardDrop && onCardDrop(id, { addedIndex, removedIndex, payload });
           }}
           getChildPayload={(index) => cards[index]}
           dragClass="card-ghost"

@@ -1,6 +1,6 @@
 import { Box } from '@mui/material';
 import { FC, useContext } from 'react';
-import { Container } from 'react-smooth-dnd';
+import { Container, Draggable } from 'react-smooth-dnd';
 
 import { ILane, KanbanBoardContext } from './KanbanBoardContext';
 import Lane from './Lane';
@@ -13,7 +13,7 @@ const DragAndDropContainer: FC<IDragAndDropContainerProps> = ({
   loading = false,
   errorMessage,
 }) => {
-  const { lanes } = useContext(KanbanBoardContext);
+  const { lanes, onLaneDrop } = useContext(KanbanBoardContext);
 
   return (
     <Box
@@ -26,14 +26,24 @@ const DragAndDropContainer: FC<IDragAndDropContainerProps> = ({
         height: '100%',
         width: '100%',
         position: 'absolute',
+        '&>.smooth-dnd-container>.smooth-dnd-draggable-wrapper': {
+          display: 'inline-block',
+        },
+        '& .column-drag-handle': {
+          cursor: 'grab',
+        },
       }}
     >
       <Container
         orientation="horizontal"
+        dragHandleSelector=".column-drag-handle"
         dropPlaceholder={{
           animationDuration: 150,
           showOnTop: true,
           className: 'cards-drop-preview',
+        }}
+        onDrop={({ addedIndex, removedIndex, payload }) => {
+          onLaneDrop && onLaneDrop({ addedIndex, removedIndex, payload });
         }}
         style={{
           display: 'block',
@@ -43,10 +53,9 @@ const DragAndDropContainer: FC<IDragAndDropContainerProps> = ({
         }}
       >
         {lanes.map(({ id, ...rest }) => (
-          <Lane
-            key={id}
-            {...{ id, ...rest, showCardCount, loading, errorMessage }}
-          />
+          <Draggable key={id}>
+            <Lane {...{ id, ...rest, showCardCount, loading, errorMessage }} />
+          </Draggable>
         ))}
       </Container>
     </Box>

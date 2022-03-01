@@ -38,10 +38,11 @@ export interface IDropResult {
 
 export interface IKanbanBoardContext {
   lanes: ILaneProps[];
-  moveCard?: (
+  onCardDrop?: (
     laneId: string | number | null,
-    { addedIndex, removedIndex }: IDropResult
+    dropResult: IDropResult
   ) => void;
+  onLaneDrop?: (dropResult: IDropResult) => void;
   activeLaneId?: string | number | null;
   setActiveLaneId?: Dispatch<SetStateAction<string | number | null>>;
 }
@@ -64,7 +65,7 @@ export const KanbanBoardProvider: FC<IKanbanBoardProviderProps> = ({
   );
   const [lanes, setLanes] = useState<ILane[]>([]);
 
-  const moveCard = useCallback(
+  const onCardDrop = useCallback(
     (
       laneId: string | number | null,
       { addedIndex, removedIndex, payload }: IDropResult
@@ -88,6 +89,21 @@ export const KanbanBoardProvider: FC<IKanbanBoardProviderProps> = ({
     [lanes]
   );
 
+  const onLaneDrop = useCallback(
+    ({ addedIndex, removedIndex, payload }: IDropResult) => {
+      if (removedIndex != null || addedIndex != null) {
+        if (removedIndex != null) {
+          payload = lanes.splice(removedIndex, 1)[0];
+        }
+        if (addedIndex != null) {
+          lanes.splice(addedIndex, 0, payload);
+        }
+        setLanes([...lanes]);
+      }
+    },
+    [lanes]
+  );
+
   useEffect(() => {
     setLanes(propLanes);
   }, [propLanes]);
@@ -96,7 +112,8 @@ export const KanbanBoardProvider: FC<IKanbanBoardProviderProps> = ({
     <KanbanBoardContext.Provider
       value={{
         lanes,
-        moveCard,
+        onCardDrop,
+        onLaneDrop,
         activeLaneId,
         setActiveLaneId,
       }}
