@@ -1,40 +1,49 @@
-import { Box, SxProps, Theme, alpha, useTheme } from '@mui/material';
-import { FC } from 'react';
+import { Box, alpha, useTheme } from '@mui/material';
+import { FC, useContext } from 'react';
 
-import { ICard } from './KanbanBoardContext';
+import { ICard, KanbanBoardContext } from './KanbanBoardContext';
 
-export interface ICardProps extends ICard {
-  isGhost?: boolean;
-}
+export interface ICardProps extends ICard {}
 
-const Card: FC<ICardProps> = (props) => {
-  const { title, description } = props;
+const Card: FC<ICardProps> = ({
+  id,
+  laneId,
+  title,
+  description,
+  sx,
+  ...rest
+}) => {
   const { palette } = useTheme();
-
-  const sx: SxProps<Theme> = {
-    border: `1px solid ${alpha(palette.text.primary, 0.2)}`,
-    backgroundColor: palette.background.default,
-    px: 2,
-    borderRadius: 1,
-    p: 1,
-    cursor: 'pointer',
-    minWidth: 250,
-  };
+  const { onCardClick } = useContext(KanbanBoardContext);
 
   return (
-    <Box>
-      <Box component="article" sx={sx}>
-        <Box component="header" sx={{ pb: 1, fontSize: 14 }}>
-          {title}
-        </Box>
-        <Box
-          component="section"
-          sx={{
-            color: palette.text.secondary,
-          }}
-        >
-          {description}
-        </Box>
+    <Box
+      component="article"
+      {...rest}
+      sx={{
+        border: `1px solid ${alpha(palette.text.primary, 0.2)}`,
+        backgroundColor: palette.background.default,
+        px: 2,
+        borderRadius: 1,
+        p: 1,
+        cursor: 'pointer',
+        minWidth: 250,
+        ...sx,
+      }}
+      onClick={() => {
+        onCardClick && onCardClick(id, laneId);
+      }}
+    >
+      <Box component="header" sx={{ pb: 1, fontSize: 14 }}>
+        {title}
+      </Box>
+      <Box
+        component="section"
+        sx={{
+          color: palette.text.secondary,
+        }}
+      >
+        {description}
       </Box>
     </Box>
   );
