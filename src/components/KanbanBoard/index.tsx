@@ -24,7 +24,7 @@ export const KanbanBoard: FC<IKanbanBoardProps> = ({
 }) => {
   return (
     <KanbanBoardProvider
-      value={{
+      {...{
         lanes,
         onCardClick,
         onCardMoveAcrossLanes,

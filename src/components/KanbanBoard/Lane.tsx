@@ -26,6 +26,7 @@ const Lane: FC<ILaneProps> = ({
   cards,
   errorMessage,
   sx,
+  footer,
   ...rest
 }) => {
   const { palette } = useTheme();
@@ -37,6 +38,9 @@ const Lane: FC<ILaneProps> = ({
     toLaneId,
     onCardMoveAcrossLanes,
   } = useContext(KanbanBoardContext);
+
+  let yPaddedHeight = 40;
+  footer && (yPaddedHeight += 40);
 
   return (
     <Box
@@ -61,7 +65,7 @@ const Lane: FC<ILaneProps> = ({
           borderRadius: 2,
           height: '100%',
           '& .smooth-dnd-container': {
-            minHeight: `calc(100% - 40px)`,
+            minHeight: `calc(100% - ${yPaddedHeight}px)`,
             px: 1,
             width: 360,
             flex: '1 1 0%',
@@ -69,7 +73,7 @@ const Lane: FC<ILaneProps> = ({
             alignSelf: 'center',
             flexDirection: 'column',
             justifyContent: 'space-between',
-            maxHeight: `calc(100% - 40px)`,
+            maxHeight: `calc(100% - ${yPaddedHeight}px)`,
           },
           '& .smooth-dnd-container>.smooth-dnd-draggable-wrapper': {
             mb: 1,
@@ -155,6 +159,20 @@ const Lane: FC<ILaneProps> = ({
             );
           })}
         </Container>
+        {footer && (
+          <Box
+            component="footer"
+            className="column-drag-handle"
+            sx={{
+              borderTop: `1px solid ${alpha(palette.text.primary, 0.2)}`,
+              height: 40,
+              display: 'flex',
+              alignItems: 'center',
+            }}
+          >
+            {footer}
+          </Box>
+        )}
       </Box>
     </Box>
   );

@@ -29,6 +29,7 @@ export interface ILane extends Omit<BoxProps, 'title' | 'id'> {
   showCardCount?: boolean;
   loading?: boolean;
   errorMessage?: string;
+  footer?: ReactNode;
 }
 
 export interface IDropResult {
@@ -67,16 +68,16 @@ export const KanbanBoardContext = createContext<IKanbanBoardContext>({
 });
 
 export interface IKanbanBoardProviderProps {
-  value: {
-    lanes: ILane[];
-    onCardClick?: TCardClickHandler;
-    onCardMoveAcrossLanes?: TCardMoveAcrossLanesHandler;
-  };
+  lanes: ILane[];
+  onCardClick?: TCardClickHandler;
+  onCardMoveAcrossLanes?: TCardMoveAcrossLanesHandler;
 }
 
 export const KanbanBoardProvider: FC<IKanbanBoardProviderProps> = ({
   children,
-  value: { lanes: propLanes, onCardClick, onCardMoveAcrossLanes },
+  lanes: propLanes,
+  onCardClick,
+  onCardMoveAcrossLanes,
 }) => {
   const [fromLaneId, setFromLaneId] = useState<string | number | null>(null);
   const [toLaneId, setToLaneId] = useState<string | number | null>(null);
