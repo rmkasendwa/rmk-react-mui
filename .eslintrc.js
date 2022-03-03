@@ -16,6 +16,7 @@ module.exports = {
     'plugin:jsx-a11y/recommended',
     'plugin:eslint-comments/recommended',
     'prettier',
+    'plugin:storybook/recommended',
   ],
   root: true,
   env: {
@@ -37,6 +38,7 @@ module.exports = {
     'react/jsx-uses-react': 'off',
     'react/react-in-jsx-scope': 'off',
     'import/no-named-as-default': 'off',
+    'import/no-unresolved': 'off',
   },
   settings: {
     react: {

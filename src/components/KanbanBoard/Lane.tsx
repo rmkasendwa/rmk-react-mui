@@ -25,17 +25,28 @@ const Lane: FC<ILaneProps> = ({
   loading = false,
   cards,
   errorMessage,
+  sx,
+  ...rest
 }) => {
   const { palette } = useTheme();
-  const { setActiveLaneId, onCardDrop } = useContext(KanbanBoardContext);
+  const {
+    setToLaneId,
+    onCardDrop,
+    setFromLaneId,
+    fromLaneId,
+    toLaneId,
+    onCardMoveAcrossLanes,
+  } = useContext(KanbanBoardContext);
 
   return (
     <Box
+      {...rest}
       sx={{
         height: '100%',
         display: 'inline-block',
         verticalAlign: 'top',
         whiteSpace: 'normal',
+        ...sx,
       }}
     >
       <Box
@@ -113,8 +124,21 @@ const Lane: FC<ILaneProps> = ({
           getChildPayload={(index) => cards[index]}
           dragClass="card-ghost"
           dropClass="card-ghost-drop"
+          onDragEnd={({ isSource, payload }) => {
+            if (isSource) {
+              onCardMoveAcrossLanes &&
+                fromLaneId != null &&
+                toLaneId != null &&
+                onCardMoveAcrossLanes(fromLaneId, toLaneId, payload.id);
+            }
+          }}
           onDragEnter={() => {
-            setActiveLaneId && setActiveLaneId(id);
+            setToLaneId && setToLaneId(id);
+          }}
+          onDragStart={({ isSource }) => {
+            if (isSource && setFromLaneId) {
+              setFromLaneId(id);
+            }
           }}
           dropPlaceholder={{
             animationDuration: 150,

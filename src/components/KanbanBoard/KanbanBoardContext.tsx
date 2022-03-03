@@ -1,3 +1,4 @@
+import { BoxProps } from '@mui/material';
 import {
   Dispatch,
   FC,
@@ -16,12 +17,12 @@ export interface ICardIdentifier {
   laneId: string | number;
 }
 
-export interface ICard extends ICardIdentifier {
+export interface ICard extends ICardIdentifier, Omit<BoxProps, 'title' | 'id'> {
   title: ReactNode;
   description: ReactNode;
 }
 
-export interface ILane {
+export interface ILane extends Omit<BoxProps, 'title' | 'id'> {
   id: string | number;
   title: ReactNode;
   cards: ICard[];
@@ -36,6 +37,17 @@ export interface IDropResult {
   payload?: any;
 }
 
+export type TCardClickHandler = (
+  cardId: string | number,
+  laneId: string | number
+) => void;
+
+export type TCardMoveAcrossLanesHandler = (
+  fromLaneId: string | number,
+  toLaneId: string | number,
+  cardId: string | number
+) => void;
+
 export interface IKanbanBoardContext {
   lanes: ILaneProps[];
   onCardDrop?: (
@@ -43,8 +55,12 @@ export interface IKanbanBoardContext {
     dropResult: IDropResult
   ) => void;
   onLaneDrop?: (dropResult: IDropResult) => void;
-  activeLaneId?: string | number | null;
-  setActiveLaneId?: Dispatch<SetStateAction<string | number | null>>;
+  toLaneId?: string | number | null;
+  fromLaneId?: string | number | null;
+  setFromLaneId?: Dispatch<SetStateAction<string | number | null>>;
+  setToLaneId?: Dispatch<SetStateAction<string | number | null>>;
+  onCardClick?: TCardClickHandler;
+  onCardMoveAcrossLanes?: TCardMoveAcrossLanesHandler;
 }
 export const KanbanBoardContext = createContext<IKanbanBoardContext>({
   lanes: [],
@@ -53,16 +69,17 @@ export const KanbanBoardContext = createContext<IKanbanBoardContext>({
 export interface IKanbanBoardProviderProps {
   value: {
     lanes: ILane[];
+    onCardClick?: TCardClickHandler;
+    onCardMoveAcrossLanes?: TCardMoveAcrossLanesHandler;
   };
 }
 
 export const KanbanBoardProvider: FC<IKanbanBoardProviderProps> = ({
   children,
-  value: { lanes: propLanes },
+  value: { lanes: propLanes, onCardClick, onCardMoveAcrossLanes },
 }) => {
-  const [activeLaneId, setActiveLaneId] = useState<string | number | null>(
-    null
-  );
+  const [fromLaneId, setFromLaneId] = useState<string | number | null>(null);
+  const [toLaneId, setToLaneId] = useState<string | number | null>(null);
   const [lanes, setLanes] = useState<ILane[]>([]);
 
   const onCardDrop = useCallback(
@@ -75,6 +92,7 @@ export const KanbanBoardProvider: FC<IKanbanBoardProviderProps> = ({
         if (lane) {
           const laneIndex = lanes.indexOf(lane);
           const newLane = { ...lane };
+          console.log({ laneId, payload });
           if (removedIndex != null) {
             payload = newLane.cards.splice(removedIndex, 1)[0];
           }
@@ -114,8 +132,12 @@ export const KanbanBoardProvider: FC<IKanbanBoardProviderProps> = ({
         lanes,
         onCardDrop,
         onLaneDrop,
-        activeLaneId,
-        setActiveLaneId,
+        fromLaneId,
+        setFromLaneId,
+        toLaneId,
+        setToLaneId,
+        onCardClick,
+        onCardMoveAcrossLanes,
       }}
     >
       {children}
