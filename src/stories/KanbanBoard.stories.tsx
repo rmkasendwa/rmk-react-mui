@@ -1,3 +1,4 @@
+import { Chip, Grid, Typography } from '@mui/material';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { LoremIpsum } from 'lorem-ipsum';
 
@@ -33,6 +34,26 @@ const lanes = Array.from({ length: 6 }).map((_, laneIndex) => {
           description: lorem.generateWords(40),
         };
       }
+    ),
+    footer: (
+      <Grid container p={1}>
+        <Grid item>
+          <Typography variant="body2">
+            Footer{' '}
+            <Chip
+              label={lorem.generateWords(1)}
+              size="small"
+              variant="outlined"
+            />
+          </Typography>
+        </Grid>
+        <Grid item xs />
+        <Grid item>
+          <Typography variant="body2" color="primary">
+            Manage
+          </Typography>
+        </Grid>
+      </Grid>
     ),
   };
 });
