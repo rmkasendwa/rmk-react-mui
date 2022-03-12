@@ -1,18 +1,29 @@
-import { Skeleton, Typography, alpha, useTheme } from '@mui/material';
+import {
+  Box,
+  Skeleton,
+  Typography,
+  TypographyProps,
+  alpha,
+  useTheme,
+} from '@mui/material';
 import { FC, ReactNode } from 'react';
 
 import { useLoadingContext } from '../hooks';
 import ErrorSkeleton from './ErrorSkeleton';
-import FieldLabel from './FieldLabel';
+import FieldLabel, { IFieldLabelProps } from './FieldLabel';
 
 export interface IFieldValueDisplayProps {
   label: string;
   value?: ReactNode;
+  LabelProps?: IFieldLabelProps;
+  ValueProps?: TypographyProps;
 }
 
 export const FieldValueDisplay: FC<IFieldValueDisplayProps> = ({
   label,
   value,
+  LabelProps = {},
+  ValueProps = {},
 }) => {
   value || (value = '-');
   const theme = useTheme();
@@ -49,24 +60,29 @@ export const FieldValueDisplay: FC<IFieldValueDisplayProps> = ({
 
   return (
     <>
-      <FieldLabel>{label}</FieldLabel>
-      {(() => {
-        if (['string', 'number'].includes(typeof value)) {
-          return (
-            <Typography
-              variant="body2"
-              sx={{
-                wordBreak: 'break-word',
-                whiteSpace: 'pre-line',
-                color: alpha(theme.palette.text.primary, 0.5),
-              }}
-            >
-              {value}
-            </Typography>
-          );
-        }
-        return value;
-      })()}
+      <FieldLabel {...LabelProps}>{label}</FieldLabel>
+      <Box sx={{ mt: 0.5 }}>
+        {(() => {
+          if (['string', 'number'].includes(typeof value)) {
+            const { sx, ...rest } = ValueProps;
+            return (
+              <Typography
+                variant="body2"
+                {...rest}
+                sx={{
+                  wordBreak: 'break-word',
+                  whiteSpace: 'pre-line',
+                  color: alpha(theme.palette.text.primary, 0.5),
+                  ...sx,
+                }}
+              >
+                {value}
+              </Typography>
+            );
+          }
+          return value;
+        })()}
+      </Box>
     </>
   );
 };

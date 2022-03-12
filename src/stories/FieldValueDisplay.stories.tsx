@@ -11,10 +11,7 @@ export default {
   },
 } as ComponentMeta<typeof FieldValueDisplay>;
 
-const Template: ComponentStory<typeof FieldValueDisplay> = ({ value }) => {
-  const props: any = {};
-  value != null && (props.value = value);
-
+const Template: ComponentStory<typeof FieldValueDisplay> = (props) => {
   return <FieldValueDisplay label="The Label" {...props} />;
 };
 
@@ -33,4 +30,20 @@ WithNumericValue.args = {
 export const WithElementValue = Template.bind({});
 WithElementValue.args = {
   value: <Chip label="A reasonably long value" color="success" size="small" />,
+};
+
+export const StyledDifferently = Template.bind({});
+StyledDifferently.args = {
+  label: 'Created On',
+  value: 'Nov 23 2022',
+  LabelProps: {
+    sx: {
+      fontWeight: 'normal',
+    },
+  },
+  ValueProps: {
+    sx: {
+      fontWeight: 'bold',
+    },
+  },
 };
