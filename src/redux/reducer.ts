@@ -1,8 +1,8 @@
 import { combineReducers } from 'redux';
 
-import { dataReducer } from './data/reducer';
-import { pageReducer } from './page/reducer';
-import { themeReducer } from './theme/reducer';
+import { dataReducer } from './Data/reducer';
+import { pageReducer } from './Page/reducer';
+import { themeReducer } from './Theme/reducer';
 
 const rootReducer = combineReducers({
   theme: themeReducer,
