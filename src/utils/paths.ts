@@ -22,7 +22,7 @@ export const getInterpolatedPath = (
 
 export const addSearchParams = (
   routePath: string,
-  params: Record<string, string | number>
+  params: Record<string, string | number | undefined>
 ): string => {
   const keys = Object.keys(params);
   if (keys.length === 0) return routePath;
@@ -31,9 +31,15 @@ export const addSearchParams = (
     '?' +
     keys
       .reduce((accumulator, key) => {
-        let value: string | string[] = String(params[key]);
-        Array.isArray(value) && (value = value.join(','));
-        accumulator.push(`${key}=${encodeURIComponent(value)}`);
+        if (params[key]) {
+          const value = (() => {
+            if (Array.isArray(params[key])) {
+              return (params[key] as any).join(',');
+            }
+            return String(params[key]);
+          })();
+          accumulator.push(`${key}=${encodeURIComponent(value)}`);
+        }
         return accumulator;
       }, [] as string[])
       .join('&')
