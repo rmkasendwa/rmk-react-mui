@@ -1,6 +1,8 @@
-export * from './data';
-export * from './page';
-export * from './theme';
+import { TPageHistory } from '../interfaces';
+
+export * from './Data';
+export * from './Page';
+export * from './Theme';
 
 export interface RootState {
   theme: {
@@ -8,6 +10,7 @@ export interface RootState {
   };
   page: {
     title: string;
+    history: TPageHistory;
   };
   data: Record<string, any>;
 }
