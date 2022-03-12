@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 
 import { ITextFieldProps } from '../components';
 import { IFile, IFileUploadFunction, IUploadableFile } from '../interfaces';
-import { useFormikValue } from './utils';
+import { useFormikValue } from './Utils';
 
 export interface IUseFileUploadOptions
   extends Pick<ITextFieldProps, 'helperText' | 'error' | 'onChange' | 'name'> {

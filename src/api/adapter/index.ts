@@ -1,9 +1,9 @@
-import axios from 'axios';
+import axios, { CancelTokenSource } from 'axios';
 
 import { IRequestOptions, IUser } from '../../interfaces';
 import { SessionTimeoutError } from '../../utils/errors';
 import StorageManager from '../../utils/StorageManager';
-import { queueRequest } from './request-queue';
+import { queueRequest } from './RequestQueue';
 
 export const HOST_URL = window.location.origin;
 
@@ -24,18 +24,13 @@ export interface IHeaderController {
 }
 export const HeaderController: IHeaderController = {};
 
+const pendingRequestCancelTokenSources: CancelTokenSource[] = [];
+
 const fetchData = async <T = any>(
   path: string,
   { headers = {}, label, ...options }: IRequestOptions
 ): Promise<T> => {
   const defaultHeaders = { ...defaultRequestHeaders };
-  const cancelTokenSource = axios.CancelToken.source();
-  options.getRequestController &&
-    options.getRequestController({
-      cancelRequest: () => {
-        cancelTokenSource.cancel();
-      },
-    });
   const url = (() => {
     if (path.match(/^https?:/)) return path;
     return HOST_URL + path;
@@ -51,6 +46,14 @@ const fetchData = async <T = any>(
       },
       async (resolve, reject) => {
         const fetchData = async (retryCount = 0): Promise<any> => {
+          const cancelTokenSource = axios.CancelToken.source();
+          options.getRequestController &&
+            options.getRequestController({
+              cancelRequest: () => {
+                cancelTokenSource.cancel();
+              },
+            });
+          pendingRequestCancelTokenSources.push(cancelTokenSource);
           const response = await axios(url, {
             ...options,
             headers: {
@@ -60,6 +63,15 @@ const fetchData = async <T = any>(
             cancelToken: cancelTokenSource.token,
             withCredentials: true,
           }).catch((err) => {
+            pendingRequestCancelTokenSources.splice(
+              pendingRequestCancelTokenSources.indexOf(cancelTokenSource),
+              1
+            );
+            const cancelPendingRequests = () => {
+              pendingRequestCancelTokenSources.forEach((cancelTokenSource) =>
+                cancelTokenSource.cancel()
+              );
+            };
             const { response } = err;
             if (response?.data) {
               const errorMessage: string =
@@ -85,11 +97,13 @@ const fetchData = async <T = any>(
                   return 'Something went wrong';
                 })();
               if (['User session timed out'].includes(errorMessage)) {
+                cancelPendingRequests();
                 return reject(new SessionTimeoutError(errorMessage));
               }
               return reject(new Error(errorMessage));
             }
             if (response?.status === 401) {
+              cancelPendingRequests();
               return reject(new SessionTimeoutError('Session timed out'));
             }
             return reject(
@@ -97,6 +111,10 @@ const fetchData = async <T = any>(
             );
           });
           if (response) {
+            pendingRequestCancelTokenSources.splice(
+              pendingRequestCancelTokenSources.indexOf(cancelTokenSource),
+              1
+            );
             if (!Array.isArray(response.data.errors)) {
               if (HeaderController.rotateHeaders) {
                 const rotatedRequestHeaders = HeaderController.rotateHeaders(
