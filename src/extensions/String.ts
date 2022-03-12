@@ -26,6 +26,7 @@ declare global {
       endIndex?: number
     ) => string;
     insertAt: (index?: number, insertion?: string) => string;
+    trimIndent: () => string;
   }
 }
 
@@ -191,4 +192,11 @@ String.prototype.replaceAt = function (
 
 String.prototype.insertAt = function (index = 0, insertion = '') {
   return this.substr(0, index) + insertion + this.substr(index);
+};
+
+String.prototype.trimIndent = function () {
+  return this.trim()
+    .split('\n')
+    .map((string) => string.trimStart())
+    .join('\n');
 };
