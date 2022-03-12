@@ -7,6 +7,7 @@ declare global {
     move: (this: Array<T>, oldIndex: number, newIndex: number) => this;
     first: (this: Array<T>) => T;
     last: (this: Array<T>) => T;
+    selectRandom: (this: Array<T>) => T;
     shuffle: (this: Array<T>) => this;
   }
 }
@@ -55,6 +56,10 @@ Array.prototype.first = function () {
 
 Array.prototype.last = function () {
   return this[this.length - 1];
+};
+
+Array.prototype.selectRandom = function () {
+  return this[Math.floor(Math.random() * this.length)];
 };
 
 Array.prototype.shuffle = function () {
