@@ -62,6 +62,7 @@ export const useAPIService = <T>(defautValue: T, key?: string) => {
   );
 
   useEffect(() => {
+    isComponentMountedRef.current = true;
     return () => {
       isComponentMountedRef.current = false;
     };
@@ -69,6 +70,7 @@ export const useAPIService = <T>(defautValue: T, key?: string) => {
 
   return {
     errorMessage,
+    setErrorMessage,
     load,
     loaded,
     loading,
@@ -110,7 +112,8 @@ export const useUpdate = <T>() => {
 export const useRecord = <T>(
   recordFinder: IAPIFunction,
   defautValue: T,
-  key?: string
+  key?: string,
+  loadOnMount = true
 ) => {
   const [apiFunction] = useState<IAPIFunction>(() => recordFinder);
   const { load: apiServiceLoad, ...rest } = useAPIService<T>(defautValue, key);
@@ -120,8 +123,8 @@ export const useRecord = <T>(
   }, [apiFunction, apiServiceLoad]);
 
   useEffect(() => {
-    load();
-  }, [apiFunction, load]);
+    loadOnMount && load();
+  }, [load, loadOnMount]);
 
   return {
     load,
@@ -129,8 +132,17 @@ export const useRecord = <T>(
   };
 };
 
-export const useRecords = <T>(recordFinder: IAPIFunction, key?: string) => {
-  const { record, setRecord, ...rest } = useRecord<T[]>(recordFinder, [], key);
+export const useRecords = <T>(
+  recordFinder: IAPIFunction,
+  key?: string,
+  loadOnMount = true
+) => {
+  const { record, setRecord, ...rest } = useRecord<T[]>(
+    recordFinder,
+    [],
+    key,
+    loadOnMount
+  );
 
   return {
     records: record,
@@ -139,12 +151,12 @@ export const useRecords = <T>(recordFinder: IAPIFunction, key?: string) => {
   };
 };
 
-export const useAPIDataContext = () => {
-  return useContext(APIDataContext);
-};
-
 export const useLoadingContext = () => {
   return useContext(LoadingContext);
+};
+
+export const useAPIDataContext = () => {
+  return useContext(APIDataContext);
 };
 
 export const useFormikValue = ({

@@ -1,4 +1,4 @@
-import { ICountryCode } from './countries';
+import { ICountryCode } from './Countries';
 
 export interface IGlobalConfiguration {
   countryCode: ICountryCode;

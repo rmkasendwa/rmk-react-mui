@@ -1,3 +1,3 @@
-export * from './files';
-export * from './page';
-export * from './utils';
+export * from './Files';
+export * from './Page';
+export * from './Utils';
