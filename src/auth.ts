@@ -26,13 +26,13 @@ const Auth = {
     clearLoggedInUserSession();
     const user = await loginFunction(username, password);
     user && updateLoggedInUserSession(user);
-    return authenticated;
+    return this.isAuthenticated();
   },
   async logout(): Promise<boolean> {
     clearLoggedInUserSession();
     logout();
     StorageManager.clear();
-    return authenticated;
+    return this.isAuthenticated();
   },
   isAuthenticated(): boolean {
     return authenticated;

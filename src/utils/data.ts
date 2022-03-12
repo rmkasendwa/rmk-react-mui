@@ -3,7 +3,7 @@ import { isEmpty, omit } from 'underscore';
 export const diff = (
   updatedData: any,
   originalData: any,
-  biDirectional: boolean = false
+  biDirectional = false
 ) => {
   const dataDiff: any = omit(updatedData, (value, key) => {
     if (originalData[key] != null && typeof originalData[key] === 'object') {
@@ -15,7 +15,7 @@ export const diff = (
   });
   if (biDirectional) {
     const mirrorDiff = diff(originalData, updatedData);
-    for (let key in mirrorDiff) {
+    for (const key in mirrorDiff) {
       if (!dataDiff[key] && mirrorDiff[key]) {
         dataDiff[key] = mirrorDiff[key];
       }
