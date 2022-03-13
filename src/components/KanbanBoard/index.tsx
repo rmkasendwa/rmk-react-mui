@@ -10,6 +10,8 @@ import {
   TCardMoveAcrossLanesHandler,
 } from './KanbanBoardContext';
 
+export * from './KanbanBoardContext';
+
 export interface IKanbanBoardProps extends IDragAndDropContainerProps {
   lanes: ILane[];
   onCardClick?: TCardClickHandler;
