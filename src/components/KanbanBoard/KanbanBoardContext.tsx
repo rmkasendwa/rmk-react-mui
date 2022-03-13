@@ -12,9 +12,11 @@ import {
 
 import { ILaneProps } from './Lane';
 
+export type TKanbanBoardId = string | number;
+
 export interface ICardIdentifier {
-  id: string | number;
-  laneId: string | number;
+  id: TKanbanBoardId;
+  laneId: TKanbanBoardId;
 }
 
 export interface ICard extends ICardIdentifier, Omit<BoxProps, 'title' | 'id'> {
@@ -23,7 +25,7 @@ export interface ICard extends ICardIdentifier, Omit<BoxProps, 'title' | 'id'> {
 }
 
 export interface ILane extends Omit<BoxProps, 'title' | 'id'> {
-  id: string | number;
+  id: TKanbanBoardId;
   title: ReactNode;
   cards: ICard[];
   showCardCount?: boolean;
@@ -39,27 +41,24 @@ export interface IDropResult {
 }
 
 export type TCardClickHandler = (
-  cardId: string | number,
-  laneId: string | number
+  cardId: TKanbanBoardId,
+  laneId: TKanbanBoardId
 ) => void;
 
 export type TCardMoveAcrossLanesHandler = (
-  fromLaneId: string | number,
-  toLaneId: string | number,
-  cardId: string | number
+  fromLaneId: TKanbanBoardId,
+  toLaneId: TKanbanBoardId,
+  cardId: TKanbanBoardId
 ) => void;
 
 export interface IKanbanBoardContext {
   lanes: ILaneProps[];
-  onCardDrop?: (
-    laneId: string | number | null,
-    dropResult: IDropResult
-  ) => void;
+  onCardDrop?: (laneId: TKanbanBoardId | null, dropResult: IDropResult) => void;
   onLaneDrop?: (dropResult: IDropResult) => void;
-  toLaneId?: string | number | null;
-  fromLaneId?: string | number | null;
-  setFromLaneId?: Dispatch<SetStateAction<string | number | null>>;
-  setToLaneId?: Dispatch<SetStateAction<string | number | null>>;
+  toLaneId?: TKanbanBoardId | null;
+  fromLaneId?: TKanbanBoardId | null;
+  setFromLaneId?: Dispatch<SetStateAction<TKanbanBoardId | null>>;
+  setToLaneId?: Dispatch<SetStateAction<TKanbanBoardId | null>>;
   onCardClick?: TCardClickHandler;
   onCardMoveAcrossLanes?: TCardMoveAcrossLanesHandler;
 }
@@ -79,8 +78,8 @@ export const KanbanBoardProvider: FC<IKanbanBoardProviderProps> = ({
   onCardClick,
   onCardMoveAcrossLanes,
 }) => {
-  const [fromLaneId, setFromLaneId] = useState<string | number | null>(null);
-  const [toLaneId, setToLaneId] = useState<string | number | null>(null);
+  const [fromLaneId, setFromLaneId] = useState<TKanbanBoardId | null>(null);
+  const [toLaneId, setToLaneId] = useState<TKanbanBoardId | null>(null);
   const [lanes, setLanes] = useState<ILane[]>([]);
 
   const onCardDrop = useCallback(
@@ -93,7 +92,6 @@ export const KanbanBoardProvider: FC<IKanbanBoardProviderProps> = ({
         if (lane) {
           const laneIndex = lanes.indexOf(lane);
           const newLane = { ...lane };
-          console.log({ laneId, payload });
           if (removedIndex != null) {
             payload = newLane.cards.splice(removedIndex, 1)[0];
           }

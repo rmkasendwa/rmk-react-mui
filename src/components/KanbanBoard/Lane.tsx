@@ -78,6 +78,9 @@ const Lane: FC<ILaneProps> = ({
           '& .smooth-dnd-container>.smooth-dnd-draggable-wrapper': {
             mb: 1,
           },
+          '& .smooth-dnd-ghost': {
+            transform: `rotate(3deg)`,
+          },
         }}
       >
         <Box component="header" className="column-drag-handle" sx={{ p: 1 }}>

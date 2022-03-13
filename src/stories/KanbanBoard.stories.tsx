@@ -44,6 +44,7 @@ const lanes = Array.from({ length: 6 }).map((_, laneIndex) => {
               label={lorem.generateWords(1)}
               size="small"
               variant="outlined"
+              component="span"
             />
           </Typography>
         </Grid>
