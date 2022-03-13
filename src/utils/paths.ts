@@ -1,6 +1,6 @@
 export const getInterpolatedPath = (
   routePath: string,
-  params: Record<string, string>
+  params: Record<string, string | number | boolean>
 ): string => {
   const regex = /:(\w+)/g;
   const extractedParameters = [];

@@ -1,6 +1,6 @@
 import { ICountryCode } from './interfaces';
 
-export const APP_NAME = 'App';
+export const APP_NAME = process.env.REACT_APP_NAME || 'App';
 
 export const DEFAULT_COUNTRY_CODE: ICountryCode =
   (process.env.REACT_APP_COUNTRY_CODE as ICountryCode) || 'UG';

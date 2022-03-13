@@ -23,9 +23,9 @@ const Card: FC<ICardProps> = ({
       sx={{
         border: `1px solid ${alpha(palette.text.primary, 0.2)}`,
         backgroundColor: palette.background.default,
-        px: 2,
         borderRadius: 1,
-        p: 1,
+        py: 1,
+        px: 2,
         cursor: 'pointer',
         minWidth: 250,
         ...sx,

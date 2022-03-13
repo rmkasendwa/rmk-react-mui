@@ -1,4 +1,4 @@
-const APP_NAME = process.env.REACT_APP_NAME || 'RMK Utils';
+const APP_NAME = process.env.REACT_APP_NAME || 'RMK Page Utils';
 
 export const updatePageTitle = (title?: string) => {
   if (title) {
