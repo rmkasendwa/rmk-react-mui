@@ -108,9 +108,11 @@ const Lane: FC<ILaneProps> = ({
             {(() => {
               if (errorMessage) {
                 return (
-                  <Tooltip title={errorMessage}>
-                    <ErrorIcon color="error" />
-                  </Tooltip>
+                  <Grid item sx={{ display: 'flex' }}>
+                    <Tooltip title={errorMessage}>
+                      <ErrorIcon color="error" />
+                    </Tooltip>
+                  </Grid>
                 );
               }
               if (loading) {

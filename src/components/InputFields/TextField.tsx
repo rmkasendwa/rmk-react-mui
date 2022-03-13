@@ -6,7 +6,7 @@ import {
 import { useFormikContext } from 'formik';
 import { forwardRef } from 'react';
 
-import { useFormikValue, useLoadingContext } from '../../hooks';
+import { useLoadingContext } from '../../hooks';
 import ErrorSkeleton from '../ErrorSkeleton';
 
 export interface ITextFieldProps
@@ -25,18 +25,17 @@ export const TextField = forwardRef<HTMLDivElement, ITextFieldProps>(
       fullWidth,
       name,
       value,
-      onBlur,
-      onChange,
-      error,
-      helperText,
+      onBlur: onBlurProp,
+      onChange: onChangeProp,
+      error: errorProp,
+      helperText: helperTextProp,
       ...rest
     },
     ref
   ) {
     const { loading, errorMessage } = useLoadingContext();
-    const { handleBlur, handleChange, touched, errors } =
+    const { values, handleBlur, handleChange, touched, errors } =
       (useFormikContext() as any) || {};
-    value = useFormikValue({ value, name });
 
     const labelSkeletonWidth = typeof label === 'string' ? label.length * 7 : 0;
 
@@ -76,11 +75,18 @@ export const TextField = forwardRef<HTMLDivElement, ITextFieldProps>(
           name,
         }}
         {...rest}
-        value={value}
-        onChange={onChange ?? handleChange}
-        onBlur={onBlur ?? handleBlur}
+        value={
+          value ??
+          (() => {
+            if (values && name && values[name] != null) {
+              return values[name];
+            }
+          })()
+        }
+        onChange={onChangeProp ?? handleChange}
+        onBlur={onBlurProp ?? handleBlur}
         error={
-          error ??
+          errorProp ??
           (() => {
             if (errors && touched && name && touched[name]) {
               return Boolean(errors[name]);
@@ -88,7 +94,7 @@ export const TextField = forwardRef<HTMLDivElement, ITextFieldProps>(
           })()
         }
         helperText={
-          helperText ??
+          helperTextProp ??
           (() => {
             if (errors && touched && name && touched[name]) {
               return errors[name];

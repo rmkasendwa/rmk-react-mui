@@ -27,7 +27,7 @@ import ReloadIconButton from '../ReloadIconButton';
 import RetryErrorMessage from '../RetryErrorMessage';
 import TextField, { ITextFieldProps } from './TextField';
 
-interface IDropdownOption {
+export interface IDropdownOption {
   value: string | number;
   label: ReactNode;
   searchableLabel?: string;
@@ -63,6 +63,7 @@ export const DataDropdownField: FC<IDataDropdownFieldProps> = ({
   onBlur,
   error,
   helperText,
+  InputProps,
   ...rest
 }) => {
   value = useFormikValue({ value, name });
@@ -284,8 +285,9 @@ export const DataDropdownField: FC<IDataDropdownFieldProps> = ({
         setSearchTerm(event.target.value);
       }}
       InputProps={{
-        ref: anchorRef,
         endAdornment: <ExpandMoreIcon />,
+        ...InputProps,
+        ref: anchorRef,
       }}
       value={searchTerm}
       error={
