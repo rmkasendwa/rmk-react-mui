@@ -13,7 +13,7 @@ import {
 
 import { GlobalConfigurationContext } from '../../../contexts';
 import { useFormikValue } from '../../../hooks';
-import { ICountryCode, IGlobalConfiguration } from '../../../interfaces';
+import { ICountryCode } from '../../../interfaces';
 import { systemStandardPhoneNumberFormat } from '../../../utils/PhoneNumberUtil';
 import TextField, { ITextFieldProps } from '../TextField';
 import { ICountry, countries } from './countries';
@@ -56,9 +56,7 @@ export const PhoneNumberInputField: FC<IPhoneNumberInputFieldProps> = ({
 }) => {
   value = useFormikValue({ value, name });
 
-  const { countryCode }: IGlobalConfiguration = useContext(
-    GlobalConfigurationContext
-  );
+  const { countryCode } = useContext(GlobalConfigurationContext);
   regionalCode || (regionalCode = countryCode);
   const [selectedCountry, setSelectedCountry] = useState(flags[regionalCode]);
 
