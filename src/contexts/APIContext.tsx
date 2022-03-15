@@ -1,6 +1,7 @@
 import { FC, createContext } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
+import { clearLoggedInUserSession } from '../auth';
 import { IAPI, IAPIFunction } from '../interfaces';
 import { SESSION_LOGIN_ROUTE_PATH } from '../route-paths';
 
@@ -19,6 +20,7 @@ export const APIProvider: FC = ({ children }) => {
           'Invalid token',
         ].includes(err.message)
       ) {
+        clearLoggedInUserSession();
         const { pathname, search } = location;
         navigate(
           SESSION_LOGIN_ROUTE_PATH +
