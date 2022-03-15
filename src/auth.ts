@@ -1,11 +1,10 @@
 import { login, logout } from './api';
-import { IUser } from './interfaces';
 import StorageManager from './utils/StorageManager';
 
-let loggedInUser: IUser | null = StorageManager.get('user');
+let loggedInUser: any | null = StorageManager.get('user');
 let authenticated: boolean = loggedInUser != null;
 
-export const updateLoggedInUserSession = (user: IUser) => {
+export const updateLoggedInUserSession = <T = any>(user: T) => {
   loggedInUser = user;
   StorageManager.add('user', user);
   authenticated = true;
@@ -18,29 +17,25 @@ export const clearLoggedInUserSession = () => {
 };
 
 const Auth = {
-  async login(
-    username: string,
-    password: string,
-    loginFunction = login
-  ): Promise<boolean> {
+  async login(username: string, password: string, loginFunction = login) {
     clearLoggedInUserSession();
     const user = await loginFunction(username, password);
     user && updateLoggedInUserSession(user);
     return this.isAuthenticated();
   },
-  async logout(): Promise<boolean> {
+  async logout() {
     clearLoggedInUserSession();
     logout();
     StorageManager.clear();
     return this.isAuthenticated();
   },
-  isAuthenticated(): boolean {
+  isAuthenticated() {
     return authenticated;
   },
-  loggedInUser(): IUser | null {
+  loggedInUser() {
     return loggedInUser;
   },
-  updateLoggedInUser(user: IUser) {
+  updateLoggedInUser<T = any>(user: T) {
     updateLoggedInUserSession(user);
   },
 };

@@ -1,6 +1,6 @@
-import axios, { CancelTokenSource } from 'axios';
+import axios, { AxiosResponse, CancelTokenSource } from 'axios';
 
-import { IRequestOptions, IUser } from '../../interfaces';
+import { IRequestOptions } from '../../interfaces';
 import { SessionTimeoutError } from '../../utils/errors';
 import StorageManager from '../../utils/StorageManager';
 import { queueRequest } from './RequestQueue';
@@ -16,6 +16,11 @@ const cachedDefaultRequestHeaders: Record<string, string> | null =
 cachedDefaultRequestHeaders &&
   Object.assign(defaultRequestHeaders, cachedDefaultRequestHeaders);
 
+export const patchDefaultRequestHeaders = (headers: Record<string, string>) => {
+  Object.assign(defaultRequestHeaders, headers);
+  StorageManager.add('defaultRequestHeaders', defaultRequestHeaders);
+};
+
 export interface IHeaderController {
   rotateHeaders?: (
     responseHeaders: Record<string, string>,
@@ -29,7 +34,7 @@ const pendingRequestCancelTokenSources: CancelTokenSource[] = [];
 const fetchData = async <T = any>(
   path: string,
   { headers = {}, label, ...options }: IRequestOptions
-): Promise<T> => {
+): Promise<AxiosResponse<T>> => {
   const defaultHeaders = { ...defaultRequestHeaders };
   const url = (() => {
     if (path.match(/^https?:/)) return path;
@@ -117,14 +122,11 @@ const fetchData = async <T = any>(
             );
             if (!Array.isArray(response.data.errors)) {
               if (HeaderController.rotateHeaders) {
-                const rotatedRequestHeaders = HeaderController.rotateHeaders(
-                  response.headers,
-                  defaultHeaders
-                );
-                Object.assign(defaultRequestHeaders, rotatedRequestHeaders);
-                StorageManager.add(
-                  'defaultRequestHeaders',
-                  defaultRequestHeaders
+                patchDefaultRequestHeaders(
+                  HeaderController.rotateHeaders(
+                    response.headers,
+                    defaultHeaders
+                  )
                 );
               }
               return resolve(response);
@@ -144,8 +146,8 @@ const fetchData = async <T = any>(
   });
 };
 
-export const get = (path: string, options: IRequestOptions = {}) => {
-  return fetchData(path, options);
+export const get = <T = any>(path: string, options: IRequestOptions = {}) => {
+  return fetchData<T>(path, options);
 };
 
 const getRequestDefaultOptions = ({ ...options }: IRequestOptions = {}) => {
@@ -163,36 +165,36 @@ const getRequestDefaultOptions = ({ ...options }: IRequestOptions = {}) => {
   return options;
 };
 
-export const post = async (
+export const post = async <T = any>(
   path: string,
   { ...options }: IRequestOptions = {}
-): Promise<any> => {
+) => {
   options.method = 'POST';
-  return fetchData(path, getRequestDefaultOptions(options));
+  return fetchData<T>(path, getRequestDefaultOptions(options));
 };
 
-export const put = async (
+export const put = async <T = any>(
   path: string,
   { ...options }: IRequestOptions = {}
-): Promise<any> => {
+) => {
   options.method = 'PUT';
-  return fetchData(path, getRequestDefaultOptions(options));
+  return fetchData<T>(path, getRequestDefaultOptions(options));
 };
 
-export const patch = async (
+export const patch = async <T = any>(
   path: string,
   { ...options }: IRequestOptions = {}
-): Promise<any> => {
+) => {
   options.method = 'PATCH';
-  return fetchData(path, getRequestDefaultOptions(options));
+  return fetchData<T>(path, getRequestDefaultOptions(options));
 };
 
-export const login = async (
+export const login = async <T = any>(
   username: string,
   password: string,
   endpointPath = '/v1/login'
-): Promise<IUser> => {
-  const { data } = await post(endpointPath, {
+) => {
+  const { data } = await post<T>(endpointPath, {
     data: {
       username,
       password,
