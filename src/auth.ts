@@ -11,7 +11,6 @@ export const updateLoggedInUserSession = <T = any>(user: T) => {
 };
 
 export const clearLoggedInUserSession = () => {
-  loggedInUser = null;
   StorageManager.remove('user');
   authenticated = false;
 };
