@@ -13,7 +13,7 @@ export const AuthGuard: FC<IAuthGuardProps> = ({ variant }) => {
 
   switch (variant) {
     case 'PROTECTED':
-      if (!Auth.isAuthenticated()) {
+      if (!Auth.loggedInUser()) {
         const redirectConfig: Partial<Path> = {
           pathname: LOGIN_ROUTE_PATH,
         };
