@@ -23,6 +23,7 @@ const Auth = {
     return this.isAuthenticated();
   },
   async logout() {
+    loggedInUser = null;
     clearLoggedInUserSession();
     logout();
     StorageManager.clear();
