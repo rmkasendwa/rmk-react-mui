@@ -4,7 +4,7 @@ import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { APIContext, APIDataContext, LoadingContext } from '../contexts';
-import { IAPI, IAPIFunction } from '../interfaces';
+import { IAPIFunction } from '../interfaces';
 import { RootState, updateData } from '../redux';
 
 export const useAPIService = <T>(defautValue: T, key?: string) => {
@@ -15,7 +15,7 @@ export const useAPIService = <T>(defautValue: T, key?: string) => {
   if (key && data[key]) {
     defautValue = data[key];
   }
-  const { call }: IAPI = useContext(APIContext);
+  const { call } = useContext(APIContext);
   const [record, setRecord] = useState<T>(defautValue);
   const [loaded, setLoaded] = useState(false);
   const [loading, setLoading] = useState(false);

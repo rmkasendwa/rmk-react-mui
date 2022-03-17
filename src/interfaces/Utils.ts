@@ -2,10 +2,6 @@ import { AxiosRequestConfig } from 'axios';
 
 export type IAPIFunction = () => Promise<any>;
 
-export interface IAPI {
-  call: <T extends IAPIFunction>(func: T) => Promise<ReturnType<T>>;
-}
-
 export interface IReduxAction {
   type: string;
   payload?: any;
