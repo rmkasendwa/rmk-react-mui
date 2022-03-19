@@ -2,7 +2,7 @@ import { Reducer } from 'redux';
 
 import { TPageHistory } from '../../interfaces';
 import StorageManager from '../../utils/StorageManager';
-import { SET_PAGE_TITLE } from './types';
+import { CLEAR_PAGE_HISTORY, SET_PAGE_TITLE } from './types';
 
 const page: {
   title?: string;
@@ -23,6 +23,9 @@ export const pageReducer: Reducer = (state = page, { type, payload }) => {
       history.splice(500);
       StorageManager.add('page-history', history);
       return { ...state, title: payload, history };
+    case CLEAR_PAGE_HISTORY:
+      StorageManager.remove('page-history');
+      return { ...state, history: [] };
     default:
       return { ...state };
   }

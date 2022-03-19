@@ -1,1 +1,2 @@
 export const SET_PAGE_TITLE = 'SET_PAGE_TITLE';
+export const CLEAR_PAGE_HISTORY = 'CLEAR_PAGE_HISTORY';
