@@ -12,6 +12,7 @@ import {
 import { useFormikContext } from 'formik';
 import {
   FC,
+  Fragment,
   ReactNode,
   useCallback,
   useEffect,
@@ -30,7 +31,11 @@ import TextField, { ITextFieldProps } from './TextField';
 export interface IDropdownOption {
   value: string | number;
   label: ReactNode;
+  fieldValueLabel?: string;
   searchableLabel?: string;
+  selectable?: boolean;
+  isDropdownOption?: boolean;
+  isDropdownOptionWrapped?: boolean;
 }
 
 export interface IDataDropdownFieldProps extends ITextFieldProps {
@@ -42,13 +47,12 @@ export interface IDataDropdownFieldProps extends ITextFieldProps {
   sortOptions?: boolean;
   value?: string | string[];
   selectedOption?: IDropdownOption;
+  menuMaxHeight?: number;
+  optionPaging?: boolean;
 }
 
-const DROPDOWN_MENU_MAX_HEIGHT = 200;
+const DEFAULT_DROPDOWN_MENU_MAX_HEIGHT = 200;
 const DEFAULT_DROPDOWN_OPTION_HEIGHT = 36;
-const DEFAULT_NUMBER_OF_OPTIONS_TO_RENDER = Math.ceil(
-  DROPDOWN_MENU_MAX_HEIGHT / DEFAULT_DROPDOWN_OPTION_HEIGHT
-);
 
 export const DataDropdownField: FC<IDataDropdownFieldProps> = ({
   SelectProps,
@@ -64,6 +68,8 @@ export const DataDropdownField: FC<IDataDropdownFieldProps> = ({
   error,
   helperText,
   InputProps,
+  menuMaxHeight = DEFAULT_DROPDOWN_MENU_MAX_HEIGHT,
+  optionPaging = true,
   ...rest
 }) => {
   value = useFormikValue({ value, name });
@@ -86,7 +92,7 @@ export const DataDropdownField: FC<IDataDropdownFieldProps> = ({
     errorMessage,
   } = useAPIService<any[]>([], dataKey);
 
-  const [limit, setLimit] = useState(DEFAULT_NUMBER_OF_OPTIONS_TO_RENDER);
+  const [limit, setLimit] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
   const [open, setOpen] = useState(false);
   const anchorRef = useRef<HTMLInputElement>(null);
@@ -97,6 +103,9 @@ export const DataDropdownField: FC<IDataDropdownFieldProps> = ({
   const [missingOptionValues, setMissingOptionValues] = useState<
     (string | number)[]
   >([]);
+  const [focusedOptionIndex, setFocusedOptionIndex] = useState<number | null>(
+    null
+  );
 
   const loadOptions = useCallback(
     async (reloadOptions = false) => {
@@ -158,6 +167,10 @@ export const DataDropdownField: FC<IDataDropdownFieldProps> = ({
     isTouchedRef.current = true;
     setOpen(false);
   };
+
+  useEffect(() => {
+    setLimit(Math.ceil(menuMaxHeight / DEFAULT_DROPDOWN_OPTION_HEIGHT));
+  }, [menuMaxHeight]);
 
   useEffect(() => {
     if (value) {
@@ -231,16 +244,56 @@ export const DataDropdownField: FC<IDataDropdownFieldProps> = ({
     );
   }, [options, value]);
 
+  useEffect(() => {
+    if (open) {
+      const keydownCallback = (event: KeyboardEvent) => {
+        setFocusedOptionIndex((prevFocusedOptionIndex) => {
+          switch (event.key) {
+            case 'ArrowDown':
+              if (prevFocusedOptionIndex != null) {
+                return (prevFocusedOptionIndex + 1) % options.length;
+              }
+              return 0;
+            case 'ArrowUp':
+              if (prevFocusedOptionIndex != null) {
+                return (
+                  (!!prevFocusedOptionIndex
+                    ? prevFocusedOptionIndex
+                    : options.length) - 1
+                );
+              }
+              return options.length - 1;
+          }
+          return prevFocusedOptionIndex;
+        });
+      };
+      window.addEventListener('keydown', keydownCallback);
+      return () => {
+        setFocusedOptionIndex(null);
+        window.removeEventListener('keydown', keydownCallback);
+      };
+    }
+  }, [open, options.length]);
+
+  useEffect(() => {
+    if (focusedOptionIndex != null && focusedOptionIndex > limit - 1) {
+      setLimit(focusedOptionIndex + 1);
+    }
+  }, [focusedOptionIndex, limit]);
+
   const filteredOptions = useMemo(() => {
     if (searchTerm && searchTerm !== selectedOptionDisplayString) {
       const searchFilterTerms = searchTerm
         .split(',')
         .map((string) => string.trim().toLowerCase());
-      return options.filter(({ label }) => {
+      return options.filter(({ label, searchableLabel }) => {
+        if (typeof label !== 'string' && searchableLabel) {
+          label = searchableLabel;
+        }
         return (
           typeof label === 'string' &&
           searchFilterTerms.some((searchFilterTerm) => {
-            return label.toLowerCase().match(searchFilterTerm);
+            return String(label).toLowerCase().match(searchFilterTerm);
           })
         );
       });
@@ -264,12 +317,15 @@ export const DataDropdownField: FC<IDataDropdownFieldProps> = ({
     );
   }
 
-  const displayOptions = filteredOptions.slice(0, limit);
+  const displayOptions = optionPaging
+    ? filteredOptions.slice(0, limit)
+    : filteredOptions;
 
   const displayOverlay =
     selectedOptions.length > 0 &&
     !SelectProps?.multiple &&
-    !['string', 'number'].includes(typeof selectedOptions[0].label);
+    !['string', 'number'].includes(typeof selectedOptions[0].label) &&
+    !selectedOptions[0].searchableLabel;
 
   const textField = (
     <TextField
@@ -345,82 +401,138 @@ export const DataDropdownField: FC<IDataDropdownFieldProps> = ({
             element.style.zIndex = '1400';
           }
         }}
+        tabIndex={-1}
       >
         {({ TransitionProps }) => {
           return (
             <Grow {...TransitionProps}>
-              <Box>
+              <Box tabIndex={-1}>
                 <ClickAwayListener onClickAway={handleClose}>
-                  <Card>
+                  <Card tabIndex={-1}>
                     <Box
                       onScroll={(event: any) => {
-                        const { scrollTop } = event.target;
-                        const topOptionCount = Math.floor(
-                          scrollTop / DEFAULT_DROPDOWN_OPTION_HEIGHT
-                        );
-                        setLimit(
-                          topOptionCount + DEFAULT_NUMBER_OF_OPTIONS_TO_RENDER
-                        );
+                        if (optionPaging) {
+                          const { scrollTop } = event.target;
+                          const topOptionCount = Math.floor(
+                            scrollTop / DEFAULT_DROPDOWN_OPTION_HEIGHT
+                          );
+                          setLimit(
+                            topOptionCount +
+                              Math.ceil(
+                                menuMaxHeight / DEFAULT_DROPDOWN_OPTION_HEIGHT
+                              )
+                          );
+                        }
                       }}
                       sx={{
                         minWidth: anchorRef.current
                           ? anchorRef.current.offsetWidth
                           : 200,
-                        maxHeight: DROPDOWN_MENU_MAX_HEIGHT,
+                        maxHeight: menuMaxHeight,
                         boxSizing: 'border-box',
                         overflowY: 'auto',
                       }}
+                      tabIndex={-1}
                     >
                       <Box
                         component="ul"
                         sx={{
                           m: 0,
                           p: 0,
-                          minHeight:
-                            filteredOptions.length *
-                            DEFAULT_DROPDOWN_OPTION_HEIGHT,
+                          minHeight: optionPaging
+                            ? filteredOptions.length *
+                              DEFAULT_DROPDOWN_OPTION_HEIGHT
+                            : undefined,
                         }}
+                        onClick={() => {
+                          if (!SelectProps?.multiple) {
+                            handleClose();
+                          }
+                        }}
+                        tabIndex={-1}
                       >
                         {displayOptions.length > 0 ? (
-                          displayOptions.map((option) => {
-                            const { value, label } = option;
-                            return (
-                              <MenuItem
-                                value={value}
-                                key={value}
-                                onClick={() => {
-                                  if (SelectProps?.multiple) {
-                                    setSelectedOptions((prevOptions) => {
-                                      const selectedOption = prevOptions.find(
-                                        ({ value: selectedOptionValue }) => {
-                                          return selectedOptionValue === value;
+                          displayOptions.map((option, index) => {
+                            const {
+                              value,
+                              label,
+                              selectable = true,
+                              isDropdownOption = true,
+                              isDropdownOptionWrapped = true,
+                            } = option;
+                            if (isDropdownOption && isDropdownOptionWrapped) {
+                              const classNames = [];
+                              const isFocused = index === focusedOptionIndex;
+                              if (isFocused) {
+                                classNames.push('Mui-focusVisible');
+                              }
+                              return (
+                                <MenuItem
+                                  className={classNames.join(' ')}
+                                  value={value}
+                                  key={value}
+                                  onClick={
+                                    selectable
+                                      ? () => {
+                                          if (SelectProps?.multiple) {
+                                            setSelectedOptions(
+                                              (prevOptions) => {
+                                                const selectedOption =
+                                                  prevOptions.find(
+                                                    ({
+                                                      value:
+                                                        selectedOptionValue,
+                                                    }) => {
+                                                      return (
+                                                        selectedOptionValue ===
+                                                        value
+                                                      );
+                                                    }
+                                                  );
+                                                if (selectedOption) {
+                                                  prevOptions.splice(
+                                                    prevOptions.indexOf(
+                                                      selectedOption
+                                                    ),
+                                                    1
+                                                  );
+                                                } else {
+                                                  prevOptions.push(option);
+                                                }
+                                                return [...prevOptions];
+                                              }
+                                            );
+                                          } else {
+                                            setSelectedOptions([option]);
+                                            handleClose();
+                                          }
                                         }
-                                      );
-                                      if (selectedOption) {
-                                        prevOptions.splice(
-                                          prevOptions.indexOf(selectedOption),
-                                          1
-                                        );
-                                      } else {
-                                        prevOptions.push(option);
-                                      }
-                                      return [...prevOptions];
-                                    });
-                                  } else {
-                                    setSelectedOptions([option]);
-                                    handleClose();
+                                      : undefined
                                   }
-                                }}
-                                selected={selectedOptions
-                                  .map(({ value }) => value)
-                                  .includes(value)}
-                                sx={{
-                                  minHeight: DEFAULT_DROPDOWN_OPTION_HEIGHT,
-                                }}
-                              >
-                                {label}
-                              </MenuItem>
-                            );
+                                  selected={selectedOptions
+                                    .map(({ value }) => value)
+                                    .includes(value)}
+                                  sx={{
+                                    minHeight: DEFAULT_DROPDOWN_OPTION_HEIGHT,
+                                    fontSize: 14,
+                                    lineHeight: `24px`,
+                                    p: 0,
+                                  }}
+                                  tabIndex={isFocused ? 0 : -1}
+                                >
+                                  <Box
+                                    sx={{
+                                      py: 0.75,
+                                      px: 2,
+                                      width: `100%`,
+                                    }}
+                                  >
+                                    {label}
+                                  </Box>
+                                </MenuItem>
+                              );
+                            }
+                            return <Fragment key={value}>{label}</Fragment>;
                           })
                         ) : (
                           <MenuItem disabled>

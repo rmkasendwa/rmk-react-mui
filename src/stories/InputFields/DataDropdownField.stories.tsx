@@ -10,16 +10,7 @@ export default {
   },
 } as ComponentMeta<typeof DataDropdownField>;
 
-const Template: ComponentStory<typeof DataDropdownField> = ({
-  required,
-  label,
-  options,
-}) => {
-  const props: any = {};
-  required && (props.required = required);
-  label && (props.label = label);
-  options && (props.options = options);
-
+const Template: ComponentStory<typeof DataDropdownField> = (props) => {
   return (
     <DataDropdownField label="Dropdown" {...props} sx={{ minWidth: 300 }} />
   );
@@ -45,4 +36,17 @@ WithOverflowingOptions.args = {
     label: String(index),
     value: index,
   })),
+};
+
+export const MultipleSelect = Template.bind({});
+MultipleSelect.args = {
+  label: 'Multiple Select',
+  required: true,
+  options: Array.from({ length: 100 }).map((_, index) => ({
+    label: String(index),
+    value: index,
+  })),
+  SelectProps: {
+    multiple: true,
+  },
 };
