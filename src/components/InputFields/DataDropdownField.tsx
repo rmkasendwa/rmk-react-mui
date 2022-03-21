@@ -96,6 +96,7 @@ export const DataDropdownField: FC<IDataDropdownFieldProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [open, setOpen] = useState(false);
   const anchorRef = useRef<HTMLInputElement>(null);
+  const scrollableDropdownWrapperRef = useRef<HTMLInputElement>(null);
   const isTouchedRef = useRef(false);
 
   const [options, setOptions] = useState<IDropdownOption[]>([]);
@@ -165,8 +166,34 @@ export const DataDropdownField: FC<IDataDropdownFieldProps> = ({
 
   const handleClose = () => {
     isTouchedRef.current = true;
+    setFocusedOptionIndex(null);
     setOpen(false);
   };
+
+  const selectOption = useCallback(
+    (option: IDropdownOption) => {
+      const { value } = option;
+      if (SelectProps?.multiple) {
+        setSelectedOptions((prevOptions) => {
+          const selectedOption = prevOptions.find(
+            ({ value: selectedOptionValue }) => {
+              return selectedOptionValue === value;
+            }
+          );
+          if (selectedOption) {
+            prevOptions.splice(prevOptions.indexOf(selectedOption), 1);
+          } else {
+            prevOptions.push(option);
+          }
+          return [...prevOptions];
+        });
+      } else {
+        setSelectedOptions([option]);
+        handleClose();
+      }
+    },
+    [SelectProps?.multiple]
+  );
 
   useEffect(() => {
     setLimit(Math.ceil(menuMaxHeight / DEFAULT_DROPDOWN_OPTION_HEIGHT));
@@ -247,39 +274,61 @@ export const DataDropdownField: FC<IDataDropdownFieldProps> = ({
   useEffect(() => {
     if (open) {
       const keydownCallback = (event: KeyboardEvent) => {
-        setFocusedOptionIndex((prevFocusedOptionIndex) => {
+        const nextFocusedOptionIndex = (() => {
           switch (event.key) {
-            case 'ArrowDown':
-              if (prevFocusedOptionIndex != null) {
-                return (prevFocusedOptionIndex + 1) % options.length;
-              }
-              return 0;
             case 'ArrowUp':
-              if (prevFocusedOptionIndex != null) {
+              if (focusedOptionIndex != null) {
                 return (
-                  (!!prevFocusedOptionIndex
-                    ? prevFocusedOptionIndex
-                    : options.length) - 1
+                  (!!focusedOptionIndex ? focusedOptionIndex : options.length) -
+                  1
                 );
               }
               return options.length - 1;
+            case 'ArrowDown':
+              if (focusedOptionIndex != null) {
+                return (focusedOptionIndex + 1) % options.length;
+              }
+              return 0;
+            case 'Enter':
+              if (focusedOptionIndex) {
+                selectOption(options[focusedOptionIndex]);
+              }
+              break;
           }
-          return prevFocusedOptionIndex;
-        });
+        })();
+        if (nextFocusedOptionIndex != null) {
+          setFocusedOptionIndex(nextFocusedOptionIndex);
+          if (scrollableDropdownWrapperRef.current) {
+            if (nextFocusedOptionIndex > limit - 1) {
+              scrollableDropdownWrapperRef.current.scrollTop =
+                (nextFocusedOptionIndex + 1) * DEFAULT_DROPDOWN_OPTION_HEIGHT -
+                menuMaxHeight;
+            } else {
+              const { scrollTop } = scrollableDropdownWrapperRef.current;
+              const nextFocusedOptionScrollTop =
+                (nextFocusedOptionIndex + 1) * DEFAULT_DROPDOWN_OPTION_HEIGHT;
+              if (nextFocusedOptionScrollTop <= scrollTop) {
+                scrollableDropdownWrapperRef.current.scrollTop =
+                  nextFocusedOptionScrollTop - DEFAULT_DROPDOWN_OPTION_HEIGHT;
+              }
+            }
+          }
+        }
       };
       window.addEventListener('keydown', keydownCallback);
       return () => {
-        setFocusedOptionIndex(null);
         window.removeEventListener('keydown', keydownCallback);
       };
     }
-  }, [open, options.length]);
-
-  useEffect(() => {
-    if (focusedOptionIndex != null && focusedOptionIndex > limit - 1) {
-      setLimit(focusedOptionIndex + 1);
-    }
-  }, [focusedOptionIndex, limit]);
+  }, [
+    focusedOptionIndex,
+    limit,
+    menuMaxHeight,
+    open,
+    options,
+    options.length,
+    selectOption,
+  ]);
 
   const filteredOptions = useMemo(() => {
     if (searchTerm && searchTerm !== selectedOptionDisplayString) {
@@ -410,6 +459,7 @@ export const DataDropdownField: FC<IDataDropdownFieldProps> = ({
                 <ClickAwayListener onClickAway={handleClose}>
                   <Card tabIndex={-1}>
                     <Box
+                      ref={scrollableDropdownWrapperRef}
                       onScroll={(event: any) => {
                         if (optionPaging) {
                           const { scrollTop } = event.target;
@@ -474,38 +524,7 @@ export const DataDropdownField: FC<IDataDropdownFieldProps> = ({
                                   onClick={
                                     selectable
                                       ? () => {
-                                          if (SelectProps?.multiple) {
-                                            setSelectedOptions(
-                                              (prevOptions) => {
-                                                const selectedOption =
-                                                  prevOptions.find(
-                                                    ({
-                                                      value:
-                                                        selectedOptionValue,
-                                                    }) => {
-                                                      return (
-                                                        selectedOptionValue ===
-                                                        value
-                                                      );
-                                                    }
-                                                  );
-                                                if (selectedOption) {
-                                                  prevOptions.splice(
-                                                    prevOptions.indexOf(
-                                                      selectedOption
-                                                    ),
-                                                    1
-                                                  );
-                                                } else {
-                                                  prevOptions.push(option);
-                                                }
-                                                return [...prevOptions];
-                                              }
-                                            );
-                                          } else {
-                                            setSelectedOptions([option]);
-                                            handleClose();
-                                          }
+                                          selectOption(option);
                                         }
                                       : undefined
                                   }
