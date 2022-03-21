@@ -20,3 +20,4 @@ export * from './ReloadIconButton';
 export * from './RetryErrorMessage';
 export * from './SingleFieldCard';
 export * from './Table';
+export * from './PaginatedDropdownOptionList';

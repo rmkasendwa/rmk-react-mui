@@ -13,7 +13,6 @@ import { useFormikContext } from 'formik';
 import {
   FC,
   Fragment,
-  ReactNode,
   useCallback,
   useEffect,
   useMemo,
@@ -24,19 +23,10 @@ import {
 import { LoadingProvider } from '../../contexts';
 import { useAPIDataContext, useAPIService, useFormikValue } from '../../hooks';
 import { IAPIFunction } from '../../interfaces';
+import { IDropdownOption } from '../PaginatedDropdownOptionList';
 import ReloadIconButton from '../ReloadIconButton';
 import RetryErrorMessage from '../RetryErrorMessage';
 import TextField, { ITextFieldProps } from './TextField';
-
-export interface IDropdownOption {
-  value: string | number;
-  label: ReactNode;
-  fieldValueLabel?: string;
-  searchableLabel?: string;
-  selectable?: boolean;
-  isDropdownOption?: boolean;
-  isDropdownOptionWrapped?: boolean;
-}
 
 export interface IDataDropdownFieldProps extends ITextFieldProps {
   disableEmptyOption?: boolean;
