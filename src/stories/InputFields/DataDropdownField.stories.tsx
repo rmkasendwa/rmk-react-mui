@@ -50,3 +50,13 @@ MultipleSelect.args = {
     multiple: true,
   },
 };
+
+export const WithSelectedOptionProp = Template.bind({});
+WithSelectedOptionProp.args = {
+  label: 'Custom Selected Option',
+  required: true,
+  selectedOption: {
+    label: 'Selected Option',
+    value: 'Selected Value',
+  },
+};

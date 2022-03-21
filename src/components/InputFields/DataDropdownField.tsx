@@ -70,6 +70,7 @@ export const DataDropdownField: FC<IDataDropdownFieldProps> = ({
   InputProps,
   menuMaxHeight = DEFAULT_DROPDOWN_MENU_MAX_HEIGHT,
   optionPaging = true,
+  selectedOption,
   ...rest
 }) => {
   value = useFormikValue({ value, name });
@@ -329,6 +330,18 @@ export const DataDropdownField: FC<IDataDropdownFieldProps> = ({
     options.length,
     selectOption,
   ]);
+
+  useEffect(() => {
+    if (selectedOption) {
+      const existingOption = options.find(
+        ({ value }) => value === selectedOption.value
+      );
+      if (!existingOption) {
+        options.push(selectedOption);
+      }
+      selectOption(selectedOption);
+    }
+  }, [options, selectOption, selectedOption]);
 
   const filteredOptions = useMemo(() => {
     if (searchTerm && searchTerm !== selectedOptionDisplayString) {
