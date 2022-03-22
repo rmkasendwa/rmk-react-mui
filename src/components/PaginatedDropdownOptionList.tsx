@@ -7,7 +7,6 @@ import {
   SetStateAction,
   useCallback,
   useEffect,
-  useRef,
   useState,
 } from 'react';
 
@@ -27,8 +26,10 @@ export interface IPaginatedDropdownOptionListProps {
   options: IDropdownOption[];
   selectedOptions?: IDropdownOption[];
   setSelectedOptions?: Dispatch<SetStateAction<IDropdownOption[]>>;
-  menuMaxHeight?: number;
-  optionPaging?: boolean;
+  minWidth?: number;
+  maxHeight?: number;
+  optionHeight?: number;
+  paging?: boolean;
   multiple?: boolean;
   loading?: boolean;
   onClose?: () => void;
@@ -43,15 +44,18 @@ export const PaginatedDropdownOptionList: FC<
 > = ({
   selectedOptions: propSelectedOptions,
   setSelectedOptions: propSetSelectedOptions,
-  menuMaxHeight = DEFAULT_DROPDOWN_MENU_MAX_HEIGHT,
-  optionPaging = true,
+  minWidth = DEFAULT_DROPDOWN_MENU_MAX_HEIGHT,
+  maxHeight = DEFAULT_DROPDOWN_MENU_MAX_HEIGHT,
+  optionHeight = DEFAULT_DROPDOWN_OPTION_HEIGHT,
+  paging = true,
   options,
   multiple,
   onClose,
   loading,
   loadOptions,
 }) => {
-  const scrollableDropdownWrapperRef = useRef<HTMLInputElement>(null);
+  const [scrollableDropdownWrapper, setScrollableDropdownWrapper] =
+    useState<HTMLDivElement | null>(null);
   const [limit, setLimit] = useState(0);
   const [selectedOptions, setSelectedOptions] = useState<IDropdownOption[]>([]);
   const [focusedOptionIndex, setFocusedOptionIndex] = useState<number | null>(
@@ -122,18 +126,17 @@ export const PaginatedDropdownOptionList: FC<
       })();
       if (nextFocusedOptionIndex != null) {
         setFocusedOptionIndex(nextFocusedOptionIndex);
-        if (scrollableDropdownWrapperRef.current) {
+        if (scrollableDropdownWrapper) {
           if (nextFocusedOptionIndex > limit - 1) {
-            scrollableDropdownWrapperRef.current.scrollTop =
-              (nextFocusedOptionIndex + 1) * DEFAULT_DROPDOWN_OPTION_HEIGHT -
-              menuMaxHeight;
+            scrollableDropdownWrapper.scrollTop =
+              (nextFocusedOptionIndex + 1) * optionHeight - maxHeight;
           } else {
-            const { scrollTop } = scrollableDropdownWrapperRef.current;
+            const { scrollTop } = scrollableDropdownWrapper;
             const nextFocusedOptionScrollTop =
-              (nextFocusedOptionIndex + 1) * DEFAULT_DROPDOWN_OPTION_HEIGHT;
+              (nextFocusedOptionIndex + 1) * optionHeight;
             if (nextFocusedOptionScrollTop <= scrollTop) {
-              scrollableDropdownWrapperRef.current.scrollTop =
-                nextFocusedOptionScrollTop - DEFAULT_DROPDOWN_OPTION_HEIGHT;
+              scrollableDropdownWrapper.scrollTop =
+                nextFocusedOptionScrollTop - optionHeight;
             }
           }
         }
@@ -146,33 +149,43 @@ export const PaginatedDropdownOptionList: FC<
   }, [
     focusedOptionIndex,
     limit,
-    menuMaxHeight,
+    maxHeight,
+    optionHeight,
     options,
     options.length,
+    scrollableDropdownWrapper,
     selectOption,
   ]);
 
-  const displayOptions = optionPaging ? options.slice(0, limit) : options;
+  useEffect(() => {
+    if (scrollableDropdownWrapper && paging) {
+      const scrollCallback = () => {
+        const { scrollTop } = scrollableDropdownWrapper;
+        const topOptionCount = Math.floor(scrollTop / optionHeight);
+        setLimit(topOptionCount + Math.ceil(maxHeight / optionHeight));
+      };
+      scrollableDropdownWrapper.addEventListener('scroll', scrollCallback);
+      return () => {
+        scrollableDropdownWrapper.removeEventListener('scroll', scrollCallback);
+      };
+    }
+  }, [maxHeight, optionHeight, paging, scrollableDropdownWrapper]);
+
+  useEffect(() => {
+    setLimit(Math.ceil(maxHeight / optionHeight));
+  }, [maxHeight, optionHeight]);
+
+  const displayOptions = paging ? options.slice(0, limit) : options;
 
   return (
     <Card tabIndex={-1}>
       <Box
-        ref={scrollableDropdownWrapperRef}
-        onScroll={(event: any) => {
-          if (optionPaging) {
-            const { scrollTop } = event.target;
-            const topOptionCount = Math.floor(
-              scrollTop / DEFAULT_DROPDOWN_OPTION_HEIGHT
-            );
-            setLimit(
-              topOptionCount +
-                Math.ceil(menuMaxHeight / DEFAULT_DROPDOWN_OPTION_HEIGHT)
-            );
-          }
+        ref={(scrollableDropdownWrapper: HTMLDivElement) => {
+          setScrollableDropdownWrapper(scrollableDropdownWrapper);
         }}
         sx={{
-          minWidth: 200,
-          maxHeight: menuMaxHeight,
+          minWidth,
+          maxHeight,
           boxSizing: 'border-box',
           overflowY: 'auto',
         }}
@@ -183,9 +196,7 @@ export const PaginatedDropdownOptionList: FC<
           sx={{
             m: 0,
             p: 0,
-            minHeight: optionPaging
-              ? options.length * DEFAULT_DROPDOWN_OPTION_HEIGHT
-              : undefined,
+            minHeight: paging ? options.length * optionHeight : undefined,
           }}
           onClick={() => {
             if (!multiple && onClose) {
@@ -225,7 +236,7 @@ export const PaginatedDropdownOptionList: FC<
                       .map(({ value }) => value)
                       .includes(value)}
                     sx={{
-                      minHeight: DEFAULT_DROPDOWN_OPTION_HEIGHT,
+                      minHeight: optionHeight,
                       fontSize: 14,
                       lineHeight: `24px`,
                       p: 0,

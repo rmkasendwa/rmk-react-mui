@@ -1,4 +1,5 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { LoremIpsum } from 'lorem-ipsum';
 
 import { DataDropdownField } from '../../components';
 
@@ -9,6 +10,8 @@ export default {
     layout: 'centered',
   },
 } as ComponentMeta<typeof DataDropdownField>;
+
+const lorem = new LoremIpsum();
 
 const Template: ComponentStory<typeof DataDropdownField> = (props) => {
   return (
@@ -30,10 +33,10 @@ WithStaticOptions.args = {
 
 export const WithOverflowingOptions = Template.bind({});
 WithOverflowingOptions.args = {
-  label: 'Dropdown With Many Options',
+  label: 'Paginated Dropdown List',
   required: true,
   options: Array.from({ length: 200 }).map((_, index) => ({
-    label: String(index),
+    label: `${index + 1}. ${lorem.generateWords(4)}`,
     value: index,
   })),
 };
@@ -43,7 +46,7 @@ MultipleSelect.args = {
   label: 'Multiple Select',
   required: true,
   options: Array.from({ length: 100 }).map((_, index) => ({
-    label: String(index),
+    label: `${index + 1}. ${lorem.generateWords(4)}`,
     value: index,
   })),
   SelectProps: {

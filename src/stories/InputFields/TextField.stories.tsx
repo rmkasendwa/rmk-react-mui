@@ -10,10 +10,8 @@ export default {
   },
 } as ComponentMeta<typeof TextField>;
 
-const Template: ComponentStory<typeof TextField> = ({ required }) => {
-  return (
-    <TextField label="Short Text" {...{ required }} sx={{ minWidth: 300 }} />
-  );
+const Template: ComponentStory<typeof TextField> = (props) => {
+  return <TextField label="Short Text" {...props} sx={{ minWidth: 300 }} />;
 };
 
 export const Default = Template.bind({});
