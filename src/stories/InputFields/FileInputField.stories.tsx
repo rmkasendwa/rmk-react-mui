@@ -10,11 +10,11 @@ export default {
   },
 } as ComponentMeta<typeof FileInputField>;
 
-const Template: ComponentStory<typeof FileInputField> = ({ required }) => {
+const Template: ComponentStory<typeof FileInputField> = (props) => {
   return (
     <FileInputField
       label="File Input Field"
-      {...{ required }}
+      {...props}
       sx={{ minWidth: 300 }}
     />
   );

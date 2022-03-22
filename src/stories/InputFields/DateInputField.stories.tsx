@@ -10,10 +10,8 @@ export default {
   },
 } as ComponentMeta<typeof DateInputField>;
 
-const Template: ComponentStory<typeof DateInputField> = ({ required }) => {
-  return (
-    <DateInputField label="Date" {...{ required }} sx={{ minWidth: 300 }} />
-  );
+const Template: ComponentStory<typeof DateInputField> = (props) => {
+  return <DateInputField label="Date" {...props} sx={{ minWidth: 300 }} />;
 };
 
 export const Default = Template.bind({});

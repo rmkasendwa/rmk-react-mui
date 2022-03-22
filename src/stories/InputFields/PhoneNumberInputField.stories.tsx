@@ -10,13 +10,11 @@ export default {
   },
 } as ComponentMeta<typeof PhoneNumberInputField>;
 
-const Template: ComponentStory<typeof PhoneNumberInputField> = ({
-  required,
-}) => {
+const Template: ComponentStory<typeof PhoneNumberInputField> = (props) => {
   return (
     <PhoneNumberInputField
       label="Phone Number"
-      {...{ required }}
+      {...props}
       sx={{ minWidth: 300 }}
     />
   );

@@ -10,10 +10,8 @@ export default {
   },
 } as ComponentMeta<typeof NumberInputField>;
 
-const Template: ComponentStory<typeof NumberInputField> = ({ required }) => {
-  return (
-    <NumberInputField label="Number" {...{ required }} sx={{ minWidth: 300 }} />
-  );
+const Template: ComponentStory<typeof NumberInputField> = (props) => {
+  return <NumberInputField label="Number" {...props} sx={{ minWidth: 300 }} />;
 };
 
 export const Default = Template.bind({});

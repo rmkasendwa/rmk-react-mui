@@ -10,13 +10,9 @@ export default {
   },
 } as ComponentMeta<typeof CurrencyInputField>;
 
-const Template: ComponentStory<typeof CurrencyInputField> = ({ required }) => {
+const Template: ComponentStory<typeof CurrencyInputField> = (props) => {
   return (
-    <CurrencyInputField
-      label="Currency"
-      {...{ required }}
-      sx={{ minWidth: 300 }}
-    />
+    <CurrencyInputField label="Currency" {...props} sx={{ minWidth: 300 }} />
   );
 };
 
