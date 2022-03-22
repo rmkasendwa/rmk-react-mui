@@ -1,10 +1,10 @@
 import { Box, Card, MenuItem, Typography, useTheme } from '@mui/material';
 import {
   Dispatch,
-  FC,
   Fragment,
   ReactNode,
   SetStateAction,
+  forwardRef,
   useCallback,
   useEffect,
   useState,
@@ -39,25 +39,31 @@ export interface IPaginatedDropdownOptionListProps {
 const DEFAULT_DROPDOWN_MENU_MAX_HEIGHT = 200;
 const DEFAULT_DROPDOWN_OPTION_HEIGHT = 36;
 
-export const PaginatedDropdownOptionList: FC<
+export const PaginatedDropdownOptionList = forwardRef<
+  HTMLDivElement,
   IPaginatedDropdownOptionListProps
-> = ({
-  selectedOptions: propSelectedOptions,
-  setSelectedOptions: propSetSelectedOptions,
-  minWidth = DEFAULT_DROPDOWN_MENU_MAX_HEIGHT,
-  maxHeight = DEFAULT_DROPDOWN_MENU_MAX_HEIGHT,
-  optionHeight = DEFAULT_DROPDOWN_OPTION_HEIGHT,
-  paging = true,
-  options,
-  multiple,
-  onClose,
-  loading,
-  loadOptions,
-}) => {
+>(function PaginatedDropdownOptionList(
+  {
+    selectedOptions: selectedOptionsProp,
+    setSelectedOptions: setSelectedOptionsProp,
+    minWidth = DEFAULT_DROPDOWN_MENU_MAX_HEIGHT,
+    maxHeight = DEFAULT_DROPDOWN_MENU_MAX_HEIGHT,
+    optionHeight = DEFAULT_DROPDOWN_OPTION_HEIGHT,
+    paging = true,
+    options,
+    multiple,
+    onClose,
+    loading,
+    loadOptions,
+  },
+  ref
+) {
   const [scrollableDropdownWrapper, setScrollableDropdownWrapper] =
     useState<HTMLDivElement | null>(null);
   const [limit, setLimit] = useState(0);
-  const [selectedOptions, setSelectedOptions] = useState<IDropdownOption[]>([]);
+  const [selectedOptions, setSelectedOptions] = useState<IDropdownOption[]>(
+    selectedOptionsProp || []
+  );
   const [focusedOptionIndex, setFocusedOptionIndex] = useState<number | null>(
     null
   );
@@ -90,16 +96,16 @@ export const PaginatedDropdownOptionList: FC<
   );
 
   useEffect(() => {
-    if (propSelectedOptions) {
-      setSelectedOptions(propSelectedOptions);
+    if (selectedOptionsProp) {
+      setSelectedOptions(selectedOptionsProp);
     }
-  }, [propSelectedOptions]);
+  }, [selectedOptionsProp]);
 
   useEffect(() => {
-    if (propSetSelectedOptions) {
-      propSetSelectedOptions(selectedOptions);
+    if (setSelectedOptionsProp) {
+      setSelectedOptionsProp(selectedOptions);
     }
-  }, [propSetSelectedOptions, selectedOptions]);
+  }, [setSelectedOptionsProp, selectedOptions]);
 
   useEffect(() => {
     const keydownCallback = (event: KeyboardEvent) => {
@@ -121,6 +127,9 @@ export const PaginatedDropdownOptionList: FC<
             if (focusedOptionIndex) {
               selectOption(options[focusedOptionIndex]);
             }
+            break;
+          case 'Escape':
+            onClose && onClose();
             break;
         }
       })();
@@ -150,6 +159,7 @@ export const PaginatedDropdownOptionList: FC<
     focusedOptionIndex,
     limit,
     maxHeight,
+    onClose,
     optionHeight,
     options,
     options.length,
@@ -178,7 +188,7 @@ export const PaginatedDropdownOptionList: FC<
   const displayOptions = paging ? options.slice(0, limit) : options;
 
   return (
-    <Card tabIndex={-1}>
+    <Card ref={ref} tabIndex={-1}>
       <Box
         ref={(scrollableDropdownWrapper: HTMLDivElement) => {
           setScrollableDropdownWrapper(scrollableDropdownWrapper);
@@ -279,6 +289,6 @@ export const PaginatedDropdownOptionList: FC<
       )}
     </Card>
   );
-};
+});
 
 export default PaginatedDropdownOptionList;
