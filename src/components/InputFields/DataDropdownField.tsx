@@ -21,7 +21,7 @@ export interface IDataDropdownFieldProps extends ITextFieldProps {
   sortOptions?: boolean;
   value?: string | string[];
   selectedOption?: IDropdownOption;
-  menuMaxHeight?: number;
+  dropdownListMaxHeight?: number;
   optionPaging?: boolean;
 }
 
@@ -39,7 +39,7 @@ export const DataDropdownField: FC<IDataDropdownFieldProps> = ({
   error,
   helperText,
   InputProps,
-  menuMaxHeight,
+  dropdownListMaxHeight,
   optionPaging = true,
   selectedOption,
   ...rest
@@ -348,7 +348,7 @@ export const DataDropdownField: FC<IDataDropdownFieldProps> = ({
                         ? anchorRef.current.offsetWidth
                         : undefined
                     }
-                    maxHeight={menuMaxHeight}
+                    maxHeight={dropdownListMaxHeight}
                     paging={optionPaging}
                     multiple={SelectProps?.multiple}
                     onClose={handleClose}
