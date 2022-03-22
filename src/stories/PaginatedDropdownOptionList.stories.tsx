@@ -28,3 +28,12 @@ WithOptions.args = {
     value: index,
   })),
 };
+
+export const MultipleSelect = Template.bind({});
+MultipleSelect.args = {
+  options: Array.from({ length: 100 }).map((_, index) => ({
+    label: `${index + 1}. ${lorem.generateWords(4)}`,
+    value: index,
+  })),
+  multiple: true,
+};

@@ -1,30 +1,14 @@
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import {
-  Box,
-  Card,
-  ClickAwayListener,
-  Grow,
-  MenuItem,
-  Popper,
-  Typography,
-  useTheme,
-} from '@mui/material';
+import { Box, ClickAwayListener, Grow, Popper } from '@mui/material';
 import { useFormikContext } from 'formik';
-import {
-  FC,
-  Fragment,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { LoadingProvider } from '../../contexts';
 import { useAPIDataContext, useAPIService, useFormikValue } from '../../hooks';
 import { IAPIFunction } from '../../interfaces';
-import { IDropdownOption } from '../PaginatedDropdownOptionList';
-import ReloadIconButton from '../ReloadIconButton';
+import PaginatedDropdownOptionList, {
+  IDropdownOption,
+} from '../PaginatedDropdownOptionList';
 import RetryErrorMessage from '../RetryErrorMessage';
 import TextField, { ITextFieldProps } from './TextField';
 
@@ -41,9 +25,6 @@ export interface IDataDropdownFieldProps extends ITextFieldProps {
   optionPaging?: boolean;
 }
 
-const DEFAULT_DROPDOWN_MENU_MAX_HEIGHT = 200;
-const DEFAULT_DROPDOWN_OPTION_HEIGHT = 36;
-
 export const DataDropdownField: FC<IDataDropdownFieldProps> = ({
   SelectProps,
   getDropdownEntities,
@@ -58,7 +39,7 @@ export const DataDropdownField: FC<IDataDropdownFieldProps> = ({
   error,
   helperText,
   InputProps,
-  menuMaxHeight = DEFAULT_DROPDOWN_MENU_MAX_HEIGHT,
+  menuMaxHeight,
   optionPaging = true,
   selectedOption,
   ...rest
@@ -73,8 +54,6 @@ export const DataDropdownField: FC<IDataDropdownFieldProps> = ({
 
   const { preferStale } = useAPIDataContext();
 
-  const theme = useTheme();
-
   const {
     load,
     loaded,
@@ -83,11 +62,9 @@ export const DataDropdownField: FC<IDataDropdownFieldProps> = ({
     errorMessage,
   } = useAPIService<any[]>([], dataKey);
 
-  const [limit, setLimit] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
   const [open, setOpen] = useState(false);
   const anchorRef = useRef<HTMLInputElement>(null);
-  const scrollableDropdownWrapperRef = useRef<HTMLInputElement>(null);
   const isTouchedRef = useRef(false);
 
   const [options, setOptions] = useState<IDropdownOption[]>([]);
@@ -95,9 +72,6 @@ export const DataDropdownField: FC<IDataDropdownFieldProps> = ({
   const [missingOptionValues, setMissingOptionValues] = useState<
     (string | number)[]
   >([]);
-  const [focusedOptionIndex, setFocusedOptionIndex] = useState<number | null>(
-    null
-  );
 
   const loadOptions = useCallback(
     async (reloadOptions = false) => {
@@ -157,38 +131,8 @@ export const DataDropdownField: FC<IDataDropdownFieldProps> = ({
 
   const handleClose = () => {
     isTouchedRef.current = true;
-    setFocusedOptionIndex(null);
     setOpen(false);
   };
-
-  const selectOption = useCallback(
-    (option: IDropdownOption) => {
-      const { value } = option;
-      if (SelectProps?.multiple) {
-        setSelectedOptions((prevOptions) => {
-          const selectedOption = prevOptions.find(
-            ({ value: selectedOptionValue }) => {
-              return selectedOptionValue === value;
-            }
-          );
-          if (selectedOption) {
-            prevOptions.splice(prevOptions.indexOf(selectedOption), 1);
-          } else {
-            prevOptions.push(option);
-          }
-          return [...prevOptions];
-        });
-      } else {
-        setSelectedOptions([option]);
-        handleClose();
-      }
-    },
-    [SelectProps?.multiple]
-  );
-
-  useEffect(() => {
-    setLimit(Math.ceil(menuMaxHeight / DEFAULT_DROPDOWN_OPTION_HEIGHT));
-  }, [menuMaxHeight]);
 
   useEffect(() => {
     if (value) {
@@ -263,75 +207,16 @@ export const DataDropdownField: FC<IDataDropdownFieldProps> = ({
   }, [options, value]);
 
   useEffect(() => {
-    if (open) {
-      const keydownCallback = (event: KeyboardEvent) => {
-        const nextFocusedOptionIndex = (() => {
-          switch (event.key) {
-            case 'ArrowUp':
-              if (focusedOptionIndex != null) {
-                return (
-                  (!!focusedOptionIndex ? focusedOptionIndex : options.length) -
-                  1
-                );
-              }
-              return options.length - 1;
-            case 'ArrowDown':
-              if (focusedOptionIndex != null) {
-                return (focusedOptionIndex + 1) % options.length;
-              }
-              return 0;
-            case 'Enter':
-              if (focusedOptionIndex) {
-                selectOption(options[focusedOptionIndex]);
-              }
-              break;
-          }
-        })();
-        if (nextFocusedOptionIndex != null) {
-          setFocusedOptionIndex(nextFocusedOptionIndex);
-          if (scrollableDropdownWrapperRef.current) {
-            if (nextFocusedOptionIndex > limit - 1) {
-              scrollableDropdownWrapperRef.current.scrollTop =
-                (nextFocusedOptionIndex + 1) * DEFAULT_DROPDOWN_OPTION_HEIGHT -
-                menuMaxHeight;
-            } else {
-              const { scrollTop } = scrollableDropdownWrapperRef.current;
-              const nextFocusedOptionScrollTop =
-                (nextFocusedOptionIndex + 1) * DEFAULT_DROPDOWN_OPTION_HEIGHT;
-              if (nextFocusedOptionScrollTop <= scrollTop) {
-                scrollableDropdownWrapperRef.current.scrollTop =
-                  nextFocusedOptionScrollTop - DEFAULT_DROPDOWN_OPTION_HEIGHT;
-              }
-            }
-          }
-        }
-      };
-      window.addEventListener('keydown', keydownCallback);
-      return () => {
-        window.removeEventListener('keydown', keydownCallback);
-      };
-    }
-  }, [
-    focusedOptionIndex,
-    limit,
-    menuMaxHeight,
-    open,
-    options,
-    options.length,
-    selectOption,
-  ]);
-
-  useEffect(() => {
     if (selectedOption) {
       const existingOption = options.find(
         ({ value }) => value === selectedOption.value
       );
       if (!existingOption) {
-        options.push(selectedOption);
+        setOptions([...options, selectedOption]);
       }
-      selectOption(selectedOption);
+      setSelectedOptions([selectedOption]);
     }
-  }, [options, selectOption, selectedOption]);
+  }, [options, selectedOption]);
 
   const filteredOptions = useMemo(() => {
     if (searchTerm && searchTerm !== selectedOptionDisplayString) {
@@ -368,10 +253,6 @@ export const DataDropdownField: FC<IDataDropdownFieldProps> = ({
       <RetryErrorMessage message={errorMessage} retry={loadOptions} />
     );
   }
-
-  const displayOptions = optionPaging
-    ? filteredOptions.slice(0, limit)
-    : filteredOptions;
 
   const displayOverlay =
     selectedOptions.length > 0 &&
@@ -460,129 +341,24 @@ export const DataDropdownField: FC<IDataDropdownFieldProps> = ({
             <Grow {...TransitionProps}>
               <Box tabIndex={-1}>
                 <ClickAwayListener onClickAway={handleClose}>
-                  <Card tabIndex={-1}>
-                    <Box
-                      ref={scrollableDropdownWrapperRef}
-                      onScroll={(event: any) => {
-                        if (optionPaging) {
-                          const { scrollTop } = event.target;
-                          const topOptionCount = Math.floor(
-                            scrollTop / DEFAULT_DROPDOWN_OPTION_HEIGHT
-                          );
-                          setLimit(
-                            topOptionCount +
-                              Math.ceil(
-                                menuMaxHeight / DEFAULT_DROPDOWN_OPTION_HEIGHT
-                              )
-                          );
-                        }
-                      }}
-                      sx={{
-                        minWidth: anchorRef.current
-                          ? anchorRef.current.offsetWidth
-                          : 200,
-                        maxHeight: menuMaxHeight,
-                        boxSizing: 'border-box',
-                        overflowY: 'auto',
-                      }}
-                      tabIndex={-1}
-                    >
-                      <Box
-                        component="ul"
-                        sx={{
-                          m: 0,
-                          p: 0,
-                          minHeight: optionPaging
-                            ? filteredOptions.length *
-                              DEFAULT_DROPDOWN_OPTION_HEIGHT
-                            : undefined,
-                        }}
-                        onClick={() => {
-                          if (!SelectProps?.multiple) {
-                            handleClose();
-                          }
-                        }}
-                        tabIndex={-1}
-                      >
-                        {displayOptions.length > 0 ? (
-                          displayOptions.map((option, index) => {
-                            const {
-                              value,
-                              label,
-                              selectable = true,
-                              isDropdownOption = true,
-                              isDropdownOptionWrapped = true,
-                            } = option;
-                            if (isDropdownOption && isDropdownOptionWrapped) {
-                              const classNames = [];
-                              const isFocused = index === focusedOptionIndex;
-                              if (isFocused) {
-                                classNames.push('Mui-focusVisible');
-                              }
-                              return (
-                                <MenuItem
-                                  className={classNames.join(' ')}
-                                  value={value}
-                                  key={value}
-                                  onClick={
-                                    selectable
-                                      ? () => {
-                                          selectOption(option);
-                                        }
-                                      : undefined
-                                  }
-                                  selected={selectedOptions
-                                    .map(({ value }) => value)
-                                    .includes(value)}
-                                  sx={{
-                                    minHeight: DEFAULT_DROPDOWN_OPTION_HEIGHT,
-                                    fontSize: 14,
-                                    lineHeight: `24px`,
-                                    p: 0,
-                                  }}
-                                  tabIndex={isFocused ? 0 : -1}
-                                >
-                                  <Box
-                                    sx={{
-                                      py: 0.75,
-                                      px: 2,
-                                      width: `100%`,
-                                    }}
-                                  >
-                                    {label}
-                                  </Box>
-                                </MenuItem>
-                              );
-                            }
-                            return <Fragment key={value}>{label}</Fragment>;
-                          })
-                        ) : (
-                          <MenuItem disabled>
-                            <Typography
-                              variant="body2"
-                              color={theme.palette.error.main}
-                            >
-                              No options found
-                            </Typography>
-                          </MenuItem>
-                        )}
-                      </Box>
-                    </Box>
-                    {getDropdownEntities && (
-                      <Box
-                        sx={{
-                          display: 'flex',
-                          justifyContent: 'center',
-                          py: 1,
-                        }}
-                      >
-                        <ReloadIconButton
-                          load={() => loadOptions(true)}
-                          {...{ loading }}
-                        />
-                      </Box>
-                    )}
-                  </Card>
+                  <PaginatedDropdownOptionList
+                    options={filteredOptions}
+                    minWidth={
+                      anchorRef.current
+                        ? anchorRef.current.offsetWidth
+                        : undefined
+                    }
+                    maxHeight={menuMaxHeight}
+                    paging={optionPaging}
+                    multiple={SelectProps?.multiple}
+                    onClose={handleClose}
+                    loading={loading}
+                    loadOptions={
+                      getDropdownEntities ? () => loadOptions(true) : undefined
+                    }
+                    selectedOptions={selectedOptions}
+                    setSelectedOptions={setSelectedOptions}
+                  />
                 </ClickAwayListener>
               </Box>
             </Grow>
