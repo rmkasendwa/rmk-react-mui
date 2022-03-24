@@ -32,6 +32,7 @@ const lanes = Array.from({ length: 6 }).map((_, laneIndex) => {
           laneId: laneIndex,
           title: `${cardIndex + 1}. ${lorem.generateWords(5)}`,
           description: lorem.generateWords(40),
+          draggable: cardIndex % 2 === 0,
         };
       }
     ),
