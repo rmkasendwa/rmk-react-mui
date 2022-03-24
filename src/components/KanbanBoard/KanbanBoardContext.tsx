@@ -22,6 +22,7 @@ export interface ICardIdentifier {
 export interface ICard extends ICardIdentifier, Omit<BoxProps, 'title' | 'id'> {
   title: ReactNode;
   description: ReactNode;
+  draggable?: boolean;
 }
 
 export interface ILane extends Omit<BoxProps, 'title' | 'id'> {
@@ -32,6 +33,7 @@ export interface ILane extends Omit<BoxProps, 'title' | 'id'> {
   loading?: boolean;
   errorMessage?: string;
   footer?: ReactNode;
+  draggable?: boolean;
 }
 
 export interface IDropResult {

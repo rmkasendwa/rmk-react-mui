@@ -75,9 +75,10 @@ const Lane: FC<ILaneProps> = ({
             justifyContent: 'space-between',
             maxHeight: `calc(100% - ${yPaddedHeight}px)`,
           },
-          '& .smooth-dnd-container>.smooth-dnd-draggable-wrapper': {
-            mb: 1,
-          },
+          '& .smooth-dnd-container>.smooth-dnd-draggable-wrapper, & .undraggable-wrapper':
+            {
+              mb: 1,
+            },
           '& .smooth-dnd-ghost': {
             transform: `rotate(3deg)`,
           },
@@ -156,12 +157,27 @@ const Lane: FC<ILaneProps> = ({
           }}
           animationDuration={200}
         >
-          {cards.map(({ id: cardId, ...rest }) => {
-            return (
-              <Draggable key={cardId}>
-                <Card {...{ id: cardId, ...rest }} laneId={id} />
-              </Draggable>
+          {cards.map(({ id: cardId, draggable = true, sx, ...rest }) => {
+            const cardStyles: any = {};
+            if (!draggable) {
+              cardStyles.bgcolor = alpha(palette.background.paper, 0.6);
+              cardStyles.cursor = 'default';
+              cardStyles.userSelect = 'none';
+            }
+            const card = (
+              <Card
+                {...{ id: cardId, ...rest }}
+                sx={{
+                  ...cardStyles,
+                  ...sx,
+                }}
+                laneId={id}
+              />
             );
+            if (!draggable) {
+              return <Box className="undraggable-wrapper">{card}</Box>;
+            }
+            return <Draggable key={cardId}>{card}</Draggable>;
           })}
         </Container>
         {footer && (
