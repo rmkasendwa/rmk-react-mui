@@ -50,13 +50,12 @@ const Lane: FC<ILaneProps> = ({
         display: 'inline-block',
         verticalAlign: 'top',
         whiteSpace: 'normal',
-        ...sx,
       }}
     >
       <Box
         component="section"
         sx={{
-          backgroundColor: darken(
+          bgcolor: darken(
             palette.background.default,
             palette.mode === 'dark' ? 0.9 : 0.1
           ),
@@ -75,13 +74,13 @@ const Lane: FC<ILaneProps> = ({
             justifyContent: 'space-between',
             maxHeight: `calc(100% - ${yPaddedHeight}px)`,
           },
-          '& .smooth-dnd-container>.smooth-dnd-draggable-wrapper, & .undraggable-wrapper':
-            {
-              mb: 1,
-            },
-          '& .smooth-dnd-ghost': {
-            transform: `rotate(3deg)`,
+          [`
+            & .smooth-dnd-container>.smooth-dnd-draggable-wrapper,
+            & .undraggable-wrapper
+          `]: {
+            mb: 1,
           },
+          ...sx,
         }}
       >
         <Box component="header" className="column-drag-handle" sx={{ p: 1 }}>
@@ -161,7 +160,6 @@ const Lane: FC<ILaneProps> = ({
             const cardStyles: any = {};
             if (!draggable) {
               cardStyles.bgcolor = alpha(palette.background.paper, 0.6);
-              cardStyles.cursor = 'default';
               cardStyles.userSelect = 'none';
             }
             const card = (
@@ -175,7 +173,11 @@ const Lane: FC<ILaneProps> = ({
               />
             );
             if (!draggable) {
-              return <Box className="undraggable-wrapper">{card}</Box>;
+              return (
+                <Box key={cardId} className="undraggable-wrapper">
+                  {card}
+                </Box>
+              );
             }
             return <Draggable key={cardId}>{card}</Draggable>;
           })}
