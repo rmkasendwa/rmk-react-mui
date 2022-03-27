@@ -15,6 +15,7 @@ import { Container, Draggable } from 'react-smooth-dnd';
 
 import Card from './Card';
 import { ILane, KanbanBoardContext } from './KanbanBoardContext';
+import LaneTools from './LaneTools';
 
 export interface ILaneProps extends ILane {}
 
@@ -27,6 +28,7 @@ const Lane: FC<ILaneProps> = ({
   errorMessage,
   sx,
   footer,
+  tools,
   ...rest
 }) => {
   const { palette } = useTheme();
@@ -100,15 +102,24 @@ const Lane: FC<ILaneProps> = ({
                 />{' '}
               </Grid>
             ) : null}
-            <Grid item xs>
-              <Typography sx={{ fontWeight: 'bold', fontSize: 15 }}>
+            <Grid item xs minWidth={0}>
+              <Typography sx={{ fontWeight: 'bold', fontSize: 15 }} noWrap>
                 {title}
               </Typography>
             </Grid>
             {(() => {
+              if (tools) {
+                return (
+                  <Grid item display="flex">
+                    <LaneTools tools={tools} laneId={id} />
+                  </Grid>
+                );
+              }
+            })()}
+            {(() => {
               if (errorMessage) {
                 return (
-                  <Grid item sx={{ display: 'flex' }}>
+                  <Grid item display="flex">
                     <Tooltip title={errorMessage}>
                       <ErrorIcon color="error" />
                     </Tooltip>
@@ -117,7 +128,7 @@ const Lane: FC<ILaneProps> = ({
               }
               if (loading) {
                 return (
-                  <Grid item>
+                  <Grid item display="flex">
                     <CircularProgress size={16} color="inherit" />
                   </Grid>
                 );
