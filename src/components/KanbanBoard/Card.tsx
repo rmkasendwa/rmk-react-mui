@@ -26,13 +26,11 @@ const Card: FC<ICardProps> = ({
         borderRadius: 1,
         py: 1,
         px: 2,
-        cursor: 'pointer',
+        cursor: onCardClick ? 'pointer' : '',
         minWidth: 250,
         ...sx,
       }}
-      onClick={() => {
-        onCardClick && onCardClick(id, laneId);
-      }}
+      onClick={onCardClick ? () => onCardClick(id, laneId) : undefined}
     >
       <Box component="header" sx={{ pb: 1, fontSize: 14 }}>
         {title}

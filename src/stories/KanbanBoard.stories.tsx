@@ -25,6 +25,7 @@ const lanes = Array.from({ length: 6 }).map((_, laneIndex) => {
     id: laneIndex,
     title: lorem.generateWords(3),
     showCardCount: true,
+    draggable: laneIndex % 2 === 0,
     cards: Array.from({ length: Math.round(Math.random() * 20) }).map(
       (_, cardIndex) => {
         return {
