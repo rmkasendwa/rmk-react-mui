@@ -76,12 +76,13 @@ const LaneTools: FC<ILaneToolsProps> = ({ tools, laneId }) => {
       >
         {tools.map((toolItem, index) => {
           if (toolItem === 'DIVIDER') {
-            return <Divider />;
+            return <Divider key={index} />;
           }
           const { label, icon, onClick } = toolItem;
           if (!icon) {
             return (
               <MenuItem
+                key={index}
                 onClick={() => {
                   onClick && onClick(laneId);
                   handleClose();

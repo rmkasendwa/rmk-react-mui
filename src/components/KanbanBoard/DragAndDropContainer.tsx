@@ -129,17 +129,16 @@ const DragAndDropContainer: FC<IDragAndDropContainerProps> = ({
         }}
         onDragStart={() => {
           setDragging && setDragging(true);
-          console.log('Dragging');
         }}
         onDragEnd={() => {
           setDragging && setDragging(false);
-          console.log('Done dragging');
         }}
         style={{
           display: 'block',
           whiteSpace: 'nowrap',
           position: 'relative',
           height: '100%',
+          minWidth: 'auto',
         }}
       >
         {lanes.map(({ id, draggable = true, sx, ...rest }) => {
