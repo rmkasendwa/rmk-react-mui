@@ -104,6 +104,12 @@ const DragAndDropContainer: FC<IDragAndDropContainerProps> = ({
           display: 'inline-block',
           height: '100%',
         },
+        [`
+          &>.smooth-dnd-container.horizontal>.smooth-dnd-draggable-wrapper:not(:last-of-type),
+          &>.smooth-dnd-container.horizontal>.undraggable-wrapper:not(:last-of-type)
+        `]: {
+          mr: 2,
+        },
         '& .smooth-dnd-draggable-wrapper .column-drag-handle': {
           cursor: 'grab',
         },
