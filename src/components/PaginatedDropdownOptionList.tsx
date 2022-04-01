@@ -61,6 +61,7 @@ export const PaginatedDropdownOptionList = forwardRef<
   const [scrollableDropdownWrapper, setScrollableDropdownWrapper] =
     useState<HTMLDivElement | null>(null);
   const [limit, setLimit] = useState(0);
+  const [offset, setOffset] = useState(0);
   const [selectedOptions, setSelectedOptions] = useState<IDropdownOption[]>(
     selectedOptionsProp || []
   );
@@ -136,7 +137,7 @@ export const PaginatedDropdownOptionList = forwardRef<
       if (nextFocusedOptionIndex != null) {
         setFocusedOptionIndex(nextFocusedOptionIndex);
         if (scrollableDropdownWrapper) {
-          if (nextFocusedOptionIndex > limit - 1) {
+          if (nextFocusedOptionIndex > offset + limit - 1) {
             scrollableDropdownWrapper.scrollTop =
               (nextFocusedOptionIndex + 1) * optionHeight - maxHeight;
           } else {
@@ -159,6 +160,7 @@ export const PaginatedDropdownOptionList = forwardRef<
     focusedOptionIndex,
     limit,
     maxHeight,
+    offset,
     onClose,
     optionHeight,
     options,
@@ -171,8 +173,7 @@ export const PaginatedDropdownOptionList = forwardRef<
     if (scrollableDropdownWrapper && paging) {
       const scrollCallback = () => {
         const { scrollTop } = scrollableDropdownWrapper;
-        const topOptionCount = Math.floor(scrollTop / optionHeight);
-        setLimit(topOptionCount + Math.ceil(maxHeight / optionHeight));
+        setOffset(Math.floor(scrollTop / optionHeight));
       };
       scrollableDropdownWrapper.addEventListener('scroll', scrollCallback);
       return () => {
@@ -185,7 +186,9 @@ export const PaginatedDropdownOptionList = forwardRef<
     setLimit(Math.ceil(maxHeight / optionHeight));
   }, [maxHeight, optionHeight]);
 
-  const displayOptions = paging ? options.slice(0, limit) : options;
+  const displayOptions = paging
+    ? options.slice(offset, offset + limit)
+    : options;
 
   return (
     <Card ref={ref} tabIndex={-1}>
@@ -215,8 +218,9 @@ export const PaginatedDropdownOptionList = forwardRef<
           }}
           tabIndex={-1}
         >
+          <Box sx={{ height: offset * optionHeight }} />
           {displayOptions.length > 0 ? (
-            displayOptions.map((option, index) => {
+            displayOptions.map((option) => {
               const {
                 value,
                 label,
@@ -226,7 +230,8 @@ export const PaginatedDropdownOptionList = forwardRef<
               } = option;
               if (isDropdownOption && isDropdownOptionWrapped) {
                 const classNames = [];
-                const isFocused = index === focusedOptionIndex;
+                const isFocused =
+                  options.indexOf(option) === focusedOptionIndex;
                 if (isFocused) {
                   classNames.push('Mui-focusVisible');
                 }
