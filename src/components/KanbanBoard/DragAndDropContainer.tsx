@@ -1,5 +1,5 @@
 import { Box, BoxProps, darken, useTheme } from '@mui/material';
-import { FC, useContext } from 'react';
+import { FC, useContext, useEffect, useState } from 'react';
 import { Container, Draggable } from 'react-smooth-dnd';
 
 import { ILane, KanbanBoardContext } from './KanbanBoardContext';
@@ -18,10 +18,66 @@ const DragAndDropContainer: FC<IDragAndDropContainerProps> = ({
 }) => {
   const { lanes, onLaneDrop } = useContext(KanbanBoardContext);
   const { palette } = useTheme();
+  const [boardWrapper, setBoardWrapper] = useState<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (boardWrapper) {
+      let scrollingTimeout: NodeJS.Timeout;
+      const scrollHorizontally = (direction: 'left' | 'right', tick = 1) => {
+        const { scrollLeft, scrollWidth } = boardWrapper;
+        const { width } = boardWrapper.getBoundingClientRect();
+        const { canScroll, scrollDistance } = (() => {
+          const scrollDistance = 5 + tick;
+          switch (direction) {
+            case 'right':
+              return {
+                canScroll: scrollLeft + width < scrollWidth,
+                scrollDistance: scrollLeft + scrollDistance,
+              };
+            case 'left':
+              return {
+                canScroll: scrollLeft > 0,
+                scrollDistance: scrollLeft - scrollDistance,
+              };
+          }
+        })();
+        if (canScroll) {
+          boardWrapper.scrollLeft = scrollDistance;
+          scrollingTimeout = setTimeout(
+            () => scrollHorizontally(direction, tick + 1),
+            50
+          );
+        } else {
+          clearTimeout(scrollingTimeout);
+        }
+      };
+      const mouseMoveEventCallback = (event: MouseEvent) => {
+        const { width, x } = boardWrapper.getBoundingClientRect();
+        if (event.clientX > x && event.clientX < width + x) {
+          if (width + x - event.clientX <= 30) {
+            scrollHorizontally('right');
+          } else if (event.clientX - x <= 30) {
+            scrollHorizontally('left');
+          } else {
+            clearTimeout(scrollingTimeout);
+          }
+        } else {
+          clearTimeout(scrollingTimeout);
+        }
+      };
+      window.addEventListener('mousemove', mouseMoveEventCallback);
+      return () => {
+        window.removeEventListener('mousemove', mouseMoveEventCallback);
+      };
+    }
+  }, [boardWrapper]);
 
   return (
     <Box
       {...rest}
+      ref={(boardWrapper: HTMLDivElement | null) => {
+        setBoardWrapper(boardWrapper);
+      }}
       sx={{
         overflowY: 'hidden',
         py: 1,
