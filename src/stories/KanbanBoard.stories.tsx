@@ -76,6 +76,7 @@ Default.args = { lanes: BASE_LANES };
 export const WithLaneTools = Template.bind({});
 WithLaneTools.args = {
   lanes: BASE_LANES.map(({ ...laneProps }, index) => {
+    laneProps.draggable = true;
     switch (index % 4) {
       case 0:
         return {

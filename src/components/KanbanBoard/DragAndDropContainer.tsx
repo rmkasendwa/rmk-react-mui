@@ -1,5 +1,5 @@
 import { Box, BoxProps, darken, useTheme } from '@mui/material';
-import { FC, useContext } from 'react';
+import { FC, useContext, useEffect, useState } from 'react';
 import { Container, Draggable } from 'react-smooth-dnd';
 
 import { ILane, KanbanBoardContext } from './KanbanBoardContext';
@@ -16,12 +16,76 @@ const DragAndDropContainer: FC<IDragAndDropContainerProps> = ({
   sx,
   ...rest
 }) => {
-  const { lanes, onLaneDrop } = useContext(KanbanBoardContext);
+  const { lanes, onLaneDrop, dragging, setDragging } =
+    useContext(KanbanBoardContext);
   const { palette } = useTheme();
+  const [boardWrapper, setBoardWrapper] = useState<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (boardWrapper && dragging) {
+      const borderOffset = 40;
+      let scrollingTimeout: NodeJS.Timeout;
+      const scrollHorizontally = (direction: 'left' | 'right', tick = 1) => {
+        const { scrollLeft, scrollWidth } = boardWrapper;
+        const { width } = boardWrapper.getBoundingClientRect();
+        const { canScroll, scrollDistance } = (() => {
+          const scrollDistance = 5 + tick;
+          switch (direction) {
+            case 'right':
+              return {
+                canScroll: scrollLeft + width < scrollWidth,
+                scrollDistance: scrollLeft + scrollDistance,
+              };
+            case 'left':
+              return {
+                canScroll: scrollLeft > 0,
+                scrollDistance: scrollLeft - scrollDistance,
+              };
+          }
+        })();
+        if (canScroll) {
+          boardWrapper.scrollLeft = scrollDistance;
+          scrollingTimeout = setTimeout(
+            () => scrollHorizontally(direction, tick + 1),
+            50
+          );
+        } else {
+          clearTimeout(scrollingTimeout);
+        }
+      };
+      const mouseMoveEventCallback = (event: MouseEvent) => {
+        const { width, height, x, y } = boardWrapper.getBoundingClientRect();
+        if (
+          event.clientX >= x &&
+          event.clientX <= width + x &&
+          event.clientY >= y + borderOffset &&
+          event.clientY <= height + y
+        ) {
+          if (width + x - event.clientX <= borderOffset) {
+            scrollHorizontally('right');
+          } else if (event.clientX - x <= borderOffset) {
+            scrollHorizontally('left');
+          } else {
+            clearTimeout(scrollingTimeout);
+          }
+        } else {
+          clearTimeout(scrollingTimeout);
+        }
+      };
+      window.addEventListener('mousemove', mouseMoveEventCallback);
+      return () => {
+        clearTimeout(scrollingTimeout);
+        window.removeEventListener('mousemove', mouseMoveEventCallback);
+      };
+    }
+  }, [boardWrapper, dragging]);
 
   return (
     <Box
       {...rest}
+      ref={(boardWrapper: HTMLDivElement | null) => {
+        setBoardWrapper(boardWrapper);
+      }}
       sx={{
         overflowY: 'hidden',
         py: 1,
@@ -63,11 +127,18 @@ const DragAndDropContainer: FC<IDragAndDropContainerProps> = ({
         onDrop={({ addedIndex, removedIndex, payload }) => {
           onLaneDrop && onLaneDrop({ addedIndex, removedIndex, payload });
         }}
+        onDragStart={() => {
+          setDragging && setDragging(true);
+        }}
+        onDragEnd={() => {
+          setDragging && setDragging(false);
+        }}
         style={{
           display: 'block',
           whiteSpace: 'nowrap',
           position: 'relative',
           height: '100%',
+          minWidth: 'auto',
         }}
       >
         {lanes.map(({ id, draggable = true, sx, ...rest }) => {
