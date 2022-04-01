@@ -15,6 +15,7 @@ import { Container, Draggable } from 'react-smooth-dnd';
 
 import Card from './Card';
 import { ILane, KanbanBoardContext } from './KanbanBoardContext';
+import LaneTools from './LaneTools';
 
 export interface ILaneProps extends ILane {}
 
@@ -27,6 +28,7 @@ const Lane: FC<ILaneProps> = ({
   errorMessage,
   sx,
   footer,
+  tools,
   ...rest
 }) => {
   const { palette } = useTheme();
@@ -50,13 +52,12 @@ const Lane: FC<ILaneProps> = ({
         display: 'inline-block',
         verticalAlign: 'top',
         whiteSpace: 'normal',
-        ...sx,
       }}
     >
       <Box
         component="section"
         sx={{
-          backgroundColor: darken(
+          bgcolor: darken(
             palette.background.default,
             palette.mode === 'dark' ? 0.9 : 0.1
           ),
@@ -75,12 +76,13 @@ const Lane: FC<ILaneProps> = ({
             justifyContent: 'space-between',
             maxHeight: `calc(100% - ${yPaddedHeight}px)`,
           },
-          '& .smooth-dnd-container>.smooth-dnd-draggable-wrapper': {
+          [`
+            & .smooth-dnd-container>.smooth-dnd-draggable-wrapper,
+            & .undraggable-wrapper
+          `]: {
             mb: 1,
           },
-          '& .smooth-dnd-ghost': {
-            transform: `rotate(3deg)`,
-          },
+          ...sx,
         }}
       >
         <Box component="header" className="column-drag-handle" sx={{ p: 1 }}>
@@ -100,15 +102,24 @@ const Lane: FC<ILaneProps> = ({
                 />{' '}
               </Grid>
             ) : null}
-            <Grid item xs>
-              <Typography sx={{ fontWeight: 'bold', fontSize: 15 }}>
+            <Grid item xs minWidth={0}>
+              <Typography sx={{ fontWeight: 'bold', fontSize: 15 }} noWrap>
                 {title}
               </Typography>
             </Grid>
             {(() => {
+              if (tools) {
+                return (
+                  <Grid item display="flex">
+                    <LaneTools tools={tools} laneId={id} />
+                  </Grid>
+                );
+              }
+            })()}
+            {(() => {
               if (errorMessage) {
                 return (
-                  <Grid item sx={{ display: 'flex' }}>
+                  <Grid item display="flex">
                     <Tooltip title={errorMessage}>
                       <ErrorIcon color="error" />
                     </Tooltip>
@@ -117,7 +128,7 @@ const Lane: FC<ILaneProps> = ({
               }
               if (loading) {
                 return (
-                  <Grid item>
+                  <Grid item display="flex">
                     <CircularProgress size={16} color="inherit" />
                   </Grid>
                 );
@@ -156,12 +167,30 @@ const Lane: FC<ILaneProps> = ({
           }}
           animationDuration={200}
         >
-          {cards.map(({ id: cardId, ...rest }) => {
-            return (
-              <Draggable key={cardId}>
-                <Card {...{ id: cardId, ...rest }} laneId={id} />
-              </Draggable>
+          {cards.map(({ id: cardId, draggable = true, sx, ...rest }) => {
+            const cardStyles: any = {};
+            if (!draggable) {
+              cardStyles.bgcolor = alpha(palette.background.paper, 0.6);
+              cardStyles.userSelect = 'none';
+            }
+            const card = (
+              <Card
+                {...{ id: cardId, ...rest }}
+                sx={{
+                  ...cardStyles,
+                  ...sx,
+                }}
+                laneId={id}
+              />
             );
+            if (!draggable) {
+              return (
+                <Box key={cardId} className="undraggable-wrapper">
+                  {card}
+                </Box>
+              );
+            }
+            return <Draggable key={cardId}>{card}</Draggable>;
           })}
         </Container>
         {footer && (

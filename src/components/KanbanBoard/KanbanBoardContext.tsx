@@ -14,6 +14,23 @@ import { ILaneProps } from './Lane';
 
 export type TKanbanBoardId = string | number;
 
+export interface IKanbanBoardTool {
+  icon?: ReactNode;
+  label: string;
+}
+
+export interface IKanbanBoardLaneTool extends IKanbanBoardTool {
+  onClick?: (laneId: TKanbanBoardId) => void;
+}
+
+export type TKanbanBoardLaneToolItem = IKanbanBoardLaneTool | 'DIVIDER';
+
+export interface IKanbanBoardCardTool extends IKanbanBoardTool {
+  onClick?: (laneId: TKanbanBoardId, cardId: TKanbanBoardId) => void;
+}
+
+export type TKanbanBoardCardToolItem = IKanbanBoardCardTool | 'DIVIDER';
+
 export interface ICardIdentifier {
   id: TKanbanBoardId;
   laneId: TKanbanBoardId;
@@ -22,6 +39,8 @@ export interface ICardIdentifier {
 export interface ICard extends ICardIdentifier, Omit<BoxProps, 'title' | 'id'> {
   title: ReactNode;
   description: ReactNode;
+  draggable?: boolean;
+  tool?: TKanbanBoardCardToolItem[];
 }
 
 export interface ILane extends Omit<BoxProps, 'title' | 'id'> {
@@ -32,6 +51,8 @@ export interface ILane extends Omit<BoxProps, 'title' | 'id'> {
   loading?: boolean;
   errorMessage?: string;
   footer?: ReactNode;
+  draggable?: boolean;
+  tools?: TKanbanBoardLaneToolItem[];
 }
 
 export interface IDropResult {
