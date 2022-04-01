@@ -82,6 +82,8 @@ export interface IKanbanBoardContext {
   setToLaneId?: Dispatch<SetStateAction<TKanbanBoardId | null>>;
   onCardClick?: TCardClickHandler;
   onCardMoveAcrossLanes?: TCardMoveAcrossLanesHandler;
+  dragging?: boolean;
+  setDragging?: Dispatch<SetStateAction<boolean>>;
 }
 export const KanbanBoardContext = createContext<IKanbanBoardContext>({
   lanes: [],
@@ -102,6 +104,7 @@ export const KanbanBoardProvider: FC<IKanbanBoardProviderProps> = ({
   const [fromLaneId, setFromLaneId] = useState<TKanbanBoardId | null>(null);
   const [toLaneId, setToLaneId] = useState<TKanbanBoardId | null>(null);
   const [lanes, setLanes] = useState<ILane[]>([]);
+  const [dragging, setDragging] = useState(false);
 
   const onCardDrop = useCallback(
     (
@@ -158,6 +161,8 @@ export const KanbanBoardProvider: FC<IKanbanBoardProviderProps> = ({
         setToLaneId,
         onCardClick,
         onCardMoveAcrossLanes,
+        dragging,
+        setDragging,
       }}
     >
       {children}

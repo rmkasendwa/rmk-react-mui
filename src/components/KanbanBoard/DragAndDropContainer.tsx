@@ -16,12 +16,14 @@ const DragAndDropContainer: FC<IDragAndDropContainerProps> = ({
   sx,
   ...rest
 }) => {
-  const { lanes, onLaneDrop } = useContext(KanbanBoardContext);
+  const { lanes, onLaneDrop, dragging, setDragging } =
+    useContext(KanbanBoardContext);
   const { palette } = useTheme();
   const [boardWrapper, setBoardWrapper] = useState<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (boardWrapper) {
+    if (boardWrapper && dragging) {
+      const borderOffset = 40;
       let scrollingTimeout: NodeJS.Timeout;
       const scrollHorizontally = (direction: 'left' | 'right', tick = 1) => {
         const { scrollLeft, scrollWidth } = boardWrapper;
@@ -52,11 +54,16 @@ const DragAndDropContainer: FC<IDragAndDropContainerProps> = ({
         }
       };
       const mouseMoveEventCallback = (event: MouseEvent) => {
-        const { width, x } = boardWrapper.getBoundingClientRect();
-        if (event.clientX > x && event.clientX < width + x) {
-          if (width + x - event.clientX <= 30) {
+        const { width, height, x, y } = boardWrapper.getBoundingClientRect();
+        if (
+          event.clientX >= x &&
+          event.clientX <= width + x &&
+          event.clientY >= y + borderOffset &&
+          event.clientY <= height + y
+        ) {
+          if (width + x - event.clientX <= borderOffset) {
             scrollHorizontally('right');
-          } else if (event.clientX - x <= 30) {
+          } else if (event.clientX - x <= borderOffset) {
             scrollHorizontally('left');
           } else {
             clearTimeout(scrollingTimeout);
@@ -67,10 +74,11 @@ const DragAndDropContainer: FC<IDragAndDropContainerProps> = ({
       };
       window.addEventListener('mousemove', mouseMoveEventCallback);
       return () => {
+        clearTimeout(scrollingTimeout);
         window.removeEventListener('mousemove', mouseMoveEventCallback);
       };
     }
-  }, [boardWrapper]);
+  }, [boardWrapper, dragging]);
 
   return (
     <Box
@@ -118,6 +126,14 @@ const DragAndDropContainer: FC<IDragAndDropContainerProps> = ({
         }}
         onDrop={({ addedIndex, removedIndex, payload }) => {
           onLaneDrop && onLaneDrop({ addedIndex, removedIndex, payload });
+        }}
+        onDragStart={() => {
+          setDragging && setDragging(true);
+          console.log('Dragging');
+        }}
+        onDragEnd={() => {
+          setDragging && setDragging(false);
+          console.log('Done dragging');
         }}
         style={{
           display: 'block',
