@@ -61,7 +61,6 @@ const Lane: FC<ILaneProps> = ({
             palette.background.default,
             palette.mode === 'dark' ? 0.9 : 0.1
           ),
-          mr: 2,
           border: `1px solid ${alpha(palette.text.primary, 0.2)}`,
           borderRadius: 2,
           height: '100%',
