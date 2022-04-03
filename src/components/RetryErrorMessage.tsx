@@ -17,7 +17,7 @@ export const RetryErrorMessage: FC<IRetryErrorMessageProps> = ({
       {retry && (
         <>
           {' '}
-          <Tooltip title="Try again">
+          <Tooltip title="Try again" arrow>
             <IconButton
               onClick={() => retry()}
               size="small"
