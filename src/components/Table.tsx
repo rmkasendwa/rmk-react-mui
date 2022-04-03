@@ -356,10 +356,10 @@ export const Table: FC<ITableProps> = ({
       break;
     case 'stripped':
       Object.assign(bodyStyles, {
-        '& tr.MuiTableRow-root:nth-child(even):not(:hover)': {
+        '& tr.MuiTableRow-root:nth-of-type(even):not(:hover)': {
           backgroundColor: alpha(theme.palette.text.primary, 0.04),
         },
-        '& td.MuiTableCell-root:nth-child(even)': {
+        '& td.MuiTableCell-root:nth-of-type(even)': {
           backgroundColor: alpha(theme.palette.text.primary, 0.02),
         },
       });

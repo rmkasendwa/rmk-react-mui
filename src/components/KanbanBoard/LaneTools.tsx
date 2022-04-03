@@ -42,7 +42,7 @@ const LaneTools: FC<ILaneToolsProps> = ({ tools, laneId }) => {
     if (tool) {
       const { icon, label, onClick } = tool;
       return (
-        <Tooltip title={label}>
+        <Tooltip title={label} arrow>
           <Box
             onClick={() => {
               onClick && onClick(laneId);

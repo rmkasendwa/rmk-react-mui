@@ -119,7 +119,7 @@ const Lane: FC<ILaneProps> = ({
               if (errorMessage) {
                 return (
                   <Grid item display="flex">
-                    <Tooltip title={errorMessage}>
+                    <Tooltip title={errorMessage} arrow>
                       <ErrorIcon color="error" />
                     </Tooltip>
                   </Grid>
