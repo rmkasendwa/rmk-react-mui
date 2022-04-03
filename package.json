@@ -1,6 +1,6 @@
 {
   "name": "@infinite-debugger/react-mui",
-  "version": "0.1.0-alpha.40",
+  "version": "0.1.0-alpha.54",
   "description": "RMK React MUI is a React UI library of utility components, hooks and contexts",
   "keywords": [
     "react",
@@ -32,6 +32,7 @@
     "format": "prettier --write \"./**/*.{js,jsx,ts,tsx,html,htm,json,css,scss,md}\"",
     "postinstall": "npm run prepare",
     "prepare": "husky install",
+    "publish": "npm run build && npm publish ./lib/ --access=public",
     "start": "concurrently --names \"Typescript,Assets\" -c \"blue.bold,magenta.bold\" \"tsc -w\" \"copy-and-watch --watch src/**/*.{png,jpg,css,scss,sass,json} lib\"",
     "storybook": "start-storybook -p 6006 -s public",
     "test": "react-scripts test --watchAll=false",
