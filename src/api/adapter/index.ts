@@ -114,7 +114,7 @@ const fetchData = async <T = any>(
             }
 
             if (message) {
-              return reject(new Error(message));
+              return reject(new Error(`Error: '${label}' failed. ${message}`));
             }
             return reject(
               new Error(`Error: '${label}' failed. Something went wrong`)

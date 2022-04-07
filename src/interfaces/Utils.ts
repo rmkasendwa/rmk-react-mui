@@ -50,3 +50,9 @@ export type IFileUploadFunction = (
   file: File,
   options: IAsyncProcess
 ) => IAsyncProcessController;
+
+export interface ITaggedAPIRequest {
+  id: string;
+  errorMessage?: string;
+  loading?: boolean;
+}
