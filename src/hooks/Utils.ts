@@ -3,11 +3,14 @@ import { useFormikContext } from 'formik';
 import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
+import { CANCELLED_API_REQUEST_MESSAGE } from '../constants';
 import { APIContext, APIDataContext, LoadingContext } from '../contexts';
-import { IAPIFunction } from '../interfaces';
+import { IAPIFunction, ITaggedAPIRequest } from '../interfaces';
 import { RootState, updateData } from '../redux';
 
 export const useAPIService = <T>(defautValue: T, key?: string) => {
+  const isComponentMountedRef = useRef(true);
+  const taggedAPIRequestsRef = useRef<ITaggedAPIRequest[]>([]);
   const data = useSelector((state: RootState) => {
     const { data } = state;
     return data;
@@ -19,9 +22,10 @@ export const useAPIService = <T>(defautValue: T, key?: string) => {
   const [record, setRecord] = useState<T>(defautValue);
   const [loaded, setLoaded] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [polling, setPolling] = useState(false);
+  const [busy, setBusy] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const dispatch = useDispatch();
-  const isComponentMountedRef = useRef(true);
 
   useEffect(() => {
     if (key && data[key] && isComponentMountedRef.current) {
@@ -30,16 +34,39 @@ export const useAPIService = <T>(defautValue: T, key?: string) => {
   }, [data, key]);
 
   const load = useCallback(
-    async (apiFunction?: IAPIFunction) => {
+    async (apiFunction?: IAPIFunction, tag?: string) => {
       if (apiFunction) {
         setErrorMessage('');
         setLoaded(false);
         setLoading(true);
+        const taggedAPIRequest = (() => {
+          if (tag) {
+            return {
+              id: tag,
+              loading: true,
+            } as ITaggedAPIRequest;
+          }
+        })();
+        taggedAPIRequest && taggedAPIRequestsRef.current.push(taggedAPIRequest);
         const data = await call(() => (apiFunction as IAPIFunction)()).catch(
           (err) => {
-            setErrorMessage(err.message);
+            if (
+              !String(err.message).match(CANCELLED_API_REQUEST_MESSAGE) &&
+              !polling
+            ) {
+              setErrorMessage(err.message);
+            }
           }
         );
+        if (
+          taggedAPIRequest &&
+          taggedAPIRequestsRef.current.includes(taggedAPIRequest)
+        ) {
+          taggedAPIRequestsRef.current.splice(
+            taggedAPIRequestsRef.current.indexOf(taggedAPIRequest),
+            1
+          );
+        }
         if (data) {
           if (isComponentMountedRef.current) {
             setRecord(data);
@@ -55,10 +82,11 @@ export const useAPIService = <T>(defautValue: T, key?: string) => {
         }
         if (isComponentMountedRef.current) {
           setLoading(false);
+          setPolling(false);
         }
       }
     },
-    [call, key, dispatch]
+    [call, polling, key, dispatch]
   );
 
   useEffect(() => {
@@ -77,6 +105,11 @@ export const useAPIService = <T>(defautValue: T, key?: string) => {
     record,
     setLoaded,
     setRecord,
+    polling,
+    setPolling,
+    busy,
+    setBusy,
+    taggedAPIRequests: taggedAPIRequestsRef.current,
   };
 };
 
@@ -109,14 +142,23 @@ export const useUpdate = <T>() => {
   };
 };
 
+const DEFAULT_SYNC_TIMEOUT = 30 * 1000;
 export const useRecord = <T>(
   recordFinder: IAPIFunction,
   defautValue: T,
   key?: string,
   loadOnMount = true
 ) => {
+  const nextSyncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [apiFunction] = useState<IAPIFunction>(() => recordFinder);
-  const { load: apiServiceLoad, ...rest } = useAPIService<T>(defautValue, key);
+  const {
+    load: apiServiceLoad,
+    loading,
+    errorMessage,
+    setPolling,
+    busy,
+    ...rest
+  } = useAPIService<T>(defautValue, key);
 
   const load = useCallback(() => {
     apiServiceLoad(apiFunction);
@@ -126,8 +168,34 @@ export const useRecord = <T>(
     loadOnMount && load();
   }, [load, loadOnMount]);
 
+  useEffect(() => {
+    if (!busy && !loading && !errorMessage) {
+      const mouseMoveEventCallback = () => {
+        if (nextSyncTimeoutRef.current !== null) {
+          clearTimeout(nextSyncTimeoutRef.current);
+        }
+        nextSyncTimeoutRef.current = setTimeout(() => {
+          setPolling(true);
+          load();
+        }, DEFAULT_SYNC_TIMEOUT);
+      };
+      window.addEventListener('mousemove', mouseMoveEventCallback);
+      mouseMoveEventCallback();
+      return () => {
+        window.removeEventListener('mousemove', mouseMoveEventCallback);
+        if (nextSyncTimeoutRef.current !== null) {
+          clearTimeout(nextSyncTimeoutRef.current);
+        }
+      };
+    }
+  }, [busy, errorMessage, load, loading, setPolling]);
+
   return {
     load,
+    loading,
+    errorMessage,
+    setPolling,
+    busy,
     ...rest,
   };
 };

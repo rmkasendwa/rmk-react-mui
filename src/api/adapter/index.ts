@@ -1,5 +1,6 @@
 import axios, { AxiosResponse, CancelTokenSource } from 'axios';
 
+import { CANCELLED_API_REQUEST_MESSAGE } from '../../constants';
 import { IRequestOptions } from '../../interfaces';
 import { SessionTimeoutError } from '../../utils/errors';
 import StorageManager from '../../utils/StorageManager';
@@ -33,7 +34,7 @@ const pendingRequestCancelTokenSources: CancelTokenSource[] = [];
 
 const fetchData = async <T = any>(
   path: string,
-  { headers = {}, label, ...options }: IRequestOptions
+  { headers = {}, label = 'operation', ...options }: IRequestOptions
 ): Promise<AxiosResponse<T>> => {
   const defaultHeaders = { ...defaultRequestHeaders };
   const url = (() => {
@@ -55,7 +56,7 @@ const fetchData = async <T = any>(
           options.getRequestController &&
             options.getRequestController({
               cancelRequest: () => {
-                cancelTokenSource.cancel();
+                cancelTokenSource.cancel(CANCELLED_API_REQUEST_MESSAGE);
               },
             });
           pendingRequestCancelTokenSources.push(cancelTokenSource);
@@ -77,7 +78,7 @@ const fetchData = async <T = any>(
                 cancelTokenSource.cancel()
               );
             };
-            const { response } = err;
+            const { response, message } = err;
             if (response?.data) {
               const errorMessage: string =
                 `Error: '${label}' failed. ` +
@@ -110,6 +111,10 @@ const fetchData = async <T = any>(
             if (response?.status === 401) {
               cancelPendingRequests();
               return reject(new SessionTimeoutError('Session timed out'));
+            }
+
+            if (message) {
+              return reject(new Error(`Error: '${label}' failed. ${message}`));
             }
             return reject(
               new Error(`Error: '${label}' failed. Something went wrong`)

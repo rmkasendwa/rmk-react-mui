@@ -20,6 +20,7 @@ export const dataReducer: Reducer = (state = data, { type, payload }) => {
   switch (type) {
     case UPDATE_DATA:
       newState = { ...state, ...payload };
+      break;
   }
   if ([UPDATE_DATA].includes(type)) {
     if (payload) {

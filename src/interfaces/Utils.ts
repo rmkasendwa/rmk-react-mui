@@ -7,8 +7,12 @@ export interface IReduxAction {
   payload?: any;
 }
 
+export interface IRequestController {
+  cancelRequest: () => void;
+}
+
 export interface IRequestOptions extends AxiosRequestConfig {
-  getRequestController?: (controller: { cancelRequest: () => void }) => void;
+  getRequestController?: (controller: IRequestController) => void;
   label?: string;
 }
 
@@ -46,3 +50,9 @@ export type IFileUploadFunction = (
   file: File,
   options: IAsyncProcess
 ) => IAsyncProcessController;
+
+export interface ITaggedAPIRequest {
+  id: string;
+  errorMessage?: string;
+  loading?: boolean;
+}
