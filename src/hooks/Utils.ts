@@ -34,7 +34,7 @@ export const useAPIService = <T>(defautValue: T, key?: string) => {
   }, [data, key]);
 
   const load = useCallback(
-    async (apiFunction?: IAPIFunction, tag?: string) => {
+    async (apiFunction?: IAPIFunction, tag?: string, polling = false) => {
       if (apiFunction) {
         setErrorMessage('');
         setLoaded(false);
@@ -86,7 +86,7 @@ export const useAPIService = <T>(defautValue: T, key?: string) => {
         }
       }
     },
-    [call, polling, key, dispatch]
+    [call, key, dispatch]
   );
 
   useEffect(() => {
@@ -142,7 +142,7 @@ export const useUpdate = <T>() => {
   };
 };
 
-const DEFAULT_SYNC_TIMEOUT = 30 * 1000;
+const DEFAULT_SYNC_TIMEOUT = 60 * 1000;
 export const useRecord = <T>(
   recordFinder: IAPIFunction,
   defautValue: T,
@@ -155,14 +155,18 @@ export const useRecord = <T>(
     load: apiServiceLoad,
     loading,
     errorMessage,
+    polling,
     setPolling,
     busy,
     ...rest
   } = useAPIService<T>(defautValue, key);
 
-  const load = useCallback(() => {
-    apiServiceLoad(apiFunction);
-  }, [apiFunction, apiServiceLoad]);
+  const load = useCallback(
+    (polling = false) => {
+      apiServiceLoad(apiFunction, undefined, polling);
+    },
+    [apiFunction, apiServiceLoad]
+  );
 
   useEffect(() => {
     loadOnMount && load();
@@ -176,7 +180,6 @@ export const useRecord = <T>(
         }
         nextSyncTimeoutRef.current = setTimeout(() => {
           setPolling(true);
-          load();
         }, DEFAULT_SYNC_TIMEOUT);
       };
       window.addEventListener('mousemove', mouseMoveEventCallback);
@@ -190,10 +193,17 @@ export const useRecord = <T>(
     }
   }, [busy, errorMessage, load, loading, setPolling]);
 
+  useEffect(() => {
+    if (polling && !loading) {
+      load(true);
+    }
+  }, [load, loading, polling]);
+
   return {
     load,
     loading,
     errorMessage,
+    polling,
     setPolling,
     busy,
     ...rest,
