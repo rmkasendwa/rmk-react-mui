@@ -1,6 +1,7 @@
 import 'datejs';
 
 import {
+  Box,
   Grid,
   Table as MuiTable,
   Pagination,
@@ -82,9 +83,9 @@ export interface ITableColumn {
   ) => ReactNode;
 }
 
-export interface IForEachDerivedColumnConfiguration {
+export interface IForEachDerivedColumnConfiguration<T> {
   key: string;
-  currentEntity: any;
+  currentEntity: T;
 }
 
 const getColumnWidthStyles = ({
@@ -112,20 +113,21 @@ const toolTypes = [
   'checkbox',
 ];
 
-export interface ITableProps {
+export interface ITableProps<T = any> {
   columns: Array<ITableColumn>;
-  rows: Array<any>;
+  rows: T[];
   rowsPerPage?: number;
   pageIndex?: number;
   totalRowCount?: number;
   labelPlural?: string;
   lowercaseLabelPlural?: string;
   variant?: 'stripped' | 'plain';
-  onClickRow?: (listItem: any, index: number) => void;
+  onClickRow?: (listItem: T, index: number) => void;
   onChangePage?: (pageIndex: number) => void;
   forEachDerivedColumn?: (
-    config: IForEachDerivedColumnConfiguration
+    config: IForEachDerivedColumnConfiguration<T>
   ) => ReactNode | null | undefined;
+  forEachRowProps?: (currentEntity: T) => TableRowProps;
   paging?: boolean;
   showHeaderRow?: boolean;
   HeaderRowProps?: TableRowProps;
@@ -147,6 +149,7 @@ export const Table: FC<ITableProps> = ({
   pageIndex: pageIndexProp = 0,
   onChangePage,
   forEachDerivedColumn,
+  forEachRowProps,
   variant = 'plain',
   paging = true,
   showHeaderRow = true,
@@ -240,92 +243,116 @@ export const Table: FC<ITableProps> = ({
     setFormattedRows(() => {
       const allowedDataTypes = ['number', 'string', 'boolean'];
       const nextFormattedRows = rows.map((row) => {
-        const nextRow = { ...row };
-        columns.forEach((column) => {
-          const { type, id, defaultValue, postProcessor } = column;
-          if (type && toolTypes.includes(type)) {
-            switch (type) {
-              case 'input':
-                // TODO: Implment this
-                break;
-              case 'currencyInput':
-                // TODO: Implment this
-                break;
-              case 'percentageInput':
-                // TODO: Implment this
-                break;
-              case 'numberInput':
-                // TODO: Implment this
-                break;
-              case 'dropdownInput':
-                // TODO: Implment this
-                break;
-              case 'dateInput':
-                // TODO: Implment this
-                break;
-              case 'phonenumberInput':
-                // TODO: Implment this
-                break;
-              case 'rowAdder':
-                // TODO: Implment this
-                break;
-              case 'checkbox':
-                // TODO: Implment this
-                break;
+        return columns.reduce(
+          (accumulator, column) => {
+            const { type, id, defaultValue, postProcessor, isDerivedColumn } =
+              column;
+            let columnValue = (() => {
+              if (isDerivedColumn && forEachDerivedColumn) {
+                return forEachDerivedColumn({
+                  key: id,
+                  currentEntity: row,
+                });
+              }
+              return row[id];
+            })();
+            if (type && toolTypes.includes(type)) {
+              switch (type) {
+                case 'input':
+                  // TODO: Implment this
+                  break;
+                case 'currencyInput':
+                  // TODO: Implment this
+                  break;
+                case 'percentageInput':
+                  // TODO: Implment this
+                  break;
+                case 'numberInput':
+                  // TODO: Implment this
+                  break;
+                case 'dropdownInput':
+                  // TODO: Implment this
+                  break;
+                case 'dateInput':
+                  // TODO: Implment this
+                  break;
+                case 'phonenumberInput':
+                  // TODO: Implment this
+                  break;
+                case 'rowAdder':
+                  // TODO: Implment this
+                  break;
+                case 'checkbox':
+                  // TODO: Implment this
+                  break;
+              }
+            } else if (allowedDataTypes.includes(typeof columnValue)) {
+              switch (type) {
+                case 'date':
+                  columnValue = formatDate(columnValue);
+                  break;
+                case 'dateTime':
+                  columnValue = formatDate(columnValue, true);
+                  break;
+                case 'time':
+                  const date = new Date(columnValue);
+                  columnValue = isNaN(date.getTime())
+                    ? ''
+                    : date.toString('hh:mm tt');
+                  break;
+                case 'currency':
+                case 'percentage':
+                  columnValue = parseFloat(columnValue);
+                  columnValue = addThousandCommas(
+                    columnValue,
+                    decimalPlaces || true
+                  );
+                  break;
+                case 'number':
+                  columnValue = addThousandCommas(columnValue);
+                  break;
+                case 'phoneNumber':
+                  // TODO: Implement this
+                  break;
+                case 'enum':
+                  if (labelTransform !== false) {
+                    columnValue = String(columnValue).toTitleCase(true);
+                  }
+                  break;
+                case 'boolean':
+                  columnValue = columnValue ? 'Yes' : 'No';
+                  break;
+              }
+            } else if (!columnValue) {
+              columnValue = defaultValue || <>&nbsp;</>;
             }
-          } else if (
-            (isValidElement(nextRow[id]) ||
-              allowedDataTypes.includes(typeof nextRow[id])) &&
-            nextRow[id] !== ''
-          ) {
-            switch (type) {
-              case 'date':
-                nextRow[id] = formatDate(nextRow[id]);
-                break;
-              case 'dateTime':
-                nextRow[id] = formatDate(nextRow[id], true);
-                break;
-              case 'time':
-                const date = new Date(nextRow[id]);
-                nextRow[id] = isNaN(date.getTime())
-                  ? ''
-                  : date.toString('hh:mm tt');
-                break;
-              case 'currency':
-              case 'percentage':
-                nextRow[id] = parseFloat(nextRow[id]);
-                nextRow[id] = addThousandCommas(
-                  nextRow[id],
-                  decimalPlaces || true
-                );
-                break;
-              case 'number':
-                nextRow[id] = addThousandCommas(nextRow[id]);
-                break;
-              case 'phoneNumber':
-                // TODO: Implement this
-                break;
-              case 'enum':
-                if (labelTransform !== false) {
-                  nextRow[id] = String(nextRow[id]).toTitleCase(true);
-                }
-                break;
-              case 'boolean':
-                nextRow[id] = nextRow[id] ? 'Yes' : 'No';
-                break;
+            if (postProcessor) {
+              columnValue = postProcessor(columnValue, row, column);
             }
-          } else {
-            nextRow[id] = defaultValue || <>&nbsp;</>;
-          }
-          if (postProcessor) {
-            nextRow[id] = postProcessor(nextRow[id], row, column);
-          }
-        });
-        return nextRow;
+            accumulator[id] = columnValue;
+            return accumulator;
+          },
+          {
+            currentEntity: row,
+            rowProps: (() => {
+              if (forEachRowProps) {
+                return forEachRowProps(row);
+              }
+              return {};
+            })(),
+          } as Record<string, ReactNode | TableRowProps>
+        );
       });
       return nextFormattedRows;
     });
-  }, [columns, decimalPlaces, labelTransform, rows]);
+  }, [
+    columns,
+    decimalPlaces,
+    forEachDerivedColumn,
+    forEachRowProps,
+    labelTransform,
+    rows,
+  ]);
 
   useEffect(() => {
     setRowsPerPage(rowsPerPageProp);
@@ -417,30 +444,26 @@ export const Table: FC<ITableProps> = ({
             {(() => {
               if (pageRows.length > 0) {
                 return pageRows.map((row, index) => {
-                  const sx: CSSProperties = { verticalAlign: 'top' };
-                  onClickRow && (sx.cursor = 'pointer');
+                  const { sx, ...restRowProps }: TableRowProps = row.rowProps;
                   return (
                     <TableRow
                       hover
                       role="checkbox"
+                      {...restRowProps}
                       tabIndex={-1}
                       key={index}
                       onClick={() => {
-                        onClickRow && onClickRow(row, index);
+                        onClickRow && onClickRow(row.currentEntity, index);
                       }}
-                      sx={sx}
+                      sx={{
+                        verticalAlign: 'top',
+                        cursor: onClickRow ? 'pointer' : 'default',
+                        ...sx,
+                      }}
                     >
                       {columns.map((column) => {
-                        const { id, align, style, isDerivedColumn } = column;
-                        const value = (() => {
-                          if (isDerivedColumn && forEachDerivedColumn) {
-                            return forEachDerivedColumn({
-                              key: id,
-                              currentEntity: row,
-                            });
-                          }
-                          return row[column.id];
-                        })();
+                        const { id, align = 'left', style } = column;
+                        const columnValue = row[column.id];
                         return (
                           <TableCell
                             key={id}
@@ -452,7 +475,24 @@ export const Table: FC<ITableProps> = ({
                               ...style,
                             }}
                           >
-                            {value}
+                            {(() => {
+                              if (isValidElement(columnValue)) {
+                                return (
+                                  <Box
+                                    display="flex"
+                                    flexDirection="column"
+                                    alignItems={
+                                      ({ left: 'start', right: 'end' } as any)[
+                                        align
+                                      ] || align
+                                    }
+                                  >
+                                    {columnValue}
+                                  </Box>
+                                );
+                              }
+                              return columnValue;
+                            })()}
                           </TableCell>
                         );
                       })}
