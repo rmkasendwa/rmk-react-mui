@@ -22,7 +22,6 @@ export const useAPIService = <T>(defautValue: T, key?: string) => {
   const [record, setRecord] = useState<T>(defautValue);
   const [loaded, setLoaded] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [polling, setPolling] = useState(false);
   const [busy, setBusy] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const dispatch = useDispatch();
@@ -82,7 +81,6 @@ export const useAPIService = <T>(defautValue: T, key?: string) => {
         }
         if (isComponentMountedRef.current) {
           setLoading(false);
-          setPolling(false);
         }
       }
     },
@@ -105,8 +103,6 @@ export const useAPIService = <T>(defautValue: T, key?: string) => {
     record,
     setLoaded,
     setRecord,
-    polling,
-    setPolling,
     busy,
     setBusy,
     taggedAPIRequests: taggedAPIRequestsRef.current,
@@ -155,8 +151,6 @@ export const useRecord = <T>(
     load: apiServiceLoad,
     loading,
     errorMessage,
-    polling,
-    setPolling,
     busy,
     ...rest
   } = useAPIService<T>(defautValue, key);
@@ -179,7 +173,7 @@ export const useRecord = <T>(
           clearTimeout(nextSyncTimeoutRef.current);
         }
         nextSyncTimeoutRef.current = setTimeout(() => {
-          setPolling(true);
+          load(true);
         }, DEFAULT_SYNC_TIMEOUT);
       };
       window.addEventListener('mousemove', mouseMoveEventCallback);
@@ -191,20 +185,12 @@ export const useRecord = <T>(
         }
       };
     }
-  }, [busy, errorMessage, load, loading, setPolling]);
-
-  useEffect(() => {
-    if (polling && !loading) {
-      load(true);
-    }
-  }, [load, loading, polling]);
+  }, [busy, errorMessage, load, loading]);
 
   return {
     load,
     loading,
     errorMessage,
-    polling,
-    setPolling,
     busy,
     ...rest,
   };

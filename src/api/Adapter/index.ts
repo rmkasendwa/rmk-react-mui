@@ -6,14 +6,29 @@ import { SessionTimeoutError } from '../../utils/errors';
 import StorageManager from '../../utils/StorageManager';
 import { queueRequest } from './RequestQueue';
 
-export const HOST_URL = window.location.origin;
+const HOST_URL = window.location.origin;
 
 const FAILED_REQUEST_RETRY_STATUS_BLACKLIST: number[] = [400, 401, 404, 500];
 const MAX_REQUEST_RETRY_COUNT = 2;
 
+export interface IAPIAdapterConfiguration {
+  HOST_URL: string;
+  getFullResourceURL: (path: string) => string;
+}
+
+export const APIAdapterConfiguration: IAPIAdapterConfiguration = {
+  HOST_URL,
+  getFullResourceURL: (path) => {
+    if (path.match(/^https?:/)) return path;
+    return APIAdapterConfiguration.HOST_URL + path;
+  },
+};
+
 export const defaultRequestHeaders: Record<string, string> = {};
+
 const cachedDefaultRequestHeaders: Record<string, string> | null =
   StorageManager.get('defaultRequestHeaders');
+
 cachedDefaultRequestHeaders &&
   Object.assign(defaultRequestHeaders, cachedDefaultRequestHeaders);
 
@@ -37,10 +52,7 @@ const fetchData = async <T = any>(
   { headers = {}, label = 'operation', ...options }: IRequestOptions
 ): Promise<AxiosResponse<T>> => {
   const defaultHeaders = { ...defaultRequestHeaders };
-  const url = (() => {
-    if (path.match(/^https?:/)) return path;
-    return HOST_URL + path;
-  })();
+  const url = APIAdapterConfiguration.getFullResourceURL(path);
 
   return new Promise((resolve, reject) => {
     queueRequest(
@@ -192,6 +204,11 @@ export const patch = async <T = any>(
 ) => {
   options.method = 'PATCH';
   return fetchData<T>(path, getRequestDefaultOptions(options));
+};
+
+export const del = <T = any>(path: string, options: IRequestOptions = {}) => {
+  options.method = 'DELETE';
+  return fetchData<T>(path, options);
 };
 
 export const login = async <T = any>(
