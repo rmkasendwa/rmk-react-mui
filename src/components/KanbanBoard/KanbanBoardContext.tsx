@@ -93,6 +93,7 @@ export interface IKanbanBoardProviderProps {
   lanes: ILane[];
   onCardClick?: TCardClickHandler;
   onCardMoveAcrossLanes?: TCardMoveAcrossLanesHandler;
+  children: ReactNode;
 }
 
 export const KanbanBoardProvider: FC<IKanbanBoardProviderProps> = ({

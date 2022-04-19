@@ -3,7 +3,6 @@ import {
   Skeleton,
   TextFieldProps,
 } from '@mui/material';
-import { useFormikContext } from 'formik';
 import { forwardRef } from 'react';
 
 import { useLoadingContext } from '../../hooks';
@@ -15,27 +14,10 @@ export interface ITextFieldProps
 
 export const TextField = forwardRef<HTMLDivElement, ITextFieldProps>(
   function TextField(
-    {
-      label,
-      required,
-      variant,
-      size,
-      multiline,
-      rows,
-      fullWidth,
-      name,
-      value,
-      onBlur: onBlurProp,
-      onChange: onChangeProp,
-      error: errorProp,
-      helperText: helperTextProp,
-      ...rest
-    },
+    { label, variant, size, multiline, rows, fullWidth, ...rest },
     ref
   ) {
     const { loading, errorMessage } = useLoadingContext();
-    const { values, handleBlur, handleChange, touched, errors } =
-      (useFormikContext() as any) || {};
 
     const labelSkeletonWidth = typeof label === 'string' ? label.length * 7 : 0;
 
@@ -68,39 +50,11 @@ export const TextField = forwardRef<HTMLDivElement, ITextFieldProps>(
           size,
           label,
           variant,
-          required,
           multiline,
           rows,
           fullWidth,
-          name,
         }}
         {...rest}
-        value={
-          value ??
-          (() => {
-            if (values && name && values[name] != null) {
-              return values[name];
-            }
-          })()
-        }
-        onChange={onChangeProp ?? handleChange}
-        onBlur={onBlurProp ?? handleBlur}
-        error={
-          errorProp ??
-          (() => {
-            if (errors && touched && name && touched[name]) {
-              return Boolean(errors[name]);
-            }
-          })()
-        }
-        helperText={
-          helperTextProp ??
-          (() => {
-            if (errors && touched && name && touched[name]) {
-              return errors[name];
-            }
-          })()
-        }
       />
     );
   }
