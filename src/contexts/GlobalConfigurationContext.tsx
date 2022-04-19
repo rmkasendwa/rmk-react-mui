@@ -1,4 +1,4 @@
-import { FC, createContext, useState } from 'react';
+import { FC, ReactNode, createContext, useState } from 'react';
 
 import { DEFAULT_COUNTRY_CODE, DEFAULT_CURRENCY_CODE } from '../constants';
 import { ICountryCode } from '../interfaces';
@@ -16,7 +16,9 @@ export const GlobalConfigurationContext =
     currencyCode: DEFAULT_CURRENCY_CODE,
   });
 
-export const GlobalConfigurationProvider: FC = ({ children }) => {
+export const GlobalConfigurationProvider: FC<{
+  children: ReactNode;
+}> = ({ children }) => {
   const [countryCode, setCountryCode] = useState(DEFAULT_COUNTRY_CODE);
   const [currencyCode, setCurrencyCode] = useState(DEFAULT_CURRENCY_CODE);
 

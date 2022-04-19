@@ -1,9 +1,11 @@
 import { useFormikContext } from 'formik';
-import { FC, useEffect } from 'react';
+import { FC, ReactNode, useEffect } from 'react';
 
 import { flickerElement } from '../utils/page';
 
-export interface IErrorFieldHighlighterProps {}
+export interface IErrorFieldHighlighterProps {
+  children?: ReactNode;
+}
 
 export const ErrorFieldHighlighter: FC<IErrorFieldHighlighterProps> = ({
   children,

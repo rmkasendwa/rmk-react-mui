@@ -1,4 +1,11 @@
-import { FC, createContext, useCallback, useEffect, useState } from 'react';
+import {
+  FC,
+  ReactNode,
+  createContext,
+  useCallback,
+  useEffect,
+  useState,
+} from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import { clearLoggedInUserSession } from '../auth';
@@ -14,7 +21,9 @@ export const APIContext = createContext<IAPIContext>({
   },
 });
 
-export const APIProvider: FC = ({ children }) => {
+export const APIProvider: FC<{
+  children: ReactNode;
+}> = ({ children }) => {
   const [sessionExpired, setSessionExpired] = useState(false);
   const navigate = useNavigate();
   const { pathname, search } = useLocation();

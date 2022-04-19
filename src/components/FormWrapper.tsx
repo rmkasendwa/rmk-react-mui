@@ -12,7 +12,7 @@ import PaddedContentArea, {
 } from './PaddedContentArea';
 
 export interface IFormWrapperProps<Values extends FormikValues = FormikValues>
-  extends Omit<IPaddedContentAreaProps, 'onSubmit'> {
+  extends Omit<IPaddedContentAreaProps, 'onSubmit' | 'children'> {
   initialValues?: Values;
   validationSchema?: any;
   onSubmit?: (
