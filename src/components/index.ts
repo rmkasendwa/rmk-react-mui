@@ -9,6 +9,7 @@ export * from './FieldLabel';
 export * from './FieldValueDisplay';
 export * from './FileUploader';
 export * from './FormWrapper';
+export * from './FormikInputFields';
 export * from './FullPageTable';
 export * from './ImageSelector';
 export * from './InputFields';
