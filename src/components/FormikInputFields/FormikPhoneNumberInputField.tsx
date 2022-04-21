@@ -1,6 +1,6 @@
-import { useFormikContext } from 'formik';
 import { forwardRef } from 'react';
 
+import { useAggregatedFormikContext } from '../../hooks';
 import {
   IPhoneNumberInputFieldProps,
   PhoneNumberInputField,
@@ -15,7 +15,7 @@ export const FormikPhoneNumberInputField = forwardRef<
 >(function FormikPhoneNumberInputField(
   {
     name,
-    value,
+    value: valueProp,
     onBlur: onBlurProp,
     onChange: onChangeProp,
     error: errorProp,
@@ -24,42 +24,21 @@ export const FormikPhoneNumberInputField = forwardRef<
   },
   ref
 ) {
-  const { values, handleBlur, handleChange, touched, errors } =
-    (useFormikContext() as any) || {};
+  const { value, onChange, onBlur, error, helperText } =
+    useAggregatedFormikContext({
+      value: valueProp,
+      name,
+      error: errorProp,
+      helperText: helperTextProp,
+      onBlur: onBlurProp,
+      onChange: onChangeProp,
+    });
 
   return (
     <PhoneNumberInputField
       ref={ref}
-      {...{
-        name,
-      }}
       {...rest}
-      value={
-        value ??
-        (() => {
-          if (values && name && values[name] != null) {
-            return values[name];
-          }
-        })()
-      }
-      onChange={onChangeProp ?? handleChange}
-      onBlur={onBlurProp ?? handleBlur}
-      error={
-        errorProp ??
-        (() => {
-          if (errors && touched && name && touched[name]) {
-            return Boolean(errors[name]);
-          }
-        })()
-      }
-      helperText={
-        helperTextProp ??
-        (() => {
-          if (errors && touched && name && touched[name]) {
-            return errors[name];
-          }
-        })()
-      }
+      {...{ name, value, onChange, onBlur, error, helperText }}
     />
   );
 });

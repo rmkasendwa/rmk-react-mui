@@ -1,5 +1,5 @@
-import { useMediaQuery, useTheme } from '@mui/material';
-import { useFormikContext } from 'formik';
+import { TextFieldProps, useMediaQuery, useTheme } from '@mui/material';
+import { FormikContextType, useFormikContext } from 'formik';
 import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -239,6 +239,50 @@ export const useFormikValue = ({
       }
     })())
   );
+};
+
+interface IUseAggregatedFormikContextProps
+  extends Pick<
+    TextFieldProps,
+    'value' | 'name' | 'onChange' | 'onBlur' | 'helperText' | 'error'
+  > {}
+
+export const useAggregatedFormikContext = ({
+  value,
+  name,
+  onChange,
+  onBlur,
+  helperText,
+  error,
+}: IUseAggregatedFormikContextProps) => {
+  const { values, handleBlur, handleChange, touched, errors } =
+    (useFormikContext() as FormikContextType<any>) || {};
+
+  return {
+    value:
+      value ??
+      (() => {
+        if (values && name && values[name] != null) {
+          return values[name];
+        }
+      })(),
+    onChange: onChange ?? handleChange,
+    onBlur: onBlur ?? handleBlur,
+    error:
+      error ??
+      (() => {
+        if (errors && touched && name && touched[name]) {
+          return Boolean(errors[name]);
+        }
+      })(),
+    helperText:
+      helperText ??
+      (() => {
+        if (errors && touched && name && touched[name]) {
+          return errors[name];
+        }
+      })(),
+  };
 };
 
 export const useSmallScreen = () => {

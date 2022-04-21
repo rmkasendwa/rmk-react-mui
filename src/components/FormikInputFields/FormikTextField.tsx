@@ -1,6 +1,6 @@
-import { useFormikContext } from 'formik';
 import { forwardRef } from 'react';
 
+import { useAggregatedFormikContext } from '../../hooks';
 import { ITextFieldProps, TextField } from '../InputFields';
 
 export interface IFormikTextFieldProps extends ITextFieldProps {}
@@ -11,7 +11,7 @@ export const FormikTextField = forwardRef<
 >(function FormikTextField(
   {
     name,
-    value,
+    value: valueProp,
     onBlur: onBlurProp,
     onChange: onChangeProp,
     error: errorProp,
@@ -20,42 +20,21 @@ export const FormikTextField = forwardRef<
   },
   ref
 ) {
-  const { values, handleBlur, handleChange, touched, errors } =
-    (useFormikContext() as any) || {};
+  const { value, onChange, onBlur, error, helperText } =
+    useAggregatedFormikContext({
+      value: valueProp,
+      name,
+      error: errorProp,
+      helperText: helperTextProp,
+      onBlur: onBlurProp,
+      onChange: onChangeProp,
+    });
 
   return (
     <TextField
       ref={ref}
-      {...{
-        name,
-      }}
       {...rest}
-      value={
-        value ??
-        (() => {
-          if (values && name && values[name] != null) {
-            return values[name];
-          }
-        })()
-      }
-      onChange={onChangeProp ?? handleChange}
-      onBlur={onBlurProp ?? handleBlur}
-      error={
-        errorProp ??
-        (() => {
-          if (errors && touched && name && touched[name]) {
-            return Boolean(errors[name]);
-          }
-        })()
-      }
-      helperText={
-        helperTextProp ??
-        (() => {
-          if (errors && touched && name && touched[name]) {
-            return errors[name];
-          }
-        })()
-      }
+      {...{ name, value, onChange, onBlur, error, helperText }}
     />
   );
 });
