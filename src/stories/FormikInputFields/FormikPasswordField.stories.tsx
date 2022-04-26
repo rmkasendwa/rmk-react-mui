@@ -1,21 +1,21 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { Form, Formik } from 'formik';
 
-import { FormikNumberInputField } from '../../components';
+import { FormikPasswordField } from '../../components';
 
 export default {
-  title: 'Components/Formik Input Fields/Formik Number Input Field',
-  component: FormikNumberInputField,
+  title: 'Components/Formik Input Fields/Formik Password Field',
+  component: FormikPasswordField,
   parameters: {
     layout: 'centered',
   },
-} as ComponentMeta<typeof FormikNumberInputField>;
+} as ComponentMeta<typeof FormikPasswordField>;
 
 const initialValues = {
-  field: 2500,
+  field: 'Default Field Value',
 };
 
-const Template: ComponentStory<typeof FormikNumberInputField> = (props) => {
+const Template: ComponentStory<typeof FormikPasswordField> = (props) => {
   return (
     <Formik
       initialValues={initialValues}
@@ -26,8 +26,8 @@ const Template: ComponentStory<typeof FormikNumberInputField> = (props) => {
       {() => {
         return (
           <Form noValidate>
-            <FormikNumberInputField
-              label="Formik Number Input Field"
+            <FormikPasswordField
+              label="Formik Password Field"
               name="field"
               {...props}
               sx={{ minWidth: 300 }}
