@@ -1,4 +1,4 @@
-import { FC, forwardRef } from 'react';
+import { forwardRef } from 'react';
 import NumberFormat from 'react-number-format';
 
 import { useFormikValue } from '../../hooks';
@@ -8,47 +8,48 @@ export interface INumberInputFieldProps extends ITextFieldProps {
   setFieldValue?: (value: number) => void;
 }
 
-const NumberField = forwardRef(
-  ({ onValueChange, ...rest }: any, inputRef: any) => {
-    const getInputRef = (inputField: HTMLInputElement) => {
-      if (inputField) {
-        const descriptor = Object.getOwnPropertyDescriptor(inputField, 'value');
-        if (descriptor?.get) {
-          const get = descriptor.get;
-          Object.defineProperty(inputField, 'value', {
-            get() {
-              return String(get.call(this)).replace(/\D/g, '');
-            },
-          });
-        }
+const NumberField = forwardRef(function NumberField(
+  { onValueChange, ...rest }: any,
+  inputRef: any
+) {
+  const getInputRef = (inputField: HTMLInputElement) => {
+    if (inputField) {
+      const descriptor = Object.getOwnPropertyDescriptor(inputField, 'value');
+      if (descriptor?.get) {
+        const get = descriptor.get;
+        Object.defineProperty(inputField, 'value', {
+          get() {
+            return String(get.call(this)).replace(/\D/g, '');
+          },
+        });
       }
-      inputRef(inputField);
-    };
-    return (
-      <NumberFormat
-        {...rest}
-        getInputRef={getInputRef}
-        onValueChange={(values: { floatValue: any }) => {
-          onValueChange(values.floatValue);
-        }}
-        thousandSeparator
-      />
-    );
-  }
-);
-NumberField.displayName = 'NumberField';
+    }
+    inputRef(inputField);
+  };
+  return (
+    <NumberFormat
+      {...rest}
+      getInputRef={getInputRef}
+      onValueChange={(values: { floatValue: any }) => {
+        onValueChange(values.floatValue);
+      }}
+      thousandSeparator
+    />
+  );
+});
 
-export const NumberInputField: FC<INumberInputFieldProps> = ({
-  setFieldValue,
-  InputProps,
-  value,
-  name,
-  ...rest
-}) => {
+export const NumberInputField = forwardRef<
+  HTMLDivElement,
+  INumberInputFieldProps
+>(function NumberInputField(
+  { setFieldValue, InputProps, value, name, ...rest },
+  ref
+) {
   value = useFormikValue({ value, name });
 
   return (
     <TextField
+      ref={ref}
       {...rest}
       {...{ name, value }}
       InputProps={{
@@ -62,6 +63,6 @@ export const NumberInputField: FC<INumberInputFieldProps> = ({
       }}
     />
   );
-};
+});
 
 export default NumberInputField;
