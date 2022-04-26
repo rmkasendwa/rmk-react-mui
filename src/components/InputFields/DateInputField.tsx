@@ -8,7 +8,7 @@ import {
 } from '@mui/lab';
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
 import { useFormikContext } from 'formik';
-import { FC, useState } from 'react';
+import { forwardRef, useState } from 'react';
 
 import { DEFAULT_DATE_FORMAT } from '../../constants';
 import { useFormikValue, useSmallScreen } from '../../hooks';
@@ -18,75 +18,73 @@ export interface IDateInputFieldProps extends ITextFieldProps {
   value?: string | number;
 }
 
-export const DateInputField: FC<IDateInputFieldProps> = ({
-  value,
-  name,
-  onChange,
-  onClick,
-  ...rest
-}) => {
-  value = useFormikValue({ value, name });
-  const { handleChange } = (useFormikContext() as any) || {};
+export const DateInputField = forwardRef<HTMLDivElement, IDateInputFieldProps>(
+  function DateInputField({ value, name, onChange, onClick, ...rest }, ref) {
+    value = useFormikValue({ value, name });
+    const { handleChange } = (useFormikContext() as any) || {};
 
-  const smallScreen = useSmallScreen();
-  const [inputField, setInputField] = useState<
-    HTMLInputElement | null | undefined
-  >(null);
+    const smallScreen = useSmallScreen();
+    const [inputField, setInputField] = useState<
+      HTMLInputElement | null | undefined
+    >(null);
 
-  const datePickerProps: DatePickerProps = {
-    value: value ? new Date(value) : new Date(),
-    onChange: (date: any) => {
-      if (inputField && (!date || !isNaN(date.getTime()))) {
-        inputField.value = date ? date.toISOString() : '';
-        const event: any = new Event('change', { bubbles: true });
-        Object.defineProperty(event, 'target', {
-          writable: false,
-          value: inputField,
-        });
-        onChange && onChange(event);
-        handleChange && handleChange(event);
-      }
-    },
-    renderInput: (params) => {
-      if (params.inputProps) {
-        if (value) {
-          params.inputProps.value = new Date(params.inputProps.value).toString(
-            DEFAULT_DATE_FORMAT
-          );
-        } else {
-          params.inputProps.value = '';
+    const datePickerProps: DatePickerProps = {
+      value: value ? new Date(value) : new Date(),
+      onChange: (date: any) => {
+        if (inputField && (!date || !isNaN(date.getTime()))) {
+          inputField.value = date ? date.toISOString() : '';
+          const event: any = new Event('change', { bubbles: true });
+          Object.defineProperty(event, 'target', {
+            writable: false,
+            value: inputField,
+          });
+          onChange && onChange(event);
+          handleChange && handleChange(event);
         }
-        delete params.inputProps.onFocus;
-        delete params.inputProps.onChange;
-        delete params.inputProps.onBlur;
-      }
-      delete params.error;
-      return (
-        <TextField
-          {...params}
-          {...rest}
-          {...{ name }}
-          onClick={(event) => {
-            inputField?.nextElementSibling?.querySelector('button')?.click();
-            onClick && onClick(event);
-          }}
-          ref={(inputField) => {
-            setInputField(inputField?.querySelector('input'));
-          }}
-        />
-      );
-    },
-  };
+      },
+      renderInput: (params) => {
+        if (params.inputProps) {
+          if (value) {
+            params.inputProps.value = new Date(
+              params.inputProps.value
+            ).toString(DEFAULT_DATE_FORMAT);
+          } else {
+            params.inputProps.value = '';
+          }
+          delete params.inputProps.onFocus;
+          delete params.inputProps.onChange;
+          delete params.inputProps.onBlur;
+        }
+        delete params.error;
+        return (
+          <TextField
+            {...params}
+            {...rest}
+            {...{ name }}
+            onClick={(event) => {
+              inputField?.nextElementSibling?.querySelector('button')?.click();
+              onClick && onClick(event);
+            }}
+            ref={(inputFieldWrapper) => {
+              const inputField = inputFieldWrapper?.querySelector('input');
+              setInputField(inputField);
+              typeof ref === 'function' && ref(inputField || null);
+            }}
+          />
+        );
+      },
+    };
 
-  return (
-    <LocalizationProvider dateAdapter={AdapterDateFns}>
-      {smallScreen ? (
-        <MobileDatePicker {...datePickerProps} />
-      ) : (
-        <DesktopDatePicker {...datePickerProps} />
-      )}
-    </LocalizationProvider>
-  );
-};
+    return (
+      <LocalizationProvider dateAdapter={AdapterDateFns}>
+        {smallScreen ? (
+          <MobileDatePicker {...datePickerProps} />
+        ) : (
+          <DesktopDatePicker {...datePickerProps} />
+        )}
+      </LocalizationProvider>
+    );
+  }
+);
 
 export default DateInputField;
