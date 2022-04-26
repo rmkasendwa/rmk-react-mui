@@ -1,10 +1,16 @@
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { Box, ClickAwayListener, Grow, Popper } from '@mui/material';
-import { useFormikContext } from 'formik';
-import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 import { LoadingProvider } from '../../contexts';
-import { useAPIDataContext, useAPIService, useFormikValue } from '../../hooks';
+import { useAPIDataContext, useAPIService } from '../../hooks';
 import { IAPIFunction } from '../../interfaces';
 import PaginatedDropdownOptionList, {
   IDropdownOption,
@@ -25,33 +31,29 @@ export interface IDataDropdownFieldProps extends ITextFieldProps {
   optionPaging?: boolean;
 }
 
-export const DataDropdownField: FC<IDataDropdownFieldProps> = ({
-  SelectProps,
-  getDropdownEntities,
-  getDropdownOptions,
-  name,
-  value,
-  dataKey,
-  options: propOptions,
-  sortOptions = false,
-  onChange,
-  onBlur,
-  error,
-  helperText,
-  InputProps,
-  dropdownListMaxHeight,
-  optionPaging = true,
-  selectedOption,
-  ...rest
-}) => {
-  value = useFormikValue({ value, name });
-  const {
-    handleBlur: formikHandleBlur,
-    handleChange: formikHandleChange,
-    touched,
-    errors,
-  } = (useFormikContext() as any) || {};
-
+export const DataDropdownField = forwardRef<
+  HTMLDivElement,
+  IDataDropdownFieldProps
+>(function DataDropdownField(
+  {
+    SelectProps,
+    getDropdownEntities,
+    getDropdownOptions,
+    name,
+    value,
+    dataKey,
+    options: propOptions,
+    sortOptions = false,
+    onChange,
+    onBlur,
+    InputProps,
+    dropdownListMaxHeight,
+    optionPaging = true,
+    selectedOption,
+    ...rest
+  },
+  ref
+) {
   const { preferStale } = useAPIDataContext();
 
   const {
@@ -102,7 +104,7 @@ export const DataDropdownField: FC<IDataDropdownFieldProps> = ({
   }, [SelectProps?.multiple, selectedOptions]);
 
   const handleBlur = () => {
-    if (onBlur || formikHandleBlur) {
+    if (onBlur) {
       const event: any = new Event('blur', { bubbles: true });
       Object.defineProperty(event, 'target', {
         writable: false,
@@ -111,12 +113,12 @@ export const DataDropdownField: FC<IDataDropdownFieldProps> = ({
           value: selectedOptionValue,
         },
       });
-      (onBlur || formikHandleBlur)(event);
+      onBlur(event);
     }
   };
 
   const handleChange = useCallback(() => {
-    if (onChange || formikHandleChange) {
+    if (onChange) {
       const event: any = new Event('change', { bubbles: true });
       Object.defineProperty(event, 'target', {
         writable: false,
@@ -125,9 +127,9 @@ export const DataDropdownField: FC<IDataDropdownFieldProps> = ({
           value: selectedOptionValue,
         },
       });
-      (onChange || formikHandleChange)(event);
+      onChange(event);
     }
-  }, [formikHandleChange, name, onChange, selectedOptionValue]);
+  }, [name, onChange, selectedOptionValue]);
 
   const handleClose = () => {
     isTouchedRef.current = true;
@@ -262,6 +264,7 @@ export const DataDropdownField: FC<IDataDropdownFieldProps> = ({
 
   const textField = (
     <TextField
+      ref={ref}
       onClick={() => {
         setTimeout(() => setOpen(true), 200);
         loadOptions();
@@ -279,22 +282,6 @@ export const DataDropdownField: FC<IDataDropdownFieldProps> = ({
         ref: anchorRef,
       }}
       value={searchTerm}
-      error={
-        error ??
-        (() => {
-          if (errors && touched && name && touched[name]) {
-            return Boolean(errors[name]);
-          }
-        })()
-      }
-      helperText={
-        helperText ??
-        (() => {
-          if (errors && touched && name && touched[name]) {
-            return errors[name];
-          }
-        })()
-      }
       {...rest}
       {...errorProps}
     />
@@ -367,6 +354,6 @@ export const DataDropdownField: FC<IDataDropdownFieldProps> = ({
       </Popper>
     </>
   );
-};
+});
 
 export default DataDropdownField;
