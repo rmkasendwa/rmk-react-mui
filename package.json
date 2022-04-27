@@ -73,7 +73,6 @@
     "datejs": "^1.0.0-rc3",
     "object-hash": "^2.2.0",
     "query-string": "^7.1.0",
-    "react-number-format": "^4.9.1",
     "react-smooth-dnd": "^0.11.1",
     "underscore": "^1.13.2"
   },

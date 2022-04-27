@@ -12,7 +12,7 @@ export default {
 } as ComponentMeta<typeof FormikCurrencyInputField>;
 
 const initialValues = {
-  field: 'Default Field Value',
+  field: 4800,
 };
 
 const Template: ComponentStory<typeof FormikCurrencyInputField> = (props) => {
