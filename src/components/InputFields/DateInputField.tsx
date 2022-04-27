@@ -7,11 +7,10 @@ import {
   MobileDatePicker,
 } from '@mui/lab';
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
-import { useFormikContext } from 'formik';
 import { forwardRef, useState } from 'react';
 
 import { DEFAULT_DATE_FORMAT } from '../../constants';
-import { useFormikValue, useSmallScreen } from '../../hooks';
+import { useSmallScreen } from '../../hooks';
 import TextField, { ITextFieldProps } from './TextField';
 
 export interface IDateInputFieldProps extends ITextFieldProps {
@@ -20,9 +19,6 @@ export interface IDateInputFieldProps extends ITextFieldProps {
 
 export const DateInputField = forwardRef<HTMLDivElement, IDateInputFieldProps>(
   function DateInputField({ value, name, onChange, onClick, ...rest }, ref) {
-    value = useFormikValue({ value, name });
-    const { handleChange } = (useFormikContext() as any) || {};
-
     const smallScreen = useSmallScreen();
     const [inputField, setInputField] = useState<
       HTMLInputElement | null | undefined
@@ -39,7 +35,6 @@ export const DateInputField = forwardRef<HTMLDivElement, IDateInputFieldProps>(
             value: inputField,
           });
           onChange && onChange(event);
-          handleChange && handleChange(event);
         }
       },
       renderInput: (params) => {

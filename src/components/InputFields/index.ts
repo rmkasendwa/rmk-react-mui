@@ -5,4 +5,5 @@ export * from './FileInputField';
 export * from './NumberInputField';
 export * from './PasswordField';
 export * from './PhoneNumberInputField';
+export * from './TextAreaField';
 export * from './TextField';
