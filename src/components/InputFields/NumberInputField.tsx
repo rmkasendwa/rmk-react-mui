@@ -10,6 +10,8 @@ export interface INumberInputFieldProps extends ITextFieldProps {
   value?: number;
   step?: number;
   decimalPlaces?: number;
+  min?: number;
+  max?: number;
 }
 
 const findNumericCharacters = (number: string) => {
@@ -42,7 +44,18 @@ export const NumberInputField = forwardRef<
   HTMLDivElement,
   INumberInputFieldProps
 >(function NumberInputField(
-  { step = 1, value, name, id, decimalPlaces, onChange, InputProps, ...rest },
+  {
+    step = 1,
+    value,
+    name,
+    id,
+    decimalPlaces,
+    onChange,
+    InputProps,
+    min,
+    max,
+    ...rest
+  },
   ref
 ) {
   const [, setInputField] = useState<HTMLDivElement | null>(null);
@@ -58,33 +71,32 @@ export const NumberInputField = forwardRef<
 
   const stepUpInputValue = useCallback(
     (scaleFactor = 1) => {
-      setInputValue(
-        addThousandCommas(
-          getNumericInputValue() + step * scaleFactor,
-          decimalPlaces
-        )
-      );
+      let numericValue = getNumericInputValue() + step * scaleFactor;
+      if (max != null && numericValue > max) numericValue = max;
+      setInputValue(addThousandCommas(numericValue, decimalPlaces));
     },
-    [decimalPlaces, getNumericInputValue, step]
+    [decimalPlaces, getNumericInputValue, max, step]
   );
 
   const stepDownInputValue = useCallback(
     (scaleFactor = 1) => {
-      setInputValue(
-        addThousandCommas(
-          getNumericInputValue() - step * scaleFactor,
-          decimalPlaces
-        )
-      );
+      let numericValue = getNumericInputValue() - step * scaleFactor;
+      if (min != null && numericValue < min) numericValue = min;
+      setInputValue(addThousandCommas(numericValue, decimalPlaces));
     },
-    [decimalPlaces, getNumericInputValue, step]
+    [decimalPlaces, getNumericInputValue, min, step]
   );
 
   useEffect(() => {
     if (!focused) {
       if (value !== undefined) {
         if (value != null) {
-          setInputValue(addThousandCommas(value, decimalPlaces));
+          let numericValue = value;
+
+          if (min != null && numericValue < min) numericValue = min;
+          if (max != null && numericValue > max) numericValue = max;
+
+          setInputValue(addThousandCommas(numericValue, decimalPlaces));
         } else {
           setInputValue('');
         }
@@ -101,7 +113,7 @@ export const NumberInputField = forwardRef<
         });
       }
     }
-  }, [decimalPlaces, focused, value]);
+  }, [decimalPlaces, focused, max, min, value]);
 
   useEffect(() => {
     if (focused) {
@@ -166,7 +178,11 @@ export const NumberInputField = forwardRef<
         const numericCharacters = findNumericCharacters(target.value);
         const numericString = (() => {
           if (numericCharacters.length > 0 && !isNaN(+numericCharacters)) {
-            const numericValue = +numericCharacters;
+            let numericValue = +numericCharacters;
+
+            if (min != null && numericValue < min) numericValue = min;
+            if (max != null && numericValue > max) numericValue = max;
+
             const numericValueWithThousandCommas =
               addThousandCommas(numericValue);
             if (numericCharacters.endsWith('.')) {
