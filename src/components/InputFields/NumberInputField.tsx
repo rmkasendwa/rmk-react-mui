@@ -9,6 +9,7 @@ import TextField, { ITextFieldProps } from './TextField';
 export interface INumberInputFieldProps extends ITextFieldProps {
   value?: number;
   step?: number;
+  decimalPlaces?: number;
 }
 
 const findNumericCharacters = (number: string) => {
@@ -41,7 +42,7 @@ export const NumberInputField = forwardRef<
   HTMLDivElement,
   INumberInputFieldProps
 >(function NumberInputField(
-  { step = 1, value, name, id, onChange, ...rest },
+  { step = 1, value, name, id, decimalPlaces, onChange, ...rest },
   ref
 ) {
   const [, setInputField] = useState<HTMLDivElement | null>(null);
@@ -58,30 +59,36 @@ export const NumberInputField = forwardRef<
   const stepUpInputValue = useCallback(
     (scaleFactor = 1) => {
       setInputValue(
-        addThousandCommas(getNumericInputValue() + step * scaleFactor)
+        addThousandCommas(
+          getNumericInputValue() + step * scaleFactor,
+          decimalPlaces
+        )
       );
     },
-    [getNumericInputValue, step]
+    [decimalPlaces, getNumericInputValue, step]
   );
 
   const stepDownInputValue = useCallback(
     (scaleFactor = 1) => {
       setInputValue(
-        addThousandCommas(getNumericInputValue() - step * scaleFactor)
+        addThousandCommas(
+          getNumericInputValue() - step * scaleFactor,
+          decimalPlaces
+        )
       );
     },
-    [getNumericInputValue, step]
+    [decimalPlaces, getNumericInputValue, step]
   );
 
   useEffect(() => {
     if (!focused) {
       if (value != null) {
-        setInputValue(addThousandCommas(value));
+        setInputValue(addThousandCommas(value, decimalPlaces));
       } else {
         setInputValue('');
       }
     }
-  }, [focused, value]);
+  }, [decimalPlaces, focused, value]);
 
   useEffect(() => {
     if (focused) {

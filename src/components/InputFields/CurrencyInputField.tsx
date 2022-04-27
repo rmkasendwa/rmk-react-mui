@@ -20,6 +20,8 @@ export const CurrencyInputField = forwardRef<
   return (
     <NumberInputField
       ref={ref}
+      step={500}
+      decimalPlaces={2}
       {...rest}
       InputProps={{ ...inputProps, ...InputProps }}
     />
