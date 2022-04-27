@@ -30,6 +30,7 @@ const Template: ComponentStory<typeof FormikCurrencyInputField> = (props) => {
               label="Formik Currency Input Field"
               name="field"
               {...props}
+              showCurrency
               sx={{ minWidth: 300 }}
             />
           </Form>

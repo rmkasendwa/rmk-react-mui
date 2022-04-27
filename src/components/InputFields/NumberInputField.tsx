@@ -42,7 +42,7 @@ export const NumberInputField = forwardRef<
   HTMLDivElement,
   INumberInputFieldProps
 >(function NumberInputField(
-  { step = 1, value, name, id, decimalPlaces, onChange, ...rest },
+  { step = 1, value, name, id, decimalPlaces, onChange, InputProps, ...rest },
   ref
 ) {
   const [, setInputField] = useState<HTMLDivElement | null>(null);
@@ -82,10 +82,23 @@ export const NumberInputField = forwardRef<
 
   useEffect(() => {
     if (!focused) {
-      if (value != null) {
-        setInputValue(addThousandCommas(value, decimalPlaces));
+      if (value !== undefined) {
+        if (value != null) {
+          setInputValue(addThousandCommas(value, decimalPlaces));
+        } else {
+          setInputValue('');
+        }
       } else {
-        setInputValue('');
+        setInputValue((prevInputValue) => {
+          if (prevInputValue.length > 0) {
+            const numericValue = +prevInputValue.replace(/,/g, '');
+            return addThousandCommas(
+              isNaN(numericValue) ? 0 : numericValue,
+              decimalPlaces
+            );
+          }
+          return prevInputValue;
+        });
       }
     }
   }, [decimalPlaces, focused, value]);
@@ -172,6 +185,7 @@ export const NumberInputField = forwardRef<
       onFocus={() => setFocused(true)}
       onBlur={() => setFocused(false)}
       InputProps={{
+        ...InputProps,
         endAdornment: (
           <Stack>
             <IconButton
