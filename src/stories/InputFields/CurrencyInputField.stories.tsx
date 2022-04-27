@@ -12,7 +12,12 @@ export default {
 
 const Template: ComponentStory<typeof CurrencyInputField> = (props) => {
   return (
-    <CurrencyInputField label="Currency" {...props} sx={{ minWidth: 300 }} />
+    <CurrencyInputField
+      label="Currency Input Field"
+      showCurrency
+      {...props}
+      sx={{ minWidth: 300 }}
+    />
   );
 };
 

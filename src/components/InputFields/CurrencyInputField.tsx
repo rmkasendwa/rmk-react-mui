@@ -16,7 +16,11 @@ export const CurrencyInputField = forwardRef<
 ) {
   const inputProps: InputProps = {};
   showCurrency &&
-    (inputProps.endAdornment = <Typography variant="body2">UGX</Typography>);
+    (inputProps.startAdornment = (
+      <Typography variant="body2" sx={{ mr: 1, fontWeight: 'bold' }}>
+        UGX
+      </Typography>
+    ));
   return (
     <NumberInputField
       ref={ref}
