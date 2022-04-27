@@ -5,4 +5,5 @@ export * from './FormikFileInputField';
 export * from './FormikNumberInputField';
 export * from './FormikPasswordField';
 export * from './FormikPhoneNumberInputField';
+export * from './FormikTextAreaField';
 export * from './FormikTextField';
