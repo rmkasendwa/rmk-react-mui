@@ -1,12 +1,13 @@
-import { useFormikContext } from 'formik';
 import { useEffect, useState } from 'react';
 
 import { ITextFieldProps } from '../components';
 import { IFile, IFileUploadFunction, IUploadableFile } from '../interfaces';
-import { useFormikValue } from './Utils';
 
 export interface IUseFileUploadOptions
-  extends Pick<ITextFieldProps, 'helperText' | 'error' | 'onChange' | 'name'> {
+  extends Pick<
+    ITextFieldProps,
+    'helperText' | 'error' | 'onChange' | 'name' | 'id'
+  > {
   value?: IFile[];
   fileField?: HTMLInputElement | null;
   upload?: IFileUploadFunction;
@@ -15,12 +16,10 @@ export const useFileUpload = ({
   fileField,
   upload,
   name,
+  id,
   value,
   onChange,
 }: IUseFileUploadOptions) => {
-  const { handleChange } = (useFormikContext() as any) || {};
-  value = useFormikValue({ value, name });
-
   const [files, setFiles] = useState<IUploadableFile[]>([]);
 
   useEffect(() => {
@@ -38,11 +37,14 @@ export const useFileUpload = ({
               .map((file) => {
                 return new Promise<IUploadableFile>((resolve, reject) => {
                   const reader = new FileReader();
+                  const { name, size } = file;
                   reader.readAsDataURL(file);
                   reader.onload = () =>
                     resolve({
                       base64: reader.result as string,
                       originalFile: file,
+                      name,
+                      size,
                     });
                   reader.onerror = (error) => reject(error);
                 });
@@ -149,28 +151,32 @@ export const useFileUpload = ({
   }, [fileField, files, upload]);
 
   useEffect(() => {
-    if (
-      value &&
-      value.map(({ base64 }) => base64).join('') !==
-        files.map(({ base64 }) => base64).join('')
-    ) {
-      setFiles(value);
-    }
-  }, [files, value]);
+    setFiles((prevFiles) => {
+      if (
+        value &&
+        value.map(({ base64 }) => base64).join('') !==
+          prevFiles.map(({ base64 }) => base64).join('')
+      ) {
+        return value;
+      }
+      return prevFiles;
+    });
+  }, [value]);
 
   useEffect(() => {
-    if (onChange ?? handleChange) {
+    if (onChange) {
       const event: any = new Event('change', { bubbles: true });
       Object.defineProperty(event, 'target', {
         writable: false,
         value: {
+          id,
           name,
           value: [...files],
         },
       });
-      (onChange ?? handleChange)(event);
+      onChange(event);
     }
-  }, [handleChange, files, name, onChange]);
+  }, [files, id, name, onChange]);
 
   return { files, setFiles };
 };

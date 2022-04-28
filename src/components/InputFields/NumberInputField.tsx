@@ -58,6 +58,7 @@ export const NumberInputField = forwardRef<
     max,
     valuePrefix = '',
     valueSuffix = '',
+    sx,
     ...rest
   },
   ref
@@ -242,7 +243,7 @@ export const NumberInputField = forwardRef<
       InputProps={{
         ...InputProps,
         endAdornment: (
-          <Stack>
+          <Stack className="number-input-field-step-tools">
             <IconButton
               onClick={(event) => {
                 inputField?.focus();
@@ -263,6 +264,15 @@ export const NumberInputField = forwardRef<
             </IconButton>
           </Stack>
         ),
+      }}
+      sx={{
+        '& .number-input-field-step-tools': {
+          opacity: 0,
+        },
+        '&:hover .number-input-field-step-tools': {
+          opacity: 1,
+        },
+        ...sx,
       }}
     />
   );

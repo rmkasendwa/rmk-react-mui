@@ -1,6 +1,14 @@
 import { TextFieldProps, useMediaQuery, useTheme } from '@mui/material';
 import { FormikContextType, useFormikContext } from 'formik';
-import { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import {
+  ChangeEvent,
+  FocusEvent,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { CANCELLED_API_REQUEST_MESSAGE } from '../constants';
@@ -250,13 +258,29 @@ interface IUseAggregatedFormikContextProps
 export const useAggregatedFormikContext = ({
   value,
   name,
-  onChange,
-  onBlur,
+  onChange: onChangeProp,
+  onBlur: onBlurProp,
   helperText,
   error,
 }: IUseAggregatedFormikContextProps) => {
   const { values, handleBlur, handleChange, touched, errors } =
     (useFormikContext() as FormikContextType<any>) || {};
+
+  const onChange = useCallback(
+    (event: ChangeEvent<any>) => {
+      onChangeProp && onChangeProp(event);
+      handleChange && handleChange(event);
+    },
+    [handleChange, onChangeProp]
+  );
+
+  const onBlur = useCallback(
+    (event: FocusEvent<any>) => {
+      onBlurProp && onBlurProp(event);
+      handleBlur && handleBlur(event);
+    },
+    [handleBlur, onBlurProp]
+  );
 
   return {
     value:
@@ -266,8 +290,8 @@ export const useAggregatedFormikContext = ({
           return values[name];
         }
       })(),
-    onChange: onChange ?? handleChange,
-    onBlur: onBlur ?? handleBlur,
+    onChange,
+    onBlur,
     error:
       error ??
       (() => {

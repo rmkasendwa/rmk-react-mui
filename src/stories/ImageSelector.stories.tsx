@@ -1,4 +1,4 @@
-import Box from '@mui/material/Box';
+import { Container } from '@mui/material';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 
 import { ImageSelector } from '../components';
@@ -10,9 +10,9 @@ export default {
 } as ComponentMeta<typeof ImageSelector>;
 
 const Template: ComponentStory<typeof ImageSelector> = ({ ...rest }) => (
-  <Box sx={{ maxWidth: 1200, p: 3, mx: 'auto' }}>
+  <Container maxWidth="md" sx={{ p: 3 }}>
     <ImageSelector {...rest} />
-  </Box>
+  </Container>
 );
 
 const upload: IFileUploadFunction = (
