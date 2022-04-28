@@ -25,6 +25,7 @@ export interface IFile {
   id?: string;
   base64: string;
   originalFile: File;
+  extraParams?: any;
 }
 
 export interface IUploadableFile extends IFile {
