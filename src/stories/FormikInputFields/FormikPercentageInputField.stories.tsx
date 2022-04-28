@@ -1,3 +1,4 @@
+import { Button, Grid } from '@mui/material';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { Form, Formik } from 'formik';
 
@@ -26,12 +27,21 @@ const Template: ComponentStory<typeof FormikPercentageInputField> = (props) => {
       {() => {
         return (
           <Form noValidate>
-            <FormikPercentageInputField
-              label="Formik Percentage Input Field"
-              name="field"
-              {...props}
-              sx={{ minWidth: 300 }}
-            />
+            <Grid container sx={{ alignItems: 'center', columnGap: 1 }}>
+              <Grid item>
+                <FormikPercentageInputField
+                  label="Formik Percentage Input Field"
+                  name="field"
+                  {...props}
+                  sx={{ minWidth: 300 }}
+                />
+              </Grid>
+              <Grid item>
+                <Button type="submit" variant="contained" color="primary">
+                  Submit
+                </Button>
+              </Grid>
+            </Grid>
           </Form>
         );
       }}

@@ -12,6 +12,8 @@ export interface INumberInputFieldProps extends ITextFieldProps {
   decimalPlaces?: number;
   min?: number;
   max?: number;
+  valuePrefix?: string;
+  valueSuffix?: string;
 }
 
 const findNumericCharacters = (number: string) => {
@@ -54,20 +56,32 @@ export const NumberInputField = forwardRef<
     InputProps,
     min,
     max,
+    valuePrefix = '',
+    valueSuffix = '',
     ...rest
   },
   ref
 ) {
-  const [, setInputField] = useState<HTMLDivElement | null>(null);
+  const [inputField, setInputField] = useState<HTMLInputElement | null>(null);
   const [inputValue, setInputValue] = useState('');
   const [focused, setFocused] = useState(false);
 
+  const extractNumericValue = useCallback(
+    (inputValue: string) => {
+      return inputValue.replace(
+        new RegExp(`^${valuePrefix}|,|${valueSuffix}$`, 'g'),
+        ''
+      );
+    },
+    [valuePrefix, valueSuffix]
+  );
+
   const getNumericInputValue = useCallback(() => {
     if (inputValue.length > 0) {
-      return +inputValue.replace(/,/g, '');
+      return +extractNumericValue(inputValue);
     }
     return 0;
-  }, [inputValue]);
+  }, [extractNumericValue, inputValue]);
 
   const stepUpInputValue = useCallback(
     (scaleFactor = 1) => {
@@ -103,7 +117,7 @@ export const NumberInputField = forwardRef<
       } else {
         setInputValue((prevInputValue) => {
           if (prevInputValue.length > 0) {
-            const numericValue = +prevInputValue.replace(/,/g, '');
+            const numericValue = +extractNumericValue(prevInputValue);
             return addThousandCommas(
               isNaN(numericValue) ? 0 : numericValue,
               decimalPlaces
@@ -113,11 +127,34 @@ export const NumberInputField = forwardRef<
         });
       }
     }
-  }, [decimalPlaces, focused, max, min, value]);
+  }, [decimalPlaces, extractNumericValue, focused, max, min, value]);
+
+  useEffect(() => {
+    setInputValue((prevInputValue) => {
+      if (prevInputValue.length > 0) {
+        if (focused) {
+          return prevInputValue.replace(
+            new RegExp(`^${valuePrefix}|${valueSuffix}$`, 'g'),
+            ''
+          );
+        } else {
+          return (
+            valuePrefix +
+            `${prevInputValue.replace(
+              new RegExp(`^${valuePrefix}|${valueSuffix}$`, 'g'),
+              ''
+            )}` +
+            valueSuffix
+          );
+        }
+      }
+      return prevInputValue;
+    });
+  }, [focused, valuePrefix, valueSuffix]);
 
   useEffect(() => {
     if (focused) {
-      const numericValue = +inputValue.replace(/,/g, '');
+      const numericValue = +extractNumericValue(inputValue);
       const event: any = new Event('change', { bubbles: true });
       Object.defineProperty(event, 'target', {
         writable: false,
@@ -129,7 +166,7 @@ export const NumberInputField = forwardRef<
       });
       onChange && onChange(event);
     }
-  }, [focused, id, inputValue, name, onChange]);
+  }, [extractNumericValue, focused, id, inputValue, name, onChange]);
 
   useEffect(() => {
     if (focused) {
@@ -167,10 +204,7 @@ export const NumberInputField = forwardRef<
 
   return (
     <TextField
-      ref={(inputField) => {
-        setInputField(inputField);
-        typeof ref === 'function' && ref(inputField);
-      }}
+      ref={ref}
       {...rest}
       {...{ name, id }}
       value={inputValue}
@@ -200,12 +234,18 @@ export const NumberInputField = forwardRef<
       }}
       onFocus={() => setFocused(true)}
       onBlur={() => setFocused(false)}
+      inputProps={{
+        ref: (inputField: HTMLInputElement | null) => {
+          setInputField(inputField);
+        },
+      }}
       InputProps={{
         ...InputProps,
         endAdornment: (
           <Stack>
             <IconButton
               onClick={(event) => {
+                inputField?.focus();
                 stepUpInputValue(getScaleFactor(event));
               }}
               sx={{ width: 10, height: 10, p: 1 }}
@@ -214,6 +254,7 @@ export const NumberInputField = forwardRef<
             </IconButton>
             <IconButton
               onClick={(event) => {
+                inputField?.focus();
                 stepDownInputValue(getScaleFactor(event));
               }}
               sx={{ width: 10, height: 10, p: 1 }}
