@@ -24,6 +24,8 @@ export interface ILoadingProps {
 export interface IFile {
   id?: string;
   base64: string;
+  name: string;
+  size: number;
   originalFile: File;
   extraParams?: any;
 }

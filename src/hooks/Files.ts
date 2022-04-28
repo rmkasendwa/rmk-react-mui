@@ -37,11 +37,14 @@ export const useFileUpload = ({
               .map((file) => {
                 return new Promise<IUploadableFile>((resolve, reject) => {
                   const reader = new FileReader();
+                  const { name, size } = file;
                   reader.readAsDataURL(file);
                   reader.onload = () =>
                     resolve({
                       base64: reader.result as string,
                       originalFile: file,
+                      name,
+                      size,
                     });
                   reader.onerror = (error) => reject(error);
                 });
