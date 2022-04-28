@@ -9,7 +9,14 @@ export const PercentageInputField = forwardRef<
   IPercentageInputFieldProps
 >(function PercentageInputField({ ...rest }, ref) {
   return (
-    <NumberInputField ref={ref} min={0} max={100} decimalPlaces={2} {...rest} />
+    <NumberInputField
+      ref={ref}
+      min={0}
+      max={100}
+      decimalPlaces={2}
+      valueSuffix="%"
+      {...rest}
+    />
   );
 });
 
