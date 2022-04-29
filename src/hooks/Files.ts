@@ -1,3 +1,4 @@
+import hash from 'object-hash';
 import { useEffect, useState } from 'react';
 
 import { ITextFieldProps } from '../components';
@@ -11,6 +12,7 @@ export interface IUseFileUploadOptions
   value?: IFile[];
   fileField?: HTMLInputElement | null;
   upload?: IFileUploadFunction;
+  convertFilesToBase64?: boolean;
 }
 export const useFileUpload = ({
   fileField,
@@ -19,6 +21,7 @@ export const useFileUpload = ({
   id,
   value,
   onChange,
+  convertFilesToBase64 = true,
 }: IUseFileUploadOptions) => {
   const [files, setFiles] = useState<IUploadableFile[]>([]);
 
@@ -35,19 +38,26 @@ export const useFileUpload = ({
                 return !existingFileNames.includes(file.name + file.size);
               })
               .map((file) => {
-                return new Promise<IUploadableFile>((resolve, reject) => {
-                  const reader = new FileReader();
-                  const { name, size } = file;
-                  reader.readAsDataURL(file);
-                  reader.onload = () =>
-                    resolve({
-                      base64: reader.result as string,
-                      originalFile: file,
-                      name,
-                      size,
-                    });
-                  reader.onerror = (error) => reject(error);
-                });
+                const { name, size } = file;
+                if (convertFilesToBase64) {
+                  return new Promise<IUploadableFile>((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    reader.onload = () =>
+                      resolve({
+                        base64: reader.result as string,
+                        originalFile: file,
+                        name,
+                        size,
+                      });
+                    reader.onerror = (error) => reject(error);
+                  });
+                }
+                return {
+                  originalFile: file,
+                  name,
+                  size,
+                };
               })
           );
           fileField.value = '';
@@ -148,15 +158,11 @@ export const useFileUpload = ({
         fileField.removeEventListener('change', changeEventCallback);
       };
     }
-  }, [fileField, files, upload]);
+  }, [convertFilesToBase64, fileField, files, upload]);
 
   useEffect(() => {
     setFiles((prevFiles) => {
-      if (
-        value &&
-        value.map(({ base64 }) => base64).join('') !==
-          prevFiles.map(({ base64 }) => base64).join('')
-      ) {
+      if (value && hash(value) !== hash(prevFiles)) {
         return value;
       }
       return prevFiles;

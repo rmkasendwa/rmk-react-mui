@@ -1,8 +1,8 @@
-import './style.scss';
-
 import CancelIcon from '@mui/icons-material/Cancel';
+import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import DeleteIcon from '@mui/icons-material/Delete';
+import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import ReplayIcon from '@mui/icons-material/Replay';
 import {
   Box,
@@ -21,13 +21,14 @@ import {
   alpha,
   useTheme,
 } from '@mui/material';
-import { Fragment, forwardRef, useRef, useState } from 'react';
+import { CSSProperties, Fragment, forwardRef, useRef, useState } from 'react';
 
 import { useFileUpload } from '../../hooks';
 import { IFile, IFileUploadFunction } from '../../interfaces';
 import { formatBytes } from '../../utils/bytes';
 import Card from '../Card';
 import { ITextFieldProps } from '../InputFields';
+import fileTypeIcons from './img/file-type-icons.png';
 
 export interface IFileUploaderProps
   extends Pick<
@@ -69,6 +70,18 @@ const supportedFileIcons = [
   'inf',
 ];
 
+const supportedSmallFileIconStyles = supportedFileIcons.reduce(
+  (accumulator, fileExtension, index) => {
+    const columnIndex = index % 12;
+    const rowIndex = Math.floor(index / 12);
+    accumulator[fileExtension] = {
+      backgroundPosition: `${-columnIndex * 68}px ${-rowIndex * 90}px`,
+    };
+    return accumulator;
+  },
+  {} as Record<string, CSSProperties>
+);
+
 const iconGroups: Record<string, string[]> = {
   jpg: ['jpeg'],
   zip: ['rar', '7z', 'gz', 'tar'],
@@ -101,6 +114,7 @@ export const FileUploader = forwardRef<HTMLDivElement, IFileUploaderProps>(
       id,
       value,
       onChange,
+      convertFilesToBase64: false,
     });
 
     const removeFile = (index: number) => {
@@ -115,7 +129,6 @@ export const FileUploader = forwardRef<HTMLDivElement, IFileUploaderProps>(
             setFileField(fileField);
           }}
           multiple
-          accept=".jpg,.png,.jpeg,.bmp"
           style={{ display: 'none' }}
         />
         <Grid container columnSpacing={3}>
@@ -203,25 +216,27 @@ export const FileUploader = forwardRef<HTMLDivElement, IFileUploaderProps>(
                     },
                     index
                   ) => {
-                    const fileIconClassNames = ['file-icon', 'file-icon-small'];
-                    const fileExtensionMatch = /\.(\w+)$/g.exec(name);
-                    if (
-                      fileExtensionMatch &&
-                      supportedFileIcons.includes(
-                        fileExtensionMatch[1].toLowerCase()
-                      )
-                    ) {
-                      const fileExtension = fileExtensionMatch[1].toLowerCase();
-                      fileIconClassNames.push(
-                        fileIconAliases[fileExtension] || fileExtension
-                      );
-                    }
+                    const fileExtension = (() => {
+                      const fileExtensionMatch = /\.(\w+)$/g.exec(name);
+                      if (
+                        fileExtensionMatch &&
+                        supportedFileIcons.includes(
+                          fileExtensionMatch[1].toLowerCase()
+                        )
+                      ) {
+                        const fileExtension =
+                          fileExtensionMatch[1].toLowerCase();
+                        return fileIconAliases[fileExtension] || fileExtension;
+                      }
+                      return false;
+                    })();
                     return (
                       <Fragment key={index}>
                         {index === 0 ? null : <Divider />}
                         <ListItem
                           sx={{
-                            px: 0,
+                            pl: 0,
+                            pr: 1,
                             py: 0.5,
                             '&:hover': {
                               backgroundColor: alpha(
@@ -231,11 +246,34 @@ export const FileUploader = forwardRef<HTMLDivElement, IFileUploaderProps>(
                             },
                           }}
                         >
-                          <ListItemAvatar sx={{ minWidth: 48 }}>
-                            <Box
-                              className={fileIconClassNames.join(' ')}
-                              sx={{ width: 30, height: 40 }}
-                            />
+                          <ListItemAvatar sx={{ minWidth: 40 }}>
+                            {fileExtension ? (
+                              <Box
+                                sx={{
+                                  width: 30,
+                                  height: 40,
+                                  '&:after': {
+                                    content: '""',
+                                    display: `block`,
+                                    width: 68,
+                                    height: 90,
+                                    position: `absolute`,
+                                    top: 14,
+                                    left: 7,
+                                    backgroundImage: `url('${fileTypeIcons}')`,
+                                    backgroundSize: 816,
+                                    backgroundRepeat: `no-repeat`,
+                                    transformOrigin: `top left`,
+                                    transform: `scale(0.36)`,
+                                    ...supportedSmallFileIconStyles[
+                                      fileExtension
+                                    ],
+                                  },
+                                }}
+                              />
+                            ) : (
+                              <InsertDriveFileIcon sx={{ fontSize: 36 }} />
+                            )}
                           </ListItemAvatar>
                           <ListItemText
                             primary={name}
@@ -267,7 +305,7 @@ export const FileUploader = forwardRef<HTMLDivElement, IFileUploaderProps>(
                             {!uploading && !uploadError ? (
                               <>
                                 <Button
-                                  startIcon={<CloudUploadIcon />}
+                                  startIcon={<CloudDownloadIcon />}
                                   variant="outlined"
                                   color="success"
                                 >
@@ -285,6 +323,8 @@ export const FileUploader = forwardRef<HTMLDivElement, IFileUploaderProps>(
                                 </Button>
                               </>
                             ) : null}
+
+                            {/* Upload components */}
                             {uploadError && retryUpload ? (
                               <Tooltip title={uploadError}>
                                 <Button
@@ -309,7 +349,7 @@ export const FileUploader = forwardRef<HTMLDivElement, IFileUploaderProps>(
                                   cancelUpload && cancelUpload();
                                 }}
                               >
-                                Cancel
+                                Cancel Upload
                               </Button>
                             ) : null}
                           </Box>

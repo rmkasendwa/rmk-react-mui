@@ -2,6 +2,7 @@ export * from './FormikCurrencyInputField';
 export * from './FormikDataDropdownField';
 export * from './FormikDateInputField';
 export * from './FormikFileInputField';
+export * from './FormikFileUploader';
 export * from './FormikImageSelector';
 export * from './FormikNumberInputField';
 export * from './FormikPasswordField';
