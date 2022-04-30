@@ -30,7 +30,7 @@ export interface IFile {
   extraParams?: any;
 }
 
-export interface IUploadableFile extends IFile {
+export interface ILoadableFile extends IFile {
   // Upload props
   uploading?: boolean;
   uploadProgress?: number;

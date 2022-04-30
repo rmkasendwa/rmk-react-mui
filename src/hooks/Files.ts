@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { ITextFieldProps } from '../components';
 import {
   IFile,
-  IUploadableFile,
+  ILoadableFile,
   TFileDownloadFunction,
   TFileUploadFunction,
 } from '../interfaces';
@@ -30,28 +30,30 @@ export const useFileUpload = ({
   onChange,
   convertFilesToBase64 = true,
 }: IUseFileUploadOptions) => {
-  const [files, setFiles] = useState<IUploadableFile[]>([]);
+  const [files, setFiles] = useState<ILoadableFile[]>([]);
 
   const getLoadableFiles = useCallback(
     (files: IFile[]) => {
       return files.map((file) => {
+        const loadableFile: ILoadableFile = { ...file };
         const { originalFile, id, extraParams } = file;
-        const retryFileUpload = () => {
-          setFiles((prevFiles) => {
-            const stateFile = prevFiles.find(
-              ({ originalFile: stateFile }) => stateFile === originalFile
-            );
-            if (stateFile) {
-              stateFile.uploadError = '';
-              delete stateFile.retryUpload;
-              Object.assign(stateFile, uploadFile());
-              return [...prevFiles];
-            }
-            return prevFiles;
-          });
-        };
-        const uploadFile = () => {
-          if (upload) {
+
+        if (upload) {
+          const retryFileUpload = () => {
+            setFiles((prevFiles) => {
+              const stateFile = prevFiles.find(
+                ({ originalFile: stateFile }) => stateFile === originalFile
+              );
+              if (stateFile) {
+                stateFile.uploadError = '';
+                delete stateFile.retryUpload;
+                Object.assign(stateFile, uploadFile());
+                return [...prevFiles];
+              }
+              return prevFiles;
+            });
+          };
+          const uploadFile = () => {
             const { cancel } = upload(originalFile, {
               onProgress: (progress) => {
                 setFiles((prevFiles) => {
@@ -118,25 +120,26 @@ export const useFileUpload = ({
               }
               return prevFiles;
             });
-          }
-        };
+          };
+          loadableFile.upload = uploadFile;
+        }
 
-        const retryFileDownload = () => {
-          setFiles((prevFiles) => {
-            const stateFile = prevFiles.find(
-              ({ id: stateId }) => stateId === id
-            );
-            if (stateFile) {
-              stateFile.uploadError = '';
-              delete stateFile.retryDownload;
-              Object.assign(stateFile, uploadFile());
-              return [...prevFiles];
-            }
-            return prevFiles;
-          });
-        };
-        const downloadFile = () => {
-          if (download) {
+        if (download) {
+          const retryFileDownload = () => {
+            setFiles((prevFiles) => {
+              const stateFile = prevFiles.find(
+                ({ id: stateId }) => stateId === id
+              );
+              if (stateFile) {
+                stateFile.uploadError = '';
+                delete stateFile.retryDownload;
+                Object.assign(stateFile, downloadFile());
+                return [...prevFiles];
+              }
+              return prevFiles;
+            });
+          };
+          const downloadFile = () => {
             const { cancel } = download(
               { id, extraParams },
               {
@@ -205,13 +208,10 @@ export const useFileUpload = ({
               }
               return prevFiles;
             });
-          }
-        };
-        return {
-          ...file,
-          upload: uploadFile,
-          download: downloadFile,
-        };
+          };
+          loadableFile.download = downloadFile;
+        }
+        return loadableFile;
       });
     },
     [download, upload]
@@ -232,7 +232,7 @@ export const useFileUpload = ({
               .map((file) => {
                 const { name, size } = file;
                 if (convertFilesToBase64) {
-                  return new Promise<IUploadableFile>((resolve, reject) => {
+                  return new Promise<ILoadableFile>((resolve, reject) => {
                     const reader = new FileReader();
                     reader.readAsDataURL(file);
                     reader.onload = () =>
@@ -253,17 +253,12 @@ export const useFileUpload = ({
               })
           );
           fileField.value = '';
-          const nextFiles = [
-            ...files,
-            ...getLoadableFiles(newFiles).map((newFile) => {
-              newFile.upload();
-              return {
-                ...newFile,
-                uploading: true,
-              };
-            }),
-          ];
+          const newLoadableFiles = getLoadableFiles(newFiles);
+          const nextFiles = [...files, ...newLoadableFiles];
           setFiles(nextFiles);
+          newLoadableFiles.forEach(({ upload }) => {
+            upload && upload();
+          });
         }
       };
       fileField.addEventListener('change', changeEventCallback);
