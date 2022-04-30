@@ -9,14 +9,14 @@ import {
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import { clearLoggedInUserSession } from '../auth';
-import { IAPIFunction } from '../interfaces';
+import { TAPIFunction } from '../interfaces';
 import { SESSION_LOGIN_ROUTE_PATH } from '../route-paths';
 
 export interface IAPIContext {
-  call: <T extends IAPIFunction>(func: T) => Promise<ReturnType<T>>;
+  call: <T extends TAPIFunction>(func: T) => Promise<ReturnType<T>>;
 }
 export const APIContext = createContext<IAPIContext>({
-  call: async (apiFunction: IAPIFunction) => {
+  call: async (apiFunction: TAPIFunction) => {
     return apiFunction();
   },
 });
@@ -28,7 +28,7 @@ export const APIProvider: FC<{
   const navigate = useNavigate();
   const { pathname, search } = useLocation();
 
-  const call = useCallback(async (apiCallback: IAPIFunction) => {
+  const call = useCallback(async (apiCallback: TAPIFunction) => {
     return apiCallback().catch((err) => {
       if (
         [

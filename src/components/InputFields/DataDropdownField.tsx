@@ -11,7 +11,7 @@ import {
 
 import { LoadingProvider } from '../../contexts';
 import { useAPIDataContext, useAPIService } from '../../hooks';
-import { IAPIFunction } from '../../interfaces';
+import { TAPIFunction } from '../../interfaces';
 import PaginatedDropdownOptionList, {
   IDropdownOption,
 } from '../PaginatedDropdownOptionList';
@@ -20,7 +20,7 @@ import TextField, { ITextFieldProps } from './TextField';
 
 export interface IDataDropdownFieldProps extends ITextFieldProps {
   disableEmptyOption?: boolean;
-  getDropdownEntities?: IAPIFunction;
+  getDropdownEntities?: TAPIFunction;
   getDropdownOptions?: (options: any[]) => IDropdownOption[];
   options?: IDropdownOption[];
   dataKey?: string;

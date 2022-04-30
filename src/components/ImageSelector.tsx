@@ -18,7 +18,7 @@ import Typography from '@mui/material/Typography';
 import { CSSProperties, forwardRef, useState } from 'react';
 
 import { useFileUpload } from '../hooks';
-import { IFile, IFileUploadFunction } from '../interfaces';
+import { IFile, TFileUploadFunction } from '../interfaces';
 import { ITextFieldProps } from './InputFields';
 
 export interface IImageSelectorProps
@@ -27,7 +27,7 @@ export interface IImageSelectorProps
     'helperText' | 'error' | 'onChange' | 'name' | 'id'
   > {
   value?: IFile[];
-  upload?: IFileUploadFunction;
+  upload?: TFileUploadFunction;
 }
 
 export const ImageSelector = forwardRef<HTMLDivElement, IImageSelectorProps>(

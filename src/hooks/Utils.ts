@@ -13,7 +13,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { CANCELLED_API_REQUEST_MESSAGE } from '../constants';
 import { APIContext, APIDataContext, LoadingContext } from '../contexts';
-import { IAPIFunction, ITaggedAPIRequest } from '../interfaces';
+import { ITaggedAPIRequest, TAPIFunction } from '../interfaces';
 import { RootState, updateData } from '../redux';
 
 export const useAPIService = <T>(defautValue: T, key?: string) => {
@@ -41,7 +41,7 @@ export const useAPIService = <T>(defautValue: T, key?: string) => {
   }, [data, key]);
 
   const load = useCallback(
-    async (apiFunction?: IAPIFunction, tag?: string, polling = false) => {
+    async (apiFunction?: TAPIFunction, tag?: string, polling = false) => {
       if (apiFunction) {
         setErrorMessage('');
         setLoaded(false);
@@ -55,7 +55,7 @@ export const useAPIService = <T>(defautValue: T, key?: string) => {
           }
         })();
         taggedAPIRequest && taggedAPIRequestsRef.current.push(taggedAPIRequest);
-        const data = await call(() => (apiFunction as IAPIFunction)()).catch(
+        const data = await call(() => (apiFunction as TAPIFunction)()).catch(
           (err) => {
             if (
               !String(err.message).match(CANCELLED_API_REQUEST_MESSAGE) &&
@@ -148,13 +148,13 @@ export const useUpdate = <T>() => {
 
 const DEFAULT_SYNC_TIMEOUT = 60 * 1000;
 export const useRecord = <T>(
-  recordFinder: IAPIFunction,
+  recordFinder: TAPIFunction,
   defautValue: T,
   key?: string,
   loadOnMount = true
 ) => {
   const nextSyncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const [apiFunction] = useState<IAPIFunction>(() => recordFinder);
+  const [apiFunction] = useState<TAPIFunction>(() => recordFinder);
   const {
     load: apiServiceLoad,
     loading,
@@ -205,7 +205,7 @@ export const useRecord = <T>(
 };
 
 export const useRecords = <T>(
-  recordFinder: IAPIFunction,
+  recordFinder: TAPIFunction,
   key?: string,
   loadOnMount = true
 ) => {
