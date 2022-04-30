@@ -211,6 +211,14 @@ export const FileUploader = forwardRef<HTMLDivElement, IFileUploaderProps>(
                       uploadError,
                       cancelUpload,
                       retryUpload,
+
+                      download,
+                      downloading,
+                      downloadProgress,
+                      downloadError,
+                      cancelDownload,
+                      retryDownload,
+
                       name,
                       size,
                     },
@@ -302,26 +310,36 @@ export const FileUploader = forwardRef<HTMLDivElement, IFileUploaderProps>(
                             }}
                           />
                           <Box sx={{ display: 'flex', gap: 1 }}>
-                            {!uploading && !uploadError ? (
-                              <>
-                                <Button
-                                  startIcon={<CloudDownloadIcon />}
-                                  variant="outlined"
-                                  color="success"
-                                >
-                                  Download
-                                </Button>
-                                <Button
-                                  startIcon={<DeleteIcon />}
-                                  variant="outlined"
-                                  color="error"
-                                  onClick={() => {
-                                    removeFile(index);
-                                  }}
-                                >
-                                  Delete
-                                </Button>
-                              </>
+                            {download &&
+                            !uploading &&
+                            !uploadError &&
+                            !downloading &&
+                            !downloadError ? (
+                              <Button
+                                startIcon={<CloudDownloadIcon />}
+                                variant="outlined"
+                                color="success"
+                                onClick={() => download()}
+                              >
+                                Download
+                              </Button>
+                            ) : null}
+                            {!uploading &&
+                            !uploadError &&
+                            !downloading &&
+                            !downloadError ? (
+                              <Button
+                                startIcon={<DeleteIcon />}
+                                variant="outlined"
+                                color="error"
+                                onClick={() => {
+                                  removeFile(index);
+                                  cancelUpload && cancelUpload();
+                                  cancelDownload && cancelDownload();
+                                }}
+                              >
+                                Delete
+                              </Button>
                             ) : null}
 
                             {/* Upload components */}
@@ -352,6 +370,35 @@ export const FileUploader = forwardRef<HTMLDivElement, IFileUploaderProps>(
                                 Cancel Upload
                               </Button>
                             ) : null}
+
+                            {/* Download components */}
+                            {downloadError && retryDownload ? (
+                              <Tooltip title={downloadError}>
+                                <Button
+                                  startIcon={<ReplayIcon />}
+                                  variant="outlined"
+                                  color="info"
+                                  onClick={() => {
+                                    retryDownload();
+                                  }}
+                                >
+                                  Try Again
+                                </Button>
+                              </Tooltip>
+                            ) : null}
+                            {downloading || downloadError ? (
+                              <Button
+                                startIcon={<CancelIcon />}
+                                variant="outlined"
+                                color="warning"
+                                onClick={() => {
+                                  removeFile(index);
+                                  cancelDownload && cancelDownload();
+                                }}
+                              >
+                                Cancel Download
+                              </Button>
+                            ) : null}
                           </Box>
                         </ListItem>
                         {uploadProgress && (uploading || uploadError) ? (
@@ -359,6 +406,13 @@ export const FileUploader = forwardRef<HTMLDivElement, IFileUploaderProps>(
                             value={uploadProgress}
                             variant="determinate"
                             color={uploadError ? 'error' : 'info'}
+                          />
+                        ) : null}
+                        {downloadProgress && (downloading || downloadError) ? (
+                          <LinearProgress
+                            value={downloadProgress}
+                            variant="determinate"
+                            color={downloadError ? 'error' : 'info'}
                           />
                         ) : null}
                       </Fragment>
