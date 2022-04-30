@@ -24,7 +24,7 @@ import {
 import { CSSProperties, Fragment, forwardRef, useRef, useState } from 'react';
 
 import { useFileUpload } from '../../hooks';
-import { IFile, IFileUploadFunction } from '../../interfaces';
+import { IFile, TFileUploadFunction } from '../../interfaces';
 import { formatBytes } from '../../utils/bytes';
 import Card from '../Card';
 import { ITextFieldProps } from '../InputFields';
@@ -36,7 +36,7 @@ export interface IFileUploaderProps
     'helperText' | 'error' | 'onChange' | 'name' | 'id'
   > {
   value?: IFile[];
-  upload?: IFileUploadFunction;
+  upload?: TFileUploadFunction;
 }
 
 const supportedFileIcons = [

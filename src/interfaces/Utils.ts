@@ -1,6 +1,6 @@
 import { AxiosRequestConfig } from 'axios';
 
-export type IAPIFunction = () => Promise<any>;
+export type TAPIFunction = () => Promise<any>;
 
 export interface IReduxAction {
   type: string;
@@ -31,11 +31,21 @@ export interface IFile {
 }
 
 export interface IUploadableFile extends IFile {
+  // Upload props
   uploading?: boolean;
   uploadProgress?: number;
   uploadError?: string;
+  upload?: () => void;
   cancelUpload?: () => void;
   retryUpload?: () => void;
+
+  // Download props
+  downloading?: boolean;
+  downloadProgress?: number;
+  downloadError?: string;
+  download?: () => void;
+  cancelDownload?: () => void;
+  retryDownload?: () => void;
 }
 
 export interface IAsyncProcess {
@@ -49,8 +59,13 @@ export interface IAsyncProcessController {
   cancel: () => void;
 }
 
-export type IFileUploadFunction = (
+export type TFileUploadFunction = (
   file: File,
+  options: IAsyncProcess
+) => IAsyncProcessController;
+
+export type TFileDownloadFunction = (
+  downloadProps: Pick<IFile, 'id' | 'extraParams'>,
   options: IAsyncProcess
 ) => IAsyncProcessController;
 
