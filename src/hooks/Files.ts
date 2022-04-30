@@ -1,5 +1,6 @@
 import hash from 'object-hash';
 import { useCallback, useEffect, useState } from 'react';
+import uniqid from 'uniqid';
 
 import { ITextFieldProps } from '../components';
 import {
@@ -102,7 +103,6 @@ export const useFileUpload = ({
                   );
                   if (stateFile) {
                     stateFile.uploading = false;
-                    delete stateFile.cancelUpload;
                     return [...prevFiles];
                   }
                   return prevFiles;
@@ -115,7 +115,23 @@ export const useFileUpload = ({
               );
               if (stateFile) {
                 stateFile.uploading = true;
-                stateFile.cancelUpload = cancel;
+                stateFile.cancelUpload = () => {
+                  cancel();
+                  setFiles((prevFiles) => {
+                    const stateFile = prevFiles.find(
+                      ({ originalFile: stateFile }) =>
+                        stateFile === originalFile
+                    );
+                    if (stateFile) {
+                      stateFile.uploading = false;
+                      delete stateFile.cancelUpload;
+                      delete stateFile.uploadError;
+                      delete stateFile.uploadProgress;
+                      return [...prevFiles];
+                    }
+                    return prevFiles;
+                  });
+                };
                 return [...prevFiles];
               }
               return prevFiles;
@@ -131,7 +147,7 @@ export const useFileUpload = ({
                 ({ id: stateId }) => stateId === id
               );
               if (stateFile) {
-                stateFile.uploadError = '';
+                stateFile.downloadError = '';
                 delete stateFile.retryDownload;
                 Object.assign(stateFile, downloadFile());
                 return [...prevFiles];
@@ -189,7 +205,6 @@ export const useFileUpload = ({
                     );
                     if (stateFile) {
                       stateFile.downloading = false;
-                      delete stateFile.cancelDownload;
                       return [...prevFiles];
                     }
                     return prevFiles;
@@ -203,7 +218,21 @@ export const useFileUpload = ({
               );
               if (stateFile) {
                 stateFile.downloading = true;
-                stateFile.cancelDownload = cancel;
+                stateFile.cancelDownload = () => {
+                  cancel();
+                  setFiles((prevFiles) => {
+                    const stateFile = prevFiles.find(
+                      ({ id: stateId }) => stateId === id
+                    );
+                    if (stateFile) {
+                      stateFile.downloading = false;
+                      delete stateFile.downloadError;
+                      delete stateFile.downloadProgress;
+                      return [...prevFiles];
+                    }
+                    return prevFiles;
+                  });
+                };
                 return [...prevFiles];
               }
               return prevFiles;
@@ -247,6 +276,7 @@ export const useFileUpload = ({
                 }
                 return {
                   originalFile: file,
+                  id: uniqid(),
                   name,
                   size,
                 };

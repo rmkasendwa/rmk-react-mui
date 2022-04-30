@@ -24,7 +24,11 @@ import {
 import { CSSProperties, Fragment, forwardRef, useRef, useState } from 'react';
 
 import { useFileUpload } from '../../hooks';
-import { IFile, TFileUploadFunction } from '../../interfaces';
+import {
+  IFile,
+  TFileDownloadFunction,
+  TFileUploadFunction,
+} from '../../interfaces';
 import { formatBytes } from '../../utils/bytes';
 import Card from '../Card';
 import { ITextFieldProps } from '../InputFields';
@@ -37,6 +41,7 @@ export interface IFileUploaderProps
   > {
   value?: IFile[];
   upload?: TFileUploadFunction;
+  download?: TFileDownloadFunction;
 }
 
 const supportedFileIcons = [
@@ -100,7 +105,7 @@ supportedFileIcons.push(...Object.keys(fileIconAliases));
 
 export const FileUploader = forwardRef<HTMLDivElement, IFileUploaderProps>(
   function FileUploader(
-    { helperText, error, onChange, name, id, value, upload },
+    { helperText, error, onChange, name, id, value, upload, download },
     ref
   ) {
     const theme = useTheme();
@@ -110,6 +115,7 @@ export const FileUploader = forwardRef<HTMLDivElement, IFileUploaderProps>(
     const { files, setFiles } = useFileUpload({
       fileField,
       upload,
+      download,
       name,
       id,
       value,
@@ -285,19 +291,7 @@ export const FileUploader = forwardRef<HTMLDivElement, IFileUploaderProps>(
                           </ListItemAvatar>
                           <ListItemText
                             primary={name}
-                            secondary={
-                              <>
-                                {formatBytes(size)}{' '}
-                                <Typography
-                                  variant="body2"
-                                  component="span"
-                                  color={theme.palette.success.main}
-                                >
-                                  •
-                                </Typography>{' '}
-                                Ronald M. Kasendwa
-                              </>
-                            }
+                            secondary={formatBytes(size)}
                             secondaryTypographyProps={{
                               sx: {
                                 fontSize: 12,
@@ -392,7 +386,6 @@ export const FileUploader = forwardRef<HTMLDivElement, IFileUploaderProps>(
                                 variant="outlined"
                                 color="warning"
                                 onClick={() => {
-                                  removeFile(index);
                                   cancelDownload && cancelDownload();
                                 }}
                               >
