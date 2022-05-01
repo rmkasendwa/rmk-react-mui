@@ -17,6 +17,7 @@ export const EntityViewWrapper: FC<IEntityViewWrapperProps> = ({
   title,
   pathToEdit,
   tools,
+  breadcrumbs,
 }) => {
   const toolsList: ReactNode[] = [];
   pathToEdit &&
@@ -34,7 +35,7 @@ export const EntityViewWrapper: FC<IEntityViewWrapperProps> = ({
     );
   tools && toolsList.push(tools);
   return (
-    <PaddedContentArea title={title} tools={toolsList}>
+    <PaddedContentArea tools={toolsList} {...{ title, breadcrumbs }}>
       {children}
     </PaddedContentArea>
   );

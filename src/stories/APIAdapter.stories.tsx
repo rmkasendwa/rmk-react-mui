@@ -4,7 +4,7 @@ import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { get } from '../api';
 
 export default {
-  title: 'Utils/API Adapter',
+  title: 'API/API Adapter',
   component: Button,
   parameters: {
     layout: 'centered',

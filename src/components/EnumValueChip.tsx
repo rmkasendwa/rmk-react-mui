@@ -1,8 +1,6 @@
 import { Chip, ChipProps, darken, useTheme } from '@mui/material';
 import { FC } from 'react';
 
-import { WHITE_COLOR } from '../theme';
-
 export interface IEnumValueChipProps extends ChipProps {
   label?: string;
   value: string;
@@ -23,7 +21,10 @@ export const EnumValueChip: FC<IEnumValueChipProps> = ({
     if (colors[value]) {
       return colors[value];
     }
-    return { bgcolor: palette.error.main, fgcolor: WHITE_COLOR };
+    return {
+      bgcolor: palette.error.main,
+      fgcolor: palette.getContrastText(palette.error.main),
+    };
   })();
 
   if (palette.mode === 'dark') {
