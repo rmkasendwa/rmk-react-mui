@@ -11,6 +11,7 @@ import { Children, FC, ReactNode } from 'react';
 export interface IPaddedContentAreaProps extends ContainerProps {
   title?: string;
   tools?: ReactNode | ReactNode[];
+  breadcrumbs?: ReactNode;
 }
 
 export const PaddedContentArea: FC<IPaddedContentAreaProps> = ({
@@ -18,6 +19,7 @@ export const PaddedContentArea: FC<IPaddedContentAreaProps> = ({
   title,
   sx,
   tools,
+  breadcrumbs,
   ...rest
 }) => {
   const theme = useTheme();
@@ -26,7 +28,6 @@ export const PaddedContentArea: FC<IPaddedContentAreaProps> = ({
 
   return (
     <Container
-      component="main"
       {...rest}
       sx={{
         flex: 1,
@@ -37,6 +38,7 @@ export const PaddedContentArea: FC<IPaddedContentAreaProps> = ({
         ...sx,
       }}
     >
+      {breadcrumbs && largeScreen ? breadcrumbs : null}
       {((title && largeScreen) || tools) && (
         <Grid
           container

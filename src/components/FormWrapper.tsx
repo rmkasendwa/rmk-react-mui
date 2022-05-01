@@ -12,7 +12,7 @@ import PaddedContentArea, {
 } from './PaddedContentArea';
 
 export interface IFormWrapperProps<Values extends FormikValues = FormikValues>
-  extends Omit<IPaddedContentAreaProps, 'onSubmit' | 'children'> {
+  extends Omit<IPaddedContentAreaProps, 'onSubmit'> {
   initialValues?: Values;
   validationSchema?: any;
   onSubmit?: (
@@ -26,6 +26,7 @@ export const FormWrapper: FC<IFormWrapperProps> = ({
   children,
   title,
   tools,
+  breadcrumbs,
   initialValues = {},
   validationSchema,
   onSubmit,
@@ -35,7 +36,7 @@ export const FormWrapper: FC<IFormWrapperProps> = ({
   const { load, loading, errorMessage } = useLoadingContext();
 
   return (
-    <PaddedContentArea title={title} tools={tools}>
+    <PaddedContentArea {...{ title, breadcrumbs, tools }}>
       {errorMessage && (
         <Box sx={{ mb: 2 }}>
           <ErrorAlert message={errorMessage} retry={load} />

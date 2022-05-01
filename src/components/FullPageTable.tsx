@@ -1,20 +1,20 @@
 import CloseIcon from '@mui/icons-material/Close';
 import SearchIcon from '@mui/icons-material/Search';
 import {
-  AppBar,
   Box,
-  Button,
   Container,
-  Grid,
-  IconButton,
-  Paper,
   TextField,
-  Toolbar,
   Typography,
   alpha,
   useTheme,
 } from '@mui/material';
-import { FC, useEffect, useMemo, useState } from 'react';
+import AppBar from '@mui/material/AppBar';
+import Button from '@mui/material/Button';
+import Grid from '@mui/material/Grid';
+import IconButton from '@mui/material/IconButton';
+import Paper from '@mui/material/Paper';
+import Toolbar from '@mui/material/Toolbar';
+import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import { ILoadingProps } from '../interfaces';
@@ -26,21 +26,31 @@ import PaddedContentArea, {
 import ReloadIconButton from './ReloadIconButton';
 import Table, { ITableProps } from './Table';
 
-export interface IFullPageTableProps
+export interface IFullPageTableProps<T = any>
   extends IPaddedContentAreaProps,
     Pick<
-      ITableProps,
+      ITableProps<T>,
       | 'columns'
       | 'rows'
       | 'onClickRow'
       | 'forEachDerivedColumn'
       | 'labelPlural'
       | 'variant'
+      | 'showHeaderRow'
     >,
     Partial<ILoadingProps> {
   pathToAddNew?: string;
+  permissionToAddNew?: string | string[];
+  permissionToViewDetails?: string | string[];
   load?: () => void;
+  TableProps?: Partial<ITableProps>;
+  paging?: boolean;
+  showStatusBar?: boolean;
+  searchFieldPlaceholder?: string;
+  getSearchableColumnValues?: (row: any) => (string | string[])[];
 }
+
+const DEFAULT_ROW_HEIGHT = 50;
 
 export const FullPageTable: FC<IFullPageTableProps> = ({
   title,
@@ -52,10 +62,28 @@ export const FullPageTable: FC<IFullPageTableProps> = ({
   labelPlural,
   tools,
   variant,
+  showHeaderRow,
+  breadcrumbs,
   loading,
   errorMessage,
   load,
+  permissionToAddNew,
+  permissionToViewDetails,
+  TableProps,
+  paging = true,
+  showStatusBar = true,
+  searchFieldPlaceholder,
+  getSearchableColumnValues,
 }) => {
+  searchFieldPlaceholder ||
+    (searchFieldPlaceholder = (() => {
+      const searchableFieldLabels = columns
+        .filter(({ label }) => label && typeof label === 'string')
+        .map(({ label }) => (label as string).toLowerCase());
+      return `Search by ${searchableFieldLabels
+        .slice(0, -1)
+        .join(', ')}, or ${searchableFieldLabels.slice(-1)}`;
+    })());
   const [tablePageIndex, setTablePageIndex] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredRows, setFilteredRows] = useState<any[]>([]);
@@ -68,12 +96,24 @@ export const FullPageTable: FC<IFullPageTableProps> = ({
   const searchableColumnIds = useMemo(() => {
     return columns.map(({ id }) => id);
   }, [columns]);
-  const searchableFieldLabels = columns
-    .filter((label) => typeof label === 'string')
-    .map(({ label }) => (label as string).toLowerCase());
-  const searchFieldPlaceholder = `Search by ${searchableFieldLabels
-    .slice(0, -1)
-    .join(', ')}, or ${searchableFieldLabels.slice(-1)}`;
+
+  const matchesSearchTerm = useCallback(
+    (lowerCaseSearchTerm: string, columnValue: string | string[]) => {
+      if (Array.isArray(columnValue)) {
+        return columnValue.some((item) => {
+          return (
+            typeof item === 'string' &&
+            item.toLowerCase().match(lowerCaseSearchTerm)
+          );
+        });
+      }
+      return (
+        typeof columnValue === 'string' &&
+        columnValue.toLowerCase().match(lowerCaseSearchTerm)
+      );
+    },
+    []
+  );
 
   const theme = useTheme();
 
@@ -82,80 +122,65 @@ export const FullPageTable: FC<IFullPageTableProps> = ({
       const lowerCaseSearchTerm = searchTerm.toLowerCase();
       setFilteredRows(
         rows.filter((row) => {
-          return searchableColumnIds.some((columnId) => {
-            const columnValue = row[columnId];
-            if (Array.isArray(columnValue)) {
-              return columnValue.some((item) => {
-                return (
-                  typeof item === 'string' &&
-                  item.toLowerCase().match(lowerCaseSearchTerm)
-                );
-              });
-            }
-            return (
-              typeof columnValue === 'string' &&
-              columnValue.toLowerCase().match(lowerCaseSearchTerm)
+          if (getSearchableColumnValues) {
+            return getSearchableColumnValues(row).some((columnValue) =>
+              matchesSearchTerm(lowerCaseSearchTerm, columnValue)
             );
-          });
+          }
+          return searchableColumnIds.some((columnId) =>
+            matchesSearchTerm(lowerCaseSearchTerm, row[columnId])
+          );
         })
       );
     } else {
       setFilteredRows(rows);
     }
-  }, [rows, searchTerm, searchTerm.length, searchableColumnIds]);
+  }, [
+    getSearchableColumnValues,
+    matchesSearchTerm,
+    rows,
+    searchTerm,
+    searchTerm.length,
+    searchableColumnIds,
+  ]);
 
   useEffect(() => {
-    if (tableWrapperDiv && document.scrollingElement) {
-      const scrollCallback = () => {
-        const { scrollY } = window;
-        const topRowCount = Math.floor(scrollY / 54);
-        setDisplayRows(
-          filteredRows.slice(
-            0,
-            topRowCount + Math.ceil(window.innerHeight / 54)
-          )
-        );
-      };
+    if (paging) {
+      if (tableWrapperDiv && document.scrollingElement) {
+        const scrollCallback = () => {
+          const { scrollY } = window;
+          const topRowCount = Math.floor(scrollY / DEFAULT_ROW_HEIGHT);
+          setDisplayRows(
+            filteredRows.slice(
+              0,
+              topRowCount + Math.ceil(window.innerHeight / DEFAULT_ROW_HEIGHT)
+            )
+          );
+        };
 
-      window.addEventListener('scroll', scrollCallback);
-      scrollCallback();
-      return () => {
-        window.removeEventListener('scroll', scrollCallback);
-      };
+        window.addEventListener('scroll', scrollCallback);
+        scrollCallback();
+        return () => {
+          window.removeEventListener('scroll', scrollCallback);
+        };
+      }
+    } else {
+      setDisplayRows(filteredRows);
     }
-  }, [filteredRows, filteredRows.length, tableWrapperDiv]);
+  }, [filteredRows, filteredRows.length, paging, tableWrapperDiv]);
 
   useEffect(() => {
     if (tableWrapperDiv) {
-      tableWrapperDiv.style.minHeight = `${(filteredRows.length + 2) * 54}px`;
+      tableWrapperDiv.style.minHeight = `${
+        (filteredRows.length + 1) * DEFAULT_ROW_HEIGHT
+      }px`;
     }
   }, [filteredRows.length, tableWrapperDiv]);
 
   useEffect(() => {
     const scrollCallback = () => {
       const { scrollY } = window;
-      setShowStickyToolBar((previousValue) => {
-        if (previousValue === false) {
-          if (scrollY >= 85) {
-            if (scrollY < 130 && document.scrollingElement) {
-              document.scrollingElement.scrollTop = 130;
-            }
-            return true;
-          }
-        } else {
-          if (scrollY < 120) {
-            if (scrollY >= 85 && document.scrollingElement) {
-              document.scrollingElement.scrollTop = 84;
-            }
-            return false;
-          }
-        }
-        return previousValue;
-      });
-      if (scrollY >= 85) {
-      } else {
-        setShowStickyToolBar(false);
-      }
+      setShowStickyToolBar(scrollY >= 80);
     };
     window.addEventListener('scroll', scrollCallback);
     scrollCallback();
@@ -165,14 +190,23 @@ export const FullPageTable: FC<IFullPageTableProps> = ({
   }, []);
 
   useEffect(() => {
-    setDisplayRows(filteredRows.slice(0, Math.ceil(window.innerHeight / 54)));
-  }, [filteredRows]);
+    if (paging) {
+      setDisplayRows(
+        filteredRows.slice(
+          0,
+          Math.ceil(window.innerHeight / DEFAULT_ROW_HEIGHT)
+        )
+      );
+    } else {
+      setDisplayRows(filteredRows);
+    }
+  }, [filteredRows, paging]);
 
   const toolbar = (
     <Toolbar>
-      <Grid container spacing={2} alignItems="center">
+      <Grid container alignItems="center">
         <Grid item>
-          <SearchIcon color="inherit" sx={{ display: 'block' }} />
+          <SearchIcon color="inherit" sx={{ display: 'block', mr: 1 }} />
         </Grid>
         <Grid item xs>
           <TextField
@@ -194,20 +228,26 @@ export const FullPageTable: FC<IFullPageTableProps> = ({
           />
         </Grid>
         <Grid item>
-          {pathToAddNew && (
-            <Button
-              variant="contained"
-              component={Link}
-              to={pathToAddNew}
-              sx={{ mr: 1 }}
-              size="small"
-            >
-              Add New
-            </Button>
-          )}
-          {loading && rows.length <= 0 ? null : (
-            <ReloadIconButton {...{ load, loading }} />
-          )}
+          <Grid container alignItems="center">
+            {pathToAddNew && !permissionToAddNew ? (
+              <Grid item>
+                <Button
+                  variant="contained"
+                  component={Link}
+                  to={pathToAddNew}
+                  sx={{ mr: 1 }}
+                  size="small"
+                >
+                  Add New
+                </Button>
+              </Grid>
+            ) : null}
+            {loading && rows.length <= 0 ? null : (
+              <Grid item>
+                <ReloadIconButton {...{ load, loading }} />
+              </Grid>
+            )}
+          </Grid>
         </Grid>
       </Grid>
     </Toolbar>
@@ -216,22 +256,30 @@ export const FullPageTable: FC<IFullPageTableProps> = ({
   return (
     <>
       {showStickyToolBar && (
-        <AppBar
-          position="sticky"
-          color="default"
-          elevation={0}
+        <Box
           sx={{
-            borderBottom: `1px solid ${alpha(
-              theme.palette.text.primary,
-              0.12
-            )}`,
+            position: 'sticky',
             top: 56,
+            height: 0,
+            zIndex: 5,
           }}
         >
-          <Container>{toolbar}</Container>
-        </AppBar>
+          <AppBar
+            position="static"
+            color="default"
+            elevation={0}
+            sx={{
+              borderBottom: `1px solid ${alpha(
+                theme.palette.text.primary,
+                0.12
+              )}`,
+            }}
+          >
+            <Container>{toolbar}</Container>
+          </AppBar>
+        </Box>
       )}
-      <PaddedContentArea title={title} tools={tools}>
+      <PaddedContentArea title={title} tools={tools} breadcrumbs={breadcrumbs}>
         <Paper sx={{ overflow: 'hidden' }}>
           <AppBar
             position="static"
@@ -242,6 +290,7 @@ export const FullPageTable: FC<IFullPageTableProps> = ({
                 theme.palette.text.primary,
                 0.12
               )}`,
+              visibility: showStickyToolBar ? 'hidden' : 'visible',
             }}
           >
             {toolbar}
@@ -268,37 +317,43 @@ export const FullPageTable: FC<IFullPageTableProps> = ({
                 }}
               >
                 <Table
-                  columns={columns}
+                  {...{
+                    columns,
+                    forEachDerivedColumn,
+                    labelPlural,
+                    variant,
+                    showHeaderRow,
+                  }}
+                  {...TableProps}
                   rows={displayRows}
                   pageIndex={tablePageIndex}
                   onChangePage={(pageIndex) => {
                     setTablePageIndex(pageIndex);
                   }}
-                  onClickRow={onClickRow}
-                  forEachDerivedColumn={forEachDerivedColumn}
-                  labelPlural={labelPlural}
-                  variant={variant}
+                  onClickRow={!permissionToViewDetails ? onClickRow : undefined}
                   paging={false}
                 />
               </Box>
             );
           })()}
-          <Grid container sx={{ px: 3, py: 2 }}>
-            <Grid item xs />
-            <Grid item>
-              {filteredRows.length > 0 ? (
-                filteredRows.length === rows.length ? (
-                  <Typography variant="body2">
-                    Displaying {filteredRows.length} rows
-                  </Typography>
-                ) : (
-                  <Typography variant="body2">
-                    Filtering {filteredRows.length} out of {rows.length} rows
-                  </Typography>
-                )
-              ) : null}
+          {showStatusBar ? (
+            <Grid container sx={{ px: 3, py: 2 }}>
+              <Grid item xs />
+              <Grid item>
+                {filteredRows.length > 0 ? (
+                  filteredRows.length === rows.length ? (
+                    <Typography variant="body2">
+                      Displaying {filteredRows.length} rows
+                    </Typography>
+                  ) : (
+                    <Typography variant="body2">
+                      Filtering {filteredRows.length} out of {rows.length} rows
+                    </Typography>
+                  )
+                ) : null}
+              </Grid>
             </Grid>
-          </Grid>
+          ) : null}
         </Paper>
       </PaddedContentArea>
     </>
