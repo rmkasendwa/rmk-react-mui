@@ -68,7 +68,6 @@ export const FullPageTable: FC<IFullPageTableProps> = ({
   errorMessage,
   load,
   permissionToAddNew,
-  permissionToViewDetails,
   TableProps,
   paging = true,
   showStatusBar = true,
@@ -330,7 +329,7 @@ export const FullPageTable: FC<IFullPageTableProps> = ({
                   onChangePage={(pageIndex) => {
                     setTablePageIndex(pageIndex);
                   }}
-                  onClickRow={!permissionToViewDetails ? onClickRow : undefined}
+                  onClickRow={onClickRow}
                   paging={false}
                 />
               </Box>

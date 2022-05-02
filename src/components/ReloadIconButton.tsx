@@ -28,7 +28,7 @@ export const ReloadIconButton: FC<IReloadIconButtonProps> = ({
       {(() => {
         if (loading) {
           return (
-            <Tooltip title="Loading..." arrow>
+            <Tooltip title="Loading...">
               <Box component="span">
                 <IconButton disabled>
                   <CircularProgress size={24} color="inherit" />
@@ -38,7 +38,7 @@ export const ReloadIconButton: FC<IReloadIconButtonProps> = ({
           );
         }
         const refreshButton = (
-          <Tooltip title="Reload" arrow>
+          <Tooltip title="Reload">
             <Box component="span">
               <IconButton onClick={() => load && load()}>
                 <RefreshIcon color="inherit" sx={{ display: 'block' }} />
@@ -48,9 +48,9 @@ export const ReloadIconButton: FC<IReloadIconButtonProps> = ({
         );
         if (errorMessage) {
           return (
-            <Grid container alignItems="center" columnSpacing={1}>
+            <Grid container alignItems="center">
               <Grid item display="flex">
-                <Tooltip title={errorMessage} arrow>
+                <Tooltip title={errorMessage}>
                   <ErrorIcon color="error" />
                 </Tooltip>
               </Grid>

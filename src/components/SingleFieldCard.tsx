@@ -73,7 +73,7 @@ export const SingleFieldCard: FC<ISingleFieldCardProps> = ({
                 },
               }}
             >
-              {value}
+              {value || '-'}
             </Typography>
           </>
         );
