@@ -234,6 +234,11 @@ export const getBaseTheme = (palette: Palette): any => {
           },
         },
       },
+      MuiTooltip: {
+        defaultProps: {
+          arrow: true,
+        },
+      },
     },
   });
 };

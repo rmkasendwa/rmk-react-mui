@@ -105,7 +105,7 @@ export const NumberInputField = forwardRef<
   useEffect(() => {
     if (!focused) {
       if (value !== undefined) {
-        if (value != null) {
+        if (value != null && typeof value === 'number') {
           let numericValue = value;
 
           if (min != null && numericValue < min) numericValue = min;
