@@ -6,14 +6,15 @@ import {
   Box,
   Card,
   ClickAwayListener,
-  Divider,
   Grow,
-  MenuItem,
   Popper,
   Typography,
 } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
+import PaginatedDropdownOptionList, {
+  IDropdownOption,
+} from '../../PaginatedDropdownOptionList';
 import TextField from '../TextField';
 import { ICountry, countries } from './countries';
 
@@ -25,6 +26,26 @@ export interface ICountryListProps {
   anchor?: any;
 }
 
+const getCountryOption = ({ regionalCode, name, countryCode }: ICountry) => {
+  return {
+    label: (
+      <>
+        <i
+          className={`phone-field-flag-icon phone-field-flag-${regionalCode.toLowerCase()}`}
+        />
+        <span className="phone-field-flag-country-name">
+          {name}{' '}
+          <Typography variant="body2" component="span">
+            +{countryCode}
+          </Typography>
+        </span>
+      </>
+    ),
+    searchableLabel: name,
+    value: regionalCode,
+  } as IDropdownOption;
+};
+
 const CountryList: React.FC<ICountryListProps> = ({
   open,
   onClose,
@@ -32,30 +53,60 @@ const CountryList: React.FC<ICountryListProps> = ({
   selectedCountry,
   anchor,
 }) => {
-  const [limit, setLimit] = useState(7);
   const [searchTerm, setSearchTerm] = useState('');
+  const [filteredOptions, setFilteredOptions] = useState<IDropdownOption[]>([]);
+  const [selectedOptions, setSelectedOptions] = useState<IDropdownOption[]>([]);
+
+  const options = useMemo(() => {
+    return countries.map((country) => getCountryOption(country));
+  }, []);
+
+  useEffect(() => {
+    setFilteredOptions(
+      options.filter(({ searchableLabel }) => {
+        return (
+          !searchTerm ||
+          (searchableLabel &&
+            searchableLabel.toLowerCase().match(searchTerm.toLowerCase()))
+        );
+      })
+    );
+  }, [options, searchTerm]);
+
+  useEffect(() => {
+    if (selectedCountry) {
+      setSelectedOptions([getCountryOption(selectedCountry)]);
+    } else {
+      setSelectedOptions([]);
+    }
+  }, [selectedCountry]);
 
   const handleClose = () => {
     onClose && onClose();
   };
 
-  const displayCountries = countries
-    .filter(({ name }) => {
-      return !searchTerm || name.toLowerCase().match(searchTerm.toLowerCase());
-    })
-    .slice(0, limit);
-
   return (
-    <Popper open={open} anchorEl={anchor} transition placement="bottom-start">
-      {({ TransitionProps }) => {
-        return (
-          <Grow {...TransitionProps}>
-            <Box>
-              <ClickAwayListener onClickAway={handleClose}>
-                <Card>
-                  <Box sx={{ p: 2 }}>
+    <>
+      <Popper
+        open={open}
+        anchorEl={anchor}
+        transition
+        placement="bottom-start"
+        ref={(element) => {
+          if (element) {
+            element.style.zIndex = '1400';
+          }
+        }}
+        tabIndex={-1}
+      >
+        {({ TransitionProps }) => {
+          return (
+            <Grow {...TransitionProps}>
+              <Box tabIndex={-1}>
+                <ClickAwayListener onClickAway={handleClose}>
+                  <Card>
                     <TextField
-                      variant="outlined"
+                      variant="filled"
                       size="small"
                       placeholder="Search"
                       value={searchTerm}
@@ -71,84 +122,44 @@ const CountryList: React.FC<ICountryListProps> = ({
                           />
                         ) : null,
                       }}
+                      inputProps={{
+                        sx: {
+                          py: 1.5,
+                        },
+                      }}
                       onChange={(event) => setSearchTerm(event.target.value)}
                       fullWidth
                     />
-                  </Box>
-                  <Divider />
-                  <Box
-                    onScroll={(event: any) => {
-                      if (
-                        limit < countries.length &&
-                        event.target.scrollHeight -
-                          event.target.scrollTop -
-                          event.target.offsetHeight <
-                          30
-                      ) {
-                        setLimit((prevLimit) => {
-                          const nextLimit = Math.floor(prevLimit * 1.5);
-                          if (countries.length < nextLimit) {
-                            return countries.length;
-                          }
-                          return nextLimit;
-                        });
-                      }
-                    }}
-                    component="ul"
-                    sx={{
-                      minWidth: 200,
-                      maxHeight: 200,
-                      p: 0,
-                      overflowY: 'auto',
-                    }}
-                  >
-                    {displayCountries.length > 0 ? (
-                      displayCountries.map(
-                        ({ regionalCode, countryCode, name }) => {
-                          return (
-                            <MenuItem
-                              onClick={() => {
-                                onSelectCountry &&
-                                  onSelectCountry({
-                                    regionalCode,
-                                    name,
-                                    countryCode,
-                                  });
-                                handleClose();
-                              }}
-                              selected={
-                                regionalCode === selectedCountry?.regionalCode
-                              }
-                              key={regionalCode}
-                            >
-                              <i
-                                className={`phone-field-flag-icon phone-field-flag-${regionalCode.toLowerCase()}`}
-                              />
-                              <span className="phone-field-flag-country-name">
-                                {name}{' '}
-                                <Typography variant="body2" component="span">
-                                  +{countryCode}
-                                </Typography>
-                              </span>
-                            </MenuItem>
-                          );
+                    <PaginatedDropdownOptionList
+                      options={filteredOptions}
+                      minWidth={anchor ? anchor.offsetWidth : undefined}
+                      onClose={handleClose}
+                      selectedOptions={selectedOptions}
+                      setSelectedOptions={setSelectedOptions}
+                      onSelectOption={({ value }) => {
+                        const country = countries.find(
+                          ({ regionalCode }) => regionalCode === value
+                        );
+                        if (onSelectCountry && country) {
+                          onSelectCountry(country);
                         }
-                      )
-                    ) : (
-                      <MenuItem>
-                        <Typography variant="body2">
-                          No countries found
-                        </Typography>
-                      </MenuItem>
-                    )}
-                  </Box>
-                </Card>
-              </ClickAwayListener>
-            </Box>
-          </Grow>
-        );
-      }}
-    </Popper>
+                        handleClose();
+                      }}
+                      CardProps={{
+                        sx: {
+                          bgcolor: 'transparent',
+                          border: 'none',
+                        },
+                      }}
+                    />
+                  </Card>
+                </ClickAwayListener>
+              </Box>
+            </Grow>
+          );
+        }}
+      </Popper>
+    </>
   );
 };
 
