@@ -1,4 +1,11 @@
-import { Box, Card, MenuItem, Typography, useTheme } from '@mui/material';
+import {
+  Box,
+  Card,
+  CardProps,
+  MenuItem,
+  Typography,
+  useTheme,
+} from '@mui/material';
 import {
   Dispatch,
   Fragment,
@@ -34,6 +41,8 @@ export interface IPaginatedDropdownOptionListProps {
   loading?: boolean;
   onClose?: () => void;
   loadOptions?: () => void;
+  onSelectOption?: (selectedOption: IDropdownOption) => void;
+  CardProps?: CardProps;
 }
 
 const DEFAULT_DROPDOWN_MENU_MAX_HEIGHT = 200;
@@ -55,6 +64,8 @@ export const PaginatedDropdownOptionList = forwardRef<
     onClose,
     loading,
     loadOptions,
+    onSelectOption,
+    CardProps,
   },
   ref
 ) {
@@ -191,7 +202,7 @@ export const PaginatedDropdownOptionList = forwardRef<
     : options;
 
   return (
-    <Card ref={ref} tabIndex={-1}>
+    <Card {...CardProps} ref={ref} tabIndex={-1}>
       <Box
         ref={(scrollableDropdownWrapper: HTMLDivElement) => {
           setScrollableDropdownWrapper(scrollableDropdownWrapper);
@@ -244,6 +255,7 @@ export const PaginatedDropdownOptionList = forwardRef<
                       selectable
                         ? () => {
                             selectOption(option);
+                            onSelectOption && onSelectOption(option);
                           }
                         : undefined
                     }

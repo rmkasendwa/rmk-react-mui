@@ -19,6 +19,8 @@ const PhoneNumberUtil = new PhoneNumberUtilConstructor();
 
 export default PhoneNumberUtil;
 
+export { IPhoneNumber };
+
 export const getRegionalCode = (
   formattedPhoneNumber: string
 ): ICountryCode | undefined => {

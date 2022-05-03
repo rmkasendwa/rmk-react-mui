@@ -13,7 +13,10 @@ import {
 
 import { GlobalConfigurationContext } from '../../../contexts';
 import { ICountryCode } from '../../../interfaces';
-import { systemStandardPhoneNumberFormat } from '../../../utils/PhoneNumberUtil';
+import {
+  getRegionalCode,
+  systemStandardPhoneNumberFormat,
+} from '../../../utils/PhoneNumberUtil';
 import TextField, { ITextFieldProps } from '../TextField';
 import { ICountry, countries } from './countries';
 import CountryList from './CountryList';
@@ -54,13 +57,13 @@ export const PhoneNumberInputField = forwardRef<
     onChange,
     value,
     name,
-    regionalCode,
+    regionalCode: regionalCodeProp,
     ...rest
   },
   ref
 ) {
   const { countryCode } = useContext(GlobalConfigurationContext);
-  regionalCode || (regionalCode = countryCode);
+  const [regionalCode, setRegionalCode] = useState(countryCode);
   const [selectedCountry, setSelectedCountry] = useState(flags[regionalCode]);
 
   const anchorRef = useRef(null);
@@ -70,6 +73,7 @@ export const PhoneNumberInputField = forwardRef<
   const handleMenuToggle = () => {
     setMenuOpen((prevOpen) => !prevOpen);
   };
+
   const handleMenuClose = () => {
     setMenuOpen(false);
   };
@@ -82,6 +86,14 @@ export const PhoneNumberInputField = forwardRef<
           validCharacters.join(''),
           regionalCode
         );
+        const sanitizedValueRegionalCode = getRegionalCode(sanitizedValue);
+        if (
+          sanitizedValueRegionalCode &&
+          regionalCode &&
+          sanitizedValueRegionalCode !== regionalCode
+        ) {
+          setRegionalCode(sanitizedValueRegionalCode);
+        }
         setInputValue(sanitizedValue);
       } else {
         setInputValue('');
@@ -93,6 +105,16 @@ export const PhoneNumberInputField = forwardRef<
   useEffect(() => {
     value != null && setSanitizedInputValue(value);
   }, [setSanitizedInputValue, value]);
+
+  useEffect(() => {
+    if (regionalCodeProp) {
+      setRegionalCode(regionalCodeProp);
+    }
+  }, [regionalCodeProp]);
+
+  useEffect(() => {
+    setSelectedCountry(flags[regionalCode]);
+  }, [regionalCode]);
 
   return (
     <TextField
