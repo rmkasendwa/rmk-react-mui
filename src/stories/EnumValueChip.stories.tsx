@@ -11,19 +11,16 @@ export default {
   },
 } as ComponentMeta<typeof EnumValueChip>;
 
-const Template: ComponentStory<typeof EnumValueChip> = (props) => {
-  console.log({ props });
-  return (
-    <EnumValueChip
-      colors={{
-        ACTIVE: '#4F945C',
-        PENDING: '#EDB80B',
-        TRANSLUSENT: alpha('#1F0E68', 0.3),
-      }}
-      {...props}
-    />
-  );
-};
+const Template: ComponentStory<typeof EnumValueChip> = (props) => (
+  <EnumValueChip
+    colors={{
+      ACTIVE: '#4F945C',
+      PENDING: '#EDB80B',
+      TRANSLUSENT: alpha('#1F0E68', 0.3),
+    }}
+    {...props}
+  />
+);
 
 export const Default = Template.bind({});
 Default.args = {
