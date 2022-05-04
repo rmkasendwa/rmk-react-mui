@@ -48,6 +48,8 @@ export interface IFullPageTableProps<T = any>
   showStatusBar?: boolean;
   searchFieldPlaceholder?: string;
   getSearchableColumnValues?: (row: any) => (string | string[])[];
+  searchTerm?: string;
+  onChangeSearchTerm?: (searchTerm: string) => void;
 }
 
 const DEFAULT_ROW_HEIGHT = 50;
@@ -73,6 +75,8 @@ export const FullPageTable: FC<IFullPageTableProps> = ({
   showStatusBar = true,
   searchFieldPlaceholder,
   getSearchableColumnValues,
+  searchTerm: searchTermProp = '',
+  onChangeSearchTerm,
 }) => {
   searchFieldPlaceholder ||
     (searchFieldPlaceholder = (() => {
@@ -114,7 +118,15 @@ export const FullPageTable: FC<IFullPageTableProps> = ({
     []
   );
 
-  const theme = useTheme();
+  useEffect(() => {
+    setSearchTerm(searchTermProp);
+  }, [searchTermProp]);
+
+  useEffect(() => {
+    onChangeSearchTerm && onChangeSearchTerm(searchTerm);
+  }, [onChangeSearchTerm, searchTerm]);
+
+  const { palette } = useTheme();
 
   useEffect(() => {
     if (searchTerm.length > 0) {
@@ -241,7 +253,7 @@ export const FullPageTable: FC<IFullPageTableProps> = ({
                 </Button>
               </Grid>
             ) : null}
-            {loading && rows.length <= 0 ? null : (
+            {(loading && rows.length <= 0) || !load ? null : (
               <Grid item>
                 <ReloadIconButton {...{ load, loading }} />
               </Grid>
@@ -268,10 +280,7 @@ export const FullPageTable: FC<IFullPageTableProps> = ({
             color="default"
             elevation={0}
             sx={{
-              borderBottom: `1px solid ${alpha(
-                theme.palette.text.primary,
-                0.12
-              )}`,
+              borderBottom: `1px solid ${alpha(palette.text.primary, 0.12)}`,
             }}
           >
             <Container>{toolbar}</Container>
@@ -285,10 +294,7 @@ export const FullPageTable: FC<IFullPageTableProps> = ({
             color="default"
             elevation={0}
             sx={{
-              borderBottom: `1px solid ${alpha(
-                theme.palette.text.primary,
-                0.12
-              )}`,
+              borderBottom: `1px solid ${alpha(palette.text.primary, 0.12)}`,
               visibility: showStickyToolBar ? 'hidden' : 'visible',
             }}
           >
