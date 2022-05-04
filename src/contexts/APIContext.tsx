@@ -8,9 +8,8 @@ import {
 } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-import { clearLoggedInUserSession } from '../auth';
 import { TAPIFunction } from '../interfaces';
-import { SESSION_LOGIN_ROUTE_PATH } from '../route-paths';
+import { useAuth } from './AuthContext';
 
 export interface IAPIContext {
   call: <T extends TAPIFunction>(func: T) => Promise<ReturnType<T>>;
@@ -23,37 +22,39 @@ export const APIContext = createContext<IAPIContext>({
 
 export const APIProvider: FC<{
   children: ReactNode;
-}> = ({ children }) => {
+  onSessionExpired: () => void;
+}> = ({ children, onSessionExpired }) => {
   const [sessionExpired, setSessionExpired] = useState(false);
   const navigate = useNavigate();
   const { pathname, search } = useLocation();
+  const { clearLoggedInUserSession } = useAuth();
 
-  const call = useCallback(async (apiCallback: TAPIFunction) => {
-    return apiCallback().catch((err) => {
-      if (
-        [
-          'User session timed out',
-          'Session timed out',
-          'Invalid token',
-        ].includes(err.message)
-      ) {
-        clearLoggedInUserSession();
-        setSessionExpired(true);
-      } else {
-        throw err;
-      }
-    });
-  }, []);
+  const call = useCallback(
+    async (apiCallback: TAPIFunction) => {
+      return apiCallback().catch((err) => {
+        if (
+          [
+            'User session timed out',
+            'Session timed out',
+            'Invalid token',
+          ].includes(err.message)
+        ) {
+          clearLoggedInUserSession();
+          setSessionExpired(true);
+        } else {
+          throw err;
+        }
+      });
+    },
+    [clearLoggedInUserSession]
+  );
 
   useEffect(() => {
     if (sessionExpired) {
-      navigate(
-        SESSION_LOGIN_ROUTE_PATH +
-          `?return_to=${encodeURIComponent(pathname + search)}`
-      );
+      onSessionExpired();
       setSessionExpired(false);
     }
-  }, [navigate, pathname, search, sessionExpired]);
+  }, [navigate, onSessionExpired, pathname, search, sessionExpired]);
 
   return <APIContext.Provider value={{ call }}>{children}</APIContext.Provider>;
 };
