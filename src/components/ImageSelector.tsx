@@ -10,6 +10,7 @@ import {
   FormHelperText,
   Grid,
   IconButton,
+  Modal,
   alpha,
   darken,
   useTheme,
@@ -18,7 +19,7 @@ import Typography from '@mui/material/Typography';
 import { CSSProperties, forwardRef, useState } from 'react';
 
 import { useFileUpload } from '../hooks';
-import { IFile, TFileUploadFunction } from '../interfaces';
+import { IFile, ILoadableFile, TFileUploadFunction } from '../interfaces';
 import { ITextFieldProps } from './InputFields';
 
 export interface IImageSelectorProps
@@ -35,6 +36,8 @@ export const ImageSelector = forwardRef<HTMLDivElement, IImageSelectorProps>(
     { helperText, error, onChange, name, id, value, upload },
     ref
   ) {
+    const [selectedImageFile, setSelectedImageFile] =
+      useState<ILoadableFile | null>(null);
     const [fileField, setFileField] = useState<HTMLInputElement | null>(null);
     const { files: images, setFiles: setImages } = useFileUpload({
       fileField,
@@ -56,44 +59,44 @@ export const ImageSelector = forwardRef<HTMLDivElement, IImageSelectorProps>(
     error && (wrapperStyle.borderColor = palette.error.main);
 
     return (
-      <FormControl ref={ref} fullWidth error={error}>
-        <Card
-          sx={{
-            p: 1.5,
-            borderRadius: 1,
-            bgcolor: darken(palette.background.paper, 0.03),
-            borderStyle: 'dashed',
-            ...wrapperStyle,
-          }}
-        >
-          <input
-            type="file"
-            ref={(fileField) => {
-              setFileField(fileField);
+      <>
+        <FormControl ref={ref} fullWidth error={error}>
+          <Card
+            sx={{
+              p: 1.5,
+              borderRadius: 1,
+              bgcolor: darken(palette.background.paper, 0.03),
+              borderStyle: 'dashed',
+              ...wrapperStyle,
             }}
-            multiple
-            accept=".jpg,.png,.jpeg,.bmp"
-            style={{ display: 'none' }}
-          />
-          <Grid container spacing={1.5}>
-            {images.map(
-              (
-                {
+          >
+            <input
+              type="file"
+              ref={(fileField) => {
+                setFileField(fileField);
+              }}
+              multiple
+              accept=".jpg,.png,.jpeg,.bmp"
+              style={{ display: 'none' }}
+            />
+            <Grid container spacing={1.5}>
+              {images.map((image, index) => {
+                const {
                   base64,
                   uploading,
                   uploadProgress,
                   uploadError,
                   cancelUpload,
                   retryUpload,
-                },
-                index
-              ) => {
+                } = image;
                 return (
                   <Grid item xs={4} sm={3} md={2} key={index}>
                     <Card
+                      onClick={() => setSelectedImageFile(image)}
                       sx={{
                         borderRadius: 1,
                         position: 'relative',
+                        cursor: 'pointer',
                       }}
                     >
                       <Avatar
@@ -116,7 +119,8 @@ export const ImageSelector = forwardRef<HTMLDivElement, IImageSelectorProps>(
                         }}
                       >
                         <IconButton
-                          onClick={() => {
+                          onClick={(event) => {
+                            event.stopPropagation();
                             handleClickImageRemoveButton(index);
                             cancelUpload && cancelUpload();
                           }}
@@ -133,7 +137,10 @@ export const ImageSelector = forwardRef<HTMLDivElement, IImageSelectorProps>(
                         </IconButton>
                         {retryUpload && (
                           <IconButton
-                            onClick={retryUpload}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              retryUpload();
+                            }}
                             sx={{
                               bgcolor: alphaBGColor,
                               '&:hover': {
@@ -162,42 +169,100 @@ export const ImageSelector = forwardRef<HTMLDivElement, IImageSelectorProps>(
                     </Card>
                   </Grid>
                 );
-              }
-            )}
-            <Grid item xs={4} sm={3} md={2}>
-              <Button
-                onClick={() => {
-                  fileField?.click();
-                }}
-                sx={{
-                  borderRadius: 1,
-                  width: '100%',
-                  height: `80px !important`,
-                  bgcolor: palette.background.paper,
-                  color: '#BABCC1',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  border: 'none',
-                  '&:hover': {
+              })}
+              <Grid item xs={4} sm={3} md={2}>
+                <Button
+                  onClick={() => {
+                    fileField?.click();
+                  }}
+                  sx={{
+                    borderRadius: 1,
+                    width: '100%',
+                    height: `80px !important`,
                     bgcolor: palette.background.paper,
-                  },
-                }}
-              >
-                <CameraAltIcon />
-                <Typography
-                  variant="body2"
-                  sx={{ fontSize: 12, color: '#BABCC1' }}
+                    color: '#BABCC1',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    border: 'none',
+                    '&:hover': {
+                      bgcolor: palette.background.paper,
+                    },
+                  }}
                 >
-                  Add Photos
-                </Typography>
-              </Button>
+                  <CameraAltIcon />
+                  <Typography
+                    variant="body2"
+                    sx={{ fontSize: 12, color: '#BABCC1' }}
+                  >
+                    Add Photos
+                  </Typography>
+                </Button>
+              </Grid>
             </Grid>
-          </Grid>
-        </Card>
-        {helperText && <FormHelperText>{helperText}</FormHelperText>}
-      </FormControl>
+          </Card>
+          {helperText && <FormHelperText>{helperText}</FormHelperText>}
+        </FormControl>
+
+        <Modal
+          open={Boolean(selectedImageFile)}
+          onClose={() => setSelectedImageFile(null)}
+          aria-labelledby="child-modal-title"
+          aria-describedby="child-modal-description"
+          ref={(modal: HTMLDivElement) => {
+            if (modal) {
+              Object.assign(modal.style, {
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              });
+            }
+          }}
+        >
+          <>
+            {(() => {
+              if (selectedImageFile) {
+                return (
+                  <>
+                    <Box>
+                      <img src={selectedImageFile.base64} alt="Selected File" />
+                    </Box>
+                    <Grid
+                      container
+                      sx={{
+                        position: 'fixed',
+                        alignItems: 'center',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                      }}
+                    >
+                      <Grid item xs />
+                      <Grid item sx={{ p: 3 }}>
+                        <IconButton
+                          onClick={() => setSelectedImageFile(null)}
+                          sx={{
+                            bgcolor: alphaBGColor,
+                            '&:hover': {
+                              bgcolor: alphaBGColor,
+                            },
+                            color: palette.background.paper,
+                          }}
+                        >
+                          <CloseIcon />
+                        </IconButton>
+                      </Grid>
+                    </Grid>
+                  </>
+                );
+              }
+            })()}
+          </>
+        </Modal>
+      </>
     );
   }
 );
