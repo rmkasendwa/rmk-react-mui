@@ -40,7 +40,7 @@ export interface ICard extends ICardIdentifier, Omit<BoxProps, 'title' | 'id'> {
   title: ReactNode;
   description: ReactNode;
   draggable?: boolean;
-  tool?: TKanbanBoardCardToolItem[];
+  tools?: TKanbanBoardCardToolItem[];
 }
 
 export interface ILane extends Omit<BoxProps, 'title' | 'id'> {

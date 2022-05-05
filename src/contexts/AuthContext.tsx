@@ -9,6 +9,7 @@ import {
 } from 'react';
 
 import { login as apiLogin, logout as apiLogout } from '../api';
+import { TPermissionCode } from '../interfaces';
 import StorageManager from '../utils/StorageManager';
 
 export interface IAuthContext {
@@ -22,12 +23,16 @@ export interface IAuthContext {
   updateLoggedInUser: (user: any) => void;
   authenticated: boolean;
   clearLoggedInUserSession: () => void;
+  loggedUserHasPermission: (
+    permissionCode: TPermissionCode | TPermissionCode[]
+  ) => boolean;
 }
 export const AuthContext = createContext<IAuthContext>({} as any);
 
 export const AuthProvider: FC<{
   children: ReactNode;
-}> = ({ children }) => {
+  value?: Record<string, any>;
+}> = ({ children, value }) => {
   const [loggedInUser, setLoggedInUser] = useState<any | null>(null);
 
   useEffect(() => {
@@ -71,6 +76,30 @@ export const AuthProvider: FC<{
     [updateLoggedInUserSession]
   );
 
+  const loggedInUserPermissions = useCallback(() => {
+    if (loggedInUser && loggedInUser.permissions) {
+      return loggedInUser.permissions;
+    }
+    return [];
+  }, [loggedInUser]);
+
+  const loggedUserHasPermission = useCallback(
+    (permissionCode: TPermissionCode | TPermissionCode[]) => {
+      const permissions = loggedInUserPermissions();
+      const isSuperAdmin = permissions.includes('ALL_FUNCTIONS');
+      if (isSuperAdmin) {
+        return isSuperAdmin;
+      }
+      if (Array.isArray(permissionCode)) {
+        return permissionCode.some((permission) => {
+          return permissions.includes(permission);
+        });
+      }
+      return permissions.includes(permissionCode);
+    },
+    [loggedInUserPermissions]
+  );
+
   return (
     <AuthContext.Provider
       value={{
@@ -80,6 +109,8 @@ export const AuthProvider: FC<{
         updateLoggedInUser,
         clearLoggedInUserSession,
         authenticated: loggedInUser !== null,
+        loggedUserHasPermission,
+        ...value,
       }}
     >
       {children}

@@ -1,6 +1,7 @@
-import { Box, alpha, useTheme } from '@mui/material';
+import { Box, Grid, Tooltip, Typography, alpha, useTheme } from '@mui/material';
 import { FC, useContext } from 'react';
 
+import CardTools from './CardTools';
 import { ICard, KanbanBoardContext } from './KanbanBoardContext';
 
 export interface ICardProps extends ICard {}
@@ -11,6 +12,7 @@ const Card: FC<ICardProps> = ({
   title,
   description,
   sx,
+  tools,
   ...rest
 }) => {
   const { palette } = useTheme();
@@ -32,9 +34,24 @@ const Card: FC<ICardProps> = ({
       }}
       onClick={onCardClick ? () => onCardClick(id, laneId) : undefined}
     >
-      <Box component="header" sx={{ pb: 1, fontSize: 14 }}>
-        {title}
-      </Box>
+      <Grid container component="header" sx={{ pb: 1, alignItems: 'center' }}>
+        <Grid item xs minWidth={0}>
+          <Tooltip title={<>{title}</>}>
+            <Typography sx={{ fontSize: 14 }} noWrap>
+              {title}
+            </Typography>
+          </Tooltip>
+        </Grid>
+        {(() => {
+          if (tools) {
+            return (
+              <Grid item display="flex">
+                <CardTools tools={tools} cardId={id} laneId={laneId} />
+              </Grid>
+            );
+          }
+        })()}
+      </Grid>
       <Box
         component="section"
         sx={{
