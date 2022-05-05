@@ -87,7 +87,7 @@ const Lane: FC<ILaneProps> = ({
         <Box component="header" className="column-drag-handle" sx={{ p: 1 }}>
           <Grid container spacing={1} alignItems="center">
             {showCardCount && cards.length > 0 ? (
-              <Grid item>
+              <Grid item display="flex">
                 <Badge
                   badgeContent={cards.length}
                   color="primary"
@@ -102,9 +102,11 @@ const Lane: FC<ILaneProps> = ({
               </Grid>
             ) : null}
             <Grid item xs minWidth={0}>
-              <Typography sx={{ fontWeight: 'bold', fontSize: 15 }} noWrap>
-                {title}
-              </Typography>
+              <Tooltip title={<>{title}</>}>
+                <Typography sx={{ fontWeight: 'bold', fontSize: 15 }} noWrap>
+                  {title}
+                </Typography>
+              </Tooltip>
             </Grid>
             {(() => {
               if (tools) {

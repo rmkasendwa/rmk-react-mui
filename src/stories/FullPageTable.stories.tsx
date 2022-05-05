@@ -15,7 +15,6 @@ const Template: ComponentStory<typeof FullPageTable> = (props) => (
         {
           id: 'accountNumber',
           label: 'Account Number',
-          type: 'id',
           width: 180,
         },
         { id: 'name', label: 'Name' },

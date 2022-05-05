@@ -148,3 +148,74 @@ WithLaneTools.args = {
     };
   }),
 };
+
+export const WithCardTools = Template.bind({});
+WithCardTools.args = {
+  lanes: BASE_LANES.map(({ cards: baseCards, ...laneProps }, laneIndex) => {
+    laneProps.draggable = true;
+    return {
+      ...laneProps,
+      cards: baseCards.map(({ ...cardProps }, index) => {
+        cardProps.draggable = true;
+        switch ((laneIndex + index) % 4) {
+          case 0:
+            return {
+              ...cardProps,
+              tools: [
+                {
+                  icon: <AllInboxIcon />,
+                  label: 'One Tool With Icon',
+                  onClick: (laneId, cardId) => {
+                    console.log({ cardId, laneId });
+                  },
+                },
+              ],
+            };
+          case 1:
+            return {
+              ...cardProps,
+              tools: [
+                {
+                  label: 'One Tool Without Icon',
+                  onClick: (laneId, cardId) => {
+                    console.log({ cardId, laneId });
+                  },
+                },
+              ],
+            };
+          case 2:
+            return {
+              ...cardProps,
+              tools: [
+                { label: 'Edit card' },
+                { label: 'Archive card' },
+                'DIVIDER',
+                { label: 'Copy card link' },
+                { label: 'Delete card' },
+              ],
+            };
+          case 3:
+            return {
+              ...cardProps,
+              tools: [
+                { label: 'Edit card', icon: <EditIcon /> },
+                { label: 'Archive card', icon: <ArchiveIcon /> },
+                'DIVIDER',
+                { label: 'Copy card link' },
+                { label: 'Delete card' },
+              ],
+            };
+        }
+        return {
+          ...cardProps,
+          tools: [
+            {
+              icon: <AllInboxIcon />,
+              label: 'One Tool With Icon',
+            },
+          ],
+        };
+      }),
+    };
+  }),
+};
