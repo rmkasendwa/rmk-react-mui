@@ -1,5 +1,6 @@
 export * from './AuthGuard';
 export * from './Card';
+export * from './CloseButton';
 export * from './EntityViewWrapper';
 export * from './EnumValueChip';
 export * from './ErrorAlert';

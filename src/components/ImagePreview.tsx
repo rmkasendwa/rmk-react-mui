@@ -1,13 +1,7 @@
-import CloseIcon from '@mui/icons-material/Close';
-import {
-  Card,
-  IconButton,
-  Modal,
-  ModalProps,
-  alpha,
-  useTheme,
-} from '@mui/material';
+import { Card, Modal, ModalProps, useTheme } from '@mui/material';
 import { forwardRef, useCallback, useEffect, useRef, useState } from 'react';
+
+import CloseButton from './CloseButton';
 
 export interface IImagePreviewProps extends Omit<ModalProps, 'children'> {
   imageSource?: string;
@@ -22,8 +16,7 @@ export const ImagePreview = forwardRef<HTMLDivElement, IImagePreviewProps>(
     const [imagePreviewElement, setImagePreviewElement] =
       useState<HTMLDivElement | null>(null);
 
-    const { palette, spacing } = useTheme();
-    const alphaBGColor = alpha(palette.text.primary, 0.3);
+    const { spacing } = useTheme();
 
     const transformImagePreview = useCallback(() => {
       if (imagePreviewElement) {
@@ -176,23 +169,16 @@ export const ImagePreview = forwardRef<HTMLDivElement, IImagePreviewProps>(
                       backgroundImage: `url(${imageSource})`,
                     }}
                   />
-                  <IconButton
+                  <CloseButton
                     onClick={() => {
                       onClose && onClose({}, 'backdropClick');
                     }}
                     sx={{
-                      bgcolor: alphaBGColor,
-                      '&:hover': {
-                        bgcolor: alphaBGColor,
-                      },
-                      color: palette.background.paper,
                       position: 'fixed',
                       top: spacing(3),
                       right: spacing(3),
                     }}
-                  >
-                    <CloseIcon />
-                  </IconButton>
+                  />
                 </>
               );
             }
