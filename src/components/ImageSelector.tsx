@@ -10,7 +10,6 @@ import {
   FormHelperText,
   Grid,
   IconButton,
-  Modal,
   alpha,
   darken,
   useTheme,
@@ -20,6 +19,7 @@ import { CSSProperties, forwardRef, useState } from 'react';
 
 import { useFileUpload } from '../hooks';
 import { IFile, ILoadableFile, TFileUploadFunction } from '../interfaces';
+import ImagePreview from './ImagePreview';
 import { ITextFieldProps } from './InputFields';
 
 export interface IImageSelectorProps
@@ -204,64 +204,11 @@ export const ImageSelector = forwardRef<HTMLDivElement, IImageSelectorProps>(
           </Card>
           {helperText && <FormHelperText>{helperText}</FormHelperText>}
         </FormControl>
-
-        <Modal
+        <ImagePreview
           open={Boolean(selectedImageFile)}
           onClose={() => setSelectedImageFile(null)}
-          aria-labelledby="child-modal-title"
-          aria-describedby="child-modal-description"
-          ref={(modal: HTMLDivElement) => {
-            if (modal) {
-              Object.assign(modal.style, {
-                width: '100%',
-                height: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              });
-            }
-          }}
-        >
-          <>
-            {(() => {
-              if (selectedImageFile) {
-                return (
-                  <>
-                    <Box>
-                      <img src={selectedImageFile.base64} alt="Selected File" />
-                    </Box>
-                    <Grid
-                      container
-                      sx={{
-                        position: 'fixed',
-                        alignItems: 'center',
-                        top: 0,
-                        left: 0,
-                        width: '100%',
-                      }}
-                    >
-                      <Grid item xs />
-                      <Grid item sx={{ p: 3 }}>
-                        <IconButton
-                          onClick={() => setSelectedImageFile(null)}
-                          sx={{
-                            bgcolor: alphaBGColor,
-                            '&:hover': {
-                              bgcolor: alphaBGColor,
-                            },
-                            color: palette.background.paper,
-                          }}
-                        >
-                          <CloseIcon />
-                        </IconButton>
-                      </Grid>
-                    </Grid>
-                  </>
-                );
-              }
-            })()}
-          </>
-        </Modal>
+          imageSource={selectedImageFile?.base64}
+        />
       </>
     );
   }

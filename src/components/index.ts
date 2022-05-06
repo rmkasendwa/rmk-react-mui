@@ -11,6 +11,7 @@ export * from './FileUploader';
 export * from './FormWrapper';
 export * from './FormikInputFields';
 export * from './FullPageTable';
+export * from './ImagePreview';
 export * from './ImageSelector';
 export * from './InputFields';
 export * from './KanbanBoard';
