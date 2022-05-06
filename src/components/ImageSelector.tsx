@@ -1,5 +1,4 @@
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
-import CloseIcon from '@mui/icons-material/Close';
 import ReplayIcon from '@mui/icons-material/Replay';
 import {
   Avatar,
@@ -9,8 +8,6 @@ import {
   FormControl,
   FormHelperText,
   Grid,
-  IconButton,
-  alpha,
   darken,
   useTheme,
 } from '@mui/material';
@@ -19,6 +16,7 @@ import { CSSProperties, forwardRef, useState } from 'react';
 
 import { useFileUpload } from '../hooks';
 import { IFile, ILoadableFile, TFileUploadFunction } from '../interfaces';
+import CloseButton from './CloseButton';
 import ImagePreview from './ImagePreview';
 import { ITextFieldProps } from './InputFields';
 
@@ -54,7 +52,6 @@ export const ImageSelector = forwardRef<HTMLDivElement, IImageSelectorProps>(
     };
 
     const { palette } = useTheme();
-    const alphaBGColor = alpha(palette.text.primary, 0.3);
     const wrapperStyle: CSSProperties = {};
     error && (wrapperStyle.borderColor = palette.error.main);
 
@@ -118,40 +115,24 @@ export const ImageSelector = forwardRef<HTMLDivElement, IImageSelectorProps>(
                           gap: '5px',
                         }}
                       >
-                        <IconButton
+                        <CloseButton
                           onClick={(event) => {
                             event.stopPropagation();
                             handleClickImageRemoveButton(index);
                             cancelUpload && cancelUpload();
                           }}
-                          sx={{
-                            bgcolor: alphaBGColor,
-                            '&:hover': {
-                              bgcolor: alphaBGColor,
-                            },
-                            color: palette.background.paper,
-                          }}
                           size="small"
-                        >
-                          <CloseIcon sx={{ fontSize: '12px' }} />
-                        </IconButton>
+                          IconProps={{ sx: { fontSize: '12px' } }}
+                        />
                         {retryUpload && (
-                          <IconButton
+                          <CloseButton
                             onClick={(event) => {
                               event.stopPropagation();
                               retryUpload();
                             }}
-                            sx={{
-                              bgcolor: alphaBGColor,
-                              '&:hover': {
-                                bgcolor: alphaBGColor,
-                              },
-                              color: palette.background.paper,
-                            }}
                             size="small"
-                          >
-                            <ReplayIcon sx={{ fontSize: '12px' }} />
-                          </IconButton>
+                            icon={<ReplayIcon sx={{ fontSize: '12px' }} />}
+                          />
                         )}
                       </Box>
                       {uploadProgress && (uploading || uploadError) ? (
