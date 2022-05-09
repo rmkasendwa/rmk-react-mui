@@ -21,6 +21,7 @@ export * from './NotFound';
 export * from './NotificationsTool';
 export * from './PaddedContentArea';
 export * from './PaginatedDropdownOptionList';
+export * from './PermissionGuard';
 export * from './ReloadIconButton';
 export * from './RetryErrorMessage';
 export * from './SingleFieldCard';

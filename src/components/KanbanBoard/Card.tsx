@@ -35,12 +35,19 @@ const Card: FC<ICardProps> = ({
       onClick={onCardClick ? () => onCardClick(id, laneId) : undefined}
     >
       <Grid container component="header" sx={{ pb: 1, alignItems: 'center' }}>
-        <Grid item xs minWidth={0}>
-          <Tooltip title={<>{title}</>}>
-            <Typography sx={{ fontSize: 14 }} noWrap>
-              {title}
-            </Typography>
-          </Tooltip>
+        <Grid item xs sx={{ minWidth: 0, fontSize: 14 }}>
+          {(() => {
+            if (typeof title === 'string') {
+              return (
+                <Tooltip title={title} followCursor>
+                  <Typography sx={{ fontSize: 14 }} noWrap>
+                    {title}
+                  </Typography>
+                </Tooltip>
+              );
+            }
+            return <>{title}</>;
+          })()}
         </Grid>
         {(() => {
           if (tools) {

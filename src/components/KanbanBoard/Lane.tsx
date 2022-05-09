@@ -101,12 +101,26 @@ const Lane: FC<ILaneProps> = ({
                 />{' '}
               </Grid>
             ) : null}
-            <Grid item xs minWidth={0}>
-              <Tooltip title={<>{title}</>}>
-                <Typography sx={{ fontWeight: 'bold', fontSize: 15 }} noWrap>
-                  {title}
-                </Typography>
-              </Tooltip>
+            <Grid
+              item
+              xs
+              sx={{ minWidth: 0, fontWeight: 'bold', fontSize: 15 }}
+            >
+              {(() => {
+                if (typeof title === 'string') {
+                  return (
+                    <Tooltip title={title} followCursor>
+                      <Typography
+                        sx={{ fontWeight: 'bold', fontSize: 15 }}
+                        noWrap
+                      >
+                        {title}
+                      </Typography>
+                    </Tooltip>
+                  );
+                }
+                return <>{title}</>;
+              })()}
             </Grid>
             {(() => {
               if (tools) {
