@@ -93,7 +93,7 @@ export const ImageSelector = forwardRef<HTMLDivElement, IImageSelectorProps>(
                       sx={{
                         borderRadius: 1,
                         position: 'relative',
-                        cursor: 'pointer',
+                        cursor: 'zoom-in',
                       }}
                     >
                       <Avatar

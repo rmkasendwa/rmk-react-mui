@@ -26,6 +26,7 @@ export interface IAuthContext {
   loggedUserHasPermission: (
     permissionCode: TPermissionCode | TPermissionCode[]
   ) => boolean;
+  loadingCurrentSession: boolean;
 }
 export const AuthContext = createContext<IAuthContext>({} as any);
 
@@ -34,10 +35,12 @@ export const AuthProvider: FC<{
   value?: Record<string, any>;
 }> = ({ children, value }) => {
   const [loggedInUser, setLoggedInUser] = useState<any | null>(null);
+  const [loadingCurrentSession, setLoadingCurrentSession] = useState(true);
 
   useEffect(() => {
     const user = StorageManager.get('user');
     setLoggedInUser(user);
+    setLoadingCurrentSession(false);
   }, []);
 
   const updateLoggedInUserSession = useCallback((user: any) => {
@@ -110,6 +113,7 @@ export const AuthProvider: FC<{
         clearLoggedInUserSession,
         authenticated: loggedInUser !== null,
         loggedUserHasPermission,
+        loadingCurrentSession,
         ...value,
       }}
     >

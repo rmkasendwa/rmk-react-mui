@@ -167,6 +167,7 @@ export const ImagePreview = forwardRef<HTMLDivElement, IImagePreviewProps>(
                       width: image?.width,
                       height: image?.height,
                       backgroundImage: `url(${imageSource})`,
+                      cursor: 'move',
                     }}
                   />
                   <CloseButton
