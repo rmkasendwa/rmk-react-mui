@@ -1,12 +1,4 @@
-import {
-  FC,
-  ReactNode,
-  createContext,
-  useCallback,
-  useEffect,
-  useState,
-} from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { FC, ReactNode, createContext, useCallback, useEffect } from 'react';
 
 import { TAPIFunction } from '../interfaces';
 import { useAuth } from './AuthContext';
@@ -24,10 +16,7 @@ export const APIProvider: FC<{
   children: ReactNode;
   onSessionExpired: () => void;
 }> = ({ children, onSessionExpired }) => {
-  const [sessionExpired, setSessionExpired] = useState(false);
-  const navigate = useNavigate();
-  const { pathname, search } = useLocation();
-  const { clearLoggedInUserSession } = useAuth();
+  const { setSessionExpired, sessionExpired } = useAuth();
 
   const call = useCallback(
     async (apiCallback: TAPIFunction) => {
@@ -39,22 +28,20 @@ export const APIProvider: FC<{
             'Invalid token',
           ].includes(err.message)
         ) {
-          clearLoggedInUserSession();
           setSessionExpired(true);
         } else {
           throw err;
         }
       });
     },
-    [clearLoggedInUserSession]
+    [setSessionExpired]
   );
 
   useEffect(() => {
     if (sessionExpired) {
       onSessionExpired();
-      setSessionExpired(false);
     }
-  }, [navigate, onSessionExpired, pathname, search, sessionExpired]);
+  }, [onSessionExpired, sessionExpired]);
 
   return <APIContext.Provider value={{ call }}>{children}</APIContext.Provider>;
 };
