@@ -16,10 +16,12 @@ export const ClientSideAPIProvider: FC<{
   const { pathname, search } = useLocation();
 
   const onSessionExpired = useCallback(() => {
-    navigate(
-      SESSION_LOGIN_ROUTE_PATH +
-        `?return_to=${encodeURIComponent(pathname + search)}`
-    );
+    if (pathname !== SESSION_LOGIN_ROUTE_PATH) {
+      navigate(
+        SESSION_LOGIN_ROUTE_PATH +
+          `?return_to=${encodeURIComponent(pathname + search)}`
+      );
+    }
   }, [navigate, pathname, search]);
 
   return <APIProvider {...{ onSessionExpired }}>{children}</APIProvider>;

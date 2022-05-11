@@ -1,6 +1,8 @@
 import {
+  Dispatch,
   FC,
   ReactNode,
+  SetStateAction,
   createContext,
   useCallback,
   useContext,
@@ -27,6 +29,8 @@ export interface IAuthContext {
     permissionCode: TPermissionCode | TPermissionCode[]
   ) => boolean;
   loadingCurrentSession: boolean;
+  sessionExpired: boolean;
+  setSessionExpired: Dispatch<SetStateAction<boolean>>;
 }
 export const AuthContext = createContext<IAuthContext>({} as any);
 
@@ -36,6 +40,7 @@ export const AuthProvider: FC<{
 }> = ({ children, value }) => {
   const [loggedInUser, setLoggedInUser] = useState<any | null>(null);
   const [loadingCurrentSession, setLoadingCurrentSession] = useState(true);
+  const [sessionExpired, setSessionExpired] = useState(false);
 
   useEffect(() => {
     const user = StorageManager.get('user');
@@ -46,6 +51,7 @@ export const AuthProvider: FC<{
   const updateLoggedInUserSession = useCallback((user: any) => {
     StorageManager.add('user', user);
     setLoggedInUser(user);
+    setSessionExpired(false);
   }, []);
 
   const clearLoggedInUserSession = useCallback(() => {
@@ -103,6 +109,12 @@ export const AuthProvider: FC<{
     [loggedInUserPermissions]
   );
 
+  useEffect(() => {
+    if (sessionExpired) {
+      clearLoggedInUserSession();
+    }
+  }, [clearLoggedInUserSession, sessionExpired]);
+
   return (
     <AuthContext.Provider
       value={{
@@ -114,6 +126,8 @@ export const AuthProvider: FC<{
         authenticated: loggedInUser !== null,
         loggedUserHasPermission,
         loadingCurrentSession,
+        sessionExpired,
+        setSessionExpired,
         ...value,
       }}
     >
