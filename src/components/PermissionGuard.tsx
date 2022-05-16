@@ -5,6 +5,7 @@ import { useAuth } from '../contexts';
 export interface IPermissionGuardProps {
   permission: string | string[];
   fallbackComponent?: ReactNode;
+  children: ReactNode;
 }
 
 export const PermissionGuard: FC<IPermissionGuardProps> = ({

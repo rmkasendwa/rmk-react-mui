@@ -28,7 +28,12 @@ export const DateInputField = forwardRef<HTMLDivElement, IDateInputFieldProps>(
       value: value ? new Date(value) : new Date(),
       onChange: (date: any) => {
         if (inputField && (!date || !isNaN(date.getTime()))) {
-          inputField.value = date ? date.toISOString() : '';
+          inputField.value = date
+            ? (() => {
+                date.addMinutes(-date.getTimezoneOffset());
+                return date.toISOString();
+              })()
+            : '';
           const event: any = new Event('change', { bubbles: true });
           Object.defineProperty(event, 'target', {
             writable: false,

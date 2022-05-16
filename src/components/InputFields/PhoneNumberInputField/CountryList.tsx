@@ -1,5 +1,3 @@
-import './scss/style.scss';
-
 import ClearIcon from '@mui/icons-material/Clear';
 import SearchIcon from '@mui/icons-material/Search';
 import {
@@ -17,6 +15,8 @@ import PaginatedDropdownOptionList, {
 } from '../../PaginatedDropdownOptionList';
 import TextField from '../TextField';
 import { ICountry, countries } from './countries';
+import flagsImage from './flags.png';
+import { phoneNumberFlags } from './phoneNumberFlags';
 
 export interface ICountryListProps {
   open: boolean;
@@ -30,15 +30,21 @@ const getCountryOption = ({ regionalCode, name, countryCode }: ICountry) => {
   return {
     label: (
       <>
-        <i
-          className={`phone-field-flag-icon phone-field-flag-${regionalCode.toLowerCase()}`}
+        <Box
+          component="i"
+          sx={{
+            mr: 1,
+            display: 'inline-block',
+            width: 16,
+            height: 11,
+            backgroundImage: `url(${flagsImage})`,
+            backgroundRepeat: 'no-repeat',
+            ...phoneNumberFlags[regionalCode.toLowerCase()],
+          }}
         />
-        <span className="phone-field-flag-country-name">
-          {name}{' '}
-          <Typography variant="body2" component="span">
-            +{countryCode}
-          </Typography>
-        </span>
+        <Typography variant="body2" component="span">
+          {name} +{countryCode}
+        </Typography>
       </>
     ),
     searchableLabel: name,

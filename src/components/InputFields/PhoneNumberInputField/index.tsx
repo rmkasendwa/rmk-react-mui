@@ -1,5 +1,3 @@
-import './scss/style.scss';
-
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { Box, Button, InputAdornment, Typography } from '@mui/material';
 import {
@@ -20,6 +18,8 @@ import {
 import TextField, { ITextFieldProps } from '../TextField';
 import { ICountry, countries } from './countries';
 import CountryList from './CountryList';
+import flagsImage from './flags.png';
+import { phoneNumberFlags } from './phoneNumberFlags';
 
 export interface IPhoneNumberInputFieldProps extends ITextFieldProps {
   value?: string;
@@ -155,8 +155,19 @@ export const PhoneNumberInputField = forwardRef<
                 sx={{ display: 'inline-flex', alignItems: 'center' }}
                 title={selectedCountry.name}
               >
-                <i
-                  className={`phone-field-flag-icon phone-field-flag-${selectedCountry.regionalCode.toLowerCase()}`}
+                <Box
+                  component="i"
+                  sx={{
+                    mr: `4px`,
+                    display: 'inline-block',
+                    width: 16,
+                    height: 11,
+                    backgroundImage: `url(${flagsImage})`,
+                    backgroundRepeat: 'no-repeat',
+                    ...phoneNumberFlags[
+                      selectedCountry.regionalCode.toLowerCase()
+                    ],
+                  }}
                 />
                 {displaySelectedFlagLabel && (
                   <Typography

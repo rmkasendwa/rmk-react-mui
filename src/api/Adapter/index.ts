@@ -6,7 +6,7 @@ import { SessionTimeoutError } from '../../utils/errors';
 import StorageManager from '../../utils/StorageManager';
 import { queueRequest } from './RequestQueue';
 
-const HOST_URL = window.location.origin;
+const HOST_URL = typeof window !== 'undefined' ? window.location.origin : '';
 
 const FAILED_REQUEST_RETRY_STATUS_BLACKLIST: number[] = [400, 401, 404, 500];
 const MAX_REQUEST_RETRY_COUNT = 2;
