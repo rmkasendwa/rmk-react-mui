@@ -21,7 +21,13 @@ import {
   alpha,
   useTheme,
 } from '@mui/material';
-import { CSSProperties, Fragment, forwardRef, useRef, useState } from 'react';
+import {
+  CSSProperties,
+  Fragment,
+  forwardRef,
+  useEffect,
+  useState,
+} from 'react';
 
 import { useFileUpload } from '../../hooks';
 import {
@@ -30,6 +36,7 @@ import {
   TFileUploadFunction,
 } from '../../interfaces';
 import { formatBytes } from '../../utils/bytes';
+import { flickerElement } from '../../utils/page';
 import Card from '../Card';
 import { ITextFieldProps } from '../InputFields';
 import fileTypeIcons from './img/file-type-icons.png';
@@ -109,10 +116,11 @@ export const FileUploader = forwardRef<HTMLDivElement, IFileUploaderProps>(
     ref
   ) {
     const theme = useTheme();
-    const fileListContainerRef = useRef<HTMLUListElement | null>(null);
+    const [fileListContainer, setFileListContainer] =
+      useState<HTMLUListElement | null>(null);
 
     const [fileField, setFileField] = useState<HTMLInputElement | null>(null);
-    const { files, setFiles } = useFileUpload({
+    const { files, setFiles, duplicateFileSelections } = useFileUpload({
       fileField,
       upload,
       download,
@@ -127,6 +135,17 @@ export const FileUploader = forwardRef<HTMLDivElement, IFileUploaderProps>(
       files.splice(index, 1);
       setFiles([...files]);
     };
+
+    useEffect(() => {
+      if (fileListContainer && duplicateFileSelections.length > 0) {
+        [...fileListContainer.querySelectorAll('.file-uploader-file-list-item')]
+          .filter((_, index) => {
+            return duplicateFileSelections.includes(index);
+          })
+          .forEach((fileLIstItem) => flickerElement(fileLIstItem));
+      }
+    }, [duplicateFileSelections, fileListContainer]);
+
     return (
       <FormControl ref={ref} fullWidth error={error}>
         <input
@@ -208,7 +227,13 @@ export const FileUploader = forwardRef<HTMLDivElement, IFileUploaderProps>(
                   </Typography>
                 </Grid>
               </Grid>
-              <List ref={fileListContainerRef} sx={{ width: '100%' }}>
+              <List
+                ref={(fileListContainer) => {
+                  setFileListContainer(fileListContainer);
+                }}
+                className="file-uploader-file-list"
+                sx={{ width: '100%' }}
+              >
                 {files.map(
                   (
                     {
@@ -248,6 +273,7 @@ export const FileUploader = forwardRef<HTMLDivElement, IFileUploaderProps>(
                       <Fragment key={index}>
                         {index === 0 ? null : <Divider />}
                         <ListItem
+                          className="file-uploader-file-list-item"
                           sx={{
                             pl: 0,
                             pr: 1,
