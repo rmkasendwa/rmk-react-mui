@@ -32,6 +32,9 @@ export const useFileUpload = ({
   convertFilesToBase64 = true,
 }: IUseFileUploadOptions) => {
   const [files, setFiles] = useState<ILoadableFile[]>([]);
+  const [duplicateFileSelections, setDuplicateFileSelections] = useState<
+    number[]
+  >([]);
 
   const getLoadableFiles = useCallback(
     (files: IFile[]) => {
@@ -250,42 +253,53 @@ export const useFileUpload = ({
     if (fileField) {
       const changeEventCallback = async () => {
         if (fileField.files && fileField.files.length > 0) {
-          const existingFileNames: string[] = files.map(
-            (image) => image.originalFile.name + image.originalFile.size
+          const [selectedFiles, duplicateFileSelections] = [
+            ...fileField.files,
+          ].reduce(
+            (accumulator, file) => {
+              const existingFile = files.find(({ name, size }) => {
+                return file.name === name && file.size === size;
+              });
+              if (existingFile) {
+                accumulator[1].push(files.indexOf(existingFile));
+              } else {
+                accumulator[0].push(file);
+              }
+              return accumulator;
+            },
+            [[], []] as [File[], number[]]
           );
+
           const newFiles = await Promise.all(
-            [...fileField.files]
-              .filter((file) => {
-                return !existingFileNames.includes(file.name + file.size);
-              })
-              .map((file) => {
-                const { name, size } = file;
-                if (convertFilesToBase64) {
-                  return new Promise<ILoadableFile>((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.readAsDataURL(file);
-                    reader.onload = () =>
-                      resolve({
-                        base64: reader.result as string,
-                        originalFile: file,
-                        name,
-                        size,
-                      });
-                    reader.onerror = (error) => reject(error);
-                  });
-                }
-                return {
-                  originalFile: file,
-                  id: uniqid(),
-                  name,
-                  size,
-                };
-              })
+            selectedFiles.map((file) => {
+              const { name, size } = file;
+              if (convertFilesToBase64) {
+                return new Promise<ILoadableFile>((resolve, reject) => {
+                  const reader = new FileReader();
+                  reader.readAsDataURL(file);
+                  reader.onload = () =>
+                    resolve({
+                      base64: reader.result as string,
+                      originalFile: file,
+                      name,
+                      size,
+                    });
+                  reader.onerror = (error) => reject(error);
+                });
+              }
+              return {
+                originalFile: file,
+                id: uniqid(),
+                name,
+                size,
+              };
+            })
           );
           fileField.value = '';
           const newLoadableFiles = getLoadableFiles(newFiles);
           const nextFiles = [...files, ...newLoadableFiles];
           setFiles(nextFiles);
+          setDuplicateFileSelections(duplicateFileSelections);
           newLoadableFiles.forEach(({ upload }) => {
             upload && upload();
           });
@@ -337,5 +351,5 @@ export const useFileUpload = ({
     }
   }, [files, id, name, onChange]);
 
-  return { files, setFiles };
+  return { files, duplicateFileSelections, setFiles };
 };

@@ -89,6 +89,7 @@ ColumnTypes.args = {
     { id: 'amount', label: 'Currency', type: 'currency' },
     { id: 'number', label: 'Number', type: 'number' },
     { id: 'percent', label: 'Percent', type: 'percentage' },
+    { id: 'time', label: 'Time', type: 'time' },
     { id: 'isHere', label: 'Boolean', type: 'boolean' },
   ],
   rows: Array.from({ length: 4 + Math.round(Math.random() * 100) }).map(() => {
@@ -98,6 +99,7 @@ ColumnTypes.args = {
       number: Math.round(Math.random() * 10000),
       percent: Math.random() * 100,
       isHere: Math.round(Math.random() * 10) % 2 === 0,
+      time: Date.now(),
     };
   }),
 };

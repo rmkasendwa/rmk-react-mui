@@ -1,5 +1,3 @@
-import 'datejs';
-
 import {
   Box,
   Grid,
@@ -19,6 +17,7 @@ import {
   alpha,
   useTheme,
 } from '@mui/material';
+import { format } from 'date-fns';
 import {
   CSSProperties,
   FC,
@@ -298,7 +297,7 @@ export const Table: FC<ITableProps> = ({
                 const date = new Date(columnValue);
                 columnValue = isNaN(date.getTime())
                   ? ''
-                  : date.toString('hh:mm tt');
+                  : format(date, 'hh:mm aa');
                 break;
               case 'currency':
               case 'percentage':

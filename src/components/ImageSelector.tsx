@@ -12,10 +12,11 @@ import {
   useTheme,
 } from '@mui/material';
 import Typography from '@mui/material/Typography';
-import { CSSProperties, forwardRef, useState } from 'react';
+import { CSSProperties, forwardRef, useEffect, useState } from 'react';
 
 import { useFileUpload } from '../hooks';
 import { IFile, ILoadableFile, TFileUploadFunction } from '../interfaces';
+import { flickerElement } from '../utils/page';
 import CloseButton from './CloseButton';
 import ImagePreview from './ImagePreview';
 import { ITextFieldProps } from './InputFields';
@@ -34,10 +35,16 @@ export const ImageSelector = forwardRef<HTMLDivElement, IImageSelectorProps>(
     { helperText, error, onChange, name, id, value, upload },
     ref
   ) {
+    const [imageThumbnailContainer, setImageThumbnailContainer] =
+      useState<HTMLDivElement | null>(null);
     const [selectedImageFile, setSelectedImageFile] =
       useState<ILoadableFile | null>(null);
     const [fileField, setFileField] = useState<HTMLInputElement | null>(null);
-    const { files: images, setFiles: setImages } = useFileUpload({
+    const {
+      files: images,
+      setFiles: setImages,
+      duplicateFileSelections,
+    } = useFileUpload({
       fileField,
       upload,
       name,
@@ -50,6 +57,20 @@ export const ImageSelector = forwardRef<HTMLDivElement, IImageSelectorProps>(
       images.splice(index, 1);
       setImages([...images]);
     };
+
+    useEffect(() => {
+      if (imageThumbnailContainer && duplicateFileSelections.length > 0) {
+        [
+          ...imageThumbnailContainer.querySelectorAll(
+            '.image-selector-thumbnail'
+          ),
+        ]
+          .filter((_, index) => {
+            return duplicateFileSelections.includes(index);
+          })
+          .forEach((thumbnail) => flickerElement(thumbnail));
+      }
+    }, [duplicateFileSelections, imageThumbnailContainer]);
 
     const { palette } = useTheme();
     const wrapperStyle: CSSProperties = {};
@@ -76,7 +97,13 @@ export const ImageSelector = forwardRef<HTMLDivElement, IImageSelectorProps>(
               accept=".jpg,.png,.jpeg,.bmp"
               style={{ display: 'none' }}
             />
-            <Grid container spacing={1.5}>
+            <Grid
+              ref={(imageThumbnailContainer) => {
+                setImageThumbnailContainer(imageThumbnailContainer);
+              }}
+              container
+              spacing={1.5}
+            >
               {images.map((image, index) => {
                 const {
                   base64,
@@ -89,6 +116,7 @@ export const ImageSelector = forwardRef<HTMLDivElement, IImageSelectorProps>(
                 return (
                   <Grid item xs={4} sm={3} md={2} key={index}>
                     <Card
+                      className="image-selector-thumbnail"
                       onClick={() => setSelectedImageFile(image)}
                       sx={{
                         borderRadius: 1,

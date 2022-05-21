@@ -1,5 +1,3 @@
-require('datejs');
-
 const fs = require('fs-extra');
 const { omit } = require('underscore');
 const os = require('os');
