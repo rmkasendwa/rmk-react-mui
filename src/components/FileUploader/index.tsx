@@ -115,7 +115,7 @@ export const FileUploader = forwardRef<HTMLDivElement, IFileUploaderProps>(
     { helperText, error, onChange, name, id, value, upload, download },
     ref
   ) {
-    const theme = useTheme();
+    const { palette } = useTheme();
     const [fileListContainer, setFileListContainer] =
       useState<HTMLUListElement | null>(null);
 
@@ -166,8 +166,10 @@ export const FileUploader = forwardRef<HTMLDivElement, IFileUploaderProps>(
           >
             <Card
               sx={{
-                backgroundColor: alpha(theme.palette.text.primary, 0.1),
+                backgroundColor: alpha(palette.text.primary, 0.1),
                 cursor: 'pointer',
+                borderStyle: error ? 'dashed' : 'solid',
+                borderColor: error ? palette.error.main : 'divider',
               }}
               onClick={() => {
                 fileField?.click();
@@ -188,7 +190,7 @@ export const FileUploader = forwardRef<HTMLDivElement, IFileUploaderProps>(
                   sx={{
                     fontSize: 80,
                     display: 'block',
-                    color: alpha(theme.palette.text.primary, 0.2),
+                    color: alpha(palette.text.primary, 0.2),
                   }}
                 />
                 <Button variant="contained" color="success" sx={{ mb: 1 }}>
@@ -197,7 +199,7 @@ export const FileUploader = forwardRef<HTMLDivElement, IFileUploaderProps>(
                 <Typography
                   variant="body2"
                   sx={{
-                    color: alpha(theme.palette.text.primary, 0.2),
+                    color: alpha(palette.text.primary, 0.2),
                     fontWeight: 'bold',
                   }}
                 >
@@ -218,7 +220,7 @@ export const FileUploader = forwardRef<HTMLDivElement, IFileUploaderProps>(
                 <Grid item>
                   <Typography
                     sx={{
-                      color: theme.palette.success.main,
+                      color: palette.success.main,
                       cursor: 'pointer',
                       fontSize: 14,
                     }}
@@ -279,10 +281,7 @@ export const FileUploader = forwardRef<HTMLDivElement, IFileUploaderProps>(
                             pr: 1,
                             py: 0.5,
                             '&:hover': {
-                              backgroundColor: alpha(
-                                theme.palette.primary.main,
-                                0.1
-                              ),
+                              backgroundColor: alpha(palette.primary.main, 0.1),
                             },
                           }}
                         >
