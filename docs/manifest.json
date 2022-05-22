@@ -3,7 +3,7 @@
   "display": "standalone",
   "icons": [
     {
-      "sizes": "64x64 32x32 24x24 16x16",
+      "sizes": "64x64",
       "src": "favicon.ico",
       "type": "image/x-icon"
     },
@@ -18,8 +18,8 @@
       "type": "image/png"
     }
   ],
-  "name": "Create React App Sample",
-  "short_name": "React App",
+  "name": "RMK React MUI is a React UI library of utility components, hooks and contexts",
+  "short_name": "RMK MUI",
   "start_url": ".",
   "theme_color": "#000000"
 }
