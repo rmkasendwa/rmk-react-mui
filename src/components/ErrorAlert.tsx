@@ -17,7 +17,12 @@ export const ErrorAlert: FC<IErrorAlertProps> = ({
     <Alert
       {...rest}
       severity="error"
-      sx={{ width: '100%', boxSizing: 'border-box', whiteSpace: 'pre', ...sx }}
+      sx={{
+        width: '100%',
+        boxSizing: 'border-box',
+        whiteSpace: 'pre-wrap',
+        ...sx,
+      }}
     >
       <RetryErrorMessage {...{ message, retry }} />
     </Alert>
