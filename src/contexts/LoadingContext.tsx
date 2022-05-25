@@ -4,6 +4,7 @@ export interface ILoadingContext {
   load?: () => void;
   loading: boolean;
   loaded?: boolean;
+  locked?: boolean;
   errorMessage?: string;
 }
 export const LoadingContext = createContext<ILoadingContext>({
