@@ -9,7 +9,7 @@ import {
 } from '@mui/material';
 import { FC, ReactNode } from 'react';
 
-import { useLoadingContext, useSmallScreen } from '../hooks';
+import { useLoadingContext, useSmallScreen } from '../hooks/Utils';
 import ErrorSkeleton from './ErrorSkeleton';
 
 export interface ICardProps extends Omit<CardProps, 'title'> {

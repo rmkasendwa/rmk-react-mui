@@ -1,7 +1,9 @@
 import { forwardRef } from 'react';
 
-import { useAggregatedFormikContext } from '../../hooks';
-import { INumberInputFieldProps, NumberInputField } from '../InputFields';
+import { useAggregatedFormikContext } from '../../hooks/Utils';
+import NumberInputField, {
+  INumberInputFieldProps,
+} from '../InputFields/NumberInputField';
 
 export interface IFormikNumberInputFieldProps extends INumberInputFieldProps {}
 

@@ -1,7 +1,9 @@
 import { forwardRef } from 'react';
 
-import { useAggregatedFormikContext } from '../../hooks';
-import { FileInputField, IFileInputFieldProps } from '../InputFields';
+import { useAggregatedFormikContext } from '../../hooks/Utils';
+import FileInputField, {
+  IFileInputFieldProps,
+} from '../InputFields/FileInputField';
 
 export interface IFormikFileInputFieldProps extends IFileInputFieldProps {}
 

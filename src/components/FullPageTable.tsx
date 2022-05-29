@@ -17,7 +17,7 @@ import Toolbar from '@mui/material/Toolbar';
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 
-import { ILoadingProps } from '../interfaces';
+import { ILoadingProps } from '../interfaces/Utils';
 import ErrorAlert from './ErrorAlert';
 import LoadingScreen from './LoadingScreen';
 import PaddedContentArea, {

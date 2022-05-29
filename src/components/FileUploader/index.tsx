@@ -29,16 +29,16 @@ import {
   useState,
 } from 'react';
 
-import { useFileUpload } from '../../hooks';
+import { useFileUpload } from '../../hooks/Files';
 import {
   IFile,
   TFileDownloadFunction,
   TFileUploadFunction,
-} from '../../interfaces';
+} from '../../interfaces/Utils';
 import { formatBytes } from '../../utils/bytes';
 import { flickerElement } from '../../utils/page';
 import Card from '../Card';
-import { ITextFieldProps } from '../InputFields';
+import { ITextFieldProps } from '../InputFields/TextField';
 import fileTypeIcons from './img/file-type-icons.png';
 
 export interface IFileUploaderProps

@@ -29,7 +29,7 @@ import {
   useState,
 } from 'react';
 
-import { GlobalConfigurationContext } from '../contexts';
+import { GlobalConfigurationContext } from '../contexts/GlobalConfigurationContext';
 import { formatDate } from '../utils/dates';
 import { addThousandCommas } from '../utils/numbers';
 

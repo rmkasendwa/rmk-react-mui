@@ -1,7 +1,7 @@
 import { FC, useEffect } from 'react';
 import { Outlet, Path, useLocation, useNavigate } from 'react-router-dom';
 
-import { useAuth } from '../contexts';
+import { useAuth } from '../contexts/AuthContext';
 import {
   INDEX_ROUTE_PATH,
   LOGIN_ROUTE_PATH,

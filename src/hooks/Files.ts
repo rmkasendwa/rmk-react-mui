@@ -2,13 +2,13 @@ import hash from 'object-hash';
 import { useCallback, useEffect, useState } from 'react';
 import uniqid from 'uniqid';
 
-import { ITextFieldProps } from '../components';
+import { ITextFieldProps } from '../components/InputFields/TextField';
 import {
   IFile,
   ILoadableFile,
   TFileDownloadFunction,
   TFileUploadFunction,
-} from '../interfaces';
+} from '../interfaces/Utils';
 
 export interface IUseFileUploadOptions
   extends Pick<

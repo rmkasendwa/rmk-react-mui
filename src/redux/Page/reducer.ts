@@ -1,6 +1,6 @@
 import { Reducer } from 'redux';
 
-import { TPageHistory } from '../../interfaces';
+import { TPageHistory } from '../../interfaces/Page';
 import StorageManager from '../../utils/StorageManager';
 import { CLEAR_PAGE_HISTORY, SET_PAGE_TITLE } from './types';
 

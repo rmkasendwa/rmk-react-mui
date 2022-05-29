@@ -1,4 +1,4 @@
-import { ICountryCode } from './interfaces';
+import { ICountryCode } from './interfaces/Countries';
 
 export const APP_NAME = process.env.REACT_APP_NAME || 'App';
 

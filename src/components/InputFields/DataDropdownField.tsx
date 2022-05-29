@@ -9,9 +9,9 @@ import {
   useState,
 } from 'react';
 
-import { LoadingProvider } from '../../contexts';
-import { useAPIDataContext, useAPIService } from '../../hooks';
-import { TAPIFunction } from '../../interfaces';
+import { LoadingProvider } from '../../contexts/LoadingContext';
+import { useAPIDataContext, useAPIService } from '../../hooks/Utils';
+import { TAPIFunction } from '../../interfaces/Utils';
 import PaginatedDropdownOptionList, {
   IDropdownOption,
 } from '../PaginatedDropdownOptionList';

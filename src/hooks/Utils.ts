@@ -12,8 +12,10 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 
 import { CANCELLED_API_REQUEST_MESSAGE } from '../constants';
-import { APIContext, APIDataContext, LoadingContext } from '../contexts';
-import { ITaggedAPIRequest, TAPIFunction } from '../interfaces';
+import { APIContext } from '../contexts/APIContext';
+import { APIDataContext } from '../contexts/APIDataContext';
+import { LoadingContext } from '../contexts/LoadingContext';
+import { ITaggedAPIRequest, TAPIFunction } from '../interfaces/Utils';
 import { RootState, updateData } from '../redux';
 
 export const useAPIService = <T>(defautValue: T, key?: string) => {

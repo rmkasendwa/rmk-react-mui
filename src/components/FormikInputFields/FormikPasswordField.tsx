@@ -1,7 +1,9 @@
 import { forwardRef } from 'react';
 
-import { useAggregatedFormikContext } from '../../hooks';
-import { IPasswordFieldProps, PasswordField } from '../InputFields';
+import { useAggregatedFormikContext } from '../../hooks/Utils';
+import PasswordField, {
+  IPasswordFieldProps,
+} from '../InputFields/PasswordField';
 
 export interface IFormikPasswordFieldProps extends IPasswordFieldProps {}
 

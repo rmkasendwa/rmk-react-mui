@@ -1,7 +1,9 @@
 import { forwardRef } from 'react';
 
-import { useAggregatedFormikContext } from '../../hooks';
-import { CurrencyInputField, ICurrencyInputFieldProps } from '../InputFields';
+import { useAggregatedFormikContext } from '../../hooks/Utils';
+import CurrencyInputField, {
+  ICurrencyInputFieldProps,
+} from '../InputFields/CurrencyInputField';
 
 export interface IFormikCurrencyInputFieldProps
   extends ICurrencyInputFieldProps {}

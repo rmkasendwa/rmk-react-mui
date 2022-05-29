@@ -1,6 +1,6 @@
 import { FC, ReactNode, createContext, useCallback, useEffect } from 'react';
 
-import { TAPIFunction } from '../interfaces';
+import { TAPIFunction } from '../interfaces/Utils';
 import { useAuth } from './AuthContext';
 
 export interface IAPIContext {
