@@ -9,8 +9,8 @@ import {
   useState,
 } from 'react';
 
-import { GlobalConfigurationContext } from '../../../contexts';
-import { ICountryCode } from '../../../interfaces';
+import { GlobalConfigurationContext } from '../../../contexts/GlobalConfigurationContext';
+import { ICountryCode } from '../../../interfaces/Countries';
 import {
   getRegionalCode,
   systemStandardPhoneNumberFormat,

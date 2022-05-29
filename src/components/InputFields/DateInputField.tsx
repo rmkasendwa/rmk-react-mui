@@ -12,7 +12,7 @@ import { addMinutes, format } from 'date-fns';
 import { forwardRef, useEffect, useState } from 'react';
 
 import { DEFAULT_DATE_FORMAT } from '../../constants';
-import { useSmallScreen } from '../../hooks';
+import { useSmallScreen } from '../../hooks/Utils';
 import TextField, { ITextFieldProps } from './TextField';
 
 export interface IDateInputFieldProps extends ITextFieldProps {

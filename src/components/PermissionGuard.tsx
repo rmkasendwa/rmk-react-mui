@@ -1,6 +1,6 @@
 import { FC, ReactNode } from 'react';
 
-import { useAuth } from '../contexts';
+import { useAuth } from '../contexts/AuthContext';
 
 export interface IPermissionGuardProps {
   permission: string | string[];

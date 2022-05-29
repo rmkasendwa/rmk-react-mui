@@ -14,12 +14,12 @@ import {
 import Typography from '@mui/material/Typography';
 import { CSSProperties, forwardRef, useEffect, useState } from 'react';
 
-import { useFileUpload } from '../hooks';
-import { IFile, ILoadableFile, TFileUploadFunction } from '../interfaces';
+import { useFileUpload } from '../hooks/Files';
+import { IFile, ILoadableFile, TFileUploadFunction } from '../interfaces/Utils';
 import { flickerElement } from '../utils/page';
 import CloseButton from './CloseButton';
 import ImagePreview from './ImagePreview';
-import { ITextFieldProps } from './InputFields';
+import { ITextFieldProps } from './InputFields/TextField';
 
 export interface IImageSelectorProps
   extends Pick<

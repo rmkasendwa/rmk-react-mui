@@ -1,7 +1,7 @@
 import { forwardRef } from 'react';
 
-import { useAggregatedFormikContext } from '../../hooks';
-import { ITextFieldProps, TextField } from '../InputFields';
+import { useAggregatedFormikContext } from '../../hooks/Utils';
+import TextField, { ITextFieldProps } from '../InputFields/TextField';
 
 export interface IFormikTextFieldProps extends ITextFieldProps {}
 

@@ -1,7 +1,9 @@
 import { forwardRef } from 'react';
 
-import { useAggregatedFormikContext } from '../../hooks';
-import { ITextAreaFieldProps, TextAreaField } from '../InputFields';
+import { useAggregatedFormikContext } from '../../hooks/Utils';
+import TextAreaField, {
+  ITextAreaFieldProps,
+} from '../InputFields/TextAreaField';
 
 export interface IFormikTextAreaFieldProps extends ITextAreaFieldProps {}
 

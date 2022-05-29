@@ -6,7 +6,7 @@ import {
   PhoneNumberUtil as PhoneNumberUtilConstructor,
 } from 'google-libphonenumber';
 
-import { ICountryCode } from '../interfaces';
+import { ICountryCode } from '../interfaces/Countries';
 
 const systemStandardFormatSupportedCountries: ICountryCode[] = [
   'UG',

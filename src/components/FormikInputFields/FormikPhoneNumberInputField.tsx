@@ -1,10 +1,9 @@
 import { forwardRef } from 'react';
 
-import { useAggregatedFormikContext } from '../../hooks';
-import {
+import { useAggregatedFormikContext } from '../../hooks/Utils';
+import PhoneNumberInputField, {
   IPhoneNumberInputFieldProps,
-  PhoneNumberInputField,
-} from '../InputFields';
+} from '../InputFields/PhoneNumberInputField';
 
 export interface IFormikPhoneNumberInputFieldProps
   extends IPhoneNumberInputFieldProps {}

@@ -1,7 +1,7 @@
 import { Skeleton, Typography, useTheme } from '@mui/material';
 import { FC } from 'react';
 
-import { useLoadingContext } from '../hooks';
+import { useLoadingContext } from '../hooks/Utils';
 import Card from './Card';
 import ErrorSkeleton from './ErrorSkeleton';
 import FieldLabel from './FieldLabel';

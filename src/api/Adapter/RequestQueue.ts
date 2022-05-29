@@ -1,6 +1,6 @@
 import hash from 'object-hash';
 
-import { IRequestOptions } from '../../interfaces';
+import { IRequestOptions } from '../../interfaces/Utils';
 
 type TResolve = (payload?: any) => void;
 

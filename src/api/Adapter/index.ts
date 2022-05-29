@@ -1,7 +1,7 @@
 import axios, { AxiosResponse, CancelTokenSource } from 'axios';
 
 import { CANCELLED_API_REQUEST_MESSAGE } from '../../constants';
-import { IRequestOptions } from '../../interfaces';
+import { IRequestOptions } from '../../interfaces/Utils';
 import { SessionTimeoutError } from '../../utils/errors';
 import StorageManager from '../../utils/StorageManager';
 import { queueRequest } from './RequestQueue';

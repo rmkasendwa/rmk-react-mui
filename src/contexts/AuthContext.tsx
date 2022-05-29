@@ -11,7 +11,7 @@ import {
 } from 'react';
 
 import { login as apiLogin, logout as apiLogout } from '../api';
-import { TPermissionCode } from '../interfaces';
+import { TPermissionCode } from '../interfaces/Users';
 import StorageManager from '../utils/StorageManager';
 
 export interface IAuthContext {

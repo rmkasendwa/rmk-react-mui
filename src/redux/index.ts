@@ -1,4 +1,4 @@
-import { TPageHistory } from '../interfaces';
+import { TPageHistory } from '../interfaces/Page';
 
 export * from './Data';
 export * from './Page';

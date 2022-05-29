@@ -1,6 +1,6 @@
 import { forwardRef } from 'react';
 
-import { useAggregatedFormikContext } from '../../hooks';
+import { useAggregatedFormikContext } from '../../hooks/Utils';
 import FileUploader, { IFileUploaderProps } from '../FileUploader';
 
 export interface IFormikFileUploaderProps extends IFileUploaderProps {}
