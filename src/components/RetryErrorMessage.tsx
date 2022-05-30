@@ -1,5 +1,6 @@
 import RefreshIcon from '@mui/icons-material/Refresh';
-import { IconButton, Tooltip } from '@mui/material';
+import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
 import { FC } from 'react';
 
 export interface IRetryErrorMessageProps {

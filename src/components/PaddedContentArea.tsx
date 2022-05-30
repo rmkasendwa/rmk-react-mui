@@ -1,11 +1,8 @@
-import {
-  Container,
-  ContainerProps,
-  Grid,
-  Typography,
-  useMediaQuery,
-  useTheme,
-} from '@mui/material';
+import Container, { ContainerProps } from '@mui/material/Container';
+import Grid from '@mui/material/Grid';
+import useTheme from '@mui/material/styles/useTheme';
+import Typography from '@mui/material/Typography';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import { Children, FC, ReactNode } from 'react';
 
 export interface IPaddedContentAreaProps extends ContainerProps {

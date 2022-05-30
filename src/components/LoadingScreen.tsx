@@ -1,4 +1,5 @@
-import { Box, CircularProgress } from '@mui/material';
+import Box from '@mui/material/Box';
+import CircularProgress from '@mui/material/CircularProgress';
 import { CSSProperties, FC } from 'react';
 
 interface ILoadingScreenProps {

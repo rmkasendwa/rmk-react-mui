@@ -1,4 +1,5 @@
-import { InputProps, Typography } from '@mui/material';
+import { InputProps } from '@mui/material/Input';
+import Typography from '@mui/material/Typography';
 import { forwardRef } from 'react';
 
 import NumberInputField, { INumberInputFieldProps } from './NumberInputField';

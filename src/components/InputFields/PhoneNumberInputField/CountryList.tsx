@@ -1,13 +1,11 @@
 import ClearIcon from '@mui/icons-material/Clear';
 import SearchIcon from '@mui/icons-material/Search';
-import {
-  Box,
-  Card,
-  ClickAwayListener,
-  Grow,
-  Popper,
-  Typography,
-} from '@mui/material';
+import Box from '@mui/material/Box';
+import Card from '@mui/material/Card';
+import ClickAwayListener from '@mui/material/ClickAwayListener';
+import Grow from '@mui/material/Grow';
+import Popper from '@mui/material/Popper';
+import Typography from '@mui/material/Typography';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import PaginatedDropdownOptionList, {

@@ -1,4 +1,4 @@
-import { Chip } from '@mui/material';
+import Chip from '@mui/material/Chip';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 
 import { FieldValueDisplay } from '../components';

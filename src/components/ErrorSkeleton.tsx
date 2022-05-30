@@ -1,4 +1,6 @@
-import { Skeleton, SkeletonProps, alpha, useTheme } from '@mui/material';
+import Skeleton, { SkeletonProps } from '@mui/material/Skeleton';
+import useTheme from '@mui/material/styles/useTheme';
+import { alpha } from '@mui/system/colorManipulator';
 import { FC } from 'react';
 
 export interface IErrorSkeletonProps extends SkeletonProps {}

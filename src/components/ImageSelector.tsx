@@ -1,17 +1,15 @@
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
 import ReplayIcon from '@mui/icons-material/Replay';
-import {
-  Avatar,
-  Box,
-  Button,
-  Card,
-  FormControl,
-  FormHelperText,
-  Grid,
-  darken,
-  useTheme,
-} from '@mui/material';
+import Avatar from '@mui/material/Avatar';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Card from '@mui/material/Card';
+import FormControl from '@mui/material/FormControl';
+import FormHelperText from '@mui/material/FormHelperText';
+import Grid from '@mui/material/Grid';
+import useTheme from '@mui/material/styles/useTheme';
 import Typography from '@mui/material/Typography';
+import { darken } from '@mui/system/colorManipulator';
 import { CSSProperties, forwardRef, useEffect, useState } from 'react';
 
 import { useFileUpload } from '../hooks/Files';

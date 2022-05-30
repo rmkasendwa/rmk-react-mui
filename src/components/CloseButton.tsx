@@ -1,11 +1,8 @@
 import CloseIcon from '@mui/icons-material/Close';
-import {
-  IconButton,
-  IconButtonProps,
-  SvgIconProps,
-  alpha,
-  useTheme,
-} from '@mui/material';
+import IconButton, { IconButtonProps } from '@mui/material/IconButton';
+import useTheme from '@mui/material/styles/useTheme';
+import { SvgIconProps } from '@mui/material/SvgIcon';
+import { alpha } from '@mui/system/colorManipulator';
 import { ReactNode, forwardRef } from 'react';
 
 export interface ICloseButtonProps extends IconButtonProps {

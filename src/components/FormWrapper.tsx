@@ -1,6 +1,7 @@
 import SaveIcon from '@mui/icons-material/Save';
-import { LoadingButton } from '@mui/lab';
-import { Box, Grid } from '@mui/material';
+import LoadingButton from '@mui/lab/LoadingButton';
+import Box from '@mui/material/Box';
+import Grid from '@mui/material/Grid';
 import { Form, Formik, FormikHelpers, FormikProps, FormikValues } from 'formik';
 import { FC, ReactNode } from 'react';
 

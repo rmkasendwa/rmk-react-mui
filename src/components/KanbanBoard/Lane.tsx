@@ -1,15 +1,12 @@
 import ErrorIcon from '@mui/icons-material/Error';
-import {
-  Badge,
-  Box,
-  CircularProgress,
-  Grid,
-  Tooltip,
-  Typography,
-  alpha,
-  darken,
-  useTheme,
-} from '@mui/material';
+import Badge from '@mui/material/Badge';
+import Box from '@mui/material/Box';
+import CircularProgress from '@mui/material/CircularProgress';
+import Grid from '@mui/material/Grid';
+import useTheme from '@mui/material/styles/useTheme';
+import Tooltip from '@mui/material/Tooltip';
+import Typography from '@mui/material/Typography';
+import { alpha, darken } from '@mui/system/colorManipulator';
 import { FC, useContext } from 'react';
 import { Container, Draggable } from 'react-smooth-dnd';
 

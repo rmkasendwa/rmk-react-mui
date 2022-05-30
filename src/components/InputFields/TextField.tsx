@@ -1,8 +1,5 @@
-import {
-  TextField as MuiTextField,
-  Skeleton,
-  TextFieldProps,
-} from '@mui/material';
+import Skeleton from '@mui/material/Skeleton';
+import MuiTextField, { TextFieldProps } from '@mui/material/TextField';
 import { forwardRef } from 'react';
 
 import { useLoadingContext } from '../../hooks/Utils';

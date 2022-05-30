@@ -1,6 +1,8 @@
 import CloseIcon from '@mui/icons-material/Close';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import { Button, IconButton, InputAdornment } from '@mui/material';
+import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
+import InputAdornment from '@mui/material/InputAdornment';
 import { forwardRef, useEffect, useRef, useState } from 'react';
 
 import { formatBytes } from '../../utils/bytes';

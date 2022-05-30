@@ -1,4 +1,4 @@
-import { alpha } from '@mui/material';
+import { alpha } from '@mui/system/colorManipulator';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 
 import { EnumValueChip } from '../components';

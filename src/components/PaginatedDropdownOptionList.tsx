@@ -1,11 +1,8 @@
-import {
-  Box,
-  Card,
-  CardProps,
-  MenuItem,
-  Typography,
-  useTheme,
-} from '@mui/material';
+import Box from '@mui/material/Box';
+import Card, { CardProps } from '@mui/material/Card';
+import MenuItem from '@mui/material/MenuItem';
+import useTheme from '@mui/material/styles/useTheme';
+import Typography from '@mui/material/Typography';
 import {
   Dispatch,
   Fragment,
