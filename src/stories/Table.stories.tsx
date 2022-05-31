@@ -1,7 +1,7 @@
 import Box from '@mui/material/Box';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 
-import { Table } from '../components';
+import Table from '../components/Table';
 
 export default {
   title: 'Components/Table',

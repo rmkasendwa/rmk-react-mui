@@ -1,7 +1,7 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { LoremIpsum } from 'lorem-ipsum';
 
-import { PaginatedDropdownOptionList } from '../components';
+import PaginatedDropdownOptionList from '../components/PaginatedDropdownOptionList';
 
 export default {
   title: 'Components/Paginated Dropdown Option List',

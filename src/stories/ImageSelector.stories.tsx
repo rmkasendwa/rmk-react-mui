@@ -1,8 +1,8 @@
 import Container from '@mui/material/Container';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 
-import { ImageSelector } from '../components';
-import { IFileUploadFunction } from '../interfaces';
+import ImageSelector from '../components/ImageSelector';
+import { TFileUploadFunction } from '../interfaces/Utils';
 
 export default {
   title: 'Components/Image Selector',
@@ -15,7 +15,7 @@ const Template: ComponentStory<typeof ImageSelector> = ({ ...rest }) => (
   </Container>
 );
 
-const upload: IFileUploadFunction = (
+const upload: TFileUploadFunction = (
   imageFile,
   { onComplete, onProgress, onSuccess }
 ) => {
@@ -39,7 +39,7 @@ const upload: IFileUploadFunction = (
   };
 };
 
-const uploadWithErrors: IFileUploadFunction = (
+const uploadWithErrors: TFileUploadFunction = (
   imageFile,
   { onComplete, onError, onProgress }
 ) => {

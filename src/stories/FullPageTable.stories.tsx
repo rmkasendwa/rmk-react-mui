@@ -1,7 +1,7 @@
 import Container from '@mui/material/Container';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 
-import { FullPageTable } from '../components';
+import FullPageTable from '../components/FullPageTable';
 
 export default {
   title: 'Components/Full Page Table',

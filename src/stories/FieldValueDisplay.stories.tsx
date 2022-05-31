@@ -1,7 +1,7 @@
 import Chip from '@mui/material/Chip';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 
-import { FieldValueDisplay } from '../components';
+import FieldValueDisplay from '../components/FieldValueDisplay';
 
 export default {
   title: 'Components/Field Value Display',
