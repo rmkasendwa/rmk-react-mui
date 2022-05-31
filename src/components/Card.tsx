@@ -1,12 +1,7 @@
-import {
-  CardContent,
-  CardContentProps,
-  CardHeader,
-  CardHeaderProps,
-  CardProps,
-  Card as MuiCard,
-  Skeleton,
-} from '@mui/material';
+import MuiCard, { CardProps } from '@mui/material/Card';
+import CardContent, { CardContentProps } from '@mui/material/CardContent';
+import CardHeader, { CardHeaderProps } from '@mui/material/CardHeader';
+import Skeleton from '@mui/material/Skeleton';
 import { FC, ReactNode } from 'react';
 
 import { useLoadingContext, useSmallScreen } from '../hooks/Utils';

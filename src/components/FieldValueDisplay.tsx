@@ -1,11 +1,8 @@
-import {
-  Box,
-  Skeleton,
-  Typography,
-  TypographyProps,
-  alpha,
-  useTheme,
-} from '@mui/material';
+import Box from '@mui/material/Box';
+import Skeleton from '@mui/material/Skeleton';
+import useTheme from '@mui/material/styles/useTheme';
+import Typography, { TypographyProps } from '@mui/material/Typography';
+import { alpha } from '@mui/system/colorManipulator';
 import { FC, ReactNode } from 'react';
 
 import { useLoadingContext } from '../hooks/Utils';

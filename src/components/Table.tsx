@@ -1,22 +1,18 @@
-import {
-  Box,
-  Grid,
-  Table as MuiTable,
-  Pagination,
-  PaginationProps,
-  SxProps,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TablePagination,
-  TableRow,
-  TableRowProps,
-  Theme,
-  Typography,
-  alpha,
-  useTheme,
-} from '@mui/material';
+import Box from '@mui/material/Box';
+import Grid from '@mui/material/Grid';
+import Pagination, { PaginationProps } from '@mui/material/Pagination';
+import { Theme } from '@mui/material/styles/createTheme';
+import useTheme from '@mui/material/styles/useTheme';
+import MuiTable from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TablePagination from '@mui/material/TablePagination';
+import TableRow, { TableRowProps } from '@mui/material/TableRow';
+import Typography from '@mui/material/Typography';
+import { alpha } from '@mui/system/colorManipulator';
+import { SxProps } from '@mui/system/styleFunctionSx';
 import { format } from 'date-fns';
 import {
   CSSProperties,

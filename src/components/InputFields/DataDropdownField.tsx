@@ -1,5 +1,8 @@
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { Box, ClickAwayListener, Grow, Popper } from '@mui/material';
+import Box from '@mui/material/Box';
+import ClickAwayListener from '@mui/material/ClickAwayListener';
+import Grow from '@mui/material/Grow';
+import Popper from '@mui/material/Popper';
 import {
   forwardRef,
   useCallback,

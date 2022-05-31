@@ -1,5 +1,5 @@
 import EditIcon from '@mui/icons-material/Edit';
-import { Button } from '@mui/material';
+import Button from '@mui/material/Button';
 import { FC, ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 

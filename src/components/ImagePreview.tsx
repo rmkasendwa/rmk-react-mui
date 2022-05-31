@@ -1,4 +1,6 @@
-import { Card, Modal, ModalProps, useTheme } from '@mui/material';
+import Card from '@mui/material/Card';
+import Modal, { ModalProps } from '@mui/material/Modal';
+import useTheme from '@mui/material/styles/useTheme';
 import { forwardRef, useCallback, useEffect, useRef, useState } from 'react';
 
 import CloseButton from './CloseButton';

@@ -1,15 +1,11 @@
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
-import {
-  Box,
-  Divider,
-  ListItemIcon,
-  ListItemText,
-  Menu,
-  MenuItem,
-  Tooltip,
-  listItemIconClasses,
-  listItemTextClasses,
-} from '@mui/material';
+import Box from '@mui/material/Box';
+import Divider from '@mui/material/Divider';
+import ListItemIcon, { listItemIconClasses } from '@mui/material/ListItemIcon';
+import ListItemText, { listItemTextClasses } from '@mui/material/ListItemText';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import Tooltip from '@mui/material/Tooltip';
 import { FC, useState } from 'react';
 
 import {

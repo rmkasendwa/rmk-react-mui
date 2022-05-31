@@ -1,4 +1,6 @@
-import { Skeleton, Typography, useTheme } from '@mui/material';
+import Skeleton from '@mui/material/Skeleton';
+import useTheme from '@mui/material/styles/useTheme';
+import Typography from '@mui/material/Typography';
 import { FC } from 'react';
 
 import { useLoadingContext } from '../hooks/Utils';

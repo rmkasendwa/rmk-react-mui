@@ -1,4 +1,5 @@
-import { Chip, ChipProps, useTheme } from '@mui/material';
+import Chip, { ChipProps } from '@mui/material/Chip';
+import useTheme from '@mui/material/styles/useTheme';
 import { FC } from 'react';
 
 export interface IEnumValueChipProps extends ChipProps {

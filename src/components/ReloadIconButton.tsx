@@ -1,13 +1,10 @@
 import ErrorIcon from '@mui/icons-material/Error';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import {
-  Box,
-  BoxProps,
-  CircularProgress,
-  Grid,
-  IconButton,
-  Tooltip,
-} from '@mui/material';
+import Box, { BoxProps } from '@mui/material/Box';
+import CircularProgress from '@mui/material/CircularProgress';
+import Grid from '@mui/material/Grid';
+import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
 import { FC } from 'react';
 
 export interface IReloadIconButtonProps

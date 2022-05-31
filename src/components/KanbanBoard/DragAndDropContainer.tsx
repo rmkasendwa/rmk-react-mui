@@ -1,4 +1,6 @@
-import { Box, BoxProps, darken, useTheme } from '@mui/material';
+import Box, { BoxProps } from '@mui/material/Box';
+import useTheme from '@mui/material/styles/useTheme';
+import { darken } from '@mui/system/colorManipulator';
 import { FC, useContext, useEffect, useState } from 'react';
 import { Container, Draggable } from 'react-smooth-dnd';
 

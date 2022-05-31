@@ -1,15 +1,12 @@
-import {
-  Divider,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  ListProps,
-  Typography,
-} from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import Badge from '@mui/material/Badge';
 import { grey } from '@mui/material/colors';
+import Divider from '@mui/material/Divider';
+import List, { ListProps } from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemAvatar from '@mui/material/ListItemAvatar';
+import ListItemText from '@mui/material/ListItemText';
+import Typography from '@mui/material/Typography';
 import { CSSProperties, FC, Fragment } from 'react';
 
 interface INotificationsListProps extends ListProps {}

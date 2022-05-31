@@ -1,4 +1,4 @@
-import { BoxProps } from '@mui/material';
+import { BoxProps } from '@mui/material/Box';
 import {
   Dispatch,
   FC,

@@ -1,5 +1,8 @@
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { Box, Button, InputAdornment, Typography } from '@mui/material';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import InputAdornment from '@mui/material/InputAdornment';
+import Typography from '@mui/material/Typography';
 import {
   forwardRef,
   useCallback,

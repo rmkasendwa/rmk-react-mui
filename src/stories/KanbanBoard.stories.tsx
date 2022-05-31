@@ -2,7 +2,9 @@ import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import AllInboxIcon from '@mui/icons-material/AllInbox';
 import ArchiveIcon from '@mui/icons-material/Archive';
 import EditIcon from '@mui/icons-material/Edit';
-import { Chip, Grid, Typography } from '@mui/material';
+import Chip from '@mui/material/Chip';
+import Grid from '@mui/material/Grid';
+import Typography from '@mui/material/Typography';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { LoremIpsum } from 'lorem-ipsum';
 

@@ -1,4 +1,9 @@
-import { Box, Grid, Tooltip, Typography, alpha, useTheme } from '@mui/material';
+import Box from '@mui/material/Box';
+import Grid from '@mui/material/Grid';
+import useTheme from '@mui/material/styles/useTheme';
+import Tooltip from '@mui/material/Tooltip';
+import Typography from '@mui/material/Typography';
+import { alpha } from '@mui/system/colorManipulator';
 import { FC, useContext } from 'react';
 
 import CardTools from './CardTools';

@@ -1,13 +1,12 @@
 import CloseIcon from '@mui/icons-material/Close';
 import EventIcon from '@mui/icons-material/Event';
-import {
-  DatePickerProps,
-  DesktopDatePicker,
-  LocalizationProvider,
-  MobileDatePicker,
-} from '@mui/lab';
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
-import { IconButton, Tooltip } from '@mui/material';
+import { DatePickerProps } from '@mui/lab/DatePicker';
+import DesktopDatePicker from '@mui/lab/DesktopDatePicker';
+import LocalizationProvider from '@mui/lab/LocalizationProvider';
+import MobileDatePicker from '@mui/lab/MobileDatePicker';
+import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
 import { addMinutes, format } from 'date-fns';
 import { forwardRef, useEffect, useState } from 'react';
 

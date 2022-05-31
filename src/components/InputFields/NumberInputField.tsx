@@ -1,6 +1,7 @@
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
-import { IconButton, Stack } from '@mui/material';
+import IconButton from '@mui/material/IconButton';
+import Stack from '@mui/material/Stack';
 import { forwardRef, useCallback, useEffect, useState } from 'react';
 
 import { addThousandCommas } from '../../utils/numbers';

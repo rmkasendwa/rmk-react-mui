@@ -1,4 +1,4 @@
-import { Container } from '@mui/material';
+import Container from '@mui/material/Container';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 
 import { FileUploader } from '../components';
