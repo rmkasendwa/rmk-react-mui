@@ -1,7 +1,7 @@
 import { alpha } from '@mui/system/colorManipulator';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 
-import { EnumValueChip } from '../components';
+import EnumValueChip from '../components/EnumValueChip';
 
 export default {
   title: 'Components/Enum Value Chip',

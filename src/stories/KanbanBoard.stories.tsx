@@ -8,7 +8,7 @@ import Typography from '@mui/material/Typography';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { LoremIpsum } from 'lorem-ipsum';
 
-import { KanbanBoard } from '../components';
+import KanbanBoard from '../components/KanbanBoard';
 import { ILaneProps } from '../components/KanbanBoard/Lane';
 
 export default {

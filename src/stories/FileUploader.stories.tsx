@@ -1,8 +1,11 @@
 import Container from '@mui/material/Container';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 
-import { FileUploader } from '../components';
-import { TFileDownloadFunction, TFileUploadFunction } from '../interfaces';
+import FileUploader from '../components/FileUploader';
+import {
+  TFileDownloadFunction,
+  TFileUploadFunction,
+} from '../interfaces/Utils';
 
 export default {
   title: 'Components/File Uploader',
