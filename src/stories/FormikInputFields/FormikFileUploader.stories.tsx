@@ -4,7 +4,7 @@ import Grid from '@mui/material/Grid';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { Form, Formik } from 'formik';
 
-import { FormikFileUploader } from '../../components';
+import { FormikFileUploader } from '../../components/FormikInputFields/FormikFileUploader';
 
 export default {
   title: 'Components/Formik Input Fields/Formik File Uploader',

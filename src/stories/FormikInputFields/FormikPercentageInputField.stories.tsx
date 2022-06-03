@@ -3,7 +3,7 @@ import Grid from '@mui/material/Grid';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { Form, Formik } from 'formik';
 
-import { FormikPercentageInputField } from '../../components';
+import { FormikPercentageInputField } from '../../components/FormikInputFields/FormikPercentageInputField';
 
 export default {
   title: 'Components/Formik Input Fields/Formik Percentage Input Field',

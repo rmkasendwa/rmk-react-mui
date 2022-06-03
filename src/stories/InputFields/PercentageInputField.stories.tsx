@@ -1,6 +1,6 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 
-import { PercentageInputField } from '../../components';
+import { PercentageInputField } from '../../components/InputFields/PercentageInputField';
 
 export default {
   title: 'Components/Input Fields/Percentage Input Field',

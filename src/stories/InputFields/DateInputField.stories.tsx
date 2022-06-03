@@ -1,6 +1,6 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 
-import { DateInputField } from '../../components';
+import { DateInputField } from '../../components/InputFields/DateInputField';
 
 export default {
   title: 'Components/Input Fields/Date Input Field',

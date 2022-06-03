@@ -3,7 +3,7 @@ import Grid from '@mui/material/Grid';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { Form, Formik } from 'formik';
 
-import { FormikFileInputField } from '../../components';
+import { FormikFileInputField } from '../../components/FormikInputFields/FormikFileInputField';
 
 export default {
   title: 'Components/Formik Input Fields/Formik File Input Field',

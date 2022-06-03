@@ -1,6 +1,6 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 
-import { NumberInputField } from '../../components';
+import { NumberInputField } from '../../components/InputFields/NumberInputField';
 
 export default {
   title: 'Components/Input Fields/Number Input Field',

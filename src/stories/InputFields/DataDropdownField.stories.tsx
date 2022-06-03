@@ -1,7 +1,7 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { LoremIpsum } from 'lorem-ipsum';
 
-import { DataDropdownField } from '../../components';
+import { DataDropdownField } from '../../components/InputFields/DataDropdownField';
 
 export default {
   title: 'Components/Input Fields/Data Dropdown Field',

@@ -5,7 +5,7 @@ import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { Form, Formik } from 'formik';
 import { LoremIpsum } from 'lorem-ipsum';
 
-import { FormikTextAreaField } from '../../components';
+import { FormikTextAreaField } from '../../components/FormikInputFields/FormikTextAreaField';
 
 export default {
   title: 'Components/Formik Input Fields/Formik Text Area Field',

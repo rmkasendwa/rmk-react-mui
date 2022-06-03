@@ -1,7 +1,7 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { Form, Formik } from 'formik';
 
-import { FormikCurrencyInputField } from '../../components';
+import { FormikCurrencyInputField } from '../../components/FormikInputFields/FormikCurrencyInputField';
 
 export default {
   title: 'Components/Formik Input Fields/Formik Currency Input Field',

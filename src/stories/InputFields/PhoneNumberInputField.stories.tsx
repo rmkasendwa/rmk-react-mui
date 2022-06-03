@@ -1,6 +1,6 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 
-import { PhoneNumberInputField } from '../../components';
+import { PhoneNumberInputField } from '../../components/InputFields/PhoneNumberInputField';
 
 export default {
   title: 'Components/Input Fields/Phone Number Input Field',

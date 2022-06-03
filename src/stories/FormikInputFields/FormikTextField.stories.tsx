@@ -1,7 +1,7 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { Form, Formik } from 'formik';
 
-import { FormikTextField } from '../../components';
+import { FormikTextField } from '../../components/FormikInputFields/FormikTextField';
 
 export default {
   title: 'Components/Formik Input Fields/Formik Text Field',
