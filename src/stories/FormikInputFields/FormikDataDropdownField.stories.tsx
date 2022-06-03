@@ -1,7 +1,7 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { Form, Formik } from 'formik';
 
-import { FormikDataDropdownField } from '../../components';
+import { FormikDataDropdownField } from '../../components/FormikInputFields/FormikDataDropdownField';
 
 export default {
   title: 'Components/Formik Input Fields/Formik Data Dropdown Field',

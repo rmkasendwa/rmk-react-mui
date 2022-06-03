@@ -8,7 +8,8 @@ import React, { useEffect } from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
 
-import { APIProvider, GlobalConfigurationProvider } from '../src/contexts';
+import { APIProvider } from '../src/contexts/APIContext';
+import { GlobalConfigurationProvider } from '../src/contexts/GlobalConfigurationContext';
 import store from '../src/redux/store';
 import { darkTheme, defaultTheme } from '../src/theme';
 

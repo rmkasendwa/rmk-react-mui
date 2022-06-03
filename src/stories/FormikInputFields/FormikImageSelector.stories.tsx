@@ -4,7 +4,7 @@ import Grid from '@mui/material/Grid';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { Form, Formik } from 'formik';
 
-import { FormikImageSelector } from '../../components';
+import { FormikImageSelector } from '../../components/FormikInputFields/FormikImageSelector';
 
 export default {
   title: 'Components/Formik Input Fields/Formik Image Selector',

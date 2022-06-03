@@ -1,6 +1,6 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 
-import { CurrencyInputField } from '../../components';
+import { CurrencyInputField } from '../../components/InputFields/CurrencyInputField';
 
 export default {
   title: 'Components/Input Fields/Currency Input Field',

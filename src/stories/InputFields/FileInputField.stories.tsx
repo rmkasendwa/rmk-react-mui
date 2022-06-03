@@ -1,6 +1,6 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 
-import { FileInputField } from '../../components';
+import { FileInputField } from '../../components/InputFields/FileInputField';
 
 export default {
   title: 'Components/Input Fields/File Input Field',

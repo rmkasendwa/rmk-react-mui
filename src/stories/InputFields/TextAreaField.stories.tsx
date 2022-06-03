@@ -1,7 +1,7 @@
 import Container from '@mui/material/Container';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 
-import { TextAreaField } from '../../components';
+import { TextAreaField } from '../../components/InputFields/TextAreaField';
 
 export default {
   title: 'Components/Input Fields/Text Area Field',
