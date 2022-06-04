@@ -55,6 +55,8 @@ export const NumberInputField = forwardRef<
     name,
     id,
     decimalPlaces,
+    onBlur,
+    onFocus,
     onChange,
     InputProps,
     min,
@@ -240,8 +242,14 @@ export const NumberInputField = forwardRef<
         })();
         setInputValue(numericString.replace(/^\-+/g, '-'));
       }}
-      onFocus={() => setFocused(true)}
-      onBlur={() => setFocused(false)}
+      onFocus={(event) => {
+        setFocused(true);
+        onFocus && onFocus(event);
+      }}
+      onBlur={(event) => {
+        setFocused(false);
+        onBlur && onBlur(event);
+      }}
       inputProps={{
         ref: (inputField: HTMLInputElement | null) => {
           setInputField(inputField);

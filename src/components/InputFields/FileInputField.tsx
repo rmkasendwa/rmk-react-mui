@@ -1,5 +1,6 @@
 import CloseIcon from '@mui/icons-material/Close';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import { Tooltip } from '@mui/material';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
@@ -67,9 +68,6 @@ export const FileInputField = forwardRef<HTMLDivElement, IFileInputFieldProps>(
             }
             onClick && onClick(event);
           }}
-          sx={{
-            ...sx,
-          }}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
@@ -86,28 +84,44 @@ export const FileInputField = forwardRef<HTMLDivElement, IFileInputFieldProps>(
                 </Button>
               </InputAdornment>
             ),
-            endAdornment:
-              selectedFileName.length > 0 ? (
-                <IconButton
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    if (inputFieldRef.current) {
-                      inputFieldRef.current.value = '';
-                      inputFieldRef.current.dispatchEvent(
-                        new Event('change', { bubbles: true })
-                      );
-                    }
-                  }}
-                  sx={{ p: 0.4 }}
-                >
-                  <CloseIcon color="inherit" />
-                </IconButton>
-              ) : (
-                <IconButton sx={{ p: 0.4 }}>
-                  <CloudUploadIcon color="inherit" />
-                </IconButton>
-              ),
+            endAdornment: (
+              <>
+                {selectedFileName && (
+                  <Tooltip title="Clear">
+                    <IconButton
+                      className="file-input-clear-button"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        if (inputFieldRef.current) {
+                          inputFieldRef.current.value = '';
+                          inputFieldRef.current.dispatchEvent(
+                            new Event('change', { bubbles: true })
+                          );
+                        }
+                      }}
+                      sx={{ p: 0.4 }}
+                    >
+                      <CloseIcon color="inherit" />
+                    </IconButton>
+                  </Tooltip>
+                )}
+                <Tooltip title="Select a file">
+                  <IconButton sx={{ p: 0.4 }}>
+                    <CloudUploadIcon color="inherit" />
+                  </IconButton>
+                </Tooltip>
+              </>
+            ),
             readOnly: true,
+          }}
+          sx={{
+            '& .file-input-clear-button': {
+              opacity: 0,
+            },
+            '&:hover .file-input-clear-button': {
+              opacity: 1,
+            },
+            ...sx,
           }}
         />
       </>

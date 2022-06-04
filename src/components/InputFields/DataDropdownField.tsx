@@ -55,6 +55,7 @@ export const DataDropdownField = forwardRef<
     dropdownListMaxHeight,
     optionPaging = true,
     selectedOption,
+    sx,
     ...rest
   },
   ref
@@ -287,6 +288,7 @@ export const DataDropdownField = forwardRef<
             {selectedOptions.length > 0 && (
               <Tooltip title="Clear">
                 <IconButton
+                  className="data-dropdown-input-clear-button"
                   onClick={(event) => {
                     event.stopPropagation();
                     setSelectedOptions([]);
@@ -306,6 +308,15 @@ export const DataDropdownField = forwardRef<
       value={searchTerm}
       {...rest}
       {...errorProps}
+      sx={{
+        '& .data-dropdown-input-clear-button': {
+          opacity: 0,
+        },
+        '&:hover .data-dropdown-input-clear-button': {
+          opacity: 1,
+        },
+        ...sx,
+      }}
     />
   );
 
