@@ -3,7 +3,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { Tooltip } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
-import { FC, useEffect, useState } from 'react';
+import { FC, useCallback, useEffect, useState } from 'react';
 
 import TextField, { ITextFieldProps } from './TextField';
 
@@ -14,12 +14,27 @@ export interface IPasswordFieldProps extends ITextFieldProps {
 
 export const PasswordField: FC<IPasswordFieldProps> = ({
   showPassword: showPasswordProp = false,
+  name,
+  id,
   value,
   onChange,
   ...rest
 }) => {
-  const [showPassword, setShowPassword] = useState(false);
   const [inputValue, setInputValue] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+
+  const triggerChangeEvent = useCallback(() => {
+    const event: any = new Event('change', { bubbles: true });
+    Object.defineProperty(event, 'target', {
+      writable: false,
+      value: {
+        name,
+        id,
+        value: inputValue,
+      },
+    });
+    onChange && onChange(event);
+  }, [id, inputValue, name, onChange]);
 
   useEffect(() => {
     setShowPassword(showPasswordProp);
@@ -32,6 +47,7 @@ export const PasswordField: FC<IPasswordFieldProps> = ({
   return (
     <TextField
       {...rest}
+      {...{ name, id }}
       value={inputValue}
       onChange={(event) => {
         setInputValue(event.target.value);
@@ -44,7 +60,6 @@ export const PasswordField: FC<IPasswordFieldProps> = ({
             {inputValue.length > 0 && (
               <Tooltip title="Clear">
                 <IconButton
-                  className="number-input-field-clear-button"
                   onClick={(event) => {
                     event.stopPropagation();
                     setInputValue('');
@@ -59,6 +74,7 @@ export const PasswordField: FC<IPasswordFieldProps> = ({
               aria-label="toggle password visibility"
               onClick={() => {
                 setShowPassword((prevShowPassword) => !prevShowPassword);
+                triggerChangeEvent();
               }}
               onMouseDown={(event) => {
                 event.preventDefault();
