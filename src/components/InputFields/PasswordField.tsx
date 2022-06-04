@@ -1,38 +1,73 @@
+import CloseIcon from '@mui/icons-material/Close';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import { Tooltip } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
-import InputAdornment from '@mui/material/InputAdornment';
-import { FC, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 
 import TextField, { ITextFieldProps } from './TextField';
 
-export interface IPasswordFieldProps extends ITextFieldProps {}
+export interface IPasswordFieldProps extends ITextFieldProps {
+  value?: string;
+  showPassword?: boolean;
+}
 
-export const PasswordField: FC<IPasswordFieldProps> = (props) => {
+export const PasswordField: FC<IPasswordFieldProps> = ({
+  showPassword: showPasswordProp = false,
+  value,
+  onChange,
+  ...rest
+}) => {
   const [showPassword, setShowPassword] = useState(false);
+  const [inputValue, setInputValue] = useState('');
 
-  const handleClickShowPassword = () => {
-    setShowPassword((prevShowPassword) => !prevShowPassword);
-  };
+  useEffect(() => {
+    setShowPassword(showPasswordProp);
+  }, [showPasswordProp]);
+
+  useEffect(() => {
+    setInputValue(value || '');
+  }, [value]);
 
   return (
     <TextField
-      {...props}
+      {...rest}
+      value={inputValue}
+      onChange={(event) => {
+        setInputValue(event.target.value);
+        onChange && onChange(event);
+      }}
       type={showPassword ? 'text' : 'password'}
       InputProps={{
         endAdornment: (
-          <InputAdornment position="end">
+          <>
+            {inputValue.length > 0 && (
+              <Tooltip title="Clear">
+                <IconButton
+                  className="number-input-field-clear-button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    setInputValue('');
+                  }}
+                  sx={{ p: 0.4 }}
+                >
+                  <CloseIcon />
+                </IconButton>
+              </Tooltip>
+            )}
             <IconButton
               aria-label="toggle password visibility"
-              onClick={handleClickShowPassword}
+              onClick={() => {
+                setShowPassword((prevShowPassword) => !prevShowPassword);
+              }}
               onMouseDown={(event) => {
                 event.preventDefault();
               }}
-              edge="end"
+              sx={{ p: 0.4 }}
             >
               {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
             </IconButton>
-          </InputAdornment>
+          </>
         ),
       }}
     />

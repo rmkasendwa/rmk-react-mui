@@ -69,9 +69,6 @@ export const FileInputField = forwardRef<HTMLDivElement, IFileInputFieldProps>(
           }}
           sx={{
             ...sx,
-            '&>.MuiInputBase-formControl': {
-              pr: 0,
-            },
           }}
           InputProps={{
             startAdornment: (
@@ -101,11 +98,12 @@ export const FileInputField = forwardRef<HTMLDivElement, IFileInputFieldProps>(
                       );
                     }
                   }}
+                  sx={{ p: 0.4 }}
                 >
                   <CloseIcon color="inherit" />
                 </IconButton>
               ) : (
-                <IconButton>
+                <IconButton sx={{ p: 0.4 }}>
                   <CloudUploadIcon color="inherit" />
                 </IconButton>
               ),
