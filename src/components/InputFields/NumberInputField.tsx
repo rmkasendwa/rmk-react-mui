@@ -1,5 +1,7 @@
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
+import CloseIcon from '@mui/icons-material/Close';
+import { Tooltip } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import { forwardRef, useCallback, useEffect, useState } from 'react';
@@ -244,26 +246,41 @@ export const NumberInputField = forwardRef<
       InputProps={{
         ...InputProps,
         endAdornment: (
-          <Stack className="number-input-field-step-tools">
-            <IconButton
-              onClick={(event) => {
-                inputField?.focus();
-                stepUpInputValue(getScaleFactor(event));
-              }}
-              sx={{ width: 10, height: 10, p: 1 }}
-            >
-              <ArrowDropUpIcon />
-            </IconButton>
-            <IconButton
-              onClick={(event) => {
-                inputField?.focus();
-                stepDownInputValue(getScaleFactor(event));
-              }}
-              sx={{ width: 10, height: 10, p: 1 }}
-            >
-              <ArrowDropDownIcon />
-            </IconButton>
-          </Stack>
+          <>
+            {inputValue.length > 0 && (
+              <Tooltip title="Clear">
+                <IconButton
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    setInputValue('');
+                  }}
+                  sx={{ p: 0.4 }}
+                >
+                  <CloseIcon />
+                </IconButton>
+              </Tooltip>
+            )}
+            <Stack className="number-input-field-step-tools">
+              <IconButton
+                onClick={(event) => {
+                  inputField?.focus();
+                  stepUpInputValue(getScaleFactor(event));
+                }}
+                sx={{ width: 10, height: 10, p: 1 }}
+              >
+                <ArrowDropUpIcon />
+              </IconButton>
+              <IconButton
+                onClick={(event) => {
+                  inputField?.focus();
+                  stepDownInputValue(getScaleFactor(event));
+                }}
+                sx={{ width: 10, height: 10, p: 1 }}
+              >
+                <ArrowDropDownIcon />
+              </IconButton>
+            </Stack>
+          </>
         ),
       }}
       sx={{
