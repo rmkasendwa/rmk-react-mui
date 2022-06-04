@@ -105,6 +105,20 @@ export const NumberInputField = forwardRef<
     [decimalPlaces, getNumericInputValue, min, step]
   );
 
+  const triggerChangeEvent = useCallback(() => {
+    const numericValue = +extractNumericValue(inputValue);
+    const event: any = new Event('change', { bubbles: true });
+    Object.defineProperty(event, 'target', {
+      writable: false,
+      value: {
+        name,
+        id,
+        value: isNaN(numericValue) ? 0 : numericValue,
+      },
+    });
+    onChange && onChange(event);
+  }, [extractNumericValue, id, inputValue, name, onChange]);
+
   useEffect(() => {
     if (!focused) {
       if (value !== undefined) {
@@ -158,19 +172,9 @@ export const NumberInputField = forwardRef<
 
   useEffect(() => {
     if (focused) {
-      const numericValue = +extractNumericValue(inputValue);
-      const event: any = new Event('change', { bubbles: true });
-      Object.defineProperty(event, 'target', {
-        writable: false,
-        value: {
-          name,
-          id,
-          value: isNaN(numericValue) ? 0 : numericValue,
-        },
-      });
-      onChange && onChange(event);
+      triggerChangeEvent();
     }
-  }, [extractNumericValue, focused, id, inputValue, name, onChange]);
+  }, [focused, triggerChangeEvent]);
 
   useEffect(() => {
     if (focused) {
@@ -250,9 +254,11 @@ export const NumberInputField = forwardRef<
             {inputValue.length > 0 && (
               <Tooltip title="Clear">
                 <IconButton
+                  className="number-input-field-clear-button"
                   onClick={(event) => {
                     event.stopPropagation();
                     setInputValue('');
+                    triggerChangeEvent();
                   }}
                   sx={{ p: 0.4 }}
                 >
@@ -284,12 +290,14 @@ export const NumberInputField = forwardRef<
         ),
       }}
       sx={{
-        '& .number-input-field-step-tools': {
-          opacity: 0,
-        },
-        '&:hover .number-input-field-step-tools': {
-          opacity: 1,
-        },
+        '& .number-input-field-step-tools, & .number-input-field-clear-button':
+          {
+            opacity: 0,
+          },
+        '&:hover .number-input-field-step-tools, &:hover .number-input-field-clear-button':
+          {
+            opacity: 1,
+          },
         ...sx,
       }}
     />
