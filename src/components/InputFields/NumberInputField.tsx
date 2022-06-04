@@ -1,5 +1,7 @@
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
+import CloseIcon from '@mui/icons-material/Close';
+import { Tooltip } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import { forwardRef, useCallback, useEffect, useState } from 'react';
@@ -103,6 +105,20 @@ export const NumberInputField = forwardRef<
     [decimalPlaces, getNumericInputValue, min, step]
   );
 
+  const triggerChangeEvent = useCallback(() => {
+    const numericValue = +extractNumericValue(inputValue);
+    const event: any = new Event('change', { bubbles: true });
+    Object.defineProperty(event, 'target', {
+      writable: false,
+      value: {
+        name,
+        id,
+        value: isNaN(numericValue) ? 0 : numericValue,
+      },
+    });
+    onChange && onChange(event);
+  }, [extractNumericValue, id, inputValue, name, onChange]);
+
   useEffect(() => {
     if (!focused) {
       if (value !== undefined) {
@@ -156,19 +172,9 @@ export const NumberInputField = forwardRef<
 
   useEffect(() => {
     if (focused) {
-      const numericValue = +extractNumericValue(inputValue);
-      const event: any = new Event('change', { bubbles: true });
-      Object.defineProperty(event, 'target', {
-        writable: false,
-        value: {
-          name,
-          id,
-          value: isNaN(numericValue) ? 0 : numericValue,
-        },
-      });
-      onChange && onChange(event);
+      triggerChangeEvent();
     }
-  }, [extractNumericValue, focused, id, inputValue, name, onChange]);
+  }, [focused, triggerChangeEvent]);
 
   useEffect(() => {
     if (focused) {
@@ -244,35 +250,54 @@ export const NumberInputField = forwardRef<
       InputProps={{
         ...InputProps,
         endAdornment: (
-          <Stack className="number-input-field-step-tools">
-            <IconButton
-              onClick={(event) => {
-                inputField?.focus();
-                stepUpInputValue(getScaleFactor(event));
-              }}
-              sx={{ width: 10, height: 10, p: 1 }}
-            >
-              <ArrowDropUpIcon />
-            </IconButton>
-            <IconButton
-              onClick={(event) => {
-                inputField?.focus();
-                stepDownInputValue(getScaleFactor(event));
-              }}
-              sx={{ width: 10, height: 10, p: 1 }}
-            >
-              <ArrowDropDownIcon />
-            </IconButton>
-          </Stack>
+          <>
+            {inputValue.length > 0 && (
+              <Tooltip title="Clear">
+                <IconButton
+                  className="number-input-field-clear-button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    setInputValue('');
+                    triggerChangeEvent();
+                  }}
+                  sx={{ p: 0.4 }}
+                >
+                  <CloseIcon />
+                </IconButton>
+              </Tooltip>
+            )}
+            <Stack className="number-input-field-step-tools">
+              <IconButton
+                onClick={(event) => {
+                  inputField?.focus();
+                  stepUpInputValue(getScaleFactor(event));
+                }}
+                sx={{ width: 10, height: 10, p: 1 }}
+              >
+                <ArrowDropUpIcon />
+              </IconButton>
+              <IconButton
+                onClick={(event) => {
+                  inputField?.focus();
+                  stepDownInputValue(getScaleFactor(event));
+                }}
+                sx={{ width: 10, height: 10, p: 1 }}
+              >
+                <ArrowDropDownIcon />
+              </IconButton>
+            </Stack>
+          </>
         ),
       }}
       sx={{
-        '& .number-input-field-step-tools': {
-          opacity: 0,
-        },
-        '&:hover .number-input-field-step-tools': {
-          opacity: 1,
-        },
+        '& .number-input-field-step-tools, & .number-input-field-clear-button':
+          {
+            opacity: 0,
+          },
+        '&:hover .number-input-field-step-tools, &:hover .number-input-field-clear-button':
+          {
+            opacity: 1,
+          },
         ...sx,
       }}
     />
