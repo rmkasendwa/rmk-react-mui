@@ -10,7 +10,7 @@ import ErrorSkeleton from './ErrorSkeleton';
 import FieldLabel, { IFieldLabelProps } from './FieldLabel';
 
 export interface IFieldValueDisplayProps {
-  label: string;
+  label: ReactNode;
   value?: ReactNode;
   LabelProps?: IFieldLabelProps;
   ValueProps?: TypographyProps;
@@ -26,7 +26,7 @@ export const FieldValueDisplay: FC<IFieldValueDisplayProps> = ({
   const theme = useTheme();
 
   const { loading, errorMessage } = useLoadingContext();
-  const labelSkeletonWidth = label.length * 7;
+  const labelSkeletonWidth = String(label).length * 7;
   const valueSkeletonWidth = `${20 + Math.round(Math.random() * 60)}%`;
 
   if (errorMessage) {
@@ -57,8 +57,13 @@ export const FieldValueDisplay: FC<IFieldValueDisplayProps> = ({
 
   return (
     <>
-      <FieldLabel {...LabelProps}>{label}</FieldLabel>
-      <Box sx={{ mt: 0.5 }}>
+      {(() => {
+        if (['string', 'number'].includes(typeof label)) {
+          return <FieldLabel {...LabelProps}>{label}</FieldLabel>;
+        }
+        return label;
+      })()}
+      <Box sx={{ mt: 0.5, display: 'flex' }}>
         {(() => {
           if (['string', 'number'].includes(typeof value)) {
             const { sx, ...rest } = ValueProps;
