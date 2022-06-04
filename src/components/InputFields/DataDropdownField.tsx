@@ -1,4 +1,6 @@
+import CloseIcon from '@mui/icons-material/Close';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { IconButton, Tooltip } from '@mui/material';
 import Box from '@mui/material/Box';
 import ClickAwayListener from '@mui/material/ClickAwayListener';
 import Grow from '@mui/material/Grow';
@@ -280,7 +282,24 @@ export const DataDropdownField = forwardRef<
         setSearchTerm(event.target.value);
       }}
       InputProps={{
-        endAdornment: <ExpandMoreIcon />,
+        endAdornment: (
+          <>
+            {selectedOptions.length > 0 && (
+              <Tooltip title="Clear">
+                <IconButton
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    setSelectedOptions([]);
+                  }}
+                  sx={{ p: 0.4 }}
+                >
+                  <CloseIcon />
+                </IconButton>
+              </Tooltip>
+            )}
+            <ExpandMoreIcon />
+          </>
+        ),
         ...InputProps,
         ref: anchorRef,
       }}
