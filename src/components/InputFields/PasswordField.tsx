@@ -18,6 +18,7 @@ export const PasswordField: FC<IPasswordFieldProps> = ({
   id,
   value,
   onChange,
+  sx,
   ...rest
 }) => {
   const [inputValue, setInputValue] = useState('');
@@ -60,6 +61,8 @@ export const PasswordField: FC<IPasswordFieldProps> = ({
             {inputValue.length > 0 && (
               <Tooltip title="Clear">
                 <IconButton
+                  className="password-input-clear-button"
+                  aria-label="Clear Password"
                   onClick={(event) => {
                     event.stopPropagation();
                     setInputValue('');
@@ -71,7 +74,7 @@ export const PasswordField: FC<IPasswordFieldProps> = ({
               </Tooltip>
             )}
             <IconButton
-              aria-label="toggle password visibility"
+              aria-label="Toggle password visibility"
               onClick={() => {
                 setShowPassword((prevShowPassword) => !prevShowPassword);
                 triggerChangeEvent();
@@ -85,6 +88,15 @@ export const PasswordField: FC<IPasswordFieldProps> = ({
             </IconButton>
           </>
         ),
+      }}
+      sx={{
+        '& .password-input-clear-button': {
+          opacity: 0,
+        },
+        '&:hover .password-input-clear-button': {
+          opacity: 1,
+        },
+        ...sx,
       }}
     />
   );

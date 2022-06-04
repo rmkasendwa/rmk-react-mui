@@ -22,7 +22,17 @@ export interface IDateInputFieldProps extends ITextFieldProps {
 
 export const DateInputField = forwardRef<HTMLDivElement, IDateInputFieldProps>(
   function DateInputField(
-    { value, name, placeholder, onChange, onClick, minDate, maxDate, ...rest },
+    {
+      value,
+      name,
+      placeholder,
+      onChange,
+      onClick,
+      minDate,
+      maxDate,
+      sx,
+      ...rest
+    },
     ref
   ) {
     const smallScreen = useSmallScreen();
@@ -79,6 +89,7 @@ export const DateInputField = forwardRef<HTMLDivElement, IDateInputFieldProps>(
               {selectedDate && (
                 <Tooltip title="Clear">
                   <IconButton
+                    className="date-input-clear-button"
                     onClick={() => setSelectedDate('')}
                     sx={{ p: 0.4 }}
                   >
@@ -108,6 +119,15 @@ export const DateInputField = forwardRef<HTMLDivElement, IDateInputFieldProps>(
               const inputField = inputFieldWrapper?.querySelector('input');
               setInputField(inputField);
               typeof ref === 'function' && ref(inputField || null);
+            }}
+            sx={{
+              '& .date-input-clear-button': {
+                opacity: 0,
+              },
+              '&:hover .date-input-clear-button': {
+                opacity: 1,
+              },
+              ...sx,
             }}
           />
         );

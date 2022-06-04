@@ -12,7 +12,7 @@ export default {
 } as ComponentMeta<typeof FormikPhoneNumberInputField>;
 
 const initialValues = {
-  field: 'Default Field Value',
+  field: '',
 };
 
 const Template: ComponentStory<typeof FormikPhoneNumberInputField> = (
@@ -33,7 +33,6 @@ const Template: ComponentStory<typeof FormikPhoneNumberInputField> = (
               name="field"
               {...props}
               displayPhoneNumberCountry
-              sx={{ minWidth: 500 }}
             />
           </Form>
         );

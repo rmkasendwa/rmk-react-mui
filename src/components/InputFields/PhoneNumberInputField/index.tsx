@@ -64,6 +64,7 @@ export const PhoneNumberInputField = forwardRef<
     name,
     id,
     regionalCode: regionalCodeProp,
+    sx,
     ...rest
   },
   ref
@@ -121,7 +122,7 @@ export const PhoneNumberInputField = forwardRef<
   }, [focused, triggerChangeEvent]);
 
   useEffect(() => {
-    value != null && setSanitizedInputValue(value);
+    value && setSanitizedInputValue(value);
   }, [setSanitizedInputValue, value]);
 
   useEffect(() => {
@@ -225,6 +226,7 @@ export const PhoneNumberInputField = forwardRef<
           inputValue.length > 0 ? (
             <Tooltip title="Clear">
               <IconButton
+                className="phone-number-input-clear-button"
                 onClick={(event) => {
                   event.stopPropagation();
                   setInputValue('');
@@ -241,6 +243,13 @@ export const PhoneNumberInputField = forwardRef<
         '&>.MuiInputBase-formControl': {
           pl: 0,
         },
+        '& .phone-number-input-clear-button': {
+          opacity: 0,
+        },
+        '&:hover .phone-number-input-clear-button': {
+          opacity: 1,
+        },
+        ...sx,
       }}
     />
   );
