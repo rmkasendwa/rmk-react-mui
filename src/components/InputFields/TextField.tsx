@@ -1,8 +1,16 @@
 import CloseIcon from '@mui/icons-material/Close';
-import { IconButton, Tooltip } from '@mui/material';
+import IconButton from '@mui/material/IconButton';
 import Skeleton from '@mui/material/Skeleton';
 import MuiTextField, { TextFieldProps } from '@mui/material/TextField';
-import { forwardRef, useCallback, useEffect, useRef, useState } from 'react';
+import Tooltip from '@mui/material/Tooltip';
+import {
+  ReactNode,
+  forwardRef,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
 import { useLoadingContext } from '../../hooks/Utils';
 import ErrorSkeleton from '../ErrorSkeleton';
@@ -11,6 +19,7 @@ export interface ITextFieldProps
   extends Omit<TextFieldProps, 'variant'>,
     Pick<TextFieldProps, 'variant'> {
   value?: string;
+  endAdornment?: ReactNode;
 }
 
 export const TextField = forwardRef<HTMLDivElement, ITextFieldProps>(
@@ -26,6 +35,7 @@ export const TextField = forwardRef<HTMLDivElement, ITextFieldProps>(
       id,
       onChange,
       value,
+      endAdornment: endAdornmentProp,
       sx,
       ...rest
     },
@@ -51,7 +61,7 @@ export const TextField = forwardRef<HTMLDivElement, ITextFieldProps>(
     }, [id, inputValue, name, onChange]);
 
     useEffect(() => {
-      setInputValue(value || '');
+      setInputValue(value ?? '');
     }, [value]);
 
     useEffect(() => {
@@ -108,25 +118,33 @@ export const TextField = forwardRef<HTMLDivElement, ITextFieldProps>(
         value={inputValue}
         onChange={(event) => {
           setInputValue(event.target.value);
-          onChange && onChange(event);
         }}
         InputProps={{
           endAdornment:
             endAdornment ??
-            (inputValue.length > 0 ? (
-              <Tooltip title="Clear">
-                <IconButton
-                  className="text-input-clear-button"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    setInputValue('');
-                  }}
-                  sx={{ p: 0.4 }}
-                >
-                  <CloseIcon />
-                </IconButton>
-              </Tooltip>
-            ) : null),
+            (() => {
+              if (inputValue.length > 0 || endAdornmentProp) {
+                return (
+                  <>
+                    {inputValue.length > 0 ? (
+                      <Tooltip title="Clear">
+                        <IconButton
+                          className="text-input-clear-button"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            setInputValue('');
+                          }}
+                          sx={{ p: 0.4 }}
+                        >
+                          <CloseIcon />
+                        </IconButton>
+                      </Tooltip>
+                    ) : null}
+                    {endAdornmentProp ? endAdornmentProp : null}
+                  </>
+                );
+              }
+            })(),
           ...restInputProps,
         }}
         sx={{

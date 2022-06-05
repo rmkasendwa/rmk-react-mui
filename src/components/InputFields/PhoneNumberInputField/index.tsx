@@ -1,6 +1,4 @@
-import CloseIcon from '@mui/icons-material/Close';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { IconButton, Tooltip } from '@mui/material';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import InputAdornment from '@mui/material/InputAdornment';
@@ -69,8 +67,8 @@ export const PhoneNumberInputField = forwardRef<
   },
   ref
 ) {
+  const initialRenderRef = useRef(true);
   const { countryCode } = useContext(GlobalConfigurationContext);
-  const [focused, setFocused] = useState(false);
   const [regionalCode, setRegionalCode] = useState(countryCode);
   const [selectedCountry, setSelectedCountry] = useState(flags[regionalCode]);
 
@@ -116,12 +114,6 @@ export const PhoneNumberInputField = forwardRef<
   }, [id, inputValue, name, onChange]);
 
   useEffect(() => {
-    if (focused) {
-      triggerChangeEvent();
-    }
-  }, [focused, triggerChangeEvent]);
-
-  useEffect(() => {
     value && setSanitizedInputValue(value);
   }, [setSanitizedInputValue, value]);
 
@@ -135,6 +127,19 @@ export const PhoneNumberInputField = forwardRef<
     setSelectedCountry(flags[regionalCode]);
   }, [regionalCode]);
 
+  useEffect(() => {
+    if (!initialRenderRef.current) {
+      triggerChangeEvent();
+    }
+  }, [triggerChangeEvent]);
+
+  useEffect(() => {
+    initialRenderRef.current = false;
+    return () => {
+      initialRenderRef.current = true;
+    };
+  }, []);
+
   return (
     <TextField
       ref={ref}
@@ -144,22 +149,19 @@ export const PhoneNumberInputField = forwardRef<
         if (displayRegionalCodeOnEmptyFocus && inputValue.length === 0) {
           setInputValue(`+${selectedCountry.countryCode}`);
         }
-        setFocused(true);
         onFocus && onFocus(event);
       }}
       onBlur={(event) => {
         if (inputValue === `+${selectedCountry.countryCode}`) {
           setInputValue('');
         }
-        setFocused(false);
         onBlur && onBlur(event);
       }}
       onChange={(event) => {
         setSanitizedInputValue(event.target.value);
       }}
-      placeholder={placeholder}
       {...rest}
-      {...{ name }}
+      {...{ name, id, placeholder }}
       InputProps={{
         startAdornment: displayPhoneNumberCountry ? (
           <InputAdornment position="start">
@@ -222,32 +224,10 @@ export const PhoneNumberInputField = forwardRef<
             />
           </InputAdornment>
         ) : null,
-        endAdornment:
-          inputValue.length > 0 ? (
-            <Tooltip title="Clear">
-              <IconButton
-                className="phone-number-input-clear-button"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  setInputValue('');
-                  triggerChangeEvent();
-                }}
-                sx={{ p: 0.4 }}
-              >
-                <CloseIcon />
-              </IconButton>
-            </Tooltip>
-          ) : null,
       }}
       sx={{
         '&>.MuiInputBase-formControl': {
           pl: 0,
-        },
-        '& .phone-number-input-clear-button': {
-          opacity: 0,
-        },
-        '&:hover .phone-number-input-clear-button': {
-          opacity: 1,
         },
         ...sx,
       }}

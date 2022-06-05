@@ -1,7 +1,5 @@
-import CloseIcon from '@mui/icons-material/Close';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import { Tooltip } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import { FC, useCallback, useEffect, useRef, useState } from 'react';
 
@@ -18,7 +16,7 @@ export const PasswordField: FC<IPasswordFieldProps> = ({
   name,
   id,
   value,
-  onChange,
+  onChange: onChangeProp,
   onChangeShowPassword,
   sx,
   ...rest
@@ -37,15 +35,19 @@ export const PasswordField: FC<IPasswordFieldProps> = ({
         value: inputValue,
       },
     });
-    onChange && onChange(event);
-  }, [id, inputValue, name, onChange]);
+    onChangeProp && onChangeProp(event);
+  }, [id, inputValue, name, onChangeProp]);
+
+  const onChange = useCallback((event) => {
+    setInputValue(event.target.value);
+  }, []);
 
   useEffect(() => {
     setShowPassword(showPasswordProp);
   }, [showPasswordProp]);
 
   useEffect(() => {
-    setInputValue(value || '');
+    setInputValue(value ?? '');
   }, [value]);
 
   useEffect(() => {
@@ -53,6 +55,12 @@ export const PasswordField: FC<IPasswordFieldProps> = ({
       onChangeShowPassword(showPassword);
     }
   }, [onChangeShowPassword, showPassword]);
+
+  useEffect(() => {
+    if (!initialRenderRef.current) {
+      triggerChangeEvent();
+    }
+  }, [triggerChangeEvent]);
 
   useEffect(() => {
     initialRenderRef.current = false;
@@ -64,54 +72,24 @@ export const PasswordField: FC<IPasswordFieldProps> = ({
   return (
     <TextField
       {...rest}
-      {...{ name, id }}
+      {...{ name, id, onChange }}
       value={inputValue}
-      onChange={(event) => {
-        setInputValue(event.target.value);
-        onChange && onChange(event);
-      }}
       type={showPassword ? 'text' : 'password'}
-      InputProps={{
-        endAdornment: (
-          <>
-            {inputValue.length > 0 && (
-              <Tooltip title="Clear">
-                <IconButton
-                  className="password-input-clear-button"
-                  aria-label="Clear Password"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    setInputValue('');
-                  }}
-                  sx={{ p: 0.4 }}
-                >
-                  <CloseIcon />
-                </IconButton>
-              </Tooltip>
-            )}
-            <IconButton
-              aria-label="Toggle password visibility"
-              onClick={() => {
-                setShowPassword((prevShowPassword) => !prevShowPassword);
-                triggerChangeEvent();
-              }}
-              onMouseDown={(event) => {
-                event.preventDefault();
-              }}
-              sx={{ p: 0.4 }}
-            >
-              {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
-            </IconButton>
-          </>
-        ),
-      }}
+      endAdornment={
+        <IconButton
+          aria-label="Toggle password visibility"
+          onClick={() => {
+            setShowPassword((prevShowPassword) => !prevShowPassword);
+          }}
+          onMouseDown={(event) => {
+            event.preventDefault();
+          }}
+          sx={{ p: 0.4 }}
+        >
+          {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
+        </IconButton>
+      }
       sx={{
-        '& .password-input-clear-button': {
-          opacity: 0,
-        },
-        '&:hover .password-input-clear-button': {
-          opacity: 1,
-        },
         ...sx,
       }}
     />
