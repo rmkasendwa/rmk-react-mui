@@ -68,7 +68,7 @@ export const DateInputField = forwardRef<HTMLDivElement, IDateInputFieldProps>(
           date ? addMinutes(date, -date.getTimezoneOffset()).toISOString() : ''
         );
       },
-      renderInput: (params) => {
+      renderInput: ({ value, ...params }) => {
         if (params.inputProps) {
           if (selectedDate) {
             params.inputProps.value = format(
@@ -108,6 +108,7 @@ export const DateInputField = forwardRef<HTMLDivElement, IDateInputFieldProps>(
         delete params.error;
         return (
           <TextField
+            {...{ value: value as string }}
             {...params}
             {...rest}
             {...{ name }}

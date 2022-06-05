@@ -23,7 +23,8 @@ import PaginatedDropdownOptionList, {
 import RetryErrorMessage from '../RetryErrorMessage';
 import TextField, { ITextFieldProps } from './TextField';
 
-export interface IDataDropdownFieldProps extends ITextFieldProps {
+export interface IDataDropdownFieldProps
+  extends Omit<ITextFieldProps, 'value'> {
   disableEmptyOption?: boolean;
   getDropdownEntities?: TAPIFunction;
   getDropdownOptions?: (options: any[]) => IDropdownOption[];
