@@ -46,6 +46,7 @@ export const DataDropdownField = forwardRef<
     getDropdownEntities,
     getDropdownOptions,
     name,
+    id,
     value,
     dataKey,
     options: propOptions,
@@ -71,16 +72,32 @@ export const DataDropdownField = forwardRef<
     errorMessage,
   } = useAPIService<any[]>([], dataKey);
 
+  const initialRenderRef = useRef(true);
+  const anchorRef = useRef<HTMLInputElement>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [open, setOpen] = useState(false);
-  const anchorRef = useRef<HTMLInputElement>(null);
-  const isTouchedRef = useRef(false);
 
   const [options, setOptions] = useState<IDropdownOption[]>([]);
   const [selectedOptions, setSelectedOptions] = useState<IDropdownOption[]>([]);
   const [missingOptionValues, setMissingOptionValues] = useState<
     (string | number)[]
   >([]);
+
+  const selectedOptionValue = useMemo(() => {
+    if (SelectProps?.multiple) {
+      return selectedOptions.map(({ value }) => value);
+    }
+    return selectedOptions[0]?.value;
+  }, [SelectProps?.multiple, selectedOptions]);
+
+  const triggerChangeEvent = useCallback(() => {
+    const event: any = new Event('blur', { bubbles: true });
+    Object.defineProperty(event, 'target', {
+      writable: false,
+      value: { id, name, value: selectedOptionValue },
+    });
+    onChange && onChange(event);
+  }, [id, name, onChange, selectedOptionValue]);
 
   const loadOptions = useCallback(
     async (reloadOptions = false) => {
@@ -96,50 +113,35 @@ export const DataDropdownField = forwardRef<
     [getDropdownEntities, load, loaded, loading, options.length, preferStale]
   );
 
-  const selectedOptionDisplayString = selectedOptions
-    .filter(({ label, searchableLabel }) => {
-      return typeof label === 'string' || searchableLabel;
-    })
-    .map(({ label, searchableLabel }) => searchableLabel || label)
-    .join(', ');
+  const selectedOptionDisplayString = useMemo(() => {
+    return selectedOptions
+      .filter(({ label, searchableLabel }) => {
+        return typeof label === 'string' || searchableLabel;
+      })
+      .map(({ label, searchableLabel }) => searchableLabel || label)
+      .join(', ');
+  }, [selectedOptions]);
 
-  const selectedOptionValue = useMemo(() => {
-    if (SelectProps?.multiple) {
-      return selectedOptions.map(({ value }) => value);
-    }
-    return selectedOptions[0]?.value;
-  }, [SelectProps?.multiple, selectedOptions]);
+  const handleChange = useCallback((event) => {
+    setSearchTerm(event.target.value);
+  }, []);
 
-  const handleBlur = () => {
+  const handleBlur = useCallback(() => {
     if (onBlur) {
       const event: any = new Event('blur', { bubbles: true });
       Object.defineProperty(event, 'target', {
         writable: false,
         value: {
           name,
+          id,
           value: selectedOptionValue,
         },
       });
       onBlur(event);
     }
-  };
-
-  const handleChange = useCallback(() => {
-    if (onChange) {
-      const event: any = new Event('change', { bubbles: true });
-      Object.defineProperty(event, 'target', {
-        writable: false,
-        value: {
-          name,
-          value: selectedOptionValue,
-        },
-      });
-      onChange(event);
-    }
-  }, [name, onChange, selectedOptionValue]);
+  }, [id, name, onBlur, selectedOptionValue]);
 
   const handleClose = () => {
-    isTouchedRef.current = true;
     setOpen(false);
   };
 
@@ -197,12 +199,6 @@ export const DataDropdownField = forwardRef<
   }, [selectedOptionDisplayString]);
 
   useEffect(() => {
-    if (isTouchedRef.current === true) {
-      handleChange();
-    }
-  }, [handleChange, selectedOptions]);
-
-  useEffect(() => {
     const fieldValues = Array.isArray(value) ? value : [value];
     setSelectedOptions(
       fieldValues
@@ -247,6 +243,19 @@ export const DataDropdownField = forwardRef<
     return options;
   }, [options, searchTerm, selectedOptionDisplayString]);
 
+  useEffect(() => {
+    if (!initialRenderRef.current) {
+      triggerChangeEvent();
+    }
+  }, [triggerChangeEvent]);
+
+  useEffect(() => {
+    initialRenderRef.current = false;
+    return () => {
+      initialRenderRef.current = true;
+    };
+  }, []);
+
   if (value && loading && missingOptionValues.length > 0) {
     return (
       <LoadingProvider value={{ loading, errorMessage }}>
@@ -276,13 +285,8 @@ export const DataDropdownField = forwardRef<
         setTimeout(() => setOpen(true), 200);
         loadOptions();
       }}
-      onBlur={() => {
-        isTouchedRef.current = true;
-        handleBlur();
-      }}
-      onChange={(event) => {
-        setSearchTerm(event.target.value);
-      }}
+      onBlur={handleBlur}
+      onChange={handleChange}
       InputProps={{
         endAdornment: (
           <>
@@ -373,12 +377,10 @@ export const DataDropdownField = forwardRef<
                     paging={optionPaging}
                     multiple={SelectProps?.multiple}
                     onClose={handleClose}
-                    loading={loading}
                     loadOptions={
                       getDropdownEntities ? () => loadOptions(true) : undefined
                     }
-                    selectedOptions={selectedOptions}
-                    setSelectedOptions={setSelectedOptions}
+                    {...{ selectedOptions, setSelectedOptions, loading }}
                   />
                 </ClickAwayListener>
               </Box>
