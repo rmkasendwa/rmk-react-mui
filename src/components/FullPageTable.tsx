@@ -1,15 +1,10 @@
-import CloseIcon from '@mui/icons-material/Close';
-import SearchIcon from '@mui/icons-material/Search';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
-import IconButton from '@mui/material/IconButton';
 import Paper from '@mui/material/Paper';
 import useTheme from '@mui/material/styles/useTheme';
-import TextField from '@mui/material/TextField';
-import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import { alpha } from '@mui/system/colorManipulator';
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
@@ -21,7 +16,7 @@ import LoadingScreen from './LoadingScreen';
 import PaddedContentArea, {
   IPaddedContentAreaProps,
 } from './PaddedContentArea';
-import ReloadIconButton from './ReloadIconButton';
+import SearchSyncToolbar from './SearchSyncToolbar';
 import Table, { ITableProps } from './Table';
 
 export interface IFullPageTableProps<T = any>
@@ -67,7 +62,6 @@ export const FullPageTable: FC<IFullPageTableProps> = ({
   loading,
   errorMessage,
   load,
-  permissionToAddNew,
   TableProps,
   paging = true,
   showStatusBar = true,
@@ -99,19 +93,34 @@ export const FullPageTable: FC<IFullPageTableProps> = ({
   }, [columns]);
 
   const matchesSearchTerm = useCallback(
-    (lowerCaseSearchTerm: string, columnValue: string | string[]) => {
+    (
+      lowerCaseSearchTerm: string,
+      columnValue: string | number | (string | number)[]
+    ) => {
       if (Array.isArray(columnValue)) {
         return columnValue.some((item) => {
-          return (
-            typeof item === 'string' &&
-            item.toLowerCase().match(lowerCaseSearchTerm)
-          );
+          if (typeof item === 'string') {
+            return item.toLowerCase().match(lowerCaseSearchTerm);
+          }
+          if (typeof item === 'number') {
+            return String(item)
+              .toLowerCase()
+              .match(lowerCaseSearchTerm.replace(/,/g, ''));
+          }
+          return false;
         });
       }
-      return (
-        typeof columnValue === 'string' &&
-        columnValue.toLowerCase().match(lowerCaseSearchTerm)
-      );
+      return (() => {
+        if (typeof columnValue === 'string') {
+          return columnValue.toLowerCase().match(lowerCaseSearchTerm);
+        }
+        if (typeof columnValue === 'number') {
+          return String(columnValue)
+            .toLowerCase()
+            .match(lowerCaseSearchTerm.replace(/,/g, ''));
+        }
+        return false;
+      })();
     },
     []
   );
@@ -212,59 +221,29 @@ export const FullPageTable: FC<IFullPageTableProps> = ({
   }, [filteredRows, paging]);
 
   const toolbar = (
-    <Toolbar>
-      <Grid container alignItems="center">
-        <Grid item>
-          <SearchIcon color="inherit" sx={{ display: 'block', mr: 1 }} />
-        </Grid>
-        <Grid item xs>
-          <TextField
-            fullWidth
-            placeholder={searchFieldPlaceholder}
-            InputProps={{
-              disableUnderline: true,
-              sx: { fontSize: 'default' },
-              endAdornment: searchTerm && (
-                <IconButton onClick={() => setSearchTerm('')}>
-                  <CloseIcon />
-                </IconButton>
-              ),
-            }}
-            variant="standard"
-            value={searchTerm}
-            onChange={(event) => setSearchTerm(event.target.value)}
-            disabled={loading && rows.length <= 0}
-          />
-        </Grid>
-        <Grid item>
-          <Grid container alignItems="center">
-            {pathToAddNew && !permissionToAddNew ? (
-              <Grid item>
-                <Button
-                  variant="contained"
-                  component={Link}
-                  to={pathToAddNew}
-                  sx={{ mr: 1 }}
-                  size="small"
-                >
-                  Add New
-                </Button>
-              </Grid>
-            ) : null}
-            {(loading && rows.length <= 0) || !load ? null : (
-              <Grid item>
-                <ReloadIconButton {...{ load, loading }} />
-              </Grid>
-            )}
-          </Grid>
-        </Grid>
-      </Grid>
-    </Toolbar>
+    <SearchSyncToolbar
+      {...{ searchTerm, searchFieldPlaceholder, load, loading, errorMessage }}
+      onChangeSearchTerm={(searchTerm) => setSearchTerm(searchTerm)}
+      tools={(() => {
+        if (pathToAddNew) {
+          return (
+            <Button
+              variant="contained"
+              component={Link}
+              to={pathToAddNew}
+              size="small"
+            >
+              Add New
+            </Button>
+          );
+        }
+      })()}
+    />
   );
 
   return (
     <>
-      {showStickyToolBar && (
+      {showStickyToolBar ? (
         <Box
           sx={{
             position: 'sticky',
@@ -284,7 +263,7 @@ export const FullPageTable: FC<IFullPageTableProps> = ({
             <Container>{toolbar}</Container>
           </AppBar>
         </Box>
-      )}
+      ) : null}
       <PaddedContentArea title={title} tools={tools} breadcrumbs={breadcrumbs}>
         <Paper sx={{ overflow: 'hidden' }}>
           <AppBar

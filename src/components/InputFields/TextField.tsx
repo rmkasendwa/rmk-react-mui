@@ -2,7 +2,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import { IconButton, Tooltip } from '@mui/material';
 import Skeleton from '@mui/material/Skeleton';
 import MuiTextField, { TextFieldProps } from '@mui/material/TextField';
-import { forwardRef, useCallback, useEffect, useState } from 'react';
+import { forwardRef, useCallback, useEffect, useRef, useState } from 'react';
 
 import { useLoadingContext } from '../../hooks/Utils';
 import ErrorSkeleton from '../ErrorSkeleton';
@@ -34,6 +34,7 @@ export const TextField = forwardRef<HTMLDivElement, ITextFieldProps>(
     const { InputProps = {} } = rest;
     const { endAdornment, ...restInputProps } = InputProps;
     const { loading, errorMessage } = useLoadingContext();
+    const initialRenderRef = useRef(true);
     const [inputValue, setInputValue] = useState('');
 
     const triggerChangeEvent = useCallback(() => {
@@ -52,6 +53,19 @@ export const TextField = forwardRef<HTMLDivElement, ITextFieldProps>(
     useEffect(() => {
       setInputValue(value || '');
     }, [value]);
+
+    useEffect(() => {
+      if (!initialRenderRef.current) {
+        triggerChangeEvent();
+      }
+    }, [triggerChangeEvent]);
+
+    useEffect(() => {
+      initialRenderRef.current = false;
+      return () => {
+        initialRenderRef.current = true;
+      };
+    }, []);
 
     const labelSkeletonWidth = typeof label === 'string' ? label.length * 7 : 0;
 
@@ -106,7 +120,6 @@ export const TextField = forwardRef<HTMLDivElement, ITextFieldProps>(
                   onClick={(event) => {
                     event.stopPropagation();
                     setInputValue('');
-                    triggerChangeEvent();
                   }}
                   sx={{ p: 0.4 }}
                 >
