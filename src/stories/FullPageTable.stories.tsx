@@ -35,8 +35,4 @@ const Template: ComponentStory<typeof FullPageTable> = (props) => (
 );
 
 export const Default = Template.bind({});
-Default.args = {
-  onChangeSearchTerm: (searchTerm) => {
-    console.log({ searchTerm });
-  },
-};
+Default.args = {};
