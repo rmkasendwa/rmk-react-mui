@@ -9,7 +9,7 @@ import { forwardRef, useEffect, useRef, useState } from 'react';
 import { formatBytes } from '../../utils/bytes';
 import TextField, { ITextFieldProps } from './TextField';
 
-export interface IFileInputFieldProps extends ITextFieldProps {
+export interface IFileInputFieldProps extends Omit<ITextFieldProps, 'value'> {
   value?: File | null;
 }
 

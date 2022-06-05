@@ -9,7 +9,7 @@ import { forwardRef, useCallback, useEffect, useState } from 'react';
 import { addThousandCommas } from '../../utils/numbers';
 import TextField, { ITextFieldProps } from './TextField';
 
-export interface INumberInputFieldProps extends ITextFieldProps {
+export interface INumberInputFieldProps extends Omit<ITextFieldProps, 'value'> {
   value?: number;
   step?: number;
   decimalPlaces?: number;
