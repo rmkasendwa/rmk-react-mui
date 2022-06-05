@@ -3,13 +3,14 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { Tooltip } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
-import { FC, useCallback, useEffect, useState } from 'react';
+import { FC, useCallback, useEffect, useRef, useState } from 'react';
 
 import TextField, { ITextFieldProps } from './TextField';
 
 export interface IPasswordFieldProps extends ITextFieldProps {
   value?: string;
   showPassword?: boolean;
+  onChangeShowPassword?: (showPassword: boolean) => void;
 }
 
 export const PasswordField: FC<IPasswordFieldProps> = ({
@@ -18,9 +19,11 @@ export const PasswordField: FC<IPasswordFieldProps> = ({
   id,
   value,
   onChange,
+  onChangeShowPassword,
   sx,
   ...rest
 }) => {
+  const initialRenderRef = useRef(true);
   const [inputValue, setInputValue] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
@@ -44,6 +47,19 @@ export const PasswordField: FC<IPasswordFieldProps> = ({
   useEffect(() => {
     setInputValue(value || '');
   }, [value]);
+
+  useEffect(() => {
+    if (!initialRenderRef.current && onChangeShowPassword) {
+      onChangeShowPassword(showPassword);
+    }
+  }, [onChangeShowPassword, showPassword]);
+
+  useEffect(() => {
+    initialRenderRef.current = false;
+    return () => {
+      initialRenderRef.current = true;
+    };
+  }, []);
 
   return (
     <TextField
