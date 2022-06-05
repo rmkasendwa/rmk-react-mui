@@ -1,10 +1,8 @@
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
-import CloseIcon from '@mui/icons-material/Close';
-import { Tooltip } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
-import { forwardRef, useCallback, useEffect, useState } from 'react';
+import { forwardRef, useCallback, useEffect, useRef, useState } from 'react';
 
 import { addThousandCommas } from '../../utils/numbers';
 import TextField, { ITextFieldProps } from './TextField';
@@ -57,8 +55,7 @@ export const NumberInputField = forwardRef<
     decimalPlaces,
     onBlur,
     onFocus,
-    onChange,
-    InputProps,
+    onChange: onChangeProp,
     min,
     max,
     valuePrefix = '',
@@ -68,6 +65,7 @@ export const NumberInputField = forwardRef<
   },
   ref
 ) {
+  const initialRenderRef = useRef(true);
   const [inputField, setInputField] = useState<HTMLInputElement | null>(null);
   const [inputValue, setInputValue] = useState('');
   const [focused, setFocused] = useState(false);
@@ -118,8 +116,36 @@ export const NumberInputField = forwardRef<
         value: isNaN(numericValue) ? 0 : numericValue,
       },
     });
-    onChange && onChange(event);
-  }, [extractNumericValue, id, inputValue, name, onChange]);
+    onChangeProp && onChangeProp(event);
+  }, [extractNumericValue, id, inputValue, name, onChangeProp]);
+
+  const onChange = useCallback(
+    ({ target }: any) => {
+      const numericCharacters = findNumericCharacters(target.value);
+      const numericString = (() => {
+        if (numericCharacters.length > 0 && !isNaN(+numericCharacters)) {
+          let numericValue = +numericCharacters;
+
+          if (min != null && numericValue < min) numericValue = min;
+          if (max != null && numericValue > max) numericValue = max;
+
+          const numericValueWithThousandCommas =
+            addThousandCommas(numericValue);
+          if (numericCharacters.endsWith('.')) {
+            return numericValueWithThousandCommas + '.';
+          }
+          const match = /\d+(\.\d*0+)$/g.exec(numericCharacters);
+          if (match) {
+            return numericValueWithThousandCommas.split('.')[0] + match[1];
+          }
+          return numericValueWithThousandCommas;
+        }
+        return numericCharacters;
+      })();
+      setInputValue(numericString.replace(/^\-+/g, '-'));
+    },
+    [max, min]
+  );
 
   useEffect(() => {
     if (!focused) {
@@ -174,12 +200,6 @@ export const NumberInputField = forwardRef<
 
   useEffect(() => {
     if (focused) {
-      triggerChangeEvent();
-    }
-  }, [focused, triggerChangeEvent]);
-
-  useEffect(() => {
-    if (focused) {
       const keydownEventCallback = (event: KeyboardEvent) => {
         const scaleFactor = getScaleFactor(event);
         switch (event.key) {
@@ -212,36 +232,25 @@ export const NumberInputField = forwardRef<
     }
   }, [focused, stepDownInputValue, stepUpInputValue]);
 
+  useEffect(() => {
+    if (!initialRenderRef.current) {
+      triggerChangeEvent();
+    }
+  }, [triggerChangeEvent]);
+
+  useEffect(() => {
+    initialRenderRef.current = false;
+    return () => {
+      initialRenderRef.current = true;
+    };
+  }, []);
+
   return (
     <TextField
       ref={ref}
       {...rest}
-      {...{ name, id }}
+      {...{ name, id, onChange }}
       value={inputValue}
-      onChange={({ target }) => {
-        const numericCharacters = findNumericCharacters(target.value);
-        const numericString = (() => {
-          if (numericCharacters.length > 0 && !isNaN(+numericCharacters)) {
-            let numericValue = +numericCharacters;
-
-            if (min != null && numericValue < min) numericValue = min;
-            if (max != null && numericValue > max) numericValue = max;
-
-            const numericValueWithThousandCommas =
-              addThousandCommas(numericValue);
-            if (numericCharacters.endsWith('.')) {
-              return numericValueWithThousandCommas + '.';
-            }
-            const match = /\d+(\.\d*0+)$/g.exec(numericCharacters);
-            if (match) {
-              return numericValueWithThousandCommas.split('.')[0] + match[1];
-            }
-            return numericValueWithThousandCommas;
-          }
-          return numericCharacters;
-        })();
-        setInputValue(numericString.replace(/^\-+/g, '-'));
-      }}
       onFocus={(event) => {
         setFocused(true);
         onFocus && onFocus(event);
@@ -255,57 +264,35 @@ export const NumberInputField = forwardRef<
           setInputField(inputField);
         },
       }}
-      InputProps={{
-        ...InputProps,
-        endAdornment: (
-          <>
-            {inputValue.length > 0 && (
-              <Tooltip title="Clear">
-                <IconButton
-                  className="number-input-field-clear-button"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    setInputValue('');
-                    triggerChangeEvent();
-                  }}
-                  sx={{ p: 0.4 }}
-                >
-                  <CloseIcon />
-                </IconButton>
-              </Tooltip>
-            )}
-            <Stack className="number-input-field-step-tools">
-              <IconButton
-                onClick={(event) => {
-                  inputField?.focus();
-                  stepUpInputValue(getScaleFactor(event));
-                }}
-                sx={{ width: 10, height: 10, p: 1 }}
-              >
-                <ArrowDropUpIcon />
-              </IconButton>
-              <IconButton
-                onClick={(event) => {
-                  inputField?.focus();
-                  stepDownInputValue(getScaleFactor(event));
-                }}
-                sx={{ width: 10, height: 10, p: 1 }}
-              >
-                <ArrowDropDownIcon />
-              </IconButton>
-            </Stack>
-          </>
-        ),
-      }}
+      endAdornment={
+        <Stack className="number-input-field-step-tools">
+          <IconButton
+            onClick={(event) => {
+              inputField?.focus();
+              stepUpInputValue(getScaleFactor(event));
+            }}
+            sx={{ width: 10, height: 10, p: 1 }}
+          >
+            <ArrowDropUpIcon />
+          </IconButton>
+          <IconButton
+            onClick={(event) => {
+              inputField?.focus();
+              stepDownInputValue(getScaleFactor(event));
+            }}
+            sx={{ width: 10, height: 10, p: 1 }}
+          >
+            <ArrowDropDownIcon />
+          </IconButton>
+        </Stack>
+      }
       sx={{
-        '& .number-input-field-step-tools, & .number-input-field-clear-button':
-          {
-            opacity: 0,
-          },
-        '&:hover .number-input-field-step-tools, &:hover .number-input-field-clear-button':
-          {
-            opacity: 1,
-          },
+        '& .number-input-field-step-tools': {
+          opacity: 0,
+        },
+        '&:hover .number-input-field-step-tools': {
+          opacity: 1,
+        },
         ...sx,
       }}
     />
