@@ -54,6 +54,20 @@ MultipleSelect.args = {
   },
 };
 
+export const MultipleSelectWithValue = Template.bind({});
+MultipleSelectWithValue.args = {
+  label: 'Multiple Select With Value',
+  required: true,
+  options: Array.from({ length: 100 }).map((_, index) => ({
+    label: `${index + 1}. ${lorem.generateWords(4)}`,
+    value: index,
+  })),
+  value: [2, 5, 11],
+  SelectProps: {
+    multiple: true,
+  },
+};
+
 export const WithSelectedOptionProp = Template.bind({});
 WithSelectedOptionProp.args = {
   label: 'Custom Selected Option',
