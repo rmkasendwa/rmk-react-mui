@@ -200,15 +200,19 @@ export const DataDropdownField = forwardRef<
 
   useEffect(() => {
     const fieldValues = Array.isArray(value) ? value : [value];
-    setSelectedOptions(
-      fieldValues
+    setSelectedOptions((prevSelectedOptions) => {
+      const nextSelectedOptions = fieldValues
         .map((value) => {
           return options.find(
             ({ value: optionValue }) => value === optionValue
           )!;
         })
-        .filter((option) => option)
-    );
+        .filter((option) => option);
+      if (prevSelectedOptions.join() !== nextSelectedOptions.join()) {
+        return nextSelectedOptions;
+      }
+      return prevSelectedOptions;
+    });
   }, [options, value]);
 
   useEffect(() => {

@@ -1,15 +1,14 @@
 import SearchIcon from '@mui/icons-material/Search';
 import Grid from '@mui/material/Grid';
-import Toolbar from '@mui/material/Toolbar';
+import Toolbar, { ToolbarProps } from '@mui/material/Toolbar';
 import { Children, FC, ReactNode, useEffect, useState } from 'react';
 
 import TextField from './InputFields/TextField';
 import ReloadIconButton, { IReloadIconButtonProps } from './ReloadIconButton';
 
 export interface ISearchSyncToolbarProps
-  extends Partial<
-    Pick<IReloadIconButtonProps, 'load' | 'loading' | 'errorMessage'>
-  > {
+  extends ToolbarProps,
+    Partial<Pick<IReloadIconButtonProps, 'load' | 'loading' | 'errorMessage'>> {
   searchTerm?: string;
   searchFieldPlaceholder?: string;
   onChangeSearchTerm?: (searchTerm: string) => void;
@@ -24,6 +23,7 @@ export const SearchSyncToolbar: FC<ISearchSyncToolbarProps> = ({
   errorMessage,
   onChangeSearchTerm,
   tools,
+  ...rest
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -32,7 +32,7 @@ export const SearchSyncToolbar: FC<ISearchSyncToolbarProps> = ({
   }, [searchTermProp]);
 
   return (
-    <Toolbar>
+    <Toolbar {...rest}>
       <Grid container alignItems="center" sx={{ columnGap: 2 }}>
         <Grid item>
           <SearchIcon color="inherit" sx={{ display: 'flex' }} />
