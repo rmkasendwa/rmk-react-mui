@@ -51,7 +51,6 @@ export const SearchSyncToolbar: FC<ISearchSyncToolbarProps> = ({
               setSearchTerm(event.target.value);
               onChangeSearchTerm && onChangeSearchTerm(event.target.value);
             }}
-            disabled={loading}
           />
         </Grid>
         {(() => {
