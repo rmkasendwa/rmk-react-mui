@@ -10,6 +10,7 @@ import {
   ReactNode,
   SetStateAction,
   forwardRef,
+  useCallback,
   useEffect,
   useMemo,
   useState,
@@ -81,6 +82,35 @@ export const PaginatedDropdownOptionList = forwardRef<
     null
   );
 
+  const triggerChangeEvent = useCallback(
+    (option: IDropdownOption) => {
+      const { value } = option;
+      const nextOptions = (() => {
+        if (multiple) {
+          const options = [...selectedOptions];
+          const selectedOption = options.find(
+            ({ value: selectedOptionValue }) => {
+              return selectedOptionValue === value;
+            }
+          );
+          if (selectedOption) {
+            options.splice(options.indexOf(selectedOption), 1);
+          } else {
+            options.push(option);
+          }
+          return options;
+        }
+        return [option];
+      })();
+      setSelectedOptions(nextOptions);
+      onChangeSelectedOption && onChangeSelectedOption(nextOptions);
+      if (!multiple && onClose) {
+        onClose();
+      }
+    },
+    [multiple, onChangeSelectedOption, onClose, selectedOptions]
+  );
+
   const { minOptionWidth } = useMemo(() => {
     return options.reduce(
       (accumulator, { label, searchableLabel }) => {
@@ -128,7 +158,7 @@ export const PaginatedDropdownOptionList = forwardRef<
             return 0;
           case 'Enter':
             if (focusedOptionIndex) {
-              // TODO: Select Option
+              triggerChangeEvent(options[focusedOptionIndex]);
             }
             break;
           case 'Escape':
@@ -166,8 +196,8 @@ export const PaginatedDropdownOptionList = forwardRef<
     onClose,
     optionHeight,
     options,
-    options.length,
     scrollableDropdownWrapper,
+    triggerChangeEvent,
   ]);
 
   useEffect(() => {
@@ -244,33 +274,7 @@ export const PaginatedDropdownOptionList = forwardRef<
                     onClick={
                       selectable
                         ? () => {
-                            const { value } = option;
-                            const nextOptions = (() => {
-                              if (multiple) {
-                                const options = [...selectedOptions];
-                                const selectedOption = options.find(
-                                  ({ value: selectedOptionValue }) => {
-                                    return selectedOptionValue === value;
-                                  }
-                                );
-                                if (selectedOption) {
-                                  options.splice(
-                                    options.indexOf(selectedOption),
-                                    1
-                                  );
-                                } else {
-                                  options.push(option);
-                                }
-                                return options;
-                              }
-                              return [option];
-                            })();
-                            setSelectedOptions(nextOptions);
-                            onChangeSelectedOption &&
-                              onChangeSelectedOption(nextOptions);
-                            if (!multiple && onClose) {
-                              onClose();
-                            }
+                            triggerChangeEvent(option);
                             onSelectOption && onSelectOption(option);
                           }
                         : undefined

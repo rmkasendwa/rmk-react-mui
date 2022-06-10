@@ -3,14 +3,7 @@ import IconButton from '@mui/material/IconButton';
 import Skeleton from '@mui/material/Skeleton';
 import MuiTextField, { TextFieldProps } from '@mui/material/TextField';
 import Tooltip from '@mui/material/Tooltip';
-import {
-  ReactNode,
-  forwardRef,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import { ReactNode, forwardRef, useCallback, useEffect, useState } from 'react';
 
 import { useLoadingContext } from '../../hooks/Utils';
 import ErrorSkeleton from '../ErrorSkeleton';
@@ -44,38 +37,27 @@ export const TextField = forwardRef<HTMLDivElement, ITextFieldProps>(
     const { InputProps = {} } = rest;
     const { endAdornment, ...restInputProps } = InputProps;
     const { loading, errorMessage } = useLoadingContext();
-    const initialRenderRef = useRef(true);
     const [inputValue, setInputValue] = useState('');
 
-    const triggerChangeEvent = useCallback(() => {
-      const event: any = new Event('change', { bubbles: true });
-      Object.defineProperty(event, 'target', {
-        writable: false,
-        value: {
-          name,
-          id,
-          value: inputValue,
-        },
-      });
-      onChange && onChange(event);
-    }, [id, inputValue, name, onChange]);
+    const triggerChangeEvent = useCallback(
+      (inputValue: string) => {
+        const event: any = new Event('change', { bubbles: true });
+        Object.defineProperty(event, 'target', {
+          writable: false,
+          value: {
+            name,
+            id,
+            value: inputValue,
+          },
+        });
+        onChange && onChange(event);
+      },
+      [id, name, onChange]
+    );
 
     useEffect(() => {
       setInputValue(value ?? '');
     }, [value]);
-
-    useEffect(() => {
-      if (!initialRenderRef.current) {
-        triggerChangeEvent();
-      }
-    }, [triggerChangeEvent]);
-
-    useEffect(() => {
-      initialRenderRef.current = false;
-      return () => {
-        initialRenderRef.current = true;
-      };
-    }, []);
 
     const labelSkeletonWidth = typeof label === 'string' ? label.length * 7 : 0;
 
@@ -118,6 +100,7 @@ export const TextField = forwardRef<HTMLDivElement, ITextFieldProps>(
         value={inputValue}
         onChange={(event) => {
           setInputValue(event.target.value);
+          triggerChangeEvent(event.target.value);
         }}
         InputProps={{
           endAdornment:
@@ -133,6 +116,7 @@ export const TextField = forwardRef<HTMLDivElement, ITextFieldProps>(
                           onClick={(event) => {
                             event.stopPropagation();
                             setInputValue('');
+                            triggerChangeEvent('');
                           }}
                           sx={{ p: 0.4 }}
                         >
