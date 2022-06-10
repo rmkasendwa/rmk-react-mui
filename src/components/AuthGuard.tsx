@@ -1,5 +1,5 @@
 import { FC, useEffect } from 'react';
-import { Outlet, Path, useLocation, useNavigate } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 
 import { useAuth } from '../contexts/AuthContext';
 import {
@@ -12,8 +12,10 @@ export interface IAuthGuardProps {
   variant?: 'PROTECTED' | 'PUBLIC_ONLY' | 'PUBLIC';
 }
 
+const loginRoutePaths = [LOGIN_ROUTE_PATH, SESSION_LOGIN_ROUTE_PATH];
+
 export const AuthGuard: FC<IAuthGuardProps> = ({ variant }) => {
-  const location = useLocation();
+  const { pathname, search } = useLocation();
   const navigate = useNavigate();
   const { loggedInUser, authenticated, loadingCurrentSession } = useAuth();
 
@@ -22,25 +24,25 @@ export const AuthGuard: FC<IAuthGuardProps> = ({ variant }) => {
       switch (variant) {
         case 'PROTECTED':
           if (!loggedInUser) {
-            const loginRoutePaths = [
-              LOGIN_ROUTE_PATH,
-              SESSION_LOGIN_ROUTE_PATH,
-            ];
-            const redirectConfig: Partial<Path> = {
-              pathname: LOGIN_ROUTE_PATH,
-            };
-            if (
-              location.pathname.length > 1 &&
-              !loginRoutePaths.includes(location.pathname)
-            ) {
-              redirectConfig.search = `?return_to=${location.pathname}`;
-            }
-            navigate(redirectConfig, { state: { from: location } });
+            navigate(
+              LOGIN_ROUTE_PATH +
+                (() => {
+                  if (
+                    pathname.length > 1 &&
+                    !loginRoutePaths.includes(pathname)
+                  ) {
+                    return `?return_to=${encodeURIComponent(
+                      pathname + search
+                    )}`;
+                  }
+                  return '';
+                })()
+            );
           }
           break;
         case 'PUBLIC_ONLY':
           if (authenticated) {
-            navigate(INDEX_ROUTE_PATH, { state: { from: location } });
+            navigate(INDEX_ROUTE_PATH);
           }
           break;
       }
@@ -48,9 +50,10 @@ export const AuthGuard: FC<IAuthGuardProps> = ({ variant }) => {
   }, [
     authenticated,
     loadingCurrentSession,
-    location,
     loggedInUser,
     navigate,
+    pathname,
+    search,
     variant,
   ]);
 
