@@ -72,7 +72,6 @@ export const DataDropdownField = forwardRef<
     errorMessage,
   } = useAPIService<any[]>([], dataKey);
 
-  const initialRenderRef = useRef(true);
   const anchorRef = useRef<HTMLInputElement>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [open, setOpen] = useState(false);
@@ -90,14 +89,23 @@ export const DataDropdownField = forwardRef<
     return selectedOptions[0]?.value;
   }, [SelectProps?.multiple, selectedOptions]);
 
-  const triggerChangeEvent = useCallback(() => {
-    const event: any = new Event('blur', { bubbles: true });
-    Object.defineProperty(event, 'target', {
-      writable: false,
-      value: { id, name, value: selectedOptionValue },
-    });
-    onChange && onChange(event);
-  }, [id, name, onChange, selectedOptionValue]);
+  const triggerChangeEvent = useCallback(
+    (selectedOptions: IDropdownOption[]) => {
+      const selectedOptionValue = (() => {
+        if (SelectProps?.multiple) {
+          return selectedOptions.map(({ value }) => value);
+        }
+        return selectedOptions[0]?.value;
+      })();
+      const event: any = new Event('blur', { bubbles: true });
+      Object.defineProperty(event, 'target', {
+        writable: false,
+        value: { id, name, value: selectedOptionValue },
+      });
+      onChange && onChange(event);
+    },
+    [SelectProps?.multiple, id, name, onChange]
+  );
 
   const loadOptions = useCallback(
     async (reloadOptions = false) => {
@@ -247,19 +255,6 @@ export const DataDropdownField = forwardRef<
     return options;
   }, [options, searchTerm, selectedOptionDisplayString]);
 
-  useEffect(() => {
-    if (!initialRenderRef.current) {
-      triggerChangeEvent();
-    }
-  }, [triggerChangeEvent]);
-
-  useEffect(() => {
-    initialRenderRef.current = false;
-    return () => {
-      initialRenderRef.current = true;
-    };
-  }, []);
-
   if (value && loading && missingOptionValues.length > 0) {
     return (
       <LoadingProvider value={{ loading, errorMessage }}>
@@ -300,7 +295,9 @@ export const DataDropdownField = forwardRef<
                   className="data-dropdown-input-clear-button"
                   onClick={(event) => {
                     event.stopPropagation();
-                    setSelectedOptions([]);
+                    const options: IDropdownOption[] = [];
+                    setSelectedOptions(options);
+                    triggerChangeEvent(options);
                   }}
                   sx={{ p: 0.4 }}
                 >
@@ -384,6 +381,7 @@ export const DataDropdownField = forwardRef<
                     loadOptions={
                       getDropdownEntities ? () => loadOptions(true) : undefined
                     }
+                    onChangeSelectedOption={triggerChangeEvent}
                     {...{ selectedOptions, setSelectedOptions, loading }}
                   />
                 </ClickAwayListener>

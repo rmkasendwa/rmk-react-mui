@@ -1,16 +1,16 @@
 import { Skeleton } from '@mui/material';
 import Typography, { TypographyProps } from '@mui/material/Typography';
-import { FC } from 'react';
+import { forwardRef } from 'react';
 
 import { useLoadingContext } from '../hooks/Utils';
 import ErrorSkeleton from './ErrorSkeleton';
 
 export interface ILoadingTypographyProps extends TypographyProps {}
 
-export const LoadingTypography: FC<ILoadingTypographyProps> = ({
-  children,
-  ...rest
-}) => {
+export const LoadingTypography = forwardRef<
+  HTMLParagraphElement,
+  ILoadingTypographyProps
+>(function LoadingTypography({ children, ...rest }, ref) {
   const { loading, errorMessage } = useLoadingContext();
   const labelSkeletonWidth = String(children).length * 7;
 
@@ -27,7 +27,11 @@ export const LoadingTypography: FC<ILoadingTypographyProps> = ({
   if (loading) {
     return <Skeleton sx={{ width: labelSkeletonWidth }} />;
   }
-  return <Typography {...rest}>{children}</Typography>;
-};
+  return (
+    <Typography ref={ref} {...rest}>
+      {children}
+    </Typography>
+  );
+});
 
 export default LoadingTypography;

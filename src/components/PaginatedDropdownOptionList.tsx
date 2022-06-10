@@ -1,3 +1,4 @@
+import { Divider, iconButtonClasses } from '@mui/material';
 import Box from '@mui/material/Box';
 import Card, { CardProps } from '@mui/material/Card';
 import MenuItem from '@mui/material/MenuItem';
@@ -9,8 +10,8 @@ import {
   ReactNode,
   SetStateAction,
   forwardRef,
-  useCallback,
   useEffect,
+  useMemo,
   useState,
 } from 'react';
 
@@ -39,6 +40,7 @@ export interface IPaginatedDropdownOptionListProps {
   onClose?: () => void;
   loadOptions?: () => void;
   onSelectOption?: (selectedOption: IDropdownOption) => void;
+  onChangeSelectedOption?: (selectedOptions: IDropdownOption[]) => void;
   CardProps?: CardProps;
 }
 
@@ -62,10 +64,12 @@ export const PaginatedDropdownOptionList = forwardRef<
     loading,
     loadOptions,
     onSelectOption,
+    onChangeSelectedOption,
     CardProps,
   },
   ref
 ) {
+  const { palette, typography } = useTheme();
   const [scrollableDropdownWrapper, setScrollableDropdownWrapper] =
     useState<HTMLDivElement | null>(null);
   const [limit, setLimit] = useState(0);
@@ -77,32 +81,22 @@ export const PaginatedDropdownOptionList = forwardRef<
     null
   );
 
-  const { palette } = useTheme();
-
-  const selectOption = useCallback(
-    (option: IDropdownOption) => {
-      const { value } = option;
-      if (multiple) {
-        setSelectedOptions((prevOptions) => {
-          const selectedOption = prevOptions.find(
-            ({ value: selectedOptionValue }) => {
-              return selectedOptionValue === value;
-            }
-          );
-          if (selectedOption) {
-            prevOptions.splice(prevOptions.indexOf(selectedOption), 1);
-          } else {
-            prevOptions.push(option);
-          }
-          return [...prevOptions];
-        });
-      } else {
-        setSelectedOptions([option]);
-        onClose && onClose();
+  const { minOptionWidth } = useMemo(() => {
+    return options.reduce(
+      (accumulator, { label, searchableLabel }) => {
+        const labelWidth = Math.ceil(
+          (String(searchableLabel || label).length * typography.htmlFontSize) /
+            2
+        );
+        labelWidth > accumulator.minOptionWidth &&
+          (accumulator.minOptionWidth = labelWidth);
+        return accumulator;
+      },
+      {
+        minOptionWidth: minWidth,
       }
-    },
-    [multiple, onClose]
-  );
+    );
+  }, [minWidth, options, typography.htmlFontSize]);
 
   useEffect(() => {
     if (selectedOptionsProp) {
@@ -134,7 +128,7 @@ export const PaginatedDropdownOptionList = forwardRef<
             return 0;
           case 'Enter':
             if (focusedOptionIndex) {
-              selectOption(options[focusedOptionIndex]);
+              // TODO: Select Option
             }
             break;
           case 'Escape':
@@ -174,7 +168,6 @@ export const PaginatedDropdownOptionList = forwardRef<
     options,
     options.length,
     scrollableDropdownWrapper,
-    selectOption,
   ]);
 
   useEffect(() => {
@@ -205,7 +198,7 @@ export const PaginatedDropdownOptionList = forwardRef<
           setScrollableDropdownWrapper(scrollableDropdownWrapper);
         }}
         sx={{
-          minWidth,
+          minWidth: minOptionWidth || minWidth,
           maxHeight,
           boxSizing: 'border-box',
           overflowY: 'auto',
@@ -251,7 +244,33 @@ export const PaginatedDropdownOptionList = forwardRef<
                     onClick={
                       selectable
                         ? () => {
-                            selectOption(option);
+                            const { value } = option;
+                            const nextOptions = (() => {
+                              if (multiple) {
+                                const options = [...selectedOptions];
+                                const selectedOption = options.find(
+                                  ({ value: selectedOptionValue }) => {
+                                    return selectedOptionValue === value;
+                                  }
+                                );
+                                if (selectedOption) {
+                                  options.splice(
+                                    options.indexOf(selectedOption),
+                                    1
+                                  );
+                                } else {
+                                  options.push(option);
+                                }
+                                return options;
+                              }
+                              return [option];
+                            })();
+                            setSelectedOptions(nextOptions);
+                            onChangeSelectedOption &&
+                              onChangeSelectedOption(nextOptions);
+                            if (!multiple && onClose) {
+                              onClose();
+                            }
                             onSelectOption && onSelectOption(option);
                           }
                         : undefined
@@ -291,15 +310,26 @@ export const PaginatedDropdownOptionList = forwardRef<
         </Box>
       </Box>
       {loadOptions && (
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'center',
-            py: 1,
-          }}
-        >
-          <ReloadIconButton load={loadOptions} {...{ loading }} />
-        </Box>
+        <>
+          <Divider />
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              py: 0.5,
+            }}
+          >
+            <ReloadIconButton
+              load={loadOptions}
+              {...{ loading }}
+              sx={{
+                [`& .${iconButtonClasses.root}`]: {
+                  p: 0.4,
+                },
+              }}
+            />
+          </Box>
+        </>
       )}
     </Card>
   );

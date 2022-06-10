@@ -20,6 +20,27 @@ export const getInterpolatedPath = (
   return routePath;
 };
 
+export const paramsSufficientForPath = (
+  routePath: string,
+  params: Record<string, string | number | boolean>
+) => {
+  const regex = /:(\w+)/g;
+  const extractedParameters = [];
+  let match;
+  do {
+    match = regex.exec(routePath);
+    match && extractedParameters.push(match[1]);
+  } while (match);
+  return extractedParameters
+    .filter((key) => !key.match(/^\d+$/g))
+    .every((key) => {
+      if (!params[key]) {
+        return false;
+      }
+      return true;
+    });
+};
+
 export const addSearchParams = (
   routePath: string,
   params: Record<string, string | number | undefined>

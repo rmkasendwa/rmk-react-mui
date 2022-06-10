@@ -36,11 +36,9 @@ export const ReloadIconButton: FC<IReloadIconButtonProps> = ({
         }
         const refreshButton = (
           <Tooltip title="Reload">
-            <Box component="span">
-              <IconButton onClick={() => load && load()}>
-                <RefreshIcon color="inherit" sx={{ display: 'block' }} />
-              </IconButton>
-            </Box>
+            <IconButton onClick={() => load && load()}>
+              <RefreshIcon color="inherit" sx={{ display: 'block' }} />
+            </IconButton>
           </Tooltip>
         );
         if (errorMessage) {
