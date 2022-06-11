@@ -157,7 +157,7 @@ export const PaginatedDropdownOptionList = forwardRef<
             }
             return 0;
           case 'Enter':
-            if (focusedOptionIndex) {
+            if (focusedOptionIndex != null) {
               triggerChangeEvent(options[focusedOptionIndex]);
             }
             break;

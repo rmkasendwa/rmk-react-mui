@@ -106,7 +106,7 @@ const Lane: FC<ILaneProps> = ({
               {(() => {
                 if (typeof title === 'string') {
                   return (
-                    <Tooltip title={title} followCursor>
+                    <Tooltip title={title}>
                       <Typography
                         sx={{ fontWeight: 'bold', fontSize: 15 }}
                         noWrap
