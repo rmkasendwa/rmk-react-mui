@@ -44,7 +44,7 @@ const Card: FC<ICardProps> = ({
           {(() => {
             if (typeof title === 'string') {
               return (
-                <Tooltip title={title} followCursor>
+                <Tooltip title={title}>
                   <Typography sx={{ fontSize: 14 }} noWrap>
                     {title}
                   </Typography>
