@@ -8,7 +8,7 @@ import MobileDatePicker from '@mui/lab/MobileDatePicker';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import { addMinutes, format } from 'date-fns';
-import { forwardRef, useEffect, useState } from 'react';
+import { forwardRef, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { DEFAULT_DATE_FORMAT } from '../../constants';
 import { useSmallScreen } from '../../hooks/Utils';
@@ -24,57 +24,79 @@ export const DateInputField = forwardRef<HTMLDivElement, IDateInputFieldProps>(
   function DateInputField(
     {
       value,
+      id,
       name,
       placeholder,
       onChange,
-      onClick,
-      minDate,
-      maxDate,
+      minDate: minDateProp,
+      maxDate: maxDateProp,
       sx,
       ...rest
     },
     ref
   ) {
     const smallScreen = useSmallScreen();
-    const [inputField, setInputField] = useState<
-      HTMLInputElement | null | undefined
-    >(null);
     const [selectedDate, setSelectedDate] = useState('');
     const [open, setOpen] = useState(false);
+
+    const triggerChangeEvent = useCallback(
+      (inputValue) => {
+        const event: any = new Event('change', { bubbles: true });
+        Object.defineProperty(event, 'target', {
+          writable: false,
+          value: {
+            id,
+            name,
+            value: inputValue,
+          },
+        });
+        onChange && onChange(event);
+      },
+      [id, name, onChange]
+    );
+
+    const { minDate, maxDate } = useMemo(() => {
+      const minDate = minDateProp ? new Date(minDateProp) : null;
+      const maxDate = maxDateProp ? new Date(maxDateProp) : null;
+      if (minDate) {
+        minDate.setHours(0, 0, 0, 0);
+      }
+      if (maxDate) {
+        maxDate.setHours(0, 0, 0, 0);
+      }
+      return { minDate, maxDate };
+    }, [maxDateProp, minDateProp]);
 
     useEffect(() => {
       setSelectedDate(value || '');
     }, [value]);
 
-    useEffect(() => {
-      if (inputField) {
-        const inputFieldClone = inputField.cloneNode() as any;
-        inputFieldClone.value = selectedDate;
-        const event: any = new Event('change', { bubbles: true });
-        Object.defineProperty(event, 'target', {
-          writable: false,
-          value: inputFieldClone,
-        });
-        onChange && onChange(event);
-      }
-    }, [inputField, onChange, selectedDate]);
-
     const datePickerProps: DatePickerProps = {
       open,
       onClose: () => setOpen(false),
-      value: selectedDate ? new Date(selectedDate) : new Date(),
-      onChange: (date: any) => {
-        setSelectedDate(
-          date ? addMinutes(date, -date.getTimezoneOffset()).toISOString() : ''
-        );
+      value: selectedDate ? new Date(selectedDate) : null,
+      onChange: (selectedDateInstance: any) => {
+        const { date } = (() => {
+          let date = selectedDateInstance as Date;
+          if (date) {
+            date = addMinutes(date, -date.getTimezoneOffset());
+            date.setHours(0, 0, 0, 0);
+          }
+          return { date };
+        })();
+        const selectedDate =
+          date && (!minDate || date >= minDate) && (!maxDate || date <= maxDate)
+            ? date.toISOString()
+            : '';
+        setSelectedDate(selectedDate);
+        triggerChangeEvent(selectedDate);
       },
       renderInput: ({ value, ...params }) => {
         if (params.inputProps) {
           if (selectedDate) {
-            params.inputProps.value = format(
-              new Date(params.inputProps.value),
-              DEFAULT_DATE_FORMAT
-            );
+            const date = new Date(selectedDate);
+            date.setHours(0, 0, 0, 0);
+            params.inputProps.value = format(date, DEFAULT_DATE_FORMAT);
           } else {
             params.inputProps.value = '';
           }
@@ -90,7 +112,10 @@ export const DateInputField = forwardRef<HTMLDivElement, IDateInputFieldProps>(
                 <Tooltip title="Clear">
                   <IconButton
                     className="date-input-clear-button"
-                    onClick={() => setSelectedDate('')}
+                    onClick={() => {
+                      setSelectedDate('');
+                      triggerChangeEvent('');
+                    }}
                     sx={{ p: 0.4 }}
                   >
                     <CloseIcon />
@@ -111,16 +136,8 @@ export const DateInputField = forwardRef<HTMLDivElement, IDateInputFieldProps>(
             {...{ value: value as string }}
             {...params}
             {...rest}
-            {...{ name }}
-            onClick={(event) => {
-              inputField?.nextElementSibling?.querySelector('button')?.click();
-              onClick && onClick(event);
-            }}
-            ref={(inputFieldWrapper) => {
-              const inputField = inputFieldWrapper?.querySelector('input');
-              setInputField(inputField);
-              typeof ref === 'function' && ref(inputField || null);
-            }}
+            {...{ id, name }}
+            ref={ref}
             sx={{
               '& .date-input-clear-button': {
                 opacity: 0,
@@ -134,14 +151,14 @@ export const DateInputField = forwardRef<HTMLDivElement, IDateInputFieldProps>(
         );
       },
       minDate: (() => {
-        if (minDate) {
-          return new Date(minDate);
+        if (minDateProp) {
+          return new Date(minDateProp);
         }
         return null;
       })(),
       maxDate: (() => {
-        if (maxDate) {
-          return new Date(maxDate);
+        if (maxDateProp) {
+          return new Date(maxDateProp);
         }
         return null;
       })(),
