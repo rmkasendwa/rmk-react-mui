@@ -67,6 +67,7 @@ export const PhoneNumberInputField = forwardRef<
   },
   ref
 ) {
+  const { InputProps = {} } = rest;
   const initialRenderRef = useRef(true);
   const { countryCode } = useContext(GlobalConfigurationContext);
   const [regionalCode, setRegionalCode] = useState(countryCode);
@@ -163,6 +164,7 @@ export const PhoneNumberInputField = forwardRef<
       {...rest}
       {...{ name, id, placeholder }}
       InputProps={{
+        ...InputProps,
         startAdornment: displayPhoneNumberCountry ? (
           <InputAdornment position="start">
             <Button
