@@ -25,6 +25,7 @@ export const PaddedContentArea: FC<IPaddedContentAreaProps> = ({
 
   return (
     <Container
+      maxWidth="xl"
       {...rest}
       sx={{
         flex: 1,

@@ -153,7 +153,8 @@ export const useRecord = <T>(
   recordFinder: TAPIFunction,
   defautValue: T,
   key?: string,
-  loadOnMount = true
+  loadOnMount = true,
+  autoSync = true
 ) => {
   const nextSyncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [apiFunction] = useState<TAPIFunction>(() => recordFinder);
@@ -177,7 +178,7 @@ export const useRecord = <T>(
   }, [load, loadOnMount]);
 
   useEffect(() => {
-    if (!busy && !loading && !errorMessage) {
+    if (autoSync && !busy && !loading && !errorMessage) {
       const mouseMoveEventCallback = () => {
         if (nextSyncTimeoutRef.current !== null) {
           clearTimeout(nextSyncTimeoutRef.current);
@@ -195,7 +196,7 @@ export const useRecord = <T>(
         }
       };
     }
-  }, [busy, errorMessage, load, loading]);
+  }, [autoSync, busy, errorMessage, load, loading]);
 
   return {
     load,
@@ -209,13 +210,15 @@ export const useRecord = <T>(
 export const useRecords = <T>(
   recordFinder: TAPIFunction,
   key?: string,
-  loadOnMount = true
+  loadOnMount = true,
+  autoSync = true
 ) => {
   const { record, setRecord, ...rest } = useRecord<T[]>(
     recordFinder,
     [],
     key,
-    loadOnMount
+    loadOnMount,
+    autoSync
   );
 
   return {
