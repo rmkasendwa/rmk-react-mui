@@ -1,20 +1,10 @@
-import { TextFieldProps, useMediaQuery, useTheme } from '@mui/material';
-import { FormikContextType, useFormikContext } from 'formik';
-import {
-  ChangeEvent,
-  FocusEvent,
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import { useMediaQuery, useTheme } from '@mui/material';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { CANCELLED_API_REQUEST_MESSAGE } from '../constants';
 import { APIContext } from '../contexts/APIContext';
 import { APIDataContext } from '../contexts/APIDataContext';
-import { LoadingContext } from '../contexts/LoadingContext';
 import { ITaggedAPIRequest, TAPIFunction } from '../interfaces/Utils';
 import { RootState, updateData } from '../redux';
 
@@ -228,90 +218,8 @@ export const useRecords = <T>(
   };
 };
 
-export const useLoadingContext = () => {
-  return useContext(LoadingContext);
-};
-
 export const useAPIDataContext = () => {
   return useContext(APIDataContext);
-};
-
-export const useFormikValue = ({
-  value,
-  name,
-}: {
-  value?: any;
-  name?: string;
-}) => {
-  const { values } = (useFormikContext() as any) || {};
-  return (
-    value ??
-    (value = (() => {
-      if (values && name && values[name] != null) {
-        return values[name];
-      }
-    })())
-  );
-};
-
-interface IUseAggregatedFormikContextProps
-  extends Pick<
-    TextFieldProps,
-    'value' | 'name' | 'onChange' | 'onBlur' | 'helperText' | 'error'
-  > {}
-
-export const useAggregatedFormikContext = ({
-  value,
-  name,
-  onChange: onChangeProp,
-  onBlur: onBlurProp,
-  helperText,
-  error,
-}: IUseAggregatedFormikContextProps) => {
-  const { values, handleBlur, handleChange, touched, errors } =
-    (useFormikContext() as FormikContextType<any>) || {};
-
-  const onChange = useCallback(
-    (event: ChangeEvent<any>) => {
-      onChangeProp && onChangeProp(event);
-      handleChange && handleChange(event);
-    },
-    [handleChange, onChangeProp]
-  );
-
-  const onBlur = useCallback(
-    (event: FocusEvent<any>) => {
-      onBlurProp && onBlurProp(event);
-      handleBlur && handleBlur(event);
-    },
-    [handleBlur, onBlurProp]
-  );
-
-  return {
-    value:
-      value ??
-      (() => {
-        if (values && name && values[name] != null) {
-          return values[name];
-        }
-      })(),
-    onChange,
-    onBlur,
-    error:
-      error ??
-      (() => {
-        if (errors && touched && name && touched[name]) {
-          return Boolean(errors[name]);
-        }
-      })(),
-    helperText:
-      helperText ??
-      (() => {
-        if (errors && touched && name && touched[name]) {
-          return errors[name];
-        }
-      })(),
-  };
 };
 
 export const useSmallScreen = () => {

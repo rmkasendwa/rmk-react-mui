@@ -2,7 +2,7 @@ import { Skeleton } from '@mui/material';
 import Typography, { TypographyProps } from '@mui/material/Typography';
 import { forwardRef } from 'react';
 
-import { useLoadingContext } from '../hooks/Utils';
+import { useLoadingContext } from '../contexts/LoadingContext';
 import ErrorSkeleton from './ErrorSkeleton';
 
 export interface ILoadingTypographyProps extends TypographyProps {}

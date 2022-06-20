@@ -1,6 +1,6 @@
 {
   "name": "@infinite-debugger/react-mui",
-  "version": "0.1.0-alpha.147",
+  "version": "0.1.0-alpha.152",
   "description": "RMK React MUI is a React UI library of utility components, hooks and contexts",
   "keywords": [
     "react",
@@ -138,7 +138,8 @@
     "sass-loader": "^12.4.0",
     "style-loader": "^3.3.1",
     "typescript": "^4.5.5",
-    "webpack": "^5.67.0"
+    "webpack": "^5.67.0",
+    "yup": "^0.32.11"
   },
   "peerDependencies": {
     "@emotion/react": ">=11.7.1",

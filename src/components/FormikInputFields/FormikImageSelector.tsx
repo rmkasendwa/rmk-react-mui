@@ -1,6 +1,6 @@
 import { forwardRef } from 'react';
 
-import { useAggregatedFormikContext } from '../../hooks/Utils';
+import { useAggregatedFormikContext } from '../../hooks/Formik';
 import ImageSelector, { IImageSelectorProps } from '../ImageSelector';
 
 export interface IFormikImageSelectorProps extends IImageSelectorProps {}

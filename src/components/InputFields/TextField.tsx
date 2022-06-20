@@ -5,7 +5,7 @@ import MuiTextField, { TextFieldProps } from '@mui/material/TextField';
 import Tooltip from '@mui/material/Tooltip';
 import { ReactNode, forwardRef, useCallback, useEffect, useState } from 'react';
 
-import { useLoadingContext } from '../../hooks/Utils';
+import { useLoadingContext } from '../../contexts/LoadingContext';
 import ErrorSkeleton from '../ErrorSkeleton';
 
 export interface ITextFieldProps

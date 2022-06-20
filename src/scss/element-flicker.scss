@@ -1,0 +1,17 @@
+.flicker {
+  animation-name: flicker !important;
+  animation-duration: 0.1s !important;
+  animation-iteration-count: infinite !important;
+}
+@keyframes flicker {
+  0% {
+    opacity: 0;
+  }
+  10%,
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}

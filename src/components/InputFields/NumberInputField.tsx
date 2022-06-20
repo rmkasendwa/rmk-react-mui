@@ -214,6 +214,7 @@ export const NumberInputField = forwardRef<
         }
       };
       const mouseWheelEventCallback = (event: any) => {
+        event.preventDefault();
         const scaleFactor = getScaleFactor(event);
         const delta = event.wheelDelta ?? -event.detail;
         if (delta < 0) {
@@ -224,7 +225,9 @@ export const NumberInputField = forwardRef<
       };
 
       window.addEventListener('keydown', keydownEventCallback);
-      window.addEventListener('mousewheel', mouseWheelEventCallback);
+      window.addEventListener('mousewheel', mouseWheelEventCallback, {
+        passive: false,
+      });
       return () => {
         window.removeEventListener('keydown', keydownEventCallback);
         window.removeEventListener('mousewheel', mouseWheelEventCallback);

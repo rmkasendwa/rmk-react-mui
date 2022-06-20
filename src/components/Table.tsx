@@ -443,7 +443,9 @@ export const Table: FC<ITableProps> = ({
                       role="checkbox"
                       {...restRowProps}
                       tabIndex={-1}
-                      key={index}
+                      key={
+                        row.currentEntity?.key ?? row.currentEntity?.id ?? index
+                      }
                       onClick={() => {
                         onClickRow && onClickRow(row.currentEntity, index);
                       }}
