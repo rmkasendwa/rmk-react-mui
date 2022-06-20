@@ -4,7 +4,8 @@ import CardHeader, { CardHeaderProps } from '@mui/material/CardHeader';
 import Skeleton from '@mui/material/Skeleton';
 import { FC, ReactNode } from 'react';
 
-import { useLoadingContext, useSmallScreen } from '../hooks/Utils';
+import { useLoadingContext } from '../contexts/LoadingContext';
+import { useSmallScreen } from '../hooks/Utils';
 import ErrorSkeleton from './ErrorSkeleton';
 
 export interface ICardProps extends Omit<CardProps, 'title'> {

@@ -5,7 +5,7 @@ import Typography, { TypographyProps } from '@mui/material/Typography';
 import { alpha } from '@mui/system/colorManipulator';
 import { FC, ReactNode } from 'react';
 
-import { useLoadingContext } from '../hooks/Utils';
+import { useLoadingContext } from '../contexts/LoadingContext';
 import ErrorSkeleton from './ErrorSkeleton';
 import FieldLabel, { IFieldLabelProps } from './FieldLabel';
 

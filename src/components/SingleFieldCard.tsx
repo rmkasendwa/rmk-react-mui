@@ -3,7 +3,7 @@ import useTheme from '@mui/material/styles/useTheme';
 import Typography from '@mui/material/Typography';
 import { FC } from 'react';
 
-import { useLoadingContext } from '../hooks/Utils';
+import { useLoadingContext } from '../contexts/LoadingContext';
 import Card from './Card';
 import ErrorSkeleton from './ErrorSkeleton';
 import FieldLabel from './FieldLabel';

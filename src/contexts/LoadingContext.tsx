@@ -1,4 +1,4 @@
-import { FC, ReactNode, createContext } from 'react';
+import { FC, ReactNode, createContext, useContext } from 'react';
 
 export interface ILoadingContext {
   load?: () => void;
@@ -24,4 +24,8 @@ export const LoadingProvider: FC<ILoadingProviderProps> = ({
   return (
     <LoadingContext.Provider value={value}>{children}</LoadingContext.Provider>
   );
+};
+
+export const useLoadingContext = () => {
+  return useContext(LoadingContext);
 };

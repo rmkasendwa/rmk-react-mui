@@ -19,9 +19,9 @@ import {
   systemStandardPhoneNumberFormat,
 } from '../../../utils/PhoneNumberUtil';
 import TextField, { ITextFieldProps } from '../TextField';
+import { BASE_64_FLAG_IMAGE } from './base64Flags';
 import { ICountry, countries } from './countries';
 import CountryList from './CountryList';
-import flagsImage from './flags.png';
 import { phoneNumberFlags } from './phoneNumberFlags';
 
 export interface IPhoneNumberInputFieldProps extends ITextFieldProps {
@@ -188,7 +188,7 @@ export const PhoneNumberInputField = forwardRef<
                     display: 'inline-block',
                     width: 16,
                     height: 11,
-                    backgroundImage: `url(${flagsImage})`,
+                    backgroundImage: `url(${BASE_64_FLAG_IMAGE})`,
                     backgroundRepeat: 'no-repeat',
                     ...phoneNumberFlags[
                       selectedCountry.regionalCode.toLowerCase()
