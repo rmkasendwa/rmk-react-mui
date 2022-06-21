@@ -116,10 +116,10 @@ export const FileInputField = forwardRef<HTMLDivElement, IFileInputFieldProps>(
           }}
           sx={{
             '& .file-input-clear-button': {
-              opacity: 0,
+              visibility: 'hidden',
             },
             '&:hover .file-input-clear-button': {
-              opacity: 1,
+              visibility: 'visible',
             },
             ...sx,
           }}

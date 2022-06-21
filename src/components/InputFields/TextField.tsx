@@ -133,10 +133,10 @@ export const TextField = forwardRef<HTMLDivElement, ITextFieldProps>(
         }}
         sx={{
           '& .text-input-clear-button': {
-            opacity: 0,
+            visibility: 'hidden',
           },
           '&:hover .text-input-clear-button': {
-            opacity: 1,
+            visibility: 'visible',
           },
           ...sx,
         }}

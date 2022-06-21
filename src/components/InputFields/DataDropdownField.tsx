@@ -316,10 +316,10 @@ export const DataDropdownField = forwardRef<
       {...errorProps}
       sx={{
         '& .data-dropdown-input-clear-button': {
-          opacity: 0,
+          visibility: 'hidden',
         },
         '&:hover .data-dropdown-input-clear-button': {
-          opacity: 1,
+          visibility: 'visible',
         },
         ...sx,
       }}
