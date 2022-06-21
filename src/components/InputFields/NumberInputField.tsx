@@ -291,10 +291,10 @@ export const NumberInputField = forwardRef<
       }
       sx={{
         '& .number-input-field-step-tools': {
-          opacity: 0,
+          visibility: 'hidden',
         },
         '&:hover .number-input-field-step-tools': {
-          opacity: 1,
+          visibility: 'visible',
         },
         ...sx,
       }}
