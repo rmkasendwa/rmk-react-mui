@@ -260,7 +260,7 @@ export const FullPageTable: FC<IFullPageTableProps> = ({
               borderBottom: `1px solid ${alpha(palette.text.primary, 0.12)}`,
             }}
           >
-            <Container>{toolbar}</Container>
+            <Container maxWidth="xl">{toolbar}</Container>
           </AppBar>
         </Box>
       ) : null}
