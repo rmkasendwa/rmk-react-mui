@@ -36,6 +36,7 @@
     "start": "concurrently --names \"Typescript,Assets\" -c \"blue.bold,magenta.bold\" \"tsc -w\" \"copy-and-watch --watch src/**/*.{png,jpg,css,scss,sass,json} lib\"",
     "storybook": "start-storybook -p 6006 -s public",
     "test": "react-scripts test --watchAll=false",
+    "test:watch": "react-scripts test",
     "tsc": "tsc"
   },
   "browserslist": {
