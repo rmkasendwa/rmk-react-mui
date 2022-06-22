@@ -138,7 +138,7 @@ export const useUpdate = <T>() => {
   };
 };
 
-const DEFAULT_SYNC_TIMEOUT = 60 * 1000;
+const DEFAULT_SYNC_TIMEOUT = 5 * 60 * 1000;
 export const useRecord = <T>(
   recordFinder: TAPIFunction,
   defautValue: T,
