@@ -3,16 +3,9 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import InputAdornment from '@mui/material/InputAdornment';
 import Typography from '@mui/material/Typography';
-import {
-  forwardRef,
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import { forwardRef, useCallback, useEffect, useRef, useState } from 'react';
 
-import { GlobalConfigurationContext } from '../../../contexts/GlobalConfigurationContext';
+import { useGlobalConfiguration } from '../../../contexts/GlobalConfigurationContext';
 import { ICountryCode } from '../../../interfaces/Countries';
 import {
   getRegionalCode,
@@ -69,7 +62,7 @@ export const PhoneNumberInputField = forwardRef<
 ) {
   const { InputProps = {} } = rest;
   const initialRenderRef = useRef(true);
-  const { countryCode } = useContext(GlobalConfigurationContext);
+  const { countryCode } = useGlobalConfiguration();
   const [regionalCode, setRegionalCode] = useState(countryCode);
   const [selectedCountry, setSelectedCountry] = useState(flags[regionalCode]);
 
