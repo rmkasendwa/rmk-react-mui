@@ -18,14 +18,25 @@ export const GlobalConfigurationContext =
 
 export const GlobalConfigurationProvider: FC<{
   children: ReactNode;
-}> = ({ children }) => {
-  const [countryCode, setCountryCode] = useState(DEFAULT_COUNTRY_CODE);
-  const [currencyCode, setCurrencyCode] = useState(DEFAULT_CURRENCY_CODE);
-
-  const value = { countryCode, currencyCode, setCountryCode, setCurrencyCode };
+  value?: Record<string, any>;
+}> = ({ children, value }) => {
+  const [countryCode, setCountryCode] = useState(
+    value?.countryCode || DEFAULT_COUNTRY_CODE
+  );
+  const [currencyCode, setCurrencyCode] = useState(
+    value?.currencyCode || DEFAULT_CURRENCY_CODE
+  );
 
   return (
-    <GlobalConfigurationContext.Provider value={value}>
+    <GlobalConfigurationContext.Provider
+      value={{
+        countryCode,
+        currencyCode,
+        setCountryCode,
+        setCurrencyCode,
+        ...value,
+      }}
+    >
       {children}
     </GlobalConfigurationContext.Provider>
   );
