@@ -1,4 +1,4 @@
-import { FC, ReactNode, createContext, useState } from 'react';
+import { FC, ReactNode, createContext, useContext, useState } from 'react';
 
 import { DEFAULT_COUNTRY_CODE, DEFAULT_CURRENCY_CODE } from '../constants';
 import { ICountryCode } from '../interfaces/Countries';
@@ -40,4 +40,8 @@ export const GlobalConfigurationProvider: FC<{
       {children}
     </GlobalConfigurationContext.Provider>
   );
+};
+
+export const useGlobalConfiguration = () => {
+  return useContext(GlobalConfigurationContext);
 };
