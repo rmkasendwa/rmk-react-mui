@@ -12,8 +12,8 @@ import PaginatedDropdownOptionList, {
   IDropdownOption,
 } from '../../PaginatedDropdownOptionList';
 import TextField from '../TextField';
+import { BASE_64_FLAG_IMAGE } from './base64Flags';
 import { ICountry, countries } from './countries';
-import flagsImage from './flags.png';
 import { phoneNumberFlags } from './phoneNumberFlags';
 
 export interface ICountryListProps {
@@ -35,7 +35,7 @@ const getCountryOption = ({ regionalCode, name, countryCode }: ICountry) => {
             display: 'inline-block',
             width: 16,
             height: 11,
-            backgroundImage: `url(${flagsImage})`,
+            backgroundImage: `url(${BASE_64_FLAG_IMAGE})`,
             backgroundRepeat: 'no-repeat',
             ...phoneNumberFlags[regionalCode.toLowerCase()],
           }}

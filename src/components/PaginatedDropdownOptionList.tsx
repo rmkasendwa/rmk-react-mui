@@ -81,6 +81,8 @@ export const PaginatedDropdownOptionList = forwardRef<
   const [focusedOptionIndex, setFocusedOptionIndex] = useState<number | null>(
     null
   );
+  const [scrolledToSelectedOption, setScrolledToSelectedOption] =
+    useState(false);
 
   const triggerChangeEvent = useCallback(
     (option: IDropdownOption) => {
@@ -216,6 +218,34 @@ export const PaginatedDropdownOptionList = forwardRef<
   useEffect(() => {
     setLimit(Math.ceil(maxHeight / optionHeight));
   }, [maxHeight, optionHeight]);
+
+  useEffect(() => {
+    if (
+      scrollableDropdownWrapper &&
+      selectedOptionsProp &&
+      !scrolledToSelectedOption
+    ) {
+      const selectedOptionIndices = selectedOptionsProp
+        .map(({ value: selectedOptionValue }) => {
+          return options.findIndex(({ value }) => {
+            return value === selectedOptionValue;
+          });
+        })
+        .filter((index) => index >= 0)
+        .sort();
+      if (selectedOptionIndices.length > 0) {
+        scrollableDropdownWrapper.scrollTop =
+          selectedOptionIndices[0] * optionHeight;
+      }
+      setScrolledToSelectedOption(true);
+    }
+  }, [
+    optionHeight,
+    options,
+    scrollableDropdownWrapper,
+    scrolledToSelectedOption,
+    selectedOptionsProp,
+  ]);
 
   const displayOptions = paging
     ? options.slice(offset, offset + limit)
