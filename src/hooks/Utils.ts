@@ -121,6 +121,7 @@ export const useCreate = <T>() => {
     create: load,
     creating: loading,
     created,
+    setCreated,
     createdRecord: record,
     ...rest,
   };

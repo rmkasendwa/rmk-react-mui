@@ -108,7 +108,11 @@ export const PhoneNumberInputField = forwardRef<
   }, [id, inputValue, name, onChange]);
 
   useEffect(() => {
-    value && setSanitizedInputValue(value);
+    if (value) {
+      setSanitizedInputValue(value);
+    } else {
+      setSanitizedInputValue('');
+    }
   }, [setSanitizedInputValue, value]);
 
   useEffect(() => {
