@@ -12,6 +12,7 @@ import { forwardRef, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { DEFAULT_DATE_FORMAT } from '../../constants';
 import { useSmallScreen } from '../../hooks/Utils';
+import { isIsoDate } from '../../utils/dates';
 import TextField, { ITextFieldProps } from './TextField';
 
 export interface IDateInputFieldProps extends ITextFieldProps {
@@ -38,6 +39,17 @@ export const DateInputField = forwardRef<HTMLDivElement, IDateInputFieldProps>(
     const smallScreen = useSmallScreen();
     const [selectedDate, setSelectedDate] = useState('');
     const [open, setOpen] = useState(false);
+
+    const selectedDateInstance = useMemo(() => {
+      if (selectedDate) {
+        let date = new Date(selectedDate);
+        if (!isIsoDate(selectedDate)) {
+          date = addMinutes(date, date.getTimezoneOffset());
+        }
+        return date;
+      }
+      return null;
+    }, [selectedDate]);
 
     const triggerChangeEvent = useCallback(
       (inputValue) => {
@@ -74,29 +86,29 @@ export const DateInputField = forwardRef<HTMLDivElement, IDateInputFieldProps>(
     const datePickerProps: DatePickerProps = {
       open,
       onClose: () => setOpen(false),
-      value: selectedDate ? new Date(selectedDate) : null,
+      value: selectedDateInstance,
       onChange: (selectedDateInstance: any) => {
         const { date } = (() => {
-          let date = selectedDateInstance as Date;
+          const date = selectedDateInstance as Date;
           if (date) {
-            date = addMinutes(date, -date.getTimezoneOffset());
             date.setHours(0, 0, 0, 0);
           }
           return { date };
         })();
         const selectedDate =
           date && (!minDate || date >= minDate) && (!maxDate || date <= maxDate)
-            ? date.toISOString()
+            ? date.toISOString().replace(/T.+$/g, '')
             : '';
         setSelectedDate(selectedDate);
         triggerChangeEvent(selectedDate);
       },
       renderInput: ({ value, ...params }) => {
         if (params.inputProps) {
-          if (selectedDate) {
-            const date = new Date(selectedDate);
-            date.setHours(0, 0, 0, 0);
-            params.inputProps.value = format(date, DEFAULT_DATE_FORMAT);
+          if (selectedDateInstance) {
+            params.inputProps.value = format(
+              selectedDateInstance,
+              DEFAULT_DATE_FORMAT
+            );
           } else {
             params.inputProps.value = '';
           }
