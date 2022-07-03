@@ -39,7 +39,14 @@ const BASE_LANES = Array.from({ length: 6 }).map((_, laneIndex) => {
           id: `${laneIndex}${cardIndex}`,
           laneId: laneIndex,
           title: `${cardIndex + 1}. ${lorem.generateWords(5)}`,
-          description: lorem.generateWords(40),
+          description: (
+            <>
+              <Typography>{lorem.generateWords(40)}</Typography>
+              <Typography sx={{ pointerEvents: 'auto' }}>
+                {lorem.generateWords(10)}
+              </Typography>
+            </>
+          ),
           draggable: cardIndex % 2 === 0,
         };
       }
