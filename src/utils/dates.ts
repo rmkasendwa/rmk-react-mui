@@ -1,37 +1,39 @@
-import { format } from 'date-fns';
+import { addMinutes, format } from 'date-fns';
 
-const DEFAULT_DATE_FORMAT =
-  process.env.DEFAULT_DATE_FORMAT ||
-  process.env.REACT_DEFAULT_DATE_FORMAT ||
-  'dd MMM yyyy';
+const DEFAULT_DATE_FORMAT = 'dd MMM yyyy';
 
-const DEFAULT_DATE_TIME_FORMAT =
-  process.env.DEFAULT_DATE_TIME_FORMAT ||
-  process.env.REACT_DEFAULT_DATE_TIME_FORMAT ||
-  `dddd, ${DEFAULT_DATE_FORMAT} hh:mm aa`;
+const DEFAULT_DATE_TIME_FORMAT = `dddd, ${DEFAULT_DATE_FORMAT} hh:mm aa`;
 
-const DEFAULT_DATE_TIME_FORMAT_WITH_SECONDS =
-  process.env.DEFAULT_DATE_TIME_FORMAT_WITH_SECONDS ||
-  process.env.REACT_DEFAULT_DATE_TIME_FORMAT_WITH_SECONDS ||
-  `dddd, ${DEFAULT_DATE_FORMAT} hh:mm:ss aa`;
+const DEFAULT_DATE_TIME_FORMAT_WITH_SECONDS = `dddd, ${DEFAULT_DATE_FORMAT} hh:mm:ss aa`;
 
 export const formatDate = (
   dateParam: string | number | Date,
-  includeTime?: boolean | 'SECONDS'
+  includeTime?: boolean | 'SECONDS',
+  dateFormat?: string
 ) => {
-  const dateFormat = (() => {
-    if (includeTime === true) return DEFAULT_DATE_TIME_FORMAT;
-    if (includeTime === 'SECONDS') return DEFAULT_DATE_TIME_FORMAT_WITH_SECONDS;
-    return DEFAULT_DATE_FORMAT;
-  })();
-  if (dateParam instanceof Date) return format(dateParam, dateFormat);
-  if (typeof dateParam === 'string' && dateParam.toString().match(/^-?\d+$/))
-    dateParam = parseInt(dateParam);
-  if (['string', 'number'].includes(typeof dateParam)) {
-    const date = new Date(dateParam);
-    if (!isNaN(date.getTime())) return format(date, dateFormat);
+  dateFormat ??
+    (dateFormat = (() => {
+      if (includeTime === true) return DEFAULT_DATE_TIME_FORMAT;
+      if (includeTime === 'SECONDS')
+        return DEFAULT_DATE_TIME_FORMAT_WITH_SECONDS;
+      return DEFAULT_DATE_FORMAT;
+    })());
+  if (dateParam instanceof Date) {
+    return format(dateParam, dateFormat);
   }
-  return dateParam;
+  if (typeof dateParam === 'string' && dateParam.toString().match(/^-?\d+$/)) {
+    dateParam = parseInt(dateParam);
+  }
+  if (['string', 'number'].includes(typeof dateParam)) {
+    let date = new Date(dateParam);
+    if (!isNaN(date.getTime())) {
+      if (typeof dateParam === 'string' && !isIsoDate(dateParam)) {
+        date = addMinutes(date, date.getTimezoneOffset());
+      }
+      return format(date, dateFormat);
+    }
+  }
+  return '';
 };
 
 export const isIsoDate = (str: string) => {

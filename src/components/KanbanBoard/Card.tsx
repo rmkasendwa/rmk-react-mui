@@ -27,6 +27,7 @@ const Card: FC<ICardProps> = ({
     <Box
       component="article"
       {...rest}
+      className="kanban-board-card"
       sx={{
         border: `1px solid ${alpha(palette.text.primary, 0.2)}`,
         backgroundColor: palette.background.default,
@@ -37,7 +38,19 @@ const Card: FC<ICardProps> = ({
         minWidth: 250,
         ...sx,
       }}
-      onClick={onCardClick ? () => onCardClick(id, laneId) : undefined}
+      onClick={
+        onCardClick
+          ? (event: any) => {
+              if (
+                (event.target as HTMLElement)?.classList.contains(
+                  'kanban-board-card'
+                )
+              ) {
+                onCardClick(id, laneId);
+              }
+            }
+          : undefined
+      }
     >
       <Grid container component="header" sx={{ pb: 1, alignItems: 'center' }}>
         <Grid item xs sx={{ minWidth: 0, fontSize: 14 }}>
@@ -68,6 +81,7 @@ const Card: FC<ICardProps> = ({
         component="section"
         sx={{
           color: palette.text.secondary,
+          pointerEvents: 'none',
         }}
       >
         {description}
