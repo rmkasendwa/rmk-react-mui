@@ -16,7 +16,7 @@ const lorem = new LoremIpsum();
 const Template: ComponentStory<typeof PaginatedDropdownOptionList> = (
   props
 ) => {
-  return <PaginatedDropdownOptionList options={[]} {...props} />;
+  return <PaginatedDropdownOptionList {...props} />;
 };
 
 export const Default = Template.bind({});
@@ -36,4 +36,25 @@ MultipleSelect.args = {
     value: index,
   })),
   multiple: true,
+};
+
+export const LoadingWithEmptyOptions = Template.bind({});
+LoadingWithEmptyOptions.args = {
+  options: [],
+  loadOptions: () => {
+    console.log('Loading options');
+  },
+  loading: true,
+};
+
+export const LoadingWithOptions = Template.bind({});
+LoadingWithOptions.args = {
+  options: Array.from({ length: 100 }).map((_, index) => ({
+    label: `${index + 1}. ${lorem.generateWords(4)}`,
+    value: index,
+  })),
+  loadOptions: () => {
+    console.log('Loading options');
+  },
+  loading: true,
 };
