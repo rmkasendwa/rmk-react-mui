@@ -27,6 +27,7 @@ export interface IDataDropdownFieldProps
   extends Omit<ITextFieldProps, 'value'> {
   disableEmptyOption?: boolean;
   getDropdownEntities?: TAPIFunction;
+  filterDropdownEntities?: (entities: any[]) => any[];
   getDropdownOptions?: (options: any[]) => IDropdownOption[];
   options?: IDropdownOption[];
   dataKey?: string;
@@ -44,6 +45,7 @@ export const DataDropdownField = forwardRef<
   {
     SelectProps,
     getDropdownEntities,
+    filterDropdownEntities,
     getDropdownOptions,
     name,
     id,
@@ -115,10 +117,24 @@ export const DataDropdownField = forwardRef<
         (!preferStale || options.length <= 0 || reloadOptions) &&
         getDropdownEntities
       ) {
-        load(getDropdownEntities);
+        load(async () => {
+          const entities = await getDropdownEntities();
+          if (filterDropdownEntities) {
+            return filterDropdownEntities(entities);
+          }
+          return entities;
+        });
       }
     },
-    [getDropdownEntities, load, loaded, loading, options.length, preferStale]
+    [
+      filterDropdownEntities,
+      getDropdownEntities,
+      load,
+      loaded,
+      loading,
+      options.length,
+      preferStale,
+    ]
   );
 
   const selectedOptionDisplayString = useMemo(() => {
