@@ -334,18 +334,18 @@ export const PaginatedDropdownOptionList = forwardRef<
               }
               return <Fragment key={value}>{label}</Fragment>;
             })
-          ) : (
+          ) : !loadOptions || !loading ? (
             <MenuItem disabled>
               <Typography variant="body2" color={palette.error.main}>
                 No options found
               </Typography>
             </MenuItem>
-          )}
+          ) : null}
         </Box>
       </Box>
       {loadOptions && (
         <>
-          <Divider />
+          {displayOptions.length > 0 ? <Divider /> : null}
           <Box
             sx={{
               display: 'flex',
