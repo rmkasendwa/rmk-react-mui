@@ -77,3 +77,12 @@ WithSelectedOptionProp.args = {
     value: 'Selected Value',
   },
 };
+
+export const ListeningToSearchEvent = Template.bind({});
+ListeningToSearchEvent.args = {
+  label: 'Custom Selected Option',
+  required: true,
+  onChangeSearchTerm: (searchTerm) => {
+    console.log(searchTerm);
+  },
+};

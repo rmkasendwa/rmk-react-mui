@@ -36,6 +36,7 @@ export interface IDataDropdownFieldProps
   selectedOption?: IDropdownOption;
   dropdownListMaxHeight?: number;
   optionPaging?: boolean;
+  onChangeSearchTerm?: (searchTerm: string) => void;
 }
 
 export const DataDropdownField = forwardRef<
@@ -59,6 +60,7 @@ export const DataDropdownField = forwardRef<
     dropdownListMaxHeight,
     optionPaging = true,
     selectedOption,
+    onChangeSearchTerm,
     sx,
     ...rest
   },
@@ -145,10 +147,6 @@ export const DataDropdownField = forwardRef<
       .map(({ label, searchableLabel }) => searchableLabel || label)
       .join(', ');
   }, [selectedOptions]);
-
-  const handleChange = useCallback((event) => {
-    setSearchTerm(event.target.value);
-  }, []);
 
   const handleBlur = useCallback(() => {
     if (onBlur) {
@@ -301,7 +299,10 @@ export const DataDropdownField = forwardRef<
         loadOptions();
       }}
       onBlur={handleBlur}
-      onChange={handleChange}
+      onChange={(event) => {
+        setSearchTerm(event.target.value);
+        onChangeSearchTerm && onChangeSearchTerm(event.target.value);
+      }}
       InputProps={{
         endAdornment: (
           <>
