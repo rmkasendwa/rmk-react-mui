@@ -1,18 +1,17 @@
 import CloseIcon from '@mui/icons-material/Close';
 import EventIcon from '@mui/icons-material/Event';
-import AdapterDateFns from '@mui/lab/AdapterDateFns';
-import { DatePickerProps } from '@mui/lab/DatePicker';
-import DesktopDatePicker from '@mui/lab/DesktopDatePicker';
-import LocalizationProvider from '@mui/lab/LocalizationProvider';
-import MobileDatePicker from '@mui/lab/MobileDatePicker';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
-import { addMinutes, format } from 'date-fns';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { DatePickerProps } from '@mui/x-date-pickers/DatePicker';
+import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { MobileDatePicker } from '@mui/x-date-pickers/MobileDatePicker';
+import { format } from 'date-fns';
 import { forwardRef, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { DEFAULT_DATE_FORMAT } from '../../constants';
 import { useSmallScreen } from '../../hooks/Utils';
-import { isIsoDate } from '../../utils/dates';
 import TextField, { ITextFieldProps } from './TextField';
 
 export interface IDateInputFieldProps extends ITextFieldProps {
@@ -37,19 +36,8 @@ export const DateInputField = forwardRef<HTMLDivElement, IDateInputFieldProps>(
     ref
   ) {
     const smallScreen = useSmallScreen();
-    const [selectedDate, setSelectedDate] = useState('');
+    const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [open, setOpen] = useState(false);
-
-    const selectedDateInstance = useMemo(() => {
-      if (selectedDate) {
-        let date = new Date(selectedDate);
-        if (!isIsoDate(selectedDate)) {
-          date = addMinutes(date, date.getTimezoneOffset());
-        }
-        return date;
-      }
-      return null;
-    }, [selectedDate]);
 
     const triggerChangeEvent = useCallback(
       (inputValue) => {
@@ -80,35 +68,26 @@ export const DateInputField = forwardRef<HTMLDivElement, IDateInputFieldProps>(
     }, [maxDateProp, minDateProp]);
 
     useEffect(() => {
-      setSelectedDate(value || '');
+      setSelectedDate(value ? new Date(value) : null);
     }, [value]);
 
-    const datePickerProps: DatePickerProps = {
+    const datePickerProps: DatePickerProps<any, any> = {
       open,
       onClose: () => setOpen(false),
-      value: selectedDateInstance,
+      value: selectedDate,
       onChange: (selectedDateInstance: any) => {
-        const { date } = (() => {
-          const date = selectedDateInstance as Date;
-          if (date) {
-            date.setHours(0, 0, 0, 0);
-          }
-          return { date };
-        })();
+        const date = selectedDateInstance as Date;
         const selectedDate =
           date && (!minDate || date >= minDate) && (!maxDate || date <= maxDate)
-            ? date.toISOString().replace(/T.+$/g, '')
-            : '';
+            ? date
+            : null;
         setSelectedDate(selectedDate);
-        triggerChangeEvent(selectedDate);
+        triggerChangeEvent(selectedDate?.toISOString() || '');
       },
       renderInput: ({ value, ...params }) => {
         if (params.inputProps) {
-          if (selectedDateInstance) {
-            params.inputProps.value = format(
-              selectedDateInstance,
-              DEFAULT_DATE_FORMAT
-            );
+          if (selectedDate) {
+            params.inputProps.value = format(selectedDate, DEFAULT_DATE_FORMAT);
           } else {
             params.inputProps.value = '';
           }
@@ -125,7 +104,7 @@ export const DateInputField = forwardRef<HTMLDivElement, IDateInputFieldProps>(
                   <IconButton
                     className="date-input-clear-button"
                     onClick={() => {
-                      setSelectedDate('');
+                      setSelectedDate(null);
                       triggerChangeEvent('');
                     }}
                     sx={{ p: 0.4 }}
