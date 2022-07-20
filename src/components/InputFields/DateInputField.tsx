@@ -145,13 +145,11 @@ export const DateInputField = forwardRef<HTMLDivElement, IDateInputFieldProps>(
         if (minDateProp) {
           return new Date(minDateProp);
         }
-        return null;
       })(),
       maxDate: (() => {
         if (maxDateProp) {
           return new Date(maxDateProp);
         }
-        return null;
       })(),
     };
 

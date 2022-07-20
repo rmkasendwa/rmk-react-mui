@@ -1,6 +1,6 @@
 import CloseIcon from '@mui/icons-material/Close';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { IconButton, Tooltip } from '@mui/material';
+import { IconButton, Tooltip, inputBaseClasses } from '@mui/material';
 import Box from '@mui/material/Box';
 import ClickAwayListener from '@mui/material/ClickAwayListener';
 import Grow from '@mui/material/Grow';
@@ -37,6 +37,7 @@ export interface IDataDropdownFieldProps
   dropdownListMaxHeight?: number;
   optionPaging?: boolean;
   onChangeSearchTerm?: (searchTerm: string) => void;
+  displayRawOptionLabelInField?: boolean;
 }
 
 export const DataDropdownField = forwardRef<
@@ -61,6 +62,7 @@ export const DataDropdownField = forwardRef<
     optionPaging = true,
     selectedOption,
     onChangeSearchTerm,
+    displayRawOptionLabelInField = false,
     sx,
     ...rest
   },
@@ -287,9 +289,10 @@ export const DataDropdownField = forwardRef<
 
   const displayOverlay =
     selectedOptions.length > 0 &&
-    !SelectProps?.multiple &&
-    !['string', 'number'].includes(typeof selectedOptions[0].label) &&
-    !selectedOptions[0].searchableLabel;
+    (displayRawOptionLabelInField ||
+      (!SelectProps?.multiple &&
+        !['string', 'number'].includes(typeof selectedOptions[0].label) &&
+        !selectedOptions[0].searchableLabel));
 
   const textField = (
     <TextField
@@ -328,7 +331,7 @@ export const DataDropdownField = forwardRef<
         ...InputProps,
         ref: anchorRef,
       }}
-      value={searchTerm}
+      value={open ? searchTerm : selectedOptionDisplayString}
       {...rest}
       {...errorProps}
       sx={{
@@ -346,23 +349,36 @@ export const DataDropdownField = forwardRef<
   return (
     <>
       {displayOverlay ? (
-        <Box sx={{ position: 'relative', '& input': { visibility: 'hidden' } }}>
+        <Box
+          sx={{
+            position: 'relative',
+            width: '100%',
+            [`& .${inputBaseClasses.input}`]: (() => {
+              if (!open) {
+                return { color: 'transparent' };
+              }
+              return {};
+            })(),
+          }}
+        >
           {textField}
-          <Box
-            sx={{
-              position: 'absolute',
-              bottom: 0,
-              left: 0,
-              height: '100%',
-              width: '100%',
-              pointerEvents: 'none',
-              display: 'flex',
-              alignItems: 'center',
-              pl: 1,
-            }}
-          >
-            {selectedOptions[0].label}
-          </Box>
+          {!open ? (
+            <Box
+              sx={{
+                position: 'absolute',
+                bottom: 0,
+                left: 0,
+                height: '100%',
+                width: '100%',
+                pointerEvents: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                pl: 1,
+              }}
+            >
+              {selectedOptions[0].label}
+            </Box>
+          ) : null}
         </Box>
       ) : (
         textField
