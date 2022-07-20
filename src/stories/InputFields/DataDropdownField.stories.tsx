@@ -1,7 +1,8 @@
+import { Typography } from '@mui/material';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { LoremIpsum } from 'lorem-ipsum';
 
-import { DataDropdownField } from '../../components/InputFields/DataDropdownField';
+import DataDropdownField from '../../components/InputFields/DataDropdownField';
 
 export default {
   title: 'Components/Input Fields/Data Dropdown Field',
@@ -85,4 +86,19 @@ ListeningToSearchEvent.args = {
   onChangeSearchTerm: (searchTerm) => {
     console.log(searchTerm);
   },
+};
+
+export const WithReactElementOptionLabels = Template.bind({});
+WithReactElementOptionLabels.args = {
+  label: 'Element Labels List',
+  required: true,
+  options: Array.from({ length: 10 }).map((_, index) => {
+    const label = `${index + 1}. ${lorem.generateWords(4)}`;
+    return {
+      label: <Typography variant="body2">{label}</Typography>,
+      searchableLabel: label,
+      value: index,
+    };
+  }),
+  displayRawOptionLabelInField: true,
 };
