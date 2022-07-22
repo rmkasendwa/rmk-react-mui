@@ -247,9 +247,19 @@ export const PaginatedDropdownOptionList = forwardRef<
     selectedOptionsProp,
   ]);
 
+  const menuItemStyles = useMemo(() => {
+    return {
+      minHeight: optionHeight,
+      fontSize: 14,
+      lineHeight: `24px`,
+      p: 0,
+    };
+  }, [optionHeight]);
+
   const displayOptions = paging
     ? options.slice(offset, offset + limit)
     : options;
+  const hasAllOptionsSelected = options.length === selectedOptions.length;
 
   return (
     <Card {...CardProps} ref={ref} tabIndex={-1}>
@@ -312,12 +322,7 @@ export const PaginatedDropdownOptionList = forwardRef<
                     selected={selectedOptions
                       .map(({ value }) => value)
                       .includes(value)}
-                    sx={{
-                      minHeight: optionHeight,
-                      fontSize: 14,
-                      lineHeight: `24px`,
-                      p: 0,
-                    }}
+                    sx={menuItemStyles}
                     tabIndex={isFocused ? 0 : -1}
                   >
                     <Box
@@ -343,6 +348,38 @@ export const PaginatedDropdownOptionList = forwardRef<
           ) : null}
         </Box>
       </Box>
+      {multiple ? (
+        <>
+          {displayOptions.length > 0 ? <Divider /> : null}
+          <MenuItem
+            onClick={() => {
+              const selectableOptions = (() => {
+                if (hasAllOptionsSelected) {
+                  return [];
+                }
+                return options.filter((option) => {
+                  const { selectable = true } = option;
+                  return selectable;
+                });
+              })();
+              setSelectedOptions(selectableOptions);
+              onChangeSelectedOption &&
+                onChangeSelectedOption(selectableOptions);
+            }}
+            sx={menuItemStyles}
+          >
+            <Box
+              sx={{
+                py: 0.75,
+                px: 2,
+                width: `100%`,
+              }}
+            >
+              {hasAllOptionsSelected ? 'Deselect' : 'Select'} All
+            </Box>
+          </MenuItem>
+        </>
+      ) : null}
       {loadOptions && (
         <>
           {displayOptions.length > 0 ? <Divider /> : null}

@@ -209,12 +209,23 @@ export const DataDropdownField = forwardRef<
 
   useEffect(() => {
     if (sortOptions) {
-      options.sort(({ label: aLabel }, { label: bLabel }) => {
-        if (typeof aLabel === 'string' && typeof bLabel === 'string') {
-          return aLabel.localeCompare(bLabel);
+      options.sort(
+        (
+          { label: aLabel, searchableLabel: aSearchableLabel },
+          { label: bLabel, searchableLabel: bSearchableLabel }
+        ) => {
+          if (typeof aLabel === 'string' && typeof bLabel === 'string') {
+            return aLabel.localeCompare(bLabel);
+          }
+          if (
+            typeof aSearchableLabel === 'string' &&
+            typeof bSearchableLabel === 'string'
+          ) {
+            return aSearchableLabel.localeCompare(bSearchableLabel);
+          }
+          return 0;
         }
-        return 0;
-      });
+      );
     }
   }, [options, sortOptions]);
 
