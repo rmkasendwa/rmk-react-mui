@@ -18,6 +18,7 @@ import {
 
 import DropdownOption, {
   DEFAULT_DROPDOWN_OPTION_HEIGHT,
+  TDropdownOptionVariant,
 } from './DropdownOption';
 import ReloadIconButton from './ReloadIconButton';
 
@@ -46,6 +47,7 @@ export interface IPaginatedDropdownOptionListProps {
   onSelectOption?: (selectedOption: IDropdownOption) => void;
   onChangeSelectedOption?: (selectedOptions: IDropdownOption[]) => void;
   CardProps?: CardProps;
+  optionVariant?: TDropdownOptionVariant;
 }
 
 const DEFAULT_DROPDOWN_MENU_MAX_HEIGHT = 200;
@@ -69,6 +71,7 @@ export const PaginatedDropdownOptionList = forwardRef<
     onSelectOption,
     onChangeSelectedOption,
     CardProps,
+    optionVariant,
   },
   ref
 ) {
@@ -218,7 +221,7 @@ export const PaginatedDropdownOptionList = forwardRef<
   }, [maxHeight, optionHeight, paging, scrollableDropdownWrapper]);
 
   useEffect(() => {
-    setLimit(Math.ceil(maxHeight / optionHeight));
+    setLimit(Math.ceil(maxHeight / optionHeight) + 1);
   }, [maxHeight, optionHeight]);
 
   useEffect(() => {
@@ -313,6 +316,7 @@ export const PaginatedDropdownOptionList = forwardRef<
                       .includes(value)}
                     tabIndex={isFocused ? 0 : -1}
                     height={optionHeight}
+                    variant={optionVariant}
                     {...{ selectable }}
                   >
                     {label}
