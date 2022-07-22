@@ -45,7 +45,6 @@ export interface IDataDropdownFieldProps
   dropdownListMaxHeight?: number;
   optionPaging?: boolean;
   onChangeSearchTerm?: (searchTerm: string) => void;
-  displayRawOptionLabelInField?: boolean;
 }
 
 export const DataDropdownField = forwardRef<
@@ -64,13 +63,13 @@ export const DataDropdownField = forwardRef<
     options: propOptions,
     sortOptions = false,
     onChange,
+    onFocus,
     onBlur,
     InputProps,
     dropdownListMaxHeight,
     optionPaging = true,
     selectedOption,
     onChangeSearchTerm,
-    displayRawOptionLabelInField = false,
     optionVariant,
     sx,
     ...rest
@@ -91,6 +90,7 @@ export const DataDropdownField = forwardRef<
   const anchorRef = useRef<HTMLInputElement>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [open, setOpen] = useState(false);
+  const [focused, setFocused] = useState(false);
 
   const [options, setOptions] = useState<IDropdownOption[]>([]);
   const [selectedOptions, setSelectedOptions] = useState<IDropdownOption[]>([]);
@@ -160,24 +160,7 @@ export const DataDropdownField = forwardRef<
       .join(', ');
   }, [selectedOptions]);
 
-  const handleBlur = useCallback(() => {
-    if (onBlur) {
-      const event: any = new Event('blur', { bubbles: true });
-      Object.defineProperty(event, 'target', {
-        writable: false,
-        value: {
-          name,
-          id,
-          value: selectedOptionValue,
-        },
-      });
-      onBlur(event);
-    }
-  }, [id, name, onBlur, selectedOptionValue]);
-
-  const handleClose = () => {
-    setOpen(false);
-  };
+  const handleClose = () => setOpen(false);
 
   useEffect(() => {
     if (value) {
@@ -238,10 +221,6 @@ export const DataDropdownField = forwardRef<
       );
     }
   }, [options, sortOptions]);
-
-  useEffect(() => {
-    setSearchTerm(selectedOptionDisplayString);
-  }, [selectedOptionDisplayString]);
 
   useEffect(() => {
     const fieldValues = Array.isArray(value) ? value : [value];
@@ -308,13 +287,6 @@ export const DataDropdownField = forwardRef<
     );
   }
 
-  const displayOverlay =
-    selectedOptions.length > 0 &&
-    (displayRawOptionLabelInField ||
-      (!SelectProps?.multiple &&
-        !['string', 'number'].includes(typeof selectedOptions[0].label) &&
-        !selectedOptions[0].searchableLabel));
-
   const textField = (
     <TextField
       ref={ref}
@@ -322,7 +294,25 @@ export const DataDropdownField = forwardRef<
         setTimeout(() => setOpen(true), 200);
         loadOptions();
       }}
-      onBlur={handleBlur}
+      onFocus={(event) => {
+        setFocused(true);
+        onFocus && onFocus(event);
+      }}
+      onBlur={() => {
+        setFocused(false);
+        if (onBlur) {
+          const event: any = new Event('blur', { bubbles: true });
+          Object.defineProperty(event, 'target', {
+            writable: false,
+            value: {
+              name,
+              id,
+              value: selectedOptionValue,
+            },
+          });
+          onBlur(event);
+        }
+      }}
       onChange={(event) => {
         setSearchTerm(event.target.value);
         onChangeSearchTerm && onChangeSearchTerm(event.target.value);
@@ -352,7 +342,13 @@ export const DataDropdownField = forwardRef<
         ...InputProps,
         ref: anchorRef,
       }}
-      value={open ? searchTerm : selectedOptionDisplayString}
+      value={(() => {
+        if (focused) {
+          return searchTerm;
+        } else {
+          return selectedOptionDisplayString;
+        }
+      })()}
       {...rest}
       {...errorProps}
       sx={{
@@ -369,57 +365,61 @@ export const DataDropdownField = forwardRef<
 
   return (
     <>
-      {displayOverlay ? (
-        <Box
-          sx={{
-            position: 'relative',
-            width: '100%',
-            [`& .${inputBaseClasses.input}`]: (() => {
-              if (!open) {
-                return { color: 'transparent' };
-              }
-              return {};
-            })(),
-          }}
-        >
-          {textField}
-          {!open ? (
-            <Box
-              sx={{
-                position: 'absolute',
-                bottom: 0,
-                left: 0,
-                height: '100%',
-                width: 'calc(100% - 72px)',
-                pointerEvents: 'none',
-                display: 'flex',
-                alignItems: 'center',
-                pl: '14px',
-                whiteSpace: 'nowrap',
-                gap: 1,
-                overflow: 'hidden',
-              }}
-            >
-              {selectedOptions.map(({ label, value }) => {
-                return (
-                  <Box
-                    key={value}
-                    sx={{
-                      bgcolor: alpha(palette.primary.main, 0.05),
-                      borderRadius: 4,
-                      px: 0.5,
-                    }}
-                  >
-                    {label}
-                  </Box>
-                );
-              })}
-            </Box>
-          ) : null}
-        </Box>
-      ) : (
-        textField
-      )}
+      <Box
+        sx={{
+          position: 'relative',
+          width: '100%',
+          [`& .${inputBaseClasses.input}`]: (() => {
+            if (!focused && selectedOptionDisplayString.length > 0) {
+              return { color: 'transparent' };
+            }
+            return {};
+          })(),
+          '&>.data-dropdown-field-selected-option-wrapper': {
+            width: 'calc(100% - 40px)',
+          },
+          '&:hover>.data-dropdown-field-selected-option-wrapper': {
+            width: 'calc(100% - 72px)',
+          },
+        }}
+      >
+        {textField}
+        {!focused ? (
+          <Box
+            className="data-dropdown-field-selected-option-wrapper"
+            sx={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              height: '100%',
+              pointerEvents: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              pl: '14px',
+              whiteSpace: 'nowrap',
+              gap: 0.5,
+              overflow: 'hidden',
+            }}
+          >
+            {selectedOptions.map(({ label, value }) => {
+              return (
+                <Box
+                  key={value}
+                  sx={{
+                    fontSize: 14,
+                    bgcolor: alpha(palette.primary.main, 0.1),
+                    borderRadius: '10px',
+                    py: '2px',
+                    px: '4px',
+                  }}
+                >
+                  {label}
+                </Box>
+              );
+            })}
+          </Box>
+        ) : null}
+      </Box>
       <Popper
         open={open}
         anchorEl={anchorRef.current}
