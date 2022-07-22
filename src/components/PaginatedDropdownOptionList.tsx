@@ -16,6 +16,9 @@ import {
   useState,
 } from 'react';
 
+import DropdownOption, {
+  DEFAULT_DROPDOWN_OPTION_HEIGHT,
+} from './DropdownOption';
 import ReloadIconButton from './ReloadIconButton';
 
 export interface IDropdownOption {
@@ -46,7 +49,6 @@ export interface IPaginatedDropdownOptionListProps {
 }
 
 const DEFAULT_DROPDOWN_MENU_MAX_HEIGHT = 200;
-const DEFAULT_DROPDOWN_OPTION_HEIGHT = 36;
 
 export const PaginatedDropdownOptionList = forwardRef<
   HTMLDivElement,
@@ -247,15 +249,6 @@ export const PaginatedDropdownOptionList = forwardRef<
     selectedOptionsProp,
   ]);
 
-  const menuItemStyles = useMemo(() => {
-    return {
-      minHeight: optionHeight,
-      fontSize: 14,
-      lineHeight: `24px`,
-      p: 0,
-    };
-  }, [optionHeight]);
-
   const displayOptions = paging
     ? options.slice(offset, offset + limit)
     : options;
@@ -295,7 +288,7 @@ export const PaginatedDropdownOptionList = forwardRef<
               const {
                 value,
                 label,
-                selectable = true,
+                selectable,
                 isDropdownOption = true,
                 isDropdownOptionWrapped = true,
               } = option;
@@ -307,34 +300,23 @@ export const PaginatedDropdownOptionList = forwardRef<
                   classNames.push('Mui-focusVisible');
                 }
                 return (
-                  <MenuItem
+                  <DropdownOption
                     className={classNames.join(' ')}
                     value={value}
                     key={value}
-                    onClick={
-                      selectable
-                        ? () => {
-                            triggerChangeEvent(option);
-                            onSelectOption && onSelectOption(option);
-                          }
-                        : undefined
-                    }
+                    onClick={() => {
+                      triggerChangeEvent(option);
+                      onSelectOption && onSelectOption(option);
+                    }}
                     selected={selectedOptions
                       .map(({ value }) => value)
                       .includes(value)}
-                    sx={menuItemStyles}
                     tabIndex={isFocused ? 0 : -1}
+                    height={optionHeight}
+                    {...{ selectable }}
                   >
-                    <Box
-                      sx={{
-                        py: 0.75,
-                        px: 2,
-                        width: `100%`,
-                      }}
-                    >
-                      {label}
-                    </Box>
-                  </MenuItem>
+                    {label}
+                  </DropdownOption>
                 );
               }
               return <Fragment key={value}>{label}</Fragment>;
@@ -351,7 +333,7 @@ export const PaginatedDropdownOptionList = forwardRef<
       {multiple ? (
         <>
           {displayOptions.length > 0 ? <Divider /> : null}
-          <MenuItem
+          <DropdownOption
             onClick={() => {
               const selectableOptions = (() => {
                 if (hasAllOptionsSelected) {
@@ -366,18 +348,9 @@ export const PaginatedDropdownOptionList = forwardRef<
               onChangeSelectedOption &&
                 onChangeSelectedOption(selectableOptions);
             }}
-            sx={menuItemStyles}
           >
-            <Box
-              sx={{
-                py: 0.75,
-                px: 2,
-                width: `100%`,
-              }}
-            >
-              {hasAllOptionsSelected ? 'Deselect' : 'Select'} All
-            </Box>
-          </MenuItem>
+            {hasAllOptionsSelected ? 'Deselect' : 'Select'} All
+          </DropdownOption>
         </>
       ) : null}
       {loadOptions && (
