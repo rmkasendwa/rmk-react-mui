@@ -101,4 +101,7 @@ WithReactElementOptionLabels.args = {
     };
   }),
   displayRawOptionLabelInField: true,
+  SelectProps: {
+    multiple: true,
+  },
 };
