@@ -1,6 +1,12 @@
 import CloseIcon from '@mui/icons-material/Close';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { IconButton, Tooltip, inputBaseClasses } from '@mui/material';
+import {
+  IconButton,
+  Tooltip,
+  alpha,
+  inputBaseClasses,
+  useTheme,
+} from '@mui/material';
 import Box from '@mui/material/Box';
 import ClickAwayListener from '@mui/material/ClickAwayListener';
 import Grow from '@mui/material/Grow';
@@ -19,12 +25,14 @@ import { useAPIDataContext, useAPIService } from '../../hooks/Utils';
 import { TAPIFunction } from '../../interfaces/Utils';
 import PaginatedDropdownOptionList, {
   IDropdownOption,
+  IPaginatedDropdownOptionListProps,
 } from '../PaginatedDropdownOptionList';
 import RetryErrorMessage from '../RetryErrorMessage';
 import TextField, { ITextFieldProps } from './TextField';
 
 export interface IDataDropdownFieldProps
-  extends Omit<ITextFieldProps, 'value'> {
+  extends Omit<ITextFieldProps, 'value'>,
+    Pick<IPaginatedDropdownOptionListProps, 'optionVariant'> {
   disableEmptyOption?: boolean;
   getDropdownEntities?: TAPIFunction;
   filterDropdownEntities?: (entities: any[]) => any[];
@@ -63,12 +71,14 @@ export const DataDropdownField = forwardRef<
     selectedOption,
     onChangeSearchTerm,
     displayRawOptionLabelInField = false,
+    optionVariant,
     sx,
     ...rest
   },
   ref
 ) {
   const { preferStale } = useAPIDataContext();
+  const { palette } = useTheme();
 
   const {
     load,
@@ -380,14 +390,30 @@ export const DataDropdownField = forwardRef<
                 bottom: 0,
                 left: 0,
                 height: '100%',
-                width: '100%',
+                width: 'calc(100% - 72px)',
                 pointerEvents: 'none',
                 display: 'flex',
                 alignItems: 'center',
-                pl: 1,
+                pl: '14px',
+                whiteSpace: 'nowrap',
+                gap: 1,
+                overflow: 'hidden',
               }}
             >
-              {selectedOptions[0].label}
+              {selectedOptions.map(({ label, value }) => {
+                return (
+                  <Box
+                    key={value}
+                    sx={{
+                      bgcolor: alpha(palette.primary.main, 0.05),
+                      borderRadius: 4,
+                      px: 0.5,
+                    }}
+                  >
+                    {label}
+                  </Box>
+                );
+              })}
             </Box>
           ) : null}
         </Box>
@@ -426,7 +452,12 @@ export const DataDropdownField = forwardRef<
                       getDropdownEntities ? () => loadOptions(true) : undefined
                     }
                     onChangeSelectedOption={triggerChangeEvent}
-                    {...{ selectedOptions, setSelectedOptions, loading }}
+                    {...{
+                      selectedOptions,
+                      setSelectedOptions,
+                      loading,
+                      optionVariant,
+                    }}
                   />
                 </ClickAwayListener>
               </Box>

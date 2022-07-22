@@ -35,10 +35,12 @@ export const DropdownOption = forwardRef<HTMLLIElement, IDropdownOptionProps>(
         {...{ selected }}
         onClick={selectable ? onClick : undefined}
         sx={{
-          minHeight: height,
+          minHeight: `${height}px !important`,
           fontSize: 14,
           lineHeight: `24px`,
           p: 0,
+          display: 'flex',
+          alignItems: 'center',
         }}
       >
         <Box
