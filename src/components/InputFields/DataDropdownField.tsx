@@ -326,6 +326,7 @@ export const DataDropdownField = forwardRef<
                   className="data-dropdown-input-clear-button"
                   onClick={(event) => {
                     event.stopPropagation();
+                    setSearchTerm('');
                     const options: IDropdownOption[] = [];
                     setSelectedOptions(options);
                     triggerChangeEvent(options);
@@ -408,9 +409,15 @@ export const DataDropdownField = forwardRef<
                   sx={{
                     fontSize: 14,
                     bgcolor: alpha(palette.primary.main, 0.1),
-                    borderRadius: '10px',
-                    py: '2px',
-                    px: '4px',
+                    borderRadius: '20px',
+                    py: 0.25,
+                    pl: (() => {
+                      if (['string', 'number'].includes(typeof label)) {
+                        return 1;
+                      }
+                      return 0.25;
+                    })(),
+                    pr: 1,
                   }}
                 >
                   {label}
