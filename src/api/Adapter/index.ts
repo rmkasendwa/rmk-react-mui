@@ -26,11 +26,17 @@ export const APIAdapterConfiguration: IAPIAdapterConfiguration = {
 
 export const defaultRequestHeaders: Record<string, string> = {};
 
-const cachedDefaultRequestHeaders: Record<string, string> | null =
-  StorageManager.get('defaultRequestHeaders');
+const setDefaultRequestHeaders = () => {
+  const cachedDefaultRequestHeaders: Record<string, string> | null =
+    StorageManager.get('defaultRequestHeaders');
+  cachedDefaultRequestHeaders &&
+    Object.assign(defaultRequestHeaders, cachedDefaultRequestHeaders);
+};
+setDefaultRequestHeaders();
 
-cachedDefaultRequestHeaders &&
-  Object.assign(defaultRequestHeaders, cachedDefaultRequestHeaders);
+if (typeof window !== 'undefined') {
+  window.addEventListener('focus', setDefaultRequestHeaders);
+}
 
 export const patchDefaultRequestHeaders = (headers: Record<string, string>) => {
   Object.assign(defaultRequestHeaders, headers);

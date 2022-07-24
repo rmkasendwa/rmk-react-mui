@@ -178,10 +178,30 @@ export const useRecord = <T>(
           load(true);
         }, DEFAULT_SYNC_TIMEOUT);
       };
-      window.addEventListener('mousemove', mouseMoveEventCallback);
-      mouseMoveEventCallback();
+      const visiblityChangeEventCallback = (event?: Event) => {
+        if (nextSyncTimeoutRef.current !== null) {
+          clearTimeout(nextSyncTimeoutRef.current);
+        }
+        window.removeEventListener('mousemove', mouseMoveEventCallback);
+        if (!document.hidden) {
+          window.addEventListener('mousemove', mouseMoveEventCallback);
+          mouseMoveEventCallback();
+          if (event) {
+            load(true);
+          }
+        }
+      };
+      document.addEventListener(
+        'visibilitychange',
+        visiblityChangeEventCallback
+      );
+      visiblityChangeEventCallback();
       return () => {
         window.removeEventListener('mousemove', mouseMoveEventCallback);
+        document.removeEventListener(
+          'visibilitychange',
+          visiblityChangeEventCallback
+        );
         if (nextSyncTimeoutRef.current !== null) {
           clearTimeout(nextSyncTimeoutRef.current);
         }
