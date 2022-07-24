@@ -115,6 +115,17 @@ export const AuthProvider: FC<{
     }
   }, [clearLoggedInUserSession, sessionExpired]);
 
+  useEffect(() => {
+    const windowFocusEventCallback = () => {
+      const user = StorageManager.get('user');
+      setLoggedInUser(user);
+    };
+    window.addEventListener('focus', windowFocusEventCallback);
+    return () => {
+      window.removeEventListener('focus', windowFocusEventCallback);
+    };
+  }, []);
+
   return (
     <AuthContext.Provider
       value={{
