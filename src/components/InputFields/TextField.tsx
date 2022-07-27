@@ -1,4 +1,5 @@
 import CloseIcon from '@mui/icons-material/Close';
+import CircularProgress from '@mui/material/CircularProgress';
 import IconButton from '@mui/material/IconButton';
 import Skeleton from '@mui/material/Skeleton';
 import MuiTextField, { TextFieldProps } from '@mui/material/TextField';
@@ -79,6 +80,9 @@ export const TextField = forwardRef<HTMLDivElement, ITextFieldProps>(
           label={<Skeleton width={labelSkeletonWidth} />}
           value=""
           disabled
+          InputProps={{
+            endAdornment: <CircularProgress size={18} color="inherit" />,
+          }}
         />
       );
     }
