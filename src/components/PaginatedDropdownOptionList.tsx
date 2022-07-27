@@ -334,9 +334,9 @@ export const PaginatedDropdownOptionList = forwardRef<
           ) : null}
         </Box>
       </Box>
-      {multiple ? (
+      {multiple && options.length > 1 ? (
         <>
-          {displayOptions.length > 0 ? <Divider /> : null}
+          <Divider />
           <DropdownOption
             onClick={() => {
               const selectableOptions = (() => {
