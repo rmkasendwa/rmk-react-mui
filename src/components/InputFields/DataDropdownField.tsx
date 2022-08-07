@@ -3,6 +3,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {
   IconButton,
   Tooltip,
+  Typography,
   alpha,
   inputBaseClasses,
   useTheme,
@@ -76,6 +77,7 @@ export const DataDropdownField = forwardRef<
   },
   ref
 ) {
+  const multiple = SelectProps?.multiple;
   const { preferStale } = useAPIDataContext();
   const { palette } = useTheme();
 
@@ -99,16 +101,16 @@ export const DataDropdownField = forwardRef<
   >([]);
 
   const selectedOptionValue = useMemo(() => {
-    if (SelectProps?.multiple) {
+    if (multiple) {
       return selectedOptions.map(({ value }) => value);
     }
     return selectedOptions[0]?.value;
-  }, [SelectProps?.multiple, selectedOptions]);
+  }, [multiple, selectedOptions]);
 
   const triggerChangeEvent = useCallback(
     (selectedOptions: IDropdownOption[]) => {
       const selectedOptionValue = (() => {
-        if (SelectProps?.multiple) {
+        if (multiple) {
           return selectedOptions.map(({ value }) => value);
         }
         return selectedOptions[0]?.value;
@@ -120,7 +122,7 @@ export const DataDropdownField = forwardRef<
       });
       onChange && onChange(event);
     },
-    [SelectProps?.multiple, id, name, onChange]
+    [multiple, id, name, onChange]
   );
 
   const loadOptions = useCallback(
@@ -385,7 +387,7 @@ export const DataDropdownField = forwardRef<
         }}
       >
         {textField}
-        {!focused ? (
+        {!focused && selectedOptions.length > 0 ? (
           <Box
             className="data-dropdown-field-selected-option-wrapper"
             sx={{
@@ -402,28 +404,39 @@ export const DataDropdownField = forwardRef<
               overflow: 'hidden',
             }}
           >
-            {selectedOptions.map(({ label, value }) => {
-              return (
-                <Box
-                  key={value}
-                  sx={{
-                    fontSize: 14,
-                    bgcolor: alpha(palette.primary.main, 0.1),
-                    borderRadius: '20px',
-                    py: 0.25,
-                    pl: (() => {
-                      if (['string', 'number'].includes(typeof label)) {
-                        return 1;
-                      }
-                      return 0.25;
-                    })(),
-                    pr: 1,
-                  }}
-                >
-                  {label}
-                </Box>
-              );
-            })}
+            {multiple ? (
+              selectedOptions.map(({ label, value }) => {
+                return (
+                  <Box
+                    key={value}
+                    sx={{
+                      fontSize: 14,
+                      bgcolor: alpha(palette.primary.main, 0.1),
+                      borderRadius: '20px',
+                      height: 25,
+                      py: 0.25,
+                      pl: (() => {
+                        if (['string', 'number'].includes(typeof label)) {
+                          return 1;
+                        }
+                        return 0.25;
+                      })(),
+                      pr: 1,
+                    }}
+                  >
+                    {label}
+                  </Box>
+                );
+              })
+            ) : (
+              <Typography
+                sx={{
+                  fontSize: 14,
+                }}
+              >
+                {selectedOptions[0]?.label}
+              </Typography>
+            )}
           </Box>
         ) : null}
       </Box>
@@ -453,7 +466,6 @@ export const DataDropdownField = forwardRef<
                     }
                     maxHeight={dropdownListMaxHeight}
                     paging={optionPaging}
-                    multiple={SelectProps?.multiple}
                     onClose={handleClose}
                     loadOptions={
                       getDropdownEntities ? () => loadOptions(true) : undefined
@@ -464,6 +476,7 @@ export const DataDropdownField = forwardRef<
                       setSelectedOptions,
                       loading,
                       optionVariant,
+                      multiple,
                     }}
                   />
                 </ClickAwayListener>
