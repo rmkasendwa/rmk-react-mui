@@ -1,3 +1,4 @@
+import CheckIcon from '@mui/icons-material/Check';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import { Grid } from '@mui/material';
@@ -7,7 +8,7 @@ import { forwardRef } from 'react';
 
 export const DEFAULT_DROPDOWN_OPTION_HEIGHT = 36;
 
-export type TDropdownOptionVariant = 'text' | 'checkbox';
+export type TDropdownOptionVariant = 'text' | 'checkbox' | 'check';
 
 export interface IDropdownOptionProps extends MenuItemProps {
   height?: number;
@@ -61,6 +62,17 @@ export const DropdownOption = forwardRef<HTMLLIElement, IDropdownOptionProps>(
                       ) : (
                         <CheckBoxOutlineBlankIcon color="inherit" />
                       )}
+                    </Grid>
+                    <Grid item xs sx={{ minWidth: 0 }}>
+                      {children}
+                    </Grid>
+                  </Grid>
+                );
+              case 'check':
+                return (
+                  <Grid container sx={{ alignItems: 'center' }}>
+                    <Grid item sx={{ display: 'flex', width: 30 }}>
+                      {selected ? <CheckIcon color="inherit" /> : null}
                     </Grid>
                     <Grid item xs sx={{ minWidth: 0 }}>
                       {children}

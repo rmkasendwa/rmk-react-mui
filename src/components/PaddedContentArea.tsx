@@ -1,11 +1,11 @@
-import Container, { ContainerProps } from '@mui/material/Container';
+import Box, { BoxProps } from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import useTheme from '@mui/material/styles/useTheme';
 import Typography from '@mui/material/Typography';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { Children, FC, ReactNode } from 'react';
 
-export interface IPaddedContentAreaProps extends ContainerProps {
+export interface IPaddedContentAreaProps extends BoxProps {
   title?: string;
   tools?: ReactNode | ReactNode[];
   breadcrumbs?: ReactNode;
@@ -19,13 +19,12 @@ export const PaddedContentArea: FC<IPaddedContentAreaProps> = ({
   breadcrumbs,
   ...rest
 }) => {
-  const theme = useTheme();
-  const smallScreenBreakpoint = theme.breakpoints.down('sm');
-  const largeScreen = useMediaQuery(theme.breakpoints.up('sm'));
+  const { breakpoints } = useTheme();
+  const smallScreenBreakpoint = breakpoints.down('sm');
+  const largeScreen = useMediaQuery(breakpoints.up('sm'));
 
   return (
-    <Container
-      maxWidth="xl"
+    <Box
       {...rest}
       sx={{
         flex: 1,
@@ -65,7 +64,7 @@ export const PaddedContentArea: FC<IPaddedContentAreaProps> = ({
                 variant="h3"
                 sx={{
                   fontSize: 28,
-                  [theme.breakpoints.down('md')]: {
+                  [breakpoints.down('md')]: {
                     fontSize: 18,
                   },
                 }}
@@ -90,7 +89,7 @@ export const PaddedContentArea: FC<IPaddedContentAreaProps> = ({
         </Grid>
       )}
       {children}
-    </Container>
+    </Box>
   );
 };
 
