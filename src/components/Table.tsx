@@ -1,3 +1,4 @@
+import { Tooltip } from '@mui/material';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Pagination, { PaginationProps } from '@mui/material/Pagination';
@@ -126,6 +127,7 @@ export interface ITableProps<T = any> {
   forEachRowProps?: (currentEntity: T) => TableRowProps;
   paging?: boolean;
   showHeaderRow?: boolean;
+  showDataRows?: boolean;
   HeaderRowProps?: TableRowProps;
   currencyCode?: string;
   decimalPlaces?: number;
@@ -149,6 +151,7 @@ export const Table: FC<ITableProps> = ({
   variant = 'plain',
   paging = true,
   showHeaderRow = true,
+  showDataRows = true,
   HeaderRowProps = {},
   currencyCode,
   decimalPlaces,
@@ -420,91 +423,97 @@ export const Table: FC<ITableProps> = ({
                         ...style,
                       }}
                     >
-                      <Typography
-                        sx={{ fontWeight: 'bold', fontSize: 12 }}
-                        noWrap
-                      >
-                        {label}
-                      </Typography>
+                      <Tooltip title={<>{label}</>}>
+                        <Typography
+                          sx={{ fontWeight: 'bold', fontSize: 12 }}
+                          noWrap
+                        >
+                          {label}
+                        </Typography>
+                      </Tooltip>
                     </TableCell>
                   );
                 })}
               </TableRow>
             </TableHead>
           ) : null}
-          <TableBody sx={bodyStyles}>
-            {(() => {
-              if (pageRows.length > 0) {
-                return pageRows.map((row, index) => {
-                  const { sx, ...restRowProps }: TableRowProps = row.rowProps;
-                  return (
-                    <TableRow
-                      hover
-                      role="checkbox"
-                      {...restRowProps}
-                      tabIndex={-1}
-                      key={
-                        row.currentEntity?.key ?? row.currentEntity?.id ?? index
-                      }
-                      onClick={() => {
-                        onClickRow && onClickRow(row.currentEntity, index);
-                      }}
-                      sx={{
-                        verticalAlign: 'top',
-                        cursor: onClickRow ? 'pointer' : 'default',
-                        ...sx,
-                      }}
-                    >
-                      {columns.map((column) => {
-                        const { id, align = 'left', style } = column;
-                        const columnValue = row[column.id];
-                        return (
-                          <TableCell
-                            key={id}
-                            align={align}
-                            sx={{
-                              py: 1.8,
-                              px: 3,
-                              ...getColumnWidthStyles(column),
-                              ...style,
-                            }}
-                          >
-                            {(() => {
-                              if (isValidElement(columnValue)) {
-                                return (
-                                  <Box
-                                    display="flex"
-                                    flexDirection="column"
-                                    alignItems={
-                                      ({ left: 'start', right: 'end' } as any)[
-                                        align
-                                      ] || align
-                                    }
-                                  >
-                                    {columnValue}
-                                  </Box>
-                                );
-                              }
-                              return columnValue;
-                            })()}
-                          </TableCell>
-                        );
-                      })}
-                    </TableRow>
-                  );
-                });
-              }
-              return (
-                <TableRow>
-                  <TableCell colSpan={columns.length} align="center">
-                    <Typography variant="body2">
-                      No {lowercaseLabelPlural} found
-                    </Typography>
-                  </TableCell>
-                </TableRow>
-              );
-            })()}
-          </TableBody>
+          {showDataRows ? (
+            <TableBody sx={bodyStyles}>
+              {(() => {
+                if (pageRows.length > 0) {
+                  return pageRows.map((row, index) => {
+                    const { sx, ...restRowProps }: TableRowProps = row.rowProps;
+                    return (
+                      <TableRow
+                        hover
+                        role="checkbox"
+                        {...restRowProps}
+                        tabIndex={-1}
+                        key={
+                          row.currentEntity?.key ??
+                          row.currentEntity?.id ??
+                          index
+                        }
+                        onClick={() => {
+                          onClickRow && onClickRow(row.currentEntity, index);
+                        }}
+                        sx={{
+                          verticalAlign: 'top',
+                          cursor: onClickRow ? 'pointer' : 'default',
+                          ...sx,
+                        }}
+                      >
+                        {columns.map((column) => {
+                          const { id, align = 'left', style } = column;
+                          const columnValue = row[column.id];
+                          return (
+                            <TableCell
+                              key={id}
+                              align={align}
+                              sx={{
+                                py: 1.8,
+                                px: 3,
+                                ...getColumnWidthStyles(column),
+                                ...style,
+                              }}
+                            >
+                              {(() => {
+                                if (isValidElement(columnValue)) {
+                                  return (
+                                    <Box
+                                      display="flex"
+                                      flexDirection="column"
+                                      alignItems={
+                                        (
+                                          { left: 'start', right: 'end' } as any
+                                        )[align] || align
+                                      }
+                                    >
+                                      {columnValue}
+                                    </Box>
+                                  );
+                                }
+                                return columnValue;
+                              })()}
+                            </TableCell>
+                          );
+                        })}
+                      </TableRow>
+                    );
+                  });
+                }
+                return (
+                  <TableRow>
+                    <TableCell colSpan={columns.length} align="center">
+                      <Typography variant="body2">
+                        No {lowercaseLabelPlural} found
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                );
+              })()}
+            </TableBody>
+          ) : null}
         </MuiTable>
       </TableContainer>
       {(() => {
