@@ -338,8 +338,6 @@ export const PaginatedDropdownOptionList = forwardRef<
         <>
           <Divider />
           <DropdownOption
-            variant={optionVariant}
-            selected={hasAllOptionsSelected}
             onClick={() => {
               const selectableOptions = (() => {
                 if (hasAllOptionsSelected) {
