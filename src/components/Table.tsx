@@ -6,11 +6,14 @@ import { Theme } from '@mui/material/styles/createTheme';
 import useTheme from '@mui/material/styles/useTheme';
 import MuiTable from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
+import TableCell, { tableCellClasses } from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
-import TableRow, { TableRowProps } from '@mui/material/TableRow';
+import TableRow, {
+  TableRowProps,
+  tableRowClasses,
+} from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 import { alpha } from '@mui/system/colorManipulator';
 import { SxProps } from '@mui/system/styleFunctionSx';
@@ -113,6 +116,7 @@ const toolTypes = [
 export interface ITableProps<T = any> {
   columns: Array<ITableColumn>;
   rows: T[];
+  rowStartIndex?: number;
   rowsPerPage?: number;
   pageIndex?: number;
   totalRowCount?: number;
@@ -141,6 +145,7 @@ export const Table: FC<ITableProps> = ({
   columns: columnsProp,
   rows,
   totalRowCount,
+  rowStartIndex = 0,
   labelPlural = 'Records',
   lowercaseLabelPlural,
   rowsPerPage: rowsPerPageProp = 10,
@@ -378,10 +383,10 @@ export const Table: FC<ITableProps> = ({
       break;
     case 'stripped':
       Object.assign(bodyStyles, {
-        '& tr.MuiTableRow-root:nth-of-type(even):not(:hover)': {
+        [`& tr.${tableRowClasses.root}.even:not(:hover)`]: {
           backgroundColor: alpha(palette.text.primary, 0.04),
         },
-        '& td.MuiTableCell-root:nth-of-type(even)': {
+        [`& td.${tableCellClasses.root}:nth-of-type(even)`]: {
           backgroundColor: alpha(palette.text.primary, 0.02),
         },
       });
@@ -443,12 +448,19 @@ export const Table: FC<ITableProps> = ({
                 if (pageRows.length > 0) {
                   return pageRows.map((row, index) => {
                     const { sx, ...restRowProps }: TableRowProps = row.rowProps;
+                    const classNames = [];
+                    const rowNumber = rowStartIndex + 1 + index;
+                    if (rowNumber % 2 === 0) {
+                      classNames.push('even');
+                    } else {
+                      classNames.push('odd');
+                    }
                     return (
                       <TableRow
-                        hover
-                        role="checkbox"
+                        className={classNames.join(' ')}
                         {...restRowProps}
                         tabIndex={-1}
+                        hover
                         key={
                           row.currentEntity?.key ??
                           row.currentEntity?.id ??
