@@ -1,5 +1,5 @@
 import { Tooltip } from '@mui/material';
-import Box from '@mui/material/Box';
+import Box, { BoxProps } from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Pagination, { PaginationProps } from '@mui/material/Pagination';
 import { Theme } from '@mui/material/styles/createTheme';
@@ -7,7 +7,9 @@ import useTheme from '@mui/material/styles/useTheme';
 import MuiTable from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell, { tableCellClasses } from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
+import TableContainer, {
+  TableContainerProps,
+} from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow, {
@@ -20,8 +22,8 @@ import { SxProps } from '@mui/system/styleFunctionSx';
 import { format } from 'date-fns';
 import {
   CSSProperties,
-  FC,
   ReactNode,
+  forwardRef,
   isValidElement,
   useContext,
   useEffect,
@@ -113,7 +115,7 @@ const toolTypes = [
   'checkbox',
 ];
 
-export interface ITableProps<T = any> {
+export interface ITableProps<T = any> extends Partial<Omit<BoxProps, 'ref'>> {
   columns: Array<ITableColumn>;
   rows: T[];
   rowStartIndex?: number;
@@ -136,34 +138,44 @@ export interface ITableProps<T = any> {
   currencyCode?: string;
   decimalPlaces?: number;
   labelTransform?: boolean;
+  TableContainerProps?: Partial<TableContainerProps>;
   paginationType?: 'default' | 'classic';
   PaginationProps?: PaginationProps;
+  stickyHeader?: boolean;
 }
 
-export const Table: FC<ITableProps> = ({
-  onClickRow,
-  columns: columnsProp,
-  rows,
-  totalRowCount,
-  rowStartIndex = 0,
-  labelPlural = 'Records',
-  lowercaseLabelPlural,
-  rowsPerPage: rowsPerPageProp = 10,
-  pageIndex: pageIndexProp = 0,
-  onChangePage,
-  forEachDerivedColumn,
-  forEachRowProps,
-  variant = 'plain',
-  paging = true,
-  showHeaderRow = true,
-  showDataRows = true,
-  HeaderRowProps = {},
-  currencyCode,
-  decimalPlaces,
-  labelTransform,
-  paginationType = 'default',
-  PaginationProps = {},
-}) => {
+export const Table = forwardRef<HTMLDivElement, ITableProps>(function Table(
+  {
+    onClickRow,
+    columns: columnsProp,
+    rows,
+    totalRowCount,
+    rowStartIndex = 0,
+    labelPlural = 'Records',
+    lowercaseLabelPlural,
+    rowsPerPage: rowsPerPageProp = 10,
+    pageIndex: pageIndexProp = 0,
+    onChangePage,
+    forEachDerivedColumn,
+    forEachRowProps,
+    variant = 'plain',
+    paging = true,
+    showHeaderRow = true,
+    showDataRows = true,
+    HeaderRowProps = {},
+    currencyCode,
+    decimalPlaces,
+    labelTransform,
+    TableContainerProps = {},
+    paginationType = 'default',
+    PaginationProps = {},
+    stickyHeader = false,
+    ...rest
+  },
+  ref
+) {
+  const { sx: tableContainerPropsSx, ...tableContainerPropsRest } =
+    TableContainerProps;
   lowercaseLabelPlural || (lowercaseLabelPlural = labelPlural.toLowerCase());
 
   const { palette } = useTheme();
@@ -393,15 +405,23 @@ export const Table: FC<ITableProps> = ({
       break;
   }
 
-  const tableContainerStyles: CSSProperties = {};
-  if (paging && pageRows.length > 0) {
-    tableContainerStyles.height = 'calc(100% - 52px)';
-  }
-
   return (
-    <>
-      <TableContainer sx={tableContainerStyles}>
-        <MuiTable stickyHeader aria-label="sticky table">
+    <Box ref={ref} {...rest}>
+      <TableContainer
+        {...tableContainerPropsRest}
+        sx={{
+          height: '100%',
+          ...(() => {
+            const tableContainerStyles: CSSProperties = {};
+            if (paging && pageRows.length > 0) {
+              tableContainerStyles.height = 'calc(100% - 52px)';
+            }
+            return tableContainerStyles;
+          })(),
+          ...tableContainerPropsSx,
+        }}
+      >
+        <MuiTable stickyHeader={stickyHeader}>
           {showHeaderRow ? (
             <TableHead>
               <TableRow
@@ -583,8 +603,8 @@ export const Table: FC<ITableProps> = ({
           );
         }
       })()}
-    </>
+    </Box>
   );
-};
+});
 
 export default Table;
