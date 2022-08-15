@@ -16,7 +16,7 @@ const lorem = new LoremIpsum();
 const Template: ComponentStory<typeof PaginatedDropdownOptionList> = (
   props
 ) => {
-  return <PaginatedDropdownOptionList options={[]} {...props} />;
+  return <PaginatedDropdownOptionList {...props} />;
 };
 
 export const Default = Template.bind({});
