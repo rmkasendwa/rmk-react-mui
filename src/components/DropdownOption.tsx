@@ -72,7 +72,14 @@ export const DropdownOption = forwardRef<HTMLLIElement, IDropdownOptionProps>(
                 return (
                   <Grid container sx={{ alignItems: 'center' }}>
                     <Grid item sx={{ display: 'flex', width: 30 }}>
-                      {selected ? <CheckIcon color="inherit" /> : null}
+                      {selected ? (
+                        <CheckIcon color="inherit" />
+                      ) : (
+                        <CheckBoxOutlineBlankIcon
+                          color="inherit"
+                          sx={{ opacity: 0.05 }}
+                        />
+                      )}
                     </Grid>
                     <Grid item xs sx={{ minWidth: 0 }}>
                       {children}
