@@ -8,7 +8,7 @@ import {
   inputBaseClasses,
   useTheme,
 } from '@mui/material';
-import Box from '@mui/material/Box';
+import Box, { BoxProps } from '@mui/material/Box';
 import ClickAwayListener from '@mui/material/ClickAwayListener';
 import Grow from '@mui/material/Grow';
 import Popper from '@mui/material/Popper';
@@ -46,6 +46,7 @@ export interface IDataDropdownFieldProps
   dropdownListMaxHeight?: number;
   optionPaging?: boolean;
   onChangeSearchTerm?: (searchTerm: string) => void;
+  SelectedOptionPillProps?: Partial<BoxProps>;
 }
 
 export const DataDropdownField = forwardRef<
@@ -73,10 +74,13 @@ export const DataDropdownField = forwardRef<
     onChangeSearchTerm,
     optionVariant,
     sx,
+    SelectedOptionPillProps = {},
     ...rest
   },
   ref
 ) {
+  const { sx: selectedOptionPillPropsSx, ...selectedOptionPillPropsRest } =
+    SelectedOptionPillProps;
   const multiple = SelectProps?.multiple;
   const { preferStale } = useAPIDataContext();
   const { palette } = useTheme();
@@ -409,6 +413,7 @@ export const DataDropdownField = forwardRef<
                 return (
                   <Box
                     key={value}
+                    {...selectedOptionPillPropsRest}
                     sx={{
                       fontSize: 14,
                       bgcolor: alpha(palette.primary.main, 0.1),
@@ -422,6 +427,8 @@ export const DataDropdownField = forwardRef<
                         return 0.25;
                       })(),
                       pr: 1,
+                      mr: 0.5,
+                      ...selectedOptionPillPropsSx,
                     }}
                   >
                     {label}

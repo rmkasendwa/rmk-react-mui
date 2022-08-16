@@ -2,7 +2,9 @@ import { Typography } from '@mui/material';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { LoremIpsum } from 'lorem-ipsum';
 
-import DataDropdownField from '../../components/InputFields/DataDropdownField';
+import DataDropdownField, {
+  IDataDropdownFieldProps,
+} from '../../components/InputFields/DataDropdownField';
 
 export default {
   title: 'Components/Input Fields/Data Dropdown Field',
@@ -62,7 +64,7 @@ MultipleSelectWithValue.args = {
   options: [
     { label: '', value: '' },
     ...Array.from({ length: 100 }).map((_, index) => ({
-      label: `${index + 1}. ${lorem.generateWords(4)}`,
+      label: `${index + 1}. ${lorem.generateWords(2)}`,
       value: index,
     })),
   ],
@@ -108,3 +110,23 @@ WithReactElementOptionLabels.args = {
     multiple: true,
   },
 };
+
+export const WithSelectedOptionPillProps = Template.bind({});
+WithSelectedOptionPillProps.args = {
+  label: 'Multiple Select',
+  required: true,
+  options: Array.from({ length: 100 }).map((_, index) => ({
+    label: `${index + 1}. ${lorem.generateWords(1)}`,
+    value: index,
+  })),
+  SelectProps: {
+    multiple: true,
+  },
+  SelectedOptionPillProps: {
+    sx: {
+      bgcolor: 'transparent',
+      px: 0,
+      mr: 1,
+    },
+  },
+} as IDataDropdownFieldProps;
