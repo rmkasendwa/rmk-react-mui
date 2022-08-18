@@ -140,6 +140,7 @@ export const useUpdate = <T>() => {
 };
 
 const DEFAULT_SYNC_TIMEOUT = 5 * 60 * 1000;
+const WINDOW_BLUR_THRESHOLD = 60 * 1000;
 export const useRecord = <T>(
   recordFinder: TAPIFunction,
   defautValue: T,
@@ -170,6 +171,7 @@ export const useRecord = <T>(
 
   useEffect(() => {
     if (autoSync && !busy && !loading && !errorMessage) {
+      let blurTime: number;
       const mouseMoveEventCallback = () => {
         if (nextSyncTimeoutRef.current !== null) {
           clearTimeout(nextSyncTimeoutRef.current);
@@ -183,10 +185,16 @@ export const useRecord = <T>(
           clearTimeout(nextSyncTimeoutRef.current);
         }
         window.removeEventListener('mousemove', mouseMoveEventCallback);
-        if (!document.hidden) {
+        if (document.hidden) {
+          blurTime = Date.now();
+        } else {
           window.addEventListener('mousemove', mouseMoveEventCallback);
           mouseMoveEventCallback();
-          if (event) {
+          if (
+            event &&
+            blurTime != null &&
+            Date.now() - blurTime >= WINDOW_BLUR_THRESHOLD
+          ) {
             load(true);
           }
         }
