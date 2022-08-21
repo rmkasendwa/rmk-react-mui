@@ -100,7 +100,7 @@
     "@types/crypto-js": "^4.1.0",
     "@types/google-libphonenumber": "^7.4.23",
     "@types/jest": "^27.4.0",
-    "@types/node": "^16.11.21",
+    "@types/node": "^16.11.52",
     "@types/object-hash": "^2.2.1",
     "@types/react": "^17.0.38",
     "@types/react-dom": "^17.0.11",
