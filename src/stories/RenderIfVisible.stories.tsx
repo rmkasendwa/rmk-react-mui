@@ -1,4 +1,4 @@
-import { Box, BoxProps } from '@mui/material';
+import { Box, BoxProps, alpha } from '@mui/material';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import React from 'react';
 
@@ -17,6 +17,7 @@ const DIMENSIONS = {
   width: 100,
   height: 100,
 };
+
 export const Default = Template.bind({});
 Default.args = {
   children: (
@@ -33,6 +34,83 @@ Default.args = {
           <RenderIfVisible
             key={index}
             defaultPlaceholderDimensions={DIMENSIONS}
+          >
+            <Box
+              sx={{
+                bgcolor: 'teal',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                ...DIMENSIONS,
+              }}
+            >
+              {index}
+            </Box>
+          </RenderIfVisible>
+        );
+      })}
+    </Box>
+  ),
+} as BoxProps;
+
+export const WithPersistingRendering = Template.bind({});
+WithPersistingRendering.args = {
+  children: (
+    <Box
+      sx={{
+        display: 'flex',
+        gap: 2,
+        justifyContent: 'center',
+        flexWrap: 'wrap',
+      }}
+    >
+      {Array.from({ length: 200 }).map((_, index) => {
+        return (
+          <RenderIfVisible
+            key={index}
+            defaultPlaceholderDimensions={DIMENSIONS}
+            stayRendered
+          >
+            <Box
+              sx={{
+                bgcolor: 'teal',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                ...DIMENSIONS,
+              }}
+            >
+              {index}
+            </Box>
+          </RenderIfVisible>
+        );
+      })}
+    </Box>
+  ),
+} as BoxProps;
+
+export const WithPlaceholderProps = Template.bind({});
+WithPlaceholderProps.args = {
+  children: (
+    <Box
+      sx={{
+        display: 'flex',
+        gap: 2,
+        justifyContent: 'center',
+        flexWrap: 'wrap',
+      }}
+    >
+      {Array.from({ length: 200 }).map((_, index) => {
+        return (
+          <RenderIfVisible
+            key={index}
+            defaultPlaceholderDimensions={DIMENSIONS}
+            PlaceholderProps={{
+              sx: {
+                border: `1px solid coral`,
+                bgcolor: alpha('#88B04B', 0.1),
+              },
+            }}
           >
             <Box
               sx={{
