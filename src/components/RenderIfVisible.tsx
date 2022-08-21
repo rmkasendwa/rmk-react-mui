@@ -2,8 +2,8 @@ import Box, { BoxProps } from '@mui/material/Box';
 import { FC, ReactNode, useEffect, useRef, useState } from 'react';
 
 export interface IDefaultPlaceholderDimensions {
-  width: number;
   height: number;
+  width?: number;
 }
 
 export interface IRenderIfVisibleProps {
@@ -44,7 +44,7 @@ export const RenderIfVisible: FC<IRenderIfVisibleProps> = ({
   stayRendered = false,
   rootNode = null,
   children,
-  defaultPlaceholderDimensions = { width: 0, height: 0 },
+  defaultPlaceholderDimensions = { height: 0 },
   PlaceholderProps = {},
 }) => {
   const { sx: placeholderPropsSx, ...placeholderPropsRest } = PlaceholderProps;
