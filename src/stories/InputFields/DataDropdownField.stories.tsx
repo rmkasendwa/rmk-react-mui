@@ -1,6 +1,7 @@
 import { Typography } from '@mui/material';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { LoremIpsum } from 'lorem-ipsum';
+import React from 'react';
 
 import DataDropdownField, {
   IDataDropdownFieldProps,
@@ -17,9 +18,7 @@ export default {
 const lorem = new LoremIpsum();
 
 const Template: ComponentStory<typeof DataDropdownField> = (props) => {
-  return (
-    <DataDropdownField label="Dropdown" {...props} sx={{ minWidth: 300 }} />
-  );
+  return <DataDropdownField {...props} sx={{ minWidth: 300 }} />;
 };
 
 export const Default = Template.bind({});
@@ -113,12 +112,15 @@ WithReactElementOptionLabels.args = {
 
 export const WithSelectedOptionPillProps = Template.bind({});
 WithSelectedOptionPillProps.args = {
-  label: 'Multiple Select',
   required: true,
-  options: Array.from({ length: 100 }).map((_, index) => ({
-    label: `${index + 1}. ${lorem.generateWords(1)}`,
-    value: index,
-  })),
+  options: Array.from({ length: 10 }).map((_, index) => {
+    const label = `${index + 1}. ${lorem.generateWords(4)}`;
+    return {
+      label: <Typography variant="body2">{label}</Typography>,
+      value: index,
+    };
+  }),
+  placeholder: 'Multiple select with placeholder',
   SelectProps: {
     multiple: true,
   },
