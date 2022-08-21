@@ -347,6 +347,13 @@ export const DataDropdownField = forwardRef<
           </>
         ),
         ...InputProps,
+        ...(() => {
+          const props: Partial<typeof InputProps> = {};
+          if (selectedOptions.length > 0) {
+            props.placeholder = '';
+          }
+          return props;
+        })(),
         ref: anchorRef,
       }}
       value={(() => {
