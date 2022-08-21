@@ -28,8 +28,7 @@ export interface IRenderIfVisibleProps {
   children: ReactNode;
   /**
    * The default dimensions given to the placeholder element to avoid flickering.
-   * Note: The placeholder dimensions will change when the element is rendered
-   * if they are different from the element dimensions
+   * Note: The placeholder dimensions will change when the element is rendered if they are different from the element dimensions
    */
   defaultPlaceholderDimensions?: IDefaultPlaceholderDimensions;
   /**
