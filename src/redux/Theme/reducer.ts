@@ -1,15 +1,27 @@
 import { Reducer } from 'redux';
 
 import StorageManager from '../../utils/StorageManager';
-import { TOGGLE_DARK_MODE } from './types';
+import { SET_DARK_MODE, TOGGLE_DARK_MODE } from './types';
 
 const theme = StorageManager.get('theme') || { darkMode: false };
 
-export const themeReducer: Reducer = (state = theme, action) => {
+if (
+  window.matchMedia &&
+  window.matchMedia('(prefers-color-scheme: dark)').matches &&
+  StorageManager.get('theme')?.darkMode == null
+) {
+  theme.darkMode = true;
+}
+
+export const themeReducer: Reducer = (state = theme, { type, payload }) => {
   let newState = { ...state };
-  switch (action.type) {
+  switch (type) {
     case TOGGLE_DARK_MODE:
       newState = { ...state, darkMode: !state.darkMode };
+      break;
+    case SET_DARK_MODE:
+      newState = { ...state, darkMode: payload };
+      break;
   }
   StorageManager.add('theme', newState);
   return newState;

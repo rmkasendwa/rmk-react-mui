@@ -43,7 +43,7 @@ export const paramsSufficientForPath = (
 
 export const addSearchParams = (
   routePath: string,
-  params: Record<string, string | number | undefined>
+  params: Record<string, string | number | boolean | undefined>
 ): string => {
   const keys = Object.keys(params);
   if (keys.length === 0) return routePath;
