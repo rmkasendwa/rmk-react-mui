@@ -30,3 +30,12 @@ WithTitle.args = {
     console.log('Loading...');
   },
 } as ISearchSyncToolbarProps;
+
+export const WithoutSearchTool = Template.bind({});
+WithoutSearchTool.args = {
+  title: 'Title',
+  hasSearchTool: false,
+  load: () => {
+    console.log('Loading...');
+  },
+} as ISearchSyncToolbarProps;
