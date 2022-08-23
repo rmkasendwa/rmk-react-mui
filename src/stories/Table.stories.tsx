@@ -1,5 +1,6 @@
 import Box from '@mui/material/Box';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
+import React from 'react';
 
 import Table, { ITableProps } from '../components/Table';
 
@@ -17,6 +18,28 @@ const Template: ComponentStory<typeof Table> = (props) => {
 };
 
 export const Default = Template.bind({});
+Default.args = {
+  columns: [
+    {
+      id: 'accountNumber',
+      label: 'Account Number',
+      type: 'id',
+      width: 160,
+    },
+    { id: 'name', label: 'Name' },
+    {
+      id: 'outstandingBalance',
+      label: 'Balance',
+      type: 'currency',
+    },
+  ],
+  rows: Array.from({ length: 3 }).map(() => ({
+    accountNumber: '18728',
+    name: 'John Doe',
+    outstandingBalance: 660000,
+  })),
+  paging: false,
+};
 
 export const WithoutPaging = Template.bind({});
 WithoutPaging.args = {

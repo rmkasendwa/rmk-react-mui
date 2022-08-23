@@ -28,9 +28,9 @@ export const PaddedContentArea: FC<IPaddedContentAreaProps> = ({
       {...rest}
       sx={{
         flex: 1,
-        p: 3,
+        px: 3,
         [smallScreenBreakpoint]: {
-          p: 2,
+          px: 2,
         },
         ...sx,
       }}
@@ -39,12 +39,10 @@ export const PaddedContentArea: FC<IPaddedContentAreaProps> = ({
       {((title && largeScreen) || tools) && (
         <Grid
           container
-          spacing={1}
           sx={{
-            mb: 3,
+            gap: 1,
             alignItems: 'center',
             [smallScreenBreakpoint]: {
-              mb: 2,
               justifyContent: 'end',
             },
           }}
@@ -63,7 +61,8 @@ export const PaddedContentArea: FC<IPaddedContentAreaProps> = ({
               <Typography
                 variant="h3"
                 sx={{
-                  fontSize: 28,
+                  fontSize: 22,
+                  lineHeight: '50px',
                   [breakpoints.down('md')]: {
                     fontSize: 18,
                   },
