@@ -16,17 +16,32 @@ export interface ISearchSyncToolbarProps
   extends Omit<ToolbarProps, 'title'>,
     Partial<Pick<IReloadIconButtonProps, 'load' | 'loading' | 'errorMessage'>> {
   title?: ReactNode;
+  /**
+   * Determines whether the component should be rendered with a search tool
+   *
+   * @default true
+   */
+  hasSearchTool?: boolean;
   searchTerm?: string;
   searchFieldPlaceholder?: string;
   onChangeSearchTerm?: (searchTerm: string) => void;
+  /**
+   * Determines whether the component should be rendered with a synchronize tool
+   * Note: The synchronize tool will not be rendered if the load function is not supplied regardless of whether this value is set to true
+   *
+   * @default true
+   */
+  hasSyncTool?: boolean;
   tools?: ReactNode | ReactNode[];
   TitleProps?: Partial<TypographyProps>;
 }
 
 export const SearchSyncToolbar: FC<ISearchSyncToolbarProps> = ({
   title,
+  hasSearchTool = true,
   searchTerm: searchTermProp,
   searchFieldPlaceholder,
+  hasSyncTool = true,
   load,
   loading,
   errorMessage,
@@ -61,41 +76,43 @@ export const SearchSyncToolbar: FC<ISearchSyncToolbarProps> = ({
                 {title}
               </Typography>
             </Grid>
-            <Grid item sx={{ display: 'flex' }}>
-              {searchFieldOpen ? (
-                <ClickAwayListener
-                  onClickAway={() => {
-                    if (searchTerm.length <= 0) {
-                      setSearchFieldOpen(false);
-                    }
-                  }}
-                >
-                  <TextField
-                    placeholder={searchFieldPlaceholder}
-                    InputProps={{
-                      startAdornment: <SearchIcon color="inherit" />,
-                      sx: { fontSize: 'default' },
+            {hasSearchTool ? (
+              <Grid item sx={{ display: 'flex' }}>
+                {searchFieldOpen ? (
+                  <ClickAwayListener
+                    onClickAway={() => {
+                      if (searchTerm.length <= 0) {
+                        setSearchFieldOpen(false);
+                      }
                     }}
-                    variant="outlined"
-                    value={searchTerm}
-                    onChange={(event) => {
-                      setSearchTerm(event.target.value);
-                      onChangeSearchTerm &&
-                        onChangeSearchTerm(event.target.value);
-                    }}
-                    sx={{
-                      width: 200,
-                    }}
-                  />
-                </ClickAwayListener>
-              ) : (
-                <IconButton onClick={() => setSearchFieldOpen(true)}>
-                  <SearchIcon color="inherit" />
-                </IconButton>
-              )}
-            </Grid>
+                  >
+                    <TextField
+                      placeholder={searchFieldPlaceholder}
+                      InputProps={{
+                        startAdornment: <SearchIcon color="inherit" />,
+                        sx: { fontSize: 'default' },
+                      }}
+                      variant="outlined"
+                      value={searchTerm}
+                      onChange={(event) => {
+                        setSearchTerm(event.target.value);
+                        onChangeSearchTerm &&
+                          onChangeSearchTerm(event.target.value);
+                      }}
+                      sx={{
+                        width: 200,
+                      }}
+                    />
+                  </ClickAwayListener>
+                ) : (
+                  <IconButton onClick={() => setSearchFieldOpen(true)}>
+                    <SearchIcon color="inherit" />
+                  </IconButton>
+                )}
+              </Grid>
+            ) : null}
           </>
-        ) : (
+        ) : hasSearchTool ? (
           <>
             <Grid item sx={{ display: 'flex' }}>
               <SearchIcon color="inherit" />
@@ -117,7 +134,7 @@ export const SearchSyncToolbar: FC<ISearchSyncToolbarProps> = ({
               />
             </Grid>
           </>
-        )}
+        ) : null}
         {(() => {
           if (tools) {
             const toolsList = Children.toArray(tools);
@@ -130,7 +147,7 @@ export const SearchSyncToolbar: FC<ISearchSyncToolbarProps> = ({
             });
           }
         })()}
-        {load ? (
+        {hasSyncTool && load ? (
           <Grid item>
             <ReloadIconButton {...{ load, loading, errorMessage }} />
           </Grid>
