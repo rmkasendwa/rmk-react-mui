@@ -7,7 +7,7 @@ export const DEFAULT_COUNTRY_CODE: ICountryCode =
 
 export const DEFAULT_CURRENCY_CODE = 'UGX';
 
-export const DEFAULT_DATE_FORMAT = 'dd MMM yyyy';
+export const DEFAULT_DATE_FORMAT = 'MMM dd yyyy';
 
 export const NOT_APPLICABLE = 'n/a';
 
