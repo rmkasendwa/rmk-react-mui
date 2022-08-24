@@ -17,7 +17,7 @@ export interface ISearchSyncToolbarProps
     Partial<Pick<IReloadIconButtonProps, 'load' | 'loading' | 'errorMessage'>> {
   title?: ReactNode;
   /**
-   * Determines whether the component should be rendered with a search tool
+   * Determines whether the component should be rendered with a search tool.
    *
    * @default true
    */
@@ -26,14 +26,24 @@ export interface ISearchSyncToolbarProps
   searchFieldPlaceholder?: string;
   onChangeSearchTerm?: (searchTerm: string) => void;
   /**
-   * Determines whether the component should be rendered with a synchronize tool
-   * Note: The synchronize tool will not be rendered if the load function is not supplied regardless of whether this value is set to true
+   * Determines whether the component should be rendered with a synchronize tool.
+   * Note: The synchronize tool will not be rendered if the load function is not supplied regardless of whether this value is set to true.
    *
    * @default true
    */
   hasSyncTool?: boolean;
+  /**
+   * Extra tools to be added to the toolbar.
+   *
+   */
   tools?: ReactNode | ReactNode[];
-  TitleProps?: Partial<TypographyProps>;
+  /**
+   * Extra tools to be added to the toolbar.
+   * Note: Tools will always over-write children.
+   *
+   */
+  children?: ReactNode;
+  TitleProps?: Partial<Omit<TypographyProps, 'ref'>>;
 }
 
 export const SearchSyncToolbar: FC<ISearchSyncToolbarProps> = ({
@@ -47,9 +57,12 @@ export const SearchSyncToolbar: FC<ISearchSyncToolbarProps> = ({
   errorMessage,
   onChangeSearchTerm,
   tools,
+  children,
   TitleProps = {},
   ...rest
 }) => {
+  tools || (tools = children);
+
   const { sx: titlePropsSx, ...titlePropsRest } = TitleProps;
   const [searchTerm, setSearchTerm] = useState('');
   const [searchFieldOpen, setSearchFieldOpen] = useState(false);
@@ -65,6 +78,7 @@ export const SearchSyncToolbar: FC<ISearchSyncToolbarProps> = ({
           <>
             <Grid item xs>
               <Typography
+                component="div"
                 {...titlePropsRest}
                 noWrap
                 sx={{
