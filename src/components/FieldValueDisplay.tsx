@@ -9,7 +9,8 @@ import { useLoadingContext } from '../contexts/LoadingContext';
 import ErrorSkeleton from './ErrorSkeleton';
 import FieldLabel, { IFieldLabelProps } from './FieldLabel';
 
-export interface IFieldValueDisplayProps {
+export interface IFieldValueDisplayProps
+  extends Pick<IFieldLabelProps, 'required'> {
   label: ReactNode;
   value?: ReactNode;
   LabelProps?: IFieldLabelProps;
@@ -21,10 +22,13 @@ export const FieldValueDisplay: FC<IFieldValueDisplayProps> = ({
   value,
   LabelProps = {},
   ValueProps = {},
+  required,
 }) => {
   value || (value = '-');
-  const theme = useTheme();
 
+  const { sx: labelPropsSx, ...labelPropsRest } = LabelProps;
+
+  const { palette } = useTheme();
   const { loading, errorMessage } = useLoadingContext();
   const labelSkeletonWidth = String(label).length * 7;
   const valueSkeletonWidth = `${20 + Math.round(Math.random() * 60)}%`;
@@ -59,7 +63,17 @@ export const FieldValueDisplay: FC<IFieldValueDisplayProps> = ({
     <>
       {(() => {
         if (['string', 'number'].includes(typeof label)) {
-          return <FieldLabel {...LabelProps}>{label}</FieldLabel>;
+          return (
+            <FieldLabel
+              {...{ required }}
+              {...labelPropsRest}
+              sx={{
+                ...labelPropsSx,
+              }}
+            >
+              {label}
+            </FieldLabel>
+          );
         }
         return label;
       })()}
@@ -74,7 +88,7 @@ export const FieldValueDisplay: FC<IFieldValueDisplayProps> = ({
                 sx={{
                   wordBreak: 'break-word',
                   whiteSpace: 'pre-line',
-                  color: alpha(theme.palette.text.primary, 0.5),
+                  color: alpha(palette.text.primary, 0.5),
                   ...sx,
                 }}
               >
