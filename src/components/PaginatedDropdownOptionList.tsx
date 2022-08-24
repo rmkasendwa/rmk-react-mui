@@ -1,7 +1,7 @@
 import { Divider, iconButtonClasses } from '@mui/material';
 import Box from '@mui/material/Box';
 import Card, { CardProps } from '@mui/material/Card';
-import MenuItem from '@mui/material/MenuItem';
+import MenuItem, { MenuItemProps } from '@mui/material/MenuItem';
 import useTheme from '@mui/material/styles/useTheme';
 import Typography from '@mui/material/Typography';
 import {
@@ -22,7 +22,7 @@ import DropdownOption, {
 } from './DropdownOption';
 import ReloadIconButton from './ReloadIconButton';
 
-export interface IDropdownOption {
+export interface IDropdownOption extends Pick<MenuItemProps, 'onClick'> {
   value: string | number;
   label: ReactNode;
   fieldValueLabel?: string;
@@ -294,6 +294,7 @@ export const PaginatedDropdownOptionList = forwardRef<
                 selectable,
                 isDropdownOption = true,
                 isDropdownOptionWrapped = true,
+                onClick,
               } = option;
               if (isDropdownOption && isDropdownOptionWrapped) {
                 const classNames = [];
@@ -307,8 +308,9 @@ export const PaginatedDropdownOptionList = forwardRef<
                     className={classNames.join(' ')}
                     value={value}
                     key={value}
-                    onClick={() => {
+                    onClick={(event) => {
                       triggerChangeEvent(option);
+                      onClick && onClick(event);
                       onSelectOption && onSelectOption(option);
                     }}
                     selected={selectedOptions
