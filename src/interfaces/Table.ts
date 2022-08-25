@@ -57,13 +57,16 @@ export interface IForEachDerivedColumnConfiguration<T> {
   currentEntity: T;
 }
 
+export type TGetRowProps<T = any> = (currentEntity: T) => TableRowProps;
+
 export interface ITableRowProps<T = any> {
   columns: Array<ITableColumn<T>>;
   row: T;
   forEachDerivedColumn?: (
     config: IForEachDerivedColumnConfiguration<T>
   ) => ReactNode | null | undefined;
-  forEachRowProps?: (currentEntity: T) => TableRowProps;
+  generateRowData?: (currentEntity: T) => any;
+  getRowProps?: TGetRowProps;
   decimalPlaces?: number;
   labelTransform?: boolean;
   onClickRow?: (currentEntity: T) => void;

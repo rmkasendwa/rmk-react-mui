@@ -193,3 +193,41 @@ FixedHeader.args = {
     height: '100%',
   },
 } as ITableProps;
+
+export const WithDynamicRowData = Template.bind({});
+WithDynamicRowData.args = {
+  columns: [
+    { id: 'id', label: 'id', type: 'id' },
+    { id: 'amount', label: 'Currency', type: 'currency' },
+    { id: 'number', label: 'Number', type: 'number' },
+    { id: 'percent', label: 'Percent', type: 'percentage' },
+    { id: 'isHere', label: 'Boolean', type: 'boolean' },
+  ],
+  rows: Array.from({ length: 4 + Math.round(Math.random() * 100) }).map(() => {
+    return {
+      id: uniqid(),
+      amount: Math.round(Math.random() * 5000) * 500,
+      number: Math.round(Math.random() * 10000),
+      percent: Math.random() * 100,
+      isHere: Math.round(Math.random() * 10) % 2 === 0,
+    };
+  }),
+  generateRowData: (account: any) => {
+    return {
+      number: (
+        <Box sx={{ whiteSpace: 'nowrap' }}>
+          <Box component="span" sx={{ color: 'green' }}>
+            $$$
+          </Box>
+          &nbsp;
+          {account.number}
+        </Box>
+      ),
+    };
+  },
+  paging: false,
+  stickyHeader: true,
+  sx: {
+    height: '100%',
+  },
+} as ITableProps;

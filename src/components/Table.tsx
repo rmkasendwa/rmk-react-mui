@@ -19,7 +19,6 @@ import TableRow, {
 import Typography from '@mui/material/Typography';
 import { alpha } from '@mui/system/colorManipulator';
 import { SxProps } from '@mui/system/styleFunctionSx';
-import { format } from 'date-fns';
 import {
   CSSProperties,
   forwardRef,
@@ -30,9 +29,11 @@ import {
 } from 'react';
 
 import { GlobalConfigurationContext } from '../contexts/GlobalConfigurationContext';
-import { ITableColumn, ITableRowProps } from '../interfaces/Table';
-import { formatDate } from '../utils/dates';
-import { addThousandCommas } from '../utils/numbers';
+import {
+  ITableColumn,
+  ITableRowProps,
+  TGetRowProps,
+} from '../interfaces/Table';
 import { getColumnWidthStyles } from '../utils/Table';
 import RenderIfVisible from './RenderIfVisible';
 import TableBodyRow from './TableBodyRow';
@@ -43,27 +44,13 @@ export type {
   ITableColumnEnumValue,
 } from '../interfaces/Table';
 
-const toolTypes = [
-  'tool',
-  'input',
-  'currencyInput',
-  'selectInput',
-  'dateInput',
-  'phoneInput',
-  'rowAdder',
-  'percentageInput',
-  'numberInput',
-  'fragment',
-  'checkbox',
-];
-
 export interface ITableProps<T = any>
   extends Partial<Omit<BoxProps, 'ref'>>,
     Pick<
       ITableRowProps<T>,
       | 'columns'
       | 'forEachDerivedColumn'
-      | 'forEachRowProps'
+      | 'generateRowData'
       | 'decimalPlaces'
       | 'labelTransform'
       | 'onClickRow'
@@ -77,6 +64,7 @@ export interface ITableProps<T = any>
   lowercaseLabelPlural?: string;
   variant?: 'stripped' | 'plain';
   onChangePage?: (pageIndex: number) => void;
+  forEachRowProps?: TGetRowProps;
   paging?: boolean;
   showHeaderRow?: boolean;
   showDataRows?: boolean;
@@ -102,6 +90,7 @@ export const Table = forwardRef<HTMLDivElement, ITableProps>(function Table(
     onChangePage,
     forEachDerivedColumn,
     forEachRowProps,
+    generateRowData,
     variant = 'plain',
     paging = true,
     showHeaderRow = true,
@@ -193,129 +182,13 @@ export const Table = forwardRef<HTMLDivElement, ITableProps>(function Table(
   }, [columnsProp, currencyCode]);
 
   const pageRows = useMemo(() => {
-    const allowedDataTypes = ['number', 'string', 'boolean'];
-    const pageRows =
-      totalRowCount || !paging
-        ? rows
-        : rows.slice(
-            pageIndex * rowsPerPage,
-            pageIndex * rowsPerPage + rowsPerPage
-          );
-
-    const nextFormattedRows = pageRows.map((row) => {
-      return columns.reduce(
-        (accumulator, column) => {
-          const { type, id, defaultValue, postProcessor, isDerivedColumn } =
-            column;
-          let columnValue = (() => {
-            if (isDerivedColumn && forEachDerivedColumn) {
-              return forEachDerivedColumn({
-                key: id,
-                currentEntity: row,
-              });
-            }
-            return row[id];
-          })();
-          if (type && toolTypes.includes(type)) {
-            switch (type) {
-              case 'input':
-                // TODO: Implment this
-                break;
-              case 'currencyInput':
-                // TODO: Implment this
-                break;
-              case 'percentageInput':
-                // TODO: Implment this
-                break;
-              case 'numberInput':
-                // TODO: Implment this
-                break;
-              case 'dropdownInput':
-                // TODO: Implment this
-                break;
-              case 'dateInput':
-                // TODO: Implment this
-                break;
-              case 'phonenumberInput':
-                // TODO: Implment this
-                break;
-              case 'rowAdder':
-                // TODO: Implment this
-                break;
-              case 'checkbox':
-                // TODO: Implment this
-                break;
-            }
-          } else if (allowedDataTypes.includes(typeof columnValue)) {
-            switch (type) {
-              case 'date':
-                columnValue = formatDate(columnValue);
-                break;
-              case 'dateTime':
-                columnValue = formatDate(columnValue, true);
-                break;
-              case 'time':
-                const date = new Date(columnValue);
-                columnValue = isNaN(date.getTime())
-                  ? ''
-                  : format(date, 'hh:mm aa');
-                break;
-              case 'currency':
-              case 'percentage':
-                columnValue = parseFloat(columnValue);
-                columnValue = addThousandCommas(
-                  columnValue,
-                  decimalPlaces || true
-                );
-                break;
-              case 'number':
-                columnValue = addThousandCommas(columnValue);
-                break;
-              case 'phoneNumber':
-                // TODO: Implement this
-                break;
-              case 'enum':
-                if (labelTransform !== false) {
-                  columnValue = String(columnValue).toTitleCase(true);
-                }
-                break;
-              case 'boolean':
-                columnValue = columnValue ? 'Yes' : 'No';
-                break;
-            }
-          } else if (!columnValue) {
-            columnValue = defaultValue || <>&nbsp;</>;
-          }
-          if (postProcessor) {
-            columnValue = postProcessor(columnValue, row, column);
-          }
-          accumulator[id] = columnValue;
-          return accumulator;
-        },
-        {
-          currentEntity: row,
-          rowProps: (() => {
-            if (forEachRowProps) {
-              return forEachRowProps(row);
-            }
-            return {};
-          })(),
-        } as Record<string, TableRowProps>
-      );
-    });
-    return nextFormattedRows;
-  }, [
-    columns,
-    decimalPlaces,
-    forEachDerivedColumn,
-    forEachRowProps,
-    labelTransform,
-    pageIndex,
-    paging,
-    rows,
-    rowsPerPage,
-    totalRowCount,
-  ]);
+    return totalRowCount || !paging
+      ? rows
+      : rows.slice(
+          pageIndex * rowsPerPage,
+          pageIndex * rowsPerPage + rowsPerPage
+        );
+  }, [pageIndex, paging, rows, rowsPerPage, totalRowCount]);
 
   useEffect(() => {
     setPageIndex(pageIndexProp);
@@ -436,11 +309,12 @@ export const Table = forwardRef<HTMLDivElement, ITableProps>(function Table(
                             columns,
                             row,
                             forEachDerivedColumn,
-                            forEachRowProps,
                             decimalPlaces,
                             labelTransform,
                             onClickRow,
+                            generateRowData,
                           }}
+                          getRowProps={forEachRowProps}
                           className={classNames.join(' ')}
                         />
                       </RenderIfVisible>
