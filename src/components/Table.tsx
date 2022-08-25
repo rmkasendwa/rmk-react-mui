@@ -22,9 +22,7 @@ import { SxProps } from '@mui/system/styleFunctionSx';
 import { format } from 'date-fns';
 import {
   CSSProperties,
-  ReactNode,
   forwardRef,
-  isValidElement,
   useContext,
   useEffect,
   useMemo,
@@ -32,74 +30,18 @@ import {
 } from 'react';
 
 import { GlobalConfigurationContext } from '../contexts/GlobalConfigurationContext';
+import { ITableColumn, ITableRowProps } from '../interfaces/Table';
 import { formatDate } from '../utils/dates';
 import { addThousandCommas } from '../utils/numbers';
+import { getColumnWidthStyles } from '../utils/Table';
+import RenderIfVisible from './RenderIfVisible';
+import TableBodyRow from './TableBodyRow';
 
-export type ITableColumnEnumValue =
-  | {
-      id: string;
-      label: string;
-    }
-  | string;
-
-export interface ITableColumn {
-  id: string;
-  label: ReactNode;
-  type?:
-    | 'boolean'
-    | 'checkbox'
-    | 'currency'
-    | 'currencyInput'
-    | 'date'
-    | 'dateInput'
-    | 'dateTime'
-    | 'dropdownInput'
-    | 'enum'
-    | 'id'
-    | 'input'
-    | 'number'
-    | 'numberInput'
-    | 'percentage'
-    | 'percentageInput'
-    | 'phoneNumber'
-    | 'phonenumberInput'
-    | 'rowAdder'
-    | 'time'
-    | 'tool';
-  align?: 'left' | 'center' | 'right';
-  width?: number;
-  minWidth?: number;
-  style?: CSSProperties;
-  isDerivedColumn?: boolean;
-  noHeaderTextAfter?: boolean;
-  headerTextAfter?: ReactNode;
-  enumValues?: ITableColumnEnumValue[];
-  searchKeyMapper?: (displayingColumnValue: string) => any;
-  columnClassName?: string;
-  locked?: boolean;
-  defaultValue?: ReactNode;
-  postProcessor?: (
-    columnValue: ReactNode,
-    row: any,
-    column: ITableColumn
-  ) => ReactNode;
-}
-
-export interface IForEachDerivedColumnConfiguration<T> {
-  key: string;
-  currentEntity: T;
-}
-
-const getColumnWidthStyles = ({
-  width,
-  minWidth,
-}: ITableColumn): { width?: number; minWidth: number; maxWidth: number } => {
-  return {
-    width,
-    minWidth: minWidth || width || 70,
-    maxWidth: width || 180,
-  };
-};
+export type {
+  IForEachDerivedColumnConfiguration,
+  ITableColumn,
+  ITableColumnEnumValue,
+} from '../interfaces/Table';
 
 const toolTypes = [
   'tool',
@@ -115,8 +57,17 @@ const toolTypes = [
   'checkbox',
 ];
 
-export interface ITableProps<T = any> extends Partial<Omit<BoxProps, 'ref'>> {
-  columns: Array<ITableColumn>;
+export interface ITableProps<T = any>
+  extends Partial<Omit<BoxProps, 'ref'>>,
+    Pick<
+      ITableRowProps<T>,
+      | 'columns'
+      | 'forEachDerivedColumn'
+      | 'forEachRowProps'
+      | 'decimalPlaces'
+      | 'labelTransform'
+      | 'onClickRow'
+    > {
   rows: T[];
   rowStartIndex?: number;
   rowsPerPage?: number;
@@ -125,19 +76,12 @@ export interface ITableProps<T = any> extends Partial<Omit<BoxProps, 'ref'>> {
   labelPlural?: string;
   lowercaseLabelPlural?: string;
   variant?: 'stripped' | 'plain';
-  onClickRow?: (listItem: T, index: number) => void;
   onChangePage?: (pageIndex: number) => void;
-  forEachDerivedColumn?: (
-    config: IForEachDerivedColumnConfiguration<T>
-  ) => ReactNode | null | undefined;
-  forEachRowProps?: (currentEntity: T) => TableRowProps;
   paging?: boolean;
   showHeaderRow?: boolean;
   showDataRows?: boolean;
   HeaderRowProps?: TableRowProps;
   currencyCode?: string;
-  decimalPlaces?: number;
-  labelTransform?: boolean;
   TableContainerProps?: Partial<TableContainerProps>;
   paginationType?: 'default' | 'classic';
   PaginationProps?: PaginationProps;
@@ -187,6 +131,7 @@ export const Table = forwardRef<HTMLDivElement, ITableProps>(function Table(
   );
   currencyCode || (currencyCode = defaultCurrencyCode);
 
+  // Setting default column properties
   const columns = useMemo(() => {
     return columnsProp.map((column): ITableColumn => {
       const nextColumn = { ...column };
@@ -424,12 +369,9 @@ export const Table = forwardRef<HTMLDivElement, ITableProps>(function Table(
         <MuiTable stickyHeader={stickyHeader}>
           {showHeaderRow ? (
             <TableHead>
-              <TableRow
-                {...restHeaderRowProps}
-                sx={{ textTransform: 'uppercase', ...headerRowPropsSx }}
-              >
+              <TableRow {...restHeaderRowProps} sx={{ ...headerRowPropsSx }}>
                 {columns.map((column) => {
-                  const { id, align, style } = column;
+                  const { id, align, style, sx } = column;
                   let label = column.label;
                   column.headerTextAfter &&
                     (label = (
@@ -446,6 +388,7 @@ export const Table = forwardRef<HTMLDivElement, ITableProps>(function Table(
                         px: 3,
                         ...getColumnWidthStyles(column),
                         ...style,
+                        ...sx,
                       }}
                     >
                       <Tooltip title={<>{label}</>}>
@@ -467,7 +410,6 @@ export const Table = forwardRef<HTMLDivElement, ITableProps>(function Table(
               {(() => {
                 if (pageRows.length > 0) {
                   return pageRows.map((row, index) => {
-                    const { sx, ...restRowProps }: TableRowProps = row.rowProps;
                     const classNames = [];
                     const rowNumber = rowStartIndex + 1 + index;
                     if (rowNumber % 2 === 0) {
@@ -476,61 +418,32 @@ export const Table = forwardRef<HTMLDivElement, ITableProps>(function Table(
                       classNames.push('odd');
                     }
                     return (
-                      <TableRow
-                        className={classNames.join(' ')}
-                        {...restRowProps}
-                        tabIndex={-1}
-                        hover
+                      <RenderIfVisible
                         key={
                           row.currentEntity?.key ??
                           row.currentEntity?.id ??
                           index
                         }
-                        onClick={() => {
-                          onClickRow && onClickRow(row.currentEntity, index);
-                        }}
+                        component="tr"
+                        displayPlaceholder={false}
+                        unWrapChildrenIfVisible
                         sx={{
-                          verticalAlign: 'top',
-                          cursor: onClickRow ? 'pointer' : 'default',
-                          ...sx,
+                          height: 50,
                         }}
                       >
-                        {columns.map((column) => {
-                          const { id, align = 'left', style } = column;
-                          const columnValue = row[column.id];
-                          return (
-                            <TableCell
-                              key={id}
-                              align={align}
-                              sx={{
-                                py: 1.8,
-                                px: 3,
-                                ...getColumnWidthStyles(column),
-                                ...style,
-                              }}
-                            >
-                              {(() => {
-                                if (isValidElement(columnValue)) {
-                                  return (
-                                    <Box
-                                      display="flex"
-                                      flexDirection="column"
-                                      alignItems={
-                                        (
-                                          { left: 'start', right: 'end' } as any
-                                        )[align] || align
-                                      }
-                                    >
-                                      {columnValue}
-                                    </Box>
-                                  );
-                                }
-                                return columnValue;
-                              })()}
-                            </TableCell>
-                          );
-                        })}
-                      </TableRow>
+                        <TableBodyRow
+                          {...{
+                            columns,
+                            row,
+                            forEachDerivedColumn,
+                            forEachRowProps,
+                            decimalPlaces,
+                            labelTransform,
+                            onClickRow,
+                          }}
+                          className={classNames.join(' ')}
+                        />
+                      </RenderIfVisible>
                     );
                   });
                 }

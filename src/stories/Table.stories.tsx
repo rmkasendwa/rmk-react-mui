@@ -1,6 +1,7 @@
 import Box from '@mui/material/Box';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import React from 'react';
+import uniqid from 'uniqid';
 
 import Table, { ITableProps } from '../components/Table';
 
@@ -137,7 +138,7 @@ ColumnTypes.args = {
   ],
   rows: Array.from({ length: 4 + Math.round(Math.random() * 100) }).map(() => {
     return {
-      id: Math.round(Math.random() * 500),
+      id: uniqid(),
       amount: Math.round(Math.random() * 5000) * 500,
       number: Math.round(Math.random() * 10000),
       percent: Math.random() * 100,
@@ -179,7 +180,7 @@ FixedHeader.args = {
   ],
   rows: Array.from({ length: 4 + Math.round(Math.random() * 100) }).map(() => {
     return {
-      id: Math.round(Math.random() * 500),
+      id: uniqid(),
       amount: Math.round(Math.random() * 5000) * 500,
       number: Math.round(Math.random() * 10000),
       percent: Math.random() * 100,
