@@ -2,7 +2,7 @@ import Box from '@mui/material/Box';
 import TableCell from '@mui/material/TableCell';
 import TableRow, { TableRowProps } from '@mui/material/TableRow';
 import { format } from 'date-fns';
-import { FC, isValidElement, useMemo, useRef } from 'react';
+import { FC, isValidElement, useEffect, useMemo, useRef } from 'react';
 
 import { ITableRowProps } from '../interfaces/Table';
 import { formatDate } from '../utils/dates';
@@ -44,6 +44,12 @@ export const TableBodyRow: FC<ITableBodyRowProps> = ({
   const forEachDerivedColumnRef = useRef(forEachDerivedColumn);
   const getRowPropsRef = useRef(getRowProps);
   const generateRowDataRef = useRef(generateRowData);
+
+  useEffect(() => {
+    forEachDerivedColumnRef.current = forEachDerivedColumn;
+    getRowPropsRef.current = getRowProps;
+    generateRowDataRef.current = generateRowData;
+  }, [forEachDerivedColumn, generateRowData, getRowProps]);
 
   const formattedRow = useMemo(() => {
     return {
@@ -167,23 +173,35 @@ export const TableBodyRow: FC<ITableBodyRowProps> = ({
       }}
       sx={{
         verticalAlign: 'top',
-        cursor: onClickRow ? 'pointer' : 'default',
+        cursor: onClickRow ? 'pointer' : 'inherit',
         ...rowPropsSx,
         ...sx,
       }}
     >
       {columns.map((column) => {
-        const { id, align = 'left', style, sx } = column;
+        const {
+          id,
+          align = 'left',
+          sx,
+          style,
+          onClick,
+          onClickColumn,
+        } = column;
         const columnValue = formattedRow[column.id];
         return (
           <TableCell
             key={id}
+            {...{ style }}
+            onClick={(event) => {
+              onClickColumn && onClickColumn(formattedRow.currentEntity);
+              onClick && onClick(event);
+            }}
             align={align}
             sx={{
               py: 1.8,
               px: 3,
+              cursor: onClickColumn ? 'pointer' : 'inherit',
               ...getColumnWidthStyles(column),
-              ...style,
               ...sx,
             }}
           >

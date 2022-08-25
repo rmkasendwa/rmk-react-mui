@@ -10,7 +10,7 @@ export type ITableColumnEnumValue =
   | string;
 
 export interface ITableColumn<T = any>
-  extends Pick<TableCellProps, 'sx' | 'style'> {
+  extends Partial<Omit<TableCellProps, 'defaultValue'>> {
   id: string;
   label: ReactNode;
   type?:
@@ -50,6 +50,7 @@ export interface ITableColumn<T = any>
     row: T,
     column: ITableColumn
   ) => ReactNode;
+  onClickColumn?: (currentEntity: T) => void;
 }
 
 export interface IForEachDerivedColumnConfiguration<T> {

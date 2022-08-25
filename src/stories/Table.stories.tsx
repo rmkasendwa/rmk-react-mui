@@ -198,7 +198,14 @@ export const WithDynamicRowData = Template.bind({});
 WithDynamicRowData.args = {
   columns: [
     { id: 'id', label: 'id', type: 'id' },
-    { id: 'amount', label: 'Currency', type: 'currency' },
+    {
+      id: 'amount',
+      label: 'Currency',
+      type: 'currency',
+      onClickColumn: (row) => {
+        console.log({ row });
+      },
+    },
     { id: 'number', label: 'Number', type: 'number' },
     { id: 'percent', label: 'Percent', type: 'percentage' },
     { id: 'isHere', label: 'Boolean', type: 'boolean' },
