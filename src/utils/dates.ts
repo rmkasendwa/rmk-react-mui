@@ -1,4 +1,4 @@
-import { addMinutes, format } from 'date-fns';
+import { format } from 'date-fns';
 
 const DEFAULT_DATE_FORMAT = 'dd MMM yyyy';
 
@@ -25,11 +25,8 @@ export const formatDate = (
     dateParam = parseInt(dateParam);
   }
   if (['string', 'number'].includes(typeof dateParam)) {
-    let date = new Date(dateParam);
+    const date = new Date(dateParam);
     if (!isNaN(date.getTime())) {
-      if (typeof dateParam === 'string' && !isIsoDate(dateParam)) {
-        date = addMinutes(date, date.getTimezoneOffset());
-      }
       return format(date, dateFormat);
     }
   }
