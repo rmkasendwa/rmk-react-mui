@@ -1,7 +1,6 @@
 import { Tooltip } from '@mui/material';
 import Box, { BoxProps } from '@mui/material/Box';
-import Grid from '@mui/material/Grid';
-import Pagination, { PaginationProps } from '@mui/material/Pagination';
+import { PaginationProps } from '@mui/material/Pagination';
 import { Theme } from '@mui/material/styles/createTheme';
 import useTheme from '@mui/material/styles/useTheme';
 import MuiTable from '@mui/material/Table';
@@ -35,6 +34,7 @@ import {
   TGetRowProps,
 } from '../interfaces/Table';
 import { getColumnWidthStyles } from '../utils/Table';
+import DataTablePagination from './DataTablePagination';
 import RenderIfVisible from './RenderIfVisible';
 import TableBodyRow from './TableBodyRow';
 
@@ -61,6 +61,7 @@ export interface ITableProps<T = any>
   pageIndex?: number;
   totalRowCount?: number;
   labelPlural?: string;
+  labelSingular?: string;
   lowercaseLabelPlural?: string;
   variant?: 'stripped' | 'plain';
   onChangePage?: (pageIndex: number) => void;
@@ -84,6 +85,7 @@ export const Table = forwardRef<HTMLDivElement, ITableProps>(function Table(
     totalRowCount,
     rowStartIndex = 0,
     labelPlural = 'Records',
+    labelSingular,
     lowercaseLabelPlural,
     rowsPerPage: rowsPerPageProp = 10,
     pageIndex: pageIndexProp = 0,
@@ -339,38 +341,23 @@ export const Table = forwardRef<HTMLDivElement, ITableProps>(function Table(
         if (paging && pageRows.length > 0) {
           if (paginationType === 'classic') {
             return (
-              <Grid
-                container
-                spacing={3}
-                sx={{ height: 40, alignItems: 'center', pl: 3 }}
-              >
-                <Grid item>
-                  <Typography variant="body2" sx={{ lineHeight: '40px' }}>
-                    {rows.length} {labelPlural}
-                  </Typography>
-                </Grid>
-                <Grid item>
-                  <Typography variant="body2" sx={{ lineHeight: '40px' }}>
-                    Display {rowsPerPage} {lowercaseLabelPlural} per page
-                  </Typography>
-                </Grid>
-                <Grid item xs />
-                <Grid item>
-                  <Pagination
-                    count={Math.ceil(
-                      (totalRowCount || rows.length) / rowsPerPage
-                    )}
-                    page={pageIndex + 1}
-                    onChange={(e, pageNumber) => {
-                      handleChangePage(e, pageNumber - 1);
-                    }}
-                    shape="rounded"
-                    showFirstButton
-                    showLastButton
-                    {...PaginationProps}
-                  />
-                </Grid>
-              </Grid>
+              <DataTablePagination
+                {...{
+                  labelPlural,
+                  labelSingular,
+                  lowercaseLabelPlural,
+                }}
+                filteredCount={rows.length}
+                totalCount={rows.length}
+                limit={rowsPerPage}
+                offset={pageIndex}
+                PaginationProps={{
+                  ...PaginationProps,
+                  onChange: (e, pageNumber) => {
+                    handleChangePage(e, pageNumber - 1);
+                  },
+                }}
+              />
             );
           }
           return (
