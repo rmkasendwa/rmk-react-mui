@@ -77,7 +77,14 @@ export const FieldValueDisplay: FC<IFieldValueDisplayProps> = ({
         }
         return label;
       })()}
-      <Box sx={{ mt: 0.5, display: 'flex', flexDirection: 'column' }}>
+      <Box
+        sx={{
+          mt: 0.5,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'start',
+        }}
+      >
         {(() => {
           if (['string', 'number'].includes(typeof value)) {
             const { sx, ...rest } = ValueProps;
