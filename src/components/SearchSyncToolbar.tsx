@@ -82,7 +82,6 @@ export const SearchSyncToolbar: FC<ISearchSyncToolbarProps> = ({
                 {...titlePropsRest}
                 noWrap
                 sx={{
-                  fontWeight: 'bold',
                   lineHeight: '48px',
                   ...titlePropsSx,
                 }}
