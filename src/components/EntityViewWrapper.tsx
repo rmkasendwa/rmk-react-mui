@@ -3,9 +3,8 @@ import Button from '@mui/material/Button';
 import { FC, ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 
-import PaddedContentArea, {
-  IPaddedContentAreaProps,
-} from './PaddedContentArea';
+import FixedHeaderContentArea from './FixedHeaderContentArea';
+import { IPaddedContentAreaProps } from './PaddedContentArea';
 
 export interface IEntityViewWrapperProps extends IPaddedContentAreaProps {
   pathToEdit?: string;
@@ -35,9 +34,9 @@ export const EntityViewWrapper: FC<IEntityViewWrapperProps> = ({
     );
   tools && toolsList.push(tools);
   return (
-    <PaddedContentArea tools={toolsList} {...{ title, breadcrumbs }}>
+    <FixedHeaderContentArea tools={toolsList} {...{ title, breadcrumbs }}>
       {children}
-    </PaddedContentArea>
+    </FixedHeaderContentArea>
   );
 };
 

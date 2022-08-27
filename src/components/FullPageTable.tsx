@@ -1,7 +1,6 @@
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
 import useTheme from '@mui/material/styles/useTheme';
@@ -260,7 +259,7 @@ export const FullPageTable: FC<IFullPageTableProps> = ({
               borderBottom: `1px solid ${alpha(palette.text.primary, 0.12)}`,
             }}
           >
-            <Container maxWidth="xl">{toolbar}</Container>
+            <Box sx={{ px: 3 }}>{toolbar}</Box>
           </AppBar>
         </Box>
       ) : null}
