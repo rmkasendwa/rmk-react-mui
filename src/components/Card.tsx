@@ -1,67 +1,63 @@
-import MuiCard, { CardProps } from '@mui/material/Card';
-import CardContent, { CardContentProps } from '@mui/material/CardContent';
-import CardHeader, { CardHeaderProps } from '@mui/material/CardHeader';
-import Skeleton from '@mui/material/Skeleton';
+import { Box, BoxProps, Divider } from '@mui/material';
+import Paper, { PaperProps } from '@mui/material/Paper';
 import { FC, ReactNode } from 'react';
 
 import { useLoadingContext } from '../contexts/LoadingContext';
-import { useSmallScreen } from '../hooks/Utils';
-import ErrorSkeleton from './ErrorSkeleton';
+import { ILoadingProps } from '../interfaces/Utils';
+import SearchSyncToolbar, {
+  ISearchSyncToolbarProps,
+} from './SearchSyncToolbar';
 
-export interface ICardProps extends Omit<CardProps, 'title'> {
+export interface ICardProps
+  extends Partial<Omit<PaperProps, 'title'>>,
+    Partial<ILoadingProps> {
   title?: ReactNode;
-  CardHeaderProps?: CardHeaderProps;
-  CardContentProps?: CardContentProps;
+  load?: () => void;
+  SearchSyncToolbarProps?: Partial<ISearchSyncToolbarProps>;
+  CardBodyProps?: Partial<BoxProps>;
 }
 
 export const Card: FC<ICardProps> = ({
   children,
   title,
-  CardHeaderProps = {},
-  CardContentProps = {},
+  load,
+  loading,
+  errorMessage,
+  SearchSyncToolbarProps,
+  CardBodyProps = {},
   ...rest
 }) => {
-  const { loading, errorMessage } = useLoadingContext();
-  const smallScreen = useSmallScreen();
-
-  const { sx: sxCardHeaderProps, ...restCardHeaderProps } = CardHeaderProps;
-  const { sx: sxCardContentProps, ...restCardContentProps } = CardContentProps;
+  const { sx: cardBodyPropsSx, ...cardBodyPropsRest } = CardBodyProps;
+  const { loading: contextLoading, errorMessage: contextErrorMessage } =
+    useLoadingContext();
 
   return (
-    <MuiCard {...rest}>
+    <Paper {...rest}>
       {title && (
-        <CardHeader
-          {...restCardHeaderProps}
-          title={(() => {
-            const titleSkeletonWidth =
-              typeof title === 'string' ? title.length * 10 : 0;
-
-            if (errorMessage) {
-              return (
-                <ErrorSkeleton
-                  sx={{
-                    width: titleSkeletonWidth,
-                  }}
-                />
-              );
-            }
-
-            if (loading) {
-              return <Skeleton sx={{ width: titleSkeletonWidth }} />;
-            }
-
-            return title;
-          })()}
-          sx={{ px: smallScreen ? 2 : 3, ...sxCardHeaderProps }}
-        />
+        <Paper
+          elevation={0}
+          component="header"
+          sx={{ position: 'sticky', top: 0, zIndex: 5 }}
+        >
+          <SearchSyncToolbar
+            load={load}
+            loading={loading || contextLoading}
+            errorMessage={errorMessage || contextErrorMessage}
+            title={title}
+            hasSearchTool={false}
+            {...SearchSyncToolbarProps}
+          />
+          <Divider />
+        </Paper>
       )}
-      <CardContent
-        {...restCardContentProps}
-        sx={{ p: smallScreen ? 2 : 3, ...sxCardContentProps }}
+      <Box
+        {...cardBodyPropsRest}
+        component="section"
+        sx={{ pt: 2, px: 3, pb: 3, ...cardBodyPropsSx }}
       >
         {children}
-      </CardContent>
-    </MuiCard>
+      </Box>
+    </Paper>
   );
 };
 

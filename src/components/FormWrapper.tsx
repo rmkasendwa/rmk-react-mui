@@ -9,9 +9,8 @@ import { useLoadingContext } from '../contexts/LoadingContext';
 import { useSmallScreen } from '../hooks/Utils';
 import ErrorAlert from './ErrorAlert';
 import ErrorFieldHighlighter from './ErrorFieldHighlighter';
-import PaddedContentArea, {
-  IPaddedContentAreaProps,
-} from './PaddedContentArea';
+import FixedHeaderContentArea from './FixedHeaderContentArea';
+import { IPaddedContentAreaProps } from './PaddedContentArea';
 
 export interface IFormWrapperProps<Values extends FormikValues = FormikValues>
   extends Omit<IPaddedContentAreaProps, 'onSubmit'> {
@@ -38,7 +37,7 @@ export const FormWrapper: FC<IFormWrapperProps> = ({
   const { load, loading, errorMessage } = useLoadingContext();
 
   return (
-    <PaddedContentArea {...{ title, breadcrumbs, tools }}>
+    <FixedHeaderContentArea {...{ title, breadcrumbs, tools }}>
       {errorMessage && (
         <Box sx={{ mb: 2 }}>
           <ErrorAlert message={errorMessage} retry={load} />
@@ -79,7 +78,7 @@ export const FormWrapper: FC<IFormWrapperProps> = ({
           );
         }}
       </Formik>
-    </PaddedContentArea>
+    </FixedHeaderContentArea>
   );
 };
 
