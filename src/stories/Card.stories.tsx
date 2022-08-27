@@ -11,7 +11,7 @@ export default {
 
 const Template: ComponentStory<typeof Card> = (props) => {
   return (
-    <Box sx={{ height: '100vh' }}>
+    <Box sx={{ height: '100vh', p: 3 }}>
       <Card {...props} />
     </Box>
   );

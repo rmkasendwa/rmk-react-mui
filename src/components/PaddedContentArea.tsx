@@ -1,9 +1,9 @@
 import Box, { BoxProps } from '@mui/material/Box';
-import Grid from '@mui/material/Grid';
 import useTheme from '@mui/material/styles/useTheme';
-import Typography from '@mui/material/Typography';
 import useMediaQuery from '@mui/material/useMediaQuery';
-import { Children, FC, ReactNode } from 'react';
+import { FC, ReactNode } from 'react';
+
+import PageTitle from './PageTitle';
 
 export interface IPaddedContentAreaProps extends BoxProps {
   title?: string;
@@ -36,57 +36,9 @@ export const PaddedContentArea: FC<IPaddedContentAreaProps> = ({
       }}
     >
       {breadcrumbs && largeScreen ? breadcrumbs : null}
-      {((title && largeScreen) || tools) && (
-        <Grid
-          container
-          sx={{
-            gap: 1,
-            alignItems: 'center',
-            [smallScreenBreakpoint]: {
-              justifyContent: 'end',
-            },
-          }}
-        >
-          {largeScreen && title && (
-            <Grid
-              item
-              xs
-              sx={{
-                minWidth: 0,
-                [smallScreenBreakpoint]: {
-                  mb: 1,
-                },
-              }}
-            >
-              <Typography
-                variant="h3"
-                sx={{
-                  fontSize: 22,
-                  lineHeight: '50px',
-                  [breakpoints.down('md')]: {
-                    fontSize: 18,
-                  },
-                }}
-                noWrap
-              >
-                {title}
-              </Typography>
-            </Grid>
-          )}
-          {(() => {
-            if (tools) {
-              const toolsList = Children.toArray(tools);
-              return toolsList.map((tool, index) => {
-                return (
-                  <Grid item key={index} sx={{ minWidth: 0 }}>
-                    {tool}
-                  </Grid>
-                );
-              });
-            }
-          })()}
-        </Grid>
-      )}
+      {(title && largeScreen) || tools ? (
+        <PageTitle {...{ title, tools }} />
+      ) : null}
       {children}
     </Box>
   );
