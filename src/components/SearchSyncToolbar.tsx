@@ -2,6 +2,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import {
   ClickAwayListener,
   IconButton,
+  Tooltip,
   Typography,
   TypographyProps,
 } from '@mui/material';
@@ -49,7 +50,7 @@ export interface ISearchSyncToolbarProps
 export const SearchSyncToolbar: FC<ISearchSyncToolbarProps> = ({
   title,
   hasSearchTool = true,
-  searchTerm: searchTermProp,
+  searchTerm: searchTermProp = '',
   searchFieldPlaceholder,
   hasSyncTool = true,
   load,
@@ -65,10 +66,12 @@ export const SearchSyncToolbar: FC<ISearchSyncToolbarProps> = ({
 
   const { sx: titlePropsSx, ...titlePropsRest } = TitleProps;
   const [searchTerm, setSearchTerm] = useState('');
-  const [searchFieldOpen, setSearchFieldOpen] = useState(false);
+  const [searchFieldOpen, setSearchFieldOpen] = useState(
+    searchTermProp.length > 0
+  );
 
   useEffect(() => {
-    setSearchTerm(searchTermProp ?? '');
+    setSearchTerm(searchTermProp);
   }, [searchTermProp]);
 
   return (
@@ -92,35 +95,51 @@ export const SearchSyncToolbar: FC<ISearchSyncToolbarProps> = ({
             {hasSearchTool ? (
               <Grid item sx={{ display: 'flex' }}>
                 {searchFieldOpen ? (
-                  <ClickAwayListener
-                    onClickAway={() => {
-                      if (searchTerm.length <= 0) {
-                        setSearchFieldOpen(false);
-                      }
-                    }}
-                  >
-                    <TextField
-                      placeholder={searchFieldPlaceholder}
-                      InputProps={{
-                        startAdornment: <SearchIcon color="inherit" />,
-                        sx: { fontSize: 'default' },
-                      }}
-                      variant="outlined"
-                      value={searchTerm}
-                      onChange={(event) => {
-                        setSearchTerm(event.target.value);
-                        onChangeSearchTerm &&
-                          onChangeSearchTerm(event.target.value);
-                      }}
-                      sx={{
-                        width: 200,
-                      }}
-                    />
-                  </ClickAwayListener>
+                  (() => {
+                    const textField = (
+                      <TextField
+                        placeholder={searchFieldPlaceholder}
+                        InputProps={{
+                          startAdornment: <SearchIcon color="inherit" />,
+                          autoFocus: true,
+                          sx: { fontSize: 'default' },
+                        }}
+                        variant="outlined"
+                        value={searchTerm}
+                        onChange={(event) => {
+                          setSearchTerm(event.target.value);
+                          onChangeSearchTerm &&
+                            onChangeSearchTerm(event.target.value);
+                        }}
+                        sx={{
+                          width: 200,
+                        }}
+                      />
+                    );
+                    return (
+                      <ClickAwayListener
+                        onClickAway={() => {
+                          if (searchTerm.length <= 0) {
+                            setSearchFieldOpen(false);
+                          }
+                        }}
+                      >
+                        {searchFieldPlaceholder ? (
+                          <Tooltip title={searchFieldPlaceholder}>
+                            {textField}
+                          </Tooltip>
+                        ) : (
+                          textField
+                        )}
+                      </ClickAwayListener>
+                    );
+                  })()
                 ) : (
-                  <IconButton onClick={() => setSearchFieldOpen(true)}>
-                    <SearchIcon color="inherit" />
-                  </IconButton>
+                  <Tooltip title="Search">
+                    <IconButton onClick={() => setSearchFieldOpen(true)}>
+                      <SearchIcon color="inherit" />
+                    </IconButton>
+                  </Tooltip>
                 )}
               </Grid>
             ) : null}
