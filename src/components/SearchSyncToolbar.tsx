@@ -79,7 +79,7 @@ export const SearchSyncToolbar: FC<ISearchSyncToolbarProps> = ({
       <Grid container sx={{ alignItems: 'center', columnGap: 1 }}>
         {title ? (
           <>
-            <Grid item xs>
+            <Grid item xs sx={{ minWidth: 0 }}>
               <Typography
                 component="div"
                 {...titlePropsRest}
@@ -149,7 +149,7 @@ export const SearchSyncToolbar: FC<ISearchSyncToolbarProps> = ({
             <Grid item sx={{ display: 'flex' }}>
               <SearchIcon color="inherit" />
             </Grid>
-            <Grid item xs>
+            <Grid item xs sx={{ minWidth: 0 }}>
               <TextField
                 fullWidth
                 placeholder={searchFieldPlaceholder}

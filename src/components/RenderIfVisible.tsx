@@ -89,7 +89,6 @@ export const RenderIfVisible: FC<IRenderIfVisibleProps> = ({
           // Before switching off `isVisible`, set the height of the placeholder
           if (!entries[0].isIntersecting) {
             placeholderDimensionsRef.current = {
-              width: wrapperElement.offsetWidth,
               height: wrapperElement.offsetHeight,
             };
           }
