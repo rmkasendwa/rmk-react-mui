@@ -444,6 +444,7 @@ export const DataDropdownField = forwardRef<
               })
             ) : (
               <Typography
+                component="div"
                 sx={{
                   fontSize: 14,
                 }}

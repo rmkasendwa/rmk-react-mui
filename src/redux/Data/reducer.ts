@@ -1,10 +1,13 @@
 import { Reducer } from 'redux';
 
+import { getMemorySize } from '../../utils/data';
 import StorageManager from '../../utils/StorageManager';
 import { UPDATE_DATA } from './types';
 
+const MAX_DATA_MEMORY_SIZE = 15 * 1024; // 15KB
+const MAX_DATA_KEY_COUNT = 35;
 const allDataKeys: string[] = StorageManager.get('api-data-keys') || [];
-const dataKeys = allDataKeys.splice(-10);
+const dataKeys = allDataKeys.splice(-MAX_DATA_KEY_COUNT);
 const data: Record<string, any> = StorageManager.get('data') || {};
 
 if (allDataKeys.length > 0) {
@@ -31,13 +34,19 @@ export const dataReducer: Reducer = (state = data, { type, payload }) => {
       break;
   }
   if ([UPDATE_DATA].includes(type)) {
-    if (payload) {
+    if (payload && getMemorySize(payload) <= MAX_DATA_MEMORY_SIZE) {
       Object.keys(payload).forEach((key) => {
         StorageManager.add(`api-data-${key}`, payload[key]);
-        dataKeys.includes(key) || dataKeys.push(key);
+        if (dataKeys.includes(key)) {
+          dataKeys.splice(dataKeys.indexOf(key), 1);
+        }
+        dataKeys.push(key);
       });
-      if (dataKeys.length > 0) {
-        const staleDataKeys = dataKeys.splice(0, dataKeys.length - 10);
+      if (dataKeys.length > MAX_DATA_KEY_COUNT) {
+        const staleDataKeys = dataKeys.splice(
+          0,
+          dataKeys.length - MAX_DATA_KEY_COUNT
+        );
         staleDataKeys.forEach((key) => {
           StorageManager.remove(`api-data-${key}`);
         });
