@@ -101,7 +101,7 @@ export const SearchSyncToolbar: FC<ISearchSyncToolbarProps> = ({
                         placeholder={searchFieldPlaceholder}
                         InputProps={{
                           startAdornment: <SearchIcon color="inherit" />,
-                          autoFocus: true,
+                          autoFocus: searchTermProp.length <= 0,
                           sx: { fontSize: 'default' },
                         }}
                         variant="outlined"

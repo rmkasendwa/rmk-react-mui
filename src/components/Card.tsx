@@ -1,4 +1,4 @@
-import { Box, BoxProps, Divider } from '@mui/material';
+import { Box, BoxProps, Divider, gridClasses, useTheme } from '@mui/material';
 import Paper, { PaperProps } from '@mui/material/Paper';
 import { FC, ReactNode } from 'react';
 
@@ -23,13 +23,16 @@ export const Card: FC<ICardProps> = ({
   load,
   loading,
   errorMessage,
-  SearchSyncToolbarProps,
+  SearchSyncToolbarProps = {},
   CardBodyProps = {},
   ...rest
 }) => {
+  const { sx: searchSyncToolbarPropsSx, ...searchSyncToolbarPropsRest } =
+    SearchSyncToolbarProps;
   const { sx: cardBodyPropsSx, ...cardBodyPropsRest } = CardBodyProps;
   const { loading: contextLoading, errorMessage: contextErrorMessage } =
     useLoadingContext();
+  const { spacing } = useTheme();
 
   return (
     <Paper {...rest}>
@@ -45,7 +48,14 @@ export const Card: FC<ICardProps> = ({
             errorMessage={errorMessage || contextErrorMessage}
             title={title}
             hasSearchTool={false}
-            {...SearchSyncToolbarProps}
+            {...searchSyncToolbarPropsRest}
+            sx={{
+              pr: `${spacing(1.75)} !important`,
+              [`&>.${gridClasses.container}`]: {
+                columnGap: 1,
+              },
+              ...searchSyncToolbarPropsSx,
+            }}
           />
           <Divider />
         </Paper>
