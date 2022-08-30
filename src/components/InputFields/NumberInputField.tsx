@@ -52,6 +52,7 @@ export const NumberInputField = forwardRef<
     value,
     name,
     id,
+    disabled,
     decimalPlaces,
     onBlur,
     onFocus,
@@ -252,7 +253,7 @@ export const NumberInputField = forwardRef<
     <TextField
       ref={ref}
       {...rest}
-      {...{ name, id, onChange }}
+      {...{ name, id, onChange, disabled }}
       value={inputValue}
       onFocus={(event) => {
         setFocused(true);
@@ -268,26 +269,28 @@ export const NumberInputField = forwardRef<
         },
       }}
       endAdornment={
-        <Stack className="number-input-field-step-tools">
-          <IconButton
-            onClick={(event) => {
-              inputField?.focus();
-              stepUpInputValue(getScaleFactor(event));
-            }}
-            sx={{ width: 10, height: 10, p: 1 }}
-          >
-            <ArrowDropUpIcon />
-          </IconButton>
-          <IconButton
-            onClick={(event) => {
-              inputField?.focus();
-              stepDownInputValue(getScaleFactor(event));
-            }}
-            sx={{ width: 10, height: 10, p: 1 }}
-          >
-            <ArrowDropDownIcon />
-          </IconButton>
-        </Stack>
+        !disabled ? (
+          <Stack className="number-input-field-step-tools">
+            <IconButton
+              onClick={(event) => {
+                inputField?.focus();
+                stepUpInputValue(getScaleFactor(event));
+              }}
+              sx={{ width: 10, height: 10, p: 1 }}
+            >
+              <ArrowDropUpIcon />
+            </IconButton>
+            <IconButton
+              onClick={(event) => {
+                inputField?.focus();
+                stepDownInputValue(getScaleFactor(event));
+              }}
+              sx={{ width: 10, height: 10, p: 1 }}
+            >
+              <ArrowDropDownIcon />
+            </IconButton>
+          </Stack>
+        ) : null
       }
       sx={{
         '& .number-input-field-step-tools': {

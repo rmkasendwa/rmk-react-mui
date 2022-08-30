@@ -28,6 +28,7 @@ export const TextField = forwardRef<HTMLDivElement, ITextFieldProps>(
       name,
       id,
       onChange,
+      disabled,
       value,
       endAdornment: endAdornmentProp,
       sx,
@@ -99,6 +100,7 @@ export const TextField = forwardRef<HTMLDivElement, ITextFieldProps>(
           fullWidth,
           id,
           name,
+          disabled,
         }}
         {...rest}
         value={inputValue}
@@ -113,7 +115,7 @@ export const TextField = forwardRef<HTMLDivElement, ITextFieldProps>(
               if (inputValue.length > 0 || endAdornmentProp) {
                 return (
                   <>
-                    {inputValue.length > 0 ? (
+                    {inputValue.length > 0 && !disabled ? (
                       <Tooltip title="Clear">
                         <IconButton
                           className="text-input-clear-button"

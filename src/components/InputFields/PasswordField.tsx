@@ -16,6 +16,7 @@ export const PasswordField: FC<IPasswordFieldProps> = ({
   name,
   id,
   value,
+  disabled,
   onChange: onChangeProp,
   onChangeShowPassword,
   sx,
@@ -72,22 +73,24 @@ export const PasswordField: FC<IPasswordFieldProps> = ({
   return (
     <TextField
       {...rest}
-      {...{ name, id, onChange }}
+      {...{ name, id, onChange, disabled }}
       value={inputValue}
       type={showPassword ? 'text' : 'password'}
       endAdornment={
-        <IconButton
-          aria-label="Toggle password visibility"
-          onClick={() => {
-            setShowPassword((prevShowPassword) => !prevShowPassword);
-          }}
-          onMouseDown={(event) => {
-            event.preventDefault();
-          }}
-          sx={{ p: 0.4 }}
-        >
-          {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
-        </IconButton>
+        !disabled ? (
+          <IconButton
+            aria-label="Toggle password visibility"
+            onClick={() => {
+              setShowPassword((prevShowPassword) => !prevShowPassword);
+            }}
+            onMouseDown={(event) => {
+              event.preventDefault();
+            }}
+            sx={{ p: 0.4 }}
+          >
+            {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
+          </IconButton>
+        ) : null
       }
       sx={{
         ...sx,
