@@ -75,6 +75,7 @@ export const DataDropdownField = forwardRef<
     optionVariant,
     sx,
     SelectedOptionPillProps = {},
+    disabled,
     ...rest
   },
   ref
@@ -326,7 +327,7 @@ export const DataDropdownField = forwardRef<
       InputProps={{
         endAdornment: (
           <>
-            {selectedOptions.length > 0 && (
+            {selectedOptions.length > 0 && !disabled ? (
               <Tooltip title="Clear">
                 <IconButton
                   className="data-dropdown-input-clear-button"
@@ -342,7 +343,7 @@ export const DataDropdownField = forwardRef<
                   <CloseIcon />
                 </IconButton>
               </Tooltip>
-            )}
+            ) : null}
             <ExpandMoreIcon />
           </>
         ),
@@ -363,6 +364,7 @@ export const DataDropdownField = forwardRef<
           return selectedOptionDisplayString;
         }
       })()}
+      {...{ disabled }}
       {...rest}
       {...errorProps}
       sx={{

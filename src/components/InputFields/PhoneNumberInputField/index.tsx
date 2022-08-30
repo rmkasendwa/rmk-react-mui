@@ -52,6 +52,7 @@ export const PhoneNumberInputField = forwardRef<
     onBlur,
     onChange,
     value,
+    disabled,
     name,
     id,
     regionalCode: regionalCodeProp,
@@ -159,7 +160,7 @@ export const PhoneNumberInputField = forwardRef<
         setSanitizedInputValue(event.target.value);
       }}
       {...rest}
-      {...{ name, id, placeholder }}
+      {...{ name, id, placeholder, disabled }}
       InputProps={{
         ...InputProps,
         startAdornment: displayPhoneNumberCountry ? (
@@ -167,6 +168,7 @@ export const PhoneNumberInputField = forwardRef<
             <Button
               color="inherit"
               ref={anchorRef}
+              {...{ disabled }}
               onClick={() => {
                 setMenuOpen((prevOpen) => !prevOpen);
               }}

@@ -30,6 +30,7 @@ export const DateInputField = forwardRef<HTMLDivElement, IDateInputFieldProps>(
       onChange,
       minDate: minDateProp,
       maxDate: maxDateProp,
+      disabled,
       sx,
       ...rest
     },
@@ -95,31 +96,40 @@ export const DateInputField = forwardRef<HTMLDivElement, IDateInputFieldProps>(
           delete params.inputProps.onFocus;
           delete params.inputProps.onChange;
           delete params.inputProps.onBlur;
+          delete params.inputProps.disabled;
         }
         if (params.InputProps) {
-          params.InputProps.endAdornment = (
-            <>
-              {selectedDate && (
-                <Tooltip title="Clear">
-                  <IconButton
-                    className="date-input-clear-button"
-                    onClick={() => {
-                      setSelectedDate(null);
-                      triggerChangeEvent('');
-                    }}
-                    sx={{ p: 0.4 }}
-                  >
-                    <CloseIcon />
-                  </IconButton>
-                </Tooltip>
-              )}
-              <Tooltip title="Choose a date">
-                <IconButton onClick={() => setOpen(true)} sx={{ p: 0.4 }}>
-                  <EventIcon />
+          delete params.InputProps.endAdornment;
+          const selectDateIconButton = (
+            <IconButton
+              {...{ disabled }}
+              onClick={() => setOpen(true)}
+              sx={{ p: 0.4, ml: -0.5 }}
+            >
+              <EventIcon />
+            </IconButton>
+          );
+          params.InputProps.startAdornment = disabled ? (
+            selectDateIconButton
+          ) : (
+            <Tooltip title="Choose a date">{selectDateIconButton}</Tooltip>
+          );
+          if (selectedDate && !disabled) {
+            params.InputProps.endAdornment = (
+              <Tooltip title="Clear">
+                <IconButton
+                  className="date-input-clear-button"
+                  onClick={() => {
+                    setSelectedDate(null);
+                    triggerChangeEvent('');
+                  }}
+                  sx={{ p: 0.4 }}
+                >
+                  <CloseIcon />
                 </IconButton>
               </Tooltip>
-            </>
-          );
+            );
+          }
         }
         delete params.error;
         return (
@@ -127,7 +137,7 @@ export const DateInputField = forwardRef<HTMLDivElement, IDateInputFieldProps>(
             {...{ value: value as string }}
             {...params}
             {...rest}
-            {...{ id, name }}
+            {...{ id, name, disabled }}
             ref={ref}
             sx={{
               '& .date-input-clear-button': {

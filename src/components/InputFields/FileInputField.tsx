@@ -15,7 +15,7 @@ export interface IFileInputFieldProps extends Omit<ITextFieldProps, 'value'> {
 
 export const FileInputField = forwardRef<HTMLDivElement, IFileInputFieldProps>(
   function FileInputField(
-    { onClick, onChange, value, name, sx, ...rest },
+    { onClick, onChange, value, name, disabled, sx, ...rest },
     ref
   ) {
     const inputFieldRef = useRef<HTMLInputElement | null>(null);
@@ -60,7 +60,7 @@ export const FileInputField = forwardRef<HTMLDivElement, IFileInputFieldProps>(
         <TextField
           ref={ref}
           {...rest}
-          {...{ name }}
+          {...{ name, disabled }}
           value={selectedFileName}
           onClick={(event) => {
             if (inputFieldRef.current) {
@@ -69,7 +69,7 @@ export const FileInputField = forwardRef<HTMLDivElement, IFileInputFieldProps>(
             onClick && onClick(event);
           }}
           InputProps={{
-            startAdornment: (
+            startAdornment: !disabled ? (
               <InputAdornment position="start">
                 <Button
                   variant="contained"
@@ -83,10 +83,10 @@ export const FileInputField = forwardRef<HTMLDivElement, IFileInputFieldProps>(
                   Choose File
                 </Button>
               </InputAdornment>
-            ),
+            ) : null,
             endAdornment: (
               <>
-                {selectedFileName && (
+                {selectedFileName && !disabled ? (
                   <Tooltip title="Clear">
                     <IconButton
                       className="file-input-clear-button"
@@ -104,7 +104,7 @@ export const FileInputField = forwardRef<HTMLDivElement, IFileInputFieldProps>(
                       <CloseIcon color="inherit" />
                     </IconButton>
                   </Tooltip>
-                )}
+                ) : null}
                 <Tooltip title="Select a file">
                   <IconButton sx={{ p: 0.4 }}>
                     <CloudUploadIcon color="inherit" />
