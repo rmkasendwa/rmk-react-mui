@@ -86,6 +86,16 @@ export const DataDropdownField = forwardRef<
   const { preferStale } = useAPIDataContext();
   const { palette } = useTheme();
 
+  const onChangeRef = useRef(onChange);
+  const getDropdownEntitiesRef = useRef(getDropdownEntities);
+  const filterDropdownEntitiesRef = useRef(filterDropdownEntities);
+
+  useEffect(() => {
+    onChangeRef.current = onChange;
+    getDropdownEntitiesRef.current = getDropdownEntities;
+    filterDropdownEntitiesRef.current = filterDropdownEntities;
+  }, [filterDropdownEntities, getDropdownEntities, onChange]);
+
   const {
     load,
     loaded,
@@ -125,9 +135,9 @@ export const DataDropdownField = forwardRef<
         writable: false,
         value: { id, name, value: selectedOptionValue },
       });
-      onChange && onChange(event);
+      onChangeRef.current && onChangeRef.current(event);
     },
-    [multiple, id, name, onChange]
+    [multiple, id, name]
   );
 
   const loadOptions = useCallback(
@@ -136,26 +146,18 @@ export const DataDropdownField = forwardRef<
         !loading &&
         (!loaded || reloadOptions) &&
         (!preferStale || options.length <= 0 || reloadOptions) &&
-        getDropdownEntities
+        getDropdownEntitiesRef.current
       ) {
         load(async () => {
-          const entities = await getDropdownEntities();
-          if (filterDropdownEntities) {
-            return filterDropdownEntities(entities);
+          const entities = await getDropdownEntitiesRef.current!();
+          if (filterDropdownEntitiesRef.current) {
+            return filterDropdownEntitiesRef.current(entities);
           }
           return entities;
         });
       }
     },
-    [
-      filterDropdownEntities,
-      getDropdownEntities,
-      load,
-      loaded,
-      loading,
-      options.length,
-      preferStale,
-    ]
+    [load, loaded, loading, options.length, preferStale]
   );
 
   const selectedOptionDisplayString = useMemo(() => {
@@ -239,7 +241,10 @@ export const DataDropdownField = forwardRef<
           )!;
         })
         .filter((option) => option);
-      if (prevSelectedOptions.join() !== nextSelectedOptions.join()) {
+      if (
+        prevSelectedOptions.map(({ value }) => value).join() !==
+        nextSelectedOptions.map(({ value }) => value).join()
+      ) {
         return nextSelectedOptions;
       }
       return prevSelectedOptions;
