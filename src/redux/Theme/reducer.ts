@@ -6,6 +6,7 @@ import { SET_DARK_MODE, TOGGLE_DARK_MODE } from './types';
 const theme = StorageManager.get('theme') || { darkMode: false };
 
 if (
+  typeof window !== 'undefined' &&
   window.matchMedia &&
   window.matchMedia('(prefers-color-scheme: dark)').matches &&
   StorageManager.get('theme')?.darkMode == null
