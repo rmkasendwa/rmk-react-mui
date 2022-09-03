@@ -35,7 +35,7 @@ import {
 } from '../interfaces/Table';
 import { getColumnWidthStyles } from '../utils/Table';
 import DataTablePagination from './DataTablePagination';
-import RenderIfVisible from './RenderIfVisible';
+import RenderIfVisible, { IRenderIfVisibleProps } from './RenderIfVisible';
 import TableBodyRow from './TableBodyRow';
 
 export type {
@@ -75,6 +75,7 @@ export interface ITableProps<T = any>
   paginationType?: 'default' | 'classic';
   PaginationProps?: PaginationProps;
   stickyHeader?: boolean;
+  TableBodyRowPlaceholderProps?: Partial<IRenderIfVisibleProps>;
 }
 
 export const Table = forwardRef<HTMLDivElement, ITableProps>(function Table(
@@ -105,12 +106,17 @@ export const Table = forwardRef<HTMLDivElement, ITableProps>(function Table(
     paginationType = 'default',
     PaginationProps = {},
     stickyHeader = false,
+    TableBodyRowPlaceholderProps = {},
     ...rest
   },
   ref
 ) {
   const { sx: tableContainerPropsSx, ...tableContainerPropsRest } =
     TableContainerProps;
+  const {
+    sx: tableBodyRowPlaceholderPropsSx,
+    ...tableBodyRowPlaceholderPropsRest
+  } = TableBodyRowPlaceholderProps;
   lowercaseLabelPlural || (lowercaseLabelPlural = labelPlural.toLowerCase());
 
   const { palette } = useTheme();
@@ -294,6 +300,7 @@ export const Table = forwardRef<HTMLDivElement, ITableProps>(function Table(
                     }
                     return (
                       <RenderIfVisible
+                        {...tableBodyRowPlaceholderPropsRest}
                         key={
                           row.currentEntity?.key ??
                           row.currentEntity?.id ??
@@ -304,6 +311,7 @@ export const Table = forwardRef<HTMLDivElement, ITableProps>(function Table(
                         unWrapChildrenIfVisible
                         sx={{
                           height: 50,
+                          ...tableBodyRowPlaceholderPropsSx,
                         }}
                       >
                         <TableBodyRow
