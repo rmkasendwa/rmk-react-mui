@@ -47,16 +47,21 @@ export const useAPIService = <T>(defautValue: T, key?: string) => {
           }
         })();
         taggedAPIRequest && taggedAPIRequestsRef.current.push(taggedAPIRequest);
-        const data = await call(() => (apiFunction as TAPIFunction)()).catch(
-          (err) => {
+        const data = await call(() => (apiFunction as TAPIFunction)())
+          .then((payload) => {
+            if (isComponentMountedRef.current) {
+              setLoaded(true);
+            }
+            return payload;
+          })
+          .catch((err) => {
             if (
               !String(err.message).match(CANCELLED_API_REQUEST_MESSAGE) &&
               !polling
             ) {
               setErrorMessage(err.message);
             }
-          }
-        );
+          });
         if (
           taggedAPIRequest &&
           taggedAPIRequestsRef.current.includes(taggedAPIRequest)
@@ -69,7 +74,6 @@ export const useAPIService = <T>(defautValue: T, key?: string) => {
         if (data) {
           if (isComponentMountedRef.current) {
             setRecord(data);
-            setLoaded(true);
           }
           if (key) {
             dispatch(

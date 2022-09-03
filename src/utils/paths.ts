@@ -34,7 +34,7 @@ export const paramsSufficientForPath = (
   return extractedParameters
     .filter((key) => !key.match(/^\d+$/g))
     .every((key) => {
-      if (!params[key]) {
+      if (params[key] == null) {
         return false;
       }
       return true;
@@ -52,7 +52,7 @@ export const addSearchParams = (
     '?' +
     keys
       .reduce((accumulator, key) => {
-        if (params[key]) {
+        if (params[key] != null) {
           const value = (() => {
             if (Array.isArray(params[key])) {
               return (params[key] as any).join(',');
