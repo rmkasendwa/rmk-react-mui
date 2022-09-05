@@ -66,6 +66,7 @@ export const FieldLabel: FC<IFieldLabelProps> = (inProps) => {
   return (
     <Typography
       className={clsx(classes.root)}
+      component={'div' as any}
       variant="body2"
       noWrap
       {...rest}
