@@ -6,7 +6,7 @@ import { FC } from 'react';
 import { useLoadingContext } from '../contexts/LoadingContext';
 import Card from './Card';
 import ErrorSkeleton from './ErrorSkeleton';
-import FieldLabel from './FieldLabel';
+import FieldLabel from './FieldLabel/FieldLabel';
 
 export interface ISingleFieldCardProps {
   label: string;
