@@ -7,15 +7,14 @@ import {
 } from '@mui/material';
 import Box from '@mui/material/Box';
 import Skeleton from '@mui/material/Skeleton';
-import useTheme from '@mui/material/styles/useTheme';
-import Typography, { TypographyProps } from '@mui/material/Typography';
-import { alpha } from '@mui/system/colorManipulator';
+import { TypographyProps } from '@mui/material/Typography';
 import clsx from 'clsx';
 import { FC, ReactNode } from 'react';
 
 import { useLoadingContext } from '../../contexts/LoadingContext';
 import ErrorSkeleton from '../ErrorSkeleton';
 import FieldLabel, { IFieldLabelProps } from '../FieldLabel';
+import FieldValue from '../FieldValue/FieldValue';
 import {
   FieldValueDisplayClasses,
   getFieldValueDisplayUtilityClass,
@@ -78,9 +77,8 @@ export const FieldValueDisplay: FC<IFieldValueDisplayProps> = (inProps) => {
     ...props,
   });
 
-  const { sx: labelPropsSx, ...labelPropsRest } = LabelProps;
+  const { ...labelPropsRest } = LabelProps;
 
-  const { palette } = useTheme();
   const { loading, errorMessage } = useLoadingContext();
   const labelSkeletonWidth = String(label).length * 7;
   const valueSkeletonWidth = `${20 + Math.round(Math.random() * 60)}%`;
@@ -113,13 +111,7 @@ export const FieldValueDisplay: FC<IFieldValueDisplayProps> = (inProps) => {
 
   return (
     <Box className={clsx(classes.root)}>
-      <FieldLabel
-        {...{ required }}
-        {...labelPropsRest}
-        sx={{
-          ...labelPropsSx,
-        }}
-      >
+      <FieldLabel {...{ required }} {...labelPropsRest}>
         {label}
       </FieldLabel>
       <Box
@@ -130,26 +122,7 @@ export const FieldValueDisplay: FC<IFieldValueDisplayProps> = (inProps) => {
           alignItems: 'start',
         }}
       >
-        {(() => {
-          if (['string', 'number'].includes(typeof value)) {
-            const { sx, ...rest } = ValueProps;
-            return (
-              <Typography
-                variant="body2"
-                {...rest}
-                sx={{
-                  wordBreak: 'break-word',
-                  whiteSpace: 'pre-line',
-                  color: alpha(palette.text.primary, 0.5),
-                  ...sx,
-                }}
-              >
-                {value}
-              </Typography>
-            );
-          }
-          return value;
-        })()}
+        <FieldValue {...ValueProps}>{value}</FieldValue>
       </Box>
     </Box>
   );
