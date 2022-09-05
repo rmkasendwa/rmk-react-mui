@@ -2,6 +2,7 @@ import {
   ComponentsOverrides,
   ComponentsProps,
   ComponentsVariants,
+  alpha,
   unstable_composeClasses as composeClasses,
   useTheme,
   useThemeProps,
@@ -11,31 +12,31 @@ import clsx from 'clsx';
 import { FC } from 'react';
 
 import {
-  FieldLabelClasses,
-  getFieldLabelUtilityClass,
-} from './FieldLabelClasses';
+  FieldValueClasses,
+  getFieldValueUtilityClass,
+} from './FieldValueClasses';
 
 // Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
-    MuiFieldLabel: IFieldLabelProps;
+    MuiFieldValue: IFieldValueProps;
   }
 }
 
 // Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
-    MuiFieldLabel: keyof FieldLabelClasses;
+    MuiFieldValue: keyof FieldValueClasses;
   }
 }
 
 // Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
-    MuiFieldLabel?: {
-      defaultProps?: ComponentsProps['MuiFieldLabel'];
-      styleOverrides?: ComponentsOverrides<Theme>['MuiFieldLabel'];
-      variants?: ComponentsVariants['MuiFieldLabel'];
+    MuiFieldValue?: {
+      defaultProps?: ComponentsProps['MuiFieldValue'];
+      styleOverrides?: ComponentsOverrides<Theme>['MuiFieldValue'];
+      variants?: ComponentsVariants['MuiFieldValue'];
     };
   }
 }
@@ -47,16 +48,14 @@ const useUtilityClasses = (ownerState: any) => {
     root: ['root'],
   };
 
-  return composeClasses(slots, getFieldLabelUtilityClass, classes);
+  return composeClasses(slots, getFieldValueUtilityClass, classes);
 };
 
-export interface IFieldLabelProps extends TypographyProps {
-  required?: boolean;
-}
+export interface IFieldValueProps extends TypographyProps {}
 
-export const FieldLabel: FC<IFieldLabelProps> = (inProps) => {
-  const props = useThemeProps({ props: inProps, name: 'MuiFieldLabel' });
-  const { required, children, sx, ...rest } = props;
+export const FieldValue: FC<IFieldValueProps> = (inProps) => {
+  const props = useThemeProps({ props: inProps, name: 'MuiFieldValue' });
+  const { children, sx, ...rest } = props;
 
   const classes = useUtilityClasses({
     ...props,
@@ -67,21 +66,11 @@ export const FieldLabel: FC<IFieldLabelProps> = (inProps) => {
     <Typography
       className={clsx(classes.root)}
       variant="body2"
-      noWrap
       {...rest}
       sx={{
-        fontWeight: 'bold',
-        ...(() => {
-          if (required) {
-            return {
-              '&:after': {
-                content: '"*"',
-                ml: 0.2,
-                color: palette.error.main,
-              },
-            };
-          }
-        })(),
+        wordBreak: 'break-word',
+        whiteSpace: 'pre-line',
+        color: alpha(palette.text.primary, 0.5),
         ...sx,
       }}
     >
@@ -90,4 +79,4 @@ export const FieldLabel: FC<IFieldLabelProps> = (inProps) => {
   );
 };
 
-export default FieldLabel;
+export default FieldValue;
