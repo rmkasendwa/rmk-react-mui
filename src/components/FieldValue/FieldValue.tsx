@@ -66,6 +66,7 @@ export const FieldValue: FC<IFieldValueProps> = (inProps) => {
     <Typography
       className={clsx(classes.root)}
       variant="body2"
+      component={'div' as any}
       {...rest}
       sx={{
         wordBreak: 'break-word',
