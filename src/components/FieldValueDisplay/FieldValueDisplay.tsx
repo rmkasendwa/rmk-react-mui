@@ -15,7 +15,7 @@ import { FC, ReactNode } from 'react';
 
 import { useLoadingContext } from '../../contexts/LoadingContext';
 import ErrorSkeleton from '../ErrorSkeleton';
-import FieldLabel, { IFieldLabelProps } from '../FieldLabel/FieldLabel';
+import FieldLabel, { IFieldLabelProps } from '../FieldLabel';
 import {
   FieldValueDisplayClasses,
   getFieldValueDisplayUtilityClass,
