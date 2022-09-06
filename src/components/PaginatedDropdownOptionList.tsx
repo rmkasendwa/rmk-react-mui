@@ -1,4 +1,4 @@
-import { Divider } from '@mui/material';
+import { Divider, Grid, iconButtonClasses } from '@mui/material';
 import Box from '@mui/material/Box';
 import Card, { CardProps } from '@mui/material/Card';
 import MenuItem, { MenuItemProps } from '@mui/material/MenuItem';
@@ -21,6 +21,7 @@ import DropdownOption, {
   DEFAULT_DROPDOWN_OPTION_HEIGHT,
   TDropdownOptionVariant,
 } from './DropdownOption';
+import ReloadIconButton from './ReloadIconButton';
 
 export type TDropdownOptionValue = string | number;
 
@@ -382,12 +383,27 @@ export const PaginatedDropdownOptionList = forwardRef<
         <>
           {displayOptions.length > 0 ? <Divider /> : null}
           <DropdownOption onClick={() => loadOptions()}>
-            {(() => {
-              if (loading) {
-                return 'Refreshing...';
-              }
-              return 'Refresh';
-            })()}
+            <Grid container sx={{ alignItems: 'center', gap: 1 }}>
+              <Grid item>
+                <ReloadIconButton
+                  {...{ loading }}
+                  sx={{
+                    pointerEvents: 'none',
+                    [`& .${iconButtonClasses.root}`]: {
+                      p: 0,
+                    },
+                  }}
+                />
+              </Grid>
+              <Grid item xs sx={{ minWidth: 0 }}>
+                {(() => {
+                  if (loading) {
+                    return 'Refreshing...';
+                  }
+                  return 'Refresh';
+                })()}
+              </Grid>
+            </Grid>
           </DropdownOption>
         </>
       )}
