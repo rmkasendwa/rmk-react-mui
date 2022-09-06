@@ -3,20 +3,20 @@ import Button from '@mui/material/Button';
 import { FC, ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 
-import FixedHeaderContentArea from './FixedHeaderContentArea';
-import { IPaddedContentAreaProps } from './PaddedContentArea';
+import FixedHeaderContentArea, {
+  IFixedHeaderContentAreaProps,
+} from './FixedHeaderContentArea';
 
-export interface IEntityViewWrapperProps extends IPaddedContentAreaProps {
+export interface IEntityViewWrapperProps extends IFixedHeaderContentAreaProps {
   pathToEdit?: string;
   tools?: ReactNode;
 }
 
 export const EntityViewWrapper: FC<IEntityViewWrapperProps> = ({
   children,
-  title,
   pathToEdit,
   tools,
-  breadcrumbs,
+  ...rest
 }) => {
   const toolsList: ReactNode[] = [];
   pathToEdit &&
@@ -34,7 +34,7 @@ export const EntityViewWrapper: FC<IEntityViewWrapperProps> = ({
     );
   tools && toolsList.push(tools);
   return (
-    <FixedHeaderContentArea tools={toolsList} {...{ title, breadcrumbs }}>
+    <FixedHeaderContentArea {...rest} tools={toolsList}>
       {children}
     </FixedHeaderContentArea>
   );

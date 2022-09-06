@@ -1,5 +1,6 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { LoremIpsum } from 'lorem-ipsum';
+import React from 'react';
 
 import PaginatedDropdownOptionList from '../components/PaginatedDropdownOptionList';
 
@@ -20,6 +21,12 @@ const Template: ComponentStory<typeof PaginatedDropdownOptionList> = (
 };
 
 export const Default = Template.bind({});
+Default.args = {
+  options: Array.from({ length: 100 }).map((_, index) => ({
+    label: `${index + 1}. ${lorem.generateWords(4)}`,
+    value: index,
+  })),
+};
 
 export const WithOptions = Template.bind({});
 WithOptions.args = {
