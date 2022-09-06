@@ -62,7 +62,7 @@ export const FieldLabel: FC<IFieldLabelProps> = (inProps) => {
     ...props,
   });
 
-  const { palette } = useTheme();
+  const { palette, components } = useTheme();
   return (
     <Typography
       className={clsx(classes.root)}
@@ -83,6 +83,7 @@ export const FieldLabel: FC<IFieldLabelProps> = (inProps) => {
             };
           }
         })(),
+        ...((components?.MuiFieldLabel?.styleOverrides?.root as any) || {}),
         ...sx,
       }}
     >

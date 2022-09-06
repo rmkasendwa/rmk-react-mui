@@ -6,9 +6,9 @@ import MuiTextField, { TextFieldProps } from '@mui/material/TextField';
 import Tooltip from '@mui/material/Tooltip';
 import { ReactNode, forwardRef, useCallback, useEffect, useState } from 'react';
 
-import { useLoadingContext } from '../../contexts/LoadingContext';
-import ErrorSkeleton from '../ErrorSkeleton';
-import FieldValueDisplay from '../FieldValueDisplay';
+import { useLoadingContext } from '../../../contexts/LoadingContext';
+import ErrorSkeleton from '../../ErrorSkeleton';
+import FieldValueDisplay from '../../FieldValueDisplay';
 
 export interface ITextFieldProps
   extends Omit<TextFieldProps, 'variant'>,
