@@ -3,12 +3,13 @@ import useTheme from '@mui/material/styles/useTheme';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { FC, ReactNode } from 'react';
 
-import PageTitle from './PageTitle';
+import PageTitle, { IPageTitleProps } from './PageTitle';
 
 export interface IPaddedContentAreaProps extends BoxProps {
   title?: string;
   tools?: ReactNode | ReactNode[];
   breadcrumbs?: ReactNode;
+  PageTitleProps?: Partial<IPageTitleProps>;
 }
 
 export const PaddedContentArea: FC<IPaddedContentAreaProps> = ({
@@ -17,6 +18,7 @@ export const PaddedContentArea: FC<IPaddedContentAreaProps> = ({
   sx,
   tools,
   breadcrumbs,
+  PageTitleProps,
   ...rest
 }) => {
   const { breakpoints } = useTheme();
@@ -37,7 +39,7 @@ export const PaddedContentArea: FC<IPaddedContentAreaProps> = ({
     >
       {breadcrumbs && largeScreen ? breadcrumbs : null}
       {(title && largeScreen) || tools ? (
-        <PageTitle {...{ title, tools }} />
+        <PageTitle {...{ title, tools }} {...PageTitleProps} />
       ) : null}
       {children}
     </Box>

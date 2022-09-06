@@ -1,4 +1,4 @@
-import { Divider, iconButtonClasses } from '@mui/material';
+import { Divider } from '@mui/material';
 import Box from '@mui/material/Box';
 import Card, { CardProps } from '@mui/material/Card';
 import MenuItem, { MenuItemProps } from '@mui/material/MenuItem';
@@ -13,6 +13,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 
@@ -20,10 +21,11 @@ import DropdownOption, {
   DEFAULT_DROPDOWN_OPTION_HEIGHT,
   TDropdownOptionVariant,
 } from './DropdownOption';
-import ReloadIconButton from './ReloadIconButton';
+
+export type TDropdownOptionValue = string | number;
 
 export interface IDropdownOption extends Pick<MenuItemProps, 'onClick'> {
-  value: string | number;
+  value: TDropdownOptionValue;
   label: ReactNode;
   fieldValueLabel?: string;
   searchableLabel?: string;
@@ -75,6 +77,20 @@ export const PaginatedDropdownOptionList = forwardRef<
   },
   ref
 ) {
+  const optionsRef = useRef(options);
+  const onCloseRef = useRef(onClose);
+  const loadOptionsRef = useRef(loadOptions);
+  const onSelectOptionRef = useRef(onSelectOption);
+  const onChangeSelectedOptionRef = useRef(onChangeSelectedOption);
+
+  useEffect(() => {
+    optionsRef.current = options;
+    onCloseRef.current = onClose;
+    loadOptionsRef.current = loadOptions;
+    onSelectOptionRef.current = onSelectOption;
+    onChangeSelectedOptionRef.current = onChangeSelectedOption;
+  }, [loadOptions, onChangeSelectedOption, onClose, onSelectOption, options]);
+
   const { palette, typography } = useTheme();
   const [scrollableDropdownWrapper, setScrollableDropdownWrapper] =
     useState<HTMLDivElement | null>(null);
@@ -110,12 +126,13 @@ export const PaginatedDropdownOptionList = forwardRef<
         return [option];
       })();
       setSelectedOptions(nextOptions);
-      onChangeSelectedOption && onChangeSelectedOption(nextOptions);
-      if (!multiple && onClose) {
-        onClose();
+      onChangeSelectedOptionRef.current &&
+        onChangeSelectedOptionRef.current(nextOptions);
+      if (!multiple && onCloseRef.current) {
+        onCloseRef.current();
       }
     },
-    [multiple, onChangeSelectedOption, onClose, selectedOptions]
+    [multiple, selectedOptions]
   );
 
   const { minOptionWidth } = useMemo(() => {
@@ -169,7 +186,7 @@ export const PaginatedDropdownOptionList = forwardRef<
             }
             break;
           case 'Escape':
-            onClose && onClose();
+            onCloseRef.current && onCloseRef.current();
             break;
         }
       })();
@@ -200,7 +217,6 @@ export const PaginatedDropdownOptionList = forwardRef<
     limit,
     maxHeight,
     offset,
-    onClose,
     optionHeight,
     options,
     scrollableDropdownWrapper,
@@ -279,8 +295,8 @@ export const PaginatedDropdownOptionList = forwardRef<
             minHeight: paging ? options.length * optionHeight : undefined,
           }}
           onClick={() => {
-            if (!multiple && onClose) {
-              onClose();
+            if (!multiple && onCloseRef.current) {
+              onCloseRef.current();
             }
           }}
           tabIndex={-1}
@@ -313,9 +329,12 @@ export const PaginatedDropdownOptionList = forwardRef<
                       onClick && onClick(event);
                       onSelectOption && onSelectOption(option);
                     }}
-                    selected={selectedOptions
-                      .map(({ value }) => value)
-                      .includes(value)}
+                    selected={(() => {
+                      const selectedOptionValues = selectedOptions.map(
+                        ({ value }) => value
+                      );
+                      return selectedOptionValues.includes(value);
+                    })()}
                     tabIndex={isFocused ? 0 : -1}
                     height={optionHeight}
                     variant={optionVariant}
@@ -327,7 +346,7 @@ export const PaginatedDropdownOptionList = forwardRef<
               }
               return <Fragment key={value}>{label}</Fragment>;
             })
-          ) : !loadOptions || !loading ? (
+          ) : !loadOptionsRef.current || !loading ? (
             <MenuItem disabled>
               <Typography variant="body2" color={palette.error.main}>
                 No options found
@@ -362,23 +381,14 @@ export const PaginatedDropdownOptionList = forwardRef<
       {loadOptions && (
         <>
           {displayOptions.length > 0 ? <Divider /> : null}
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'center',
-              py: 0.5,
-            }}
-          >
-            <ReloadIconButton
-              load={loadOptions}
-              {...{ loading }}
-              sx={{
-                [`& .${iconButtonClasses.root}`]: {
-                  p: 0.4,
-                },
-              }}
-            />
-          </Box>
+          <DropdownOption onClick={() => loadOptions()}>
+            {(() => {
+              if (loading) {
+                return 'Refreshing...';
+              }
+              return 'Refresh';
+            })()}
+          </DropdownOption>
         </>
       )}
     </Card>

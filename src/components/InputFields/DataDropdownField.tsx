@@ -89,12 +89,19 @@ export const DataDropdownField = forwardRef<
   const onChangeRef = useRef(onChange);
   const getDropdownEntitiesRef = useRef(getDropdownEntities);
   const filterDropdownEntitiesRef = useRef(filterDropdownEntities);
+  const getDropdownOptionsRef = useRef(getDropdownOptions);
 
   useEffect(() => {
     onChangeRef.current = onChange;
     getDropdownEntitiesRef.current = getDropdownEntities;
     filterDropdownEntitiesRef.current = filterDropdownEntities;
-  }, [filterDropdownEntities, getDropdownEntities, onChange]);
+    getDropdownOptionsRef.current = getDropdownOptions;
+  }, [
+    filterDropdownEntities,
+    getDropdownEntities,
+    getDropdownOptions,
+    onChange,
+  ]);
 
   const {
     load,
@@ -202,12 +209,12 @@ export const DataDropdownField = forwardRef<
       });
     } else {
       setOptions(
-        getDropdownOptions
-          ? getDropdownOptions(dropdownEntities)
+        getDropdownOptionsRef.current
+          ? getDropdownOptionsRef.current(dropdownEntities)
           : dropdownEntities
       );
     }
-  }, [dropdownEntities, getDropdownOptions, propOptions, setOptions]);
+  }, [dropdownEntities, propOptions]);
 
   useEffect(() => {
     if (sortOptions) {
