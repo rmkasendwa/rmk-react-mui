@@ -61,7 +61,7 @@ export const FieldValue: FC<IFieldValueProps> = (inProps) => {
     ...props,
   });
 
-  const { palette } = useTheme();
+  const { palette, components } = useTheme();
   return (
     <Typography
       className={clsx(classes.root)}
@@ -72,6 +72,8 @@ export const FieldValue: FC<IFieldValueProps> = (inProps) => {
         wordBreak: 'break-word',
         whiteSpace: 'pre-line',
         color: alpha(palette.text.primary, 0.5),
+        width: '100%',
+        ...((components?.MuiFieldValue?.styleOverrides?.root as any) || {}),
         ...sx,
       }}
     >

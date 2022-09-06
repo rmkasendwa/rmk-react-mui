@@ -3,9 +3,10 @@ import {
   ComponentsProps,
   ComponentsVariants,
   unstable_composeClasses as composeClasses,
+  useTheme,
   useThemeProps,
 } from '@mui/material';
-import Box from '@mui/material/Box';
+import Box, { BoxProps } from '@mui/material/Box';
 import Skeleton from '@mui/material/Skeleton';
 import { TypographyProps } from '@mui/material/Typography';
 import clsx from 'clsx';
@@ -56,7 +57,8 @@ const useUtilityClasses = (ownerState: any) => {
 };
 
 export interface IFieldValueDisplayProps
-  extends Pick<IFieldLabelProps, 'required'> {
+  extends Partial<BoxProps>,
+    Pick<IFieldLabelProps, 'required'> {
   label: ReactNode;
   value?: ReactNode;
   LabelProps?: IFieldLabelProps;
@@ -71,6 +73,8 @@ export const FieldValueDisplay: FC<IFieldValueDisplayProps> = (inProps) => {
     LabelProps = {},
     ValueProps = {},
     required,
+    sx,
+    ...rest
   } = props;
 
   const classes = useUtilityClasses({
@@ -78,14 +82,24 @@ export const FieldValueDisplay: FC<IFieldValueDisplayProps> = (inProps) => {
   });
 
   const { ...labelPropsRest } = LabelProps;
+  const { sx: valuePropsSx, ...valuePropsRest } = ValueProps;
 
+  const { components } = useTheme();
   const { loading, errorMessage } = useLoadingContext();
   const labelSkeletonWidth = String(label).length * 7;
   const valueSkeletonWidth = `${20 + Math.round(Math.random() * 60)}%`;
 
   if (errorMessage) {
     return (
-      <Box className={clsx(classes.root)}>
+      <Box
+        className={clsx(classes.root)}
+        {...rest}
+        sx={{
+          ...((components?.MuiFieldValueDisplay?.styleOverrides?.root as any) ||
+            {}),
+          ...sx,
+        }}
+      >
         <ErrorSkeleton
           sx={{
             width: labelSkeletonWidth,
@@ -102,7 +116,15 @@ export const FieldValueDisplay: FC<IFieldValueDisplayProps> = (inProps) => {
 
   if (loading) {
     return (
-      <Box className={clsx(classes.root)}>
+      <Box
+        className={clsx(classes.root)}
+        {...rest}
+        sx={{
+          ...((components?.MuiFieldValueDisplay?.styleOverrides?.root as any) ||
+            {}),
+          ...sx,
+        }}
+      >
         <Skeleton sx={{ width: labelSkeletonWidth }} />
         <Skeleton sx={{ width: valueSkeletonWidth }} />
       </Box>
@@ -110,20 +132,21 @@ export const FieldValueDisplay: FC<IFieldValueDisplayProps> = (inProps) => {
   }
 
   return (
-    <Box className={clsx(classes.root)}>
+    <Box
+      className={clsx(classes.root)}
+      {...rest}
+      sx={{
+        ...((components?.MuiFieldValueDisplay?.styleOverrides?.root as any) ||
+          {}),
+        ...sx,
+      }}
+    >
       <FieldLabel {...{ required }} {...labelPropsRest}>
         {label}
       </FieldLabel>
-      <Box
-        sx={{
-          mt: 0.5,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'start',
-        }}
-      >
-        <FieldValue {...ValueProps}>{value}</FieldValue>
-      </Box>
+      <FieldValue {...valuePropsRest} sx={{ mt: 0.5, ...valuePropsSx }}>
+        {value}
+      </FieldValue>
     </Box>
   );
 };
