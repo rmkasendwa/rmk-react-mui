@@ -1,6 +1,6 @@
 {
   "name": "@infinite-debugger/react-mui",
-  "version": "0.1.0-alpha.265",
+  "version": "0.1.0-alpha.269",
   "description": "RMK React MUI is a React UI library of utility components, hooks and contexts",
   "keywords": [
     "react",
@@ -74,6 +74,7 @@
     "date-fns": "^2.28.0",
     "object-hash": "^2.2.0",
     "query-string": "^7.1.0",
+    "react-merge-refs": "^2.0.1",
     "react-smooth-dnd": "^0.11.1",
     "underscore": "^1.13.2"
   },

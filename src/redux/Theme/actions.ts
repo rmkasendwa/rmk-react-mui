@@ -12,3 +12,10 @@ export const setDarkMode = (darkMode: boolean) => {
     payload: darkMode,
   };
 };
+
+export const setThemeProperty = (property: string, payload: any) => {
+  return {
+    type: property,
+    payload,
+  };
+};
