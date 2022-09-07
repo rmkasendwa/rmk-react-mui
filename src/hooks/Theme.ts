@@ -1,7 +1,12 @@
 import { useCallback, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
-import { toggleDarkMode as baseToggleDarkMode, setDarkMode } from '../redux';
+import {
+  RootState,
+  setThemeProperty as baseSetThemeProperty,
+  toggleDarkMode as baseToggleDarkMode,
+  setDarkMode,
+} from '../redux';
 import StorageManager from '../utils/StorageManager';
 
 export const useDarkMode = () => {
@@ -32,4 +37,32 @@ export const useDarkMode = () => {
   }, [toggleDarkMode]);
 
   return { toggleDarkMode };
+};
+
+export const useCachedThemeProperty = <T = any>(
+  property: string,
+  defaultValue?: T
+) => {
+  const dispatch = useDispatch();
+  const value: T = useSelector((state: RootState) => {
+    const { theme } = state;
+    return (theme as any)[property] || defaultValue;
+  });
+
+  const setThemeProperty = useCallback(
+    (payload?: T) => {
+      dispatch(baseSetThemeProperty(property, payload));
+    },
+    [dispatch, property]
+  );
+
+  useEffect(() => {
+    if (defaultValue != null && value == null) {
+      setThemeProperty(defaultValue);
+    }
+  }, [defaultValue, setThemeProperty, value]);
+
+  return { setThemeProperty, [property]: value } as {
+    setThemeProperty: (payload: T) => void;
+  } & { [property: string]: T };
 };

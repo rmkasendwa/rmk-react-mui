@@ -23,6 +23,8 @@ export const themeReducer: Reducer = (state = theme, { type, payload }) => {
     case SET_DARK_MODE:
       newState = { ...state, darkMode: payload };
       break;
+    default:
+      newState = { ...state, [type]: payload };
   }
   StorageManager.add('theme', newState);
   return newState;
