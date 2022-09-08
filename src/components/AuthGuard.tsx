@@ -1,3 +1,4 @@
+import * as queryString from 'query-string';
 import { FC, useEffect } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 
@@ -42,7 +43,11 @@ export const AuthGuard: FC<IAuthGuardProps> = ({ variant }) => {
           break;
         case 'PUBLIC_ONLY':
           if (authenticated) {
-            navigate(INDEX_ROUTE_PATH);
+            const search = queryString.parse(location.search) as Record<
+              string,
+              string
+            >;
+            navigate(search.return_to ?? INDEX_ROUTE_PATH);
           }
           break;
       }
@@ -56,6 +61,13 @@ export const AuthGuard: FC<IAuthGuardProps> = ({ variant }) => {
     search,
     variant,
   ]);
+
+  if (
+    (variant === 'PROTECTED' && !loggedInUser) ||
+    (variant === 'PUBLIC_ONLY' && authenticated)
+  ) {
+    return null;
+  }
 
   return <Outlet />;
 };

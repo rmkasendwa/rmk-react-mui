@@ -1,4 +1,8 @@
+import { HmacSHA512, enc } from 'crypto-js';
+
 import { decrypt, encrypt } from './Cypher';
+
+const { Base64 } = enc;
 
 interface IStorageManagerAddOptions {
   isSessionValue?: boolean;
@@ -9,7 +13,15 @@ const ENCRYPTION_KEY =
   process.env.ENCRYPTION_KEY ||
   process.env.APP_NAME ||
   process.env.REACT_APP_NAME ||
+  window?.location?.origin ||
   'A really trivial key';
+
+const getEncryptedKey = (key: string) => {
+  return Base64.stringify(HmacSHA512(key, ENCRYPTION_KEY)).substring(
+    0,
+    key.length
+  );
+};
 
 const StorageManager = {
   add(key: string, value: any, options?: boolean | IStorageManagerAddOptions) {
@@ -30,7 +42,7 @@ const StorageManager = {
       })();
       value = encrypt(value, key);
       (isSessionValue ? sessionStorage : localStorage).setItem(
-        btoa(encrypt(key, ENCRYPTION_KEY, false)),
+        getEncryptedKey(key),
         btoa(value)
       );
       typeof options === 'object' &&
@@ -41,7 +53,7 @@ const StorageManager = {
   get(key: string, isSessionValue = false) {
     if (typeof window !== 'undefined') {
       let item = (isSessionValue ? sessionStorage : localStorage).getItem(
-        btoa(encrypt(key, ENCRYPTION_KEY, false))
+        getEncryptedKey(key)
       );
       if (item) {
         item = decrypt(atob(item), key);
@@ -63,7 +75,7 @@ const StorageManager = {
   remove(key: string, isSessionValue = false) {
     if (typeof window !== 'undefined') {
       (isSessionValue ? sessionStorage : localStorage).removeItem(
-        btoa(encrypt(key, ENCRYPTION_KEY, false))
+        getEncryptedKey(key)
       );
     }
   },
