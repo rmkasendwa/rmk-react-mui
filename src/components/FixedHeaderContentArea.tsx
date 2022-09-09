@@ -33,6 +33,7 @@ export const FixedHeaderContentArea: FC<IFixedHeaderContentAreaProps> = ({
           flex: 1,
           minHeight: 0,
           overflowY: 'auto',
+          overflowX: 'hidden',
           position: 'relative',
         }}
       >
