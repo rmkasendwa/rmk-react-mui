@@ -13,7 +13,11 @@ const ENCRYPTION_KEY =
   process.env.ENCRYPTION_KEY ||
   process.env.APP_NAME ||
   process.env.REACT_APP_NAME ||
-  window?.location?.origin ||
+  (() => {
+    if (typeof window !== 'undefined') {
+      return window.location.origin;
+    }
+  })() ||
   'A really trivial key';
 
 const getEncryptedKey = (key: string) => {
