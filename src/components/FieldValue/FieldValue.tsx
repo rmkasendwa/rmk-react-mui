@@ -9,7 +9,7 @@ import {
 } from '@mui/material';
 import Typography, { TypographyProps } from '@mui/material/Typography';
 import clsx from 'clsx';
-import { FC } from 'react';
+import { forwardRef } from 'react';
 
 import {
   FieldValueClasses,
@@ -53,33 +53,36 @@ const useUtilityClasses = (ownerState: any) => {
 
 export interface IFieldValueProps extends TypographyProps {}
 
-export const FieldValue: FC<IFieldValueProps> = (inProps) => {
-  const props = useThemeProps({ props: inProps, name: 'MuiFieldValue' });
-  const { children, sx, ...rest } = props;
+export const FieldValue = forwardRef<HTMLElement, IFieldValueProps>(
+  function FieldValue(inProps, ref) {
+    const props = useThemeProps({ props: inProps, name: 'MuiFieldValue' });
+    const { children, sx, ...rest } = props;
 
-  const classes = useUtilityClasses({
-    ...props,
-  });
+    const classes = useUtilityClasses({
+      ...props,
+    });
 
-  const { palette, components } = useTheme();
-  return (
-    <Typography
-      className={clsx(classes.root)}
-      variant="body2"
-      component={'div' as any}
-      {...rest}
-      sx={{
-        wordBreak: 'break-word',
-        whiteSpace: 'pre-line',
-        color: alpha(palette.text.primary, 0.5),
-        width: '100%',
-        ...((components?.MuiFieldValue?.styleOverrides?.root as any) || {}),
-        ...sx,
-      }}
-    >
-      {children}
-    </Typography>
-  );
-};
+    const { palette, components } = useTheme();
+    return (
+      <Typography
+        ref={ref}
+        className={clsx(classes.root)}
+        variant="body2"
+        component={'div' as any}
+        {...rest}
+        sx={{
+          wordBreak: 'break-word',
+          whiteSpace: 'pre-line',
+          color: alpha(palette.text.primary, 0.5),
+          width: '100%',
+          ...((components?.MuiFieldValue?.styleOverrides?.root as any) || {}),
+          ...sx,
+        }}
+      >
+        {children}
+      </Typography>
+    );
+  }
+);
 
 export default FieldValue;

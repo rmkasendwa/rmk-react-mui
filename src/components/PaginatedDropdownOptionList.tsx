@@ -1,4 +1,4 @@
-import { Divider, Grid, iconButtonClasses } from '@mui/material';
+import { Divider, Grid, Tooltip, iconButtonClasses } from '@mui/material';
 import Box from '@mui/material/Box';
 import Card, { CardProps } from '@mui/material/Card';
 import MenuItem, { MenuItemProps } from '@mui/material/MenuItem';
@@ -28,6 +28,7 @@ export type TDropdownOptionValue = string | number;
 export interface IDropdownOption extends Pick<MenuItemProps, 'onClick'> {
   value: TDropdownOptionValue;
   label: ReactNode;
+  description?: ReactNode;
   fieldValueLabel?: string;
   searchableLabel?: string;
   selectable?: boolean;
@@ -308,6 +309,7 @@ export const PaginatedDropdownOptionList = forwardRef<
               const {
                 value,
                 label,
+                description,
                 selectable,
                 isDropdownOption = true,
                 isDropdownOptionWrapped = true,
@@ -320,7 +322,7 @@ export const PaginatedDropdownOptionList = forwardRef<
                 if (isFocused) {
                   classNames.push('Mui-focusVisible');
                 }
-                return (
+                const dropdownOptionElement = (
                   <DropdownOption
                     className={classNames.join(' ')}
                     value={value}
@@ -344,6 +346,14 @@ export const PaginatedDropdownOptionList = forwardRef<
                     {label}
                   </DropdownOption>
                 );
+                if (description) {
+                  return (
+                    <Tooltip title={description}>
+                      {dropdownOptionElement}
+                    </Tooltip>
+                  );
+                }
+                return dropdownOptionElement;
               }
               return <Fragment key={value}>{label}</Fragment>;
             })
