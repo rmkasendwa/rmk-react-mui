@@ -306,169 +306,165 @@ export const DataDropdownField = forwardRef<
     );
   }
 
-  const textField = (
-    <TextField
-      ref={ref}
-      onClick={() => {
-        setTimeout(() => setOpen(true), 200);
-        loadOptions();
-      }}
-      onFocus={(event) => {
-        setFocused(true);
-        onFocus && onFocus(event);
-      }}
-      onBlur={() => {
-        setFocused(false);
-        if (onBlur) {
-          const event: any = new Event('blur', { bubbles: true });
-          Object.defineProperty(event, 'target', {
-            writable: false,
-            value: {
-              name,
-              id,
-              value: selectedOptionValue,
-            },
-          });
-          onBlur(event);
-        }
-      }}
-      onChange={(event) => {
-        setSearchTerm(event.target.value);
-        onChangeSearchTerm && onChangeSearchTerm(event.target.value);
-      }}
-      InputProps={{
-        endAdornment: (
-          <>
-            {selectedOptions.length > 0 && !disabled ? (
-              <Tooltip title="Clear">
-                <IconButton
-                  className="data-dropdown-input-clear-button"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    setSearchTerm('');
-                    const options: IDropdownOption[] = [];
-                    setSelectedOptions(options);
-                    triggerChangeEvent(options);
-                  }}
-                  sx={{ p: 0.4 }}
-                >
-                  <CloseIcon />
-                </IconButton>
-              </Tooltip>
-            ) : null}
-            <ExpandMoreIcon />
-          </>
-        ),
-        ...InputProps,
-        ...(() => {
-          const props: Partial<typeof InputProps> = {};
-          if (selectedOptions.length > 0) {
-            props.placeholder = '';
-          }
-          return props;
-        })(),
-        ref: anchorRef,
-      }}
-      value={(() => {
-        if (focused) {
-          return searchTerm;
-        } else {
-          return selectedOptionDisplayString;
-        }
-      })()}
-      {...{ disabled }}
-      {...rest}
-      {...errorProps}
-      sx={{
-        '& .data-dropdown-input-clear-button': {
-          visibility: 'hidden',
-        },
-        '&:hover .data-dropdown-input-clear-button': {
-          visibility: 'visible',
-        },
-        ...sx,
-      }}
-    />
-  );
-
   return (
     <>
-      <Box
-        sx={{
-          position: 'relative',
-          width: '100%',
-          [`& .${inputBaseClasses.input}`]: (() => {
-            if (!focused && selectedOptionDisplayString.length > 0) {
-              return { color: 'transparent' };
+      <TextField
+        ref={ref}
+        onClick={() => {
+          setTimeout(() => setOpen(true), 200);
+          loadOptions();
+        }}
+        onFocus={(event) => {
+          setFocused(true);
+          onFocus && onFocus(event);
+        }}
+        onBlur={() => {
+          setFocused(false);
+          if (onBlur) {
+            const event: any = new Event('blur', { bubbles: true });
+            Object.defineProperty(event, 'target', {
+              writable: false,
+              value: {
+                name,
+                id,
+                value: selectedOptionValue,
+              },
+            });
+            onBlur(event);
+          }
+        }}
+        onChange={(event) => {
+          setSearchTerm(event.target.value);
+          onChangeSearchTerm && onChangeSearchTerm(event.target.value);
+        }}
+        InputProps={{
+          endAdornment: (
+            <>
+              {selectedOptions.length > 0 && !disabled ? (
+                <Tooltip title="Clear">
+                  <IconButton
+                    className="data-dropdown-input-clear-button"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setSearchTerm('');
+                      const options: IDropdownOption[] = [];
+                      setSelectedOptions(options);
+                      triggerChangeEvent(options);
+                    }}
+                    sx={{ p: 0.4 }}
+                  >
+                    <CloseIcon />
+                  </IconButton>
+                </Tooltip>
+              ) : null}
+              <ExpandMoreIcon />
+            </>
+          ),
+          ...InputProps,
+          ...(() => {
+            const props: Partial<typeof InputProps> = {};
+            if (selectedOptions.length > 0) {
+              props.placeholder = '';
             }
-            return {};
+            return props;
           })(),
-          '&>.data-dropdown-field-selected-option-wrapper': {
-            width: 'calc(100% - 40px)',
-          },
-          '&:hover>.data-dropdown-field-selected-option-wrapper': {
-            width: 'calc(100% - 72px)',
+          ref: anchorRef,
+        }}
+        value={(() => {
+          if (focused) {
+            return searchTerm;
+          } else {
+            return selectedOptionDisplayString;
+          }
+        })()}
+        {...{ disabled }}
+        {...rest}
+        {...errorProps}
+        endChildren={
+          !focused && selectedOptions.length > 0 ? (
+            <Box
+              className="data-dropdown-field-selected-option-wrapper"
+              sx={{
+                position: 'absolute',
+                bottom: 0,
+                left: 0,
+                height: '100%',
+                pointerEvents: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                pl: '14px',
+                whiteSpace: 'nowrap',
+                gap: 0.5,
+                overflow: 'hidden',
+              }}
+            >
+              {multiple ? (
+                selectedOptions.map(({ label, value }) => {
+                  return (
+                    <Box
+                      key={value}
+                      {...selectedOptionPillPropsRest}
+                      sx={{
+                        fontSize: 14,
+                        bgcolor: alpha(palette.primary.main, 0.1),
+                        borderRadius: '20px',
+                        height: 25,
+                        py: 0.25,
+                        pl: (() => {
+                          if (['string', 'number'].includes(typeof label)) {
+                            return 1;
+                          }
+                          return 0.25;
+                        })(),
+                        pr: 1,
+                        mr: 0.5,
+                        ...selectedOptionPillPropsSx,
+                      }}
+                    >
+                      {label}
+                    </Box>
+                  );
+                })
+              ) : (
+                <Typography
+                  component="div"
+                  sx={{
+                    fontSize: 14,
+                  }}
+                >
+                  {selectedOptions[0]?.label}
+                </Typography>
+              )}
+            </Box>
+          ) : null
+        }
+        WrapperProps={{
+          sx: {
+            width: '100%',
+            [`& .${inputBaseClasses.input}`]: (() => {
+              if (!focused && selectedOptionDisplayString.length > 0) {
+                return { color: 'transparent' };
+              }
+              return {};
+            })(),
+            '&>.data-dropdown-field-selected-option-wrapper': {
+              width: 'calc(100% - 40px)',
+            },
+            '&:hover>.data-dropdown-field-selected-option-wrapper': {
+              width: 'calc(100% - 72px)',
+            },
           },
         }}
-      >
-        {textField}
-        {!focused && selectedOptions.length > 0 ? (
-          <Box
-            className="data-dropdown-field-selected-option-wrapper"
-            sx={{
-              position: 'absolute',
-              bottom: 0,
-              left: 0,
-              height: '100%',
-              pointerEvents: 'none',
-              display: 'flex',
-              alignItems: 'center',
-              pl: '14px',
-              whiteSpace: 'nowrap',
-              gap: 0.5,
-              overflow: 'hidden',
-            }}
-          >
-            {multiple ? (
-              selectedOptions.map(({ label, value }) => {
-                return (
-                  <Box
-                    key={value}
-                    {...selectedOptionPillPropsRest}
-                    sx={{
-                      fontSize: 14,
-                      bgcolor: alpha(palette.primary.main, 0.1),
-                      borderRadius: '20px',
-                      height: 25,
-                      py: 0.25,
-                      pl: (() => {
-                        if (['string', 'number'].includes(typeof label)) {
-                          return 1;
-                        }
-                        return 0.25;
-                      })(),
-                      pr: 1,
-                      mr: 0.5,
-                      ...selectedOptionPillPropsSx,
-                    }}
-                  >
-                    {label}
-                  </Box>
-                );
-              })
-            ) : (
-              <Typography
-                component="div"
-                sx={{
-                  fontSize: 14,
-                }}
-              >
-                {selectedOptions[0]?.label}
-              </Typography>
-            )}
-          </Box>
-        ) : null}
-      </Box>
+        sx={{
+          '& .data-dropdown-input-clear-button': {
+            visibility: 'hidden',
+          },
+          '&:hover .data-dropdown-input-clear-button': {
+            visibility: 'visible',
+          },
+          ...sx,
+        }}
+      />
       <Popper
         open={open}
         anchorEl={anchorRef.current}
