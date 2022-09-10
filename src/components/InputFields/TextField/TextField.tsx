@@ -1,4 +1,5 @@
 import CloseIcon from '@mui/icons-material/Close';
+import { Box, BoxProps } from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
 import IconButton from '@mui/material/IconButton';
 import Skeleton from '@mui/material/Skeleton';
@@ -16,6 +17,8 @@ export interface ITextFieldProps
   labelWrapped?: boolean;
   value?: string;
   endAdornment?: ReactNode;
+  endChildren?: ReactNode;
+  WrapperProps?: Partial<BoxProps>;
 }
 
 export const TextField = forwardRef<HTMLDivElement, ITextFieldProps>(
@@ -36,13 +39,18 @@ export const TextField = forwardRef<HTMLDivElement, ITextFieldProps>(
       required,
       labelWrapped = false,
       endAdornment: endAdornmentProp,
+      endChildren,
+      WrapperProps = {},
       sx,
       ...rest
     },
     ref
   ) {
+    const { sx: wrapperPropsSx, ...wrapperPropsRest } = WrapperProps;
+
     const { InputProps = {} } = rest;
     const { endAdornment, ...restInputProps } = InputProps;
+
     const { loading, errorMessage } = useLoadingContext();
     const [inputValue, setInputValue] = useState('');
 
@@ -95,75 +103,84 @@ export const TextField = forwardRef<HTMLDivElement, ITextFieldProps>(
       }
 
       return (
-        <MuiTextField
-          ref={ref}
-          {...{
-            size,
-            variant,
-            multiline,
-            rows,
-            fullWidth,
-            id,
-            name,
-            disabled,
-            required,
-          }}
-          {...rest}
-          label={(() => {
-            if (!labelWrapped) {
-              return label;
-            }
-          })()}
-          placeholder={(() => {
-            if (labelWrapped && !placeholder && typeof label === 'string') {
-              return label;
-            }
-            return placeholder;
-          })()}
-          value={inputValue}
-          onChange={(event) => {
-            setInputValue(event.target.value);
-            triggerChangeEvent(event.target.value);
-          }}
-          InputProps={{
-            endAdornment:
-              endAdornment ??
-              (() => {
-                if (inputValue.length > 0 || endAdornmentProp) {
-                  return (
-                    <>
-                      {inputValue.length > 0 && !disabled ? (
-                        <Tooltip title="Clear">
-                          <IconButton
-                            className="text-input-clear-button"
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              setInputValue('');
-                              triggerChangeEvent('');
-                            }}
-                            sx={{ p: 0.4 }}
-                          >
-                            <CloseIcon />
-                          </IconButton>
-                        </Tooltip>
-                      ) : null}
-                      {endAdornmentProp ? endAdornmentProp : null}
-                    </>
-                  );
-                }
-              })(),
-            ...restInputProps,
-          }}
+        <Box
+          {...wrapperPropsRest}
           sx={{
-            '& .text-input-clear-button': {
-              visibility: 'hidden',
-            },
-            '&:hover .text-input-clear-button': {
-              visibility: 'visible',
-            },
-            ...sx,
+            position: 'relative',
+            ...wrapperPropsSx,
           }}
-        />
+        >
+          <MuiTextField
+            ref={ref}
+            {...{
+              size,
+              variant,
+              multiline,
+              rows,
+              fullWidth,
+              id,
+              name,
+              disabled,
+              required,
+            }}
+            {...rest}
+            label={(() => {
+              if (!labelWrapped) {
+                return label;
+              }
+            })()}
+            placeholder={(() => {
+              if (labelWrapped && !placeholder && typeof label === 'string') {
+                return label;
+              }
+              return placeholder;
+            })()}
+            value={inputValue}
+            onChange={(event) => {
+              setInputValue(event.target.value);
+              triggerChangeEvent(event.target.value);
+            }}
+            InputProps={{
+              endAdornment:
+                endAdornment ??
+                (() => {
+                  if (inputValue.length > 0 || endAdornmentProp) {
+                    return (
+                      <>
+                        {inputValue.length > 0 && !disabled ? (
+                          <Tooltip title="Clear">
+                            <IconButton
+                              className="text-input-clear-button"
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                setInputValue('');
+                                triggerChangeEvent('');
+                              }}
+                              sx={{ p: 0.4 }}
+                            >
+                              <CloseIcon />
+                            </IconButton>
+                          </Tooltip>
+                        ) : null}
+                        {endAdornmentProp ? endAdornmentProp : null}
+                      </>
+                    );
+                  }
+                })(),
+              ...restInputProps,
+            }}
+            sx={{
+              '& .text-input-clear-button': {
+                visibility: 'hidden',
+              },
+              '&:hover .text-input-clear-button': {
+                visibility: 'visible',
+              },
+              ...sx,
+            }}
+          />
+          {endChildren}
+        </Box>
       );
     })();
 
