@@ -1,4 +1,4 @@
-import Alert, { AlertProps } from '@mui/material/Alert';
+import Alert, { AlertProps, alertClasses } from '@mui/material/Alert';
 import { FC } from 'react';
 
 import RetryErrorMessage, {
@@ -21,6 +21,9 @@ export const ErrorAlert: FC<IErrorAlertProps> = ({
         width: '100%',
         boxSizing: 'border-box',
         whiteSpace: 'pre-wrap',
+        [`& .${alertClasses.message}`]: {
+          overflow: 'hidden',
+        },
         ...sx,
       }}
     >

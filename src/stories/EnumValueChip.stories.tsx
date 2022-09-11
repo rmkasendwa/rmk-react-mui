@@ -1,5 +1,6 @@
 import { alpha } from '@mui/system/colorManipulator';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
+import React from 'react';
 
 import EnumValueChip from '../components/EnumValueChip';
 
@@ -13,12 +14,12 @@ export default {
 
 const Template: ComponentStory<typeof EnumValueChip> = (props) => (
   <EnumValueChip
+    {...props}
     colors={{
       ACTIVE: '#4F945C',
       PENDING: '#EDB80B',
       TRANSLUSENT: alpha('#1F0E68', 0.3),
     }}
-    {...props}
   />
 );
 
