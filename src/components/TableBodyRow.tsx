@@ -2,9 +2,9 @@ import Box from '@mui/material/Box';
 import TableCell from '@mui/material/TableCell';
 import TableRow, { TableRowProps } from '@mui/material/TableRow';
 import { format } from 'date-fns';
-import { FC, isValidElement, useEffect, useMemo, useRef } from 'react';
+import { isValidElement, useEffect, useMemo, useRef } from 'react';
 
-import { ITableRowProps } from '../interfaces/Table';
+import { IBaseTableRow, ITableRowProps } from '../interfaces/Table';
 import { formatDate } from '../utils/dates';
 import { addThousandCommas } from '../utils/numbers';
 import { getColumnWidthStyles } from '../utils/Table';
@@ -29,7 +29,7 @@ export interface ITableBodyRowProps<T = any>
   extends Partial<TableRowProps>,
     ITableRowProps<T> {}
 
-export const TableBodyRow: FC<ITableBodyRowProps> = ({
+export const TableBodyRow = <T extends IBaseTableRow>({
   columns,
   row,
   forEachDerivedColumn,
@@ -40,7 +40,7 @@ export const TableBodyRow: FC<ITableBodyRowProps> = ({
   onClickRow,
   sx,
   ...rest
-}) => {
+}: ITableBodyRowProps<T>) => {
   const forEachDerivedColumnRef = useRef(forEachDerivedColumn);
   const getRowPropsRef = useRef(getRowProps);
   const generateRowDataRef = useRef(generateRowData);
@@ -64,7 +64,7 @@ export const TableBodyRow: FC<ITableBodyRowProps> = ({
                 currentEntity: row,
               });
             }
-            return row[id];
+            return (row as any)[id];
           })();
           if (type && toolTypes.includes(type)) {
             switch (type) {
@@ -96,7 +96,10 @@ export const TableBodyRow: FC<ITableBodyRowProps> = ({
                 // TODO: Implment this
                 break;
             }
-          } else if (allowedDataTypes.includes(typeof columnValue)) {
+          } else if (
+            columnValue != null &&
+            allowedDataTypes.includes(typeof columnValue)
+          ) {
             switch (type) {
               case 'date':
                 columnValue = formatDate(columnValue);
@@ -133,11 +136,12 @@ export const TableBodyRow: FC<ITableBodyRowProps> = ({
                 columnValue = columnValue ? 'Yes' : 'No';
                 break;
             }
-          } else if (!columnValue) {
-            columnValue = defaultValue || <>&nbsp;</>;
           }
-          if (postProcessor) {
+          if (postProcessor && columnValue != null) {
             columnValue = postProcessor(columnValue, row, column);
+          }
+          if (!columnValue) {
+            columnValue = defaultValue || <>&nbsp;</>;
           }
           accumulator[id] = columnValue;
           return accumulator;

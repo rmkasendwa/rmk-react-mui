@@ -34,13 +34,14 @@ Default.args = {
       type: 'currency',
     },
   ],
-  rows: Array.from({ length: 3 }).map(() => ({
+  rows: Array.from({ length: 3 }).map((_, index) => ({
+    id: index,
     accountNumber: '18728',
     name: 'John Doe',
     outstandingBalance: 660000,
   })),
   paging: false,
-};
+} as ITableProps;
 
 export const WithoutPaging = Template.bind({});
 WithoutPaging.args = {
@@ -58,13 +59,14 @@ WithoutPaging.args = {
       type: 'currency',
     },
   ],
-  rows: Array.from({ length: 3 }).map(() => ({
+  rows: Array.from({ length: 3 }).map((_, index) => ({
+    id: index,
     accountNumber: '18728',
     name: 'John Doe',
     outstandingBalance: 660000,
   })),
   paging: false,
-};
+} as ITableProps;
 
 export const WithoutHeaderRow = Template.bind({});
 WithoutHeaderRow.args = {
@@ -82,13 +84,14 @@ WithoutHeaderRow.args = {
       type: 'currency',
     },
   ],
-  rows: Array.from({ length: 3 }).map(() => ({
+  rows: Array.from({ length: 3 }).map((_, index) => ({
+    id: index,
     accountNumber: '18728',
     name: 'John Doe',
     outstandingBalance: 660000,
   })),
   showHeaderRow: false,
-};
+} as ITableProps;
 
 export const WithHeaderRowProps = Template.bind({});
 WithHeaderRowProps.args = {
@@ -106,7 +109,8 @@ WithHeaderRowProps.args = {
       type: 'currency',
     },
   ],
-  rows: Array.from({ length: 3 }).map(() => ({
+  rows: Array.from({ length: 3 }).map((_, index) => ({
+    id: index,
     accountNumber: '18728',
     name: 'John Doe',
     outstandingBalance: 660000,
@@ -124,7 +128,7 @@ WithHeaderRowProps.args = {
       },
     },
   },
-};
+} as ITableProps;
 
 export const ColumnTypes = Template.bind({});
 ColumnTypes.args = {
@@ -146,7 +150,7 @@ ColumnTypes.args = {
       time: Date.now(),
     };
   }),
-};
+} as ITableProps;
 
 export const ClassicPagination = Template.bind({});
 ClassicPagination.args = {
@@ -167,7 +171,7 @@ ClassicPagination.args = {
     };
   }),
   paginationType: 'classic',
-};
+} as ITableProps;
 
 export const FixedHeader = Template.bind({});
 FixedHeader.args = {
