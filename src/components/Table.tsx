@@ -48,7 +48,7 @@ export type {
 } from '../interfaces/Table';
 
 export interface ITableProps<T = any>
-  extends Partial<Omit<BoxProps, 'ref'>>,
+  extends Partial<Omit<BoxProps, 'ref' | 'defaultValue'>>,
     Pick<
       ITableRowProps<T>,
       | 'columns'
@@ -57,6 +57,7 @@ export interface ITableProps<T = any>
       | 'decimalPlaces'
       | 'labelTransform'
       | 'onClickRow'
+      | 'defaultValue'
     > {
   rows: T[];
   rowStartIndex?: number;
@@ -110,6 +111,7 @@ const BaseTable = <T extends IBaseTableRow>(
     PaginationProps = {},
     stickyHeader = false,
     TableBodyRowPlaceholderProps = {},
+    defaultValue,
     ...rest
   }: ITableProps<T>,
   ref: Ref<HTMLDivElement>
@@ -322,6 +324,7 @@ const BaseTable = <T extends IBaseTableRow>(
                             labelTransform,
                             onClickRow,
                             generateRowData,
+                            defaultValue,
                           }}
                           getRowProps={forEachRowProps}
                           className={classNames.join(' ')}

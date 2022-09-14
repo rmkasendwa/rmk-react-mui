@@ -75,4 +75,5 @@ export interface ITableRowProps<T = any> {
   decimalPlaces?: number;
   labelTransform?: boolean;
   onClickRow?: (currentEntity: T) => void;
+  defaultValue?: ReactNode;
 }

@@ -26,7 +26,7 @@ const toolTypes = [
 ];
 
 export interface ITableBodyRowProps<T = any>
-  extends Partial<TableRowProps>,
+  extends Partial<Omit<TableRowProps, 'defaultValue'>>,
     ITableRowProps<T> {}
 
 export const TableBodyRow = <T extends IBaseTableRow>({
@@ -39,6 +39,7 @@ export const TableBodyRow = <T extends IBaseTableRow>({
   labelTransform,
   onClickRow,
   sx,
+  defaultValue,
   ...rest
 }: ITableBodyRowProps<T>) => {
   const forEachDerivedColumnRef = useRef(forEachDerivedColumn);
@@ -51,12 +52,20 @@ export const TableBodyRow = <T extends IBaseTableRow>({
     generateRowDataRef.current = generateRowData;
   }, [forEachDerivedColumn, generateRowData, getRowProps]);
 
-  const formattedRow = useMemo(() => {
+  const formattedRow: any & {
+    currentEntity: T;
+    rowProps: any;
+  } = useMemo(() => {
     return {
       ...columns.reduce(
         (accumulator, column) => {
-          const { type, id, defaultValue, postProcessor, isDerivedColumn } =
-            column;
+          const {
+            type,
+            id,
+            defaultValue: columnDefaultValue,
+            postProcessor,
+            isDerivedColumn,
+          } = column;
           let columnValue = (() => {
             if (isDerivedColumn && forEachDerivedColumnRef.current) {
               return forEachDerivedColumnRef.current({
@@ -140,8 +149,8 @@ export const TableBodyRow = <T extends IBaseTableRow>({
           if (postProcessor && columnValue != null) {
             columnValue = postProcessor(columnValue, row, column);
           }
-          if (!columnValue) {
-            columnValue = defaultValue || <>&nbsp;</>;
+          if (columnValue == null) {
+            columnValue = columnDefaultValue ?? defaultValue ?? <>&nbsp;</>;
           }
           accumulator[id] = columnValue;
           return accumulator;
@@ -158,12 +167,16 @@ export const TableBodyRow = <T extends IBaseTableRow>({
       ),
       ...(() => {
         if (generateRowDataRef.current) {
-          return generateRowDataRef.current(row);
+          return Object.fromEntries(
+            Object.entries(generateRowDataRef.current(row)).filter(
+              ([, value]) => value != null
+            )
+          );
         }
         return {};
       })(),
     };
-  }, [columns, decimalPlaces, labelTransform, row]);
+  }, [columns, decimalPlaces, defaultValue, labelTransform, row]);
 
   const { sx: rowPropsSx, ...restRowProps }: any = formattedRow.rowProps;
   return (
