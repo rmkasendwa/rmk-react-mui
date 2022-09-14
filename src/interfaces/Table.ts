@@ -11,7 +11,7 @@ export type ITableColumnEnumValue =
 
 export interface ITableColumn<T = any>
   extends Partial<Omit<TableCellProps, 'defaultValue'>> {
-  id: string;
+  id: keyof T & string;
   label: ReactNode;
   type?:
     | 'boolean'
@@ -59,6 +59,10 @@ export interface IForEachDerivedColumnConfiguration<T> {
 }
 
 export type TGetRowProps<T = any> = (currentEntity: T) => TableRowProps;
+
+export interface IBaseTableRow {
+  id: string | number;
+}
 
 export interface ITableRowProps<T = any> {
   columns: Array<ITableColumn<T>>;

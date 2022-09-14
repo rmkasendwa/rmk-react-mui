@@ -131,7 +131,7 @@ const fetchData = async <T = any>(
               return reject(new SessionTimeoutError('Session timed out'));
             }
 
-            if (message) {
+            if (message && !String(message).match(/request\sfailed/gi)) {
               return reject(new Error(`Error: '${label}' failed. ${message}`));
             }
             return reject(

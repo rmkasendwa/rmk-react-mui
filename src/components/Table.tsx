@@ -20,6 +20,8 @@ import { alpha } from '@mui/system/colorManipulator';
 import { SxProps } from '@mui/system/styleFunctionSx';
 import {
   CSSProperties,
+  ReactElement,
+  Ref,
   forwardRef,
   useContext,
   useEffect,
@@ -29,6 +31,7 @@ import {
 
 import { GlobalConfigurationContext } from '../contexts/GlobalConfigurationContext';
 import {
+  IBaseTableRow,
   ITableColumn,
   ITableRowProps,
   TGetRowProps,
@@ -78,7 +81,7 @@ export interface ITableProps<T = any>
   TableBodyRowPlaceholderProps?: Partial<IRenderIfVisibleProps>;
 }
 
-export const Table = forwardRef<HTMLDivElement, ITableProps>(function Table(
+const BaseTable = <T extends IBaseTableRow>(
   {
     onClickRow,
     columns: columnsProp,
@@ -108,9 +111,9 @@ export const Table = forwardRef<HTMLDivElement, ITableProps>(function Table(
     stickyHeader = false,
     TableBodyRowPlaceholderProps = {},
     ...rest
-  },
-  ref
-) {
+  }: ITableProps<T>,
+  ref: Ref<HTMLDivElement>
+) => {
   const { sx: tableContainerPropsSx, ...tableContainerPropsRest } =
     TableContainerProps;
   const {
@@ -189,7 +192,7 @@ export const Table = forwardRef<HTMLDivElement, ITableProps>(function Table(
     });
   }, [columnsProp, currencyCode]);
 
-  const pageRows = useMemo(() => {
+  const pageRows: typeof rows = useMemo(() => {
     return totalRowCount || !paging
       ? rows
       : rows.slice(
@@ -301,11 +304,7 @@ export const Table = forwardRef<HTMLDivElement, ITableProps>(function Table(
                     return (
                       <RenderIfVisible
                         {...tableBodyRowPlaceholderPropsRest}
-                        key={
-                          row.currentEntity?.key ??
-                          row.currentEntity?.id ??
-                          index
-                        }
+                        key={row.id}
                         component="tr"
                         displayPlaceholder={false}
                         unWrapChildrenIfVisible
@@ -387,6 +386,9 @@ export const Table = forwardRef<HTMLDivElement, ITableProps>(function Table(
       })()}
     </Box>
   );
-});
+};
 
+export const Table = forwardRef(BaseTable) as <T>(
+  p: ITableProps<T> & { ref?: Ref<HTMLDivElement> }
+) => ReactElement;
 export default Table;

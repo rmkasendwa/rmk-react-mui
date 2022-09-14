@@ -32,7 +32,7 @@ export const PaddedContentArea: FC<IPaddedContentAreaProps> = ({
         flex: 1,
         px: 3,
         [smallScreenBreakpoint]: {
-          px: 2,
+          px: 0,
         },
         ...sx,
       }}
