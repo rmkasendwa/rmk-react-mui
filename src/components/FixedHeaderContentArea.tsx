@@ -1,18 +1,23 @@
-import { Box } from '@mui/material';
+import { Box, BoxProps } from '@mui/material';
 import { FC } from 'react';
 
 import PaddedContentArea, {
   IPaddedContentAreaProps,
 } from './PaddedContentArea';
 
-export interface IFixedHeaderContentAreaProps extends IPaddedContentAreaProps {}
+export interface IFixedHeaderContentAreaProps extends IPaddedContentAreaProps {
+  BodyProps?: Partial<BoxProps>;
+}
 
 export const FixedHeaderContentArea: FC<IFixedHeaderContentAreaProps> = ({
   title,
   children,
   sx,
+  BodyProps = {},
   ...rest
 }) => {
+  const { sx: bodyPropsSx, ...bodyPropsRest } = BodyProps;
+
   return (
     <PaddedContentArea
       title={title}
@@ -29,12 +34,14 @@ export const FixedHeaderContentArea: FC<IFixedHeaderContentAreaProps> = ({
       }}
     >
       <Box
+        {...bodyPropsRest}
         sx={{
           flex: 1,
           minHeight: 0,
           overflowY: 'auto',
           overflowX: 'hidden',
           position: 'relative',
+          ...bodyPropsSx,
         }}
       >
         {children}

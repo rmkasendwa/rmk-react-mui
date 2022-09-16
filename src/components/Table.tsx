@@ -1,4 +1,3 @@
-import { Tooltip } from '@mui/material';
 import Box, { BoxProps } from '@mui/material/Box';
 import { PaginationProps } from '@mui/material/Pagination';
 import { Theme } from '@mui/material/styles/createTheme';
@@ -252,7 +251,12 @@ const BaseTable = <T extends IBaseTableRow>(
           ...tableContainerPropsSx,
         }}
       >
-        <MuiTable stickyHeader={stickyHeader}>
+        <MuiTable
+          stickyHeader={stickyHeader}
+          sx={{
+            tableLayout: 'fixed',
+          }}
+        >
           {showHeaderRow ? (
             <TableHead>
               <TableRow {...restHeaderRowProps} sx={{ ...headerRowPropsSx }}>
@@ -277,14 +281,14 @@ const BaseTable = <T extends IBaseTableRow>(
                         ...sx,
                       }}
                     >
-                      <Tooltip title={<>{label}</>}>
-                        <Typography
-                          sx={{ fontWeight: 'bold', fontSize: 12 }}
-                          noWrap
-                        >
-                          {label}
-                        </Typography>
-                      </Tooltip>
+                      <Typography
+                        component="div"
+                        variant="body2"
+                        sx={{ fontWeight: 'bold' }}
+                        noWrap
+                      >
+                        {label}
+                      </Typography>
                     </TableCell>
                   );
                 })}
