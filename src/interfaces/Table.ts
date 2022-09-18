@@ -11,7 +11,7 @@ export type ITableColumnEnumValue =
 
 export interface ITableColumn<T = any>
   extends Partial<Omit<TableCellProps, 'defaultValue'>> {
-  id: keyof T & string;
+  id: string;
   label: ReactNode;
   type?:
     | 'boolean'
@@ -50,6 +50,7 @@ export interface ITableColumn<T = any>
     row: T,
     column: ITableColumn
   ) => ReactNode;
+  getColumnValue?: (row: T, column: ITableColumn) => ReactNode;
   onClickColumn?: (currentEntity: T) => void;
 }
 

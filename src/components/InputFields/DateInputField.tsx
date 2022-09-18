@@ -83,7 +83,9 @@ export const DateInputField = forwardRef<HTMLDivElement, IDateInputFieldProps>(
             ? date
             : null;
         setSelectedDate(selectedDate);
-        triggerChangeEvent(selectedDate?.toISOString() || '');
+        triggerChangeEvent(
+          selectedDate ? format(selectedDate, 'yyyy-MM-dd') : ''
+        );
       },
       renderInput: ({ value, ...params }) => {
         if (params.inputProps) {

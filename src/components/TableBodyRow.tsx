@@ -65,8 +65,12 @@ export const TableBodyRow = <T extends IBaseTableRow>({
             defaultValue: columnDefaultValue,
             postProcessor,
             isDerivedColumn,
+            getColumnValue,
           } = column;
           let columnValue = (() => {
+            if (getColumnValue) {
+              return getColumnValue(row, column);
+            }
             if (isDerivedColumn && forEachDerivedColumnRef.current) {
               return forEachDerivedColumnRef.current({
                 key: id,
