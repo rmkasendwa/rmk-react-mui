@@ -1,7 +1,10 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import React from 'react';
 
-import { DateInputField } from '../../components/InputFields/DateInputField';
+import {
+  DateInputField,
+  IDateInputFieldProps,
+} from '../../components/InputFields/DateInputField';
 
 export default {
   title: 'Components/Input Fields/Date Input Field',
@@ -19,7 +22,10 @@ export const Default = Template.bind({});
 Default.args = {
   label: 'Date',
   required: true,
-};
+  onChange: (event) => {
+    console.log(event.target.value);
+  },
+} as IDateInputFieldProps;
 
 export const WithPlaceholder = Template.bind({});
 WithPlaceholder.args = {
