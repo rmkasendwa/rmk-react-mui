@@ -49,6 +49,16 @@ PERFORMANCE OF THIS SOFTWARE.
 /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */
 
 /**
+ * @license React
+ * react-is.production.min.js
+ *
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/**
  * React Router DOM v6.3.0
  *
  * Copyright (c) Remix Software Inc.
@@ -70,7 +80,7 @@ PERFORMANCE OF THIS SOFTWARE.
  * @license MIT
  */
 
-/** @license MUI v5.3.0
+/** @license MUI v5.10.1
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
