@@ -1,6 +1,17 @@
 import { AxiosRequestConfig } from 'axios';
 
-export type TAPIFunction = () => Promise<any>;
+export interface IPaginatedRequestParams {
+  limit?: number;
+  offset?: number;
+  showRecords?: boolean;
+}
+
+export interface IPaginatedResponseData<T> {
+  recordsTotalCount: number;
+  records: T[];
+}
+
+export type TAPIFunction<T = any> = () => Promise<T>;
 
 export interface IReduxAction {
   type: string;
