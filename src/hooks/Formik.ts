@@ -1,5 +1,6 @@
 import { TextFieldProps } from '@mui/material';
 import { FormikContextType, useFormikContext } from 'formik';
+import { get } from 'lodash';
 import { ChangeEvent, FocusEvent, useCallback } from 'react';
 
 interface IUseAggregatedFormikContextProps
@@ -39,8 +40,8 @@ export const useAggregatedFormikContext = ({
     value:
       value ??
       (() => {
-        if (values && name && values[name] != null) {
-          return values[name];
+        if (values && name && get(values, name) != null) {
+          return get(values, name);
         }
       })(),
     onChange,
@@ -48,15 +49,15 @@ export const useAggregatedFormikContext = ({
     error:
       error ??
       (() => {
-        if (errors && touched && name && touched[name]) {
-          return Boolean(errors[name]);
+        if (errors && touched && name && get(touched, name)) {
+          return Boolean(get(errors, name));
         }
       })(),
     helperText:
       helperText ??
       (() => {
-        if (errors && touched && name && touched[name]) {
-          return errors[name];
+        if (errors && touched && name && get(touched, name)) {
+          return get(errors, name);
         }
       })(),
   };

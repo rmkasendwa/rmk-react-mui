@@ -1,6 +1,6 @@
 {
   "name": "@infinite-debugger/react-mui",
-  "version": "0.1.0-alpha.294",
+  "version": "0.1.0-alpha.297",
   "description": "RMK React MUI is a React UI library of utility components, hooks and contexts",
   "keywords": [
     "react",
@@ -72,11 +72,11 @@
     "clsx": "^1.2.1",
     "crypto-js": "^4.1.1",
     "date-fns": "^2.28.0",
+    "lodash": "^4.17.21",
     "object-hash": "^2.2.0",
     "query-string": "^7.1.1",
     "react-merge-refs": "^2.0.1",
-    "react-smooth-dnd": "^0.11.1",
-    "underscore": "^1.13.2"
+    "react-smooth-dnd": "^0.11.1"
   },
   "devDependencies": {
     "@emotion/react": "^11.7.1",
@@ -101,11 +101,11 @@
     "@types/crypto-js": "^4.1.0",
     "@types/google-libphonenumber": "^7.4.23",
     "@types/jest": "^27.4.0",
+    "@types/lodash": "^4.14.185",
     "@types/node": "^16.11.52",
     "@types/object-hash": "^2.2.1",
     "@types/react": "^17.0.38",
     "@types/react-dom": "^17.0.11",
-    "@types/underscore": "^1.11.4",
     "@types/uniqid": "^5.3.2",
     "@typescript-eslint/eslint-plugin": "^5.7.0",
     "@typescript-eslint/parser": "^5.7.0",

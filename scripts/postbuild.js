@@ -1,5 +1,5 @@
 const fs = require('fs-extra');
-const { omit } = require('underscore');
+const { omit } = require('lodash');
 const os = require('os');
 const { execSync } = require('child_process');
 const currentWorkingDirectory = process.cwd();

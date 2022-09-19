@@ -1,4 +1,4 @@
-import { isEmpty, omit } from 'underscore';
+import { isEmpty, omitBy } from 'lodash';
 
 import { formatBytes } from './bytes';
 
@@ -7,7 +7,7 @@ export const diff = (
   originalData: any,
   biDirectional = false
 ) => {
-  const dataDiff: any = omit(updatedData, (value, key) => {
+  const dataDiff: any = omitBy(updatedData, (value, key) => {
     if (originalData[key] != null && typeof originalData[key] === 'object') {
       const similar = isEmpty(diff(updatedData[key], originalData[key]));
       if (similar) return isEmpty(diff(originalData[key], updatedData[key]));

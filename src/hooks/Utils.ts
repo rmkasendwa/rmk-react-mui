@@ -1,11 +1,24 @@
 import { useMediaQuery, useTheme } from '@mui/material';
-import { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { pick } from 'lodash';
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { CANCELLED_API_REQUEST_MESSAGE } from '../constants';
 import { APIContext } from '../contexts/APIContext';
 import { APIDataContext } from '../contexts/APIDataContext';
-import { ITaggedAPIRequest, TAPIFunction } from '../interfaces/Utils';
+import {
+  IPaginatedRequestParams,
+  IPaginatedResponseData,
+  ITaggedAPIRequest,
+  TAPIFunction,
+} from '../interfaces/Utils';
 import { RootState, updateData } from '../redux';
 
 export const useAPIService = <T>(defautValue: T, key?: string) => {
@@ -251,11 +264,118 @@ export const useRecords = <T>(
   };
 };
 
+export interface IUsePaginatedRecordsOptions extends IPaginatedRequestParams {
+  key?: string;
+  loadOnMount?: boolean;
+  autoSync?: boolean;
+}
+export const usePaginatedRecords = <T>(
+  recordFinder: TAPIFunction<IPaginatedResponseData<T>>,
+  {
+    key,
+    loadOnMount = true,
+    limit: limitProp = 100,
+    offset: offsetProp = 0,
+    showRecords: showRecordsProp = true,
+  }: IUsePaginatedRecordsOptions
+) => {
+  const {
+    load: loadFromAPIService,
+    record: responseData,
+    ...rest
+  } = useAPIService<IPaginatedResponseData<T> | null>(
+    null,
+    (() => {
+      if (key) {
+        return `${key}_${limitProp}_${offsetProp}_${String(showRecordsProp)}`;
+      }
+    })()
+  );
+
+  const loadedPages = useMemo(() => {
+    return new Map<string, T[]>();
+  }, []);
+
+  const [currentPageRecords, setCurrentPageRecords] = useState<T[]>([]);
+  const [allPageRecords, setAllPageRecords] = useState<T[]>([]);
+  const [recordsTotalCount, setRecordsTotalCount] = useState(0);
+
+  const defaultPaginationParams = useMemo(() => {
+    return {
+      offset: offsetProp,
+      limit: limitProp,
+      showRecords: showRecordsProp,
+    } as IPaginatedRequestParams;
+  }, [limitProp, offsetProp, showRecordsProp]);
+
+  const [loadingPaginationParams, setLoadingPaginationParams] = useState(
+    defaultPaginationParams
+  );
+
+  const load = useCallback(
+    (params?: IPaginatedRequestParams) => {
+      params = { ...params };
+      params.offset || (params.offset = defaultPaginationParams.offset);
+      params.limit || (params.limit = defaultPaginationParams.limit);
+      setLoadingPaginationParams(pick(params, 'offset', 'limit'));
+      loadFromAPIService(async () => {
+        const responseData = await recordFinder();
+        const { records, recordsTotalCount } = responseData;
+        setCurrentPageRecords(records);
+        setRecordsTotalCount(recordsTotalCount);
+        return responseData;
+      });
+    },
+    [
+      defaultPaginationParams.limit,
+      defaultPaginationParams.offset,
+      loadFromAPIService,
+      recordFinder,
+    ]
+  );
+
+  useEffect(() => {
+    if (responseData) {
+      const pageKey = `${loadingPaginationParams.offset},${loadingPaginationParams.limit}`;
+      loadedPages.set(pageKey, responseData.records);
+      setAllPageRecords(
+        [...loadedPages.keys()]
+          .sort((a, b) => a.localeCompare(b))
+          .map((key) => loadedPages.get(key)!)
+          .flat()
+      );
+    }
+  }, [
+    loadingPaginationParams.limit,
+    loadingPaginationParams.offset,
+    loadedPages,
+    responseData,
+  ]);
+
+  useEffect(() => {
+    if (loadOnMount) {
+      load();
+    }
+  }, [load, loadOnMount]);
+
+  return {
+    currentPageRecords,
+    allPageRecords,
+    setCurrentPageRecords,
+    setAllPageRecords,
+    recordsTotalCount,
+    loadedPages,
+    load,
+    responseData,
+    ...rest,
+  };
+};
+
 export const useAPIDataContext = () => {
   return useContext(APIDataContext);
 };
 
 export const useSmallScreen = () => {
-  const theme = useTheme();
-  return useMediaQuery(theme.breakpoints.down('sm'));
+  const { breakpoints } = useTheme();
+  return useMediaQuery(breakpoints.down('sm'));
 };
