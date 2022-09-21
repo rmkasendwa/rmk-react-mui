@@ -18,7 +18,7 @@ export const queueRequest = (
   requestOptions: IQueuedRequestOptions,
   callback: (resolve: TResolve, reject: TReject) => void
 ) => {
-  const requestKey = hash(requestOptions);
+  const requestKey = hash(JSON.stringify(requestOptions));
   if (requestQueue[requestKey]) {
     requestQueue[requestKey].push(requestOptions);
   } else {

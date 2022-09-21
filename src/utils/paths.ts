@@ -41,9 +41,11 @@ export const paramsSufficientForPath = (
     });
 };
 
+export type TSearchParam = string | number | boolean;
+
 export const addSearchParams = (
   routePath: string,
-  params: Record<string, string | number | boolean | undefined>
+  params: Record<string, TSearchParam | TSearchParam[] | null | undefined>
 ): string => {
   const keys = Object.keys(params);
   if (keys.length === 0) return routePath;

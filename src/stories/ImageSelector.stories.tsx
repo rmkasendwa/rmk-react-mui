@@ -1,5 +1,6 @@
 import Container from '@mui/material/Container';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
+import React from 'react';
 
 import ImageSelector from '../components/ImageSelector';
 import { TFileUploadFunction } from '../interfaces/Utils';
