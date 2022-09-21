@@ -279,6 +279,11 @@ export const usePaginatedRecords = <T>(
     showRecords: showRecordsProp = true,
   }: IUsePaginatedRecordsOptions
 ) => {
+  const recordFinderRef = useRef(recordFinder);
+  useEffect(() => {
+    recordFinderRef.current = recordFinder;
+  }, [recordFinder]);
+
   const {
     load: loadFromAPIService,
     record: responseData,
@@ -319,7 +324,7 @@ export const usePaginatedRecords = <T>(
       params.limit || (params.limit = defaultPaginationParams.limit);
       setLoadingPaginationParams(pick(params, 'offset', 'limit'));
       loadFromAPIService(async () => {
-        const responseData = await recordFinder();
+        const responseData = await recordFinderRef.current();
         const { records, recordsTotalCount } = responseData;
         setCurrentPageRecords(records);
         setRecordsTotalCount(recordsTotalCount);
@@ -330,7 +335,6 @@ export const usePaginatedRecords = <T>(
       defaultPaginationParams.limit,
       defaultPaginationParams.offset,
       loadFromAPIService,
-      recordFinder,
     ]
   );
 
