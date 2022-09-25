@@ -19,6 +19,7 @@ export interface ITextFieldProps
   endAdornment?: ReactNode;
   endChildren?: ReactNode;
   WrapperProps?: Partial<BoxProps>;
+  showClearButton?: boolean;
 }
 
 export const TextField = forwardRef<HTMLDivElement, ITextFieldProps>(
@@ -41,6 +42,7 @@ export const TextField = forwardRef<HTMLDivElement, ITextFieldProps>(
       endAdornment: endAdornmentProp,
       endChildren,
       WrapperProps = {},
+      showClearButton = true,
       sx,
       ...rest
     },
@@ -147,7 +149,9 @@ export const TextField = forwardRef<HTMLDivElement, ITextFieldProps>(
                   if (inputValue.length > 0 || endAdornmentProp) {
                     return (
                       <>
-                        {inputValue.length > 0 && !disabled ? (
+                        {showClearButton &&
+                        inputValue.length > 0 &&
+                        !disabled ? (
                           <Tooltip title="Clear">
                             <IconButton
                               className="text-input-clear-button"

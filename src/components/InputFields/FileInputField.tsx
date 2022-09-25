@@ -15,7 +15,7 @@ export interface IFileInputFieldProps extends Omit<ITextFieldProps, 'value'> {
 
 export const FileInputField = forwardRef<HTMLDivElement, IFileInputFieldProps>(
   function FileInputField(
-    { onClick, onChange, value, name, disabled, sx, ...rest },
+    { onClick, onChange, value, name, disabled, showClearButton, sx, ...rest },
     ref
   ) {
     const inputFieldRef = useRef<HTMLInputElement | null>(null);
@@ -86,7 +86,7 @@ export const FileInputField = forwardRef<HTMLDivElement, IFileInputFieldProps>(
             ) : null,
             endAdornment: (
               <>
-                {selectedFileName && !disabled ? (
+                {showClearButton && selectedFileName && !disabled ? (
                   <Tooltip title="Clear">
                     <IconButton
                       className="file-input-clear-button"

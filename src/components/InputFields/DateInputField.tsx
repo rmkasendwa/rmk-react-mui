@@ -30,6 +30,7 @@ export const DateInputField = forwardRef<HTMLDivElement, IDateInputFieldProps>(
       onChange,
       minDate: minDateProp,
       maxDate: maxDateProp,
+      showClearButton,
       disabled,
       sx,
       ...rest
@@ -116,7 +117,7 @@ export const DateInputField = forwardRef<HTMLDivElement, IDateInputFieldProps>(
           ) : (
             <Tooltip title="Choose a date">{selectDateIconButton}</Tooltip>
           );
-          if (selectedDate && !disabled) {
+          if (showClearButton && selectedDate && !disabled) {
             params.InputProps.endAdornment = (
               <Tooltip title="Clear">
                 <IconButton
