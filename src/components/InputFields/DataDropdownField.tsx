@@ -76,7 +76,7 @@ export const DataDropdownField = forwardRef<
     sx,
     SelectedOptionPillProps = {},
     disabled,
-    showClearButton,
+    showClearButton = true,
     ...rest
   },
   ref

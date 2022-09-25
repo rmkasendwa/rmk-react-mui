@@ -15,7 +15,16 @@ export interface IFileInputFieldProps extends Omit<ITextFieldProps, 'value'> {
 
 export const FileInputField = forwardRef<HTMLDivElement, IFileInputFieldProps>(
   function FileInputField(
-    { onClick, onChange, value, name, disabled, showClearButton, sx, ...rest },
+    {
+      onClick,
+      onChange,
+      value,
+      name,
+      disabled,
+      showClearButton = true,
+      sx,
+      ...rest
+    },
     ref
   ) {
     const inputFieldRef = useRef<HTMLInputElement | null>(null);
