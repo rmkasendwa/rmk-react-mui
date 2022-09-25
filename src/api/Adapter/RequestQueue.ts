@@ -18,7 +18,11 @@ export const queueRequest = (
   requestOptions: IQueuedRequestOptions,
   callback: (resolve: TResolve, reject: TReject) => void
 ) => {
-  const requestKey = hash(JSON.stringify(requestOptions));
+  const hashableRequestOptions = { ...requestOptions };
+  if (hashableRequestOptions.data instanceof FormData) {
+    hashableRequestOptions.data = Date.now();
+  }
+  const requestKey = hash(JSON.stringify(hashableRequestOptions));
   if (requestQueue[requestKey]) {
     requestQueue[requestKey].push(requestOptions);
   } else {
