@@ -30,7 +30,7 @@ export const DateInputField = forwardRef<HTMLDivElement, IDateInputFieldProps>(
       onChange,
       minDate: minDateProp,
       maxDate: maxDateProp,
-      showClearButton,
+      showClearButton = true,
       disabled,
       sx,
       ...rest
