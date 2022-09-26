@@ -13,11 +13,11 @@ export const PermissionGuard: FC<IPermissionGuardProps> = ({
   fallbackComponent,
   children,
 }) => {
-  const { loggedUserHasPermission, loadingCurrentSession } = useAuth();
+  const { loggedInUserHasPermission, loadingCurrentSession } = useAuth();
   if (loadingCurrentSession) {
     return null;
   }
-  if (loggedUserHasPermission(permission)) {
+  if (loggedInUserHasPermission(permission)) {
     return <>{children}</>;
   }
   return <>{fallbackComponent}</>;
