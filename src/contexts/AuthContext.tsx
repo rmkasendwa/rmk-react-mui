@@ -25,7 +25,7 @@ export interface IAuthContext {
   updateLoggedInUser: (user: any) => void;
   authenticated: boolean;
   clearLoggedInUserSession: () => void;
-  loggedUserHasPermission: (
+  loggedInUserHasPermission: (
     permissionCode: TPermissionCode | TPermissionCode[]
   ) => boolean;
   loadingCurrentSession: boolean;
@@ -92,7 +92,7 @@ export const AuthProvider: FC<{
     return [];
   }, [loggedInUser]);
 
-  const loggedUserHasPermission = useCallback(
+  const loggedInUserHasPermission = useCallback(
     (permissionCode: TPermissionCode | TPermissionCode[]) => {
       const permissions = loggedInUserPermissions();
       const isSuperAdmin = permissions.includes('ALL_FUNCTIONS');
@@ -124,7 +124,7 @@ export const AuthProvider: FC<{
         updateLoggedInUser,
         clearLoggedInUserSession,
         authenticated: loggedInUser !== null,
-        loggedUserHasPermission,
+        loggedInUserHasPermission,
         loadingCurrentSession,
         sessionExpired,
         setSessionExpired,
