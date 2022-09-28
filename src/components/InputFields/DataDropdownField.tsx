@@ -451,9 +451,15 @@ export const DataDropdownField = forwardRef<
             '&>.data-dropdown-field-selected-option-wrapper': {
               width: 'calc(100% - 40px)',
             },
-            '&:hover>.data-dropdown-field-selected-option-wrapper': {
-              width: 'calc(100% - 72px)',
-            },
+            ...(() => {
+              if (showClearButton) {
+                return {
+                  '&:hover>.data-dropdown-field-selected-option-wrapper': {
+                    width: 'calc(100% - 72px)',
+                  },
+                };
+              }
+            })(),
           },
         }}
         sx={{
