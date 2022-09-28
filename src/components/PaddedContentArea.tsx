@@ -5,9 +5,9 @@ import { FC, ReactNode } from 'react';
 
 import PageTitle, { IPageTitleProps } from './PageTitle';
 
-export interface IPaddedContentAreaProps extends BoxProps {
-  title?: string;
-  tools?: ReactNode | ReactNode[];
+export interface IPaddedContentAreaProps
+  extends Pick<BoxProps, 'sx'>,
+    Pick<IPageTitleProps, 'title' | 'tools'> {
   breadcrumbs?: ReactNode;
   PageTitleProps?: Partial<IPageTitleProps>;
 }
