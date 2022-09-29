@@ -14,15 +14,15 @@ import { login as apiLogin, logout as apiLogout } from '../api';
 import { TPermissionCode } from '../interfaces/Users';
 import StorageManager from '../utils/StorageManager';
 
-export interface IAuthContext {
+export interface IAuthContext<T = any> {
   login: (
     username: string,
     password: string,
     loginFunction?: () => void
   ) => Promise<void>;
   logout: () => Promise<void>;
-  loggedInUser: any;
-  updateLoggedInUser: (user: any) => void;
+  loggedInUser: T | null;
+  updateLoggedInUser: (user: T) => void;
   authenticated: boolean;
   clearLoggedInUserSession: () => void;
   loggedInUserHasPermission: (
