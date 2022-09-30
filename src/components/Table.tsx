@@ -38,8 +38,6 @@ import {
 } from '../interfaces/Table';
 import { getColumnWidthStyles } from '../utils/Table';
 import DataTablePagination from './DataTablePagination';
-import CaretBottomIcon from './Icons/CaretBottonIcon';
-import CaretTopIcon from './Icons/CaretTopIcon';
 import RenderIfVisible, { IRenderIfVisibleProps } from './RenderIfVisible';
 import TableBodyRow from './TableBodyRow';
 
@@ -292,7 +290,7 @@ const BaseTable = <T extends IBaseTableRow>(
                       align={align}
                       sx={{
                         fontWeight: 'bold',
-                        pl: index <= 0 ? 3 : 1.5,
+                        pl: align === 'center' || index <= 0 ? 3 : 1.5,
                         pr: 3,
                         py: 1.5,
                         ...getColumnWidthStyles(column),
@@ -315,6 +313,8 @@ const BaseTable = <T extends IBaseTableRow>(
                           top: 0,
                           right: 0,
                           height: '100%',
+                          fontSize: 10,
+                          lineHeight: 1,
                         }}
                       >
                         <Box
@@ -323,14 +323,10 @@ const BaseTable = <T extends IBaseTableRow>(
                             display: 'flex',
                             alignItems: 'end',
                             px: 0.8,
+                            color: alpha(palette.text.primary, 0.1),
                           }}
                         >
-                          <CaretTopIcon
-                            sx={{
-                              fontSize: 10,
-                              color: alpha(palette.text.primary, 0.1),
-                            }}
-                          />
+                          <span>&#9650;</span>
                         </Box>
                         <Box
                           sx={{
@@ -338,14 +334,10 @@ const BaseTable = <T extends IBaseTableRow>(
                             display: 'flex',
                             alignItems: 'start',
                             px: 0.8,
+                            color: alpha(palette.text.primary, 0.1),
                           }}
                         >
-                          <CaretBottomIcon
-                            sx={{
-                              fontSize: 10,
-                              color: alpha(palette.text.primary, 0.1),
-                            }}
-                          />
+                          <span>&#9660;</span>
                         </Box>
                       </Stack>
                     </TableCell>
