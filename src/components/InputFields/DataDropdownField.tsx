@@ -264,33 +264,30 @@ export const DataDropdownField = forwardRef<
 
   useEffect(() => {
     if (selectedOption) {
-      const existingOption = options.find(
-        ({ value }) => value === selectedOption.value
-      );
-      if (!existingOption) {
-        setOptions((prevOptions) => {
-          const nextOptions = [...options, selectedOption];
-          if (
-            nextOptions.map(({ value }) => value).join(';') !==
-            prevOptions.map(({ value }) => value).join(';')
-          ) {
-            return nextOptions;
-          }
-          return prevOptions;
-        });
-      }
-      setSelectedOptions((prevSelectedOptions) => {
-        const nextSelectedOptions = [selectedOption];
-        if (
-          nextSelectedOptions.map(({ value }) => value).join(';') !==
-          prevSelectedOptions.map(({ value }) => value).join(';')
-        ) {
-          return nextSelectedOptions;
+      const nextSelectedOptions = [selectedOption];
+      if (
+        nextSelectedOptions.map(({ value }) => value).join(';') !==
+        selectedOptions.map(({ value }) => value).join(';')
+      ) {
+        const existingOption = options.find(
+          ({ value }) => value === selectedOption.value
+        );
+        if (!existingOption) {
+          setOptions((prevOptions) => {
+            const nextOptions = [...options, selectedOption];
+            if (
+              nextOptions.map(({ value }) => value).join(';') !==
+              prevOptions.map(({ value }) => value).join(';')
+            ) {
+              return nextOptions;
+            }
+            return prevOptions;
+          });
         }
-        return prevSelectedOptions;
-      });
+        setSelectedOptions(nextSelectedOptions);
+      }
     }
-  }, [options, selectedOption]);
+  }, [options, selectedOption, selectedOptions]);
 
   const filteredOptions = useMemo(() => {
     if (searchTerm && searchTerm !== selectedOptionDisplayString) {
