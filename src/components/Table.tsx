@@ -1,3 +1,4 @@
+import { Stack } from '@mui/material';
 import Box, { BoxProps } from '@mui/material/Box';
 import { PaginationProps } from '@mui/material/Pagination';
 import { Theme } from '@mui/material/styles/createTheme';
@@ -37,6 +38,8 @@ import {
 } from '../interfaces/Table';
 import { getColumnWidthStyles } from '../utils/Table';
 import DataTablePagination from './DataTablePagination';
+import CaretBottomIcon from './Icons/CaretBottonIcon';
+import CaretTopIcon from './Icons/CaretTopIcon';
 import RenderIfVisible, { IRenderIfVisibleProps } from './RenderIfVisible';
 import TableBodyRow from './TableBodyRow';
 
@@ -279,6 +282,7 @@ const BaseTable = <T extends IBaseTableRow>(
                         ...getColumnWidthStyles(column),
                         ...style,
                         ...sx,
+                        position: 'relative',
                       }}
                     >
                       <Typography
@@ -289,6 +293,45 @@ const BaseTable = <T extends IBaseTableRow>(
                       >
                         {label}
                       </Typography>
+                      <Stack
+                        sx={{
+                          position: 'absolute',
+                          top: 0,
+                          right: 0,
+                          height: '100%',
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            flex: 1,
+                            display: 'flex',
+                            alignItems: 'end',
+                            px: 0.8,
+                          }}
+                        >
+                          <CaretTopIcon
+                            sx={{
+                              fontSize: 10,
+                              color: alpha(palette.text.primary, 0.15),
+                            }}
+                          />
+                        </Box>
+                        <Box
+                          sx={{
+                            flex: 1,
+                            display: 'flex',
+                            alignItems: 'start',
+                            px: 0.8,
+                          }}
+                        >
+                          <CaretBottomIcon
+                            sx={{
+                              fontSize: 10,
+                              color: alpha(palette.text.primary, 0.15),
+                            }}
+                          />
+                        </Box>
+                      </Stack>
                     </TableCell>
                   );
                 })}
