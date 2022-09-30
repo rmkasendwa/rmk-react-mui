@@ -69,7 +69,7 @@ export interface ITableProps<T = any>
   labelPlural?: string;
   labelSingular?: string;
   lowercaseLabelPlural?: string;
-  variant?: 'stripped' | 'plain';
+  variant?: 'stripped' | 'stripped-rows' | 'stripped-columns' | 'plain';
   onChangePage?: (pageIndex: number) => void;
   forEachRowProps?: TGetRowProps;
   paging?: boolean;
@@ -228,10 +228,24 @@ const BaseTable = <T extends IBaseTableRow>(
       break;
     case 'stripped':
       Object.assign(bodyStyles, {
-        [`& tr.${tableRowClasses.root}.even:not(:hover)`]: {
-          backgroundColor: alpha(palette.text.primary, 0.04),
+        [`& tr.${tableRowClasses.root}.odd:not(:hover)`]: {
+          backgroundColor: alpha(palette.text.primary, 0.02),
         },
-        [`& td.${tableCellClasses.root}:nth-of-type(even)`]: {
+        [`& td.${tableCellClasses.root}:nth-of-type(odd)`]: {
+          backgroundColor: alpha(palette.text.primary, 0.02),
+        },
+      });
+      break;
+    case 'stripped-rows':
+      Object.assign(bodyStyles, {
+        [`& tr.${tableRowClasses.root}.odd:not(:hover)`]: {
+          backgroundColor: alpha(palette.text.primary, 0.02),
+        },
+      });
+      break;
+    case 'stripped-columns':
+      Object.assign(bodyStyles, {
+        [`& td.${tableCellClasses.root}:nth-of-type(odd)`]: {
           backgroundColor: alpha(palette.text.primary, 0.02),
         },
       });
@@ -263,7 +277,7 @@ const BaseTable = <T extends IBaseTableRow>(
           {showHeaderRow ? (
             <TableHead>
               <TableRow {...restHeaderRowProps} sx={{ ...headerRowPropsSx }}>
-                {columns.map((column) => {
+                {columns.map((column, index) => {
                   const { id, align, style, sx } = column;
                   let label = column.label;
                   column.headerTextAfter &&
@@ -278,7 +292,9 @@ const BaseTable = <T extends IBaseTableRow>(
                       align={align}
                       sx={{
                         fontWeight: 'bold',
-                        px: 3,
+                        pl: index <= 0 ? 3 : 1.5,
+                        pr: 3,
+                        py: 1.5,
                         ...getColumnWidthStyles(column),
                         ...style,
                         ...sx,
@@ -312,7 +328,7 @@ const BaseTable = <T extends IBaseTableRow>(
                           <CaretTopIcon
                             sx={{
                               fontSize: 10,
-                              color: alpha(palette.text.primary, 0.15),
+                              color: alpha(palette.text.primary, 0.1),
                             }}
                           />
                         </Box>
@@ -327,7 +343,7 @@ const BaseTable = <T extends IBaseTableRow>(
                           <CaretBottomIcon
                             sx={{
                               fontSize: 10,
-                              color: alpha(palette.text.primary, 0.15),
+                              color: alpha(palette.text.primary, 0.1),
                             }}
                           />
                         </Box>
