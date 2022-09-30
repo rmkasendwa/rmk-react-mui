@@ -10,3 +10,16 @@ export const getColumnWidthStyles = ({
     maxWidth: width || 180,
   };
 };
+
+export const getColumnPaddingStyles = ({
+  index,
+  columnCount,
+}: {
+  index: number;
+  columnCount: number;
+}) => {
+  return {
+    pl: index <= 0 ? 3 : 1.5,
+    pr: index >= columnCount - 1 ? 3 : 1.5,
+  };
+};

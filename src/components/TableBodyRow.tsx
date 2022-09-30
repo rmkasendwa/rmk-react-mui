@@ -7,7 +7,7 @@ import { isValidElement, useEffect, useMemo, useRef } from 'react';
 import { IBaseTableRow, ITableRowProps } from '../interfaces/Table';
 import { formatDate } from '../utils/dates';
 import { addThousandCommas } from '../utils/numbers';
-import { getColumnWidthStyles } from '../utils/Table';
+import { getColumnPaddingStyles, getColumnWidthStyles } from '../utils/Table';
 
 const allowedDataTypes = ['number', 'string', 'boolean'];
 
@@ -199,7 +199,7 @@ export const TableBodyRow = <T extends IBaseTableRow>({
         ...sx,
       }}
     >
-      {columns.map((column) => {
+      {columns.map((column, index) => {
         const {
           id,
           align = 'left',
@@ -219,9 +219,13 @@ export const TableBodyRow = <T extends IBaseTableRow>({
             }}
             align={align}
             sx={{
-              py: 1.8,
+              py: 1,
               px: 3,
               cursor: onClickColumn ? 'pointer' : 'inherit',
+              ...getColumnPaddingStyles({
+                index,
+                columnCount: columns.length,
+              }),
               ...getColumnWidthStyles(column),
               ...sx,
             }}
