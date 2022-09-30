@@ -296,7 +296,6 @@ const BaseTable = <T extends IBaseTableRow>(
                         ...getColumnWidthStyles(column),
                         ...style,
                         ...sx,
-                        position: 'relative',
                       }}
                     >
                       <Typography
