@@ -91,17 +91,20 @@ export const DataDropdownField = forwardRef<
   const getDropdownEntitiesRef = useRef(getDropdownEntities);
   const filterDropdownEntitiesRef = useRef(filterDropdownEntities);
   const getDropdownOptionsRef = useRef(getDropdownOptions);
+  const optionsRef = useRef(propOptions);
 
   useEffect(() => {
     onChangeRef.current = onChange;
     getDropdownEntitiesRef.current = getDropdownEntities;
     filterDropdownEntitiesRef.current = filterDropdownEntities;
     getDropdownOptionsRef.current = getDropdownOptions;
+    optionsRef.current = propOptions;
   }, [
     filterDropdownEntities,
     getDropdownEntities,
     getDropdownOptions,
     onChange,
+    propOptions,
   ]);
 
   const {
@@ -265,9 +268,27 @@ export const DataDropdownField = forwardRef<
         ({ value }) => value === selectedOption.value
       );
       if (!existingOption) {
-        setOptions([...options, selectedOption]);
+        setOptions((prevOptions) => {
+          const nextOptions = [...options, selectedOption];
+          if (
+            nextOptions.map(({ value }) => value).join(';') !==
+            prevOptions.map(({ value }) => value).join(';')
+          ) {
+            return nextOptions;
+          }
+          return prevOptions;
+        });
       }
-      setSelectedOptions([selectedOption]);
+      setSelectedOptions((prevSelectedOptions) => {
+        const nextSelectedOptions = [selectedOption];
+        if (
+          nextSelectedOptions.map(({ value }) => value).join(';') !==
+          prevSelectedOptions.map(({ value }) => value).join(';')
+        ) {
+          return nextSelectedOptions;
+        }
+        return prevSelectedOptions;
+      });
     }
   }, [options, selectedOption]);
 
