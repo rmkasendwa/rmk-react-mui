@@ -49,6 +49,7 @@ export const DataTablePagination = forwardRef<
         fontSize: 12,
         pl: 3,
         pr: 2,
+        py: 1,
         gap: 3,
         ...sx,
       }}
