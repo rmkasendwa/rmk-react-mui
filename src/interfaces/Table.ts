@@ -12,7 +12,7 @@ export type ITableColumnEnumValue =
 export interface ITableColumn<T = any>
   extends Partial<Omit<TableCellProps, 'defaultValue'>> {
   id: string;
-  label: ReactNode;
+  label?: ReactNode;
   type?:
     | 'boolean'
     | 'checkbox'
