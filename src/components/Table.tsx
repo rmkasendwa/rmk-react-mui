@@ -1,5 +1,5 @@
 import { Stack } from '@mui/material';
-import Box from '@mui/material/Box';
+import Box, { BoxProps } from '@mui/material/Box';
 import { PaginationProps } from '@mui/material/Pagination';
 import { Theme } from '@mui/material/styles/createTheme';
 import useTheme from '@mui/material/styles/useTheme';
@@ -81,6 +81,7 @@ export interface ITableProps<T = any>
   PaginationProps?: PaginationProps;
   stickyHeader?: boolean;
   TableBodyRowPlaceholderProps?: Partial<IRenderIfVisibleProps>;
+  PaginatedTableWrapperProps?: Partial<BoxProps>;
 }
 
 const BaseTable = <T extends IBaseTableRow>(
@@ -111,6 +112,7 @@ const BaseTable = <T extends IBaseTableRow>(
     PaginationProps = {},
     stickyHeader = false,
     TableBodyRowPlaceholderProps = {},
+    PaginatedTableWrapperProps = {},
     defaultValue,
     sx,
     ...rest
@@ -121,6 +123,10 @@ const BaseTable = <T extends IBaseTableRow>(
     sx: tableBodyRowPlaceholderPropsSx,
     ...tableBodyRowPlaceholderPropsRest
   } = TableBodyRowPlaceholderProps;
+  const {
+    sx: PaginatedTableWrapperPropsSx,
+    ...PaginatedTableWrapperPropsRest
+  } = PaginatedTableWrapperProps;
   lowercaseLabelPlural || (lowercaseLabelPlural = labelPlural.toLowerCase());
 
   const { palette } = useTheme();
@@ -403,10 +409,11 @@ const BaseTable = <T extends IBaseTableRow>(
   if (paging && pageRows.length > 0) {
     return (
       <Box
+        {...PaginatedTableWrapperPropsRest}
         sx={{
+          ...PaginatedTableWrapperPropsSx,
           display: 'flex',
           flexDirection: 'column',
-          height: '100%',
         }}
       >
         <Box
