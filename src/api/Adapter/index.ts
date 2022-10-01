@@ -217,21 +217,6 @@ export const del = <T = any>(path: string, options: IRequestOptions = {}) => {
   return fetchData<T>(path, options);
 };
 
-export const login = async <T = any>(
-  username: string,
-  password: string,
-  endpointPath = '/v1/login'
-) => {
-  const { data } = await post<T>(endpointPath, {
-    data: {
-      username,
-      password,
-    },
-    label: 'Logging in',
-  });
-  return data;
-};
-
 export const logout = async () => {
   StorageManager.remove('token');
 };

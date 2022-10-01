@@ -5,12 +5,12 @@ import { SESSION_LOGIN_ROUTE_PATH } from '../route-paths';
 import { APIProvider, IAPIContext } from './APIContext';
 import { useBrowser } from './BrowserContext';
 
-export interface IServerSideAPIContext extends IAPIContext {}
-export const ServerSideAPIContext = createContext<IServerSideAPIContext>(
+export interface INextRouterAPIContext extends IAPIContext {}
+export const NextRouterAPIContext = createContext<INextRouterAPIContext>(
   {} as any
 );
 
-export const ServerSideAPIProvider: FC<{
+export const NextRouterAPIProvider: FC<{
   children: ReactNode;
 }> = ({ children }) => {
   const { push, asPath } = useRouter();

@@ -10,16 +10,14 @@ import {
   useState,
 } from 'react';
 
-import { login as apiLogin, logout as apiLogout } from '../api';
+import { logout as apiLogout } from '../api';
+import { useAPIService } from '../hooks/Utils';
 import { TPermissionCode } from '../interfaces/Users';
+import { TAPIFunction } from '../interfaces/Utils';
 import StorageManager from '../utils/StorageManager';
 
 export interface IAuthContext<T = any> {
-  login: (
-    username: string,
-    password: string,
-    loginFunction?: () => void
-  ) => Promise<void>;
+  login: (loginFunction: TAPIFunction<T>) => Promise<void>;
   logout: () => Promise<void>;
   loggedInUser: T | null;
   updateLoggedInUser: (user: T) => void;
@@ -31,6 +29,8 @@ export interface IAuthContext<T = any> {
   loadingCurrentSession: boolean;
   sessionExpired: boolean;
   setSessionExpired: Dispatch<SetStateAction<boolean>>;
+  loggingIn: boolean;
+  loginErrorMessage: string;
 }
 export const AuthContext = createContext<IAuthContext>({} as any);
 
@@ -41,6 +41,12 @@ export const AuthProvider: FC<{
   const [loggedInUser, setLoggedInUser] = useState<any | null>(null);
   const [loadingCurrentSession, setLoadingCurrentSession] = useState(true);
   const [sessionExpired, setSessionExpired] = useState(false);
+  const {
+    record: user,
+    load,
+    loading: loggingIn,
+    errorMessage: loginErrorMessage,
+  } = useAPIService(loggedInUser);
 
   useEffect(() => {
     const user = StorageManager.get('user');
@@ -59,16 +65,11 @@ export const AuthProvider: FC<{
   }, []);
 
   const login = useCallback(
-    async (
-      username: string,
-      password: string,
-      loginFunction = apiLogin
-    ): Promise<void> => {
+    async (loginFunction): Promise<void> => {
       clearLoggedInUserSession();
-      const user = await loginFunction(username, password);
-      user && updateLoggedInUserSession(user);
+      load(loginFunction);
     },
-    [clearLoggedInUserSession, updateLoggedInUserSession]
+    [clearLoggedInUserSession, load]
   );
 
   const logout = useCallback(async () => {
@@ -110,6 +111,12 @@ export const AuthProvider: FC<{
   );
 
   useEffect(() => {
+    if (user) {
+      updateLoggedInUserSession(user);
+    }
+  }, [user, updateLoggedInUserSession]);
+
+  useEffect(() => {
     if (sessionExpired) {
       clearLoggedInUserSession();
     }
@@ -128,6 +135,8 @@ export const AuthProvider: FC<{
         loadingCurrentSession,
         sessionExpired,
         setSessionExpired,
+        loggingIn,
+        loginErrorMessage,
         ...value,
       }}
     >
