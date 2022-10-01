@@ -1,14 +1,11 @@
 import { Stack } from '@mui/material';
-import Box, { BoxProps } from '@mui/material/Box';
+import Box from '@mui/material/Box';
 import { PaginationProps } from '@mui/material/Pagination';
 import { Theme } from '@mui/material/styles/createTheme';
 import useTheme from '@mui/material/styles/useTheme';
-import MuiTable from '@mui/material/Table';
+import MuiTable, { TableProps } from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell, { tableCellClasses } from '@mui/material/TableCell';
-import TableContainer, {
-  TableContainerProps,
-} from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow, {
@@ -19,7 +16,6 @@ import Typography from '@mui/material/Typography';
 import { alpha } from '@mui/system/colorManipulator';
 import { SxProps } from '@mui/system/styleFunctionSx';
 import {
-  CSSProperties,
   ReactElement,
   Ref,
   forwardRef,
@@ -54,7 +50,7 @@ export type TTableVariant =
   | 'plain';
 
 export interface ITableProps<T = any>
-  extends Partial<Pick<BoxProps, 'sx'>>,
+  extends Partial<Pick<TableProps, 'onClick' | 'sx'>>,
     Pick<
       ITableRowProps<T>,
       | 'columns'
@@ -81,7 +77,6 @@ export interface ITableProps<T = any>
   showDataRows?: boolean;
   HeaderRowProps?: TableRowProps;
   currencyCode?: string;
-  TableContainerProps?: Partial<TableContainerProps>;
   paginationType?: 'default' | 'classic';
   PaginationProps?: PaginationProps;
   stickyHeader?: boolean;
@@ -112,7 +107,6 @@ const BaseTable = <T extends IBaseTableRow>(
     currencyCode,
     decimalPlaces,
     labelTransform,
-    TableContainerProps = {},
     paginationType = 'default',
     PaginationProps = {},
     stickyHeader = false,
@@ -121,10 +115,8 @@ const BaseTable = <T extends IBaseTableRow>(
     sx,
     ...rest
   }: ITableProps<T>,
-  ref: Ref<HTMLDivElement>
+  ref: Ref<HTMLTableElement>
 ) => {
-  const { sx: tableContainerPropsSx, ...tableContainerPropsRest } =
-    TableContainerProps;
   const {
     sx: tableBodyRowPlaceholderPropsSx,
     ...tableBodyRowPlaceholderPropsRest
@@ -229,7 +221,7 @@ const BaseTable = <T extends IBaseTableRow>(
 
   const bodyStyles: SxProps<Theme> = {
     '& tr.MuiTableRow-hover:hover': {
-      backgroundColor: alpha(palette.primary.main, 0.1),
+      bgcolor: alpha(palette.primary.main, 0.1),
     },
   };
 
@@ -239,187 +231,194 @@ const BaseTable = <T extends IBaseTableRow>(
     case 'stripped':
       Object.assign(bodyStyles, {
         [`& tr.${tableRowClasses.root}.odd:not(:hover)`]: {
-          backgroundColor: alpha(palette.text.primary, 0.02),
+          bgcolor: alpha(palette.text.primary, 0.02),
         },
         [`& td.${tableCellClasses.root}:nth-of-type(odd)`]: {
-          backgroundColor: alpha(palette.text.primary, 0.02),
+          bgcolor: alpha(palette.text.primary, 0.02),
         },
       });
       break;
     case 'stripped-rows':
       Object.assign(bodyStyles, {
         [`& tr.${tableRowClasses.root}.odd:not(:hover)`]: {
-          backgroundColor: alpha(palette.text.primary, 0.02),
+          bgcolor: alpha(palette.text.primary, 0.02),
         },
       });
       break;
     case 'stripped-columns':
       Object.assign(bodyStyles, {
         [`& td.${tableCellClasses.root}:nth-of-type(odd)`]: {
-          backgroundColor: alpha(palette.text.primary, 0.02),
+          bgcolor: alpha(palette.text.primary, 0.02),
         },
       });
       break;
   }
 
-  return (
-    <Box ref={ref} {...rest} sx={{ minWidth, ...sx }}>
-      <TableContainer
-        {...tableContainerPropsRest}
-        sx={{
-          height: '100%',
-          ...(() => {
-            const tableContainerStyles: CSSProperties = {};
-            if (paging && pageRows.length > 0) {
-              tableContainerStyles.height = 'calc(100% - 52px)';
-            }
-            return tableContainerStyles;
-          })(),
-          ...tableContainerPropsSx,
-        }}
-      >
-        <MuiTable
-          stickyHeader={stickyHeader}
-          sx={{
-            tableLayout: 'fixed',
-          }}
-        >
-          {showHeaderRow ? (
-            <TableHead>
-              <TableRow {...restHeaderRowProps} sx={{ ...headerRowPropsSx }}>
-                {columns.map((column, index) => {
-                  const { id, align, style, sx } = column;
-                  let label = column.label;
-                  column.headerTextAfter &&
-                    (label = (
-                      <>
-                        {label} {column.headerTextAfter}
-                      </>
-                    ));
-                  return (
-                    <TableCell
-                      key={id}
-                      align={align}
-                      sx={{
-                        fontWeight: 'bold',
-                        pl: align === 'center' || index <= 0 ? 3 : 1.5,
-                        pr: 3,
-                        py: 1.5,
-                        ...getColumnWidthStyles(column),
-                        ...style,
-                        ...sx,
-                        position: stickyHeader ? 'sticky' : 'relative',
-                      }}
-                    >
-                      {label ? (
-                        <>
-                          <Typography
-                            component="div"
-                            variant="body2"
-                            sx={{ fontWeight: 'bold' }}
-                            noWrap
-                          >
-                            {label}
-                          </Typography>
-                          <Stack
-                            sx={{
-                              position: 'absolute',
-                              top: 0,
-                              right: 0,
-                              height: '100%',
-                              fontSize: 10,
-                              lineHeight: 1,
-                            }}
-                          >
-                            <Box
-                              sx={{
-                                flex: 1,
-                                display: 'flex',
-                                alignItems: 'end',
-                                px: 0.8,
-                                color: alpha(palette.text.primary, 0.1),
-                              }}
-                            >
-                              <span>&#9650;</span>
-                            </Box>
-                            <Box
-                              sx={{
-                                flex: 1,
-                                display: 'flex',
-                                alignItems: 'start',
-                                px: 0.8,
-                                color: alpha(palette.text.primary, 0.1),
-                              }}
-                            >
-                              <span>&#9660;</span>
-                            </Box>
-                          </Stack>
-                        </>
-                      ) : null}
-                    </TableCell>
-                  );
-                })}
-              </TableRow>
-            </TableHead>
-          ) : null}
-          {showDataRows ? (
-            <TableBody sx={bodyStyles}>
-              {(() => {
-                if (pageRows.length > 0) {
-                  return pageRows.map((row, index) => {
-                    const classNames = [];
-                    const rowNumber = rowStartIndex + 1 + index;
-                    if (rowNumber % 2 === 0) {
-                      classNames.push('even');
-                    } else {
-                      classNames.push('odd');
-                    }
-                    return (
-                      <RenderIfVisible
-                        {...tableBodyRowPlaceholderPropsRest}
-                        key={row.id}
-                        component="tr"
-                        displayPlaceholder={false}
-                        unWrapChildrenIfVisible
+  const tableElement = (
+    <MuiTable
+      {...rest}
+      ref={ref}
+      {...{ stickyHeader }}
+      sx={{
+        tableLayout: 'fixed',
+        minWidth,
+        ...sx,
+      }}
+    >
+      {showHeaderRow ? (
+        <TableHead>
+          <TableRow {...restHeaderRowProps} sx={{ ...headerRowPropsSx }}>
+            {columns.map((column, index) => {
+              const { id, align, style, sx } = column;
+              let label = column.label;
+              column.headerTextAfter &&
+                (label = (
+                  <>
+                    {label} {column.headerTextAfter}
+                  </>
+                ));
+              return (
+                <TableCell
+                  key={id}
+                  align={align}
+                  sx={{
+                    fontWeight: 'bold',
+                    pl: align === 'center' || index <= 0 ? 3 : 1.5,
+                    pr: 3,
+                    py: 1.5,
+                    ...getColumnWidthStyles(column),
+                    ...style,
+                    ...sx,
+                    position: stickyHeader ? 'sticky' : 'relative',
+                  }}
+                >
+                  {label ? (
+                    <>
+                      <Typography
+                        component="div"
+                        variant="body2"
+                        sx={{ fontWeight: 'bold' }}
+                        noWrap
+                      >
+                        {label}
+                      </Typography>
+                      <Stack
                         sx={{
-                          height: 50,
-                          ...tableBodyRowPlaceholderPropsSx,
+                          position: 'absolute',
+                          top: 0,
+                          right: 0,
+                          height: '100%',
+                          fontSize: 10,
+                          lineHeight: 1,
                         }}
                       >
-                        <TableBodyRow
-                          {...{
-                            columns,
-                            row,
-                            forEachDerivedColumn,
-                            decimalPlaces,
-                            labelTransform,
-                            onClickRow,
-                            generateRowData,
-                            defaultValue,
+                        <Box
+                          sx={{
+                            flex: 1,
+                            display: 'flex',
+                            alignItems: 'end',
+                            px: 0.8,
+                            color: alpha(palette.text.primary, 0.1),
                           }}
-                          getRowProps={forEachRowProps}
-                          className={classNames.join(' ')}
-                        />
-                      </RenderIfVisible>
-                    );
-                  });
+                        >
+                          <span>&#9650;</span>
+                        </Box>
+                        <Box
+                          sx={{
+                            flex: 1,
+                            display: 'flex',
+                            alignItems: 'start',
+                            px: 0.8,
+                            color: alpha(palette.text.primary, 0.1),
+                          }}
+                        >
+                          <span>&#9660;</span>
+                        </Box>
+                      </Stack>
+                    </>
+                  ) : null}
+                </TableCell>
+              );
+            })}
+          </TableRow>
+        </TableHead>
+      ) : null}
+      {showDataRows ? (
+        <TableBody sx={bodyStyles}>
+          {(() => {
+            if (pageRows.length > 0) {
+              return pageRows.map((row, index) => {
+                const classNames = [];
+                const rowNumber = rowStartIndex + 1 + index;
+                if (rowNumber % 2 === 0) {
+                  classNames.push('even');
+                } else {
+                  classNames.push('odd');
                 }
                 return (
-                  <TableRow>
-                    <TableCell colSpan={columns.length} align="center">
-                      <Typography variant="body2">
-                        No {lowercaseLabelPlural} found
-                      </Typography>
-                    </TableCell>
-                  </TableRow>
+                  <RenderIfVisible
+                    {...tableBodyRowPlaceholderPropsRest}
+                    key={row.id}
+                    component="tr"
+                    displayPlaceholder={false}
+                    unWrapChildrenIfVisible
+                    sx={{
+                      height: 50,
+                      ...tableBodyRowPlaceholderPropsSx,
+                    }}
+                  >
+                    <TableBodyRow
+                      {...{
+                        columns,
+                        row,
+                        forEachDerivedColumn,
+                        decimalPlaces,
+                        labelTransform,
+                        onClickRow,
+                        generateRowData,
+                        defaultValue,
+                      }}
+                      getRowProps={forEachRowProps}
+                      className={classNames.join(' ')}
+                    />
+                  </RenderIfVisible>
                 );
-              })()}
-            </TableBody>
-          ) : null}
-        </MuiTable>
-      </TableContainer>
-      {(() => {
-        if (paging && pageRows.length > 0) {
+              });
+            }
+            return (
+              <TableRow>
+                <TableCell colSpan={columns.length} align="center">
+                  <Typography variant="body2">
+                    No {lowercaseLabelPlural} found
+                  </Typography>
+                </TableCell>
+              </TableRow>
+            );
+          })()}
+        </TableBody>
+      ) : null}
+    </MuiTable>
+  );
+
+  if (paging && pageRows.length > 0) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100%',
+        }}
+      >
+        <Box
+          sx={{
+            overflow: 'auto',
+            flex: 1,
+            minHeight: 0,
+          }}
+        >
+          {tableElement}
+        </Box>
+        {(() => {
           if (paginationType === 'classic') {
             return (
               <DataTablePagination
@@ -456,13 +455,16 @@ const BaseTable = <T extends IBaseTableRow>(
               showLastButton
             />
           );
-        }
-      })()}
-    </Box>
-  );
+        })()}
+      </Box>
+    );
+  }
+
+  return tableElement;
 };
 
 export const Table = forwardRef(BaseTable) as <T>(
   p: ITableProps<T> & { ref?: Ref<HTMLDivElement> }
 ) => ReactElement;
+
 export default Table;
