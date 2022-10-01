@@ -36,7 +36,7 @@ import {
   ITableRowProps,
   TGetRowProps,
 } from '../interfaces/Table';
-import { getColumnWidthStyles } from '../utils/Table';
+import { getColumnWidthStyles, getTableMinWidth } from '../utils/Table';
 import DataTablePagination from './DataTablePagination';
 import RenderIfVisible, { IRenderIfVisibleProps } from './RenderIfVisible';
 import TableBodyRow from './TableBodyRow';
@@ -47,8 +47,14 @@ export type {
   ITableColumnEnumValue,
 } from '../interfaces/Table';
 
+export type TTableVariant =
+  | 'stripped'
+  | 'stripped-rows'
+  | 'stripped-columns'
+  | 'plain';
+
 export interface ITableProps<T = any>
-  extends Partial<Omit<BoxProps, 'ref' | 'defaultValue'>>,
+  extends Partial<Pick<BoxProps, 'sx'>>,
     Pick<
       ITableRowProps<T>,
       | 'columns'
@@ -67,7 +73,7 @@ export interface ITableProps<T = any>
   labelPlural?: string;
   labelSingular?: string;
   lowercaseLabelPlural?: string;
-  variant?: 'stripped' | 'stripped-rows' | 'stripped-columns' | 'plain';
+  variant?: TTableVariant;
   onChangePage?: (pageIndex: number) => void;
   forEachRowProps?: TGetRowProps;
   paging?: boolean;
@@ -112,6 +118,7 @@ const BaseTable = <T extends IBaseTableRow>(
     stickyHeader = false,
     TableBodyRowPlaceholderProps = {},
     defaultValue,
+    sx,
     ...rest
   }: ITableProps<T>,
   ref: Ref<HTMLDivElement>
@@ -194,6 +201,10 @@ const BaseTable = <T extends IBaseTableRow>(
     });
   }, [columnsProp, currencyCode]);
 
+  const minWidth = useMemo(() => {
+    return getTableMinWidth(columns);
+  }, [columns]);
+
   const pageRows: typeof rows = useMemo(() => {
     return totalRowCount || !paging
       ? rows
@@ -221,6 +232,7 @@ const BaseTable = <T extends IBaseTableRow>(
       backgroundColor: alpha(palette.primary.main, 0.1),
     },
   };
+
   switch (variant) {
     case 'plain':
       break;
@@ -251,7 +263,7 @@ const BaseTable = <T extends IBaseTableRow>(
   }
 
   return (
-    <Box ref={ref} {...rest}>
+    <Box ref={ref} {...rest} sx={{ minWidth, ...sx }}>
       <TableContainer
         {...tableContainerPropsRest}
         sx={{
