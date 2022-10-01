@@ -4,12 +4,11 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { SESSION_LOGIN_ROUTE_PATH } from '../route-paths';
 import { APIProvider, IAPIContext } from './APIContext';
 
-export interface IClientSideAPIContext extends IAPIContext {}
-export const ClientSideAPIContext = createContext<IClientSideAPIContext>(
-  {} as any
-);
+export interface IReactRouterDOMAPIContext extends IAPIContext {}
+export const ReactRouterDOMAPIContext =
+  createContext<IReactRouterDOMAPIContext>({} as any);
 
-export const ClientSideAPIProvider: FC<{
+export const ReactRouterDOMAPIProvider: FC<{
   children: ReactNode;
 }> = ({ children }) => {
   const navigate = useNavigate();
