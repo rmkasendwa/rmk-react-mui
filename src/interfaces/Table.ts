@@ -1,4 +1,4 @@
-import { TableRowProps } from '@mui/material';
+import { TableRowProps, TypographyProps } from '@mui/material';
 import { TableCellProps } from '@mui/material/TableCell';
 import { ReactNode } from 'react';
 
@@ -77,4 +77,5 @@ export interface ITableRowProps<T = any> {
   labelTransform?: boolean;
   onClickRow?: (currentEntity: T) => void;
   defaultValue?: ReactNode;
+  columnTypographyProps?: Partial<TypographyProps>;
 }

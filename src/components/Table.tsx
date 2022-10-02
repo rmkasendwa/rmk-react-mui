@@ -60,6 +60,7 @@ export interface ITableProps<T = any>
       | 'labelTransform'
       | 'onClickRow'
       | 'defaultValue'
+      | 'columnTypographyProps'
     > {
   rows: T[];
   rowStartIndex?: number;
@@ -114,6 +115,7 @@ const BaseTable = <T extends IBaseTableRow>(
     TableBodyRowPlaceholderProps = {},
     PaginatedTableWrapperProps = {},
     defaultValue,
+    columnTypographyProps,
     sx,
     ...rest
   }: ITableProps<T>,
@@ -383,6 +385,7 @@ const BaseTable = <T extends IBaseTableRow>(
                         onClickRow,
                         generateRowData,
                         defaultValue,
+                        columnTypographyProps,
                       }}
                       getRowProps={forEachRowProps}
                       className={classNames.join(' ')}

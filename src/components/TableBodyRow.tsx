@@ -1,6 +1,7 @@
 import Box from '@mui/material/Box';
 import TableCell from '@mui/material/TableCell';
 import TableRow, { TableRowProps } from '@mui/material/TableRow';
+import Typography from '@mui/material/Typography';
 import { format } from 'date-fns';
 import { isValidElement, useEffect, useMemo, useRef } from 'react';
 
@@ -40,6 +41,7 @@ export const TableBodyRow = <T extends IBaseTableRow>({
   onClickRow,
   sx,
   defaultValue,
+  columnTypographyProps = {},
   ...rest
 }: ITableBodyRowProps<T>) => {
   const forEachDerivedColumnRef = useRef(forEachDerivedColumn);
@@ -244,7 +246,15 @@ export const TableBodyRow = <T extends IBaseTableRow>({
                   </Box>
                 );
               }
-              return columnValue;
+              return (
+                <Typography
+                  component={'div' as any}
+                  variant="body2"
+                  {...columnTypographyProps}
+                >
+                  {columnValue}
+                </Typography>
+              );
             })()}
           </TableCell>
         );
