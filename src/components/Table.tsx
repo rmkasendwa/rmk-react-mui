@@ -371,7 +371,7 @@ const BaseTable = <T extends IBaseTableRow>(
                     displayPlaceholder={false}
                     unWrapChildrenIfVisible
                     sx={{
-                      height: 50,
+                      height: 41,
                       ...tableBodyRowPlaceholderPropsSx,
                     }}
                   >

@@ -58,6 +58,12 @@ export interface IRenderIfVisibleProps extends Partial<BoxProps> {
    *
    */
   unWrapChildrenIfVisible?: boolean;
+  /**
+   * The time to wait for idle window before displaying visible element.
+   *
+   * @default 600
+   */
+  visibilityDelay?: number;
 }
 
 export const RenderIfVisible: FC<IRenderIfVisibleProps> = ({
@@ -70,11 +76,13 @@ export const RenderIfVisible: FC<IRenderIfVisibleProps> = ({
   PlaceholderProps = {},
   unWrapChildrenIfVisible = false,
   displayPlaceholder = true,
+  visibilityDelay = 600,
   ...rest
 }) => {
   const { sx: placeholderPropsSx, ...placeholderPropsRest } = PlaceholderProps;
   unWrapChildrenIfVisible && (stayRendered = true);
 
+  const isComponentMountedRef = useRef(true);
   const [isVisible, setIsVisible] = useState(initialVisible);
   const wasVisibleRef = useRef(initialVisible);
   const placeholderDimensionsRef = useRef(defaultPlaceholderDimensions);
@@ -82,25 +90,37 @@ export const RenderIfVisible: FC<IRenderIfVisibleProps> = ({
 
   // Set visibility with intersection observer
   useEffect(() => {
-    if (wrapperElementRef.current) {
+    if (wrapperElementRef.current && isComponentMountedRef.current === true) {
       const wrapperElement = wrapperElementRef.current!;
       const observer = new IntersectionObserver(
         (entries) => {
+          const intersecting = entries.reduce(
+            (accumulator, { isIntersecting }) => accumulator || isIntersecting,
+            false
+          );
           // Before switching off `isVisible`, set the height of the placeholder
-          if (!entries[0].isIntersecting) {
+          if (!intersecting) {
             placeholderDimensionsRef.current = {
               height: wrapperElement.offsetHeight,
             };
           }
-          if (typeof window !== undefined && window.requestIdleCallback) {
+          if (
+            visibilityDelay > 0 &&
+            typeof window !== undefined &&
+            window.requestIdleCallback
+          ) {
             window.requestIdleCallback(
-              () => setIsVisible(entries[0].isIntersecting),
+              () => {
+                if (isComponentMountedRef.current === true) {
+                  setIsVisible(intersecting);
+                }
+              },
               {
-                timeout: 600,
+                timeout: visibilityDelay,
               }
             );
           } else {
-            setIsVisible(entries[0].isIntersecting);
+            setIsVisible(intersecting);
           }
         },
         {
@@ -115,13 +135,20 @@ export const RenderIfVisible: FC<IRenderIfVisibleProps> = ({
         }
       };
     }
-  }, [rootNode, visibleOffset]);
+  }, [rootNode, visibilityDelay, visibleOffset]);
 
   useEffect(() => {
     if (isVisible) {
       wasVisibleRef.current = true;
     }
   }, [isVisible]);
+
+  useEffect(() => {
+    isComponentMountedRef.current = true;
+    return () => {
+      isComponentMountedRef.current = false;
+    };
+  }, []);
 
   if (unWrapChildrenIfVisible && (isVisible || wasVisibleRef.current)) {
     return <>{children}</>;
