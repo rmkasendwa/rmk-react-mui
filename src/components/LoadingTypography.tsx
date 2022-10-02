@@ -8,7 +8,7 @@ import ErrorSkeleton from './ErrorSkeleton';
 export interface ILoadingTypographyProps extends TypographyProps {}
 
 export const LoadingTypography = forwardRef<
-  HTMLParagraphElement,
+  HTMLElement,
   ILoadingTypographyProps
 >(function LoadingTypography({ children, ...rest }, ref) {
   const { loading, errorMessage } = useLoadingContext();

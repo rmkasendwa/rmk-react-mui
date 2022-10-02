@@ -150,6 +150,9 @@ ColumnTypes.args = {
       time: Date.now(),
     };
   }),
+  columnTypographyProps: {
+    noWrap: true,
+  },
 } as ITableProps;
 
 export const ClassicPagination = Template.bind({});
