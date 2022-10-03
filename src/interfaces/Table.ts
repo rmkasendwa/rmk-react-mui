@@ -1,4 +1,4 @@
-import { TableRowProps, TypographyProps } from '@mui/material';
+import { SxProps, TableRowProps, Theme, TypographyProps } from '@mui/material';
 import { TableCellProps } from '@mui/material/TableCell';
 import { ReactNode } from 'react';
 
@@ -52,6 +52,7 @@ export interface ITableColumn<T = any>
   ) => ReactNode;
   getColumnValue?: (row: T, column: ITableColumn) => ReactNode;
   onClickColumn?: (currentEntity: T) => void;
+  bodySx?: SxProps<Theme>;
 }
 
 export interface IForEachDerivedColumnConfiguration<T> {
