@@ -209,6 +209,7 @@ export const TableBodyRow = <T extends IBaseTableRow>({
           style,
           onClick,
           onClickColumn,
+          bodySx,
         } = column;
         const columnValue = formattedRow[column.id];
         return (
@@ -230,6 +231,7 @@ export const TableBodyRow = <T extends IBaseTableRow>({
               }),
               ...getColumnWidthStyles(column),
               ...sx,
+              ...(bodySx as any),
             }}
           >
             {(() => {
