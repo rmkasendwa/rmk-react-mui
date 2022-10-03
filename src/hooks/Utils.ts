@@ -8,26 +8,22 @@ import {
   useRef,
   useState,
 } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 
 import { CANCELLED_API_REQUEST_MESSAGE } from '../constants';
 import { APIContext } from '../contexts/APIContext';
 import { APIDataContext } from '../contexts/APIDataContext';
+import { useCachedData } from '../contexts/DataStoreContext';
 import {
   IPaginatedRequestParams,
   IPaginatedResponseData,
   ITaggedAPIRequest,
   TAPIFunction,
 } from '../interfaces/Utils';
-import { RootState, updateData } from '../redux';
 
 export const useAPIService = <T>(defautValue: T, key?: string) => {
   const isComponentMountedRef = useRef(true);
   const taggedAPIRequestsRef = useRef<ITaggedAPIRequest[]>([]);
-  const data = useSelector((state: RootState) => {
-    const { data } = state;
-    return data;
-  });
+  const { data, updateData } = useCachedData();
   if (key && data[key]) {
     defautValue = data[key];
   }
@@ -37,7 +33,6 @@ export const useAPIService = <T>(defautValue: T, key?: string) => {
   const [loading, setLoading] = useState(false);
   const [busy, setBusy] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const dispatch = useDispatch();
 
   useEffect(() => {
     if (key && data[key] && isComponentMountedRef.current) {
@@ -89,11 +84,9 @@ export const useAPIService = <T>(defautValue: T, key?: string) => {
             setRecord(data);
           }
           if (key) {
-            dispatch(
-              updateData({
-                [key]: data,
-              })
-            );
+            updateData({
+              [key]: data,
+            });
           }
         }
         if (isComponentMountedRef.current) {
@@ -101,7 +94,7 @@ export const useAPIService = <T>(defautValue: T, key?: string) => {
         }
       }
     },
-    [call, key, dispatch]
+    [call, key, updateData]
   );
 
   useEffect(() => {
