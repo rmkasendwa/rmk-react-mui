@@ -10,7 +10,7 @@ export const getColumnWidthStyles = ({ width, minWidth }: ITableColumn) => {
   return {
     width,
     minWidth: minWidth || width || 100,
-    maxWidth: width || 200,
+    maxWidth: width || (!minWidth || minWidth < 200 ? 200 : minWidth),
   };
 };
 
