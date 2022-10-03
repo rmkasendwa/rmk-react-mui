@@ -1,14 +1,13 @@
-import { Reducer } from 'redux';
+import { createContext, useContext } from 'react';
 
-import { getMemorySize } from '../../utils/data';
-import StorageManager from '../../utils/StorageManager';
-import { UPDATE_DATA } from './types';
+import { getMemorySize } from '../utils/data';
+import StorageManager from '../utils/StorageManager';
 
 const MAX_DATA_MEMORY_SIZE = 15 * 1024; // 15KB
 const MAX_DATA_KEY_COUNT = 35;
 const allDataKeys: string[] = StorageManager.get('api-data-keys') || [];
 const dataKeys = allDataKeys.splice(-MAX_DATA_KEY_COUNT);
-const data: Record<string, any> = StorageManager.get('data') || {};
+const baseData: Record<string, any> = StorageManager.get('data') || {};
 
 if (allDataKeys.length > 0) {
   allDataKeys.forEach((key) => {
@@ -20,23 +19,23 @@ if (allDataKeys.length > 0) {
 dataKeys.forEach((key) => {
   const keyData = StorageManager.get(`api-data-${key}`);
   if (keyData) {
-    Object.assign(data, {
+    Object.assign(baseData, {
       [key]: keyData,
     });
   }
 });
 
-export const dataReducer: Reducer = (state = data, { type, payload }) => {
-  let newState = { ...state };
-  switch (type) {
-    case UPDATE_DATA:
-      newState = { ...state, ...payload };
-      break;
-  }
-  if ([UPDATE_DATA].includes(type)) {
-    if (payload && getMemorySize(payload) <= MAX_DATA_MEMORY_SIZE) {
-      Object.keys(payload).forEach((key) => {
-        StorageManager.add(`api-data-${key}`, payload[key]);
+export interface IDataStoreContext {
+  data: Record<string, any>;
+  updateData: (data: Record<string, any>) => void;
+}
+export const DataStoreContext = createContext<IDataStoreContext>({
+  data: baseData,
+  updateData: (data) => {
+    Object.assign(baseData, data);
+    if (data && getMemorySize(data) <= MAX_DATA_MEMORY_SIZE) {
+      Object.keys(data).forEach((key) => {
+        StorageManager.add(`api-data-${key}`, data[key]);
         if (dataKeys.includes(key)) {
           dataKeys.splice(dataKeys.indexOf(key), 1);
         }
@@ -53,6 +52,9 @@ export const dataReducer: Reducer = (state = data, { type, payload }) => {
       }
       StorageManager.add(`api-data-keys`, dataKeys);
     }
-  }
-  return newState;
+  },
+});
+
+export const useCachedData = () => {
+  return useContext(DataStoreContext);
 };
