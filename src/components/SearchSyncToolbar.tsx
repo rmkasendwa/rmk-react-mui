@@ -45,6 +45,7 @@ export interface ISearchSyncToolbarProps
    */
   children?: ReactNode;
   TitleProps?: Partial<Omit<TypographyProps, 'ref'>>;
+  searchFieldOpen?: boolean;
 }
 
 export const SearchSyncToolbar: FC<ISearchSyncToolbarProps> = ({
@@ -60,6 +61,7 @@ export const SearchSyncToolbar: FC<ISearchSyncToolbarProps> = ({
   tools,
   children,
   TitleProps = {},
+  searchFieldOpen: searchFieldOpenProp,
   ...rest
 }) => {
   tools || (tools = children);
@@ -94,14 +96,15 @@ export const SearchSyncToolbar: FC<ISearchSyncToolbarProps> = ({
             </Grid>
             {hasSearchTool ? (
               <Grid item sx={{ display: 'flex' }}>
-                {searchFieldOpen ? (
+                {searchFieldOpen || searchFieldOpenProp ? (
                   (() => {
                     const textField = (
                       <TextField
                         placeholder={searchFieldPlaceholder}
                         InputProps={{
                           startAdornment: <SearchIcon color="inherit" />,
-                          autoFocus: searchTermProp.length <= 0,
+                          autoFocus:
+                            searchTermProp.length <= 0 && searchFieldOpen,
                           sx: { fontSize: 'default' },
                         }}
                         variant="outlined"
@@ -112,7 +115,7 @@ export const SearchSyncToolbar: FC<ISearchSyncToolbarProps> = ({
                             onChangeSearchTerm(event.target.value);
                         }}
                         sx={{
-                          width: 200,
+                          width: 220,
                         }}
                       />
                     );
