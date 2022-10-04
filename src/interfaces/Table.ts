@@ -79,4 +79,5 @@ export interface ITableRowProps<T = any> {
   onClickRow?: (currentEntity: T) => void;
   defaultValue?: ReactNode;
   columnTypographyProps?: Partial<TypographyProps>;
+  minColumnWidth?: number;
 }

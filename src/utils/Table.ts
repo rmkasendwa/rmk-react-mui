@@ -9,7 +9,7 @@ import { ITableColumn } from '../interfaces/Table';
 export const getColumnWidthStyles = ({ width, minWidth }: ITableColumn) => {
   return {
     width,
-    minWidth: minWidth || width || 100,
+    minWidth: (minWidth && width && minWidth < width ? minWidth : width) || 100,
     maxWidth: width || (!minWidth || minWidth < 200 ? 200 : minWidth),
   };
 };
