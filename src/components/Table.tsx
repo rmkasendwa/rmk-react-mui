@@ -61,6 +61,7 @@ export interface ITableProps<T = any>
       | 'onClickRow'
       | 'defaultValue'
       | 'columnTypographyProps'
+      | 'minColumnWidth'
     > {
   rows: T[];
   rowStartIndex?: number;
@@ -116,6 +117,7 @@ const BaseTable = <T extends IBaseTableRow>(
     PaginatedTableWrapperProps = {},
     defaultValue,
     columnTypographyProps,
+    minColumnWidth,
     sx,
     ...rest
   }: ITableProps<T>,
@@ -277,7 +279,7 @@ const BaseTable = <T extends IBaseTableRow>(
         <TableHead>
           <TableRow {...restHeaderRowProps} sx={{ ...headerRowPropsSx }}>
             {columns.map((column, index) => {
-              const { id, align, style, sx } = column;
+              const { id, align, style, minWidth, sx } = column;
               let label = column.label;
               column.headerTextAfter &&
                 (label = (
@@ -294,7 +296,10 @@ const BaseTable = <T extends IBaseTableRow>(
                     pl: align === 'center' || index <= 0 ? 3 : 1.5,
                     pr: 3,
                     py: 1.5,
-                    ...getColumnWidthStyles(column),
+                    ...getColumnWidthStyles({
+                      ...column,
+                      minWidth: minWidth ?? minColumnWidth,
+                    }),
                     ...style,
                     ...sx,
                     position: stickyHeader ? 'sticky' : 'relative',
@@ -386,6 +391,7 @@ const BaseTable = <T extends IBaseTableRow>(
                         generateRowData,
                         defaultValue,
                         columnTypographyProps,
+                        minColumnWidth,
                       }}
                       getRowProps={forEachRowProps}
                       className={classNames.join(' ')}

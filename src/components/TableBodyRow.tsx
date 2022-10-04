@@ -42,6 +42,7 @@ export const TableBodyRow = <T extends IBaseTableRow>({
   sx,
   defaultValue,
   columnTypographyProps = {},
+  minColumnWidth,
   ...rest
 }: ITableBodyRowProps<T>) => {
   const forEachDerivedColumnRef = useRef(forEachDerivedColumn);
@@ -210,6 +211,7 @@ export const TableBodyRow = <T extends IBaseTableRow>({
           onClick,
           onClickColumn,
           bodySx,
+          minWidth,
         } = column;
         const columnValue = formattedRow[column.id];
         return (
@@ -229,7 +231,10 @@ export const TableBodyRow = <T extends IBaseTableRow>({
                 index,
                 columnCount: columns.length,
               }),
-              ...getColumnWidthStyles(column),
+              ...getColumnWidthStyles({
+                ...column,
+                minWidth: minWidth ?? minColumnWidth,
+              }),
               ...sx,
               ...(bodySx as any),
             }}
