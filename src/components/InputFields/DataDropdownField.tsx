@@ -87,23 +87,26 @@ export const DataDropdownField = forwardRef<
   const { preferStale } = useAPIDataContext();
   const { palette } = useTheme();
 
+  const [options, setOptions] = useState<IDropdownOption[]>([]);
+
   const onChangeRef = useRef(onChange);
   const getDropdownEntitiesRef = useRef(getDropdownEntities);
   const filterDropdownEntitiesRef = useRef(filterDropdownEntities);
   const getDropdownOptionsRef = useRef(getDropdownOptions);
-  const optionsRef = useRef(propOptions);
+  const optionsRef = useRef(options);
 
   useEffect(() => {
     onChangeRef.current = onChange;
     getDropdownEntitiesRef.current = getDropdownEntities;
     filterDropdownEntitiesRef.current = filterDropdownEntities;
     getDropdownOptionsRef.current = getDropdownOptions;
-    optionsRef.current = propOptions;
+    optionsRef.current = options;
   }, [
     filterDropdownEntities,
     getDropdownEntities,
     getDropdownOptions,
     onChange,
+    options,
     propOptions,
   ]);
 
@@ -120,7 +123,6 @@ export const DataDropdownField = forwardRef<
   const [open, setOpen] = useState(false);
   const [focused, setFocused] = useState(false);
 
-  const [options, setOptions] = useState<IDropdownOption[]>([]);
   const [selectedOptions, setSelectedOptions] = useState<IDropdownOption[]>([]);
   const [missingOptionValues, setMissingOptionValues] = useState<
     (string | number)[]
@@ -264,30 +266,26 @@ export const DataDropdownField = forwardRef<
 
   useEffect(() => {
     if (selectedOption) {
-      const nextSelectedOptions = [selectedOption];
-      if (
-        nextSelectedOptions.map(({ value }) => value).join(';') !==
-        selectedOptions.map(({ value }) => value).join(';')
-      ) {
-        const existingOption = options.find(
-          ({ value }) => value === selectedOption.value
-        );
-        if (!existingOption) {
-          setOptions((prevOptions) => {
-            const nextOptions = [...options, selectedOption];
-            if (
-              nextOptions.map(({ value }) => value).join(';') !==
-              prevOptions.map(({ value }) => value).join(';')
-            ) {
-              return nextOptions;
-            }
-            return prevOptions;
-          });
-        }
-        setSelectedOptions(nextSelectedOptions);
+      const existingOption = optionsRef.current.find(
+        ({ value }) => value === selectedOption.value
+      );
+      if (!existingOption) {
+        setOptions((prevOptions) => {
+          return [...prevOptions, selectedOption];
+        });
       }
+      setSelectedOptions((prevSelectedOptions) => {
+        const nextSelectedOptions = [selectedOption];
+        if (
+          nextSelectedOptions.map(({ value }) => value).join(';') !==
+          prevSelectedOptions.map(({ value }) => value).join(';')
+        ) {
+          return nextSelectedOptions;
+        }
+        return prevSelectedOptions;
+      });
     }
-  }, [options, selectedOption, selectedOptions]);
+  }, [selectedOption]);
 
   const filteredOptions = useMemo(() => {
     if (searchTerm && searchTerm !== selectedOptionDisplayString) {
