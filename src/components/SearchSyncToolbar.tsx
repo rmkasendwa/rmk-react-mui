@@ -102,7 +102,14 @@ export const SearchSyncToolbar: FC<ISearchSyncToolbarProps> = ({
                       <TextField
                         placeholder={searchFieldPlaceholder}
                         InputProps={{
-                          startAdornment: <SearchIcon color="inherit" />,
+                          startAdornment: (
+                            <SearchIcon
+                              color="inherit"
+                              sx={{
+                                mr: 0.5,
+                              }}
+                            />
+                          ),
                           autoFocus:
                             searchTermProp.length <= 0 && searchFieldOpen,
                           sx: { fontSize: 'default' },
@@ -148,27 +155,30 @@ export const SearchSyncToolbar: FC<ISearchSyncToolbarProps> = ({
             ) : null}
           </>
         ) : hasSearchTool ? (
-          <>
-            <Grid item sx={{ display: 'flex' }}>
-              <SearchIcon color="inherit" />
-            </Grid>
-            <Grid item xs sx={{ minWidth: 0 }}>
-              <TextField
-                fullWidth
-                placeholder={searchFieldPlaceholder}
-                InputProps={{
-                  disableUnderline: true,
-                  sx: { fontSize: 'default' },
-                }}
-                variant="standard"
-                value={searchTerm}
-                onChange={(event) => {
-                  setSearchTerm(event.target.value);
-                  onChangeSearchTerm && onChangeSearchTerm(event.target.value);
-                }}
-              />
-            </Grid>
-          </>
+          <Grid item xs sx={{ minWidth: 0 }}>
+            <TextField
+              fullWidth
+              placeholder={searchFieldPlaceholder}
+              InputProps={{
+                startAdornment: (
+                  <SearchIcon
+                    color="inherit"
+                    sx={{
+                      mr: 0.5,
+                    }}
+                  />
+                ),
+                disableUnderline: true,
+                sx: { fontSize: 'default' },
+              }}
+              variant="standard"
+              value={searchTerm}
+              onChange={(event) => {
+                setSearchTerm(event.target.value);
+                onChangeSearchTerm && onChangeSearchTerm(event.target.value);
+              }}
+            />
+          </Grid>
         ) : null}
         {(() => {
           if (tools) {
