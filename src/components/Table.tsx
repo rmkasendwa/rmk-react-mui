@@ -229,7 +229,7 @@ const BaseTable = <T extends IBaseTableRow>(
     onChangePage && onChangePage(newPage);
   };
 
-  const bodyStyles: SxProps<Theme> = {
+  const variantStyles: SxProps<Theme> = {
     '& tr.MuiTableRow-hover:hover': {
       bgcolor: alpha(palette.primary.main, 0.1),
     },
@@ -239,25 +239,31 @@ const BaseTable = <T extends IBaseTableRow>(
     case 'plain':
       break;
     case 'stripped':
-      Object.assign(bodyStyles, {
+      Object.assign(variantStyles, {
         [`& tr.${tableRowClasses.root}.odd:not(:hover)`]: {
           bgcolor: alpha(palette.text.primary, 0.02),
         },
-        [`& td.${tableCellClasses.root}:nth-of-type(odd)`]: {
+        [`
+          & th.${tableCellClasses.root}:nth-of-type(odd),
+          & td.${tableCellClasses.root}:nth-of-type(odd)
+        `]: {
           bgcolor: alpha(palette.text.primary, 0.02),
         },
       });
       break;
     case 'stripped-rows':
-      Object.assign(bodyStyles, {
+      Object.assign(variantStyles, {
         [`& tr.${tableRowClasses.root}.odd:not(:hover)`]: {
           bgcolor: alpha(palette.text.primary, 0.02),
         },
       });
       break;
     case 'stripped-columns':
-      Object.assign(bodyStyles, {
-        [`& td.${tableCellClasses.root}:nth-of-type(odd)`]: {
+      Object.assign(variantStyles, {
+        [`
+          & th.${tableCellClasses.root}:nth-of-type(odd),
+          & td.${tableCellClasses.root}:nth-of-type(odd),
+        `]: {
           bgcolor: alpha(palette.text.primary, 0.02),
         },
       });
@@ -272,6 +278,7 @@ const BaseTable = <T extends IBaseTableRow>(
       sx={{
         tableLayout: 'fixed',
         minWidth,
+        ...variantStyles,
         ...sx,
       }}
     >
@@ -357,7 +364,7 @@ const BaseTable = <T extends IBaseTableRow>(
         </TableHead>
       ) : null}
       {showDataRows ? (
-        <TableBody sx={bodyStyles}>
+        <TableBody>
           {(() => {
             if (pageRows.length > 0) {
               return pageRows.map((row, index) => {
