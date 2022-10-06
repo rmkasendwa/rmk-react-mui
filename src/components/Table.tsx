@@ -244,7 +244,7 @@ const BaseTable = <T extends IBaseTableRow>(
           bgcolor: alpha(palette.text.primary, 0.02),
         },
         [`
-          & th.${tableCellClasses.root}:nth-of-type(odd),
+          & th.${tableCellClasses.root}:nth-of-type(odd)>div,
           & td.${tableCellClasses.root}:nth-of-type(odd)
         `]: {
           bgcolor: alpha(palette.text.primary, 0.02),
@@ -261,7 +261,7 @@ const BaseTable = <T extends IBaseTableRow>(
     case 'stripped-columns':
       Object.assign(variantStyles, {
         [`
-          & th.${tableCellClasses.root}:nth-of-type(odd),
+          & th.${tableCellClasses.root}:nth-of-type(odd)>div,
           & td.${tableCellClasses.root}:nth-of-type(odd),
         `]: {
           bgcolor: alpha(palette.text.primary, 0.02),
@@ -300,9 +300,7 @@ const BaseTable = <T extends IBaseTableRow>(
                   align={align}
                   sx={{
                     fontWeight: 'bold',
-                    pl: align === 'center' || index <= 0 ? 3 : 1.5,
-                    pr: 3,
-                    py: 1.5,
+                    p: 0,
                     ...getColumnWidthStyles({
                       ...column,
                       minWidth: minWidth ?? minColumnWidth,
@@ -312,51 +310,71 @@ const BaseTable = <T extends IBaseTableRow>(
                     position: stickyHeader ? 'sticky' : 'relative',
                   }}
                 >
-                  {label ? (
-                    <>
-                      <Typography
-                        component="div"
-                        variant="body2"
-                        sx={{ fontWeight: 'bold' }}
-                        noWrap
-                      >
-                        {label}
-                      </Typography>
-                      <Stack
-                        sx={{
-                          position: 'absolute',
-                          top: 0,
-                          right: 0,
-                          height: '100%',
-                          fontSize: 10,
-                          lineHeight: 1,
-                        }}
-                      >
-                        <Box
+                  <Box
+                    sx={{
+                      pl: align === 'center' || index <= 0 ? 3 : 1.5,
+                      pr: 3,
+                      py: 1.5,
+                      ...(() => {
+                        if (!label) {
+                          return {
+                            position: 'absolute',
+                            top: 0,
+                            right: 0,
+                            bottom: 0,
+                            left: 0,
+                          };
+                        }
+                        return {};
+                      })(),
+                    }}
+                  >
+                    {label ? (
+                      <>
+                        <Typography
+                          component="div"
+                          variant="body2"
+                          sx={{ fontWeight: 'bold' }}
+                          noWrap
+                        >
+                          {label}
+                        </Typography>
+                        <Stack
                           sx={{
-                            flex: 1,
-                            display: 'flex',
-                            alignItems: 'end',
-                            px: 0.8,
-                            color: alpha(palette.text.primary, 0.1),
+                            position: 'absolute',
+                            top: 0,
+                            right: 0,
+                            height: '100%',
+                            fontSize: 10,
+                            lineHeight: 1,
                           }}
                         >
-                          <span>&#9650;</span>
-                        </Box>
-                        <Box
-                          sx={{
-                            flex: 1,
-                            display: 'flex',
-                            alignItems: 'start',
-                            px: 0.8,
-                            color: alpha(palette.text.primary, 0.1),
-                          }}
-                        >
-                          <span>&#9660;</span>
-                        </Box>
-                      </Stack>
-                    </>
-                  ) : null}
+                          <Box
+                            sx={{
+                              flex: 1,
+                              display: 'flex',
+                              alignItems: 'end',
+                              px: 0.8,
+                              color: alpha(palette.text.primary, 0.1),
+                            }}
+                          >
+                            <span>&#9650;</span>
+                          </Box>
+                          <Box
+                            sx={{
+                              flex: 1,
+                              display: 'flex',
+                              alignItems: 'start',
+                              px: 0.8,
+                              color: alpha(palette.text.primary, 0.1),
+                            }}
+                          >
+                            <span>&#9660;</span>
+                          </Box>
+                        </Stack>
+                      </>
+                    ) : null}
+                  </Box>
                 </TableCell>
               );
             })}
