@@ -3,7 +3,7 @@ import { useCallback } from 'react';
 
 import { SetSearchPrams, useSetSearchParam } from './Utils';
 
-export const useReactRouterDOMSearchParams = () => {
+export const useNextRouterSearchParams = () => {
   const { push, replace, query: searchParams } = useRouter();
 
   const baseSetSearchParams: SetSearchPrams = useCallback(
