@@ -42,29 +42,31 @@ export const paramsSufficientForPath = (
 };
 
 export type TSearchParam = string | number | boolean;
-
 export const addSearchParams = (
   routePath: string,
   params: Record<string, TSearchParam | TSearchParam[] | null | undefined>
 ): string => {
   const keys = Object.keys(params);
   if (keys.length === 0) return routePath;
-  return (
-    routePath +
-    '?' +
-    keys
-      .reduce((accumulator, key) => {
-        if (params[key] != null) {
-          const value = (() => {
-            if (Array.isArray(params[key])) {
-              return (params[key] as any).join(',');
-            }
-            return String(params[key]);
-          })();
-          accumulator.push(`${key}=${encodeURIComponent(value)}`);
-        }
-        return accumulator;
-      }, [] as string[])
-      .join('&')
-  );
+  const queryString = keys
+    .reduce((accumulator, key) => {
+      if (
+        params[key] != null &&
+        (typeof params[key] !== 'string' || String(params[key]).length > 0)
+      ) {
+        const value = (() => {
+          if (Array.isArray(params[key])) {
+            return (params[key] as any).join(',');
+          }
+          return String(params[key]);
+        })();
+        accumulator.push(`${key}=${encodeURIComponent(value)}`);
+      }
+      return accumulator;
+    }, [] as string[])
+    .join('&');
+  if (queryString.length > 0) {
+    return routePath + '?' + queryString;
+  }
+  return routePath;
 };
