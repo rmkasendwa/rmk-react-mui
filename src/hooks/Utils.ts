@@ -379,7 +379,7 @@ export const useSmallScreen = () => {
 };
 
 export type SetSearchPrams = (
-  nextInit: Record<string, string>,
+  nextInit: Record<string, string | string[]>,
   navigateOptions?: {
     replace?: boolean | undefined;
     state?: any;
@@ -396,9 +396,15 @@ export const useSetSearchParam = (baseSetSearchParams: SetSearchPrams) => {
       }
     ) => {
       const entries = new URL(window.location.href).searchParams.entries();
-      const existingSearchParams: Record<string, string> = {};
+      const existingSearchParams: Record<string, string | string[]> = {};
       for (const [key, value] of entries) {
-        existingSearchParams[key] = value;
+        if (Array.isArray(existingSearchParams[key])) {
+          (existingSearchParams[key] as string[]).push(value);
+        } else if (typeof existingSearchParams[key] === 'string') {
+          existingSearchParams[key] = [existingSearchParams[key] as string];
+        } else {
+          existingSearchParams[key] = value;
+        }
       }
       const combinedSearchParams = {
         ...existingSearchParams,
@@ -414,7 +420,7 @@ export const useSetSearchParam = (baseSetSearchParams: SetSearchPrams) => {
         .reduce((accumulator, key) => {
           accumulator[key] = combinedSearchParams[key]!;
           return accumulator;
-        }, {} as Record<string, string>);
+        }, {} as Record<string, string | string[]>);
 
       if (hash(nextSearchParams) !== hash(existingSearchParams)) {
         baseSetSearchParams(nextSearchParams, navigateOptions);
