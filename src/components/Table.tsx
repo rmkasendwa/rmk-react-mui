@@ -4,7 +4,7 @@ import { PaginationProps } from '@mui/material/Pagination';
 import { Theme } from '@mui/material/styles/createTheme';
 import useTheme from '@mui/material/styles/useTheme';
 import MuiTable, { TableProps } from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
+import TableBody, { tableBodyClasses } from '@mui/material/TableBody';
 import TableCell, { tableCellClasses } from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
@@ -230,7 +230,7 @@ const BaseTable = <T extends IBaseTableRow>(
   };
 
   const variantStyles: SxProps<Theme> = {
-    '& tr.MuiTableRow-hover:hover': {
+    [`& .${tableBodyClasses.root} tr.MuiTableRow-hover:hover`]: {
       bgcolor: alpha(palette.primary.main, 0.1),
     },
   };
@@ -240,9 +240,10 @@ const BaseTable = <T extends IBaseTableRow>(
       break;
     case 'stripped':
       Object.assign(variantStyles, {
-        [`& tr.${tableRowClasses.root}.odd:not(:hover)`]: {
-          bgcolor: alpha(palette.text.primary, 0.02),
-        },
+        [`& .${tableBodyClasses.root} tr.${tableRowClasses.root}.odd:not(:hover)`]:
+          {
+            bgcolor: alpha(palette.text.primary, 0.02),
+          },
         [`
           & th.${tableCellClasses.root}:nth-of-type(odd)>div,
           & td.${tableCellClasses.root}:nth-of-type(odd)
@@ -253,16 +254,17 @@ const BaseTable = <T extends IBaseTableRow>(
       break;
     case 'stripped-rows':
       Object.assign(variantStyles, {
-        [`& tr.${tableRowClasses.root}.odd:not(:hover)`]: {
-          bgcolor: alpha(palette.text.primary, 0.02),
-        },
+        [`& .${tableBodyClasses.root} tr.${tableRowClasses.root}.odd:not(:hover)`]:
+          {
+            bgcolor: alpha(palette.text.primary, 0.02),
+          },
       });
       break;
     case 'stripped-columns':
       Object.assign(variantStyles, {
         [`
           & th.${tableCellClasses.root}:nth-of-type(odd)>div,
-          & td.${tableCellClasses.root}:nth-of-type(odd),
+          & td.${tableCellClasses.root}:nth-of-type(odd)
         `]: {
           bgcolor: alpha(palette.text.primary, 0.02),
         },
