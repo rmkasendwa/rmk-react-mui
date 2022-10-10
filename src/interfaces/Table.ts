@@ -53,6 +53,7 @@ export interface ITableColumn<T = any>
   getColumnValue?: (row: T, column: ITableColumn) => ReactNode;
   onClickColumn?: (currentEntity: T) => void;
   bodySx?: SxProps<Theme>;
+  sortable?: boolean;
 }
 
 export interface IForEachDerivedColumnConfiguration<T> {

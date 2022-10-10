@@ -288,7 +288,14 @@ const BaseTable = <T extends IBaseTableRow>(
         <TableHead>
           <TableRow {...restHeaderRowProps} sx={{ ...headerRowPropsSx }}>
             {columns.map((column, index) => {
-              const { id, align, style, minWidth, sx } = column;
+              const {
+                id,
+                align,
+                style,
+                minWidth,
+                sortable = false,
+                sx,
+              } = column;
               let label = column.label;
               column.headerTextAfter &&
                 (label = (
@@ -341,39 +348,45 @@ const BaseTable = <T extends IBaseTableRow>(
                         >
                           {label}
                         </Typography>
-                        <Stack
-                          sx={{
-                            position: 'absolute',
-                            top: 0,
-                            right: 0,
-                            height: '100%',
-                            fontSize: 10,
-                            lineHeight: 1,
-                          }}
-                        >
-                          <Box
-                            sx={{
-                              flex: 1,
-                              display: 'flex',
-                              alignItems: 'end',
-                              px: 0.8,
-                              color: alpha(palette.text.primary, 0.1),
-                            }}
-                          >
-                            <span>&#9650;</span>
-                          </Box>
-                          <Box
-                            sx={{
-                              flex: 1,
-                              display: 'flex',
-                              alignItems: 'start',
-                              px: 0.8,
-                              color: alpha(palette.text.primary, 0.1),
-                            }}
-                          >
-                            <span>&#9660;</span>
-                          </Box>
-                        </Stack>
+                        {(() => {
+                          if (sortable) {
+                            return (
+                              <Stack
+                                sx={{
+                                  position: 'absolute',
+                                  top: 0,
+                                  right: 0,
+                                  height: '100%',
+                                  fontSize: 10,
+                                  lineHeight: 1,
+                                }}
+                              >
+                                <Box
+                                  sx={{
+                                    flex: 1,
+                                    display: 'flex',
+                                    alignItems: 'end',
+                                    px: 0.8,
+                                    color: alpha(palette.text.primary, 0.1),
+                                  }}
+                                >
+                                  <span>&#9650;</span>
+                                </Box>
+                                <Box
+                                  sx={{
+                                    flex: 1,
+                                    display: 'flex',
+                                    alignItems: 'start',
+                                    px: 0.8,
+                                    color: alpha(palette.text.primary, 0.1),
+                                  }}
+                                >
+                                  <span>&#9660;</span>
+                                </Box>
+                              </Stack>
+                            );
+                          }
+                        })()}
                       </>
                     ) : null}
                   </Box>
