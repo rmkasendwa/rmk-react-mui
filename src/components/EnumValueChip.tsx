@@ -1,3 +1,4 @@
+import { Tooltip } from '@mui/material';
 import Chip, { ChipProps } from '@mui/material/Chip';
 import useTheme from '@mui/material/styles/useTheme';
 import { FC } from 'react';
@@ -32,16 +33,18 @@ export const EnumValueChip: FC<IEnumValueChipProps> = ({
   })();
 
   return (
-    <Chip
-      label={label}
-      size="small"
-      {...rest}
-      sx={{
-        ...sx,
-        color,
-        bgcolor,
-      }}
-    />
+    <Tooltip title={label}>
+      <Chip
+        label={label}
+        size="small"
+        {...rest}
+        sx={{
+          ...sx,
+          color,
+          bgcolor,
+        }}
+      />
+    </Tooltip>
   );
 };
 
