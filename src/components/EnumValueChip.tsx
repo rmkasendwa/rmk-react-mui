@@ -26,8 +26,8 @@ export const EnumValueChip: FC<IEnumValueChipProps> = ({
       };
     }
     return {
-      bgcolor: palette.error.main,
-      color: palette.getContrastText(palette.error.main),
+      bgcolor: palette.divider,
+      color: palette.getContrastText(palette.divider),
     };
   })();
 
