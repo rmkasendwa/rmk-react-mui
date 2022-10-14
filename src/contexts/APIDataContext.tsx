@@ -1,4 +1,4 @@
-import { FC, ReactNode, createContext } from 'react';
+import { FC, ReactNode, createContext, useContext } from 'react';
 
 export interface IAPIDataContext {
   preferStale?: boolean;
@@ -19,4 +19,8 @@ export const APIDataProvider: FC<IAPIDataProviderProps> = ({
   return (
     <APIDataContext.Provider value={value}>{children}</APIDataContext.Provider>
   );
+};
+
+export const useAPIDataContext = () => {
+  return useContext(APIDataContext);
 };

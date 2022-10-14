@@ -21,8 +21,9 @@ import {
   useState,
 } from 'react';
 
+import { useAPIDataContext } from '../../contexts/APIDataContext';
 import { LoadingProvider } from '../../contexts/LoadingContext';
-import { useAPIDataContext, useAPIService } from '../../hooks/Utils';
+import { useAPIService } from '../../hooks/Utils';
 import { TAPIFunction } from '../../interfaces/Utils';
 import PaginatedDropdownOptionList, {
   IDropdownOption,
