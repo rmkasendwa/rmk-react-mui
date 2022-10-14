@@ -1,6 +1,8 @@
 import {
+  Dispatch,
   FC,
   ReactNode,
+  SetStateAction,
   createContext,
   useCallback,
   useContext,
@@ -13,13 +15,9 @@ import { TAPIFunction } from '../interfaces/Utils';
 export interface IAPIContext {
   call: <T extends TAPIFunction>(func: T) => Promise<ReturnType<T>>;
   sessionExpired: boolean;
+  setSessionExpired: Dispatch<SetStateAction<boolean>>;
 }
-export const APIContext = createContext<IAPIContext>({
-  call: async (apiFunction: TAPIFunction) => {
-    return apiFunction();
-  },
-  sessionExpired: false,
-});
+export const APIContext = createContext<IAPIContext>({} as any);
 
 export const APIProvider: FC<{
   children: ReactNode;
@@ -29,24 +27,19 @@ export const APIProvider: FC<{
 
   const call = useCallback(
     async (apiCallback: TAPIFunction) => {
-      return apiCallback()
-        .then((response) => {
-          setSessionExpired(false);
-          return response;
-        })
-        .catch((err) => {
-          if (
-            [
-              'User session timed out',
-              'Session timed out',
-              'Invalid token',
-            ].includes(err.message)
-          ) {
-            setSessionExpired(true);
-          } else {
-            throw err;
-          }
-        });
+      return apiCallback().catch((err) => {
+        if (
+          [
+            'User session timed out',
+            'Session timed out',
+            'Invalid token',
+          ].includes(err.message)
+        ) {
+          setSessionExpired(true);
+        } else {
+          throw err;
+        }
+      });
     },
     [setSessionExpired]
   );
@@ -58,7 +51,7 @@ export const APIProvider: FC<{
   }, [onSessionExpired, sessionExpired]);
 
   return (
-    <APIContext.Provider value={{ call, sessionExpired }}>
+    <APIContext.Provider value={{ call, sessionExpired, setSessionExpired }}>
       {children}
     </APIContext.Provider>
   );
