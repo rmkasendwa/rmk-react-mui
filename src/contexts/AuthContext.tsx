@@ -37,7 +37,7 @@ export const AuthProvider: FC<{
 }> = ({ children, value }) => {
   const [loggedInUser, setLoggedInUser] = useState<any | null>(null);
   const [loadingCurrentSession, setLoadingCurrentSession] = useState(true);
-  const { sessionExpired } = useAPIContext();
+  const { sessionExpired, setSessionExpired } = useAPIContext();
   const {
     record: user,
     load,
@@ -51,10 +51,14 @@ export const AuthProvider: FC<{
     setLoadingCurrentSession(false);
   }, []);
 
-  const updateLoggedInUserSession = useCallback((user: any) => {
-    StorageManager.add('user', user);
-    setLoggedInUser(user);
-  }, []);
+  const updateLoggedInUserSession = useCallback(
+    (user: any) => {
+      setSessionExpired(false);
+      StorageManager.add('user', user);
+      setLoggedInUser(user);
+    },
+    [setSessionExpired]
+  );
 
   const clearLoggedInUserSession = useCallback(() => {
     StorageManager.remove('user');
