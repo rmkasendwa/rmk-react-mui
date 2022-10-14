@@ -12,7 +12,6 @@ import {
 
 import { CANCELLED_API_REQUEST_MESSAGE } from '../constants';
 import { APIContext } from '../contexts/APIContext';
-import { APIDataContext } from '../contexts/APIDataContext';
 import { useCachedData } from '../contexts/DataStoreContext';
 import {
   IPaginatedRequestParams,
@@ -367,10 +366,6 @@ export const usePaginatedRecords = <T>(
     responseData,
     ...rest,
   };
-};
-
-export const useAPIDataContext = () => {
-  return useContext(APIDataContext);
 };
 
 export const useSmallScreen = () => {

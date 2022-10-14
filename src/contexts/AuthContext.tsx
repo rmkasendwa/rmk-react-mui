@@ -1,8 +1,6 @@
 import {
-  Dispatch,
   FC,
   ReactNode,
-  SetStateAction,
   createContext,
   useCallback,
   useContext,
@@ -15,6 +13,7 @@ import { useAPIService } from '../hooks/Utils';
 import { TPermissionCode } from '../interfaces/Users';
 import { TAPIFunction } from '../interfaces/Utils';
 import StorageManager from '../utils/StorageManager';
+import { useAPIContext } from './APIContext';
 
 export interface IAuthContext<T = any> {
   login: (loginFunction: TAPIFunction<T>) => Promise<void>;
@@ -27,8 +26,6 @@ export interface IAuthContext<T = any> {
     permissionCode: TPermissionCode | TPermissionCode[]
   ) => boolean;
   loadingCurrentSession: boolean;
-  sessionExpired: boolean;
-  setSessionExpired: Dispatch<SetStateAction<boolean>>;
   loggingIn: boolean;
   loginErrorMessage: string;
 }
@@ -40,7 +37,7 @@ export const AuthProvider: FC<{
 }> = ({ children, value }) => {
   const [loggedInUser, setLoggedInUser] = useState<any | null>(null);
   const [loadingCurrentSession, setLoadingCurrentSession] = useState(true);
-  const [sessionExpired, setSessionExpired] = useState(false);
+  const { sessionExpired } = useAPIContext();
   const {
     record: user,
     load,
@@ -57,7 +54,6 @@ export const AuthProvider: FC<{
   const updateLoggedInUserSession = useCallback((user: any) => {
     StorageManager.add('user', user);
     setLoggedInUser(user);
-    setSessionExpired(false);
   }, []);
 
   const clearLoggedInUserSession = useCallback(() => {
@@ -133,8 +129,6 @@ export const AuthProvider: FC<{
         authenticated: loggedInUser !== null,
         loggedInUserHasPermission,
         loadingCurrentSession,
-        sessionExpired,
-        setSessionExpired,
         loggingIn,
         loginErrorMessage,
         ...value,
