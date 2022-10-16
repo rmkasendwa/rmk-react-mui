@@ -40,7 +40,7 @@ export const TableBodyRow = <T extends IBaseTableRow>({
   labelTransform,
   onClickRow,
   sx,
-  defaultValue,
+  defaultColumnValue: baseDefaultColumnValue,
   columnTypographyProps = {},
   minColumnWidth,
   ...rest
@@ -65,7 +65,7 @@ export const TableBodyRow = <T extends IBaseTableRow>({
           const {
             type,
             id,
-            defaultValue: columnDefaultValue,
+            defaultColumnValue,
             postProcessor,
             isDerivedColumn,
             getColumnValue,
@@ -157,7 +157,9 @@ export const TableBodyRow = <T extends IBaseTableRow>({
             columnValue = postProcessor(columnValue, row, column);
           }
           if (columnValue == null) {
-            columnValue = columnDefaultValue ?? defaultValue ?? <>&nbsp;</>;
+            columnValue = defaultColumnValue ?? baseDefaultColumnValue ?? (
+              <>&nbsp;</>
+            );
           }
           accumulator[id] = columnValue;
           return accumulator;
@@ -183,7 +185,7 @@ export const TableBodyRow = <T extends IBaseTableRow>({
         return {};
       })(),
     };
-  }, [columns, decimalPlaces, defaultValue, labelTransform, row]);
+  }, [columns, decimalPlaces, baseDefaultColumnValue, labelTransform, row]);
 
   const { sx: rowPropsSx, ...restRowProps }: any = formattedRow.rowProps;
   return (
