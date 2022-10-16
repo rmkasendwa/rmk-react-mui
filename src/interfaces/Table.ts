@@ -44,7 +44,7 @@ export interface ITableColumn<T = any>
   searchKeyMapper?: (displayingColumnValue: string) => any;
   columnClassName?: string;
   locked?: boolean;
-  defaultValue?: ReactNode;
+  defaultColumnValue?: ReactNode;
   postProcessor?: (
     columnValue: ReactNode,
     row: T,
@@ -78,7 +78,7 @@ export interface ITableRowProps<T = any> {
   decimalPlaces?: number;
   labelTransform?: boolean;
   onClickRow?: (currentEntity: T) => void;
-  defaultValue?: ReactNode;
+  defaultColumnValue?: ReactNode;
   columnTypographyProps?: Partial<TypographyProps>;
   minColumnWidth?: number;
 }

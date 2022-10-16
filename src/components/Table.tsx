@@ -59,7 +59,7 @@ export interface ITableProps<T = any>
       | 'decimalPlaces'
       | 'labelTransform'
       | 'onClickRow'
-      | 'defaultValue'
+      | 'defaultColumnValue'
       | 'columnTypographyProps'
       | 'minColumnWidth'
     > {
@@ -115,7 +115,7 @@ const BaseTable = <T extends IBaseTableRow>(
     stickyHeader = false,
     TableBodyRowPlaceholderProps = {},
     PaginatedTableWrapperProps = {},
-    defaultValue,
+    defaultColumnValue,
     columnTypographyProps,
     minColumnWidth,
     sx,
@@ -429,7 +429,7 @@ const BaseTable = <T extends IBaseTableRow>(
                         labelTransform,
                         onClickRow,
                         generateRowData,
-                        defaultValue,
+                        defaultColumnValue,
                         columnTypographyProps,
                         minColumnWidth,
                       }}
