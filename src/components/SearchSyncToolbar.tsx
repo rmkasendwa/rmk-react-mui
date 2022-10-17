@@ -95,7 +95,7 @@ export const SearchSyncToolbar: FC<ISearchSyncToolbarProps> = ({
               </Typography>
             </Grid>
             {hasSearchTool ? (
-              <Grid item sx={{ display: 'flex' }}>
+              <Grid item sx={{ display: 'flex', flex: 1, maxWidth: 300 }}>
                 {searchFieldOpen || searchFieldOpenProp ? (
                   (() => {
                     const textField = (
@@ -121,9 +121,7 @@ export const SearchSyncToolbar: FC<ISearchSyncToolbarProps> = ({
                           onChangeSearchTerm &&
                             onChangeSearchTerm(event.target.value);
                         }}
-                        sx={{
-                          width: 220,
-                        }}
+                        fullWidth
                       />
                     );
                     return (

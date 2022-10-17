@@ -109,6 +109,13 @@ export const TextField = forwardRef<HTMLDivElement, ITextFieldProps>(
           {...wrapperPropsRest}
           sx={{
             position: 'relative',
+            ...(() => {
+              if (fullWidth) {
+                return {
+                  width: '100%',
+                };
+              }
+            })(),
             ...wrapperPropsSx,
           }}
         >
