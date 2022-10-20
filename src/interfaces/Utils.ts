@@ -85,3 +85,10 @@ export interface ITaggedAPIRequest {
   errorMessage?: string;
   loading?: boolean;
 }
+
+export type PrimitiveDataType =
+  | 'number'
+  | 'string'
+  | 'boolean'
+  | 'date'
+  | 'enum';

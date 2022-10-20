@@ -2,6 +2,8 @@ import { SxProps, TableRowProps, Theme, TypographyProps } from '@mui/material';
 import { TableCellProps } from '@mui/material/TableCell';
 import { ReactNode } from 'react';
 
+import { PrimitiveDataType } from './Utils';
+
 export type ITableColumnEnumValue =
   | {
       id: string;
@@ -14,18 +16,15 @@ export interface ITableColumn<T = any>
   id: keyof T;
   label?: ReactNode;
   type?:
-    | 'boolean'
+    | PrimitiveDataType
     | 'checkbox'
     | 'currency'
     | 'currencyInput'
-    | 'date'
     | 'dateInput'
     | 'dateTime'
     | 'dropdownInput'
-    | 'enum'
     | 'id'
     | 'input'
-    | 'number'
     | 'numberInput'
     | 'percentage'
     | 'percentageInput'
