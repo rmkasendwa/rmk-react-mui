@@ -10,8 +10,8 @@ export type ITableColumnEnumValue =
   | string;
 
 export interface ITableColumn<T = any>
-  extends Partial<Omit<TableCellProps, 'defaultValue'>> {
-  id: string;
+  extends Partial<Omit<TableCellProps, 'defaultValue' | 'id'>> {
+  id: keyof T;
   label?: ReactNode;
   type?:
     | 'boolean'
