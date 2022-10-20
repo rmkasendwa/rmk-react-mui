@@ -30,9 +30,9 @@ export const useDarkMode = () => {
       }
     };
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    mediaQuery.addEventListener('change', changeEventCallback);
+    mediaQuery?.addEventListener('change', changeEventCallback);
     return () => {
-      mediaQuery.removeEventListener('change', changeEventCallback);
+      mediaQuery?.removeEventListener('change', changeEventCallback);
     };
   }, [toggleDarkMode]);
 
