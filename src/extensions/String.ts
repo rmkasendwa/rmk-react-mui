@@ -150,13 +150,21 @@ String.prototype.hyphenatePascal = function () {
 String.prototype.titleCasePascal = function () {
   const inputString = String(this);
   if (inputString.toUpperCase() === inputString) return inputString;
-  return this.replace(
-    /[A-Z]/g,
-    (upperCaseCharacters, offset) =>
-      (offset > 0 ? ' ' : '') + upperCaseCharacters
-  )
+  const result = inputString
+    .replace(/[A-Z]/g, function (upperCaseCharacters, offset) {
+      return (offset > 0 ? ' ' : '') + upperCaseCharacters;
+    })
     .toTitleCase()
-    .replace(/(?<=\b[A-Z])\s(?=[A-Z]\b)/g, '');
+    .trim() // Small change here
+    .replace(/\s{2,}/, ' '); // And here (and the next whole IF)
+
+  // Note: When safari starts supporting look forward and behind,
+  // we can use
+  //  .replace(/(?<=\b[A-Z])\s(?=[A-Z]\b)/g, "");
+  if (result.length === 3 && result[1] === ' ') {
+    return result.split(' ').join('');
+  }
+  return result;
 };
 
 String.prototype.toCamelCase = function (from) {
