@@ -76,7 +76,7 @@ export const TableBodyRow = <T extends IBaseTableRow>({
             }
             if (isDerivedColumn && forEachDerivedColumnRef.current) {
               return forEachDerivedColumnRef.current({
-                key: id,
+                key: String(id),
                 currentEntity: row,
               });
             }
@@ -172,7 +172,7 @@ export const TableBodyRow = <T extends IBaseTableRow>({
             }
             return {};
           })(),
-        } as Record<string, TableRowProps>
+        } as Record<keyof T, TableRowProps>
       ),
       ...(() => {
         if (generateRowDataRef.current) {
@@ -218,7 +218,7 @@ export const TableBodyRow = <T extends IBaseTableRow>({
         const columnValue = formattedRow[column.id];
         return (
           <TableCell
-            key={id}
+            key={String(id)}
             {...{ style }}
             onClick={(event) => {
               onClickColumn && onClickColumn(formattedRow.currentEntity);

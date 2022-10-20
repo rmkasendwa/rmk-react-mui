@@ -305,7 +305,7 @@ const BaseTable = <T extends IBaseTableRow>(
                 ));
               return (
                 <TableCell
-                  key={id}
+                  key={String(id)}
                   align={align}
                   sx={{
                     fontWeight: 'bold',
