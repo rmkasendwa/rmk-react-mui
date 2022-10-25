@@ -274,6 +274,7 @@ const BaseTable = <T extends IBaseTableRow>(
       {...rest}
       ref={ref}
       {...{ stickyHeader }}
+      className={`Mui-table-${variant}`}
       sx={{
         tableLayout: 'fixed',
         minWidth,
