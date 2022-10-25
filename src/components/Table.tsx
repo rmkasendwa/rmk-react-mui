@@ -311,9 +311,10 @@ const BaseTable = <T extends IBaseTableRow>(
                       ...column,
                       minWidth: minWidth ?? minColumnWidth,
                     }),
+                    position: stickyHeader ? 'sticky' : 'relative',
+                    bgcolor: 'transparent',
                     ...style,
                     ...sx,
-                    position: stickyHeader ? 'sticky' : 'relative',
                   }}
                 >
                   <Box
