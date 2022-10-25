@@ -149,9 +149,6 @@ const BaseTable = <T extends IBaseTableRow>(
       switch (nextColumn.type) {
         case 'date':
         case 'time':
-          nextColumn.width || (nextColumn.width = 120);
-          break;
-        case 'enum':
           nextColumn.width || (nextColumn.width = 150);
           break;
         case 'currency':
@@ -174,7 +171,7 @@ const BaseTable = <T extends IBaseTableRow>(
         case 'boolean':
           nextColumn.align = 'center';
           nextColumn.enumValues = ['Yes', 'No'];
-          nextColumn.width || (nextColumn.width = 120);
+          nextColumn.width || (nextColumn.width = 150);
           nextColumn.searchKeyMapper ||
             (nextColumn.searchKeyMapper = (searchValue) =>
               searchValue === 'Yes');
@@ -314,9 +311,10 @@ const BaseTable = <T extends IBaseTableRow>(
                       ...column,
                       minWidth: minWidth ?? minColumnWidth,
                     }),
+                    position: stickyHeader ? 'sticky' : 'relative',
+                    bgcolor: 'transparent',
                     ...style,
                     ...sx,
-                    position: stickyHeader ? 'sticky' : 'relative',
                   }}
                 >
                   <Box
