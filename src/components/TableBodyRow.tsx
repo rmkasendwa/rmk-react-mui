@@ -45,15 +45,17 @@ export const TableBodyRow = <T extends IBaseTableRow>({
   minColumnWidth,
   ...rest
 }: ITableBodyRowProps<T>) => {
+  // Refs
+  const columnsRef = useRef(columns);
   const forEachDerivedColumnRef = useRef(forEachDerivedColumn);
   const getRowPropsRef = useRef(getRowProps);
   const generateRowDataRef = useRef(generateRowData);
-
   useEffect(() => {
+    columnsRef.current = columns;
     forEachDerivedColumnRef.current = forEachDerivedColumn;
     getRowPropsRef.current = getRowProps;
     generateRowDataRef.current = generateRowData;
-  }, [forEachDerivedColumn, generateRowData, getRowProps]);
+  }, [columns, forEachDerivedColumn, generateRowData, getRowProps]);
 
   const formattedRow: any & {
     currentEntity: T;
@@ -185,7 +187,7 @@ export const TableBodyRow = <T extends IBaseTableRow>({
         return {};
       })(),
     };
-  }, [columns, decimalPlaces, baseDefaultColumnValue, labelTransform, row]);
+  }, [columns, row, decimalPlaces, labelTransform, baseDefaultColumnValue]);
 
   const { sx: rowPropsSx, ...restRowProps }: any = formattedRow.rowProps;
   return (
