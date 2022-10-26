@@ -229,6 +229,16 @@ export const TableBodyRow = <T extends IBaseTableRow>({
               py: 1,
               px: 3,
               cursor: onClickColumn ? 'pointer' : 'inherit',
+              position: 'relative',
+              ['&:before']: {
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                bottom: 0,
+                left: 0,
+                right: 0,
+                pointerEvents: 'none',
+              },
               ...getColumnPaddingStyles({
                 index,
                 columnCount: columns.length,

@@ -227,8 +227,11 @@ const BaseTable = <T extends IBaseTableRow>(
   };
 
   const variantStyles: SxProps<Theme> = {
-    [`& .${tableBodyClasses.root} tr.MuiTableRow-hover:hover`]: {
-      bgcolor: alpha(palette.primary.main, 0.1),
+    [`.${tableBodyClasses.root} tr.${tableRowClasses.hover}:hover`]: {
+      bgcolor: 'transparent',
+      [`.${tableCellClasses.root}:before`]: {
+        bgcolor: alpha(palette.primary.main, 0.1),
+      },
     },
   };
 
@@ -237,13 +240,13 @@ const BaseTable = <T extends IBaseTableRow>(
       break;
     case 'stripped':
       Object.assign(variantStyles, {
-        [`& .${tableBodyClasses.root} tr.${tableRowClasses.root}.odd:not(:hover)`]:
+        [`.${tableBodyClasses.root} tr.${tableRowClasses.root}.odd:not(:hover)`]:
           {
             bgcolor: alpha(palette.text.primary, 0.02),
           },
         [`
-          & th.${tableCellClasses.root}:nth-of-type(odd)>div,
-          & td.${tableCellClasses.root}:nth-of-type(odd)
+          th.${tableCellClasses.root}:nth-of-type(odd)>div,
+          td.${tableCellClasses.root}:nth-of-type(odd)
         `]: {
           bgcolor: alpha(palette.text.primary, 0.02),
         },
@@ -251,7 +254,7 @@ const BaseTable = <T extends IBaseTableRow>(
       break;
     case 'stripped-rows':
       Object.assign(variantStyles, {
-        [`& .${tableBodyClasses.root} tr.${tableRowClasses.root}.odd:not(:hover)`]:
+        [`.${tableBodyClasses.root} tr.${tableRowClasses.root}.odd:not(:hover)`]:
           {
             bgcolor: alpha(palette.text.primary, 0.02),
           },
@@ -260,8 +263,8 @@ const BaseTable = <T extends IBaseTableRow>(
     case 'stripped-columns':
       Object.assign(variantStyles, {
         [`
-          & th.${tableCellClasses.root}:nth-of-type(odd)>div,
-          & td.${tableCellClasses.root}:nth-of-type(odd)
+          th.${tableCellClasses.root}:nth-of-type(odd)>div,
+          td.${tableCellClasses.root}:nth-of-type(odd)
         `]: {
           bgcolor: alpha(palette.text.primary, 0.02),
         },
