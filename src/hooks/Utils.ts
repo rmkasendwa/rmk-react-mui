@@ -270,7 +270,7 @@ export const usePaginatedRecords = <T>(
     limit: limitProp = 100,
     offset: offsetProp = 0,
     showRecords: showRecordsProp = true,
-  }: IUsePaginatedRecordsOptions
+  }: IUsePaginatedRecordsOptions = {}
 ) => {
   const recordFinderRef = useRef(recordFinder);
   useEffect(() => {

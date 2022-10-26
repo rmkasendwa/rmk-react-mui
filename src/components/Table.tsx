@@ -22,6 +22,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 
@@ -132,6 +133,11 @@ const BaseTable = <T extends IBaseTableRow>(
     ...PaginatedTableWrapperPropsRest
   } = PaginatedTableWrapperProps;
   lowercaseLabelPlural || (lowercaseLabelPlural = labelPlural.toLowerCase());
+  // Refs
+  const columnsRef = useRef(columnsProp);
+  useEffect(() => {
+    columnsRef.current = columnsProp;
+  }, [columnsProp]);
 
   const { palette } = useTheme();
   const { sx: headerRowPropsSx, ...restHeaderRowProps } = HeaderRowProps;
@@ -324,7 +330,7 @@ const BaseTable = <T extends IBaseTableRow>(
                   <Box
                     sx={{
                       pl: align === 'center' || index <= 0 ? 3 : 1.5,
-                      pr: 3,
+                      pr: sortable ? 3 : index < columns.length - 1 ? 1.5 : 3,
                       py: 1.5,
                       ...(() => {
                         if (!label) {
@@ -457,7 +463,7 @@ const BaseTable = <T extends IBaseTableRow>(
     </MuiTable>
   );
 
-  if (paging && pageRows.length > 0) {
+  if (paging) {
     return (
       <Box
         {...PaginatedTableWrapperPropsRest}
