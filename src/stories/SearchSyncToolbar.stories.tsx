@@ -2,7 +2,7 @@ import { ComponentMeta, ComponentStory } from '@storybook/react';
 import React from 'react';
 
 import SearchSyncToolbar, {
-  ISearchSyncToolbarProps,
+  SearchSyncToolbarProps,
 } from '../components/SearchSyncToolbar';
 
 export default {
@@ -20,7 +20,7 @@ Default.args = {
   load: () => {
     console.log('Loading...');
   },
-} as ISearchSyncToolbarProps;
+} as SearchSyncToolbarProps;
 
 export const WithTitle = Template.bind({});
 WithTitle.args = {
@@ -29,7 +29,7 @@ WithTitle.args = {
   load: () => {
     console.log('Loading...');
   },
-} as ISearchSyncToolbarProps;
+} as SearchSyncToolbarProps;
 
 export const WithoutSearchTool = Template.bind({});
 WithoutSearchTool.args = {
@@ -38,4 +38,4 @@ WithoutSearchTool.args = {
   load: () => {
     console.log('Loading...');
   },
-} as ISearchSyncToolbarProps;
+} as SearchSyncToolbarProps;

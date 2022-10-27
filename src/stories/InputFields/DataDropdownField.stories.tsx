@@ -4,7 +4,7 @@ import { LoremIpsum } from 'lorem-ipsum';
 import React from 'react';
 
 import DataDropdownField, {
-  IDataDropdownFieldProps,
+  DataDropdownFieldProps,
 } from '../../components/InputFields/DataDropdownField';
 
 export default {
@@ -131,4 +131,4 @@ WithSelectedOptionPillProps.args = {
       mr: 1,
     },
   },
-} as IDataDropdownFieldProps;
+} as DataDropdownFieldProps;

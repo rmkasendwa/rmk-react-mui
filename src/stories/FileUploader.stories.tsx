@@ -2,10 +2,7 @@ import Container from '@mui/material/Container';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 
 import FileUploader from '../components/FileUploader';
-import {
-  TFileDownloadFunction,
-  TFileUploadFunction,
-} from '../interfaces/Utils';
+import { FileDownloadFunction, FileUploadFunction } from '../interfaces/Utils';
 
 export default {
   title: 'Components/File Uploader',
@@ -18,7 +15,7 @@ const Template: ComponentStory<typeof FileUploader> = (props) => (
   </Container>
 );
 
-const upload: TFileUploadFunction = (
+const upload: FileUploadFunction = (
   file,
   { onComplete, onProgress, onSuccess }
 ) => {
@@ -42,7 +39,7 @@ const upload: TFileUploadFunction = (
   };
 };
 
-const uploadWithErrors: TFileUploadFunction = (
+const uploadWithErrors: FileUploadFunction = (
   file,
   { onComplete, onError, onProgress }
 ) => {
@@ -67,7 +64,7 @@ const uploadWithErrors: TFileUploadFunction = (
   };
 };
 
-const download: TFileDownloadFunction = (
+const download: FileDownloadFunction = (
   {},
   { onComplete, onError, onProgress }
 ) => {

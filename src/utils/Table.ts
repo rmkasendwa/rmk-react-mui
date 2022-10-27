@@ -1,4 +1,4 @@
-import { ITableColumn } from '../interfaces/Table';
+import { TableColumn } from '../interfaces/Table';
 
 /**
  * Gets the table column element widths.
@@ -6,7 +6,7 @@ import { ITableColumn } from '../interfaces/Table';
  * @param options Table column.
  * @returns Table column element widths.
  */
-export const getColumnWidthStyles = ({ width, minWidth }: ITableColumn) => {
+export const getColumnWidthStyles = ({ width, minWidth }: TableColumn) => {
   return {
     width,
     minWidth: (() => {
@@ -22,7 +22,7 @@ export const getColumnWidthStyles = ({ width, minWidth }: ITableColumn) => {
   };
 };
 
-export interface IGetColumnPaddingStylesOptions {
+export interface GetColumnPaddingStylesOptions {
   /**
    * The column index.
    */
@@ -42,7 +42,7 @@ export interface IGetColumnPaddingStylesOptions {
 export const getColumnPaddingStyles = ({
   index,
   columnCount,
-}: IGetColumnPaddingStylesOptions) => {
+}: GetColumnPaddingStylesOptions) => {
   return {
     pl: index <= 0 ? 3 : 1.5,
     pr: index >= columnCount - 1 ? 3 : 1.5,
@@ -55,7 +55,7 @@ export const getColumnPaddingStyles = ({
  * @param tableColumns The table columns.
  * @returns Minimum table width.
  */
-export const getTableMinWidth = (tableColumns: ITableColumn[]) => {
+export const getTableMinWidth = (tableColumns: TableColumn[]) => {
   return tableColumns.reduce((accumulator, tableColumn) => {
     return accumulator + getColumnWidthStyles(tableColumn).minWidth;
   }, 0);

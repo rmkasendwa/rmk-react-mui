@@ -13,22 +13,26 @@ import { darken } from '@mui/system/colorManipulator';
 import { CSSProperties, forwardRef, useEffect, useState } from 'react';
 
 import { useFileUpload } from '../hooks/Files';
-import { IFile, ILoadableFile, TFileUploadFunction } from '../interfaces/Utils';
+import {
+  FileContainer,
+  FileUploadFunction,
+  LoadableFile,
+} from '../interfaces/Utils';
 import { flickerElement } from '../utils/page';
 import CloseButton from './CloseButton';
 import ImagePreview from './ImagePreview';
-import { ITextFieldProps } from './InputFields/TextField';
+import { TextFieldProps } from './InputFields/TextField';
 
-export interface IImageSelectorProps
+export interface ImageSelectorProps
   extends Pick<
-    ITextFieldProps,
+    TextFieldProps,
     'helperText' | 'error' | 'onChange' | 'name' | 'id'
   > {
-  value?: IFile[];
-  upload?: TFileUploadFunction;
+  value?: FileContainer[];
+  upload?: FileUploadFunction;
 }
 
-export const ImageSelector = forwardRef<HTMLDivElement, IImageSelectorProps>(
+export const ImageSelector = forwardRef<HTMLDivElement, ImageSelectorProps>(
   function ImageSelector(
     { helperText, error, onChange, name, id, value, upload },
     ref
@@ -36,7 +40,7 @@ export const ImageSelector = forwardRef<HTMLDivElement, IImageSelectorProps>(
     const [imageThumbnailContainer, setImageThumbnailContainer] =
       useState<HTMLDivElement | null>(null);
     const [selectedImageFile, setSelectedImageFile] =
-      useState<ILoadableFile | null>(null);
+      useState<LoadableFile | null>(null);
     const [fileField, setFileField] = useState<HTMLInputElement | null>(null);
     const {
       files: images,

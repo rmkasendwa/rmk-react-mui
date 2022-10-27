@@ -2,9 +2,7 @@ import Container from '@mui/material/Container';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import React from 'react';
 
-import FullPageTable, {
-  IFullPageTableProps,
-} from '../components/FullPageTable';
+import FullPageTable, { FullPageTableProps } from '../components/FullPageTable';
 
 export default {
   title: 'Components/Full Page Table',
@@ -37,4 +35,4 @@ Default.args = {
     name: 'John Doe',
     outstandingBalance: 660000,
   })),
-} as IFullPageTableProps;
+} as FullPageTableProps;

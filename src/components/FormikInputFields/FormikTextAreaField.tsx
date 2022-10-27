@@ -2,14 +2,14 @@ import { forwardRef } from 'react';
 
 import { useAggregatedFormikContext } from '../../hooks/Formik';
 import TextAreaField, {
-  ITextAreaFieldProps,
+  TextAreaFieldProps,
 } from '../InputFields/TextAreaField';
 
-export interface IFormikTextAreaFieldProps extends ITextAreaFieldProps {}
+export interface FormikTextAreaFieldProps extends TextAreaFieldProps {}
 
 export const FormikTextAreaField = forwardRef<
   HTMLDivElement,
-  IFormikTextAreaFieldProps
+  FormikTextAreaFieldProps
 >(function FormikTextAreaField(
   {
     name,

@@ -1,24 +1,24 @@
 import { FC } from 'react';
 
 import DragAndDropContainer, {
-  IDragAndDropContainerProps,
+  DragAndDropContainerProps,
 } from './DragAndDropContainer';
 import {
-  ILane,
+  CardClickHandler,
+  CardMoveAcrossLanesHandler,
   KanbanBoardProvider,
-  TCardClickHandler,
-  TCardMoveAcrossLanesHandler,
+  Lane,
 } from './KanbanBoardContext';
 
 export * from './KanbanBoardContext';
 
-export interface IKanbanBoardProps extends IDragAndDropContainerProps {
-  lanes: ILane[];
-  onCardClick?: TCardClickHandler;
-  onCardMoveAcrossLanes?: TCardMoveAcrossLanesHandler;
+export interface KanbanBoardProps extends DragAndDropContainerProps {
+  lanes: Lane[];
+  onCardClick?: CardClickHandler;
+  onCardMoveAcrossLanes?: CardMoveAcrossLanesHandler;
 }
 
-export const KanbanBoard: FC<IKanbanBoardProps> = ({
+export const KanbanBoard: FC<KanbanBoardProps> = ({
   lanes,
   onCardClick,
   onCardMoveAcrossLanes,

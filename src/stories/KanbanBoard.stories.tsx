@@ -9,7 +9,7 @@ import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { LoremIpsum } from 'lorem-ipsum';
 
 import KanbanBoard from '../components/KanbanBoard';
-import { ILaneProps } from '../components/KanbanBoard/Lane';
+import { LaneProps } from '../components/KanbanBoard/Lane';
 
 export default {
   title: 'Components/KanbanBoard',
@@ -72,7 +72,7 @@ const BASE_LANES = Array.from({ length: 6 }).map((_, laneIndex) => {
         </Grid>
       </Grid>
     ),
-  } as ILaneProps;
+  } as LaneProps;
 });
 
 const Template: ComponentStory<typeof KanbanBoard> = (props) => {

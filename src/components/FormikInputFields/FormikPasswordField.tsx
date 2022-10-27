@@ -2,14 +2,14 @@ import { forwardRef } from 'react';
 
 import { useAggregatedFormikContext } from '../../hooks/Formik';
 import PasswordField, {
-  IPasswordFieldProps,
+  PasswordFieldProps,
 } from '../InputFields/PasswordField';
 
-export interface IFormikPasswordFieldProps extends IPasswordFieldProps {}
+export interface FormikPasswordFieldProps extends PasswordFieldProps {}
 
 export const FormikPasswordField = forwardRef<
   HTMLDivElement,
-  IFormikPasswordFieldProps
+  FormikPasswordFieldProps
 >(function FormikPasswordField(
   {
     name,

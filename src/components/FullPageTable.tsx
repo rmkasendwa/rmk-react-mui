@@ -9,19 +9,17 @@ import { alpha } from '@mui/system/colorManipulator';
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 
-import { ILoadingProps } from '../interfaces/Utils';
+import { LoadingProps } from '../interfaces/Utils';
 import ErrorAlert from './ErrorAlert';
 import LoadingScreen from './LoadingScreen';
-import PaddedContentArea, {
-  IPaddedContentAreaProps,
-} from './PaddedContentArea';
+import PaddedContentArea, { PaddedContentAreaProps } from './PaddedContentArea';
 import SearchSyncToolbar from './SearchSyncToolbar';
-import Table, { ITableProps } from './Table';
+import Table, { TableProps } from './Table';
 
-export interface IFullPageTableProps<T = any>
-  extends IPaddedContentAreaProps,
+export interface FullPageTableProps<T = any>
+  extends PaddedContentAreaProps,
     Pick<
-      ITableProps<T>,
+      TableProps<T>,
       | 'columns'
       | 'rows'
       | 'onClickRow'
@@ -30,12 +28,12 @@ export interface IFullPageTableProps<T = any>
       | 'variant'
       | 'showHeaderRow'
     >,
-    Partial<ILoadingProps> {
+    Partial<LoadingProps> {
   pathToAddNew?: string;
   permissionToAddNew?: string | string[];
   permissionToViewDetails?: string | string[];
   load?: () => void;
-  TableProps?: Partial<ITableProps>;
+  TableProps?: Partial<TableProps>;
   paging?: boolean;
   showStatusBar?: boolean;
   searchFieldPlaceholder?: string;
@@ -46,7 +44,7 @@ export interface IFullPageTableProps<T = any>
 
 const DEFAULT_ROW_HEIGHT = 50;
 
-export const FullPageTable: FC<IFullPageTableProps> = ({
+export const FullPageTable: FC<FullPageTableProps> = ({
   title,
   pathToAddNew,
   columns,

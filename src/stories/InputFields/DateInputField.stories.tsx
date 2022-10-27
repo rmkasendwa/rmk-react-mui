@@ -3,7 +3,7 @@ import React from 'react';
 
 import {
   DateInputField,
-  IDateInputFieldProps,
+  DateInputFieldProps,
 } from '../../components/InputFields/DateInputField';
 
 export default {
@@ -25,7 +25,7 @@ Default.args = {
   onChange: (event) => {
     console.log(event.target.value);
   },
-} as IDateInputFieldProps;
+} as DateInputFieldProps;
 
 export const WithPlaceholder = Template.bind({});
 WithPlaceholder.args = {

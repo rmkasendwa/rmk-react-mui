@@ -3,9 +3,9 @@ import useTheme from '@mui/material/styles/useTheme';
 import { alpha } from '@mui/system/colorManipulator';
 import { FC } from 'react';
 
-export interface IErrorSkeletonProps extends SkeletonProps {}
+export interface ErrorSkeletonProps extends SkeletonProps {}
 
-export const ErrorSkeleton: FC<IErrorSkeletonProps> = ({ sx, ...rest }) => {
+export const ErrorSkeleton: FC<ErrorSkeletonProps> = ({ sx, ...rest }) => {
   const theme = useTheme();
   return (
     <Skeleton

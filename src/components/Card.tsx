@@ -3,21 +3,19 @@ import Paper, { PaperProps } from '@mui/material/Paper';
 import { FC, ReactNode } from 'react';
 
 import { useLoadingContext } from '../contexts/LoadingContext';
-import { ILoadingProps } from '../interfaces/Utils';
-import SearchSyncToolbar, {
-  ISearchSyncToolbarProps,
-} from './SearchSyncToolbar';
+import { LoadingProps } from '../interfaces/Utils';
+import SearchSyncToolbar, { SearchSyncToolbarProps } from './SearchSyncToolbar';
 
-export interface ICardProps
+export interface CardProps
   extends Partial<Omit<PaperProps, 'title'>>,
-    Partial<ILoadingProps> {
+    Partial<LoadingProps> {
   title?: ReactNode;
   load?: () => void;
-  SearchSyncToolbarProps?: Partial<ISearchSyncToolbarProps>;
+  SearchSyncToolbarProps?: Partial<SearchSyncToolbarProps>;
   CardBodyProps?: Partial<BoxProps>;
 }
 
-export const Card: FC<ICardProps> = ({
+export const Card: FC<CardProps> = ({
   children,
   title,
   load,

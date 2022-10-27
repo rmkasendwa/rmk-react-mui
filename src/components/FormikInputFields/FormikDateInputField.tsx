@@ -2,14 +2,14 @@ import { forwardRef } from 'react';
 
 import { useAggregatedFormikContext } from '../../hooks/Formik';
 import DateInputField, {
-  IDateInputFieldProps,
+  DateInputFieldProps,
 } from '../InputFields/DateInputField';
 
-export interface IFormikDateInputFieldProps extends IDateInputFieldProps {}
+export interface FormikDateInputFieldProps extends DateInputFieldProps {}
 
 export const FormikDateInputField = forwardRef<
   HTMLDivElement,
-  IFormikDateInputFieldProps
+  FormikDateInputFieldProps
 >(function FormikDateInputField(
   {
     name,

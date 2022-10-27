@@ -3,13 +3,13 @@ import Box, { BoxProps } from '@mui/material/Box';
 import { PaginationProps } from '@mui/material/Pagination';
 import { Theme } from '@mui/material/styles/createTheme';
 import useTheme from '@mui/material/styles/useTheme';
-import MuiTable, { TableProps } from '@mui/material/Table';
+import MuiTable, { TableProps as MuiTableProps } from '@mui/material/Table';
 import TableBody, { tableBodyClasses } from '@mui/material/TableBody';
 import TableCell, { tableCellClasses } from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow, {
-  TableRowProps,
+  TableRowProps as MuiTableRowProps,
   tableRowClasses,
 } from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
@@ -28,32 +28,32 @@ import {
 
 import { GlobalConfigurationContext } from '../contexts/GlobalConfigurationContext';
 import {
-  IBaseTableRow,
-  ITableColumn,
-  ITableRowProps,
-  TGetRowProps,
+  BaseTableRow,
+  GetRowProps,
+  TableColumn,
+  TableRowProps,
 } from '../interfaces/Table';
 import { getColumnWidthStyles, getTableMinWidth } from '../utils/Table';
 import DataTablePagination from './DataTablePagination';
-import RenderIfVisible, { IRenderIfVisibleProps } from './RenderIfVisible';
+import RenderIfVisible, { RenderIfVisibleProps } from './RenderIfVisible';
 import TableBodyRow from './TableBodyRow';
 
 export type {
-  IForEachDerivedColumnConfiguration,
-  ITableColumn,
-  ITableColumnEnumValue,
+  ForEachDerivedColumnConfiguration,
+  TableColumn,
+  TableColumnEnumValue,
 } from '../interfaces/Table';
 
-export type TTableVariant =
+export type TableVariant =
   | 'stripped'
   | 'stripped-rows'
   | 'stripped-columns'
   | 'plain';
 
-export interface ITableProps<T = any>
-  extends Partial<Pick<TableProps, 'onClick' | 'sx'>>,
+export interface TableProps<T = any>
+  extends Partial<Pick<MuiTableProps, 'onClick' | 'sx' | 'className'>>,
     Pick<
-      ITableRowProps<T>,
+      TableRowProps<T>,
       | 'columns'
       | 'forEachDerivedColumn'
       | 'generateRowData'
@@ -72,23 +72,23 @@ export interface ITableProps<T = any>
   labelPlural?: string;
   labelSingular?: string;
   lowercaseLabelPlural?: string;
-  variant?: TTableVariant;
+  variant?: TableVariant;
   onChangePage?: (pageIndex: number) => void;
   onRowsPerPageChange?: (rowsPerPage: number) => void;
-  forEachRowProps?: TGetRowProps;
+  forEachRowProps?: GetRowProps;
   paging?: boolean;
   showHeaderRow?: boolean;
   showDataRows?: boolean;
-  HeaderRowProps?: TableRowProps;
+  HeaderRowProps?: Partial<MuiTableRowProps>;
   currencyCode?: string;
   paginationType?: 'default' | 'classic';
   PaginationProps?: PaginationProps;
   stickyHeader?: boolean;
-  TableBodyRowPlaceholderProps?: Partial<IRenderIfVisibleProps>;
+  TableBodyRowPlaceholderProps?: Partial<RenderIfVisibleProps>;
   PaginatedTableWrapperProps?: Partial<BoxProps>;
 }
 
-const BaseTable = <T extends IBaseTableRow>(
+const BaseTable = <T extends BaseTableRow>(
   {
     onClickRow,
     columns: columnsProp,
@@ -123,7 +123,7 @@ const BaseTable = <T extends IBaseTableRow>(
     minColumnWidth,
     sx,
     ...rest
-  }: ITableProps<T>,
+  }: TableProps<T>,
   ref: Ref<HTMLTableElement>
 ) => {
   const {
@@ -152,7 +152,7 @@ const BaseTable = <T extends IBaseTableRow>(
 
   // Setting default column properties
   const columns = useMemo(() => {
-    return columnsProp.map((column): ITableColumn => {
+    return columnsProp.map((column): TableColumn => {
       const nextColumn = { ...column };
       switch (nextColumn.type) {
         case 'date':
@@ -533,7 +533,7 @@ const BaseTable = <T extends IBaseTableRow>(
 };
 
 export const Table = forwardRef(BaseTable) as <T>(
-  p: ITableProps<T> & { ref?: Ref<HTMLDivElement> }
+  p: TableProps<T> & { ref?: Ref<HTMLDivElement> }
 ) => ReactElement;
 
 export default Table;

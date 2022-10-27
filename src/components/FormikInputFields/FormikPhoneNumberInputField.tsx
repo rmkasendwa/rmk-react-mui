@@ -2,15 +2,15 @@ import { forwardRef } from 'react';
 
 import { useAggregatedFormikContext } from '../../hooks/Formik';
 import PhoneNumberInputField, {
-  IPhoneNumberInputFieldProps,
+  PhoneNumberInputFieldProps,
 } from '../InputFields/PhoneNumberInputField';
 
-export interface IFormikPhoneNumberInputFieldProps
-  extends IPhoneNumberInputFieldProps {}
+export interface FormikPhoneNumberInputFieldProps
+  extends PhoneNumberInputFieldProps {}
 
 export const FormikPhoneNumberInputField = forwardRef<
   HTMLDivElement,
-  IFormikPhoneNumberInputFieldProps
+  FormikPhoneNumberInputFieldProps
 >(function FormikPhoneNumberInputField(
   {
     name,

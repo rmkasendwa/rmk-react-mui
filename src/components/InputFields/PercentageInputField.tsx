@@ -1,12 +1,12 @@
 import { forwardRef } from 'react';
 
-import NumberInputField, { INumberInputFieldProps } from './NumberInputField';
+import NumberInputField, { NumberInputFieldProps } from './NumberInputField';
 
-export interface IPercentageInputFieldProps extends INumberInputFieldProps {}
+export interface PercentageInputFieldProps extends NumberInputFieldProps {}
 
 export const PercentageInputField = forwardRef<
   HTMLDivElement,
-  IPercentageInputFieldProps
+  PercentageInputFieldProps
 >(function PercentageInputField({ ...rest }, ref) {
   return (
     <NumberInputField

@@ -2,15 +2,15 @@ import { InputProps } from '@mui/material/Input';
 import Typography from '@mui/material/Typography';
 import { forwardRef } from 'react';
 
-import NumberInputField, { INumberInputFieldProps } from './NumberInputField';
+import NumberInputField, { NumberInputFieldProps } from './NumberInputField';
 
-export interface ICurrencyInputFieldProps extends INumberInputFieldProps {
+export interface CurrencyInputFieldProps extends NumberInputFieldProps {
   showCurrency?: boolean;
 }
 
 export const CurrencyInputField = forwardRef<
   HTMLDivElement,
-  ICurrencyInputFieldProps
+  CurrencyInputFieldProps
 >(function CurrencyInputField(
   { showCurrency = false, InputProps, ...rest },
   ref

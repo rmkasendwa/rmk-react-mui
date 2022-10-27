@@ -3,7 +3,7 @@ import { ComponentMeta, ComponentStory } from '@storybook/react';
 import React from 'react';
 import uniqid from 'uniqid';
 
-import Table, { ITableProps } from '../components/Table';
+import Table, { TableProps } from '../components/Table';
 
 export default {
   title: 'Components/Table',
@@ -41,7 +41,7 @@ Default.args = {
     outstandingBalance: 660000,
   })),
   paging: false,
-} as ITableProps;
+} as TableProps;
 
 export const WithoutPaging = Template.bind({});
 WithoutPaging.args = {
@@ -66,7 +66,7 @@ WithoutPaging.args = {
     outstandingBalance: 660000,
   })),
   paging: false,
-} as ITableProps;
+} as TableProps;
 
 export const WithoutHeaderRow = Template.bind({});
 WithoutHeaderRow.args = {
@@ -91,7 +91,7 @@ WithoutHeaderRow.args = {
     outstandingBalance: 660000,
   })),
   showHeaderRow: false,
-} as ITableProps;
+} as TableProps;
 
 export const WithHeaderRowProps = Template.bind({});
 WithHeaderRowProps.args = {
@@ -128,7 +128,7 @@ WithHeaderRowProps.args = {
       },
     },
   },
-} as ITableProps;
+} as TableProps;
 
 export const ColumnTypes = Template.bind({});
 ColumnTypes.args = {
@@ -153,7 +153,7 @@ ColumnTypes.args = {
   columnTypographyProps: {
     noWrap: true,
   },
-} as ITableProps;
+} as TableProps;
 
 export const ClassicPagination = Template.bind({});
 ClassicPagination.args = {
@@ -174,7 +174,7 @@ ClassicPagination.args = {
     };
   }),
   paginationType: 'classic',
-} as ITableProps;
+} as TableProps;
 
 export const FixedHeader = Template.bind({});
 FixedHeader.args = {
@@ -199,7 +199,7 @@ FixedHeader.args = {
   sx: {
     height: '100%',
   },
-} as ITableProps;
+} as TableProps;
 
 export const WithDynamicRowData = Template.bind({});
 WithDynamicRowData.args = {
@@ -244,4 +244,4 @@ WithDynamicRowData.args = {
   sx: {
     height: '100%',
   },
-} as ITableProps;
+} as TableProps;

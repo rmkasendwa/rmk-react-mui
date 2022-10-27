@@ -6,29 +6,29 @@ import Typography from '@mui/material/Typography';
 import { forwardRef, useCallback, useEffect, useRef, useState } from 'react';
 
 import { useGlobalConfiguration } from '../../../contexts/GlobalConfigurationContext';
-import { ICountryCode } from '../../../interfaces/Countries';
+import { CountryCode } from '../../../interfaces/Countries';
 import {
   getRegionalCode,
   systemStandardPhoneNumberFormat,
 } from '../../../utils/PhoneNumberUtil';
-import TextField, { ITextFieldProps } from '../TextField';
+import TextField, { TextFieldProps } from '../TextField';
 import { BASE_64_FLAG_IMAGE } from './base64Flags';
-import { ICountry, countries } from './countries';
+import { Country, countries } from './countries';
 import CountryList from './CountryList';
 import { phoneNumberFlags } from './phoneNumberFlags';
 
-export interface IPhoneNumberInputFieldProps extends ITextFieldProps {
+export interface PhoneNumberInputFieldProps extends TextFieldProps {
   value?: string;
   displaySelectedFlagLabel?: boolean;
   displayPhoneNumberCountry?: boolean;
   displayRegionalCodeOnEmptyFocus?: boolean;
-  regionalCode?: ICountryCode;
+  regionalCode?: CountryCode;
 }
 
 const flags = countries.reduce(
   (
     accumulator: {
-      [key: string]: ICountry;
+      [key: string]: Country;
     },
     country
   ) => {
@@ -40,7 +40,7 @@ const flags = countries.reduce(
 
 export const PhoneNumberInputField = forwardRef<
   HTMLDivElement,
-  IPhoneNumberInputFieldProps
+  PhoneNumberInputFieldProps
 >(function PhoneNumberInputField(
   {
     displaySelectedFlagLabel = true,

@@ -2,15 +2,14 @@ import { forwardRef } from 'react';
 
 import { useAggregatedFormikContext } from '../../hooks/Formik';
 import DataDropdownField, {
-  IDataDropdownFieldProps,
+  DataDropdownFieldProps,
 } from '../InputFields/DataDropdownField';
 
-export interface IFormikDataDropdownFieldProps
-  extends IDataDropdownFieldProps {}
+export interface FormikDataDropdownFieldProps extends DataDropdownFieldProps {}
 
 export const FormikDataDropdownField = forwardRef<
   HTMLDivElement,
-  IFormikDataDropdownFieldProps
+  FormikDataDropdownFieldProps
 >(function FormikDataDropdownField(
   {
     name,

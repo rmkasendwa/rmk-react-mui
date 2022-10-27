@@ -2,15 +2,15 @@ import { forwardRef } from 'react';
 
 import { useAggregatedFormikContext } from '../../hooks/Formik';
 import CurrencyInputField, {
-  ICurrencyInputFieldProps,
+  CurrencyInputFieldProps,
 } from '../InputFields/CurrencyInputField';
 
-export interface IFormikCurrencyInputFieldProps
-  extends ICurrencyInputFieldProps {}
+export interface FormikCurrencyInputFieldProps
+  extends CurrencyInputFieldProps {}
 
 export const FormikCurrencyInputField = forwardRef<
   HTMLDivElement,
-  IFormikCurrencyInputFieldProps
+  FormikCurrencyInputFieldProps
 >(function FormikCurrencyInputField(
   {
     name,

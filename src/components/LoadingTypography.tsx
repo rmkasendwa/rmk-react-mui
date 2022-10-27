@@ -5,11 +5,11 @@ import { forwardRef } from 'react';
 import { useLoadingContext } from '../contexts/LoadingContext';
 import ErrorSkeleton from './ErrorSkeleton';
 
-export interface ILoadingTypographyProps extends TypographyProps {}
+export interface LoadingTypographyProps extends TypographyProps {}
 
 export const LoadingTypography = forwardRef<
   HTMLElement,
-  ILoadingTypographyProps
+  LoadingTypographyProps
 >(function LoadingTypography({ children, ...rest }, ref) {
   const { loading, errorMessage } = useLoadingContext();
   const labelSkeletonWidth = String(children).length * 7;

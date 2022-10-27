@@ -4,15 +4,15 @@ import { FC, ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 
 import FixedHeaderContentArea, {
-  IFixedHeaderContentAreaProps,
+  FixedHeaderContentAreaProps,
 } from './FixedHeaderContentArea';
 
-export interface IEntityViewWrapperProps extends IFixedHeaderContentAreaProps {
+export interface EntityViewWrapperProps extends FixedHeaderContentAreaProps {
   pathToEdit?: string;
   tools?: ReactNode;
 }
 
-export const EntityViewWrapper: FC<IEntityViewWrapperProps> = ({
+export const EntityViewWrapper: FC<EntityViewWrapperProps> = ({
   children,
   pathToEdit,
   tools,

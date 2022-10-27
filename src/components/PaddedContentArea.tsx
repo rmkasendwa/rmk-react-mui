@@ -3,16 +3,16 @@ import useTheme from '@mui/material/styles/useTheme';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { FC, ReactNode } from 'react';
 
-import PageTitle, { IPageTitleProps } from './PageTitle';
+import PageTitle, { PageTitleProps } from './PageTitle';
 
-export interface IPaddedContentAreaProps
+export interface PaddedContentAreaProps
   extends Pick<BoxProps, 'sx'>,
-    Pick<IPageTitleProps, 'title' | 'tools'> {
+    Pick<PageTitleProps, 'title' | 'tools'> {
   breadcrumbs?: ReactNode;
-  PageTitleProps?: Partial<IPageTitleProps>;
+  PageTitleProps?: Partial<PageTitleProps>;
 }
 
-export const PaddedContentArea: FC<IPaddedContentAreaProps> = ({
+export const PaddedContentArea: FC<PaddedContentAreaProps> = ({
   children,
   title,
   sx,

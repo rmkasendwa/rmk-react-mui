@@ -7,14 +7,14 @@ import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import { FC } from 'react';
 
-export interface IReloadIconButtonProps
+export interface ReloadIconButtonProps
   extends Omit<BoxProps, 'title' | 'children'> {
   loading?: boolean;
   errorMessage?: string;
   load?: () => void;
 }
 
-export const ReloadIconButton: FC<IReloadIconButtonProps> = ({
+export const ReloadIconButton: FC<ReloadIconButtonProps> = ({
   loading = false,
   load,
   errorMessage,

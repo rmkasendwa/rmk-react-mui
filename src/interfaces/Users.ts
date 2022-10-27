@@ -1,8 +1,8 @@
-export type TPermissionCode = 'ALL_FUNCTIONS' | string;
+export type PermissionCode = 'ALL_FUNCTIONS' | string;
 
-export interface IUser {
+export interface User {
   email: string;
   fullName: string;
   profilePictureUrl: string;
-  permissions: TPermissionCode[];
+  permissions: PermissionCode[];
 }

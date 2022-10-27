@@ -5,11 +5,11 @@ import { forwardRef, useCallback, useEffect, useRef, useState } from 'react';
 
 import CloseButton from './CloseButton';
 
-export interface IImagePreviewProps extends Omit<ModalProps, 'children'> {
+export interface ImagePreviewProps extends Omit<ModalProps, 'children'> {
   imageSource?: string;
 }
 
-export const ImagePreview = forwardRef<HTMLDivElement, IImagePreviewProps>(
+export const ImagePreview = forwardRef<HTMLDivElement, ImagePreviewProps>(
   function ImagePreview({ imageSource, onClose, ...rest }, ref) {
     const imageScaleRef = useRef(1);
     const translationRef = useRef({ x: 0, y: 0 });

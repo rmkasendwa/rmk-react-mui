@@ -1,9 +1,9 @@
-import { ICountryCode } from './interfaces/Countries';
+import { CountryCode } from './interfaces/Countries';
 
 export const APP_NAME = process.env.REACT_APP_NAME || 'App';
 
-export const DEFAULT_COUNTRY_CODE: ICountryCode =
-  (process.env.REACT_APP_COUNTRY_CODE as ICountryCode) || 'UG';
+export const DEFAULT_COUNTRY_CODE: CountryCode =
+  (process.env.REACT_APP_COUNTRY_CODE as CountryCode) || 'UG';
 
 export const DEFAULT_CURRENCY_CODE = 'UGX';
 

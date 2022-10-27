@@ -1,18 +1,18 @@
 import { Avatar, AvatarProps } from '@mui/material';
 import { forwardRef, useMemo } from 'react';
 
-export type TDefaultAvatar =
+export type DefaultAvatar =
   | 'standard'
   | 'hueShiftingInitials'
   | 'highContrastHueShiftingIntials';
 
-export interface IProfileAvatarProps extends AvatarProps {
+export interface ProfileAvatarProps extends AvatarProps {
   label?: string;
-  defaultAvatar?: TDefaultAvatar;
+  defaultAvatar?: DefaultAvatar;
   size?: number;
 }
 
-export const ProfileAvatar = forwardRef<HTMLDivElement, IProfileAvatarProps>(
+export const ProfileAvatar = forwardRef<HTMLDivElement, ProfileAvatarProps>(
   function ProfileAvatar(
     { label, sx, size = 32, defaultAvatar = 'standard', children, ...rest },
     ref
@@ -24,7 +24,7 @@ export const ProfileAvatar = forwardRef<HTMLDivElement, IProfileAvatarProps>(
             [
               'hueShiftingInitials',
               'highContrastHueShiftingIntials',
-            ] as TDefaultAvatar[]
+            ] as DefaultAvatar[]
           ).includes(defaultAvatar)
         ) {
           const nameCharacters = label.replaceAll(/\s/g, '').toUpperCase();

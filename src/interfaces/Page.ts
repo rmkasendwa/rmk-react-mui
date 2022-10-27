@@ -1,4 +1,4 @@
-export type TPageHistory = Array<{
+export type PageHistory = Array<{
   title: string;
   pathName: string;
   search: string;

@@ -1,7 +1,7 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import React from 'react';
 
-import ErrorAlert, { IErrorAlertProps } from '../components/ErrorAlert';
+import ErrorAlert, { ErrorAlertProps } from '../components/ErrorAlert';
 
 export default {
   title: 'Components/Error Alert',
@@ -21,4 +21,4 @@ Default.args = {
   retry: () => {
     console.log('Retrying...');
   },
-} as IErrorAlertProps;
+} as ErrorAlertProps;

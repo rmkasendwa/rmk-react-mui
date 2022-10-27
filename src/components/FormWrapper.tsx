@@ -10,10 +10,10 @@ import { useSmallScreen } from '../hooks/Utils';
 import ErrorAlert from './ErrorAlert';
 import ErrorFieldHighlighter from './ErrorFieldHighlighter';
 import FixedHeaderContentArea from './FixedHeaderContentArea';
-import { IPaddedContentAreaProps } from './PaddedContentArea';
+import { PaddedContentAreaProps } from './PaddedContentArea';
 
-export interface IFormWrapperProps<Values extends FormikValues = FormikValues>
-  extends Omit<IPaddedContentAreaProps, 'onSubmit'> {
+export interface FormWrapperProps<Values extends FormikValues = FormikValues>
+  extends Omit<PaddedContentAreaProps, 'onSubmit'> {
   initialValues?: Values;
   validationSchema?: any;
   onSubmit?: (
@@ -23,7 +23,7 @@ export interface IFormWrapperProps<Values extends FormikValues = FormikValues>
   children?: ((props: FormikProps<Values>) => ReactNode) | ReactNode;
 }
 
-export const FormWrapper: FC<IFormWrapperProps> = ({
+export const FormWrapper: FC<FormWrapperProps> = ({
   children,
   title,
   tools,

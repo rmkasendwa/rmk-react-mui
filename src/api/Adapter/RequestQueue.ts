@@ -1,22 +1,22 @@
 import hash from 'object-hash';
 
-import { IRequestOptions } from '../../interfaces/Utils';
+import { RequestOptions } from '../../interfaces/Utils';
 
-type TResolve = (payload?: any) => void;
+type Resolve = (payload?: any) => void;
 
-type TReject = (err?: any) => void;
+type Reject = (err?: any) => void;
 
-interface IQueuedRequestOptions extends IRequestOptions {
+interface QueuedRequestOptions extends RequestOptions {
   url: string;
-  resolve: TResolve;
-  reject: TReject;
+  resolve: Resolve;
+  reject: Reject;
 }
 
-const requestQueue: Record<string, IQueuedRequestOptions[]> = {};
+const requestQueue: Record<string, QueuedRequestOptions[]> = {};
 
 export const queueRequest = (
-  requestOptions: IQueuedRequestOptions,
-  callback: (resolve: TResolve, reject: TReject) => void
+  requestOptions: QueuedRequestOptions,
+  callback: (resolve: Resolve, reject: Reject) => void
 ) => {
   const hashableRequestOptions = { ...requestOptions };
   if (hashableRequestOptions.data instanceof FormData) {

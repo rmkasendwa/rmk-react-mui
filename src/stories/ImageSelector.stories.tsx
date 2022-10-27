@@ -3,7 +3,7 @@ import { ComponentMeta, ComponentStory } from '@storybook/react';
 import React from 'react';
 
 import ImageSelector from '../components/ImageSelector';
-import { TFileUploadFunction } from '../interfaces/Utils';
+import { FileUploadFunction } from '../interfaces/Utils';
 
 export default {
   title: 'Components/Image Selector',
@@ -16,7 +16,7 @@ const Template: ComponentStory<typeof ImageSelector> = ({ ...rest }) => (
   </Container>
 );
 
-const upload: TFileUploadFunction = (
+const upload: FileUploadFunction = (
   imageFile,
   { onComplete, onProgress, onSuccess }
 ) => {
@@ -40,7 +40,7 @@ const upload: TFileUploadFunction = (
   };
 };
 
-const uploadWithErrors: TFileUploadFunction = (
+const uploadWithErrors: FileUploadFunction = (
   imageFile,
   { onComplete, onError, onProgress }
 ) => {

@@ -29,24 +29,24 @@ import {
 
 import { useFileUpload } from '../../hooks/Files';
 import {
-  IFile,
-  TFileDownloadFunction,
-  TFileUploadFunction,
+  FileContainer,
+  FileDownloadFunction,
+  FileUploadFunction,
 } from '../../interfaces/Utils';
 import { formatBytes } from '../../utils/bytes';
 import { flickerElement } from '../../utils/page';
 import Card from '../Card';
-import { ITextFieldProps } from '../InputFields/TextField';
+import { TextFieldProps } from '../InputFields/TextField';
 import fileTypeIcons from './img/file-type-icons.png';
 
-export interface IFileUploaderProps
+export interface FileUploaderProps
   extends Pick<
-    ITextFieldProps,
+    TextFieldProps,
     'helperText' | 'error' | 'onChange' | 'name' | 'id'
   > {
-  value?: IFile[];
-  upload?: TFileUploadFunction;
-  download?: TFileDownloadFunction;
+  value?: FileContainer[];
+  upload?: FileUploadFunction;
+  download?: FileDownloadFunction;
 }
 
 const supportedFileIcons = [
@@ -108,7 +108,7 @@ const fileIconAliases = Object.keys(iconGroups).reduce((accumlator, key) => {
 
 supportedFileIcons.push(...Object.keys(fileIconAliases));
 
-export const FileUploader = forwardRef<HTMLDivElement, IFileUploaderProps>(
+export const FileUploader = forwardRef<HTMLDivElement, FileUploaderProps>(
   function FileUploader(
     { helperText, error, onChange, name, id, value, upload, download },
     ref

@@ -4,14 +4,14 @@ import { darken } from '@mui/system/colorManipulator';
 import { FC, useContext, useEffect, useState } from 'react';
 import { Container, Draggable } from 'react-smooth-dnd';
 
-import { ILane, KanbanBoardContext } from './KanbanBoardContext';
+import { KanbanBoardContext, Lane as LaneType } from './KanbanBoardContext';
 import Lane from './Lane';
 
-export interface IDragAndDropContainerProps
-  extends Pick<ILane, 'showCardCount' | 'loading' | 'errorMessage'>,
+export interface DragAndDropContainerProps
+  extends Pick<LaneType, 'showCardCount' | 'loading' | 'errorMessage'>,
     BoxProps {}
 
-const DragAndDropContainer: FC<IDragAndDropContainerProps> = ({
+const DragAndDropContainer: FC<DragAndDropContainerProps> = ({
   showCardCount = false,
   loading = false,
   errorMessage,

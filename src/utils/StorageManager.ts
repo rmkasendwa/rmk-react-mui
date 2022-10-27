@@ -4,7 +4,7 @@ import { decrypt, encrypt } from './Cypher';
 
 const { Base64 } = enc;
 
-interface IStorageManagerAddOptions {
+interface StorageManagerAddOptions {
   isSessionValue?: boolean;
   expiry?: number;
 }
@@ -28,7 +28,7 @@ const getEncryptedKey = (key: string) => {
 };
 
 const StorageManager = {
-  add(key: string, value: any, options?: boolean | IStorageManagerAddOptions) {
+  add(key: string, value: any, options?: boolean | StorageManagerAddOptions) {
     if (typeof window !== 'undefined') {
       const isSessionValue =
         typeof options === 'object' ? options.isSessionValue : options;

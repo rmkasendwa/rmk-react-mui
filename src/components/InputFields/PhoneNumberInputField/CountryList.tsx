@@ -9,22 +9,22 @@ import Typography from '@mui/material/Typography';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import PaginatedDropdownOptionList, {
-  IDropdownOption,
+  DropdownOption,
 } from '../../PaginatedDropdownOptionList';
 import TextField from '../TextField';
 import { BASE_64_FLAG_IMAGE } from './base64Flags';
-import { ICountry, countries } from './countries';
+import { Country, countries } from './countries';
 import { phoneNumberFlags } from './phoneNumberFlags';
 
-export interface ICountryListProps {
+export interface CountryListProps {
   open: boolean;
   onClose?: () => void;
-  selectedCountry?: ICountry;
-  onSelectCountry?: (country: ICountry) => void;
+  selectedCountry?: Country;
+  onSelectCountry?: (country: Country) => void;
   anchor?: any;
 }
 
-const getCountryOption = ({ regionalCode, name, countryCode }: ICountry) => {
+const getCountryOption = ({ regionalCode, name, countryCode }: Country) => {
   return {
     label: (
       <>
@@ -47,10 +47,10 @@ const getCountryOption = ({ regionalCode, name, countryCode }: ICountry) => {
     ),
     searchableLabel: name,
     value: regionalCode,
-  } as IDropdownOption;
+  } as DropdownOption;
 };
 
-const CountryList: React.FC<ICountryListProps> = ({
+const CountryList: React.FC<CountryListProps> = ({
   open,
   onClose,
   onSelectCountry,
@@ -58,8 +58,8 @@ const CountryList: React.FC<ICountryListProps> = ({
   anchor,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [filteredOptions, setFilteredOptions] = useState<IDropdownOption[]>([]);
-  const [selectedOptions, setSelectedOptions] = useState<IDropdownOption[]>([]);
+  const [filteredOptions, setFilteredOptions] = useState<DropdownOption[]>([]);
+  const [selectedOptions, setSelectedOptions] = useState<DropdownOption[]>([]);
 
   const options = useMemo(() => {
     return countries.map((country) => getCountryOption(country));

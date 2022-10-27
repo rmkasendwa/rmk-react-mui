@@ -2,13 +2,13 @@ import Typography from '@mui/material/Typography';
 import { forwardRef, useEffect, useState } from 'react';
 
 import { addThousandCommas } from '../../utils/numbers';
-import TextField, { ITextFieldProps } from './TextField';
+import TextField, { TextFieldProps } from './TextField';
 
-export interface ITextAreaFieldProps extends ITextFieldProps {
+export interface TextAreaFieldProps extends TextFieldProps {
   value?: string;
 }
 
-export const TextAreaField = forwardRef<HTMLDivElement, ITextAreaFieldProps>(
+export const TextAreaField = forwardRef<HTMLDivElement, TextAreaFieldProps>(
   function TextAreaField({ value, onChange, inputProps, ...rest }, ref) {
     const { maxLength } = inputProps ?? {};
     const [inputValue, setInputValue] = useState('');

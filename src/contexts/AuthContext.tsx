@@ -10,12 +10,12 @@ import {
 
 import { logout as apiLogout } from '../api';
 import { useAPIService } from '../hooks/Utils';
-import { TPermissionCode } from '../interfaces/Users';
+import { PermissionCode } from '../interfaces/Users';
 import { TAPIFunction } from '../interfaces/Utils';
 import StorageManager from '../utils/StorageManager';
 import { useAPIContext } from './APIContext';
 
-export interface IAuthContext<T = any> {
+export interface AuthContext<T = any> {
   login: (loginFunction: TAPIFunction<T>) => Promise<void>;
   logout: () => Promise<void>;
   loggedInUser: T | null;
@@ -23,13 +23,13 @@ export interface IAuthContext<T = any> {
   authenticated: boolean;
   clearLoggedInUserSession: () => void;
   loggedInUserHasPermission: (
-    permissionCode: TPermissionCode | TPermissionCode[]
+    permissionCode: PermissionCode | PermissionCode[]
   ) => boolean;
   loadingCurrentSession: boolean;
   loggingIn: boolean;
   loginErrorMessage: string;
 }
-export const AuthContext = createContext<IAuthContext>({} as any);
+export const AuthContext = createContext<AuthContext>({} as any);
 
 export const AuthProvider: FC<{
   children: ReactNode;
@@ -94,7 +94,7 @@ export const AuthProvider: FC<{
   }, [loggedInUser]);
 
   const loggedInUserHasPermission = useCallback(
-    (permissionCode: TPermissionCode | TPermissionCode[]) => {
+    (permissionCode: PermissionCode | PermissionCode[]) => {
       const permissions = loggedInUserPermissions();
       const isSuperAdmin = permissions.includes('ALL_FUNCTIONS');
       if (isSuperAdmin) {

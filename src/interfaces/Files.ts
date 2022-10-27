@@ -1,4 +1,4 @@
-export type TSupportedFileTypeIcon =
+export type SupportedFileTypeIcon =
   | 'pdf'
   | 'jpg'
   | 'png'

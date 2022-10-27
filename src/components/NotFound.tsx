@@ -1,10 +1,10 @@
 import React from 'react';
 
-interface INotFoundProps {
+interface NotFoundProps {
   width: number;
 }
 
-export const NotFound: React.FC<INotFoundProps> = (props) => {
+export const NotFound: React.FC<NotFoundProps> = (props) => {
   return (
     <svg
       viewBox="0 0 190 87"
