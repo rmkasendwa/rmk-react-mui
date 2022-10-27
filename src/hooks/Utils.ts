@@ -153,7 +153,7 @@ const DEFAULT_SYNC_TIMEOUT = 5 * 60 * 1000;
 const WINDOW_BLUR_THRESHOLD = 60 * 1000;
 export const useRecord = <T>(
   recordFinder: TAPIFunction,
-  defautValue: T,
+  defautValue: T | null,
   key?: string,
   loadOnMount = true,
   autoSync = true
@@ -166,7 +166,7 @@ export const useRecord = <T>(
     errorMessage,
     busy,
     ...rest
-  } = useAPIService<T>(defautValue, key);
+  } = useAPIService<T | null>(defautValue, key);
 
   const load = useCallback(
     (polling = false) => {
