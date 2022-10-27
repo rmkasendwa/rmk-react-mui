@@ -18,7 +18,7 @@ import {
 // Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
-    MuiFieldLabel: IFieldLabelProps;
+    MuiFieldLabel: FieldLabelProps;
   }
 }
 
@@ -50,11 +50,11 @@ const useUtilityClasses = (ownerState: any) => {
   return composeClasses(slots, getFieldLabelUtilityClass, classes);
 };
 
-export interface IFieldLabelProps extends TypographyProps {
+export interface FieldLabelProps extends TypographyProps {
   required?: boolean;
 }
 
-export const FieldLabel: FC<IFieldLabelProps> = (inProps) => {
+export const FieldLabel: FC<FieldLabelProps> = (inProps) => {
   const props = useThemeProps({ props: inProps, name: 'MuiFieldLabel' });
   const { required, children, sx, ...rest } = props;
 

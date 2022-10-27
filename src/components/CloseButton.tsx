@@ -5,12 +5,12 @@ import { SvgIconProps } from '@mui/material/SvgIcon';
 import { alpha } from '@mui/system/colorManipulator';
 import { ReactNode, forwardRef } from 'react';
 
-export interface ICloseButtonProps extends IconButtonProps {
+export interface CloseButtonProps extends IconButtonProps {
   IconProps?: SvgIconProps;
   icon?: ReactNode;
 }
 
-export const CloseButton = forwardRef<HTMLButtonElement, ICloseButtonProps>(
+export const CloseButton = forwardRef<HTMLButtonElement, CloseButtonProps>(
   function CloseButton({ icon, sx, IconProps, ...rest }, ref) {
     const { palette } = useTheme();
     const alphaBGColor = alpha(palette.text.primary, 0.3);

@@ -2,23 +2,23 @@ import hash from 'object-hash';
 import { useCallback, useEffect, useState } from 'react';
 import uniqid from 'uniqid';
 
-import { ITextFieldProps } from '../components/InputFields/TextField';
+import { TextFieldProps } from '../components/InputFields/TextField';
 import {
-  IFile,
-  ILoadableFile,
-  TFileDownloadFunction,
-  TFileUploadFunction,
+  FileContainer,
+  FileDownloadFunction,
+  FileUploadFunction,
+  LoadableFile,
 } from '../interfaces/Utils';
 
-export interface IUseFileUploadOptions
+export interface UseFileUploadOptions
   extends Pick<
-    ITextFieldProps,
+    TextFieldProps,
     'helperText' | 'error' | 'onChange' | 'name' | 'id'
   > {
-  value?: IFile[];
+  value?: FileContainer[];
   fileField?: HTMLInputElement | null;
-  upload?: TFileUploadFunction;
-  download?: TFileDownloadFunction;
+  upload?: FileUploadFunction;
+  download?: FileDownloadFunction;
   convertFilesToBase64?: boolean;
 }
 export const useFileUpload = ({
@@ -30,16 +30,16 @@ export const useFileUpload = ({
   value,
   onChange,
   convertFilesToBase64 = true,
-}: IUseFileUploadOptions) => {
-  const [files, setFiles] = useState<ILoadableFile[]>([]);
+}: UseFileUploadOptions) => {
+  const [files, setFiles] = useState<LoadableFile[]>([]);
   const [duplicateFileSelections, setDuplicateFileSelections] = useState<
     number[]
   >([]);
 
   const getLoadableFiles = useCallback(
-    (files: IFile[]) => {
+    (files: FileContainer[]) => {
       return files.map((file) => {
-        const loadableFile: ILoadableFile = { ...file };
+        const loadableFile: LoadableFile = { ...file };
         const { originalFile, id, extraParams } = file;
 
         if (upload) {
@@ -274,7 +274,7 @@ export const useFileUpload = ({
             selectedFiles.map((file) => {
               const { name, size } = file;
               if (convertFilesToBase64) {
-                return new Promise<ILoadableFile>((resolve, reject) => {
+                return new Promise<LoadableFile>((resolve, reject) => {
                   const reader = new FileReader();
                   reader.readAsDataURL(file);
                   reader.onload = () =>
@@ -342,7 +342,7 @@ export const useFileUpload = ({
                 size,
                 originalFile,
                 extraParams,
-              } as IFile;
+              } as FileContainer;
             }
           ),
         },

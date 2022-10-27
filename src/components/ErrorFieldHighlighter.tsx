@@ -4,9 +4,9 @@ import { FC, useEffect, useState } from 'react';
 
 import { flickerElement } from '../utils/page';
 
-export interface IErrorFieldHighlighterProps {}
+export interface ErrorFieldHighlighterProps {}
 
-export const ErrorFieldHighlighter: FC<IErrorFieldHighlighterProps> = () => {
+export const ErrorFieldHighlighter: FC<ErrorFieldHighlighterProps> = () => {
   const { isValid, submitCount } = useFormikContext();
   const [formElement, setFormElement] = useState<HTMLFormElement | null>(null);
 

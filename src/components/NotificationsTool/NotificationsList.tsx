@@ -9,7 +9,7 @@ import ListItemText from '@mui/material/ListItemText';
 import Typography from '@mui/material/Typography';
 import { CSSProperties, FC, Fragment } from 'react';
 
-interface INotificationsListProps extends ListProps {}
+interface NotificationsListProps extends ListProps {}
 
 const notifications: Array<{ isRead: boolean }> = [
   ...Array.from({ length: 4 }).map(() => {
@@ -24,7 +24,7 @@ const unreadNotificationStyles: CSSProperties = {
 };
 const readNotificationStyles: CSSProperties = {};
 
-const NotificationsList: FC<INotificationsListProps> = ({ sx, ...rest }) => {
+const NotificationsList: FC<NotificationsListProps> = ({ sx, ...rest }) => {
   return (
     <List
       {...rest}

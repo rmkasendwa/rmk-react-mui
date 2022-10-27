@@ -14,7 +14,7 @@ import { FC, ReactNode } from 'react';
 
 import { useLoadingContext } from '../../contexts/LoadingContext';
 import ErrorSkeleton from '../ErrorSkeleton';
-import FieldLabel, { IFieldLabelProps } from '../FieldLabel';
+import FieldLabel, { FieldLabelProps } from '../FieldLabel';
 import FieldValue from '../FieldValue/FieldValue';
 import {
   FieldValueDisplayClasses,
@@ -24,7 +24,7 @@ import {
 // Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
-    MuiFieldValueDisplay: IFieldValueDisplayProps;
+    MuiFieldValueDisplay: FieldValueDisplayProps;
   }
 }
 
@@ -56,16 +56,16 @@ const useUtilityClasses = (ownerState: any) => {
   return composeClasses(slots, getFieldValueDisplayUtilityClass, classes);
 };
 
-export interface IFieldValueDisplayProps
+export interface FieldValueDisplayProps
   extends Partial<BoxProps>,
-    Pick<IFieldLabelProps, 'required'> {
+    Pick<FieldLabelProps, 'required'> {
   label: ReactNode;
   value?: ReactNode;
-  LabelProps?: IFieldLabelProps;
+  LabelProps?: FieldLabelProps;
   ValueProps?: TypographyProps;
 }
 
-export const FieldValueDisplay: FC<IFieldValueDisplayProps> = (inProps) => {
+export const FieldValueDisplay: FC<FieldValueDisplayProps> = (inProps) => {
   const props = useThemeProps({ props: inProps, name: 'MuiFieldValueDisplay' });
   const {
     label,

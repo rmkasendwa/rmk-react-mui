@@ -1,14 +1,14 @@
 import '../extensions/String';
 
 import {
-  PhoneNumber as IPhoneNumber,
+  PhoneNumber,
   PhoneNumberFormat,
   PhoneNumberUtil as PhoneNumberUtilConstructor,
 } from 'google-libphonenumber';
 
-import { ICountryCode } from '../interfaces/Countries';
+import { CountryCode } from '../interfaces/Countries';
 
-const systemStandardFormatSupportedCountries: ICountryCode[] = [
+const systemStandardFormatSupportedCountries: CountryCode[] = [
   'UG',
   'DE',
   'TZ',
@@ -19,11 +19,11 @@ const PhoneNumberUtil = new PhoneNumberUtilConstructor();
 
 export default PhoneNumberUtil;
 
-export { IPhoneNumber };
+export { PhoneNumber };
 
 export const getRegionalCode = (
   formattedPhoneNumber: string
-): ICountryCode | undefined => {
+): CountryCode | undefined => {
   try {
     formattedPhoneNumber.startsWith('+') ||
       (formattedPhoneNumber = `+${formattedPhoneNumber}`);
@@ -35,7 +35,7 @@ export const getRegionalCode = (
       if (countryCode) {
         return PhoneNumberUtil.getRegionCodeForCountryCode(
           countryCode
-        ) as ICountryCode;
+        ) as CountryCode;
       }
     }
   } catch (exception) {
@@ -45,9 +45,9 @@ export const getRegionalCode = (
 
 export const isValidPhoneNumber = (
   phoneNumber: string,
-  regionalCode?: ICountryCode,
+  regionalCode?: CountryCode,
   defaultCountryCodeIsPrecident?: boolean
-): boolean | IPhoneNumber => {
+): boolean | PhoneNumber => {
   try {
     !defaultCountryCodeIsPrecident &&
       phoneNumber.startsWith('+') &&
@@ -75,12 +75,12 @@ export const isValidPhoneNumber = (
 
 export const systemStandardPhoneNumberFormat = (
   phoneNumberString: string,
-  regionalCode?: ICountryCode
+  regionalCode?: CountryCode
 ): string => {
   const phoneNumber = isValidPhoneNumber(
     phoneNumberString,
     regionalCode
-  ) as IPhoneNumber;
+  ) as PhoneNumber;
   if (phoneNumber) {
     let formattedPhoneNumber = PhoneNumberUtil.format(
       phoneNumber,
@@ -90,7 +90,7 @@ export const systemStandardPhoneNumberFormat = (
     if (countryCode) {
       regionalCode = PhoneNumberUtil.getRegionCodeForCountryCode(
         countryCode
-      ) as ICountryCode;
+      ) as CountryCode;
       if (systemStandardFormatSupportedCountries.includes(regionalCode)) {
         const formattedPhoneNumberWithoutSpaces =
           formattedPhoneNumber.replaceAll(/\s/g, '');

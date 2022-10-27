@@ -1,38 +1,38 @@
 import { AxiosRequestConfig } from 'axios';
 
-export interface IPaginatedRequestParams {
+export interface PaginatedRequestParams {
   limit?: number;
   offset?: number;
   showRecords?: boolean;
 }
 
-export interface IPaginatedResponseData<T> {
+export interface PaginatedResponseData<T> {
   recordsTotalCount: number;
   records: T[];
 }
 
 export type TAPIFunction<T = any> = () => Promise<T>;
 
-export interface IReduxAction {
+export interface ReduxAction {
   type: string;
   payload?: any;
 }
 
-export interface IRequestController {
+export interface RequestController {
   cancelRequest: () => void;
 }
 
-export interface IRequestOptions extends AxiosRequestConfig {
-  getRequestController?: (controller: IRequestController) => void;
+export interface RequestOptions extends AxiosRequestConfig {
+  getRequestController?: (controller: RequestController) => void;
   label?: string;
 }
 
-export interface ILoadingProps {
+export interface LoadingProps {
   loading: boolean;
   errorMessage: string;
 }
 
-export interface IFile {
+export interface FileContainer {
   id?: string;
   base64?: string;
   name: string;
@@ -41,7 +41,7 @@ export interface IFile {
   extraParams?: any;
 }
 
-export interface ILoadableFile extends IFile {
+export interface LoadableFile extends FileContainer {
   // Upload props
   uploading?: boolean;
   uploadProgress?: number;
@@ -59,28 +59,28 @@ export interface ILoadableFile extends IFile {
   retryDownload?: () => void;
 }
 
-export interface IAsyncProcess {
+export interface AsyncProcess {
   onProgress: (progress: number) => void;
   onError: (err: Error) => void;
   onSuccess: (payload: any) => void;
   onComplete: () => void;
 }
 
-export interface IAsyncProcessController {
+export interface AsyncProcessController {
   cancel: () => void;
 }
 
-export type TFileUploadFunction = (
+export type FileUploadFunction = (
   file: File,
-  options: IAsyncProcess
-) => IAsyncProcessController;
+  options: AsyncProcess
+) => AsyncProcessController;
 
-export type TFileDownloadFunction = (
-  downloadProps: Pick<IFile, 'id' | 'extraParams'>,
-  options: IAsyncProcess
-) => IAsyncProcessController;
+export type FileDownloadFunction = (
+  downloadProps: Pick<FileContainer, 'id' | 'extraParams'>,
+  options: AsyncProcess
+) => AsyncProcessController;
 
-export interface ITaggedAPIRequest {
+export interface TaggedAPIRequest {
   id: string;
   errorMessage?: string;
   loading?: boolean;

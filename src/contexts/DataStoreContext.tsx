@@ -25,11 +25,11 @@ dataKeys.forEach((key) => {
   }
 });
 
-export interface IDataStoreContext {
+export interface DataStoreContext {
   data: Record<string, any>;
   updateData: (data: Record<string, any>) => void;
 }
-export const DataStoreContext = createContext<IDataStoreContext>({
+export const DataStoreContext = createContext<DataStoreContext>({
   data: baseData,
   updateData: (data) => {
     Object.assign(baseData, data);

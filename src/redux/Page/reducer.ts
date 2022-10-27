@@ -1,12 +1,12 @@
 import { Reducer } from 'redux';
 
-import { TPageHistory } from '../../interfaces/Page';
+import { PageHistory } from '../../interfaces/Page';
 import StorageManager from '../../utils/StorageManager';
 import { CLEAR_PAGE_HISTORY, SET_PAGE_TITLE } from './types';
 
 const page: {
   title?: string;
-  history: TPageHistory;
+  history: PageHistory;
 } = {
   history: StorageManager.get('page-history') || [],
 };
@@ -14,7 +14,7 @@ const page: {
 export const pageReducer: Reducer = (state = page, { type, payload }) => {
   switch (type) {
     case SET_PAGE_TITLE:
-      const history: TPageHistory = StorageManager.get('page-history') || [];
+      const history: PageHistory = StorageManager.get('page-history') || [];
       history.unshift({
         title: payload,
         pathName: window.location.pathname,

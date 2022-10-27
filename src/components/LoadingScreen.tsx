@@ -2,11 +2,11 @@ import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
 import { CSSProperties, FC } from 'react';
 
-interface ILoadingScreenProps {
+interface LoadingScreenProps {
   absolute?: boolean;
 }
 
-export const LoadingScreen: FC<ILoadingScreenProps> = ({ absolute }) => {
+export const LoadingScreen: FC<LoadingScreenProps> = ({ absolute }) => {
   const style: CSSProperties = {};
   if (absolute) {
     Object.assign(style, {

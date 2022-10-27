@@ -1,6 +1,6 @@
-import { ICountryCode } from './Countries';
+import { CountryCode } from './Countries';
 
-export interface IGlobalConfiguration {
-  countryCode: ICountryCode;
-  setCountryCode?: (countryCode: ICountryCode) => void;
+export interface GlobalConfiguration {
+  countryCode: CountryCode;
+  setCountryCode?: (countryCode: CountryCode) => void;
 }

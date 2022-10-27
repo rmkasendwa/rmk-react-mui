@@ -7,11 +7,11 @@ import { alpha } from '@mui/system/colorManipulator';
 import { FC, useContext } from 'react';
 
 import CardTools from './CardTools';
-import { ICard, KanbanBoardContext } from './KanbanBoardContext';
+import { Card, KanbanBoardContext } from './KanbanBoardContext';
 
-export interface ICardProps extends ICard {}
+export interface CardProps extends Card {}
 
-const Card: FC<ICardProps> = ({
+const Card: FC<CardProps> = ({
   id,
   laneId,
   title,

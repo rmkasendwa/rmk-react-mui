@@ -3,7 +3,9 @@ import { Box, BoxProps } from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
 import IconButton from '@mui/material/IconButton';
 import Skeleton from '@mui/material/Skeleton';
-import MuiTextField, { TextFieldProps } from '@mui/material/TextField';
+import MuiTextField, {
+  TextFieldProps as MuiTextFieldProps,
+} from '@mui/material/TextField';
 import Tooltip from '@mui/material/Tooltip';
 import { ReactNode, forwardRef, useCallback, useEffect, useState } from 'react';
 
@@ -11,9 +13,9 @@ import { useLoadingContext } from '../../../contexts/LoadingContext';
 import ErrorSkeleton from '../../ErrorSkeleton';
 import FieldValueDisplay from '../../FieldValueDisplay';
 
-export interface ITextFieldProps
-  extends Omit<TextFieldProps, 'variant'>,
-    Pick<TextFieldProps, 'variant'> {
+export interface TextFieldProps
+  extends Omit<MuiTextFieldProps, 'variant'>,
+    Pick<MuiTextFieldProps, 'variant'> {
   labelWrapped?: boolean;
   value?: string;
   endAdornment?: ReactNode;
@@ -22,7 +24,7 @@ export interface ITextFieldProps
   showClearButton?: boolean;
 }
 
-export const TextField = forwardRef<HTMLDivElement, ITextFieldProps>(
+export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
   function TextField(
     {
       label,

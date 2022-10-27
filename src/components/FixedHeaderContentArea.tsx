@@ -1,15 +1,13 @@
 import { Box, BoxProps } from '@mui/material';
 import { FC } from 'react';
 
-import PaddedContentArea, {
-  IPaddedContentAreaProps,
-} from './PaddedContentArea';
+import PaddedContentArea, { PaddedContentAreaProps } from './PaddedContentArea';
 
-export interface IFixedHeaderContentAreaProps extends IPaddedContentAreaProps {
+export interface FixedHeaderContentAreaProps extends PaddedContentAreaProps {
   BodyProps?: Partial<BoxProps>;
 }
 
-export const FixedHeaderContentArea: FC<IFixedHeaderContentAreaProps> = ({
+export const FixedHeaderContentArea: FC<FixedHeaderContentAreaProps> = ({
   title,
   children,
   sx,

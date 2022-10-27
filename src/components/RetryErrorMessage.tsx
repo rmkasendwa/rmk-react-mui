@@ -3,12 +3,12 @@ import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import { FC } from 'react';
 
-export interface IRetryErrorMessageProps {
+export interface RetryErrorMessageProps {
   message: string;
   retry?: () => void;
 }
 
-export const RetryErrorMessage: FC<IRetryErrorMessageProps> = ({
+export const RetryErrorMessage: FC<RetryErrorMessageProps> = ({
   message,
   retry,
 }) => {

@@ -8,18 +8,18 @@ import {
   useState,
 } from 'react';
 
-export interface IBrowserContext {
+export interface BrowserContext {
   browser: boolean;
 }
-export const BrowserContext = createContext<IBrowserContext>({
+export const BrowserContext = createContext<BrowserContext>({
   browser: false,
 });
 
-export interface IBrowserProviderProps {
+export interface BrowserProviderProps {
   children: ReactNode;
 }
 
-export const BrowserProvider: FC<IBrowserProviderProps> = ({ children }) => {
+export const BrowserProvider: FC<BrowserProviderProps> = ({ children }) => {
   const [browser, setBrowser] = useState(false);
   const value = useMemo(() => {
     return { browser };

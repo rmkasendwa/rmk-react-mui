@@ -19,7 +19,7 @@ import {
 // Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
-    MuiFieldValue: IFieldValueProps;
+    MuiFieldValue: FieldValueProps;
   }
 }
 
@@ -51,9 +51,9 @@ const useUtilityClasses = (ownerState: any) => {
   return composeClasses(slots, getFieldValueUtilityClass, classes);
 };
 
-export interface IFieldValueProps extends TypographyProps {}
+export interface FieldValueProps extends TypographyProps {}
 
-export const FieldValue = forwardRef<HTMLElement, IFieldValueProps>(
+export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
   function FieldValue(inProps, ref) {
     const props = useThemeProps({ props: inProps, name: 'MuiFieldValue' });
     const { children, sx, ...rest } = props;

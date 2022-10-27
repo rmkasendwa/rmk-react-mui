@@ -1,12 +1,12 @@
 import Box, { BoxProps } from '@mui/material/Box';
 import { FC, ReactNode, useEffect, useRef, useState } from 'react';
 
-export interface IDefaultPlaceholderDimensions {
+export interface DefaultPlaceholderDimensions {
   height: number;
   width?: number;
 }
 
-export interface IRenderIfVisibleProps extends Partial<BoxProps> {
+export interface RenderIfVisibleProps extends Partial<BoxProps> {
   /**
    * Whether the element should be visible initially or not.
    * Useful e.g. for always setting the first N items to visible.
@@ -35,7 +35,7 @@ export interface IRenderIfVisibleProps extends Partial<BoxProps> {
    * The default dimensions given to the placeholder element to avoid flickering.
    * Note: The placeholder dimensions will change when the element is rendered if they are different from the element dimensions
    */
-  defaultPlaceholderDimensions?: IDefaultPlaceholderDimensions;
+  defaultPlaceholderDimensions?: DefaultPlaceholderDimensions;
   /**
    * Default width and height to be assigned to placeholder element
    *
@@ -66,7 +66,7 @@ export interface IRenderIfVisibleProps extends Partial<BoxProps> {
   visibilityDelay?: number;
 }
 
-export const RenderIfVisible: FC<IRenderIfVisibleProps> = ({
+export const RenderIfVisible: FC<RenderIfVisibleProps> = ({
   initialVisible = false,
   visibleOffset = 1000,
   stayRendered = false,

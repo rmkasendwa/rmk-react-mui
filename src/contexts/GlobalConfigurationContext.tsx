@@ -1,17 +1,17 @@
 import { FC, ReactNode, createContext, useContext, useState } from 'react';
 
 import { DEFAULT_COUNTRY_CODE, DEFAULT_CURRENCY_CODE } from '../constants';
-import { ICountryCode } from '../interfaces/Countries';
+import { CountryCode } from '../interfaces/Countries';
 
-export interface IGlobalConfigurationContext {
-  countryCode: ICountryCode;
+export interface GlobalConfigurationContext {
+  countryCode: CountryCode;
   currencyCode: string;
-  setCountryCode?: (countryCode: ICountryCode) => void;
-  setCurrencyCode?: (countryCode: ICountryCode) => void;
+  setCountryCode?: (countryCode: CountryCode) => void;
+  setCurrencyCode?: (countryCode: CountryCode) => void;
 }
 
 export const GlobalConfigurationContext =
-  createContext<IGlobalConfigurationContext>({
+  createContext<GlobalConfigurationContext>({
     countryCode: DEFAULT_COUNTRY_CODE,
     currencyCode: DEFAULT_CURRENCY_CODE,
   });

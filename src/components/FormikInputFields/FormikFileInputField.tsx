@@ -2,14 +2,14 @@ import { forwardRef } from 'react';
 
 import { useAggregatedFormikContext } from '../../hooks/Formik';
 import FileInputField, {
-  IFileInputFieldProps,
+  FileInputFieldProps,
 } from '../InputFields/FileInputField';
 
-export interface IFormikFileInputFieldProps extends IFileInputFieldProps {}
+export interface FormikFileInputFieldProps extends FileInputFieldProps {}
 
 export const FormikFileInputField = forwardRef<
   HTMLDivElement,
-  IFormikFileInputFieldProps
+  FormikFileInputFieldProps
 >(function FormikFileInputField(
   {
     name,

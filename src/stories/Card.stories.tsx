@@ -2,7 +2,7 @@ import Box from '@mui/material/Box';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import React from 'react';
 
-import Card, { ICardProps } from '../components/Card';
+import Card, { CardProps } from '../components/Card';
 
 export default {
   title: 'Components/Card',
@@ -20,4 +20,4 @@ const Template: ComponentStory<typeof Card> = (props) => {
 export const Default = Template.bind({});
 Default.args = {
   title: 'Card Title',
-} as ICardProps;
+} as CardProps;

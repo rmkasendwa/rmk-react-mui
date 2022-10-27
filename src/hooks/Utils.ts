@@ -14,15 +14,15 @@ import { CANCELLED_API_REQUEST_MESSAGE } from '../constants';
 import { APIContext } from '../contexts/APIContext';
 import { useCachedData } from '../contexts/DataStoreContext';
 import {
-  IPaginatedRequestParams,
-  IPaginatedResponseData,
-  ITaggedAPIRequest,
+  PaginatedRequestParams,
+  PaginatedResponseData,
   TAPIFunction,
+  TaggedAPIRequest,
 } from '../interfaces/Utils';
 
 export const useAPIService = <T>(defautValue: T, key?: string) => {
   const isComponentMountedRef = useRef(true);
-  const taggedAPIRequestsRef = useRef<ITaggedAPIRequest[]>([]);
+  const taggedAPIRequestsRef = useRef<TaggedAPIRequest[]>([]);
   const { data, updateData } = useCachedData();
   if (key && data[key]) {
     defautValue = data[key];
@@ -51,7 +51,7 @@ export const useAPIService = <T>(defautValue: T, key?: string) => {
             return {
               id: tag,
               loading: true,
-            } as ITaggedAPIRequest;
+            } as TaggedAPIRequest;
           }
         })();
         taggedAPIRequest && taggedAPIRequestsRef.current.push(taggedAPIRequest);
@@ -257,14 +257,14 @@ export const useRecords = <T>(
   };
 };
 
-export interface IUsePaginatedRecordsOptions extends IPaginatedRequestParams {
+export interface UsePaginatedRecordsOptions extends PaginatedRequestParams {
   key?: string;
   loadOnMount?: boolean;
   autoSync?: boolean;
   revalidationKey?: string;
 }
 export const usePaginatedRecords = <T>(
-  recordFinder: TAPIFunction<IPaginatedResponseData<T>>,
+  recordFinder: TAPIFunction<PaginatedResponseData<T>>,
   {
     key,
     loadOnMount = true,
@@ -272,7 +272,7 @@ export const usePaginatedRecords = <T>(
     offset: offsetProp = 0,
     showRecords: showRecordsProp = true,
     revalidationKey,
-  }: IUsePaginatedRecordsOptions = {}
+  }: UsePaginatedRecordsOptions = {}
 ) => {
   const recordFinderRef = useRef(recordFinder);
   useEffect(() => {
@@ -283,7 +283,7 @@ export const usePaginatedRecords = <T>(
     load: loadFromAPIService,
     record: responseData,
     ...rest
-  } = useAPIService<IPaginatedResponseData<T> | null>(
+  } = useAPIService<PaginatedResponseData<T> | null>(
     null,
     (() => {
       if (key) {
@@ -305,7 +305,7 @@ export const usePaginatedRecords = <T>(
       offset: offsetProp,
       limit: limitProp,
       showRecords: showRecordsProp,
-    } as IPaginatedRequestParams;
+    } as PaginatedRequestParams;
   }, [limitProp, offsetProp, showRecordsProp]);
 
   const [loadingPaginationParams, setLoadingPaginationParams] = useState(
@@ -313,7 +313,7 @@ export const usePaginatedRecords = <T>(
   );
 
   const load = useCallback(
-    (params?: IPaginatedRequestParams) => {
+    (params?: PaginatedRequestParams) => {
       revalidationKey; // Triggering reload whenever extra parameters change
       params = { ...params };
       params.offset || (params.offset = defaultPaginationParams.offset);

@@ -1,23 +1,23 @@
 import { FC, ReactNode, createContext, useContext } from 'react';
 
-export interface ILoadingContext {
+export interface LoadingContext {
   load?: () => void;
   loading: boolean;
   loaded?: boolean;
   locked?: boolean;
   errorMessage?: string;
 }
-export const LoadingContext = createContext<ILoadingContext>({
+export const LoadingContext = createContext<LoadingContext>({
   loading: false,
   errorMessage: '',
 });
 
-export interface ILoadingProviderProps {
-  value: ILoadingContext;
+export interface LoadingProviderProps {
+  value: LoadingContext;
   children: ReactNode;
 }
 
-export const LoadingProvider: FC<ILoadingProviderProps> = ({
+export const LoadingProvider: FC<LoadingProviderProps> = ({
   children,
   value,
 }) => {

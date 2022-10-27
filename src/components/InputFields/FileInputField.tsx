@@ -7,13 +7,13 @@ import InputAdornment from '@mui/material/InputAdornment';
 import { forwardRef, useEffect, useRef, useState } from 'react';
 
 import { formatBytes } from '../../utils/bytes';
-import TextField, { ITextFieldProps } from './TextField';
+import TextField, { TextFieldProps } from './TextField';
 
-export interface IFileInputFieldProps extends Omit<ITextFieldProps, 'value'> {
+export interface FileInputFieldProps extends Omit<TextFieldProps, 'value'> {
   value?: File | null;
 }
 
-export const FileInputField = forwardRef<HTMLDivElement, IFileInputFieldProps>(
+export const FileInputField = forwardRef<HTMLDivElement, FileInputFieldProps>(
   function FileInputField(
     {
       onClick,

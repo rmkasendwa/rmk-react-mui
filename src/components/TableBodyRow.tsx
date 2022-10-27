@@ -1,11 +1,13 @@
 import Box from '@mui/material/Box';
 import TableCell from '@mui/material/TableCell';
-import TableRow, { TableRowProps } from '@mui/material/TableRow';
+import TableRow, {
+  TableRowProps as MuiTableRowProps,
+} from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 import { format } from 'date-fns';
 import { isValidElement, useEffect, useMemo, useRef } from 'react';
 
-import { IBaseTableRow, ITableRowProps } from '../interfaces/Table';
+import { BaseTableRow, TableRowProps } from '../interfaces/Table';
 import { formatDate } from '../utils/dates';
 import { addThousandCommas } from '../utils/numbers';
 import { getColumnPaddingStyles, getColumnWidthStyles } from '../utils/Table';
@@ -26,11 +28,11 @@ const toolTypes = [
   'checkbox',
 ];
 
-export interface ITableBodyRowProps<T = any>
-  extends Partial<Omit<TableRowProps, 'defaultValue'>>,
-    ITableRowProps<T> {}
+export interface TableBodyRowProps<T = any>
+  extends Partial<Omit<MuiTableRowProps, 'defaultValue'>>,
+    TableRowProps<T> {}
 
-export const TableBodyRow = <T extends IBaseTableRow>({
+export const TableBodyRow = <T extends BaseTableRow>({
   columns,
   row,
   forEachDerivedColumn,
@@ -44,7 +46,7 @@ export const TableBodyRow = <T extends IBaseTableRow>({
   columnTypographyProps = {},
   minColumnWidth,
   ...rest
-}: ITableBodyRowProps<T>) => {
+}: TableBodyRowProps<T>) => {
   // Refs
   const columnsRef = useRef(columns);
   const forEachDerivedColumnRef = useRef(forEachDerivedColumn);
@@ -174,7 +176,7 @@ export const TableBodyRow = <T extends IBaseTableRow>({
             }
             return {};
           })(),
-        } as Record<keyof T, TableRowProps>
+        } as Record<keyof T, MuiTableRowProps>
       ),
       ...(() => {
         if (generateRowDataRef.current) {

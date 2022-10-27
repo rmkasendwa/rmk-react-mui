@@ -3,7 +3,7 @@ import Pagination, { PaginationProps } from '@mui/material/Pagination';
 import Typography from '@mui/material/Typography';
 import { forwardRef } from 'react';
 
-export interface IDataTablePaginationProps extends GridProps {
+export interface DataTablePaginationProps extends GridProps {
   filteredCount: number;
   totalCount: number;
   labelPlural: string;
@@ -16,7 +16,7 @@ export interface IDataTablePaginationProps extends GridProps {
 
 export const DataTablePagination = forwardRef<
   HTMLDivElement,
-  IDataTablePaginationProps
+  DataTablePaginationProps
 >(function DataTablePagination(
   {
     filteredCount,

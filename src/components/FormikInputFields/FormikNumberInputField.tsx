@@ -2,14 +2,14 @@ import { forwardRef } from 'react';
 
 import { useAggregatedFormikContext } from '../../hooks/Formik';
 import NumberInputField, {
-  INumberInputFieldProps,
+  NumberInputFieldProps,
 } from '../InputFields/NumberInputField';
 
-export interface IFormikNumberInputFieldProps extends INumberInputFieldProps {}
+export interface FormikNumberInputFieldProps extends NumberInputFieldProps {}
 
 export const FormikNumberInputField = forwardRef<
   HTMLDivElement,
-  IFormikNumberInputFieldProps
+  FormikNumberInputFieldProps
 >(function FormikNumberInputField(
   {
     name,

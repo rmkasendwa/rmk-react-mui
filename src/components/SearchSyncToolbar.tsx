@@ -11,11 +11,11 @@ import Toolbar, { ToolbarProps } from '@mui/material/Toolbar';
 import { Children, FC, ReactNode, useEffect, useState } from 'react';
 
 import TextField from './InputFields/TextField';
-import ReloadIconButton, { IReloadIconButtonProps } from './ReloadIconButton';
+import ReloadIconButton, { ReloadIconButtonProps } from './ReloadIconButton';
 
-export interface ISearchSyncToolbarProps
+export interface SearchSyncToolbarProps
   extends Omit<ToolbarProps, 'title'>,
-    Partial<Pick<IReloadIconButtonProps, 'load' | 'loading' | 'errorMessage'>> {
+    Partial<Pick<ReloadIconButtonProps, 'load' | 'loading' | 'errorMessage'>> {
   title?: ReactNode;
   /**
    * Determines whether the component should be rendered with a search tool.
@@ -48,7 +48,7 @@ export interface ISearchSyncToolbarProps
   searchFieldOpen?: boolean;
 }
 
-export const SearchSyncToolbar: FC<ISearchSyncToolbarProps> = ({
+export const SearchSyncToolbar: FC<SearchSyncToolbarProps> = ({
   title,
   hasSearchTool = true,
   searchTerm: searchTermProp = '',

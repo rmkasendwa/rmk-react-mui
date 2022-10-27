@@ -1,4 +1,4 @@
-import { TPageHistory } from '../interfaces/Page';
+import { PageHistory } from '../interfaces/Page';
 
 export * from './Page';
 export * from './Theme';
@@ -9,6 +9,6 @@ export interface RootState {
   };
   page: {
     title: string;
-    history: TPageHistory;
+    history: PageHistory;
   };
 }

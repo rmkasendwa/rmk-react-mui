@@ -3,7 +3,7 @@ import { FormikContextType, useFormikContext } from 'formik';
 import { get } from 'lodash';
 import { ChangeEvent, FocusEvent, useCallback } from 'react';
 
-interface IUseAggregatedFormikContextProps
+interface UseAggregatedFormikContextProps
   extends Pick<
     TextFieldProps,
     'value' | 'name' | 'onChange' | 'onBlur' | 'helperText' | 'error'
@@ -16,7 +16,7 @@ export const useAggregatedFormikContext = ({
   onBlur: onBlurProp,
   helperText,
   error,
-}: IUseAggregatedFormikContextProps) => {
+}: UseAggregatedFormikContextProps) => {
   const { values, handleBlur, handleChange, touched, errors } =
     (useFormikContext() as FormikContextType<any>) || {};
 

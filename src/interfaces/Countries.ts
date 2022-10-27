@@ -1,4 +1,4 @@
-export type ICountryCode =
+export type CountryCode =
   | 'AF'
   | 'AX'
   | 'AL'

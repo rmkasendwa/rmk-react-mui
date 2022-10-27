@@ -3,13 +3,13 @@ import Chip, { ChipProps } from '@mui/material/Chip';
 import useTheme from '@mui/material/styles/useTheme';
 import { FC } from 'react';
 
-export interface IEnumValueChipProps extends ChipProps {
+export interface EnumValueChipProps extends ChipProps {
   label?: string;
   value: string;
   colors: Record<string, string>;
 }
 
-export const EnumValueChip: FC<IEnumValueChipProps> = ({
+export const EnumValueChip: FC<EnumValueChipProps> = ({
   value,
   label,
   colors,

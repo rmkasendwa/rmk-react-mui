@@ -26,24 +26,24 @@ import { LoadingProvider } from '../../contexts/LoadingContext';
 import { useAPIService } from '../../hooks/Utils';
 import { TAPIFunction } from '../../interfaces/Utils';
 import PaginatedDropdownOptionList, {
-  IDropdownOption,
-  IPaginatedDropdownOptionListProps,
+  DropdownOption,
+  PaginatedDropdownOptionListProps,
 } from '../PaginatedDropdownOptionList';
 import RetryErrorMessage from '../RetryErrorMessage';
-import TextField, { ITextFieldProps } from './TextField';
+import TextField, { TextFieldProps } from './TextField';
 
-export interface IDataDropdownFieldProps
-  extends Omit<ITextFieldProps, 'value'>,
-    Pick<IPaginatedDropdownOptionListProps, 'optionVariant'> {
+export interface DataDropdownFieldProps
+  extends Omit<TextFieldProps, 'value'>,
+    Pick<PaginatedDropdownOptionListProps, 'optionVariant'> {
   disableEmptyOption?: boolean;
   getDropdownEntities?: TAPIFunction;
   filterDropdownEntities?: (entities: any[]) => any[];
-  getDropdownOptions?: (options: any[]) => IDropdownOption[];
-  options?: IDropdownOption[];
+  getDropdownOptions?: (options: any[]) => DropdownOption[];
+  options?: DropdownOption[];
   dataKey?: string;
   sortOptions?: boolean;
   value?: string | string[];
-  selectedOption?: IDropdownOption;
+  selectedOption?: DropdownOption;
   dropdownListMaxHeight?: number;
   optionPaging?: boolean;
   onChangeSearchTerm?: (searchTerm: string) => void;
@@ -52,7 +52,7 @@ export interface IDataDropdownFieldProps
 
 export const DataDropdownField = forwardRef<
   HTMLDivElement,
-  IDataDropdownFieldProps
+  DataDropdownFieldProps
 >(function DataDropdownField(
   {
     SelectProps,
@@ -88,7 +88,7 @@ export const DataDropdownField = forwardRef<
   const { preferStale } = useAPIDataContext();
   const { palette } = useTheme();
 
-  const [options, setOptions] = useState<IDropdownOption[]>([]);
+  const [options, setOptions] = useState<DropdownOption[]>([]);
 
   const onChangeRef = useRef(onChange);
   const getDropdownEntitiesRef = useRef(getDropdownEntities);
@@ -124,7 +124,7 @@ export const DataDropdownField = forwardRef<
   const [open, setOpen] = useState(false);
   const [focused, setFocused] = useState(false);
 
-  const [selectedOptions, setSelectedOptions] = useState<IDropdownOption[]>([]);
+  const [selectedOptions, setSelectedOptions] = useState<DropdownOption[]>([]);
   const [missingOptionValues, setMissingOptionValues] = useState<
     (string | number)[]
   >([]);
@@ -137,7 +137,7 @@ export const DataDropdownField = forwardRef<
   }, [multiple, selectedOptions]);
 
   const triggerChangeEvent = useCallback(
-    (selectedOptions: IDropdownOption[]) => {
+    (selectedOptions: DropdownOption[]) => {
       const selectedOptionValue = (() => {
         if (multiple) {
           return selectedOptions.map(({ value }) => value);
@@ -316,7 +316,7 @@ export const DataDropdownField = forwardRef<
     );
   }
 
-  const errorProps: Pick<ITextFieldProps, 'error' | 'helperText'> = {};
+  const errorProps: Pick<TextFieldProps, 'error' | 'helperText'> = {};
   if (errorMessage) {
     errorProps.error = true;
     errorProps.helperText = (
@@ -365,7 +365,7 @@ export const DataDropdownField = forwardRef<
                     onClick={(event) => {
                       event.stopPropagation();
                       setSearchTerm('');
-                      const options: IDropdownOption[] = [];
+                      const options: DropdownOption[] = [];
                       setSelectedOptions(options);
                       triggerChangeEvent(options);
                     }}

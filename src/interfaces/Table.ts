@@ -1,17 +1,22 @@
-import { SxProps, TableRowProps, Theme, TypographyProps } from '@mui/material';
+import {
+  TableRowProps as MuiTableRowProps,
+  SxProps,
+  Theme,
+  TypographyProps,
+} from '@mui/material';
 import { TableCellProps } from '@mui/material/TableCell';
 import { ReactNode } from 'react';
 
 import { PrimitiveDataType } from './Utils';
 
-export type ITableColumnEnumValue =
+export type TableColumnEnumValue =
   | {
       id: string;
       label: string;
     }
   | string;
 
-export interface ITableColumn<T = any>
+export interface TableColumn<T = any>
   extends Partial<Omit<TableCellProps, 'defaultValue' | 'id'>> {
   id: keyof T;
   label?: ReactNode;
@@ -39,7 +44,7 @@ export interface ITableColumn<T = any>
   isDerivedColumn?: boolean;
   noHeaderTextAfter?: boolean;
   headerTextAfter?: ReactNode;
-  enumValues?: ITableColumnEnumValue[];
+  enumValues?: TableColumnEnumValue[];
   searchKeyMapper?: (displayingColumnValue: string) => any;
   columnClassName?: string;
   locked?: boolean;
@@ -47,34 +52,34 @@ export interface ITableColumn<T = any>
   postProcessor?: (
     columnValue: ReactNode,
     row: T,
-    column: ITableColumn
+    column: TableColumn
   ) => ReactNode;
-  getColumnValue?: (row: T, column: ITableColumn) => ReactNode;
+  getColumnValue?: (row: T, column: TableColumn) => ReactNode;
   onClickColumn?: (currentEntity: T) => void;
   headerSx?: SxProps<Theme>;
   bodySx?: SxProps<Theme>;
   sortable?: boolean;
 }
 
-export interface IForEachDerivedColumnConfiguration<T> {
+export interface ForEachDerivedColumnConfiguration<T> {
   key: string;
   currentEntity: T;
 }
 
-export type TGetRowProps<T = any> = (currentEntity: T) => TableRowProps;
+export type GetRowProps<T = any> = (currentEntity: T) => MuiTableRowProps;
 
-export interface IBaseTableRow {
+export interface BaseTableRow {
   id: string | number;
 }
 
-export interface ITableRowProps<T = any> {
-  columns: Array<ITableColumn<T>>;
+export interface TableRowProps<T = any> {
+  columns: Array<TableColumn<T>>;
   row: T;
   forEachDerivedColumn?: (
-    config: IForEachDerivedColumnConfiguration<T>
+    config: ForEachDerivedColumnConfiguration<T>
   ) => ReactNode | null | undefined;
   generateRowData?: (currentEntity: T) => any;
-  getRowProps?: TGetRowProps;
+  getRowProps?: GetRowProps;
   decimalPlaces?: number;
   labelTransform?: boolean;
   onClickRow?: (currentEntity: T) => void;

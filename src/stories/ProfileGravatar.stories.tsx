@@ -2,7 +2,7 @@ import { ComponentMeta, ComponentStory } from '@storybook/react';
 import React from 'react';
 
 import ProfileGravatar, {
-  IProfileGravatarProps,
+  ProfileGravatarProps,
 } from '../components/ProfileGravatar';
 
 export default {
@@ -21,4 +21,4 @@ export const Default = Template.bind({});
 Default.args = {
   label: 'Ronald Kasendwa',
   email: 'kasendwaronald@gmail.com',
-} as IProfileGravatarProps;
+} as ProfileGravatarProps;

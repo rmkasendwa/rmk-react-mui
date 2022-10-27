@@ -8,15 +8,15 @@ import { forwardRef } from 'react';
 
 export const DEFAULT_DROPDOWN_OPTION_HEIGHT = 36;
 
-export type TDropdownOptionVariant = 'text' | 'checkbox' | 'check';
+export type DropdownOptionVariant = 'text' | 'checkbox' | 'check';
 
-export interface IDropdownOptionProps extends MenuItemProps {
+export interface DropdownOptionProps extends MenuItemProps {
   height?: number;
   selectable?: boolean;
-  variant?: TDropdownOptionVariant;
+  variant?: DropdownOptionVariant;
 }
 
-export const DropdownOption = forwardRef<HTMLLIElement, IDropdownOptionProps>(
+export const DropdownOption = forwardRef<HTMLLIElement, DropdownOptionProps>(
   function DropdownOption(
     {
       height = DEFAULT_DROPDOWN_OPTION_HEIGHT,

@@ -9,17 +9,17 @@ import Tooltip from '@mui/material/Tooltip';
 import { FC, useState } from 'react';
 
 import {
-  IKanbanBoardLaneTool,
-  TKanbanBoardId,
-  TKanbanBoardLaneToolItem,
+  KanbanBoardId,
+  KanbanBoardLaneTool,
+  KanbanBoardLaneToolItem,
 } from './KanbanBoardContext';
 
-export interface ILaneToolsProps {
-  tools: TKanbanBoardLaneToolItem[];
-  laneId: TKanbanBoardId;
+export interface LaneToolsProps {
+  tools: KanbanBoardLaneToolItem[];
+  laneId: KanbanBoardId;
 }
 
-const LaneTools: FC<ILaneToolsProps> = ({ tools, laneId }) => {
+const LaneTools: FC<LaneToolsProps> = ({ tools, laneId }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -31,7 +31,7 @@ const LaneTools: FC<ILaneToolsProps> = ({ tools, laneId }) => {
 
   const actualTools = tools.filter(
     (toolItem) => toolItem !== 'DIVIDER'
-  ) as IKanbanBoardLaneTool[];
+  ) as KanbanBoardLaneTool[];
   const toolsHaveIcons = actualTools.some(({ icon }) => icon);
   if (actualTools.length === 1) {
     const [tool] = actualTools.filter((toolItem) => toolItem.icon);

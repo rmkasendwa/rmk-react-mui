@@ -1,7 +1,7 @@
 import axios, { AxiosResponse, CancelTokenSource } from 'axios';
 
 import { CANCELLED_API_REQUEST_MESSAGE } from '../../constants';
-import { IRequestOptions } from '../../interfaces/Utils';
+import { RequestOptions } from '../../interfaces/Utils';
 import { SessionTimeoutError } from '../../utils/errors';
 import StorageManager from '../../utils/StorageManager';
 import { queueRequest } from './RequestQueue';
@@ -43,19 +43,19 @@ export const patchDefaultRequestHeaders = (headers: Record<string, string>) => {
   StorageManager.add('defaultRequestHeaders', defaultRequestHeaders);
 };
 
-export interface IHeaderController {
+export interface HeaderController {
   rotateHeaders?: (
     responseHeaders: Record<string, string>,
     requestHeaders: Record<string, string>
   ) => Record<string, string>;
 }
-export const HeaderController: IHeaderController = {};
+export const HeaderController: HeaderController = {};
 
 const pendingRequestCancelTokenSources: CancelTokenSource[] = [];
 
 const fetchData = async <T = any>(
   path: string,
-  { headers = {}, label = 'operation', ...options }: IRequestOptions
+  { headers = {}, label = 'operation', ...options }: RequestOptions
 ): Promise<AxiosResponse<T>> => {
   const defaultHeaders = { ...defaultRequestHeaders };
   const url = APIAdapterConfiguration.getFullResourceURL(path);
@@ -169,11 +169,11 @@ const fetchData = async <T = any>(
   });
 };
 
-export const get = <T = any>(path: string, options: IRequestOptions = {}) => {
+export const get = <T = any>(path: string, options: RequestOptions = {}) => {
   return fetchData<T>(path, options);
 };
 
-const getRequestDefaultOptions = ({ ...options }: IRequestOptions = {}) => {
+const getRequestDefaultOptions = ({ ...options }: RequestOptions = {}) => {
   options.headers || (options.headers = {});
 
   if (options.data && !options.headers['Content-Type']) {
@@ -190,7 +190,7 @@ const getRequestDefaultOptions = ({ ...options }: IRequestOptions = {}) => {
 
 export const post = async <T = any>(
   path: string,
-  { ...options }: IRequestOptions = {}
+  { ...options }: RequestOptions = {}
 ) => {
   options.method = 'POST';
   return fetchData<T>(path, getRequestDefaultOptions(options));
@@ -198,7 +198,7 @@ export const post = async <T = any>(
 
 export const put = async <T = any>(
   path: string,
-  { ...options }: IRequestOptions = {}
+  { ...options }: RequestOptions = {}
 ) => {
   options.method = 'PUT';
   return fetchData<T>(path, getRequestDefaultOptions(options));
@@ -206,13 +206,13 @@ export const put = async <T = any>(
 
 export const patch = async <T = any>(
   path: string,
-  { ...options }: IRequestOptions = {}
+  { ...options }: RequestOptions = {}
 ) => {
   options.method = 'PATCH';
   return fetchData<T>(path, getRequestDefaultOptions(options));
 };
 
-export const del = <T = any>(path: string, options: IRequestOptions = {}) => {
+export const del = <T = any>(path: string, options: RequestOptions = {}) => {
   options.method = 'DELETE';
   return fetchData<T>(path, options);
 };

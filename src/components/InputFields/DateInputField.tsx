@@ -12,15 +12,15 @@ import { forwardRef, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { DEFAULT_DATE_FORMAT } from '../../constants';
 import { useSmallScreen } from '../../hooks/Utils';
-import TextField, { ITextFieldProps } from './TextField';
+import TextField, { TextFieldProps } from './TextField';
 
-export interface IDateInputFieldProps extends ITextFieldProps {
+export interface DateInputFieldProps extends TextFieldProps {
   value?: string;
   minDate?: string;
   maxDate?: string;
 }
 
-export const DateInputField = forwardRef<HTMLDivElement, IDateInputFieldProps>(
+export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
   function DateInputField(
     {
       value,

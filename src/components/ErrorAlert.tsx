@@ -1,13 +1,11 @@
 import Alert, { AlertProps, alertClasses } from '@mui/material/Alert';
 import { FC } from 'react';
 
-import RetryErrorMessage, {
-  IRetryErrorMessageProps,
-} from './RetryErrorMessage';
+import RetryErrorMessage, { RetryErrorMessageProps } from './RetryErrorMessage';
 
-export interface IErrorAlertProps extends IRetryErrorMessageProps, AlertProps {}
+export interface ErrorAlertProps extends RetryErrorMessageProps, AlertProps {}
 
-export const ErrorAlert: FC<IErrorAlertProps> = ({
+export const ErrorAlert: FC<ErrorAlertProps> = ({
   message,
   retry,
   sx,

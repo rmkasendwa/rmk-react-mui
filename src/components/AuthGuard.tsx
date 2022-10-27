@@ -10,13 +10,13 @@ import {
   SESSION_LOGIN_PAGE_ROUTE_PATH,
 } from '../route-paths';
 
-export interface IAuthGuardProps {
+export interface AuthGuardProps {
   variant?: 'PROTECTED' | 'PUBLIC_ONLY' | 'PUBLIC';
 }
 
 const loginRoutePaths = [LOGIN_PAGE_ROUTE_PATH, SESSION_LOGIN_PAGE_ROUTE_PATH];
 
-export const AuthGuard: FC<IAuthGuardProps> = ({ variant }) => {
+export const AuthGuard: FC<AuthGuardProps> = ({ variant }) => {
   const { pathname, search } = useLocation();
   const navigate = useNavigate();
   const { sessionExpired } = useAPIContext();

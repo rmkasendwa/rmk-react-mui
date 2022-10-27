@@ -1,7 +1,7 @@
 import PhoneNumberUtil from '../../../utils/PhoneNumberUtil';
 import flags from './flags.json';
 
-export interface ICountry {
+export interface Country {
   regionalCode: string;
   name: string;
   countryCode: number;

@@ -1,13 +1,13 @@
 import { forwardRef } from 'react';
 
 import { useAggregatedFormikContext } from '../../hooks/Formik';
-import FileUploader, { IFileUploaderProps } from '../FileUploader';
+import FileUploader, { FileUploaderProps } from '../FileUploader';
 
-export interface IFormikFileUploaderProps extends IFileUploaderProps {}
+export interface FormikFileUploaderProps extends FileUploaderProps {}
 
 export const FormikFileUploader = forwardRef<
   HTMLDivElement,
-  IFormikFileUploaderProps
+  FormikFileUploaderProps
 >(function FormikFileUploader(
   {
     name,

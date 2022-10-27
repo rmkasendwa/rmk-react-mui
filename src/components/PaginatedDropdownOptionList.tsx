@@ -19,14 +19,14 @@ import {
 
 import DropdownOption, {
   DEFAULT_DROPDOWN_OPTION_HEIGHT,
-  TDropdownOptionVariant,
+  DropdownOptionVariant,
 } from './DropdownOption';
 import ReloadIconButton from './ReloadIconButton';
 
-export type TDropdownOptionValue = string | number;
+export type DropdownOptionValue = string | number;
 
-export interface IDropdownOption extends Pick<MenuItemProps, 'onClick'> {
-  value: TDropdownOptionValue;
+export interface DropdownOption extends Pick<MenuItemProps, 'onClick'> {
+  value: DropdownOptionValue;
   label: ReactNode;
   description?: ReactNode;
   fieldValueLabel?: string;
@@ -36,10 +36,10 @@ export interface IDropdownOption extends Pick<MenuItemProps, 'onClick'> {
   isDropdownOptionWrapped?: boolean;
 }
 
-export interface IPaginatedDropdownOptionListProps {
-  options: IDropdownOption[];
-  selectedOptions?: IDropdownOption[];
-  setSelectedOptions?: Dispatch<SetStateAction<IDropdownOption[]>>;
+export interface PaginatedDropdownOptionListProps {
+  options: DropdownOption[];
+  selectedOptions?: DropdownOption[];
+  setSelectedOptions?: Dispatch<SetStateAction<DropdownOption[]>>;
   minWidth?: number;
   maxHeight?: number;
   optionHeight?: number;
@@ -48,17 +48,17 @@ export interface IPaginatedDropdownOptionListProps {
   loading?: boolean;
   onClose?: () => void;
   loadOptions?: () => void;
-  onSelectOption?: (selectedOption: IDropdownOption) => void;
-  onChangeSelectedOption?: (selectedOptions: IDropdownOption[]) => void;
+  onSelectOption?: (selectedOption: DropdownOption) => void;
+  onChangeSelectedOption?: (selectedOptions: DropdownOption[]) => void;
   CardProps?: CardProps;
-  optionVariant?: TDropdownOptionVariant;
+  optionVariant?: DropdownOptionVariant;
 }
 
 const DEFAULT_DROPDOWN_MENU_MAX_HEIGHT = 200;
 
 export const PaginatedDropdownOptionList = forwardRef<
   HTMLDivElement,
-  IPaginatedDropdownOptionListProps
+  PaginatedDropdownOptionListProps
 >(function PaginatedDropdownOptionList(
   {
     selectedOptions: selectedOptionsProp,
@@ -98,7 +98,7 @@ export const PaginatedDropdownOptionList = forwardRef<
     useState<HTMLDivElement | null>(null);
   const [limit, setLimit] = useState(0);
   const [offset, setOffset] = useState(0);
-  const [selectedOptions, setSelectedOptions] = useState<IDropdownOption[]>(
+  const [selectedOptions, setSelectedOptions] = useState<DropdownOption[]>(
     selectedOptionsProp || []
   );
   const [focusedOptionIndex, setFocusedOptionIndex] = useState<number | null>(
@@ -108,7 +108,7 @@ export const PaginatedDropdownOptionList = forwardRef<
     useState(false);
 
   const triggerChangeEvent = useCallback(
-    (option: IDropdownOption) => {
+    (option: DropdownOption) => {
       const { value } = option;
       const nextOptions = (() => {
         if (multiple) {

@@ -5,9 +5,9 @@ import Stack from '@mui/material/Stack';
 import { forwardRef, useCallback, useEffect, useRef, useState } from 'react';
 
 import { addThousandCommas } from '../../utils/numbers';
-import TextField, { ITextFieldProps } from './TextField';
+import TextField, { TextFieldProps } from './TextField';
 
-export interface INumberInputFieldProps extends Omit<ITextFieldProps, 'value'> {
+export interface NumberInputFieldProps extends Omit<TextFieldProps, 'value'> {
   value?: number;
   step?: number;
   decimalPlaces?: number;
@@ -45,7 +45,7 @@ const getScaleFactor = (event: any) => {
 
 export const NumberInputField = forwardRef<
   HTMLDivElement,
-  INumberInputFieldProps
+  NumberInputFieldProps
 >(function NumberInputField(
   {
     step = 1,

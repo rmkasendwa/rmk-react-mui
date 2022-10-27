@@ -3,15 +3,15 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import IconButton from '@mui/material/IconButton';
 import { FC, useCallback, useEffect, useRef, useState } from 'react';
 
-import TextField, { ITextFieldProps } from './TextField';
+import TextField, { TextFieldProps } from './TextField';
 
-export interface IPasswordFieldProps extends ITextFieldProps {
+export interface PasswordFieldProps extends TextFieldProps {
   value?: string;
   showPassword?: boolean;
   onChangeShowPassword?: (showPassword: boolean) => void;
 }
 
-export const PasswordField: FC<IPasswordFieldProps> = ({
+export const PasswordField: FC<PasswordFieldProps> = ({
   showPassword: showPasswordProp = false,
   name,
   id,

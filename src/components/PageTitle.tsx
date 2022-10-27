@@ -2,13 +2,11 @@ import useTheme from '@mui/material/styles/useTheme';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { FC } from 'react';
 
-import SearchSyncToolbar, {
-  ISearchSyncToolbarProps,
-} from './SearchSyncToolbar';
+import SearchSyncToolbar, { SearchSyncToolbarProps } from './SearchSyncToolbar';
 
-export interface IPageTitleProps extends ISearchSyncToolbarProps {}
+export interface PageTitleProps extends SearchSyncToolbarProps {}
 
-export const PageTitle: FC<IPageTitleProps> = ({
+export const PageTitle: FC<PageTitleProps> = ({
   tools,
   title,
   TitleProps = {},

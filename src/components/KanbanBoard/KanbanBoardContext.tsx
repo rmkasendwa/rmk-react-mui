@@ -10,107 +10,107 @@ import {
   useState,
 } from 'react';
 
-import { ILaneProps } from './Lane';
+import { LaneProps } from './Lane';
 
-export type TKanbanBoardId = string | number;
+export type KanbanBoardId = string | number;
 
-export interface IKanbanBoardTool {
+export interface KanbanBoardTool {
   icon?: ReactNode;
   label: string;
 }
 
-export interface IKanbanBoardLaneTool extends IKanbanBoardTool {
-  onClick?: (laneId: TKanbanBoardId) => void;
+export interface KanbanBoardLaneTool extends KanbanBoardTool {
+  onClick?: (laneId: KanbanBoardId) => void;
 }
 
-export type TKanbanBoardLaneToolItem = IKanbanBoardLaneTool | 'DIVIDER';
+export type KanbanBoardLaneToolItem = KanbanBoardLaneTool | 'DIVIDER';
 
-export interface IKanbanBoardCardTool extends IKanbanBoardTool {
-  onClick?: (laneId: TKanbanBoardId, cardId: TKanbanBoardId) => void;
+export interface KanbanBoardCardTool extends KanbanBoardTool {
+  onClick?: (laneId: KanbanBoardId, cardId: KanbanBoardId) => void;
 }
 
-export type TKanbanBoardCardToolItem = IKanbanBoardCardTool | 'DIVIDER';
+export type KanbanBoardCardToolItem = KanbanBoardCardTool | 'DIVIDER';
 
-export interface ICardIdentifier {
-  id: TKanbanBoardId;
-  laneId: TKanbanBoardId;
+export interface CardIdentifier {
+  id: KanbanBoardId;
+  laneId: KanbanBoardId;
 }
 
-export interface ICard extends ICardIdentifier, Omit<BoxProps, 'title' | 'id'> {
+export interface Card extends CardIdentifier, Omit<BoxProps, 'title' | 'id'> {
   title: ReactNode;
   description: ReactNode;
   draggable?: boolean;
-  tools?: TKanbanBoardCardToolItem[];
+  tools?: KanbanBoardCardToolItem[];
 }
 
-export interface ILane extends Omit<BoxProps, 'title' | 'id'> {
-  id: TKanbanBoardId;
+export interface Lane extends Omit<BoxProps, 'title' | 'id'> {
+  id: KanbanBoardId;
   title: ReactNode;
-  cards: ICard[];
+  cards: Card[];
   showCardCount?: boolean;
   loading?: boolean;
   errorMessage?: string;
   footer?: ReactNode;
   draggable?: boolean;
-  tools?: TKanbanBoardLaneToolItem[];
+  tools?: KanbanBoardLaneToolItem[];
 }
 
-export interface IDropResult {
+export interface DropResult {
   addedIndex?: number | null;
   removedIndex?: number | null;
   payload?: any;
 }
 
-export type TCardClickHandler = (
-  cardId: TKanbanBoardId,
-  laneId: TKanbanBoardId
+export type CardClickHandler = (
+  cardId: KanbanBoardId,
+  laneId: KanbanBoardId
 ) => void;
 
-export type TCardMoveAcrossLanesHandler = (
-  fromLaneId: TKanbanBoardId,
-  toLaneId: TKanbanBoardId,
-  cardId: TKanbanBoardId
+export type CardMoveAcrossLanesHandler = (
+  fromLaneId: KanbanBoardId,
+  toLaneId: KanbanBoardId,
+  cardId: KanbanBoardId
 ) => void;
 
-export interface IKanbanBoardContext {
-  lanes: ILaneProps[];
-  onCardDrop?: (laneId: TKanbanBoardId | null, dropResult: IDropResult) => void;
-  onLaneDrop?: (dropResult: IDropResult) => void;
-  toLaneId?: TKanbanBoardId | null;
-  fromLaneId?: TKanbanBoardId | null;
-  setFromLaneId?: Dispatch<SetStateAction<TKanbanBoardId | null>>;
-  setToLaneId?: Dispatch<SetStateAction<TKanbanBoardId | null>>;
-  onCardClick?: TCardClickHandler;
-  onCardMoveAcrossLanes?: TCardMoveAcrossLanesHandler;
+export interface KanbanBoardContext {
+  lanes: LaneProps[];
+  onCardDrop?: (laneId: KanbanBoardId | null, dropResult: DropResult) => void;
+  onLaneDrop?: (dropResult: DropResult) => void;
+  toLaneId?: KanbanBoardId | null;
+  fromLaneId?: KanbanBoardId | null;
+  setFromLaneId?: Dispatch<SetStateAction<KanbanBoardId | null>>;
+  setToLaneId?: Dispatch<SetStateAction<KanbanBoardId | null>>;
+  onCardClick?: CardClickHandler;
+  onCardMoveAcrossLanes?: CardMoveAcrossLanesHandler;
   dragging?: boolean;
   setDragging?: Dispatch<SetStateAction<boolean>>;
 }
-export const KanbanBoardContext = createContext<IKanbanBoardContext>({
+export const KanbanBoardContext = createContext<KanbanBoardContext>({
   lanes: [],
 });
 
-export interface IKanbanBoardProviderProps {
-  lanes: ILane[];
-  onCardClick?: TCardClickHandler;
-  onCardMoveAcrossLanes?: TCardMoveAcrossLanesHandler;
+export interface KanbanBoardProviderProps {
+  lanes: Lane[];
+  onCardClick?: CardClickHandler;
+  onCardMoveAcrossLanes?: CardMoveAcrossLanesHandler;
   children: ReactNode;
 }
 
-export const KanbanBoardProvider: FC<IKanbanBoardProviderProps> = ({
+export const KanbanBoardProvider: FC<KanbanBoardProviderProps> = ({
   children,
   lanes: propLanes,
   onCardClick,
   onCardMoveAcrossLanes,
 }) => {
-  const [fromLaneId, setFromLaneId] = useState<TKanbanBoardId | null>(null);
-  const [toLaneId, setToLaneId] = useState<TKanbanBoardId | null>(null);
-  const [lanes, setLanes] = useState<ILane[]>([]);
+  const [fromLaneId, setFromLaneId] = useState<KanbanBoardId | null>(null);
+  const [toLaneId, setToLaneId] = useState<KanbanBoardId | null>(null);
+  const [lanes, setLanes] = useState<Lane[]>([]);
   const [dragging, setDragging] = useState(false);
 
   const onCardDrop = useCallback(
     (
       laneId: string | number | null,
-      { addedIndex, removedIndex, payload }: IDropResult
+      { addedIndex, removedIndex, payload }: DropResult
     ) => {
       if (laneId != null && (removedIndex != null || addedIndex != null)) {
         const lane = lanes.find((lane) => lane.id === laneId);
@@ -132,7 +132,7 @@ export const KanbanBoardProvider: FC<IKanbanBoardProviderProps> = ({
   );
 
   const onLaneDrop = useCallback(
-    ({ addedIndex, removedIndex, payload }: IDropResult) => {
+    ({ addedIndex, removedIndex, payload }: DropResult) => {
       if (removedIndex != null || addedIndex != null) {
         if (removedIndex != null) {
           payload = lanes.splice(removedIndex, 1)[0];

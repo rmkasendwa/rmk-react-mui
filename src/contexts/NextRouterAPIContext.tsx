@@ -5,8 +5,8 @@ import { SESSION_LOGIN_PAGE_ROUTE_PATH } from '../route-paths';
 import { APIProvider, IAPIContext } from './APIContext';
 import { useBrowser } from './BrowserContext';
 
-export interface INextRouterAPIContext extends IAPIContext {}
-export const NextRouterAPIContext = createContext<INextRouterAPIContext>(
+export interface NextRouterAPIContext extends IAPIContext {}
+export const NextRouterAPIContext = createContext<NextRouterAPIContext>(
   {} as any
 );
 

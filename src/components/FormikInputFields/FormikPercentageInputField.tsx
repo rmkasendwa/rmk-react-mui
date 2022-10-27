@@ -2,15 +2,15 @@ import { forwardRef } from 'react';
 
 import { useAggregatedFormikContext } from '../../hooks/Formik';
 import PercentageInputField, {
-  IPercentageInputFieldProps,
+  PercentageInputFieldProps,
 } from '../InputFields/PercentageInputField';
 
-export interface IFormikPercentageInputFieldProps
-  extends IPercentageInputFieldProps {}
+export interface FormikPercentageInputFieldProps
+  extends PercentageInputFieldProps {}
 
 export const FormikPercentageInputField = forwardRef<
   HTMLDivElement,
-  IFormikPercentageInputFieldProps
+  FormikPercentageInputFieldProps
 >(function FormikPercentageInputField(
   {
     name,

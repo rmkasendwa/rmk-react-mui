@@ -3,7 +3,7 @@ import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { FC, useCallback, useState } from 'react';
 
 import PasswordField, {
-  IPasswordFieldProps,
+  PasswordFieldProps,
 } from '../../components/InputFields/PasswordField';
 
 export default {
@@ -14,7 +14,7 @@ export default {
   },
 } as ComponentMeta<typeof PasswordField>;
 
-const DoublePasswordField: FC<IPasswordFieldProps> = (props) => {
+const DoublePasswordField: FC<PasswordFieldProps> = (props) => {
   const [showPassword, setShowPassword] = useState(false);
   const onChangeShowPassword = useCallback(
     (showPassword: boolean) => setShowPassword(showPassword),
@@ -46,7 +46,7 @@ const DoublePasswordField: FC<IPasswordFieldProps> = (props) => {
 const Template: ComponentStory<typeof PasswordField> = ({
   story,
   ...props
-}: IPasswordFieldProps & { story?: string }) => {
+}: PasswordFieldProps & { story?: string }) => {
   if (story === 'VISIBILITY_TOGGLE') {
     return <DoublePasswordField {...props} />;
   }

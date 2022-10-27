@@ -8,15 +8,12 @@ import Card from './Card';
 import ErrorSkeleton from './ErrorSkeleton';
 import FieldLabel from './FieldLabel/FieldLabel';
 
-export interface ISingleFieldCardProps {
+export interface SingleFieldCardProps {
   label: string;
   value: string | number;
 }
 
-export const SingleFieldCard: FC<ISingleFieldCardProps> = ({
-  label,
-  value,
-}) => {
+export const SingleFieldCard: FC<SingleFieldCardProps> = ({ label, value }) => {
   const theme = useTheme();
   const { loading, errorMessage } = useLoadingContext();
 
