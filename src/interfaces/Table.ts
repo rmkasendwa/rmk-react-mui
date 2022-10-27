@@ -51,6 +51,7 @@ export interface ITableColumn<T = any>
   ) => ReactNode;
   getColumnValue?: (row: T, column: ITableColumn) => ReactNode;
   onClickColumn?: (currentEntity: T) => void;
+  headerSx?: SxProps<Theme>;
   bodySx?: SxProps<Theme>;
   sortable?: boolean;
 }
