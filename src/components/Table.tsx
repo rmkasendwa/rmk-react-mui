@@ -74,6 +74,7 @@ export interface ITableProps<T = any>
   lowercaseLabelPlural?: string;
   variant?: TTableVariant;
   onChangePage?: (pageIndex: number) => void;
+  onRowsPerPageChange?: (rowsPerPage: number) => void;
   forEachRowProps?: TGetRowProps;
   paging?: boolean;
   showHeaderRow?: boolean;
@@ -100,6 +101,7 @@ const BaseTable = <T extends IBaseTableRow>(
     rowsPerPage: rowsPerPageProp = 10,
     pageIndex: pageIndexProp = 0,
     onChangePage,
+    onRowsPerPageChange,
     forEachDerivedColumn,
     forEachRowProps,
     generateRowData,
@@ -512,6 +514,7 @@ const BaseTable = <T extends IBaseTableRow>(
               rowsPerPage={rowsPerPage}
               onRowsPerPageChange={(event) => {
                 setRowsPerPage(+event.target.value);
+                onRowsPerPageChange && onRowsPerPageChange(+event.target.value);
               }}
               page={pageIndex}
               onPageChange={handleChangePage}
