@@ -261,6 +261,7 @@ export interface IUsePaginatedRecordsOptions extends IPaginatedRequestParams {
   key?: string;
   loadOnMount?: boolean;
   autoSync?: boolean;
+  revalidationKey?: string;
 }
 export const usePaginatedRecords = <T>(
   recordFinder: TAPIFunction<IPaginatedResponseData<T>>,
@@ -270,6 +271,7 @@ export const usePaginatedRecords = <T>(
     limit: limitProp = 100,
     offset: offsetProp = 0,
     showRecords: showRecordsProp = true,
+    revalidationKey,
   }: IUsePaginatedRecordsOptions = {}
 ) => {
   const recordFinderRef = useRef(recordFinder);
@@ -312,6 +314,7 @@ export const usePaginatedRecords = <T>(
 
   const load = useCallback(
     (params?: IPaginatedRequestParams) => {
+      revalidationKey; // Triggering reload whenever extra parameters change
       params = { ...params };
       params.offset || (params.offset = defaultPaginationParams.offset);
       params.limit || (params.limit = defaultPaginationParams.limit);
@@ -328,6 +331,7 @@ export const usePaginatedRecords = <T>(
       defaultPaginationParams.limit,
       defaultPaginationParams.offset,
       loadFromAPIService,
+      revalidationKey,
     ]
   );
 
