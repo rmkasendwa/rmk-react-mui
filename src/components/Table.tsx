@@ -303,6 +303,7 @@ const BaseTable = <T extends IBaseTableRow>(
                 style,
                 minWidth,
                 sortable = false,
+                headerSx,
                 sx,
               } = column;
               let label = column.label;
@@ -327,6 +328,7 @@ const BaseTable = <T extends IBaseTableRow>(
                     bgcolor: 'transparent',
                     ...style,
                     ...sx,
+                    ...(headerSx as any),
                   }}
                 >
                   <Box
