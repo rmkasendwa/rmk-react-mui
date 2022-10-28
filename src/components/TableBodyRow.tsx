@@ -1,3 +1,4 @@
+import { useTheme } from '@mui/material';
 import Box from '@mui/material/Box';
 import TableCell from '@mui/material/TableCell';
 import TableRow, {
@@ -11,6 +12,9 @@ import { BaseTableRow, TableRowProps } from '../interfaces/Table';
 import { formatDate } from '../utils/dates';
 import { addThousandCommas } from '../utils/numbers';
 import { getColumnPaddingStyles, getColumnWidthStyles } from '../utils/Table';
+import EllipsisMenuIconButton, {
+  EllipsisMenuIconButtonProps,
+} from './EllipsisMenuIconButton';
 
 const allowedDataTypes = ['number', 'string', 'boolean'];
 
@@ -59,6 +63,8 @@ export const TableBodyRow = <T extends BaseTableRow>({
     generateRowDataRef.current = generateRowData;
   }, [columns, forEachDerivedColumn, generateRowData, getRowProps]);
 
+  const { palette } = useTheme();
+
   const formattedRow: any & {
     currentEntity: T;
     rowProps: any;
@@ -76,6 +82,20 @@ export const TableBodyRow = <T extends BaseTableRow>({
           } = column;
           let columnValue = (() => {
             if (getColumnValue) {
+              if (type === 'ellipsisMenuTool') {
+                const { options, ...rest } =
+                  (getColumnValue(
+                    row,
+                    column
+                  ) as EllipsisMenuIconButtonProps) || {};
+                if (options && options.length > 0) {
+                  return (
+                    <Box onClick={(event) => event.stopPropagation()}>
+                      <EllipsisMenuIconButton options={options} {...rest} />
+                    </Box>
+                  );
+                }
+              }
               return getColumnValue(row, column);
             }
             if (isDerivedColumn && forEachDerivedColumnRef.current) {
@@ -218,12 +238,14 @@ export const TableBodyRow = <T extends BaseTableRow>({
           onClickColumn,
           bodySx,
           minWidth,
+          type,
+          className,
         } = column;
         const columnValue = formattedRow[column.id];
         return (
           <TableCell
             key={String(id)}
-            {...{ style }}
+            {...{ style, className }}
             onClick={(event) => {
               onClickColumn && onClickColumn(formattedRow.currentEntity);
               onClick && onClick(event);
@@ -251,6 +273,13 @@ export const TableBodyRow = <T extends BaseTableRow>({
                 ...column,
                 minWidth: minWidth ?? minColumnWidth,
               }),
+              ...(() => {
+                if (type === 'ellipsisMenuTool') {
+                  return {
+                    bgcolor: palette.background.paper,
+                  };
+                }
+              })(),
               ...sx,
               ...(bodySx as any),
             }}

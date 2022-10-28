@@ -13,7 +13,7 @@ import TableRow, {
   tableRowClasses,
 } from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
-import { alpha } from '@mui/system/colorManipulator';
+import { alpha, darken, lighten } from '@mui/system/colorManipulator';
 import { SxProps } from '@mui/system/styleFunctionSx';
 import clsx from 'clsx';
 import {
@@ -31,7 +31,7 @@ import { GlobalConfigurationContext } from '../contexts/GlobalConfigurationConte
 import {
   BaseTableRow,
   GetRowProps,
-  TableColumn,
+  TableColumnType,
   TableRowProps,
 } from '../interfaces/Table';
 import { getColumnWidthStyles, getTableMinWidth } from '../utils/Table';
@@ -87,6 +87,7 @@ export interface TableProps<T = any>
   stickyHeader?: boolean;
   TableBodyRowPlaceholderProps?: Partial<RenderIfVisibleProps>;
   PaginatedTableWrapperProps?: Partial<BoxProps>;
+  parentBackgroundColor?: string;
 }
 
 const BaseTable = <T extends BaseTableRow>(
@@ -123,6 +124,7 @@ const BaseTable = <T extends BaseTableRow>(
     columnTypographyProps,
     minColumnWidth,
     className,
+    parentBackgroundColor,
     sx,
     ...rest
   }: TableProps<T>,
@@ -150,12 +152,18 @@ const BaseTable = <T extends BaseTableRow>(
   const { currencyCode: defaultCurrencyCode } = useContext(
     GlobalConfigurationContext
   );
+
   currencyCode || (currencyCode = defaultCurrencyCode);
 
   // Setting default column properties
   const columns = useMemo(() => {
-    return columnsProp.map((column): TableColumn => {
-      const nextColumn = { ...column };
+    return columnsProp.map((column) => {
+      const nextColumn = { ...column } as typeof column;
+      nextColumn.type || (nextColumn.type = 'string');
+      nextColumn.className = clsx(
+        `MuiTableCell-${nextColumn.type}`,
+        nextColumn.className
+      );
       switch (nextColumn.type) {
         case 'date':
         case 'time':
@@ -205,6 +213,17 @@ const BaseTable = <T extends BaseTableRow>(
           nextColumn.locked = true;
           nextColumn.align = 'center';
           break;
+        case 'ellipsisMenuTool':
+          nextColumn.width || (nextColumn.width = 40);
+          nextColumn.defaultColumnValue ||
+            (nextColumn.defaultColumnValue = <>&nbsp;</>);
+          nextColumn.sx = {
+            position: 'sticky',
+            p: 0,
+            right: 0,
+            ...nextColumn.sx,
+          };
+          break;
       }
       return nextColumn;
     });
@@ -245,6 +264,10 @@ const BaseTable = <T extends BaseTableRow>(
     },
   };
 
+  const ellipsisMenuToolColumnClassName = `MuiTableCell-${
+    'ellipsisMenuTool' as TableColumnType
+  }`;
+
   switch (variant) {
     case 'plain':
       break;
@@ -260,14 +283,37 @@ const BaseTable = <T extends BaseTableRow>(
         `]: {
           bgcolor: alpha(palette.text.primary, 0.02),
         },
+        [`tr.${tableRowClasses.root}.odd `]: {
+          [`
+            th.${tableCellClasses.root}:nth-of-type(odd).${ellipsisMenuToolColumnClassName}>div,
+            td.${tableCellClasses.root}:nth-of-type(odd).${ellipsisMenuToolColumnClassName},
+          `]: {
+            bgcolor: (palette.mode === 'light' ? darken : lighten)(
+              parentBackgroundColor || palette.background.paper,
+              0.04
+            ),
+          },
+        },
       });
       break;
     case 'stripped-rows':
       Object.assign(variantStyles, {
-        [`.${tableBodyClasses.root} tr.${tableRowClasses.root}.odd:not(:hover)`]:
-          {
-            bgcolor: alpha(palette.text.primary, 0.02),
-          },
+        [`tr.${tableRowClasses.root}.odd:not(:hover)`]: {
+          bgcolor: alpha(palette.text.primary, 0.02),
+        },
+        [`
+          tr.${tableRowClasses.root}.odd:not(:hover) td.${ellipsisMenuToolColumnClassName}
+        `]: {
+          bgcolor: (palette.mode === 'light' ? darken : lighten)(
+            parentBackgroundColor || palette.background.paper,
+            0.02
+          ),
+        },
+        [`
+          tr.${tableRowClasses.root}.even:not(:hover) td.${ellipsisMenuToolColumnClassName}
+        `]: {
+          bgcolor: parentBackgroundColor || palette.background.paper,
+        },
       });
       break;
     case 'stripped-columns':
@@ -277,6 +323,15 @@ const BaseTable = <T extends BaseTableRow>(
           td.${tableCellClasses.root}:nth-of-type(odd)
         `]: {
           bgcolor: alpha(palette.text.primary, 0.02),
+        },
+        [`
+          th.${tableCellClasses.root}:nth-of-type(odd).${ellipsisMenuToolColumnClassName}>div,
+          td.${tableCellClasses.root}:nth-of-type(odd).${ellipsisMenuToolColumnClassName},
+        `]: {
+          bgcolor: (palette.mode === 'light' ? darken : lighten)(
+            parentBackgroundColor || palette.background.paper,
+            0.02
+          ),
         },
       });
       break;

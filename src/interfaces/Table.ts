@@ -7,6 +7,7 @@ import {
 import { TableCellProps } from '@mui/material/TableCell';
 import { ReactNode } from 'react';
 
+import { EllipsisMenuIconButtonProps } from '../components/EllipsisMenuIconButton';
 import { PrimitiveDataType } from './Utils';
 
 export type TableColumnEnumValue =
@@ -16,28 +17,43 @@ export type TableColumnEnumValue =
     }
   | string;
 
-export interface TableColumn<T = any>
-  extends Partial<Omit<TableCellProps, 'defaultValue' | 'id'>> {
-  id: keyof T;
+export type TableColumnType =
+  | PrimitiveDataType
+  | 'checkbox'
+  | 'currency'
+  | 'currencyInput'
+  | 'dateInput'
+  | 'dateTime'
+  | 'dropdownInput'
+  | 'id'
+  | 'input'
+  | 'numberInput'
+  | 'percentage'
+  | 'percentageInput'
+  | 'phoneNumber'
+  | 'phonenumberInput'
+  | 'rowAdder'
+  | 'time'
+  | 'tool'
+  | 'ellipsisMenuTool';
+
+export type GetColumnValue<
+  RowObject = any,
+  ColumnType extends TableColumnType = TableColumnType
+> = (
+  row: RowObject,
+  column: TableColumn<RowObject, ColumnType>
+) => ColumnType extends 'ellipsisMenuTool'
+  ? EllipsisMenuIconButtonProps
+  : ReactNode;
+
+export interface TableColumn<
+  RowObject = any,
+  ColumnType extends TableColumnType = TableColumnType
+> extends Partial<Omit<TableCellProps, 'defaultValue' | 'id'>> {
+  id: keyof RowObject;
   label?: ReactNode;
-  type?:
-    | PrimitiveDataType
-    | 'checkbox'
-    | 'currency'
-    | 'currencyInput'
-    | 'dateInput'
-    | 'dateTime'
-    | 'dropdownInput'
-    | 'id'
-    | 'input'
-    | 'numberInput'
-    | 'percentage'
-    | 'percentageInput'
-    | 'phoneNumber'
-    | 'phonenumberInput'
-    | 'rowAdder'
-    | 'time'
-    | 'tool';
+  type?: ColumnType;
   align?: 'left' | 'center' | 'right';
   width?: number;
   minWidth?: number;
@@ -51,11 +67,11 @@ export interface TableColumn<T = any>
   defaultColumnValue?: ReactNode;
   postProcessor?: (
     columnValue: ReactNode,
-    row: T,
-    column: TableColumn
+    row: RowObject,
+    column: TableColumn<RowObject, ColumnType>
   ) => ReactNode;
-  getColumnValue?: (row: T, column: TableColumn) => ReactNode;
-  onClickColumn?: (currentEntity: T) => void;
+  getColumnValue?: GetColumnValue<RowObject, ColumnType>;
+  onClickColumn?: (currentEntity: RowObject) => void;
   headerSx?: SxProps<Theme>;
   bodySx?: SxProps<Theme>;
   sortable?: boolean;

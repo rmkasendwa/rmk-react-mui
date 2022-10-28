@@ -11,10 +11,10 @@ import { FC, useContext } from 'react';
 import { Container, Draggable } from 'react-smooth-dnd';
 
 import Card from './Card';
-import { KanbanBoardContext, Lane } from './KanbanBoardContext';
+import { KanbanBoardContext, Lane as LaneType } from './KanbanBoardContext';
 import LaneTools from './LaneTools';
 
-export interface LaneProps extends Lane {}
+export interface LaneProps extends LaneType {}
 
 const Lane: FC<LaneProps> = ({
   id,

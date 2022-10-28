@@ -1,4 +1,5 @@
 import { AxiosRequestConfig } from 'axios';
+import { ReactNode } from 'react';
 
 export interface PaginatedRequestParams {
   limit?: number;
@@ -92,3 +93,20 @@ export type PrimitiveDataType =
   | 'boolean'
   | 'date'
   | 'enum';
+
+export type DropdownOptionValue = string | number;
+
+export interface DropdownOption {
+  value: DropdownOptionValue;
+  label: ReactNode;
+  description?: ReactNode;
+  fieldValueLabel?: string;
+  searchableLabel?: string;
+  selectable?: boolean;
+  isDropdownOption?: boolean;
+  isDropdownOptionWrapped?: boolean;
+}
+
+export interface EllipsisMenuToolProps {
+  options: DropdownOption[];
+}
