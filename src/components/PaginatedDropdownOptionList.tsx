@@ -7,7 +7,6 @@ import Typography from '@mui/material/Typography';
 import {
   Dispatch,
   Fragment,
-  ReactNode,
   SetStateAction,
   forwardRef,
   useCallback,
@@ -17,24 +16,16 @@ import {
   useState,
 } from 'react';
 
+import { DropdownOption as BaseDropdownOption } from '../interfaces/Utils';
 import DropdownOption, {
   DEFAULT_DROPDOWN_OPTION_HEIGHT,
   DropdownOptionVariant,
 } from './DropdownOption';
 import ReloadIconButton from './ReloadIconButton';
 
-export type DropdownOptionValue = string | number;
-
-export interface DropdownOption extends Pick<MenuItemProps, 'onClick'> {
-  value: DropdownOptionValue;
-  label: ReactNode;
-  description?: ReactNode;
-  fieldValueLabel?: string;
-  searchableLabel?: string;
-  selectable?: boolean;
-  isDropdownOption?: boolean;
-  isDropdownOptionWrapped?: boolean;
-}
+export interface DropdownOption
+  extends Pick<MenuItemProps, 'onClick'>,
+    BaseDropdownOption {}
 
 export interface PaginatedDropdownOptionListProps {
   options: DropdownOption[];
