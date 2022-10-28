@@ -376,6 +376,7 @@ const BaseTable = <T extends BaseTableRow>(
                 minWidth,
                 sortable = false,
                 headerSx,
+                className,
                 sx,
               } = column;
               let label = column.label;
