@@ -282,16 +282,14 @@ const BaseTable = <T extends BaseTableRow>(
           bgcolor: alpha(palette.text.primary, 0.02),
         },
         [`tr.${tableRowClasses.root}`]: {
-          [`&.even`]: {
-            [`
-              th.${tableCellClasses.root}:nth-of-type(odd).${OPAQUE_BG_CLASS_NAME}>div,
-              td.${tableCellClasses.root}:nth-of-type(odd).${OPAQUE_BG_CLASS_NAME}
-            `]: {
-              bgcolor: (palette.mode === 'light' ? darken : lighten)(
-                parentBackgroundColor,
-                0.02
-              ),
-            },
+          [`
+            th.${tableCellClasses.root}:nth-of-type(odd).${OPAQUE_BG_CLASS_NAME}>div,
+            td.${tableCellClasses.root}:nth-of-type(odd).${OPAQUE_BG_CLASS_NAME}
+          `]: {
+            bgcolor: (palette.mode === 'light' ? darken : lighten)(
+              parentBackgroundColor,
+              0.02
+            ),
           },
           [`&.odd`]: {
             [`
@@ -344,6 +342,12 @@ const BaseTable = <T extends BaseTableRow>(
             0.02
           ),
         },
+        [`
+          th.${tableCellClasses.root}:nth-of-type(even).${OPAQUE_BG_CLASS_NAME}>div,
+          td.${tableCellClasses.root}:nth-of-type(even).${OPAQUE_BG_CLASS_NAME}
+        `]: {
+          bgcolor: parentBackgroundColor,
+        },
       });
       break;
   }
@@ -384,7 +388,7 @@ const BaseTable = <T extends BaseTableRow>(
               return (
                 <TableCell
                   key={String(id)}
-                  align={align}
+                  {...{ style, className, align }}
                   sx={{
                     fontWeight: 'bold',
                     p: 0,
