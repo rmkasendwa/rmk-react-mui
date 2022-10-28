@@ -32,6 +32,7 @@ Default.args = {
       id: 'outstandingBalance',
       label: 'Balance',
       type: 'currency',
+      opaque: true,
     },
   ],
   rows: Array.from({ length: 3 }).map((_, index) => ({
