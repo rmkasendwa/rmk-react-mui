@@ -15,6 +15,7 @@ import TableRow, {
 import Typography from '@mui/material/Typography';
 import { alpha } from '@mui/system/colorManipulator';
 import { SxProps } from '@mui/system/styleFunctionSx';
+import clsx from 'clsx';
 import {
   ReactElement,
   Ref,
@@ -121,6 +122,7 @@ const BaseTable = <T extends BaseTableRow>(
     defaultColumnValue,
     columnTypographyProps,
     minColumnWidth,
+    className,
     sx,
     ...rest
   }: TableProps<T>,
@@ -285,7 +287,7 @@ const BaseTable = <T extends BaseTableRow>(
       {...rest}
       ref={ref}
       {...{ stickyHeader }}
-      className={`Mui-table-${variant}`}
+      className={clsx(`Mui-table-${variant}`, className)}
       sx={{
         tableLayout: 'fixed',
         minWidth,
