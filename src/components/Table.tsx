@@ -28,12 +28,7 @@ import {
 } from 'react';
 
 import { GlobalConfigurationContext } from '../contexts/GlobalConfigurationContext';
-import {
-  BaseTableRow,
-  GetRowProps,
-  TableColumnType,
-  TableRowProps,
-} from '../interfaces/Table';
+import { BaseTableRow, GetRowProps, TableRowProps } from '../interfaces/Table';
 import { getColumnWidthStyles, getTableMinWidth } from '../utils/Table';
 import DataTablePagination from './DataTablePagination';
 import RenderIfVisible, { RenderIfVisibleProps } from './RenderIfVisible';
@@ -44,6 +39,8 @@ export type {
   TableColumn,
   TableColumnEnumValue,
 } from '../interfaces/Table';
+
+const OPAQUE_BG_CLASS_NAME = `MuiTableCell-opaque`;
 
 export type TableVariant =
   | 'stripped'
@@ -153,6 +150,7 @@ const BaseTable = <T extends BaseTableRow>(
     GlobalConfigurationContext
   );
 
+  parentBackgroundColor || (parentBackgroundColor = palette.background.paper);
   currencyCode || (currencyCode = defaultCurrencyCode);
 
   // Setting default column properties
@@ -214,7 +212,8 @@ const BaseTable = <T extends BaseTableRow>(
           nextColumn.align = 'center';
           break;
         case 'ellipsisMenuTool':
-          nextColumn.width || (nextColumn.width = 40);
+          nextColumn.width = 40;
+          nextColumn.opaque = true;
           nextColumn.defaultColumnValue ||
             (nextColumn.defaultColumnValue = <>&nbsp;</>);
           nextColumn.sx = {
@@ -225,6 +224,9 @@ const BaseTable = <T extends BaseTableRow>(
           };
           break;
       }
+      nextColumn.className = clsx(
+        nextColumn.opaque ? OPAQUE_BG_CLASS_NAME : null
+      );
       return nextColumn;
     });
   }, [columnsProp, currencyCode]);
@@ -264,10 +266,6 @@ const BaseTable = <T extends BaseTableRow>(
     },
   };
 
-  const ellipsisMenuToolColumnClassName = `MuiTableCell-${
-    'ellipsisMenuTool' as TableColumnType
-  }`;
-
   switch (variant) {
     case 'plain':
       break;
@@ -283,36 +281,49 @@ const BaseTable = <T extends BaseTableRow>(
         `]: {
           bgcolor: alpha(palette.text.primary, 0.02),
         },
-        [`tr.${tableRowClasses.root}.odd `]: {
-          [`
-            th.${tableCellClasses.root}:nth-of-type(odd).${ellipsisMenuToolColumnClassName}>div,
-            td.${tableCellClasses.root}:nth-of-type(odd).${ellipsisMenuToolColumnClassName},
-          `]: {
-            bgcolor: (palette.mode === 'light' ? darken : lighten)(
-              parentBackgroundColor || palette.background.paper,
-              0.04
-            ),
+        [`tr.${tableRowClasses.root}`]: {
+          [`&.even`]: {
+            [`
+              th.${tableCellClasses.root}:nth-of-type(odd).${OPAQUE_BG_CLASS_NAME}>div,
+              td.${tableCellClasses.root}:nth-of-type(odd).${OPAQUE_BG_CLASS_NAME}
+            `]: {
+              bgcolor: (palette.mode === 'light' ? darken : lighten)(
+                parentBackgroundColor,
+                0.02
+              ),
+            },
+          },
+          [`&.odd`]: {
+            [`
+              th.${tableCellClasses.root}:nth-of-type(odd).${OPAQUE_BG_CLASS_NAME}>div,
+              td.${tableCellClasses.root}:nth-of-type(odd).${OPAQUE_BG_CLASS_NAME}
+            `]: {
+              bgcolor: (palette.mode === 'light' ? darken : lighten)(
+                parentBackgroundColor,
+                0.04
+              ),
+            },
           },
         },
       });
       break;
     case 'stripped-rows':
       Object.assign(variantStyles, {
-        [`tr.${tableRowClasses.root}.odd:not(:hover)`]: {
-          bgcolor: alpha(palette.text.primary, 0.02),
-        },
-        [`
-          tr.${tableRowClasses.root}.odd:not(:hover) td.${ellipsisMenuToolColumnClassName}
-        `]: {
-          bgcolor: (palette.mode === 'light' ? darken : lighten)(
-            parentBackgroundColor || palette.background.paper,
-            0.02
-          ),
-        },
-        [`
-          tr.${tableRowClasses.root}.even:not(:hover) td.${ellipsisMenuToolColumnClassName}
-        `]: {
-          bgcolor: parentBackgroundColor || palette.background.paper,
+        [`tr.${tableRowClasses.root}`]: {
+          [`&.odd`]: {
+            bgcolor: alpha(palette.text.primary, 0.02),
+            [`td.${OPAQUE_BG_CLASS_NAME}`]: {
+              bgcolor: (palette.mode === 'light' ? darken : lighten)(
+                parentBackgroundColor,
+                0.02
+              ),
+            },
+          },
+          [`&.even`]: {
+            [`td.${OPAQUE_BG_CLASS_NAME}`]: {
+              bgcolor: parentBackgroundColor,
+            },
+          },
         },
       });
       break;
@@ -325,11 +336,11 @@ const BaseTable = <T extends BaseTableRow>(
           bgcolor: alpha(palette.text.primary, 0.02),
         },
         [`
-          th.${tableCellClasses.root}:nth-of-type(odd).${ellipsisMenuToolColumnClassName}>div,
-          td.${tableCellClasses.root}:nth-of-type(odd).${ellipsisMenuToolColumnClassName},
+          th.${tableCellClasses.root}:nth-of-type(odd).${OPAQUE_BG_CLASS_NAME}>div,
+          td.${tableCellClasses.root}:nth-of-type(odd).${OPAQUE_BG_CLASS_NAME}
         `]: {
           bgcolor: (palette.mode === 'light' ? darken : lighten)(
-            parentBackgroundColor || palette.background.paper,
+            parentBackgroundColor,
             0.02
           ),
         },

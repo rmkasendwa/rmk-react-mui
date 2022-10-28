@@ -75,6 +75,7 @@ export interface TableColumn<
   headerSx?: SxProps<Theme>;
   bodySx?: SxProps<Theme>;
   sortable?: boolean;
+  opaque?: boolean;
 }
 
 export interface ForEachDerivedColumnConfiguration<T> {
@@ -102,4 +103,5 @@ export interface TableRowProps<T = any> {
   defaultColumnValue?: ReactNode;
   columnTypographyProps?: Partial<TypographyProps>;
   minColumnWidth?: number;
+  opaque?: boolean;
 }

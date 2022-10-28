@@ -95,7 +95,7 @@ export const TableBodyRow = <T extends BaseTableRow>({
                     </Box>
                   );
                 }
-                return <>&nbsp;</>;
+                return defaultColumnValue;
               }
               return getColumnValue(row, column);
             }
