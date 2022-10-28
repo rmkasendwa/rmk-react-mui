@@ -1,7 +1,7 @@
 import axios, { AxiosResponse, CancelTokenSource } from 'axios';
 
 import { CANCELLED_API_REQUEST_MESSAGE } from '../../constants';
-import { RequestOptions } from '../../interfaces/Utils';
+import { RequestOptions, ResponseProcessor } from '../../interfaces/Utils';
 import { SessionTimeoutError } from '../../utils/errors';
 import StorageManager from '../../utils/StorageManager';
 import { queueRequest } from './RequestQueue';
@@ -43,19 +43,26 @@ export const patchDefaultRequestHeaders = (headers: Record<string, string>) => {
   StorageManager.add('defaultRequestHeaders', defaultRequestHeaders);
 };
 
-export interface HeaderController {
+export interface RequestController {
   rotateHeaders?: (
     responseHeaders: Record<string, string>,
     requestHeaders: Record<string, string>
   ) => Record<string, string>;
+  processResponse?: ResponseProcessor;
+  processResponseError?: (err: any) => any;
 }
-export const HeaderController: HeaderController = {};
+export const RequestController: RequestController = {};
 
 const pendingRequestCancelTokenSources: CancelTokenSource[] = [];
 
 const fetchData = async <T = any>(
   path: string,
-  { headers = {}, label = 'operation', ...options }: RequestOptions
+  {
+    headers = {},
+    label = 'operation',
+    processResponse,
+    ...options
+  }: RequestOptions
 ): Promise<AxiosResponse<T>> => {
   const defaultHeaders = { ...defaultRequestHeaders };
   const url = APIAdapterConfiguration.getFullResourceURL(path);
@@ -86,21 +93,35 @@ const fetchData = async <T = any>(
             },
             cancelToken: cancelTokenSource.token,
             withCredentials: true,
-          }).catch((err) => {
-            pendingRequestCancelTokenSources.splice(
-              pendingRequestCancelTokenSources.indexOf(cancelTokenSource),
-              1
-            );
-            const cancelPendingRequests = () => {
-              pendingRequestCancelTokenSources.forEach((cancelTokenSource) =>
-                cancelTokenSource.cancel()
+          })
+            .then(async (response) => {
+              const requestControllerResponse = await (() => {
+                if (RequestController.processResponse) {
+                  return RequestController.processResponse(response);
+                }
+                return response;
+              })();
+              if (processResponse) {
+                return processResponse(requestControllerResponse);
+              }
+              return response;
+            })
+            .catch(async (err) => {
+              pendingRequestCancelTokenSources.splice(
+                pendingRequestCancelTokenSources.indexOf(cancelTokenSource),
+                1
               );
-            };
-            const { response, message } = err;
-            if (response?.data) {
-              const errorMessage: string =
-                `Error: '${label}' failed. ` +
-                (() => {
+              const cancelPendingRequests = () => {
+                pendingRequestCancelTokenSources.forEach((cancelTokenSource) =>
+                  cancelTokenSource.cancel()
+                );
+              };
+              if (RequestController.processResponseError) {
+                err = await RequestController.processResponseError(err);
+              }
+              const { response, message } = err;
+              if (response?.data) {
+                const message = (() => {
                   if (typeof response.data.message === 'string')
                     return response.data.message;
                   if (Array.isArray(response.data.message)) {
@@ -120,33 +141,38 @@ const fetchData = async <T = any>(
                   }
                   return 'Something went wrong';
                 })();
-              if (['User session timed out'].includes(errorMessage)) {
-                cancelPendingRequests();
-                return reject(new SessionTimeoutError(errorMessage));
+                const errorMessage = `Error: '${label}' failed with message "${message}"`;
+                if (['User session timed out'].includes(errorMessage)) {
+                  cancelPendingRequests();
+                  return reject(new SessionTimeoutError(errorMessage));
+                }
+                return reject(new Error(errorMessage));
               }
-              return reject(new Error(errorMessage));
-            }
-            if (response?.status === 401) {
-              cancelPendingRequests();
-              return reject(new SessionTimeoutError('Session timed out'));
-            }
+              if (response?.status === 401) {
+                cancelPendingRequests();
+                return reject(new SessionTimeoutError('Session timed out'));
+              }
 
-            if (message && !String(message).match(/request\sfailed/gi)) {
-              return reject(new Error(`Error: '${label}' failed. ${message}`));
-            }
-            return reject(
-              new Error(`Error: '${label}' failed. Something went wrong`)
-            );
-          });
+              if (message && !String(message).match(/request\sfailed/gi)) {
+                return reject(
+                  new Error(
+                    `Error: '${label}' failed with message "${message}"`
+                  )
+                );
+              }
+              return reject(
+                new Error(`Error: '${label}' failed. Something went wrong`)
+              );
+            });
           if (response) {
             pendingRequestCancelTokenSources.splice(
               pendingRequestCancelTokenSources.indexOf(cancelTokenSource),
               1
             );
             if (!Array.isArray(response.data.errors)) {
-              if (HeaderController.rotateHeaders) {
+              if (RequestController.rotateHeaders) {
                 patchDefaultRequestHeaders(
-                  HeaderController.rotateHeaders(
+                  RequestController.rotateHeaders(
                     response.headers,
                     defaultHeaders
                   )
