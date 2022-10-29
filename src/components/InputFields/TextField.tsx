@@ -29,8 +29,10 @@ export function getTextFieldUtilityClass(slot: string): string {
   return generateUtilityClass('MuiTextField', slot);
 }
 
-export const fieldValueDisplayClasses: TextFieldClasses =
-  generateUtilityClasses('MuiTextField', ['root']);
+export const textFieldClasses: TextFieldClasses = generateUtilityClasses(
+  'MuiTextField',
+  ['root']
+);
 
 export interface TextFieldProps
   extends Omit<MuiTextFieldProps, 'variant'>,
