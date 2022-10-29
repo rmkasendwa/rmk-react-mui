@@ -1,10 +1,20 @@
-import { useTheme } from '@mui/material';
+import {
+  ComponentsOverrides,
+  ComponentsProps,
+  ComponentsVariants,
+  unstable_composeClasses as composeClasses,
+  generateUtilityClass,
+  generateUtilityClasses,
+  useTheme,
+  useThemeProps,
+} from '@mui/material';
 import Box from '@mui/material/Box';
 import TableCell from '@mui/material/TableCell';
 import TableRow, {
   TableRowProps as MuiTableRowProps,
 } from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
+import clsx from 'clsx';
 import { format } from 'date-fns';
 import { isValidElement, useEffect, useMemo, useRef } from 'react';
 
@@ -32,25 +42,85 @@ const toolTypes = [
   'checkbox',
 ];
 
+export interface TableBodyRowClasses {
+  /** Styles applied to the root element. */
+  root: string;
+}
+
+export type TableBodyRowClassKey = keyof TableBodyRowClasses;
+
+export function getTableBodyRowUtilityClass(slot: string): string {
+  return generateUtilityClass('MuiTableBodyRow', slot);
+}
+
+export const tableBodyRowClasses: TableBodyRowClasses = generateUtilityClasses(
+  'MuiTableBodyRow',
+  ['root']
+);
+
+// Adding theme prop types
+declare module '@mui/material/styles/props' {
+  interface ComponentsPropsList {
+    MuiTableBodyRow: TableBodyRowProps;
+  }
+}
+
+// Adding theme override types
+declare module '@mui/material/styles/overrides' {
+  interface ComponentNameToClassKey {
+    MuiTableBodyRow: keyof TableBodyRowClasses;
+  }
+}
+
+// Adding theme component types
+declare module '@mui/material/styles/components' {
+  interface Components<Theme = unknown> {
+    MuiTableBodyRow?: {
+      defaultProps?: ComponentsProps['MuiTableBodyRow'];
+      styleOverrides?: ComponentsOverrides<Theme>['MuiTableBodyRow'];
+      variants?: ComponentsVariants['MuiTableBodyRow'];
+    };
+  }
+}
+
+const useUtilityClasses = (ownerState: any) => {
+  const { classes } = ownerState;
+
+  const slots = {
+    root: ['root'],
+  };
+
+  return composeClasses(slots, getTableBodyRowUtilityClass, classes);
+};
+
 export interface TableBodyRowProps<T = any>
   extends Partial<Omit<MuiTableRowProps, 'defaultValue'>>,
     TableRowProps<T> {}
 
-export const TableBodyRow = <T extends BaseTableRow>({
-  columns,
-  row,
-  forEachDerivedColumn,
-  getRowProps,
-  generateRowData,
-  decimalPlaces,
-  labelTransform,
-  onClickRow,
-  sx,
-  defaultColumnValue: baseDefaultColumnValue,
-  columnTypographyProps = {},
-  minColumnWidth,
-  ...rest
-}: TableBodyRowProps<T>) => {
+export const TableBodyRow = <T extends BaseTableRow>(
+  inProps: TableBodyRowProps<T>
+) => {
+  const props = useThemeProps({ props: inProps, name: 'MuiTableBodyRow' });
+  const {
+    columns,
+    row,
+    forEachDerivedColumn,
+    getRowProps,
+    generateRowData,
+    decimalPlaces,
+    labelTransform,
+    onClickRow,
+    sx,
+    defaultColumnValue: baseDefaultColumnValue,
+    columnTypographyProps = {},
+    minColumnWidth,
+    ...rest
+  } = props;
+
+  const classes = useUtilityClasses({
+    ...props,
+  });
+
   // Refs
   const columnsRef = useRef(columns);
   const forEachDerivedColumnRef = useRef(forEachDerivedColumn);
@@ -63,7 +133,7 @@ export const TableBodyRow = <T extends BaseTableRow>({
     generateRowDataRef.current = generateRowData;
   }, [columns, forEachDerivedColumn, generateRowData, getRowProps]);
 
-  const { palette } = useTheme();
+  const { palette, components } = useTheme();
 
   const formattedRow: any & {
     currentEntity: T;
@@ -217,6 +287,7 @@ export const TableBodyRow = <T extends BaseTableRow>({
     <TableRow
       {...restRowProps}
       {...rest}
+      className={clsx(classes.root)}
       tabIndex={-1}
       hover
       onClick={() => {
@@ -225,6 +296,7 @@ export const TableBodyRow = <T extends BaseTableRow>({
       sx={{
         verticalAlign: 'top',
         cursor: onClickRow ? 'pointer' : 'inherit',
+        ...(components?.MuiTableBodyRow?.styleOverrides?.root as any),
         ...rowPropsSx,
         ...sx,
       }}

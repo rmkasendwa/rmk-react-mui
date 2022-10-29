@@ -148,8 +148,7 @@ export const FieldValueDisplay: FC<FieldValueDisplayProps> = (inProps) => {
       className={clsx(classes.root)}
       {...rest}
       sx={{
-        ...((components?.MuiFieldValueDisplay?.styleOverrides?.root as any) ||
-          {}),
+        ...(components?.MuiFieldValueDisplay?.styleOverrides?.root as any),
         ...sx,
       }}
     >
