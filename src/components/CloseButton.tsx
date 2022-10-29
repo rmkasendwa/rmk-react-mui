@@ -26,8 +26,10 @@ export function getCloseButtonUtilityClass(slot: string): string {
   return generateUtilityClass('MuiCloseButton', slot);
 }
 
-export const fieldValueDisplayClasses: CloseButtonClasses =
-  generateUtilityClasses('MuiCloseButton', ['root']);
+export const closeButtonClasses: CloseButtonClasses = generateUtilityClasses(
+  'MuiCloseButton',
+  ['root']
+);
 
 // Adding theme prop types
 declare module '@mui/material/styles/props' {
