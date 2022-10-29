@@ -3,6 +3,8 @@ import {
   ComponentsProps,
   ComponentsVariants,
   unstable_composeClasses as composeClasses,
+  generateUtilityClass,
+  generateUtilityClasses,
   useTheme,
   useThemeProps,
 } from '@mui/material';
@@ -10,10 +12,19 @@ import Typography, { TypographyProps } from '@mui/material/Typography';
 import clsx from 'clsx';
 import { FC } from 'react';
 
-import {
-  FieldLabelClasses,
-  getFieldLabelUtilityClass,
-} from './FieldLabelClasses';
+export interface FieldLabelClasses {
+  /** Styles applied to the root element. */
+  root: string;
+}
+
+export type FieldLabelClassKey = keyof FieldLabelClasses;
+
+export function getFieldLabelUtilityClass(slot: string): string {
+  return generateUtilityClass('MuiFieldLabel', slot);
+}
+
+export const fieldValueDisplayClasses: FieldLabelClasses =
+  generateUtilityClasses('MuiFieldLabel', ['root']);
 
 // Adding theme prop types
 declare module '@mui/material/styles/props' {

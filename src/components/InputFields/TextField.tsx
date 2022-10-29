@@ -1,5 +1,10 @@
 import CloseIcon from '@mui/icons-material/Close';
-import { Box, BoxProps } from '@mui/material';
+import {
+  Box,
+  BoxProps,
+  generateUtilityClass,
+  generateUtilityClasses,
+} from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
 import IconButton from '@mui/material/IconButton';
 import Skeleton from '@mui/material/Skeleton';
@@ -9,9 +14,23 @@ import MuiTextField, {
 import Tooltip from '@mui/material/Tooltip';
 import { ReactNode, forwardRef, useCallback, useEffect, useState } from 'react';
 
-import { useLoadingContext } from '../../../contexts/LoadingContext';
-import ErrorSkeleton from '../../ErrorSkeleton';
-import FieldValueDisplay from '../../FieldValueDisplay';
+import { useLoadingContext } from '../../contexts/LoadingContext';
+import ErrorSkeleton from '../ErrorSkeleton';
+import FieldValueDisplay from '../FieldValueDisplay';
+
+export interface TextFieldClasses {
+  /** Styles applied to the root element. */
+  root: string;
+}
+
+export type TextFieldClassKey = keyof TextFieldClasses;
+
+export function getTextFieldUtilityClass(slot: string): string {
+  return generateUtilityClass('MuiTextField', slot);
+}
+
+export const fieldValueDisplayClasses: TextFieldClasses =
+  generateUtilityClasses('MuiTextField', ['root']);
 
 export interface TextFieldProps
   extends Omit<MuiTextFieldProps, 'variant'>,
