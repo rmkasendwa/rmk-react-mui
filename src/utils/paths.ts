@@ -1,12 +1,27 @@
+export type PathParam = string | number | boolean;
+
+/**
+ * Returns an interpolated path with placeholder parameters replaced with actual parameters.
+ *
+ * @param templatePath The path template to interpolate.
+ * @param params The parameters to interpolate.
+ *
+ * @returns Interpolated path.
+ *
+ * @throws Error if params can't fully interpolate the template path.
+ *
+ * @example
+ * getInterpolatedPath("/users/:userId", { userId: 123 }); -> "/users/123"
+ */
 export const getInterpolatedPath = (
-  routePath: string,
-  params: Record<string, string | number | boolean>
+  templatePath: string,
+  params: Record<string, PathParam>
 ): string => {
   const regex = /:(\w+)/g;
   const extractedParameters = [];
   let match;
   do {
-    match = regex.exec(routePath);
+    match = regex.exec(templatePath);
     match && extractedParameters.push(match[1]);
   } while (match);
   extractedParameters
@@ -15,20 +30,36 @@ export const getInterpolatedPath = (
       if (!params[key]) {
         throw new Error(`Param ${key} not found`);
       }
-      routePath = routePath.replace(`:${key}`, encodeURIComponent(params[key]));
+      templatePath = templatePath.replace(
+        `:${key}`,
+        encodeURIComponent(params[key])
+      );
     });
-  return routePath;
+  return templatePath;
 };
 
+/**
+ * Determines if params are sufficient to interpolate a template path.
+ *
+ * @param templatePath The template path.
+ * @param params Interpolation parameters.
+ *
+ * @returns whether the params are sufficient to interpolate the path or not.
+ *
+ * @example
+ * paramsSufficientForPath("/users/:userId/properties/:propertyId", { userId: 123 }); -> false
+ * paramsSufficientForPath("/users/:userId/properties/:propertyId", { userId: 123, status: "ACTIVE" }); -> false
+ * paramsSufficientForPath("/users/:userId/properties/:propertyId", { userId: 123, propertyId: 432 }); -> true
+ */
 export const paramsSufficientForPath = (
-  routePath: string,
-  params: Record<string, string | number | boolean>
+  templatePath: string,
+  params: Record<string, PathParam>
 ) => {
   const regex = /:(\w+)/g;
   const extractedParameters = [];
   let match;
   do {
-    match = regex.exec(routePath);
+    match = regex.exec(templatePath);
     match && extractedParameters.push(match[1]);
   } while (match);
   return extractedParameters
@@ -41,10 +72,20 @@ export const paramsSufficientForPath = (
     });
 };
 
-export type SearchParam = string | number | boolean;
+/**
+ * Adds search params to a path.
+ *
+ * @param routePath The path to which search params will be added.
+ * @param params The search params to add to path.
+ *
+ * @returns The full path with search params added.
+ *
+ * @example
+ * addSearchParams("/users", { userId: 123, status: "ACTIVE" }); -> "/users?userId=123&status=ACTIVE"
+ */
 export const addSearchParams = (
   routePath: string,
-  params: Record<string, SearchParam | SearchParam[] | null | undefined>
+  params: Record<string, PathParam | PathParam[] | null | undefined>
 ): string => {
   const keys = Object.keys(params);
   if (keys.length === 0) return routePath;
@@ -69,4 +110,18 @@ export const addSearchParams = (
     return routePath + '?' + queryString;
   }
   return routePath;
+};
+
+/**
+ * Determines if a path matches a template path.
+ *
+ * @param templatePath The template path.
+ * @param testPath The path to test.
+ *
+ * @returns whether the path matches or not.
+ */
+export const matchPath = (templatePath: string, testPath: string) => {
+  return Boolean(
+    RegExp(`^${templatePath.replace(/:(\w+)/g, '(\\w+)')}$`, 'g').exec(testPath)
+  );
 };
