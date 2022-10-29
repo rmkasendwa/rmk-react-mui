@@ -1,4 +1,4 @@
-import axios, { AxiosResponse, CancelTokenSource } from 'axios';
+import axios, { AxiosError, AxiosResponse, CancelTokenSource } from 'axios';
 
 import { CANCELLED_API_REQUEST_MESSAGE } from '../../constants';
 import { RequestOptions, ResponseProcessor } from '../../interfaces/Utils';
@@ -49,7 +49,7 @@ export interface RequestController {
     requestHeaders: Record<string, string>
   ) => Record<string, string>;
   processResponse?: ResponseProcessor;
-  processResponseError?: (err: any) => any;
+  processResponseError?: (err: AxiosError) => any;
 }
 export const RequestController: RequestController = {};
 
@@ -106,7 +106,7 @@ const fetchData = async <T = any>(
               }
               return response;
             })
-            .catch(async (err) => {
+            .catch(async (err: AxiosError) => {
               pendingRequestCancelTokenSources.splice(
                 pendingRequestCancelTokenSources.indexOf(cancelTokenSource),
                 1
@@ -122,8 +122,9 @@ const fetchData = async <T = any>(
               const { response, message } = err;
               if (response?.data) {
                 const message = (() => {
-                  if (typeof response.data.message === 'string')
+                  if (typeof response.data.message === 'string') {
                     return response.data.message;
+                  }
                   if (Array.isArray(response.data.message)) {
                     return response.data.message
                       .filter((message: any) => typeof message === 'string')
