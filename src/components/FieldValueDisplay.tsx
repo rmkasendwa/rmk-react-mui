@@ -3,6 +3,8 @@ import {
   ComponentsProps,
   ComponentsVariants,
   unstable_composeClasses as composeClasses,
+  generateUtilityClass,
+  generateUtilityClasses,
   useTheme,
   useThemeProps,
 } from '@mui/material';
@@ -12,14 +14,24 @@ import { TypographyProps } from '@mui/material/Typography';
 import clsx from 'clsx';
 import { FC, ReactNode } from 'react';
 
-import { useLoadingContext } from '../../contexts/LoadingContext';
-import ErrorSkeleton from '../ErrorSkeleton';
-import FieldLabel, { FieldLabelProps } from '../FieldLabel';
-import FieldValue from '../FieldValue/FieldValue';
-import {
-  FieldValueDisplayClasses,
-  getFieldValueDisplayUtilityClass,
-} from './fieldValueDisplayClasses';
+import { useLoadingContext } from '../contexts/LoadingContext';
+import ErrorSkeleton from './ErrorSkeleton';
+import FieldLabel, { FieldLabelProps } from './FieldLabel';
+import FieldValue from './FieldValue';
+
+export interface FieldValueDisplayClasses {
+  /** Styles applied to the root element. */
+  root: string;
+}
+
+export type FieldValueDisplayClassKey = keyof FieldValueDisplayClasses;
+
+export function getFieldValueDisplayUtilityClass(slot: string): string {
+  return generateUtilityClass('MuiFieldValueDisplay', slot);
+}
+
+export const fieldValueDisplayClasses: FieldValueDisplayClasses =
+  generateUtilityClasses('MuiFieldValueDisplay', ['root']);
 
 // Adding theme prop types
 declare module '@mui/material/styles/props' {
