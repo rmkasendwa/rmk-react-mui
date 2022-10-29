@@ -4,7 +4,6 @@ import {
   Alert,
   Box,
   Button,
-  ButtonProps,
   Card,
   CardProps,
   ComponentsOverrides,
@@ -14,6 +13,7 @@ import {
   Grid,
   IconButton,
   Modal,
+  ModalProps,
   alpha,
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
@@ -83,7 +83,7 @@ const useUtilityClasses = (ownerState: any) => {
 };
 
 export interface ModalFormProps<Values extends FormikValues = FormikValues>
-  extends ButtonProps {
+  extends Partial<Omit<ModalProps, 'children'>> {
   initialValues: Values;
   validationSchema: any;
   title: string;
@@ -141,11 +141,15 @@ export const ModalForm: FC<ModalFormProps> = (inProps) => {
     CardProps = {},
     SubmitButtonProps = {},
     loading,
+    sx,
+    ...rest
   } = props;
 
   const classes = useUtilityClasses({
     ...props,
   });
+
+  const { spacing, palette, components } = useTheme();
 
   const { sx: cardPropsSx, ...cardPropsRest } = CardProps;
   const { ...submitButtonPropsRest } = SubmitButtonProps;
@@ -158,7 +162,6 @@ export const ModalForm: FC<ModalFormProps> = (inProps) => {
     onCloseRef.current = onClose;
   }, [onClose, onSubmitSuccess]);
 
-  const { spacing, palette } = useTheme();
   const [detailsContainerElement, setDetailsContainerElement] =
     useState<HTMLDivElement | null>(null);
   const [detailsContainerHeight, setDetailsContainerHeight] = useState(0);
@@ -185,6 +188,7 @@ export const ModalForm: FC<ModalFormProps> = (inProps) => {
 
   return (
     <Modal
+      {...rest}
       className={clsx(classes.root)}
       open={open}
       onClose={(_, reason) => {
@@ -197,6 +201,8 @@ export const ModalForm: FC<ModalFormProps> = (inProps) => {
         p: 4,
         justifyContent: 'center',
         alignItems: 'center',
+        ...(components?.MuiModalForm?.styleOverrides?.root as any),
+        ...sx,
       }}
       disableEscapeKeyDown
       disableAutoFocus
