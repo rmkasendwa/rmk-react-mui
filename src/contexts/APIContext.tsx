@@ -11,6 +11,7 @@ import {
 } from 'react';
 
 import { TAPIFunction } from '../interfaces/Utils';
+import { REDIRECTION_ERROR_MESSAGES } from '../utils/JWT';
 
 export interface IAPIContext {
   call: <T extends TAPIFunction>(func: T) => Promise<ReturnType<T>>;
@@ -28,13 +29,7 @@ export const APIProvider: FC<{
   const call = useCallback(
     async (apiCallback: TAPIFunction) => {
       return apiCallback().catch((err) => {
-        if (
-          [
-            'User session timed out',
-            'Session timed out',
-            'Invalid token',
-          ].includes(err.message)
-        ) {
+        if (REDIRECTION_ERROR_MESSAGES.includes(err.message)) {
           setSessionExpired(true);
         } else {
           throw err;
