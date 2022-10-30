@@ -12,6 +12,7 @@ import {
   Grid,
   IconButton,
   Modal,
+  ModalProps,
   alpha,
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
@@ -75,7 +76,7 @@ const useUtilityClasses = (ownerState: any) => {
   return composeClasses(slots, getModalPopupUtilityClass, classes);
 };
 
-export interface ModalPopupProps {
+export interface ModalPopupProps extends Partial<Omit<ModalProps, 'children'>> {
   title: string;
   children?: ReactNode;
   loading?: boolean;
@@ -98,11 +99,15 @@ export const ModalPopup: FC<ModalPopupProps> = (inProps) => {
     CardProps = {},
     loading = false,
     CloseActionButtonProps = {},
+    sx,
+    ...rest
   } = props;
 
   const classes = useUtilityClasses({
     ...props,
   });
+
+  const { palette, components } = useTheme();
 
   const { sx: cardPropsSx, ...cardPropsRest } = CardProps;
   const {
@@ -116,8 +121,6 @@ export const ModalPopup: FC<ModalPopupProps> = (inProps) => {
   useEffect(() => {
     onCloseRef.current = onClose;
   }, [onClose]);
-
-  const { palette } = useTheme();
 
   const [detailsContainerElement, setDetailsContainerElement] =
     useState<HTMLDivElement | null>(null);
@@ -138,6 +141,7 @@ export const ModalPopup: FC<ModalPopupProps> = (inProps) => {
 
   return (
     <Modal
+      {...rest}
       className={clsx(classes.root)}
       open={open}
       onClose={(_, reason) => {
@@ -150,6 +154,8 @@ export const ModalPopup: FC<ModalPopupProps> = (inProps) => {
         p: 4,
         justifyContent: 'center',
         alignItems: 'center',
+        ...(components?.MuiModalPopup?.styleOverrides?.root as any),
+        ...sx,
       }}
       disableEscapeKeyDown
       disableAutoFocus
