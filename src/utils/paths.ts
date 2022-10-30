@@ -6,6 +6,8 @@ export type TemplatePath<T extends TemplatePathParams = any> = string & {
   [key in keyof T]?: string;
 };
 
+export type InferPathParams<P> = P extends TemplatePath<infer T> ? T : never;
+
 /**
  * Returns an interpolated path with placeholder parameters replaced with actual parameters.
  *
