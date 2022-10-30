@@ -1,5 +1,11 @@
 export type PathParam = string | number | boolean;
 
+export type TemplatePathParams = Record<string, PathParam>;
+
+export type TemplatePath<T extends TemplatePathParams = any> = string & {
+  [key in keyof T]?: string;
+};
+
 /**
  * Returns an interpolated path with placeholder parameters replaced with actual parameters.
  *
@@ -13,9 +19,9 @@ export type PathParam = string | number | boolean;
  * @example
  * getInterpolatedPath("/users/:userId", { userId: 123 }); -> "/users/123"
  */
-export const getInterpolatedPath = (
-  templatePath: string,
-  params: Record<string, PathParam>
+export const getInterpolatedPath = <T extends TemplatePathParams = any>(
+  templatePath: TemplatePath<T> | string,
+  params: T
 ): string => {
   const regex = /:(\w+)/g;
   const extractedParameters = [];
@@ -33,7 +39,7 @@ export const getInterpolatedPath = (
       templatePath = templatePath.replace(
         `:${key}`,
         encodeURIComponent(params[key])
-      );
+      ) as typeof templatePath;
     });
   return templatePath;
 };
