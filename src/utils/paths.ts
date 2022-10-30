@@ -1,6 +1,6 @@
 export type PathParam = string | number | boolean;
 
-export type TemplatePathParams = Record<string, PathParam>;
+export type TemplatePathParams = Record<string | number | symbol, PathParam>;
 
 export type TemplatePath<T extends TemplatePathParams = any> = string & {
   [key in keyof T]?: string;

@@ -108,7 +108,7 @@ export const TableBodyRow = <T extends BaseTableRow>(
     getRowProps,
     generateRowData,
     decimalPlaces,
-    labelTransform,
+    textTransform = false,
     onClickRow,
     sx,
     defaultColumnValue: baseDefaultColumnValue,
@@ -239,7 +239,7 @@ export const TableBodyRow = <T extends BaseTableRow>(
                 // TODO: Implement this
                 break;
               case 'enum':
-                if (labelTransform !== false) {
+                if (textTransform) {
                   columnValue = String(columnValue).toTitleCase(true);
                 }
                 break;
@@ -280,7 +280,7 @@ export const TableBodyRow = <T extends BaseTableRow>(
         return {};
       })(),
     };
-  }, [columns, row, decimalPlaces, labelTransform, baseDefaultColumnValue]);
+  }, [columns, row, decimalPlaces, textTransform, baseDefaultColumnValue]);
 
   const { sx: rowPropsSx, ...restRowProps }: any = formattedRow.rowProps;
   return (

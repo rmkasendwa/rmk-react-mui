@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router';
 import { useCallback } from 'react';
 
-import { SetSearchPrams, useSetSearchParam } from './Utils';
+import { SetSearchPrams, useSetSearchParam } from './Paths';
 
 export const useNextRouterSearchParams = () => {
   const { push, replace, query: searchParams } = useRouter();

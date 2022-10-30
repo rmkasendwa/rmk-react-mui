@@ -14,7 +14,7 @@ export const FixedHeaderContentArea: FC<FixedHeaderContentAreaProps> = ({
   BodyProps = {},
   ...rest
 }) => {
-  const { sx: bodyPropsSx, ...bodyPropsRest } = BodyProps;
+  const { sx: BodyPropsSx, ...BodyPropsRest } = BodyProps;
 
   return (
     <PaddedContentArea
@@ -32,14 +32,14 @@ export const FixedHeaderContentArea: FC<FixedHeaderContentAreaProps> = ({
       }}
     >
       <Box
-        {...bodyPropsRest}
+        {...BodyPropsRest}
         sx={{
           flex: 1,
           minHeight: 0,
           overflowY: 'auto',
           overflowX: 'hidden',
           position: 'relative',
-          ...bodyPropsSx,
+          ...BodyPropsSx,
         }}
       >
         {children}
