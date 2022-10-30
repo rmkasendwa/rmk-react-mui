@@ -2,7 +2,7 @@ import axios, { AxiosError, AxiosResponse, CancelTokenSource } from 'axios';
 
 import { CANCELLED_API_REQUEST_MESSAGE } from '../../constants';
 import { RequestOptions, ResponseProcessor } from '../../interfaces/Utils';
-import { SessionTimeoutError } from '../../utils/errors';
+import { REDIRECTION_ERROR_MESSAGES } from '../../utils/JWT';
 import StorageManager from '../../utils/StorageManager';
 import { queueRequest } from './RequestQueue';
 
@@ -121,6 +121,7 @@ const fetchData = async <T = any>(
               }
               const { response, message } = err;
               if (response?.data) {
+                // Extracting server side error message
                 const message = (() => {
                   if (typeof response.data.message === 'string') {
                     return response.data.message;
@@ -142,27 +143,26 @@ const fetchData = async <T = any>(
                   }
                   return 'Something went wrong';
                 })();
-                const errorMessage = `Error: '${label}' failed with message "${message}"`;
-                if (['User session timed out'].includes(errorMessage)) {
+                if (REDIRECTION_ERROR_MESSAGES.includes(message)) {
                   cancelPendingRequests();
-                  return reject(new SessionTimeoutError(errorMessage));
+                  return reject(Error(message));
                 }
-                return reject(new Error(errorMessage));
+                return reject(
+                  Error(`Error: '${label}' failed with message "${message}"`)
+                );
               }
               if (response?.status === 401) {
                 cancelPendingRequests();
-                return reject(new SessionTimeoutError('Session timed out'));
+                return reject(Error('Session timed out'));
               }
 
               if (message && !String(message).match(/request\sfailed/gi)) {
                 return reject(
-                  new Error(
-                    `Error: '${label}' failed with message "${message}"`
-                  )
+                  Error(`Error: '${label}' failed with message "${message}"`)
                 );
               }
               return reject(
-                new Error(`Error: '${label}' failed. Something went wrong`)
+                Error(`Error: '${label}' failed. Something went wrong`)
               );
             });
           if (response) {
