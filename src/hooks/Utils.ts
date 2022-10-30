@@ -1,6 +1,4 @@
-import { useMediaQuery, useTheme } from '@mui/material';
 import { pick } from 'lodash';
-import hash from 'object-hash';
 import {
   useCallback,
   useContext,
@@ -20,15 +18,24 @@ import {
   TaggedAPIRequest,
 } from '../interfaces/Utils';
 
-export const useAPIService = <T>(defautValue: T, key?: string) => {
+export interface UseQueryOptions {
+  key?: string;
+  loadOnMount?: boolean;
+  autoSync?: boolean;
+}
+
+const DEFAULT_SYNC_TIMEOUT = 5 * 60 * 1000;
+const WINDOW_BLUR_THRESHOLD = 60 * 1000;
+
+export const useAPIService = <T>(defaultValue: T, key?: string) => {
   const isComponentMountedRef = useRef(true);
   const taggedAPIRequestsRef = useRef<TaggedAPIRequest[]>([]);
   const { data, updateData } = useCachedData();
   if (key && data[key]) {
-    defautValue = data[key];
+    defaultValue = data[key];
   }
   const { call } = useContext(APIContext);
-  const [record, setRecord] = useState<T>(defautValue);
+  const [record, setRecord] = useState<T>(defaultValue);
   const [loaded, setLoaded] = useState(false);
   const [loading, setLoading] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -149,24 +156,29 @@ export const useUpdate = <T>() => {
   };
 };
 
-const DEFAULT_SYNC_TIMEOUT = 5 * 60 * 1000;
-const WINDOW_BLUR_THRESHOLD = 60 * 1000;
+export interface UseRecordOptions<T> extends UseQueryOptions {
+  defaultValue?: T;
+}
+
 export const useRecord = <T>(
-  recordFinder: TAPIFunction,
-  defautValue: T,
-  key?: string,
-  loadOnMount = true,
-  autoSync = true
+  recordFinder: TAPIFunction<T>,
+  {
+    defaultValue,
+    key,
+    loadOnMount = true,
+    autoSync = true,
+  }: UseRecordOptions<T> = {}
 ) => {
   const nextSyncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const [apiFunction] = useState<TAPIFunction>(() => recordFinder);
+  const [apiFunction] = useState<TAPIFunction<T>>(() => recordFinder);
   const {
     load: apiServiceLoad,
     loading,
     errorMessage,
     busy,
+    record,
     ...rest
-  } = useAPIService<T>(defautValue, key);
+  } = useAPIService(defaultValue!, key);
 
   const load = useCallback(
     (polling = false) => {
@@ -231,38 +243,36 @@ export const useRecord = <T>(
     load,
     loading,
     errorMessage,
+    record: record || null,
     busy,
     ...rest,
   };
 };
 
 export const useRecords = <T>(
-  recordFinder: TAPIFunction,
-  key?: string,
-  loadOnMount = true,
-  autoSync = true
+  recordFinder: TAPIFunction<T[]>,
+  { loadOnMount = true, autoSync = true, ...inputRest }: UseQueryOptions
 ) => {
-  const { record, setRecord, ...rest } = useRecord<T[]>(
-    recordFinder,
-    [],
-    key,
+  const { record, setRecord, ...rest } = useRecord(recordFinder, {
+    defaultValue: [],
     loadOnMount,
-    autoSync
-  );
+    autoSync,
+    ...inputRest,
+  });
 
   return {
-    records: record,
+    records: record!,
     setRecords: setRecord,
     ...rest,
   };
 };
 
-export interface UsePaginatedRecordsOptions extends PaginatedRequestParams {
-  key?: string;
-  loadOnMount?: boolean;
-  autoSync?: boolean;
+export interface UsePaginatedRecordsOptions
+  extends PaginatedRequestParams,
+    UseQueryOptions {
   revalidationKey?: string;
 }
+
 export const usePaginatedRecords = <T>(
   recordFinder: TAPIFunction<PaginatedResponseData<T>>,
   {
@@ -370,63 +380,4 @@ export const usePaginatedRecords = <T>(
     responseData,
     ...rest,
   };
-};
-
-export const useSmallScreen = () => {
-  const { breakpoints } = useTheme();
-  return useMediaQuery(breakpoints.down('sm'));
-};
-
-export type SetSearchPrams = (
-  nextInit: Record<string, string | string[]>,
-  navigateOptions?: {
-    replace?: boolean | undefined;
-    state?: any;
-  }
-) => void;
-
-export const useSetSearchParam = (baseSetSearchParams: SetSearchPrams) => {
-  const setSearchParams = useCallback(
-    (
-      searchParams: Record<string, string | null>,
-      navigateOptions?: {
-        replace?: boolean | undefined;
-        state?: any;
-      }
-    ) => {
-      const entries = new URL(window.location.href).searchParams.entries();
-      const existingSearchParams: Record<string, string | string[]> = {};
-      for (const [key, value] of entries) {
-        if (Array.isArray(existingSearchParams[key])) {
-          (existingSearchParams[key] as string[]).push(value);
-        } else if (typeof existingSearchParams[key] === 'string') {
-          existingSearchParams[key] = [existingSearchParams[key] as string];
-        } else {
-          existingSearchParams[key] = value;
-        }
-      }
-      const combinedSearchParams = {
-        ...existingSearchParams,
-        ...searchParams,
-      };
-      const nextSearchParams = Object.keys(combinedSearchParams)
-        .filter((key) => {
-          return (
-            combinedSearchParams[key] != null &&
-            combinedSearchParams[key]!.length > 0
-          );
-        })
-        .reduce((accumulator, key) => {
-          accumulator[key] = combinedSearchParams[key]!;
-          return accumulator;
-        }, {} as Record<string, string | string[]>);
-
-      if (hash(nextSearchParams) !== hash(existingSearchParams)) {
-        baseSetSearchParams(nextSearchParams, navigateOptions);
-      }
-    },
-    [baseSetSearchParams]
-  );
-
-  return { setSearchParams };
 };

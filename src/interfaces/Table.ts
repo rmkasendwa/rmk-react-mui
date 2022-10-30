@@ -98,7 +98,7 @@ export interface TableRowProps<T = any> {
   generateRowData?: (currentEntity: T) => any;
   getRowProps?: GetRowProps;
   decimalPlaces?: number;
-  labelTransform?: boolean;
+  textTransform?: boolean;
   onClickRow?: (currentEntity: T) => void;
   defaultColumnValue?: ReactNode;
   columnTypographyProps?: Partial<TypographyProps>;

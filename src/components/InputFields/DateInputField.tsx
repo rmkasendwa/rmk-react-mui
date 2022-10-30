@@ -1,7 +1,9 @@
 import CloseIcon from '@mui/icons-material/Close';
 import EventIcon from '@mui/icons-material/Event';
 import IconButton from '@mui/material/IconButton';
+import useTheme from '@mui/material/styles/useTheme';
 import Tooltip from '@mui/material/Tooltip';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { DatePickerProps } from '@mui/x-date-pickers/DatePicker';
 import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
@@ -11,7 +13,6 @@ import { format } from 'date-fns';
 import { forwardRef, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { DEFAULT_DATE_FORMAT } from '../../constants';
-import { useSmallScreen } from '../../hooks/Utils';
 import TextField, { TextFieldProps } from './TextField';
 
 export interface DateInputFieldProps extends TextFieldProps {
@@ -37,7 +38,8 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
     },
     ref
   ) {
-    const smallScreen = useSmallScreen();
+    const { breakpoints } = useTheme();
+    const smallScreen = useMediaQuery(breakpoints.down('sm'));
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [open, setOpen] = useState(false);
 

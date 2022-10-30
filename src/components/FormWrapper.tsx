@@ -1,12 +1,12 @@
 import SaveIcon from '@mui/icons-material/Save';
 import LoadingButton from '@mui/lab/LoadingButton';
+import { useMediaQuery, useTheme } from '@mui/material';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import { Form, Formik, FormikHelpers, FormikProps, FormikValues } from 'formik';
 import { FC, ReactNode } from 'react';
 
 import { useLoadingContext } from '../contexts/LoadingContext';
-import { useSmallScreen } from '../hooks/Utils';
 import ErrorAlert from './ErrorAlert';
 import ErrorFieldHighlighter from './ErrorFieldHighlighter';
 import FixedHeaderContentArea from './FixedHeaderContentArea';
@@ -32,7 +32,8 @@ export const FormWrapper: FC<FormWrapperProps> = ({
   validationSchema,
   onSubmit,
 }) => {
-  const smallScreen = useSmallScreen();
+  const { breakpoints } = useTheme();
+  const smallScreen = useMediaQuery(breakpoints.down('sm'));
 
   const { load, loading, errorMessage } = useLoadingContext();
 

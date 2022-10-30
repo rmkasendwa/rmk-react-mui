@@ -56,7 +56,7 @@ export interface TableProps<T = any>
       | 'forEachDerivedColumn'
       | 'generateRowData'
       | 'decimalPlaces'
-      | 'labelTransform'
+      | 'textTransform'
       | 'onClickRow'
       | 'defaultColumnValue'
       | 'columnTypographyProps'
@@ -111,7 +111,7 @@ const BaseTable = <T extends BaseTableRow>(
     HeaderRowProps = {},
     currencyCode,
     decimalPlaces,
-    labelTransform,
+    textTransform,
     paginationType = 'default',
     PaginationProps = {},
     stickyHeader = false,
@@ -511,7 +511,7 @@ const BaseTable = <T extends BaseTableRow>(
                         row,
                         forEachDerivedColumn,
                         decimalPlaces,
-                        labelTransform,
+                        textTransform,
                         onClickRow,
                         generateRowData,
                         defaultColumnValue,
