@@ -76,6 +76,7 @@ export interface TableColumn<
   bodySx?: SxProps<Theme>;
   sortable?: boolean;
   opaque?: boolean;
+  propagateClickToParentRowClickEvent?: boolean;
 }
 
 export interface ForEachDerivedColumnConfiguration<T> {

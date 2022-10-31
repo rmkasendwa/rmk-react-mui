@@ -49,15 +49,6 @@ export interface TableBodyRowClasses {
 
 export type TableBodyRowClassKey = keyof TableBodyRowClasses;
 
-export function getTableBodyRowUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiTableBodyRow', slot);
-}
-
-export const tableBodyRowClasses: TableBodyRowClasses = generateUtilityClasses(
-  'MuiTableBodyRow',
-  ['root']
-);
-
 // Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
@@ -83,19 +74,22 @@ declare module '@mui/material/styles/components' {
   }
 }
 
-const useUtilityClasses = (ownerState: any) => {
-  const { classes } = ownerState;
-
-  const slots = {
-    root: ['root'],
-  };
-
-  return composeClasses(slots, getTableBodyRowUtilityClass, classes);
-};
-
 export interface TableBodyRowProps<T = any>
   extends Partial<Omit<MuiTableRowProps, 'defaultValue'>>,
     TableRowProps<T> {}
+
+export function getTableBodyRowUtilityClass(slot: string): string {
+  return generateUtilityClass('MuiTableBodyRow', slot);
+}
+
+export const tableBodyRowClasses: TableBodyRowClasses = generateUtilityClasses(
+  'MuiTableBodyRow',
+  ['root']
+);
+
+const slots = {
+  root: ['root'],
+};
 
 export const TableBodyRow = <T extends BaseTableRow>(
   inProps: TableBodyRowProps<T>
@@ -114,12 +108,21 @@ export const TableBodyRow = <T extends BaseTableRow>(
     defaultColumnValue: baseDefaultColumnValue,
     columnTypographyProps = {},
     minColumnWidth,
+    className,
     ...rest
   } = props;
 
-  const classes = useUtilityClasses({
-    ...props,
-  });
+  const classes = composeClasses(
+    slots,
+    getTableBodyRowUtilityClass,
+    (() => {
+      if (className) {
+        return {
+          root: className,
+        };
+      }
+    })()
+  );
 
   // Refs
   const columnsRef = useRef(columns);
@@ -160,7 +163,7 @@ export const TableBodyRow = <T extends BaseTableRow>(
                   ) as EllipsisMenuIconButtonProps) || {};
                 if (options && options.length > 0) {
                   return (
-                    <Box onClick={(event) => event.stopPropagation()}>
+                    <Box>
                       <EllipsisMenuIconButton options={options} {...rest} />
                     </Box>
                   );
@@ -290,9 +293,6 @@ export const TableBodyRow = <T extends BaseTableRow>(
       className={clsx(classes.root)}
       tabIndex={-1}
       hover
-      onClick={() => {
-        onClickRow && onClickRow(formattedRow.currentEntity);
-      }}
       sx={{
         verticalAlign: 'top',
         cursor: onClickRow ? 'pointer' : 'inherit',
@@ -313,6 +313,7 @@ export const TableBodyRow = <T extends BaseTableRow>(
           minWidth,
           type,
           className,
+          propagateClickToParentRowClickEvent = true,
         } = column;
         const columnValue = formattedRow[column.id];
         return (
@@ -321,6 +322,9 @@ export const TableBodyRow = <T extends BaseTableRow>(
             {...{ style, className }}
             onClick={(event) => {
               onClickColumn && onClickColumn(formattedRow.currentEntity);
+              propagateClickToParentRowClickEvent &&
+                onClickRow &&
+                onClickRow(formattedRow.currentEntity);
               onClick && onClick(event);
             }}
             align={align}
