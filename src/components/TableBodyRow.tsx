@@ -163,7 +163,7 @@ export const TableBodyRow = <T extends BaseTableRow>(
                   ) as EllipsisMenuIconButtonProps) || {};
                 if (options && options.length > 0) {
                   return (
-                    <Box onClick={(event) => event.stopPropagation()}>
+                    <Box>
                       <EllipsisMenuIconButton options={options} {...rest} />
                     </Box>
                   );
@@ -293,9 +293,6 @@ export const TableBodyRow = <T extends BaseTableRow>(
       className={clsx(classes.root)}
       tabIndex={-1}
       hover
-      onClick={() => {
-        onClickRow && onClickRow(formattedRow.currentEntity);
-      }}
       sx={{
         verticalAlign: 'top',
         cursor: onClickRow ? 'pointer' : 'inherit',
@@ -316,6 +313,7 @@ export const TableBodyRow = <T extends BaseTableRow>(
           minWidth,
           type,
           className,
+          propagateClickToParentRowClickEvent = true,
         } = column;
         const columnValue = formattedRow[column.id];
         return (
@@ -324,6 +322,9 @@ export const TableBodyRow = <T extends BaseTableRow>(
             {...{ style, className }}
             onClick={(event) => {
               onClickColumn && onClickColumn(formattedRow.currentEntity);
+              propagateClickToParentRowClickEvent &&
+                onClickRow &&
+                onClickRow(formattedRow.currentEntity);
               onClick && onClick(event);
             }}
             align={align}

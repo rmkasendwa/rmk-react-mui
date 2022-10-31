@@ -286,6 +286,7 @@ export const BaseTable = <T extends BaseTableRow>(
           nextColumn.opaque = true;
           nextColumn.defaultColumnValue ||
             (nextColumn.defaultColumnValue = <>&nbsp;</>);
+          nextColumn.propagateClickToParentRowClickEvent = false;
           nextColumn.sx = {
             position: 'sticky',
             p: 0,
