@@ -1,9 +1,20 @@
-import { Stack } from '@mui/material';
+import {
+  ComponentsOverrides,
+  ComponentsProps,
+  ComponentsVariants,
+  Stack,
+  unstable_composeClasses as composeClasses,
+  generateUtilityClass,
+  generateUtilityClasses,
+  useThemeProps,
+} from '@mui/material';
 import Box, { BoxProps } from '@mui/material/Box';
 import { PaginationProps } from '@mui/material/Pagination';
 import { Theme } from '@mui/material/styles/createTheme';
 import useTheme from '@mui/material/styles/useTheme';
-import MuiTable, { TableProps as MuiTableProps } from '@mui/material/Table';
+import MuiBaseTable, {
+  TableProps as MuiBaseTableProps,
+} from '@mui/material/Table';
 import TableBody, { tableBodyClasses } from '@mui/material/TableBody';
 import TableCell, { tableCellClasses } from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
@@ -40,7 +51,37 @@ export type {
   TableColumnEnumValue,
 } from '../interfaces/Table';
 
-const OPAQUE_BG_CLASS_NAME = `MuiTableCell-opaque`;
+export interface TableClasses {
+  /** Styles applied to the root element. */
+  root: string;
+}
+
+export type TableClassKey = keyof TableClasses;
+
+// Adding theme prop types
+declare module '@mui/material/styles/props' {
+  interface ComponentsPropsList {
+    MuiTableExtended: TableProps;
+  }
+}
+
+// Adding theme override types
+declare module '@mui/material/styles/overrides' {
+  interface ComponentNameToClassKey {
+    MuiTableExtended: keyof TableClasses;
+  }
+}
+
+// Adding theme component types
+declare module '@mui/material/styles/components' {
+  interface Components<Theme = unknown> {
+    MuiTableExtended?: {
+      defaultProps?: ComponentsProps['MuiTableExtended'];
+      styleOverrides?: ComponentsOverrides<Theme>['MuiTableExtended'];
+      variants?: ComponentsVariants['MuiTableExtended'];
+    };
+  }
+}
 
 export type TableVariant =
   | 'stripped'
@@ -49,7 +90,7 @@ export type TableVariant =
   | 'plain';
 
 export interface TableProps<T = any>
-  extends Partial<Pick<MuiTableProps, 'onClick' | 'sx' | 'className'>>,
+  extends Partial<Pick<MuiBaseTableProps, 'onClick' | 'sx' | 'className'>>,
     Pick<
       TableRowProps<T>,
       | 'columns'
@@ -87,8 +128,27 @@ export interface TableProps<T = any>
   parentBackgroundColor?: string;
 }
 
-const BaseTable = <T extends BaseTableRow>(
-  {
+const OPAQUE_BG_CLASS_NAME = `MuiTableCell-opaque`;
+
+export function getTableUtilityClass(slot: string): string {
+  return generateUtilityClass('MuiTableExtended', slot);
+}
+
+export const tableClasses: TableClasses = generateUtilityClasses(
+  'MuiTableExtended',
+  ['root']
+);
+
+const slots = {
+  root: ['root'],
+};
+
+export const BaseTable = <T extends BaseTableRow>(
+  inProps: TableProps<T>,
+  ref: Ref<HTMLTableElement>
+) => {
+  const props = useThemeProps({ props: inProps, name: 'MuiTableExtended' });
+  const {
     onClickRow,
     columns: columnsProp,
     rows,
@@ -96,7 +156,6 @@ const BaseTable = <T extends BaseTableRow>(
     rowStartIndex = 0,
     labelPlural = 'Records',
     labelSingular,
-    lowercaseLabelPlural,
     rowsPerPage: rowsPerPageProp = 10,
     pageIndex: pageIndexProp = 0,
     onChangePage,
@@ -109,7 +168,6 @@ const BaseTable = <T extends BaseTableRow>(
     showHeaderRow = true,
     showDataRows = true,
     HeaderRowProps = {},
-    currencyCode,
     decimalPlaces,
     textTransform,
     paginationType = 'default',
@@ -121,12 +179,24 @@ const BaseTable = <T extends BaseTableRow>(
     columnTypographyProps,
     minColumnWidth,
     className,
-    parentBackgroundColor,
     sx,
     ...rest
-  }: TableProps<T>,
-  ref: Ref<HTMLTableElement>
-) => {
+  } = props;
+
+  let { lowercaseLabelPlural, parentBackgroundColor, currencyCode } = props;
+
+  const classes = composeClasses(
+    slots,
+    getTableUtilityClass,
+    (() => {
+      if (className) {
+        return {
+          root: className,
+        };
+      }
+    })()
+  );
+
   const {
     sx: tableBodyRowPlaceholderPropsSx,
     ...tableBodyRowPlaceholderPropsRest
@@ -353,11 +423,11 @@ const BaseTable = <T extends BaseTableRow>(
   }
 
   const tableElement = (
-    <MuiTable
+    <MuiBaseTable
       {...rest}
       ref={ref}
       {...{ stickyHeader }}
-      className={clsx(`Mui-table-${variant}`, className)}
+      className={clsx(classes.root, `Mui-table-${variant}`)}
       sx={{
         tableLayout: 'fixed',
         minWidth,
@@ -537,7 +607,7 @@ const BaseTable = <T extends BaseTableRow>(
           })()}
         </TableBody>
       ) : null}
-    </MuiTable>
+    </MuiBaseTable>
   );
 
   if (paging) {
