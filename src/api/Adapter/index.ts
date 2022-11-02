@@ -1,9 +1,9 @@
+import StorageManager from '@infinite-debugger/rmk-utils/StorageManager';
 import axios, { AxiosError, AxiosResponse, CancelTokenSource } from 'axios';
 
 import { CANCELLED_API_REQUEST_MESSAGE } from '../../constants';
 import { RequestOptions, ResponseProcessor } from '../../interfaces/Utils';
 import { REDIRECTION_ERROR_MESSAGES } from '../../utils/JWT';
-import StorageManager from '../../utils/StorageManager';
 import { queueRequest } from './RequestQueue';
 
 const HOST_URL = typeof window !== 'undefined' ? window.location.origin : '';

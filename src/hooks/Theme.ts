@@ -1,3 +1,4 @@
+import StorageManager from '@infinite-debugger/rmk-utils/StorageManager';
 import { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -7,7 +8,6 @@ import {
   toggleDarkMode as baseToggleDarkMode,
   setDarkMode,
 } from '../redux';
-import StorageManager from '../utils/StorageManager';
 
 export const useDarkMode = () => {
   const dispatch = useDispatch();

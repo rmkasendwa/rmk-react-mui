@@ -1,7 +1,6 @@
+import { getMemorySize } from '@infinite-debugger/rmk-utils/data';
+import StorageManager from '@infinite-debugger/rmk-utils/StorageManager';
 import { createContext, useContext } from 'react';
-
-import { getMemorySize } from '../utils/data';
-import StorageManager from '../utils/StorageManager';
 
 const CACHED_DATA_PREFIX = 'cached-data';
 const MAX_DATA_MEMORY_SIZE = 15 * 1024; // 15KB

@@ -1,9 +1,12 @@
+import {
+  addSearchParams,
+  getInterpolatedPath,
+} from '@infinite-debugger/rmk-utils/paths';
 import { Box } from '@mui/material';
 import { MD5 } from 'crypto-js';
 import { forwardRef } from 'react';
 
 import { GRAVATAR_URL } from '../constants';
-import { addSearchParams, getInterpolatedPath } from '../utils/paths';
 import ProfileAvatar, { ProfileAvatarProps } from './ProfileAvatar';
 
 export interface ProfileGravatarProps extends ProfileAvatarProps {

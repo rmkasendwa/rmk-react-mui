@@ -1,7 +1,7 @@
+import { addThousandCommas } from '@infinite-debugger/rmk-utils/numbers';
 import Typography from '@mui/material/Typography';
 import { forwardRef, useEffect, useState } from 'react';
 
-import { addThousandCommas } from '../../utils/numbers';
 import TextField, { TextFieldProps } from './TextField';
 
 export interface TextAreaFieldProps extends TextFieldProps {

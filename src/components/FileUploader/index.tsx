@@ -1,3 +1,4 @@
+import { formatBytes } from '@infinite-debugger/rmk-utils/bytes';
 import CancelIcon from '@mui/icons-material/Cancel';
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
@@ -33,7 +34,6 @@ import {
   FileDownloadFunction,
   FileUploadFunction,
 } from '../../interfaces/Utils';
-import { formatBytes } from '../../utils/bytes';
 import { flickerElement } from '../../utils/page';
 import Card from '../Card';
 import { TextFieldProps } from '../InputFields/TextField';

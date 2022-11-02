@@ -1,10 +1,10 @@
+import { addThousandCommas } from '@infinite-debugger/rmk-utils/numbers';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import { forwardRef, useCallback, useEffect, useRef, useState } from 'react';
 
-import { addThousandCommas } from '../../utils/numbers';
 import TextField, { TextFieldProps } from './TextField';
 
 export interface NumberInputFieldProps extends Omit<TextFieldProps, 'value'> {
