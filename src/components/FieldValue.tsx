@@ -86,6 +86,7 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
           whiteSpace: 'pre-line',
           color: alpha(palette.text.primary, 0.5),
           width: '100%',
+          lineHeight: 'inherit',
           ...((components?.MuiFieldValue?.styleOverrides?.root as any) || {}),
           ...sx,
         }}

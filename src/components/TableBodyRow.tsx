@@ -333,13 +333,14 @@ export const TableBodyRow = <T extends BaseTableRow>(
               px: 3,
               cursor: onClickColumn ? 'pointer' : 'inherit',
               position: 'relative',
+              overflow: 'hidden',
               ['&:before']: {
                 content: '""',
                 position: 'absolute',
                 top: 0,
                 bottom: 0,
                 left: 0,
-                right: 0,
+                width: `calc(100% + 1px)`,
                 pointerEvents: 'none',
               },
               ...getColumnPaddingStyles({
