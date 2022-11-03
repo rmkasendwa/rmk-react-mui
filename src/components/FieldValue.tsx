@@ -2,6 +2,8 @@ import {
   ComponentsOverrides,
   ComponentsProps,
   ComponentsVariants,
+  Grid,
+  GridProps,
   alpha,
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
@@ -11,7 +13,7 @@ import {
 } from '@mui/material';
 import Typography, { TypographyProps } from '@mui/material/Typography';
 import clsx from 'clsx';
-import { forwardRef } from 'react';
+import { ReactNode, forwardRef } from 'react';
 
 export interface FieldValueClasses {
   /** Styles applied to the root element. */
@@ -19,13 +21,6 @@ export interface FieldValueClasses {
 }
 
 export type FieldValueClassKey = keyof FieldValueClasses;
-
-export function getFieldValueUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiFieldValue', slot);
-}
-
-export const fieldValueDisplayClasses: FieldValueClasses =
-  generateUtilityClasses('MuiFieldValue', ['root']);
 
 // Adding theme prop types
 declare module '@mui/material/styles/props' {
@@ -52,47 +47,123 @@ declare module '@mui/material/styles/components' {
   }
 }
 
-const useUtilityClasses = (ownerState: any) => {
-  const { classes } = ownerState;
+export interface FieldValueProps extends TypographyProps {
+  icon?: ReactNode;
+  endIcon?: ReactNode;
+  EndIconContainerProps?: Partial<GridProps>;
+  ContainerGridProps?: Partial<GridProps>;
+}
 
-  const slots = {
-    root: ['root'],
-  };
+export function getFieldValueUtilityClass(slot: string): string {
+  return generateUtilityClass('MuiFieldValue', slot);
+}
 
-  return composeClasses(slots, getFieldValueUtilityClass, classes);
+export const FieldValueClasses: FieldValueClasses = generateUtilityClasses(
+  'MuiFieldValue',
+  ['root']
+);
+
+const slots = {
+  root: ['root'],
 };
-
-export interface FieldValueProps extends TypographyProps {}
 
 export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
   function FieldValue(inProps, ref) {
     const props = useThemeProps({ props: inProps, name: 'MuiFieldValue' });
-    const { children, sx, ...rest } = props;
+    const {
+      icon,
+      endIcon,
+      EndIconContainerProps = {},
+      ContainerGridProps = {},
+      children,
+      sx,
+      className,
+      ...rest
+    } = props;
 
-    const classes = useUtilityClasses({
-      ...props,
-    });
+    const classes = composeClasses(
+      slots,
+      getFieldValueUtilityClass,
+      (() => {
+        if (className) {
+          return {
+            root: className,
+          };
+        }
+      })()
+    );
+
+    const { sx: ContainerGridPropsSx, ...ContainerGridPropsRest } =
+      ContainerGridProps;
+    const { sx: EndIconContainerPropsSx, ...EndIconContainerPropsRest } =
+      EndIconContainerProps;
 
     const { palette, components } = useTheme();
+
     return (
-      <Typography
-        ref={ref}
+      <Grid
+        {...ContainerGridPropsRest}
+        container
         className={clsx(classes.root)}
-        variant="body2"
-        component={'div' as any}
-        {...rest}
-        sx={{
-          wordBreak: 'break-word',
-          whiteSpace: 'pre-line',
-          color: alpha(palette.text.primary, 0.5),
-          width: '100%',
-          lineHeight: 'inherit',
-          ...((components?.MuiFieldValue?.styleOverrides?.root as any) || {}),
-          ...sx,
-        }}
+        sx={{ gap: 1, ...ContainerGridPropsSx }}
       >
-        {children}
-      </Typography>
+        {icon ? (
+          <Grid
+            item
+            sx={{
+              display: 'flex',
+              maxWidth: 24,
+              height: 24,
+              justifyContent: 'center',
+            }}
+          >
+            {icon}
+          </Grid>
+        ) : null}
+        <Grid
+          item
+          xs
+          sx={{
+            minWidth: 0,
+            maxWidth: 'none !important',
+          }}
+        >
+          <Typography
+            ref={ref}
+            className={clsx(classes.root)}
+            variant="body2"
+            component={'div' as any}
+            {...rest}
+            sx={{
+              wordBreak: 'break-word',
+              whiteSpace: 'pre-line',
+              color: alpha(palette.text.primary, 0.5),
+              width: '100%',
+              lineHeight: 'inherit',
+              ...((components?.MuiFieldValue?.styleOverrides?.root as any) ||
+                {}),
+              ...sx,
+            }}
+          >
+            {children}
+          </Typography>
+        </Grid>
+        {endIcon ? (
+          <Grid
+            {...EndIconContainerPropsRest}
+            item
+            sx={{
+              display: 'flex',
+              maxWidth: 24,
+              height: 24,
+              justifyContent: 'center',
+              ...EndIconContainerPropsSx,
+            }}
+          >
+            {endIcon}
+          </Grid>
+        ) : null}
+      </Grid>
     );
   }
 );

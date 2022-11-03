@@ -10,14 +10,13 @@ import {
 } from '@mui/material';
 import Box, { BoxProps } from '@mui/material/Box';
 import Skeleton from '@mui/material/Skeleton';
-import { TypographyProps } from '@mui/material/Typography';
 import clsx from 'clsx';
 import { FC, ReactNode } from 'react';
 
 import { useLoadingContext } from '../contexts/LoadingContext';
 import ErrorSkeleton from './ErrorSkeleton';
 import FieldLabel, { FieldLabelProps } from './FieldLabel';
-import FieldValue from './FieldValue';
+import FieldValue, { FieldValueProps } from './FieldValue';
 
 export interface FieldValueDisplayClasses {
   /** Styles applied to the root element. */
@@ -74,7 +73,7 @@ export interface FieldValueDisplayProps
   label: ReactNode;
   value?: ReactNode;
   LabelProps?: FieldLabelProps;
-  ValueProps?: TypographyProps;
+  ValueProps?: Partial<FieldValueProps>;
 }
 
 export const FieldValueDisplay: FC<FieldValueDisplayProps> = (inProps) => {
@@ -93,8 +92,8 @@ export const FieldValueDisplay: FC<FieldValueDisplayProps> = (inProps) => {
     ...props,
   });
 
-  const { ...labelPropsRest } = LabelProps;
-  const { sx: valuePropsSx, ...valuePropsRest } = ValueProps;
+  const { ...LabelPropsRest } = LabelProps;
+  const { sx: ValuePropsSx, ...ValuePropsRest } = ValueProps;
 
   const { components } = useTheme();
   const { loading, errorMessage } = useLoadingContext();
@@ -152,10 +151,10 @@ export const FieldValueDisplay: FC<FieldValueDisplayProps> = (inProps) => {
         ...sx,
       }}
     >
-      <FieldLabel {...{ required }} {...labelPropsRest}>
+      <FieldLabel {...{ required }} {...LabelPropsRest}>
         {label}
       </FieldLabel>
-      <FieldValue {...valuePropsRest} sx={{ mt: 0.5, ...valuePropsSx }}>
+      <FieldValue {...ValuePropsRest} sx={{ mt: 0.5, ...ValuePropsSx }}>
         {value}
       </FieldValue>
     </Box>
