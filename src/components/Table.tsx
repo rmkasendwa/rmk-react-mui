@@ -27,6 +27,7 @@ import Typography from '@mui/material/Typography';
 import { alpha, darken, lighten } from '@mui/system/colorManipulator';
 import { SxProps } from '@mui/system/styleFunctionSx';
 import clsx from 'clsx';
+import { omit } from 'lodash';
 import {
   ReactElement,
   Ref,
@@ -425,7 +426,12 @@ export const BaseTable = <T extends BaseTableRow>(
 
   const tableElement = (
     <MuiBaseTable
-      {...rest}
+      {...omit(
+        rest,
+        'lowercaseLabelPlural',
+        'parentBackgroundColor',
+        'currencyCode'
+      )}
       ref={ref}
       {...{ stickyHeader }}
       className={clsx(classes.root, `Mui-table-${variant}`)}
