@@ -1,3 +1,5 @@
+import { formatDate } from '@infinite-debugger/rmk-utils/dates';
+import { addThousandCommas } from '@infinite-debugger/rmk-utils/numbers';
 import {
   ComponentsOverrides,
   ComponentsProps,
@@ -19,8 +21,6 @@ import { format } from 'date-fns';
 import { isValidElement, useEffect, useMemo, useRef } from 'react';
 
 import { BaseTableRow, TableRowProps } from '../interfaces/Table';
-import { formatDate } from '../utils/dates';
-import { addThousandCommas } from '../utils/numbers';
 import { getColumnPaddingStyles, getColumnWidthStyles } from '../utils/Table';
 import EllipsisMenuIconButton, {
   EllipsisMenuIconButtonProps,

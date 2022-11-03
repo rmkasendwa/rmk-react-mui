@@ -1,7 +1,7 @@
+import StorageManager from '@infinite-debugger/rmk-utils/StorageManager';
 import { Reducer } from 'redux';
 
 import { PageHistory } from '../../interfaces/Page';
-import StorageManager from '../../utils/StorageManager';
 import { CLEAR_PAGE_HISTORY, SET_PAGE_TITLE } from './types';
 
 const page: {

@@ -1,3 +1,4 @@
+import StorageManager from '@infinite-debugger/rmk-utils/StorageManager';
 import {
   FC,
   ReactNode,
@@ -12,7 +13,6 @@ import { logout as apiLogout } from '../api';
 import { useAPIService } from '../hooks/Utils';
 import { PermissionCode } from '../interfaces/Users';
 import { TAPIFunction } from '../interfaces/Utils';
-import StorageManager from '../utils/StorageManager';
 import { useAPIContext } from './APIContext';
 
 export interface AuthContext<T = any> {

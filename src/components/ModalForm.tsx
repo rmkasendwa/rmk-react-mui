@@ -1,3 +1,4 @@
+import { diff } from '@infinite-debugger/rmk-utils/data';
 import CloseIcon from '@mui/icons-material/Close';
 import { LoadingButton, LoadingButtonProps } from '@mui/lab';
 import {
@@ -26,7 +27,6 @@ import { Form, Formik, FormikConfig, FormikProps, FormikValues } from 'formik';
 import { isEmpty } from 'lodash';
 import { Children, FC, ReactNode, useEffect, useRef, useState } from 'react';
 
-import { diff } from '../utils/data';
 import ErrorAlert from './ErrorAlert';
 import ErrorFieldHighlighter from './ErrorFieldHighlighter';
 import SearchSyncToolbar from './SearchSyncToolbar';

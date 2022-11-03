@@ -1,6 +1,6 @@
+import StorageManager from '@infinite-debugger/rmk-utils/StorageManager';
 import { Reducer } from 'redux';
 
-import StorageManager from '../../utils/StorageManager';
 import { SET_DARK_MODE, TOGGLE_DARK_MODE } from './types';
 
 const theme = StorageManager.get('theme') || { darkMode: false };
