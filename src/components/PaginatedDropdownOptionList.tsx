@@ -339,7 +339,7 @@ export const PaginatedDropdownOptionList = forwardRef<
                 );
                 if (description) {
                   return (
-                    <Tooltip title={description}>
+                    <Tooltip title={description} key={value}>
                       {dropdownOptionElement}
                     </Tooltip>
                   );

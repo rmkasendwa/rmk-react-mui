@@ -37,7 +37,7 @@ export const FormikPhoneNumberInputField = forwardRef<
     <PhoneNumberInputField
       ref={ref}
       {...rest}
-      {...{ name, value, onChange, onBlur, error, helperText }}
+      {...({ name, value, onChange, onBlur, error, helperText } as any)}
     />
   );
 });

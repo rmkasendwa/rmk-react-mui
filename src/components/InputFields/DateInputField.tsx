@@ -44,7 +44,7 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
     const [open, setOpen] = useState(false);
 
     const triggerChangeEvent = useCallback(
-      (inputValue) => {
+      (inputValue: any) => {
         const event: any = new Event('change', { bubbles: true });
         Object.defineProperty(event, 'target', {
           writable: false,

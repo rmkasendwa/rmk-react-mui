@@ -1,5 +1,6 @@
 import Box, { BoxProps } from '@mui/material/Box';
-import { FC, ReactNode, useEffect, useRef, useState } from 'react';
+import { FC, ReactNode, useEffect, useRef } from 'react';
+import { useInView } from 'react-intersection-observer';
 
 export interface DefaultPlaceholderDimensions {
   height: number;
@@ -68,74 +69,25 @@ export interface RenderIfVisibleProps extends Partial<BoxProps> {
 
 export const RenderIfVisible: FC<RenderIfVisibleProps> = ({
   initialVisible = false,
-  visibleOffset = 1000,
   stayRendered = false,
-  rootNode = null,
   children,
   defaultPlaceholderDimensions = { height: 50 },
   PlaceholderProps = {},
   unWrapChildrenIfVisible = false,
   displayPlaceholder = true,
-  visibilityDelay = 600,
   ...rest
 }) => {
   const { sx: placeholderPropsSx, ...placeholderPropsRest } = PlaceholderProps;
   unWrapChildrenIfVisible && (stayRendered = true);
 
   const isComponentMountedRef = useRef(true);
-  const [isVisible, setIsVisible] = useState(initialVisible);
   const wasVisibleRef = useRef(initialVisible);
   const placeholderDimensionsRef = useRef(defaultPlaceholderDimensions);
-  const wrapperElementRef = useRef<HTMLDivElement>(null);
 
-  // Set visibility with intersection observer
-  useEffect(() => {
-    if (wrapperElementRef.current && isComponentMountedRef.current === true) {
-      const wrapperElement = wrapperElementRef.current!;
-      const observer = new IntersectionObserver(
-        (entries) => {
-          const intersecting = entries.reduce(
-            (accumulator, { isIntersecting }) => accumulator || isIntersecting,
-            false
-          );
-          // Before switching off `isVisible`, set the height of the placeholder
-          if (!intersecting) {
-            placeholderDimensionsRef.current = {
-              height: wrapperElement.offsetHeight,
-            };
-          }
-          if (
-            visibilityDelay > 0 &&
-            typeof window !== undefined &&
-            window.requestIdleCallback
-          ) {
-            window.requestIdleCallback(
-              () => {
-                if (isComponentMountedRef.current === true) {
-                  setIsVisible(intersecting);
-                }
-              },
-              {
-                timeout: visibilityDelay,
-              }
-            );
-          } else {
-            setIsVisible(intersecting);
-          }
-        },
-        {
-          root: rootNode,
-          rootMargin: `${visibleOffset}px 0px ${visibleOffset}px 0px`,
-        }
-      );
-      observer.observe(wrapperElement);
-      return () => {
-        if (wrapperElement) {
-          observer.unobserve(wrapperElement);
-        }
-      };
-    }
-  }, [rootNode, visibilityDelay, visibleOffset]);
+  const { ref, inView: isVisible } = useInView({
+    threshold: 0,
+    initialInView: initialVisible,
+  });
 
   useEffect(() => {
     if (isVisible) {
@@ -155,7 +107,7 @@ export const RenderIfVisible: FC<RenderIfVisibleProps> = ({
   }
 
   return (
-    <Box ref={wrapperElementRef} {...rest}>
+    <Box ref={ref} {...rest}>
       {(() => {
         if (
           (isVisible || (stayRendered && wasVisibleRef.current)) &&

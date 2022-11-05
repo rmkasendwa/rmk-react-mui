@@ -1,26 +1,20 @@
 import StorageManager from '@infinite-debugger/rmk-utils/StorageManager';
 import { useCallback, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 
-import {
-  RootState,
-  setThemeProperty as baseSetThemeProperty,
-  toggleDarkMode as baseToggleDarkMode,
-  setDarkMode,
-} from '../redux';
+import { useAppThemeProperty } from '../contexts/AppThemeContext';
 
 export const useDarkMode = () => {
-  const dispatch = useDispatch();
+  const [darkMode, setDarkMode] = useAppThemeProperty('darkMode');
 
   const toggleDarkMode = useCallback(
-    (darkMode?: boolean) => {
-      if (darkMode != null) {
-        dispatch(setDarkMode(darkMode));
+    (localDarkMode?: boolean) => {
+      if (localDarkMode != null) {
+        setDarkMode(localDarkMode);
       } else {
-        dispatch(baseToggleDarkMode());
+        setDarkMode(!darkMode);
       }
     },
-    [dispatch]
+    [darkMode, setDarkMode]
   );
 
   useEffect(() => {
@@ -37,32 +31,4 @@ export const useDarkMode = () => {
   }, [toggleDarkMode]);
 
   return { toggleDarkMode };
-};
-
-export const useCachedThemeProperty = <T = any>(
-  property: string,
-  defaultValue?: T
-) => {
-  const dispatch = useDispatch();
-  const value: T = useSelector((state: RootState) => {
-    const { theme } = state;
-    return (theme as any)[property] || defaultValue;
-  });
-
-  const setThemeProperty = useCallback(
-    (payload?: T) => {
-      dispatch(baseSetThemeProperty(property, payload));
-    },
-    [dispatch, property]
-  );
-
-  useEffect(() => {
-    if (defaultValue != null && value == null) {
-      setThemeProperty(defaultValue);
-    }
-  }, [defaultValue, setThemeProperty, value]);
-
-  return { setThemeProperty, [property]: value } as {
-    setThemeProperty: (payload: T) => void;
-  } & { [property: string]: T };
 };

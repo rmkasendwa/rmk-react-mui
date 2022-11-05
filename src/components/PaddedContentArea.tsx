@@ -10,6 +10,7 @@ export interface PaddedContentAreaProps
     Pick<PageTitleProps, 'title' | 'tools'> {
   breadcrumbs?: ReactNode;
   PageTitleProps?: Partial<PageTitleProps>;
+  children: ReactNode;
 }
 
 export const PaddedContentArea: FC<PaddedContentAreaProps> = ({

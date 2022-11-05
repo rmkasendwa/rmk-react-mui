@@ -40,6 +40,7 @@ module.exports = {
     'import/no-named-as-default': 'off',
     'import/no-unresolved': 'off',
     'import/default': 'off',
+    'import/no-named-as-default-member': 'off',
   },
   settings: {
     react: {

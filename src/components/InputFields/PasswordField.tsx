@@ -39,7 +39,7 @@ export const PasswordField: FC<PasswordFieldProps> = ({
     onChangeProp && onChangeProp(event);
   }, [id, inputValue, name, onChangeProp]);
 
-  const onChange = useCallback((event) => {
+  const onChange = useCallback((event: any) => {
     setInputValue(event.target.value);
   }, []);
 

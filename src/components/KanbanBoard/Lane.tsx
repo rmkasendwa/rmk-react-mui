@@ -8,11 +8,17 @@ import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import { alpha, darken } from '@mui/system/colorManipulator';
 import { FC, useContext } from 'react';
-import { Container, Draggable } from 'react-smooth-dnd';
+import {
+  Container as BaseContainer,
+  Draggable as BaseDraggable,
+} from 'react-smooth-dnd';
 
 import Card from './Card';
 import { KanbanBoardContext, Lane as LaneType } from './KanbanBoardContext';
 import LaneTools from './LaneTools';
+
+const Container = BaseContainer as any;
+const Draggable = BaseDraggable as any;
 
 export interface LaneProps extends LaneType {}
 
@@ -150,13 +156,13 @@ const Lane: FC<LaneProps> = ({
         </Box>
         <Container
           groupName="col"
-          onDrop={({ addedIndex, removedIndex, payload }) => {
+          onDrop={({ addedIndex, removedIndex, payload }: any) => {
             onCardDrop && onCardDrop(id, { addedIndex, removedIndex, payload });
           }}
-          getChildPayload={(index) => cards[index]}
+          getChildPayload={(index: any) => cards[index]}
           dragClass="card-ghost"
           dropClass="card-ghost-drop"
-          onDragEnd={({ isSource, payload }) => {
+          onDragEnd={({ isSource, payload }: any) => {
             if (isSource) {
               onCardMoveAcrossLanes &&
                 fromLaneId != null &&
@@ -167,7 +173,7 @@ const Lane: FC<LaneProps> = ({
           onDragEnter={() => {
             setToLaneId && setToLaneId(id);
           }}
-          onDragStart={({ isSource }) => {
+          onDragStart={({ isSource }: any) => {
             if (isSource && setFromLaneId) {
               setFromLaneId(id);
             }
