@@ -2,10 +2,16 @@ import Box, { BoxProps } from '@mui/material/Box';
 import useTheme from '@mui/material/styles/useTheme';
 import { darken } from '@mui/system/colorManipulator';
 import { FC, useContext, useEffect, useState } from 'react';
-import { Container, Draggable } from 'react-smooth-dnd';
+import {
+  Container as BaseContainer,
+  Draggable as BaseDraggable,
+} from 'react-smooth-dnd';
 
 import { KanbanBoardContext, Lane as LaneType } from './KanbanBoardContext';
 import Lane from './Lane';
+
+const Container = BaseContainer as any;
+const Draggable = BaseDraggable as any;
 
 export interface DragAndDropContainerProps
   extends Pick<LaneType, 'showCardCount' | 'loading' | 'errorMessage'>,
@@ -132,7 +138,7 @@ const DragAndDropContainer: FC<DragAndDropContainerProps> = ({
           showOnTop: true,
           className: 'cards-drop-preview',
         }}
-        onDrop={({ addedIndex, removedIndex, payload }) => {
+        onDrop={({ addedIndex, removedIndex, payload }: any) => {
           onLaneDrop && onLaneDrop({ addedIndex, removedIndex, payload });
         }}
         onDragStart={() => {

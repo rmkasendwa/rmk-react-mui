@@ -65,7 +65,7 @@ export const AuthProvider: FC<{
   }, []);
 
   const login = useCallback(
-    async (loginFunction): Promise<void> => {
+    async (loginFunction: TAPIFunction): Promise<void> => {
       clearLoggedInUserSession();
       load(loginFunction);
     },

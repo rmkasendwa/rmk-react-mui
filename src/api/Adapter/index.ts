@@ -119,7 +119,7 @@ const fetchData = async <T = any>(
               if (RequestController.processResponseError) {
                 err = await RequestController.processResponseError(err);
               }
-              const { response, message } = err;
+              const { response, message } = err as any;
               if (response?.data) {
                 // Extracting server side error message
                 const message = (() => {
@@ -174,7 +174,7 @@ const fetchData = async <T = any>(
               if (RequestController.rotateHeaders) {
                 patchDefaultRequestHeaders(
                   RequestController.rotateHeaders(
-                    response.headers,
+                    response.headers as any,
                     defaultHeaders
                   )
                 );

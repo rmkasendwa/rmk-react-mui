@@ -36,7 +36,7 @@ export const FormikNumberInputField = forwardRef<
     <NumberInputField
       ref={ref}
       {...rest}
-      {...{ name, value, onChange, onBlur, error, helperText }}
+      {...({ name, value, onChange, onBlur, error, helperText } as any)}
     />
   );
 });

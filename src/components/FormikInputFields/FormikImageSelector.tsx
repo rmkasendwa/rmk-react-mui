@@ -31,7 +31,7 @@ export const FormikImageSelector = forwardRef<
     <ImageSelector
       ref={ref}
       {...rest}
-      {...{ name, value, onChange, error, helperText }}
+      {...({ name, value, onChange, error, helperText } as any)}
     />
   );
 });

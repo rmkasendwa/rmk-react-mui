@@ -36,7 +36,7 @@ export const FormikTextAreaField = forwardRef<
     <TextAreaField
       ref={ref}
       {...rest}
-      {...{ name, value, onChange, onBlur, error, helperText }}
+      {...({ name, value, onChange, onBlur, error, helperText } as any)}
     />
   );
 });

@@ -13,7 +13,7 @@ import FixedHeaderContentArea from './FixedHeaderContentArea';
 import { PaddedContentAreaProps } from './PaddedContentArea';
 
 export interface FormWrapperProps<Values extends FormikValues = FormikValues>
-  extends Omit<PaddedContentAreaProps, 'onSubmit'> {
+  extends Omit<PaddedContentAreaProps, 'onSubmit' | 'children'> {
   initialValues?: Values;
   validationSchema?: any;
   onSubmit?: (
