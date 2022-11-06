@@ -1,9 +1,9 @@
-import { FC } from 'react';
-import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { FC, useEffect, useRef } from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
 
 import { useCachedData } from '../contexts/DataStoreContext';
 
-const ROUTE_CACHE_KEY = 'routeCache';
+export const ROUTE_CACHE_KEY = 'routeCache';
 
 export interface ReactRouterDomSearchParamCacheProps {}
 
@@ -12,18 +12,18 @@ export const ReactRouterDomSearchParamCache: FC<
 > = () => {
   const { pathname, search } = useLocation();
   const { data, updateData } = useCachedData();
-  const routeCache: Record<string, string> = data[ROUTE_CACHE_KEY] || {};
+  const routeCacheRef = useRef(
+    (data[ROUTE_CACHE_KEY] || {}) as Record<string, string>
+  );
 
-  if (search) {
-    routeCache[pathname] = pathname + search;
-    updateData({
-      [ROUTE_CACHE_KEY]: routeCache,
-    });
-  } else {
-    if (routeCache[pathname]) {
-      return <Navigate to={routeCache[pathname]} />;
+  useEffect(() => {
+    if (search) {
+      routeCacheRef.current[pathname] = pathname + search;
+      updateData({
+        [ROUTE_CACHE_KEY]: routeCacheRef.current,
+      });
     }
-  }
+  }, [pathname, search, updateData]);
 
   return <Outlet />;
 };
