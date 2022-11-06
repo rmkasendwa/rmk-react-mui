@@ -494,12 +494,10 @@ export const DataDropdownField = forwardRef<
         anchorEl={anchorRef.current}
         transition
         placement="bottom-start"
-        ref={(element) => {
-          if (element) {
-            element.style.zIndex = '1400';
-          }
-        }}
         tabIndex={-1}
+        sx={{
+          zIndex: 1400,
+        }}
       >
         {({ TransitionProps }) => {
           return (
