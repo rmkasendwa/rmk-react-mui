@@ -1,5 +1,5 @@
 import hash from 'object-hash';
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 export type SetSearchPrams = (
   nextInit: Record<string, string | string[]>,
@@ -10,6 +10,11 @@ export type SetSearchPrams = (
 ) => void;
 
 export const useSetSearchParam = (baseSetSearchParams: SetSearchPrams) => {
+  const baseSetSearchParamsRef = useRef(baseSetSearchParams);
+  useEffect(() => {
+    baseSetSearchParamsRef.current = baseSetSearchParams;
+  }, [baseSetSearchParams]);
+
   const setSearchParams = useCallback(
     (
       searchParams: Record<string, string | null>,
@@ -46,10 +51,10 @@ export const useSetSearchParam = (baseSetSearchParams: SetSearchPrams) => {
         }, {} as Record<string, string | string[]>);
 
       if (hash(nextSearchParams) !== hash(existingSearchParams)) {
-        baseSetSearchParams(nextSearchParams, navigateOptions);
+        baseSetSearchParamsRef.current(nextSearchParams, navigateOptions);
       }
     },
-    [baseSetSearchParams]
+    []
   );
 
   return { setSearchParams };
