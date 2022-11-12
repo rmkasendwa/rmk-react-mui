@@ -25,7 +25,7 @@ import {
 import clsx from 'clsx';
 import { Form, Formik, FormikConfig, FormikProps, FormikValues } from 'formik';
 import { isEmpty } from 'lodash';
-import { Children, FC, ReactNode, useEffect, useRef, useState } from 'react';
+import { Children, FC, ReactNode, useEffect, useRef } from 'react';
 
 import ErrorAlert from './ErrorAlert';
 import ErrorFieldHighlighter from './ErrorFieldHighlighter';
@@ -149,9 +149,9 @@ export const ModalForm: FC<ModalFormProps> = (inProps) => {
     ...props,
   });
 
-  const { spacing, palette, components } = useTheme();
+  const { palette, components } = useTheme();
 
-  const { sx: cardPropsSx, ...cardPropsRest } = CardProps;
+  const { sx: CardPropsSx, ...CardPropsRest } = CardProps;
   const { ...submitButtonPropsRest } = SubmitButtonProps;
 
   const onSubmitSuccessRef = useRef(onSubmitSuccess);
@@ -161,23 +161,6 @@ export const ModalForm: FC<ModalFormProps> = (inProps) => {
     onSubmitSuccessRef.current = onSubmitSuccess;
     onCloseRef.current = onClose;
   }, [onClose, onSubmitSuccess]);
-
-  const [detailsContainerElement, setDetailsContainerElement] =
-    useState<HTMLDivElement | null>(null);
-  const [detailsContainerHeight, setDetailsContainerHeight] = useState(0);
-
-  useEffect(() => {
-    if (detailsContainerElement) {
-      const windowResizeEventCallback = () => {
-        setDetailsContainerHeight(detailsContainerElement.offsetHeight);
-      };
-      window.addEventListener('resize', windowResizeEventCallback);
-      setDetailsContainerHeight(detailsContainerElement.offsetHeight);
-      return () => {
-        window.removeEventListener('resize', windowResizeEventCallback);
-      };
-    }
-  }, [detailsContainerElement]);
 
   useEffect(() => {
     if (submitted && !successMessage) {
@@ -208,8 +191,18 @@ export const ModalForm: FC<ModalFormProps> = (inProps) => {
       disableAutoFocus
     >
       <Card
-        {...cardPropsRest}
-        sx={{ maxWidth: 640, width: `100%`, ...cardPropsSx }}
+        {...CardPropsRest}
+        sx={{
+          width: '100%',
+          maxWidth: 640,
+          maxHeight: '80%',
+          form: {
+            display: 'flex',
+            flexDirection: 'column',
+            height: '100%',
+          },
+          ...CardPropsSx,
+        }}
       >
         <Formik
           {...{ initialValues, validationSchema, onSubmit }}
@@ -236,9 +229,6 @@ export const ModalForm: FC<ModalFormProps> = (inProps) => {
                 <Box sx={{ py: 0, px: 3 }}>
                   {staticEntityDetails ? (
                     <Box
-                      ref={(detailsContainerElement: HTMLDivElement | null) => {
-                        setDetailsContainerElement(detailsContainerElement);
-                      }}
                       sx={{
                         ...(() => {
                           if (!showForm) {
@@ -264,9 +254,7 @@ export const ModalForm: FC<ModalFormProps> = (inProps) => {
                           overflowY: 'auto',
                           py: 2,
                           px: 3,
-                          maxHeight: `calc(100vh - 144px - ${spacing(
-                            8
-                          )} - ${detailsContainerHeight}px)`,
+                          flex: 1,
                         }}
                       >
                         {(() => {
