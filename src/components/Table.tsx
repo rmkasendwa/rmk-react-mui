@@ -371,6 +371,12 @@ export const BaseTable = <T extends BaseTableRow>(
               0.02
             ),
           },
+          [`
+            th.${tableCellClasses.root}:nth-of-type(even).${OPAQUE_BG_CLASS_NAME}>div,
+            td.${tableCellClasses.root}:nth-of-type(even).${OPAQUE_BG_CLASS_NAME}
+          `]: {
+            bgcolor: parentBackgroundColor,
+          },
           [`&.odd`]: {
             [`
               th.${tableCellClasses.root}:nth-of-type(odd).${OPAQUE_BG_CLASS_NAME}>div,
@@ -379,6 +385,15 @@ export const BaseTable = <T extends BaseTableRow>(
               bgcolor: (palette.mode === 'light' ? darken : lighten)(
                 parentBackgroundColor,
                 0.04
+              ),
+            },
+            [`
+              th.${tableCellClasses.root}:nth-of-type(even).${OPAQUE_BG_CLASS_NAME}>div,
+              td.${tableCellClasses.root}:nth-of-type(even).${OPAQUE_BG_CLASS_NAME}
+            `]: {
+              bgcolor: (palette.mode === 'light' ? darken : lighten)(
+                parentBackgroundColor,
+                0.02
               ),
             },
           },
@@ -448,6 +463,9 @@ export const BaseTable = <T extends BaseTableRow>(
         minWidth,
         ...variantStyles,
         ...sx,
+        [`.${OPAQUE_BG_CLASS_NAME}`]: {
+          bgcolor: parentBackgroundColor,
+        },
       }}
     >
       {showHeaderRow ? (
