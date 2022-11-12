@@ -49,7 +49,7 @@ export interface RequestController {
     requestHeaders: Record<string, string>
   ) => Record<string, string>;
   processResponse?: ResponseProcessor;
-  processResponseError?: (err: AxiosError) => any;
+  processResponseError?: (err: AxiosError<any>) => any;
 }
 export const RequestController: RequestController = {};
 

@@ -304,8 +304,16 @@ export const BaseTable = <T extends BaseTableRow>(
   }, [columnsProp, currencyCode]);
 
   const minWidth = useMemo(() => {
-    return getTableMinWidth(columns);
-  }, [columns]);
+    return getTableMinWidth(
+      columns.map((column) => {
+        const { minWidth } = column;
+        return {
+          ...column,
+          minWidth: minWidth ?? minColumnWidth,
+        };
+      })
+    );
+  }, [columns, minColumnWidth]);
 
   const pageRows: typeof rows = useMemo(() => {
     return totalRowCount || !paging
