@@ -40,7 +40,7 @@ export const isValidPhoneNumber = (
   phoneNumber: string,
   regionalCode?: CountryCode,
   defaultCountryCodeIsPrecident?: boolean
-): boolean | PhoneNumber => {
+): false | PhoneNumber => {
   const phoneNummberValid = (() => {
     try {
       !defaultCountryCodeIsPrecident &&

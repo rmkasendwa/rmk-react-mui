@@ -268,7 +268,7 @@ export const useRecords = <T>(
 
   return {
     records: record!,
-    setRecords: setRecord,
+    setRecords: setRecord as Dispatch<SetStateAction<T>>,
     ...rest,
   };
 };

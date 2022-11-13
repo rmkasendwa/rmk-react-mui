@@ -10,7 +10,7 @@ import Grid from '@mui/material/Grid';
 import Toolbar, { ToolbarProps } from '@mui/material/Toolbar';
 import { Children, FC, ReactNode, useEffect, useState } from 'react';
 
-import TextField from './InputFields/TextField';
+import TextField, { TextFieldProps } from './InputFields/TextField';
 import ReloadIconButton, { ReloadIconButtonProps } from './ReloadIconButton';
 
 export interface SearchSyncToolbarProps
@@ -47,6 +47,7 @@ export interface SearchSyncToolbarProps
   children?: ReactNode;
   TitleProps?: Partial<Omit<TypographyProps, 'ref'>>;
   searchFieldOpen?: boolean;
+  SearchFieldProps?: Partial<TextFieldProps>;
 }
 
 export const SearchSyncToolbar: FC<SearchSyncToolbarProps> = ({
@@ -64,9 +65,12 @@ export const SearchSyncToolbar: FC<SearchSyncToolbarProps> = ({
   children,
   TitleProps = {},
   searchFieldOpen: searchFieldOpenProp,
+  SearchFieldProps = {},
   ...rest
 }) => {
   tools || (tools = children);
+
+  const { ...SearchFieldPropsRest } = SearchFieldProps;
 
   const { sx: titlePropsSx, ...titlePropsRest } = TitleProps;
   const [searchTerm, setSearchTerm] = useState('');
@@ -117,6 +121,9 @@ export const SearchSyncToolbar: FC<SearchSyncToolbarProps> = ({
                     const textField = (
                       <TextField
                         placeholder={searchFieldPlaceholder}
+                        variant="outlined"
+                        fullWidth
+                        {...SearchFieldPropsRest}
                         InputProps={{
                           startAdornment: (
                             <SearchIcon
@@ -130,7 +137,6 @@ export const SearchSyncToolbar: FC<SearchSyncToolbarProps> = ({
                             searchTermProp.length <= 0 && searchFieldOpen,
                           sx: { fontSize: 'default' },
                         }}
-                        variant="outlined"
                         value={searchTerm}
                         onChange={(event) => {
                           setSearchTerm(event.target.value);
@@ -145,7 +151,6 @@ export const SearchSyncToolbar: FC<SearchSyncToolbarProps> = ({
                         onBlur={() => {
                           onSearch && onSearch(searchTerm);
                         }}
-                        fullWidth
                       />
                     );
                     return (
@@ -179,8 +184,10 @@ export const SearchSyncToolbar: FC<SearchSyncToolbarProps> = ({
         ) : hasSearchTool ? (
           <Grid item xs sx={{ minWidth: 0 }}>
             <TextField
-              fullWidth
               placeholder={searchFieldPlaceholder}
+              variant="standard"
+              fullWidth
+              {...SearchFieldPropsRest}
               InputProps={{
                 startAdornment: (
                   <SearchIcon
@@ -193,7 +200,6 @@ export const SearchSyncToolbar: FC<SearchSyncToolbarProps> = ({
                 disableUnderline: true,
                 sx: { fontSize: 'default' },
               }}
-              variant="standard"
               value={searchTerm}
               onChange={(event) => {
                 setSearchTerm(event.target.value);

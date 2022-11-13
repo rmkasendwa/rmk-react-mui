@@ -48,6 +48,7 @@ export interface DataDropdownFieldProps
   optionPaging?: boolean;
   onChangeSearchTerm?: (searchTerm: string) => void;
   SelectedOptionPillProps?: Partial<BoxProps>;
+  searchable?: boolean;
 }
 
 export const DataDropdownField = forwardRef<
@@ -76,14 +77,18 @@ export const DataDropdownField = forwardRef<
     optionVariant,
     sx,
     SelectedOptionPillProps = {},
+    WrapperProps = {},
     disabled,
     showClearButton = true,
+    searchable = true,
     ...rest
   },
   ref
 ) {
-  const { sx: selectedOptionPillPropsSx, ...selectedOptionPillPropsRest } =
+  const { sx: SelectedOptionPillPropsSx, ...SelectedOptionPillPropsRest } =
     SelectedOptionPillProps;
+  const { sx: WrapperPropsSx, ...WrapperPropsRest } = WrapperProps;
+
   const multiple = SelectProps?.multiple;
   const { preferStale } = useAPIDataContext();
   const { palette } = useTheme();
@@ -352,8 +357,10 @@ export const DataDropdownField = forwardRef<
           }
         }}
         onChange={(event) => {
-          setSearchTerm(event.target.value);
-          onChangeSearchTerm && onChangeSearchTerm(event.target.value);
+          if (searchable) {
+            setSearchTerm(event.target.value);
+            onChangeSearchTerm && onChangeSearchTerm(event.target.value);
+          }
         }}
         InputProps={{
           endAdornment: (
@@ -387,9 +394,10 @@ export const DataDropdownField = forwardRef<
             return props;
           })(),
           ref: anchorRef,
+          readOnly: !searchable,
         }}
         value={(() => {
-          if (focused) {
+          if (focused && searchable) {
             return searchTerm;
           } else {
             return selectedOptionDisplayString;
@@ -398,69 +406,77 @@ export const DataDropdownField = forwardRef<
         {...{ disabled }}
         {...rest}
         {...errorProps}
-        endChildren={
-          !focused && selectedOptions.length > 0 ? (
-            <Box
-              className="data-dropdown-field-selected-option-wrapper"
-              sx={{
-                position: 'absolute',
-                bottom: 0,
-                left: 0,
-                height: '100%',
-                pointerEvents: 'none',
-                display: 'flex',
-                alignItems: 'center',
-                pl: '14px',
-                whiteSpace: 'nowrap',
-                gap: 0.5,
-                overflow: 'hidden',
-              }}
-            >
-              {multiple ? (
-                selectedOptions.map(({ label, value }) => {
-                  return (
-                    <Box
-                      key={value}
-                      {...selectedOptionPillPropsRest}
-                      sx={{
-                        fontSize: 14,
-                        bgcolor: alpha(palette.primary.main, 0.1),
-                        borderRadius: '20px',
-                        height: 25,
-                        py: 0.25,
-                        pl: (() => {
-                          if (['string', 'number'].includes(typeof label)) {
-                            return 1;
-                          }
-                          return 0.25;
-                        })(),
-                        pr: 1,
-                        mr: 0.5,
-                        ...selectedOptionPillPropsSx,
-                      }}
-                    >
-                      {label}
-                    </Box>
-                  );
-                })
-              ) : (
-                <Typography
-                  component="div"
-                  sx={{
-                    fontSize: 14,
-                  }}
-                >
-                  {selectedOptions[0]?.label}
-                </Typography>
-              )}
-            </Box>
-          ) : null
-        }
+        endChildren={(() => {
+          if (searchable && !focused && selectedOptions.length > 0) {
+            return (
+              <Box
+                className="data-dropdown-field-selected-option-wrapper"
+                sx={{
+                  position: 'absolute',
+                  bottom: 0,
+                  left: 0,
+                  height: '100%',
+                  pointerEvents: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  pl: '14px',
+                  whiteSpace: 'nowrap',
+                  gap: 0.5,
+                  overflow: 'hidden',
+                }}
+              >
+                {multiple ? (
+                  selectedOptions.map(({ label, value }) => {
+                    return (
+                      <Box
+                        key={value}
+                        {...SelectedOptionPillPropsRest}
+                        sx={{
+                          fontSize: 14,
+                          bgcolor: alpha(palette.primary.main, 0.1),
+                          borderRadius: '20px',
+                          height: 25,
+                          py: 0.25,
+                          pl: (() => {
+                            if (['string', 'number'].includes(typeof label)) {
+                              return 1;
+                            }
+                            return 0.25;
+                          })(),
+                          pr: 1,
+                          mr: 0.5,
+                          ...SelectedOptionPillPropsSx,
+                        }}
+                      >
+                        {label}
+                      </Box>
+                    );
+                  })
+                ) : (
+                  <Typography
+                    component="div"
+                    sx={{
+                      fontSize: 14,
+                    }}
+                  >
+                    {selectedOptions[0]?.label}
+                  </Typography>
+                )}
+              </Box>
+            );
+          }
+        })()}
         WrapperProps={{
+          ...WrapperPropsRest,
           sx: {
             width: '100%',
+            ...WrapperPropsSx,
             [`& .${inputBaseClasses.input}`]: (() => {
-              if (!focused && selectedOptionDisplayString.length > 0) {
+              if (
+                searchable &&
+                !focused &&
+                selectedOptionDisplayString.length > 0
+              ) {
                 return { color: 'transparent' };
               }
               return {};
