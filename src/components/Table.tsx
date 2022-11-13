@@ -19,7 +19,9 @@ import MuiBaseTable, {
 import TableBody, { tableBodyClasses } from '@mui/material/TableBody';
 import TableCell, { tableCellClasses } from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
-import TablePagination from '@mui/material/TablePagination';
+import TablePagination, {
+  TablePaginationProps,
+} from '@mui/material/TablePagination';
 import TableRow, {
   TableRowProps as MuiTableRowProps,
   tableRowClasses,
@@ -108,6 +110,7 @@ export interface TableProps<T = any>
   rowStartIndex?: number;
   rowsPerPage?: number;
   pageIndex?: number;
+  filterdRowCount?: number;
   totalRowCount?: number;
   labelPlural?: string;
   labelSingular?: string;
@@ -153,6 +156,7 @@ export const BaseTable = <T extends BaseTableRow>(
     onClickRow,
     columns: columnsProp,
     rows,
+    filterdRowCount,
     totalRowCount,
     rowStartIndex = 0,
     labelPlural = 'Records',
@@ -662,6 +666,22 @@ export const BaseTable = <T extends BaseTableRow>(
         </Box>
         <Divider />
         {(() => {
+          const paginationProps: Pick<
+            TablePaginationProps,
+            | 'page'
+            | 'rowsPerPageOptions'
+            | 'rowsPerPage'
+            | 'onRowsPerPageChange'
+          > = {
+            page: pageIndex,
+            rowsPerPageOptions: [10, 25, 50, 100],
+            rowsPerPage,
+            onRowsPerPageChange: (event) => {
+              setPageIndex(0);
+              setRowsPerPage(+event.target.value);
+              onRowsPerPageChange && onRowsPerPageChange(+event.target.value);
+            },
+          };
           if (paginationType === 'classic') {
             return (
               <DataTablePagination
@@ -670,16 +690,9 @@ export const BaseTable = <T extends BaseTableRow>(
                   labelSingular,
                   lowercaseLabelPlural,
                 }}
-                filteredCount={rows.length}
-                totalCount={rows.length}
-                page={pageIndex}
-                rowsPerPageOptions={[10, 25, 50, 100]}
-                rowsPerPage={rowsPerPage}
-                onRowsPerPageChange={(event) => {
-                  setRowsPerPage(+event.target.value);
-                  onRowsPerPageChange &&
-                    onRowsPerPageChange(+event.target.value);
-                }}
+                filteredCount={filterdRowCount || totalRowCount || rows.length}
+                totalCount={totalRowCount || rows.length}
+                {...paginationProps}
                 PaginationProps={{
                   ...PaginationProps,
                   onChange: (e, pageNumber) => {
@@ -694,12 +707,7 @@ export const BaseTable = <T extends BaseTableRow>(
               rowsPerPageOptions={[10, 25, 50, 100]}
               component="div"
               count={totalRowCount || rows.length}
-              rowsPerPage={rowsPerPage}
-              onRowsPerPageChange={(event) => {
-                setRowsPerPage(+event.target.value);
-                onRowsPerPageChange && onRowsPerPageChange(+event.target.value);
-              }}
-              page={pageIndex}
+              {...paginationProps}
               onPageChange={handleChangePage}
               showFirstButton
               showLastButton
