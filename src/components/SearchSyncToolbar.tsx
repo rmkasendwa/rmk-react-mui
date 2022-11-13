@@ -26,6 +26,7 @@ export interface SearchSyncToolbarProps
   searchTerm?: string;
   searchFieldPlaceholder?: string;
   onChangeSearchTerm?: (searchTerm: string) => void;
+  onSearch?: (searchTerm: string) => void;
   /**
    * Determines whether the component should be rendered with a synchronize tool.
    * Note: The synchronize tool will not be rendered if the load function is not supplied regardless of whether this value is set to true.
@@ -58,6 +59,7 @@ export const SearchSyncToolbar: FC<SearchSyncToolbarProps> = ({
   loading,
   errorMessage,
   onChangeSearchTerm,
+  onSearch,
   tools,
   children,
   TitleProps = {},
@@ -71,6 +73,12 @@ export const SearchSyncToolbar: FC<SearchSyncToolbarProps> = ({
   const [searchFieldOpen, setSearchFieldOpen] = useState(
     searchTermProp.length > 0
   );
+
+  useEffect(() => {
+    if (searchTerm.length <= 0) {
+      onSearch && onSearch(searchTerm);
+    }
+  }, [onSearch, searchTerm]);
 
   useEffect(() => {
     setSearchTerm(searchTermProp);
@@ -129,6 +137,14 @@ export const SearchSyncToolbar: FC<SearchSyncToolbarProps> = ({
                           onChangeSearchTerm &&
                             onChangeSearchTerm(event.target.value);
                         }}
+                        onKeyUp={(event) => {
+                          if (event.key === 'Enter' && onSearch) {
+                            onSearch(searchTerm);
+                          }
+                        }}
+                        onBlur={() => {
+                          onSearch && onSearch(searchTerm);
+                        }}
                         fullWidth
                       />
                     );
@@ -182,6 +198,14 @@ export const SearchSyncToolbar: FC<SearchSyncToolbarProps> = ({
               onChange={(event) => {
                 setSearchTerm(event.target.value);
                 onChangeSearchTerm && onChangeSearchTerm(event.target.value);
+              }}
+              onKeyUp={(event) => {
+                if (event.key === 'Enter' && onSearch) {
+                  onSearch(searchTerm);
+                }
+              }}
+              onBlur={() => {
+                onSearch && onSearch(searchTerm);
               }}
             />
           </Grid>

@@ -4,6 +4,7 @@ import {
   ComponentsOverrides,
   ComponentsProps,
   ComponentsVariants,
+  Link,
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
   generateUtilityClasses,
@@ -19,8 +20,13 @@ import Typography from '@mui/material/Typography';
 import clsx from 'clsx';
 import { format } from 'date-fns';
 import { isValidElement, useEffect, useMemo, useRef } from 'react';
+import * as yup from 'yup';
 
 import { BaseTableRow, TableRowProps } from '../interfaces/Table';
+import {
+  isValidPhoneNumber,
+  systemStandardPhoneNumberFormat,
+} from '../utils/PhoneNumberUtil';
 import { getColumnPaddingStyles, getColumnWidthStyles } from '../utils/Table';
 import EllipsisMenuIconButton, {
   EllipsisMenuIconButtonProps,
@@ -98,7 +104,6 @@ export const TableBodyRow = <T extends BaseTableRow>(
   const {
     columns,
     row,
-    forEachDerivedColumn,
     getRowProps,
     generateRowData,
     decimalPlaces,
@@ -126,15 +131,13 @@ export const TableBodyRow = <T extends BaseTableRow>(
 
   // Refs
   const columnsRef = useRef(columns);
-  const forEachDerivedColumnRef = useRef(forEachDerivedColumn);
   const getRowPropsRef = useRef(getRowProps);
   const generateRowDataRef = useRef(generateRowData);
   useEffect(() => {
     columnsRef.current = columns;
-    forEachDerivedColumnRef.current = forEachDerivedColumn;
     getRowPropsRef.current = getRowProps;
     generateRowDataRef.current = generateRowData;
-  }, [columns, forEachDerivedColumn, generateRowData, getRowProps]);
+  }, [columns, generateRowData, getRowProps]);
 
   const { palette, components } = useTheme();
 
@@ -145,14 +148,7 @@ export const TableBodyRow = <T extends BaseTableRow>(
     return {
       ...columns.reduce(
         (accumulator, column) => {
-          const {
-            type,
-            id,
-            defaultColumnValue,
-            postProcessor,
-            isDerivedColumn,
-            getColumnValue,
-          } = column;
+          const { type, id, defaultColumnValue, getColumnValue } = column;
           let columnValue = (() => {
             if (getColumnValue) {
               if (type === 'ellipsisMenuTool') {
@@ -171,12 +167,6 @@ export const TableBodyRow = <T extends BaseTableRow>(
                 return defaultColumnValue;
               }
               return getColumnValue(row, column);
-            }
-            if (isDerivedColumn && forEachDerivedColumnRef.current) {
-              return forEachDerivedColumnRef.current({
-                key: String(id),
-                currentEntity: row,
-              });
             }
             return (row as any)[id];
           })();
@@ -239,7 +229,38 @@ export const TableBodyRow = <T extends BaseTableRow>(
                 columnValue = addThousandCommas(columnValue);
                 break;
               case 'phoneNumber':
-                // TODO: Implement this
+                if (
+                  typeof columnValue === 'string' &&
+                  isValidPhoneNumber(columnValue)
+                ) {
+                  columnValue = (
+                    <Link
+                      href={`tel://${columnValue}`}
+                      underline="hover"
+                      sx={{ display: 'block', width: '100%' }}
+                      noWrap
+                    >
+                      {systemStandardPhoneNumberFormat(columnValue)}
+                    </Link>
+                  );
+                }
+                break;
+              case 'email':
+                if (
+                  typeof columnValue === 'string' &&
+                  yup.string().email().isValidSync(columnValue)
+                ) {
+                  columnValue = (
+                    <Link
+                      href={`mailto:${columnValue}`}
+                      underline="hover"
+                      sx={{ display: 'block', width: '100%' }}
+                      noWrap
+                    >
+                      {columnValue}
+                    </Link>
+                  );
+                }
                 break;
               case 'enum':
                 if (textTransform) {
@@ -250,9 +271,6 @@ export const TableBodyRow = <T extends BaseTableRow>(
                 columnValue = columnValue ? 'Yes' : 'No';
                 break;
             }
-          }
-          if (postProcessor && columnValue != null) {
-            columnValue = postProcessor(columnValue, row, column);
           }
           if (columnValue == null) {
             columnValue = defaultColumnValue ?? baseDefaultColumnValue ?? (
