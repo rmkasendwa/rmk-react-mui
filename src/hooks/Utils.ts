@@ -1,5 +1,7 @@
 import { pick } from 'lodash';
 import {
+  Dispatch,
+  SetStateAction,
   useCallback,
   useContext,
   useEffect,
@@ -145,13 +147,15 @@ export const useCreate = <T>() => {
 };
 
 export const useUpdate = <T>() => {
-  const { create, creating, created, createdRecord, ...rest } = useCreate<T>();
+  const { create, creating, created, createdRecord, setCreated, ...rest } =
+    useCreate<T>();
 
   return {
     update: create,
     updating: creating,
     updated: created,
     updatedRecord: createdRecord,
+    setUpdated: setCreated,
     ...rest,
   };
 };
@@ -177,6 +181,7 @@ export const useRecord = <T>(
     errorMessage,
     busy,
     record,
+    setRecord,
     ...rest
   } = useAPIService(defaultValue!, key);
 
@@ -244,6 +249,7 @@ export const useRecord = <T>(
     loading,
     errorMessage,
     record: record || null,
+    setRecord: setRecord as Dispatch<SetStateAction<T | null>>,
     busy,
     ...rest,
   };
