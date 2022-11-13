@@ -96,7 +96,6 @@ export interface TableProps<T = any>
     Pick<
       TableRowProps<T>,
       | 'columns'
-      | 'forEachDerivedColumn'
       | 'generateRowData'
       | 'decimalPlaces'
       | 'textTransform'
@@ -162,7 +161,6 @@ export const BaseTable = <T extends BaseTableRow>(
     pageIndex: pageIndexProp = 0,
     onChangePage,
     onRowsPerPageChange,
-    forEachDerivedColumn,
     forEachRowProps,
     generateRowData,
     variant = 'plain',
@@ -613,7 +611,6 @@ export const BaseTable = <T extends BaseTableRow>(
                       {...{
                         columns,
                         row,
-                        forEachDerivedColumn,
                         decimalPlaces,
                         textTransform,
                         onClickRow,

@@ -8,13 +8,6 @@ import {
 
 import { CountryCode } from '../interfaces/Countries';
 
-const systemStandardFormatSupportedCountries: CountryCode[] = [
-  'UG',
-  'DE',
-  'TZ',
-  'KE',
-];
-
 const PhoneNumberUtil = new PhoneNumberUtilConstructor();
 
 export default PhoneNumberUtil;
@@ -48,29 +41,31 @@ export const isValidPhoneNumber = (
   regionalCode?: CountryCode,
   defaultCountryCodeIsPrecident?: boolean
 ): boolean | PhoneNumber => {
-  try {
-    !defaultCountryCodeIsPrecident &&
-      phoneNumber.startsWith('+') &&
-      (regionalCode = getRegionalCode(phoneNumber));
-    const parsedPhoneNumber = PhoneNumberUtil.parseAndKeepRawInput(
-      phoneNumber,
-      regionalCode
-    );
-    if (PhoneNumberUtil.isValidNumber(parsedPhoneNumber)) {
-      return parsedPhoneNumber;
+  const phoneNummberValid = (() => {
+    try {
+      !defaultCountryCodeIsPrecident &&
+        phoneNumber.startsWith('+') &&
+        (regionalCode = getRegionalCode(phoneNumber));
+      const parsedPhoneNumber = PhoneNumberUtil.parseAndKeepRawInput(
+        phoneNumber,
+        regionalCode
+      );
+      if (PhoneNumberUtil.isValidNumber(parsedPhoneNumber)) {
+        return parsedPhoneNumber;
+      }
+    } catch (exception) {
+      // TODO: Log the error
     }
-  } catch (exception) {
-    // TODO: Log the error
     return false;
-  }
-  if (!phoneNumber.startsWith('+')) {
+  })();
+  if (!phoneNummberValid && !phoneNumber.startsWith('+')) {
     return isValidPhoneNumber(
       '+' + phoneNumber,
       regionalCode,
       defaultCountryCodeIsPrecident
     );
   }
-  return false;
+  return phoneNummberValid;
 };
 
 export const systemStandardPhoneNumberFormat = (
@@ -82,36 +77,11 @@ export const systemStandardPhoneNumberFormat = (
     regionalCode
   ) as PhoneNumber;
   if (phoneNumber) {
-    let formattedPhoneNumber = PhoneNumberUtil.format(
+    const formattedPhoneNumber = PhoneNumberUtil.format(
       phoneNumber,
       PhoneNumberFormat.INTERNATIONAL
     );
-    const countryCode = phoneNumber.getCountryCode();
-    if (countryCode) {
-      regionalCode = PhoneNumberUtil.getRegionCodeForCountryCode(
-        countryCode
-      ) as CountryCode;
-      if (systemStandardFormatSupportedCountries.includes(regionalCode)) {
-        const formattedPhoneNumberWithoutSpaces =
-          formattedPhoneNumber.replaceAll(/\s/g, '');
-        if (
-          regionalCode === 'UG' &&
-          PhoneNumberUtil.isValidNumber(phoneNumber) &&
-          formattedPhoneNumberWithoutSpaces.length === 13
-        ) {
-          const formattedPhoneNumberParts = (
-            formattedPhoneNumberWithoutSpaces.chunk(4, 4) as string
-          ).split(' ');
-          formattedPhoneNumber = `${formattedPhoneNumberParts[0]} (${formattedPhoneNumberParts[1]}) ${formattedPhoneNumberParts[2]} ${formattedPhoneNumberParts[3]}`;
-        } else {
-          const formattedPhoneNumberParts = formattedPhoneNumber.split(' ');
-          formattedPhoneNumber = `${formattedPhoneNumberParts.shift()} (${formattedPhoneNumberParts.shift()}) ${formattedPhoneNumberParts
-            .join('')
-            .chunk(2)}`;
-        }
-      }
-      return formattedPhoneNumber;
-    }
+    return formattedPhoneNumber;
   }
   return phoneNumberString;
 };

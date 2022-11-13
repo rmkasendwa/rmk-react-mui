@@ -34,6 +34,7 @@ export type TableColumnType =
   | 'phonenumberInput'
   | 'rowAdder'
   | 'time'
+  | 'email'
   | 'tool'
   | 'ellipsisMenuTool';
 
@@ -57,7 +58,6 @@ export interface TableColumn<
   align?: 'left' | 'center' | 'right';
   width?: number;
   minWidth?: number;
-  isDerivedColumn?: boolean;
   noHeaderTextAfter?: boolean;
   headerTextAfter?: ReactNode;
   enumValues?: TableColumnEnumValue[];
@@ -65,11 +65,6 @@ export interface TableColumn<
   columnClassName?: string;
   locked?: boolean;
   defaultColumnValue?: ReactNode;
-  postProcessor?: (
-    columnValue: ReactNode,
-    row: RowObject,
-    column: TableColumn<RowObject, ColumnType>
-  ) => ReactNode;
   getColumnValue?: GetColumnValue<RowObject, ColumnType>;
   onClickColumn?: (currentEntity: RowObject) => void;
   headerSx?: SxProps<Theme>;
@@ -93,9 +88,6 @@ export interface BaseTableRow {
 export interface TableRowProps<T = any> {
   columns: Array<TableColumn<T>>;
   row: T;
-  forEachDerivedColumn?: (
-    config: ForEachDerivedColumnConfiguration<T>
-  ) => ReactNode | null | undefined;
   generateRowData?: (currentEntity: T) => any;
   getRowProps?: GetRowProps;
   decimalPlaces?: number;
