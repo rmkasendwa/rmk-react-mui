@@ -672,8 +672,14 @@ export const BaseTable = <T extends BaseTableRow>(
                 }}
                 filteredCount={rows.length}
                 totalCount={rows.length}
-                limit={rowsPerPage}
-                offset={pageIndex}
+                page={pageIndex}
+                rowsPerPageOptions={[10, 25, 50, 100]}
+                rowsPerPage={rowsPerPage}
+                onRowsPerPageChange={(event) => {
+                  setRowsPerPage(+event.target.value);
+                  onRowsPerPageChange &&
+                    onRowsPerPageChange(+event.target.value);
+                }}
                 PaginationProps={{
                   ...PaginationProps,
                   onChange: (e, pageNumber) => {

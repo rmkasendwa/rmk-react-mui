@@ -22,12 +22,14 @@ import { format } from 'date-fns';
 import { isValidElement, useEffect, useMemo, useRef } from 'react';
 import * as yup from 'yup';
 
+import { CountryCode } from '../interfaces/Countries';
 import { BaseTableRow, TableRowProps } from '../interfaces/Table';
-import {
+import PhoneNumberUtil, {
   isValidPhoneNumber,
   systemStandardPhoneNumberFormat,
 } from '../utils/PhoneNumberUtil';
 import { getColumnPaddingStyles, getColumnWidthStyles } from '../utils/Table';
+import CountryFieldValue from './CountryFieldValue';
 import EllipsisMenuIconButton, {
   EllipsisMenuIconButtonProps,
 } from './EllipsisMenuIconButton';
@@ -229,20 +231,38 @@ export const TableBodyRow = <T extends BaseTableRow>(
                 columnValue = addThousandCommas(columnValue);
                 break;
               case 'phoneNumber':
-                if (
-                  typeof columnValue === 'string' &&
-                  isValidPhoneNumber(columnValue)
-                ) {
-                  columnValue = (
-                    <Link
-                      href={`tel://${columnValue}`}
-                      underline="hover"
-                      sx={{ display: 'block', width: '100%' }}
-                      noWrap
-                    >
-                      {systemStandardPhoneNumberFormat(columnValue)}
-                    </Link>
-                  );
+                if (typeof columnValue === 'string') {
+                  const phoneNumber = isValidPhoneNumber(columnValue);
+                  if (phoneNumber) {
+                    columnValue = (
+                      <Link
+                        href={`tel://${columnValue}`}
+                        underline="none"
+                        color="inherit"
+                        noWrap
+                        sx={{ display: 'block', maxWidth: '100%' }}
+                      >
+                        <CountryFieldValue
+                          countryCode={
+                            PhoneNumberUtil.getRegionCodeForCountryCode(
+                              phoneNumber.getCountryCode()!
+                            ) as CountryCode
+                          }
+                          countryLabel={systemStandardPhoneNumberFormat(
+                            columnValue
+                          )}
+                          FieldValueProps={{
+                            noWrap: true,
+                            sx: {
+                              fontWeight: 'normal',
+                              whiteSpace: 'nowrap',
+                              color: 'inherit',
+                            },
+                          }}
+                        />
+                      </Link>
+                    );
+                  }
                 }
                 break;
               case 'email':
@@ -254,8 +274,9 @@ export const TableBodyRow = <T extends BaseTableRow>(
                     <Link
                       href={`mailto:${columnValue}`}
                       underline="hover"
-                      sx={{ display: 'block', width: '100%' }}
+                      color="inherit"
                       noWrap
+                      sx={{ display: 'block', maxWidth: '100%' }}
                     >
                       {columnValue}
                     </Link>

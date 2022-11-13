@@ -1,16 +1,22 @@
+import { TablePaginationProps, inputBaseClasses } from '@mui/material';
 import Grid, { GridProps } from '@mui/material/Grid';
 import Pagination, { PaginationProps } from '@mui/material/Pagination';
 import Typography from '@mui/material/Typography';
 import { forwardRef } from 'react';
 
-export interface DataTablePaginationProps extends GridProps {
+import DataDropdownField from './InputFields/DataDropdownField';
+
+export interface DataTablePaginationProps
+  extends GridProps,
+    Pick<
+      TablePaginationProps,
+      'rowsPerPage' | 'rowsPerPageOptions' | 'onRowsPerPageChange' | 'page'
+    > {
   filteredCount: number;
   totalCount: number;
   labelPlural: string;
   lowercaseLabelPlural?: string;
   labelSingular?: string;
-  limit?: number;
-  offset?: number;
   PaginationProps?: Partial<PaginationProps>;
 }
 
@@ -24,9 +30,11 @@ export const DataTablePagination = forwardRef<
     labelPlural,
     lowercaseLabelPlural,
     labelSingular,
-    limit,
-    offset,
+    page,
     PaginationProps,
+    rowsPerPageOptions = [10, 25, 50, 100],
+    rowsPerPage,
+    onRowsPerPageChange,
     sx,
     ...rest
   },
@@ -65,19 +73,52 @@ export const DataTablePagination = forwardRef<
           </Typography>
         )}
       </Grid>
-      {limit != null ? (
+      {rowsPerPage != null ? (
         <Grid item>
-          <Typography variant="body2" sx={{ fontSize: 'inherit' }}>
-            Show {limit} {lowercaseLabelPlural} per page
+          <Typography
+            component="div"
+            variant="body2"
+            sx={{ fontSize: 'inherit' }}
+          >
+            Show{' '}
+            <DataDropdownField
+              value={String(rowsPerPage)}
+              options={rowsPerPageOptions.map((value) => {
+                return {
+                  value: String(value),
+                  label: String(value),
+                };
+              })}
+              onChange={onRowsPerPageChange}
+              WrapperProps={{
+                sx: {
+                  width: 64,
+                  display: 'inline-flex',
+                },
+              }}
+              showClearButton={false}
+              searchable={false}
+              variant="outlined"
+              sx={{
+                [`.${inputBaseClasses.root}`]: {
+                  py: 0,
+                  px: 1,
+                },
+                [`.${inputBaseClasses.input}`]: {
+                  p: 0,
+                },
+              }}
+            />{' '}
+            {lowercaseLabelPlural} per page
           </Typography>
         </Grid>
       ) : null}
       <Grid item xs />
-      {limit != null && offset != null ? (
+      {rowsPerPage != null && page != null ? (
         <Grid item>
           <Pagination
-            count={Math.ceil(totalCount / limit)}
-            page={offset + 1}
+            count={Math.ceil(totalCount / rowsPerPage)}
+            page={page + 1}
             shape="rounded"
             showFirstButton
             showLastButton
