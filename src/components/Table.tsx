@@ -2,6 +2,7 @@ import {
   ComponentsOverrides,
   ComponentsProps,
   ComponentsVariants,
+  Divider,
   Stack,
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
@@ -662,6 +663,7 @@ export const BaseTable = <T extends BaseTableRow>(
         >
           {tableElement}
         </Box>
+        <Divider />
         {(() => {
           if (paginationType === 'classic') {
             return (
