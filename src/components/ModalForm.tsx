@@ -29,7 +29,7 @@ import { Children, FC, ReactNode, useEffect, useRef } from 'react';
 
 import ErrorAlert from './ErrorAlert';
 import ErrorFieldHighlighter from './ErrorFieldHighlighter';
-import SearchSyncToolbar from './SearchSyncToolbar';
+import SearchSyncToolbar, { SearchSyncToolbarProps } from './SearchSyncToolbar';
 
 export interface ModalFormClasses {
   /** Styles applied to the root element. */
@@ -113,6 +113,8 @@ export interface ModalFormProps<Values extends FormikValues = FormikValues>
   SubmitButtonProps?: Partial<LoadingButtonProps>;
   FormikProps?: Partial<FormikConfig<Values>>;
   loading?: boolean;
+  ToolbarProps?: Partial<SearchSyncToolbarProps>;
+  showCloseButton?: boolean;
 }
 
 export const ModalForm: FC<ModalFormProps> = (inProps) => {
@@ -140,6 +142,8 @@ export const ModalForm: FC<ModalFormProps> = (inProps) => {
     lockSubmitIfFormInvalid = false,
     CardProps = {},
     SubmitButtonProps = {},
+    ToolbarProps = {},
+    showCloseButton = true,
     loading,
     sx,
     ...rest
@@ -152,7 +156,8 @@ export const ModalForm: FC<ModalFormProps> = (inProps) => {
   const { palette, components } = useTheme();
 
   const { sx: CardPropsSx, ...CardPropsRest } = CardProps;
-  const { ...submitButtonPropsRest } = SubmitButtonProps;
+  const { ...SubmitButtonPropsRest } = SubmitButtonProps;
+  const { ...ToolbarPropsRest } = ToolbarProps;
 
   const onSubmitSuccessRef = useRef(onSubmitSuccess);
   const onCloseRef = useRef(onClose);
@@ -215,15 +220,20 @@ export const ModalForm: FC<ModalFormProps> = (inProps) => {
               <Form noValidate>
                 <ErrorFieldHighlighter />
                 <SearchSyncToolbar
-                  title={title}
                   hasSearchTool={false}
                   hasSyncTool={false}
+                  {...ToolbarPropsRest}
+                  title={title}
                 >
-                  {!isSubmitting ? (
-                    <IconButton onClick={onClose} sx={{ p: 0.5 }}>
-                      <CloseIcon />
-                    </IconButton>
-                  ) : null}
+                  {(() => {
+                    if (showCloseButton && !isSubmitting) {
+                      return (
+                        <IconButton onClick={onClose} sx={{ p: 0.5 }}>
+                          <CloseIcon />
+                        </IconButton>
+                      );
+                    }
+                  })()}
                 </SearchSyncToolbar>
                 <Divider />
                 <Box sx={{ py: 0, px: 3 }}>
@@ -280,7 +290,7 @@ export const ModalForm: FC<ModalFormProps> = (inProps) => {
                             : children;
                         })()}
                         {errorMessage ? (
-                          <Box sx={{ pt: 2 }}>
+                          <Box sx={{ pt: 2, position: 'sticky', bottom: 0 }}>
                             <ErrorAlert message={errorMessage} />
                           </Box>
                         ) : null}
@@ -345,7 +355,7 @@ export const ModalForm: FC<ModalFormProps> = (inProps) => {
                               return !isValid;
                             }
                           })()}
-                          {...submitButtonPropsRest}
+                          {...SubmitButtonPropsRest}
                         >
                           {submitButtonText}
                         </LoadingButton>
