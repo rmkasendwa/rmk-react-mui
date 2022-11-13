@@ -677,7 +677,7 @@ export const BaseTable = <T extends BaseTableRow>(
             rowsPerPageOptions: [10, 25, 50, 100],
             rowsPerPage,
             onRowsPerPageChange: (event) => {
-              setPageIndex(0);
+              handleChangePage(null, 0);
               setRowsPerPage(+event.target.value);
               onRowsPerPageChange && onRowsPerPageChange(+event.target.value);
             },
