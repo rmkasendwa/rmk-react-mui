@@ -255,6 +255,7 @@ export const ModalForm: FC<ModalFormProps> = (inProps) => {
                           py: 2,
                           px: 3,
                           flex: 1,
+                          position: 'relative',
                         }}
                       >
                         {(() => {
