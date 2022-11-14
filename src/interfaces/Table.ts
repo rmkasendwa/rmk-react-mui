@@ -72,6 +72,7 @@ export interface TableColumn<
   sortable?: boolean;
   opaque?: boolean;
   propagateClickToParentRowClickEvent?: boolean;
+  textTransform?: boolean;
 }
 
 export interface ForEachDerivedColumnConfiguration<T> {

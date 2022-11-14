@@ -25,14 +25,7 @@ import {
 import clsx from 'clsx';
 import { Form, Formik, FormikConfig, FormikProps, FormikValues } from 'formik';
 import { isEmpty } from 'lodash';
-import {
-  Children,
-  FC,
-  ReactElement,
-  ReactNode,
-  useEffect,
-  useRef,
-} from 'react';
+import { Children, ReactElement, ReactNode, useEffect, useRef } from 'react';
 
 import ErrorAlert from './ErrorAlert';
 import ErrorFieldHighlighter from './ErrorFieldHighlighter';
@@ -125,7 +118,9 @@ export interface ModalFormProps<Values extends FormikValues = FormikValues>
   getModalElement?: (modalElement: ReactElement) => ReactElement;
 }
 
-export const ModalForm: FC<ModalFormProps> = (inProps) => {
+export const ModalForm = <Values extends FormikValues = FormikValues>(
+  inProps: ModalFormProps<Values>
+) => {
   const props = useThemeProps({ props: inProps, name: 'MuiModalForm' });
   const {
     initialValues,
