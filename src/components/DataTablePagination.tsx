@@ -53,7 +53,6 @@ export const DataTablePagination = forwardRef<
       container
       sx={{
         alignItems: 'center',
-        fontSize: 12,
         pl: 3,
         pr: 2,
         py: 1,
