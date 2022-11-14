@@ -43,7 +43,7 @@ import {
 } from 'react';
 
 import { GlobalConfigurationContext } from '../contexts/GlobalConfigurationContext';
-import { SortDirection, SortOptions } from '../interfaces/Sort';
+import { SortBy, SortDirection, SortOptions } from '../interfaces/Sort';
 import { BaseTableRow, GetRowProps, TableRowProps } from '../interfaces/Table';
 import { sort } from '../utils/Sort';
 import { getColumnWidthStyles, getTableMinWidth } from '../utils/Table';
@@ -132,7 +132,12 @@ export interface TableProps<T = any>
   TableBodyRowPlaceholderProps?: Partial<RenderIfVisibleProps>;
   PaginatedTableWrapperProps?: Partial<BoxProps>;
   parentBackgroundColor?: string;
+
+  // Sort props
   sortable?: boolean;
+  handleSortOperations?: boolean;
+  sortBy?: SortBy<T>;
+  onChangeSortBy?: (sortOptions: SortOptions<T>) => void;
 }
 
 const OPAQUE_BG_CLASS_NAME = `MuiTableCell-opaque`;
@@ -188,6 +193,9 @@ export const BaseTable = <T extends BaseTableRow>(
     minColumnWidth,
     className,
     sortable = false,
+    handleSortOperations = true,
+    sortBy: sortByProp,
+    onChangeSortBy,
     sx,
     ...rest
   } = props;
@@ -326,7 +334,7 @@ export const BaseTable = <T extends BaseTableRow>(
 
   const pageRows: typeof rows = useMemo(() => {
     const sortedRows = (() => {
-      if (sortBy.length > 0) {
+      if (handleSortOperations && sortBy.length > 0) {
         return rows.sort((a, b) => {
           return sort(a, b, sortBy);
         });
@@ -340,7 +348,15 @@ export const BaseTable = <T extends BaseTableRow>(
           pageIndex * rowsPerPage,
           pageIndex * rowsPerPage + rowsPerPage
         );
-  }, [pageIndex, paging, rows, rowsPerPage, sortBy, totalRowCount]);
+  }, [
+    handleSortOperations,
+    pageIndex,
+    paging,
+    rows,
+    rowsPerPage,
+    sortBy,
+    totalRowCount,
+  ]);
 
   useEffect(() => {
     setPageIndex(pageIndexProp);
@@ -349,6 +365,25 @@ export const BaseTable = <T extends BaseTableRow>(
   useEffect(() => {
     setRowsPerPage(rowsPerPageProp);
   }, [rowsPerPageProp]);
+
+  useEffect(() => {
+    if (sortByProp) {
+      setSortBy((prevSortBy) => {
+        if (
+          sortByProp.map(({ id }) => id).join('') !==
+          prevSortBy.map(({ id }) => id).join('')
+        ) {
+          return sortByProp.map((sortOption) => {
+            return {
+              ...sortOption,
+              sortDirection: sortOption.sortDirection || 'ASC',
+            };
+          });
+        }
+        return prevSortBy;
+      });
+    }
+  }, [sortByProp]);
 
   const handleChangePage = (e: any, newPage: number) => {
     setPageIndex(newPage);
@@ -647,7 +682,7 @@ export const BaseTable = <T extends BaseTableRow>(
                                     <Box
                                       key={baseSortDirection}
                                       onClick={() => {
-                                        setSortBy([
+                                        const sortOptions: typeof sortBy = [
                                           {
                                             id,
                                             sortDirection: baseSortDirection,
@@ -696,7 +731,10 @@ export const BaseTable = <T extends BaseTableRow>(
                                               return '';
                                             },
                                           },
-                                        ]);
+                                        ];
+                                        setSortBy(sortOptions);
+                                        onChangeSortBy &&
+                                          onChangeSortBy(sortOptions);
                                       }}
                                       sx={{
                                         flex: 1,
