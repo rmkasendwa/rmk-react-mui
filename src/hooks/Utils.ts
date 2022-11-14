@@ -173,8 +173,13 @@ export const useRecord = <T>(
     autoSync = true,
   }: UseRecordOptions<T> = {}
 ) => {
+  // Refs
   const nextSyncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const [apiFunction] = useState<TAPIFunction<T>>(() => recordFinder);
+  const recordFinderRef = useRef(recordFinder);
+  useEffect(() => {
+    recordFinderRef.current = recordFinder;
+  }, [recordFinder]);
+
   const {
     load: apiServiceLoad,
     loading,
@@ -187,9 +192,9 @@ export const useRecord = <T>(
 
   const load = useCallback(
     (polling = false) => {
-      apiServiceLoad(apiFunction, undefined, polling);
+      apiServiceLoad(recordFinderRef.current, undefined, polling);
     },
-    [apiFunction, apiServiceLoad]
+    [apiServiceLoad]
   );
 
   useEffect(() => {

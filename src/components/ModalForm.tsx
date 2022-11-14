@@ -25,7 +25,14 @@ import {
 import clsx from 'clsx';
 import { Form, Formik, FormikConfig, FormikProps, FormikValues } from 'formik';
 import { isEmpty } from 'lodash';
-import { Children, FC, ReactNode, useEffect, useRef } from 'react';
+import {
+  Children,
+  FC,
+  ReactElement,
+  ReactNode,
+  useEffect,
+  useRef,
+} from 'react';
 
 import ErrorAlert from './ErrorAlert';
 import ErrorFieldHighlighter from './ErrorFieldHighlighter';
@@ -115,6 +122,7 @@ export interface ModalFormProps<Values extends FormikValues = FormikValues>
   loading?: boolean;
   ToolbarProps?: Partial<SearchSyncToolbarProps>;
   showCloseButton?: boolean;
+  getModalElement?: (modalElement: ReactElement) => ReactElement;
 }
 
 export const ModalForm: FC<ModalFormProps> = (inProps) => {
@@ -145,6 +153,7 @@ export const ModalForm: FC<ModalFormProps> = (inProps) => {
     ToolbarProps = {},
     showCloseButton = true,
     loading,
+    getModalElement,
     sx,
     ...rest
   } = props;
@@ -174,8 +183,200 @@ export const ModalForm: FC<ModalFormProps> = (inProps) => {
     }
   }, [submitted, successMessage]);
 
+  const modalElement = (
+    <Card
+      {...CardPropsRest}
+      sx={{
+        width: '100%',
+        maxWidth: 640,
+        maxHeight: '80%',
+        form: {
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100%',
+        },
+        ...CardPropsSx,
+      }}
+    >
+      <Formik
+        {...{ initialValues, validationSchema, onSubmit }}
+        {...FormikProps}
+        enableReinitialize
+      >
+        {({ isSubmitting, values, isValid, ...rest }) => {
+          const formHasChanges = !isEmpty(diff(values, initialValues));
+          return (
+            <Form noValidate>
+              <ErrorFieldHighlighter />
+              <SearchSyncToolbar
+                hasSearchTool={false}
+                hasSyncTool={false}
+                {...ToolbarPropsRest}
+                title={title}
+              >
+                {(() => {
+                  if (showCloseButton && !isSubmitting) {
+                    return (
+                      <IconButton onClick={onClose} sx={{ p: 0.5 }}>
+                        <CloseIcon />
+                      </IconButton>
+                    );
+                  }
+                })()}
+              </SearchSyncToolbar>
+              <Divider />
+              <Box sx={{ py: 0, px: 3 }}>
+                {staticEntityDetails ? (
+                  <Box
+                    sx={{
+                      ...(() => {
+                        if (!showForm) {
+                          return {
+                            py: 2,
+                          };
+                        }
+                        return {
+                          pt: 2,
+                        };
+                      })(),
+                    }}
+                  >
+                    {staticEntityDetails}
+                  </Box>
+                ) : null}
+              </Box>
+              {(() => {
+                if (showForm) {
+                  return (
+                    <Box
+                      sx={{
+                        overflowY: 'auto',
+                        py: 2,
+                        px: 3,
+                        flex: 1,
+                        position: 'relative',
+                      }}
+                    >
+                      {(() => {
+                        if (submitted && successMessage) {
+                          return (
+                            <Alert
+                              variant="filled"
+                              severity="success"
+                              onClose={onClose}
+                            >
+                              {successMessage}
+                            </Alert>
+                          );
+                        }
+                        return typeof children === 'function'
+                          ? children({
+                              isSubmitting,
+                              values,
+                              isValid,
+                              ...rest,
+                            })
+                          : children;
+                      })()}
+                      {errorMessage ? (
+                        <Box sx={{ pt: 2, position: 'sticky', bottom: 0 }}>
+                          <ErrorAlert message={errorMessage} />
+                        </Box>
+                      ) : null}
+                    </Box>
+                  );
+                }
+              })()}
+              <Divider />
+              <Grid
+                container
+                spacing={2}
+                sx={{ py: 2, px: 3, flexDirection: 'row-reverse' }}
+              >
+                {editMode
+                  ? null
+                  : (() => {
+                      if (viewModeTools) {
+                        const toolsList = Children.toArray(viewModeTools);
+                        return toolsList.map((tool, index) => {
+                          return (
+                            <Grid item key={index} sx={{ minWidth: 0 }}>
+                              {tool}
+                            </Grid>
+                          );
+                        });
+                      }
+                      return (
+                        <Grid item>
+                          <Button
+                            variant="contained"
+                            onClick={() => {
+                              onClickEdit && onClickEdit();
+                            }}
+                          >
+                            Edit
+                          </Button>
+                        </Grid>
+                      );
+                    })()}
+                {submitted || !showForm ? (
+                  <Grid item>
+                    <Button
+                      onClick={onClose}
+                      variant="outlined"
+                      color="inherit"
+                    >
+                      Close
+                    </Button>
+                  </Grid>
+                ) : (
+                  <>
+                    <Grid item>
+                      <LoadingButton
+                        loading={loading || isSubmitting}
+                        variant="contained"
+                        type="submit"
+                        disabled={(() => {
+                          if (lockSubmitIfNoChange) {
+                            return !formHasChanges;
+                          }
+                          if (lockSubmitIfFormInvalid) {
+                            return !isValid;
+                          }
+                        })()}
+                        {...SubmitButtonPropsRest}
+                      >
+                        {submitButtonText}
+                      </LoadingButton>
+                    </Grid>
+                    {!isSubmitting ? (
+                      <Grid item>
+                        <Button
+                          onClick={onClose}
+                          variant="outlined"
+                          color="inherit"
+                          sx={{
+                            color: alpha(palette.text.primary, 0.5),
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                      </Grid>
+                    ) : null}
+                  </>
+                )}
+              </Grid>
+            </Form>
+          );
+        }}
+      </Formik>
+    </Card>
+  );
+
   return (
     <Modal
+      disableEscapeKeyDown
+      disableAutoFocus
       {...rest}
       className={clsx(classes.root)}
       open={open}
@@ -192,196 +393,13 @@ export const ModalForm: FC<ModalFormProps> = (inProps) => {
         ...(components?.MuiModalForm?.styleOverrides?.root as any),
         ...sx,
       }}
-      disableEscapeKeyDown
-      disableAutoFocus
     >
-      <Card
-        {...CardPropsRest}
-        sx={{
-          width: '100%',
-          maxWidth: 640,
-          maxHeight: '80%',
-          form: {
-            display: 'flex',
-            flexDirection: 'column',
-            height: '100%',
-          },
-          ...CardPropsSx,
-        }}
-      >
-        <Formik
-          {...{ initialValues, validationSchema, onSubmit }}
-          {...FormikProps}
-          enableReinitialize
-        >
-          {({ isSubmitting, values, isValid, ...rest }) => {
-            const formHasChanges = !isEmpty(diff(values, initialValues));
-            return (
-              <Form noValidate>
-                <ErrorFieldHighlighter />
-                <SearchSyncToolbar
-                  hasSearchTool={false}
-                  hasSyncTool={false}
-                  {...ToolbarPropsRest}
-                  title={title}
-                >
-                  {(() => {
-                    if (showCloseButton && !isSubmitting) {
-                      return (
-                        <IconButton onClick={onClose} sx={{ p: 0.5 }}>
-                          <CloseIcon />
-                        </IconButton>
-                      );
-                    }
-                  })()}
-                </SearchSyncToolbar>
-                <Divider />
-                <Box sx={{ py: 0, px: 3 }}>
-                  {staticEntityDetails ? (
-                    <Box
-                      sx={{
-                        ...(() => {
-                          if (!showForm) {
-                            return {
-                              py: 2,
-                            };
-                          }
-                          return {
-                            pt: 2,
-                          };
-                        })(),
-                      }}
-                    >
-                      {staticEntityDetails}
-                    </Box>
-                  ) : null}
-                </Box>
-                {(() => {
-                  if (showForm) {
-                    return (
-                      <Box
-                        sx={{
-                          overflowY: 'auto',
-                          py: 2,
-                          px: 3,
-                          flex: 1,
-                          position: 'relative',
-                        }}
-                      >
-                        {(() => {
-                          if (submitted && successMessage) {
-                            return (
-                              <Alert
-                                variant="filled"
-                                severity="success"
-                                onClose={onClose}
-                              >
-                                {successMessage}
-                              </Alert>
-                            );
-                          }
-                          return typeof children === 'function'
-                            ? children({
-                                isSubmitting,
-                                values,
-                                isValid,
-                                ...rest,
-                              })
-                            : children;
-                        })()}
-                        {errorMessage ? (
-                          <Box sx={{ pt: 2, position: 'sticky', bottom: 0 }}>
-                            <ErrorAlert message={errorMessage} />
-                          </Box>
-                        ) : null}
-                      </Box>
-                    );
-                  }
-                })()}
-                <Divider />
-                <Grid
-                  container
-                  spacing={2}
-                  sx={{ py: 2, px: 3, flexDirection: 'row-reverse' }}
-                >
-                  {editMode
-                    ? null
-                    : (() => {
-                        if (viewModeTools) {
-                          const toolsList = Children.toArray(viewModeTools);
-                          return toolsList.map((tool, index) => {
-                            return (
-                              <Grid item key={index} sx={{ minWidth: 0 }}>
-                                {tool}
-                              </Grid>
-                            );
-                          });
-                        }
-                        return (
-                          <Grid item>
-                            <Button
-                              variant="contained"
-                              onClick={() => {
-                                onClickEdit && onClickEdit();
-                              }}
-                            >
-                              Edit
-                            </Button>
-                          </Grid>
-                        );
-                      })()}
-                  {submitted || !showForm ? (
-                    <Grid item>
-                      <Button
-                        onClick={onClose}
-                        variant="outlined"
-                        color="inherit"
-                      >
-                        Close
-                      </Button>
-                    </Grid>
-                  ) : (
-                    <>
-                      <Grid item>
-                        <LoadingButton
-                          loading={loading || isSubmitting}
-                          variant="contained"
-                          type="submit"
-                          disabled={(() => {
-                            if (lockSubmitIfNoChange) {
-                              return !formHasChanges;
-                            }
-                            if (lockSubmitIfFormInvalid) {
-                              return !isValid;
-                            }
-                          })()}
-                          {...SubmitButtonPropsRest}
-                        >
-                          {submitButtonText}
-                        </LoadingButton>
-                      </Grid>
-                      {!isSubmitting ? (
-                        <Grid item>
-                          <Button
-                            onClick={onClose}
-                            variant="outlined"
-                            color="inherit"
-                            sx={{
-                              color: alpha(palette.text.primary, 0.5),
-                            }}
-                          >
-                            Cancel
-                          </Button>
-                        </Grid>
-                      ) : null}
-                    </>
-                  )}
-                </Grid>
-              </Form>
-            );
-          }}
-        </Formik>
-      </Card>
+      {(() => {
+        if (getModalElement) {
+          return getModalElement(modalElement);
+        }
+        return modalElement;
+      })()}
     </Modal>
   );
 };
