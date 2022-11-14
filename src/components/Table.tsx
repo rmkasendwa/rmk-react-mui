@@ -43,7 +43,9 @@ import {
 } from 'react';
 
 import { GlobalConfigurationContext } from '../contexts/GlobalConfigurationContext';
+import { SortDirection, SortOptions } from '../interfaces/Sort';
 import { BaseTableRow, GetRowProps, TableRowProps } from '../interfaces/Table';
+import { sort } from '../utils/Sort';
 import { getColumnWidthStyles, getTableMinWidth } from '../utils/Table';
 import DataTablePagination from './DataTablePagination';
 import RenderIfVisible, { RenderIfVisibleProps } from './RenderIfVisible';
@@ -130,9 +132,11 @@ export interface TableProps<T = any>
   TableBodyRowPlaceholderProps?: Partial<RenderIfVisibleProps>;
   PaginatedTableWrapperProps?: Partial<BoxProps>;
   parentBackgroundColor?: string;
+  sortable?: boolean;
 }
 
 const OPAQUE_BG_CLASS_NAME = `MuiTableCell-opaque`;
+const TABLE_HEAD_ALPHA = 0.05;
 
 export function getTableUtilityClass(slot: string): string {
   return generateUtilityClass('MuiTableExtended', slot);
@@ -183,6 +187,7 @@ export const BaseTable = <T extends BaseTableRow>(
     columnTypographyProps,
     minColumnWidth,
     className,
+    sortable = false,
     sx,
     ...rest
   } = props;
@@ -223,6 +228,7 @@ export const BaseTable = <T extends BaseTableRow>(
   const { currencyCode: defaultCurrencyCode } = useContext(
     GlobalConfigurationContext
   );
+  const [sortBy, setSortBy] = useState<SortOptions<T>>([]);
 
   parentBackgroundColor || (parentBackgroundColor = palette.background.paper);
   currencyCode || (currencyCode = defaultCurrencyCode);
@@ -319,13 +325,22 @@ export const BaseTable = <T extends BaseTableRow>(
   }, [columns, minColumnWidth]);
 
   const pageRows: typeof rows = useMemo(() => {
+    const sortedRows = (() => {
+      if (sortBy.length > 0) {
+        return rows.sort((a, b) => {
+          return sort(a, b, sortBy);
+        });
+      }
+      return rows;
+    })();
+
     return totalRowCount || !paging
-      ? rows
-      : rows.slice(
+      ? sortedRows
+      : sortedRows.slice(
           pageIndex * rowsPerPage,
           pageIndex * rowsPerPage + rowsPerPage
         );
-  }, [pageIndex, paging, rows, rowsPerPage, totalRowCount]);
+  }, [pageIndex, paging, rows, rowsPerPage, sortBy, totalRowCount]);
 
   useEffect(() => {
     setPageIndex(pageIndexProp);
@@ -359,14 +374,25 @@ export const BaseTable = <T extends BaseTableRow>(
             bgcolor: alpha(palette.text.primary, 0.02),
           },
         [`
-          th.${tableCellClasses.root}:nth-of-type(odd)>div,
+          th.${tableCellClasses.root}:nth-of-type(odd)>div
+        `]: {
+          bgcolor: alpha(palette.text.primary, 0.02 + TABLE_HEAD_ALPHA),
+        },
+        [`
           td.${tableCellClasses.root}:nth-of-type(odd)
         `]: {
           bgcolor: alpha(palette.text.primary, 0.02),
         },
         [`tr.${tableRowClasses.root}`]: {
           [`
-            th.${tableCellClasses.root}:nth-of-type(odd).${OPAQUE_BG_CLASS_NAME}>div,
+            th.${tableCellClasses.root}:nth-of-type(odd).${OPAQUE_BG_CLASS_NAME}>div
+          `]: {
+            bgcolor: (palette.mode === 'light' ? darken : lighten)(
+              parentBackgroundColor,
+              0.02 + TABLE_HEAD_ALPHA
+            ),
+          },
+          [`
             td.${tableCellClasses.root}:nth-of-type(odd).${OPAQUE_BG_CLASS_NAME}
           `]: {
             bgcolor: (palette.mode === 'light' ? darken : lighten)(
@@ -375,14 +401,28 @@ export const BaseTable = <T extends BaseTableRow>(
             ),
           },
           [`
-            th.${tableCellClasses.root}:nth-of-type(even).${OPAQUE_BG_CLASS_NAME}>div,
+            th.${tableCellClasses.root}:nth-of-type(even).${OPAQUE_BG_CLASS_NAME}>div
+          `]: {
+            bgcolor: (palette.mode === 'light' ? darken : lighten)(
+              parentBackgroundColor,
+              TABLE_HEAD_ALPHA
+            ),
+          },
+          [`
             td.${tableCellClasses.root}:nth-of-type(even).${OPAQUE_BG_CLASS_NAME}
           `]: {
             bgcolor: parentBackgroundColor,
           },
           [`&.odd`]: {
             [`
-              th.${tableCellClasses.root}:nth-of-type(odd).${OPAQUE_BG_CLASS_NAME}>div,
+              th.${tableCellClasses.root}:nth-of-type(odd).${OPAQUE_BG_CLASS_NAME}>div
+            `]: {
+              bgcolor: (palette.mode === 'light' ? darken : lighten)(
+                parentBackgroundColor,
+                0.04 + TABLE_HEAD_ALPHA
+              ),
+            },
+            [`
               td.${tableCellClasses.root}:nth-of-type(odd).${OPAQUE_BG_CLASS_NAME}
             `]: {
               bgcolor: (palette.mode === 'light' ? darken : lighten)(
@@ -391,7 +431,14 @@ export const BaseTable = <T extends BaseTableRow>(
               ),
             },
             [`
-              th.${tableCellClasses.root}:nth-of-type(even).${OPAQUE_BG_CLASS_NAME}>div,
+              th.${tableCellClasses.root}:nth-of-type(even).${OPAQUE_BG_CLASS_NAME}>div
+            `]: {
+              bgcolor: (palette.mode === 'light' ? darken : lighten)(
+                parentBackgroundColor,
+                0.02 + TABLE_HEAD_ALPHA
+              ),
+            },
+            [`
               td.${tableCellClasses.root}:nth-of-type(even).${OPAQUE_BG_CLASS_NAME}
             `]: {
               bgcolor: (palette.mode === 'light' ? darken : lighten)(
@@ -426,13 +473,24 @@ export const BaseTable = <T extends BaseTableRow>(
     case 'stripped-columns':
       Object.assign(variantStyles, {
         [`
-          th.${tableCellClasses.root}:nth-of-type(odd)>div,
+          th.${tableCellClasses.root}:nth-of-type(odd)>div
+        `]: {
+          bgcolor: alpha(palette.text.primary, 0.02 + TABLE_HEAD_ALPHA),
+        },
+        [`
           td.${tableCellClasses.root}:nth-of-type(odd)
         `]: {
           bgcolor: alpha(palette.text.primary, 0.02),
         },
         [`
-          th.${tableCellClasses.root}:nth-of-type(odd).${OPAQUE_BG_CLASS_NAME}>div,
+          th.${tableCellClasses.root}:nth-of-type(odd).${OPAQUE_BG_CLASS_NAME}>div
+        `]: {
+          bgcolor: (palette.mode === 'light' ? darken : lighten)(
+            parentBackgroundColor,
+            0.02 + TABLE_HEAD_ALPHA
+          ),
+        },
+        [`
           td.${tableCellClasses.root}:nth-of-type(odd).${OPAQUE_BG_CLASS_NAME}
         `]: {
           bgcolor: (palette.mode === 'light' ? darken : lighten)(
@@ -441,7 +499,14 @@ export const BaseTable = <T extends BaseTableRow>(
           ),
         },
         [`
-          th.${tableCellClasses.root}:nth-of-type(even).${OPAQUE_BG_CLASS_NAME}>div,
+          th.${tableCellClasses.root}:nth-of-type(even).${OPAQUE_BG_CLASS_NAME}>div
+        `]: {
+          bgcolor: (palette.mode === 'light' ? darken : lighten)(
+            parentBackgroundColor,
+            TABLE_HEAD_ALPHA
+          ),
+        },
+        [`
           td.${tableCellClasses.root}:nth-of-type(even).${OPAQUE_BG_CLASS_NAME}
         `]: {
           bgcolor: parentBackgroundColor,
@@ -472,7 +537,11 @@ export const BaseTable = <T extends BaseTableRow>(
       }}
     >
       {showHeaderRow ? (
-        <TableHead>
+        <TableHead
+          sx={{
+            bgcolor: alpha(palette.text.primary, TABLE_HEAD_ALPHA),
+          }}
+        >
           <TableRow {...restHeaderRowProps} sx={{ ...headerRowPropsSx }}>
             {columns.map((column, index) => {
               const {
@@ -480,10 +549,12 @@ export const BaseTable = <T extends BaseTableRow>(
                 align,
                 style,
                 minWidth,
-                sortable = false,
+                sortable: columnSortable = sortable,
                 headerSx,
                 className,
+                type,
                 sx,
+                getColumnValue,
               } = column;
               let label = column.label;
               column.headerTextAfter &&
@@ -517,7 +588,11 @@ export const BaseTable = <T extends BaseTableRow>(
                   <Box
                     sx={{
                       pl: align === 'center' || index <= 0 ? 3 : 1.5,
-                      pr: sortable ? 3 : index < columns.length - 1 ? 1.5 : 3,
+                      pr: columnSortable
+                        ? 3
+                        : index < columns.length - 1
+                        ? 1.5
+                        : 3,
                       py: 1.5,
                       ...(() => {
                         if (!label) {
@@ -544,7 +619,12 @@ export const BaseTable = <T extends BaseTableRow>(
                           {label}
                         </Typography>
                         {(() => {
-                          if (sortable) {
+                          if (columnSortable) {
+                            const sortDirection = (() => {
+                              if (sortBy[0] && sortBy[0].id === id) {
+                                return sortBy[0].sortDirection || 'ASC';
+                              }
+                            })();
                             return (
                               <Stack
                                 sx={{
@@ -554,30 +634,108 @@ export const BaseTable = <T extends BaseTableRow>(
                                   height: '100%',
                                   fontSize: 10,
                                   lineHeight: 1,
+                                  color: alpha(palette.text.primary, 0.1),
                                 }}
                               >
-                                <Box
-                                  sx={{
-                                    flex: 1,
-                                    display: 'flex',
-                                    alignItems: 'end',
-                                    px: 0.8,
-                                    color: alpha(palette.text.primary, 0.1),
-                                  }}
-                                >
-                                  <span>&#9650;</span>
-                                </Box>
-                                <Box
-                                  sx={{
-                                    flex: 1,
-                                    display: 'flex',
-                                    alignItems: 'start',
-                                    px: 0.8,
-                                    color: alpha(palette.text.primary, 0.1),
-                                  }}
-                                >
-                                  <span>&#9660;</span>
-                                </Box>
+                                {(
+                                  ['ASC', 'DESC'] as [
+                                    SortDirection,
+                                    SortDirection
+                                  ]
+                                ).map((baseSortDirection) => {
+                                  return (
+                                    <Box
+                                      key={baseSortDirection}
+                                      onClick={() => {
+                                        setSortBy([
+                                          {
+                                            id,
+                                            sortDirection: baseSortDirection,
+                                            type: (() => {
+                                              switch (type) {
+                                                case 'number':
+                                                case 'numberInput':
+                                                case 'percentage':
+                                                case 'percentageInput':
+                                                case 'currency':
+                                                case 'currencyInput':
+                                                  return 'number';
+                                                case 'date':
+                                                case 'time':
+                                                case 'dateTime':
+                                                case 'dateInput':
+                                                  return 'date';
+                                                case 'boolean':
+                                                  return 'boolean';
+                                                default:
+                                                  return 'string';
+                                              }
+                                            })(),
+                                            getSortValue: (row) => {
+                                              const columnValue = (() => {
+                                                if (getColumnValue) {
+                                                  return getColumnValue(
+                                                    row,
+                                                    column
+                                                  );
+                                                }
+                                                return row[id];
+                                              })();
+                                              if (
+                                                [
+                                                  'number',
+                                                  'string',
+                                                  'boolean',
+                                                ].includes(typeof columnValue)
+                                              ) {
+                                                return columnValue as
+                                                  | number
+                                                  | string
+                                                  | boolean;
+                                              }
+                                              return '';
+                                            },
+                                          },
+                                        ]);
+                                      }}
+                                      sx={{
+                                        flex: 1,
+                                        display: 'flex',
+                                        px: 0.8,
+                                        alignItems:
+                                          baseSortDirection === 'ASC'
+                                            ? 'end'
+                                            : 'start',
+                                        cursor: 'pointer',
+                                        ...(() => {
+                                          if (
+                                            sortDirection === baseSortDirection
+                                          ) {
+                                            return {
+                                              color: palette.text.primary,
+                                            };
+                                          }
+                                          return {
+                                            '&:hover': {
+                                              color: alpha(
+                                                palette.text.primary,
+                                                0.3
+                                              ),
+                                            },
+                                          };
+                                        })(),
+                                      }}
+                                    >
+                                      <span>
+                                        {baseSortDirection === 'ASC' ? (
+                                          <>&#9650;</>
+                                        ) : (
+                                          <>&#9660;</>
+                                        )}
+                                      </span>
+                                    </Box>
+                                  );
+                                })}
                               </Stack>
                             );
                           }
