@@ -495,7 +495,11 @@ export const BaseTable = <T extends BaseTableRow>(
               return (
                 <TableCell
                   key={String(id)}
-                  {...{ style, className, align }}
+                  className={clsx(
+                    className,
+                    stickyHeader && OPAQUE_BG_CLASS_NAME
+                  )}
+                  {...{ style, align }}
                   sx={{
                     fontWeight: 'bold',
                     p: 0,

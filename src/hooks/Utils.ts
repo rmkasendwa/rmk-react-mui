@@ -29,7 +29,11 @@ export interface UseQueryOptions {
 const DEFAULT_SYNC_TIMEOUT = 5 * 60 * 1000;
 const WINDOW_BLUR_THRESHOLD = 60 * 1000;
 
-export const useAPIService = <T>(defaultValue: T, key?: string) => {
+export const useAPIService = <T>(
+  defaultValue: T,
+  key?: string,
+  loadOnMount = false
+) => {
   const isComponentMountedRef = useRef(true);
   const taggedAPIRequestsRef = useRef<TaggedAPIRequest[]>([]);
   const { data, updateData } = useCachedData();
@@ -39,7 +43,7 @@ export const useAPIService = <T>(defaultValue: T, key?: string) => {
   const { call } = useContext(APIContext);
   const [record, setRecord] = useState<T>(defaultValue);
   const [loaded, setLoaded] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(loadOnMount);
   const [busy, setBusy] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -188,7 +192,7 @@ export const useRecord = <T>(
     record,
     setRecord,
     ...rest
-  } = useAPIService(defaultValue!, key);
+  } = useAPIService(defaultValue!, key, loadOnMount);
 
   const load = useCallback(
     (polling = false) => {
@@ -310,7 +314,8 @@ export const usePaginatedRecords = <T>(
       if (key) {
         return `${key}_${limitProp}_${offsetProp}_${String(showRecordsProp)}`;
       }
-    })()
+    })(),
+    loadOnMount
   );
 
   const loadedPages = useMemo(() => {
