@@ -16,7 +16,9 @@ import { ReactNode, forwardRef, useCallback, useEffect, useState } from 'react';
 
 import { useLoadingContext } from '../../contexts/LoadingContext';
 import ErrorSkeleton from '../ErrorSkeleton';
-import FieldValueDisplay from '../FieldValueDisplay';
+import FieldValueDisplay, {
+  FieldValueDisplayProps,
+} from '../FieldValueDisplay';
 
 export interface TextFieldClasses {
   /** Styles applied to the root element. */
@@ -38,6 +40,8 @@ export interface TextFieldProps
   extends Omit<MuiTextFieldProps, 'variant'>,
     Pick<MuiTextFieldProps, 'variant'> {
   labelWrapped?: boolean;
+  labelWrappedPlaceholderFallback?: boolean;
+  FieldValueDisplayProps?: Partial<FieldValueDisplayProps>;
   value?: string;
   endAdornment?: ReactNode;
   endChildren?: ReactNode;
@@ -66,12 +70,15 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
       endChildren,
       WrapperProps = {},
       showClearButton = true,
+      labelWrappedPlaceholderFallback = false,
+      FieldValueDisplayProps = {},
       sx,
       ...rest
     },
     ref
   ) {
-    const { sx: wrapperPropsSx, ...wrapperPropsRest } = WrapperProps;
+    const { sx: WrapperPropsSx, ...WrapperPropsRest } = WrapperProps;
+    const { ...FieldValueDisplayPropsRest } = FieldValueDisplayProps;
 
     const { InputProps = {} } = rest;
     const { endAdornment, ...restInputProps } = InputProps;
@@ -129,7 +136,7 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
 
       return (
         <Box
-          {...wrapperPropsRest}
+          {...WrapperPropsRest}
           sx={{
             position: 'relative',
             ...(() => {
@@ -139,7 +146,7 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
                 };
               }
             })(),
-            ...wrapperPropsSx,
+            ...WrapperPropsSx,
           }}
         >
           <MuiTextField
@@ -162,7 +169,12 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
               }
             })()}
             placeholder={(() => {
-              if (labelWrapped && !placeholder && typeof label === 'string') {
+              if (
+                labelWrapped &&
+                labelWrappedPlaceholderFallback &&
+                !placeholder &&
+                typeof label === 'string'
+              ) {
                 return label;
               }
               return placeholder;
@@ -219,7 +231,13 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
     })();
 
     if (labelWrapped && label) {
-      return <FieldValueDisplay {...{ label, required }} value={textField} />;
+      return (
+        <FieldValueDisplay
+          {...FieldValueDisplayPropsRest}
+          {...{ label, required }}
+          value={textField}
+        />
+      );
     }
 
     return textField;

@@ -58,7 +58,7 @@ export function getFieldValueUtilityClass(slot: string): string {
   return generateUtilityClass('MuiFieldValue', slot);
 }
 
-export const FieldValueClasses: FieldValueClasses = generateUtilityClasses(
+export const fieldValueClasses: FieldValueClasses = generateUtilityClasses(
   'MuiFieldValue',
   ['root']
 );
@@ -104,7 +104,7 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
       <Grid
         {...ContainerGridPropsRest}
         container
-        className={clsx(classes.root)}
+        className={clsx(classes.root, className)}
         sx={{ gap: 1, ...ContainerGridPropsSx }}
       >
         {icon ? (

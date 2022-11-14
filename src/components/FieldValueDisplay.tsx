@@ -21,6 +21,9 @@ import FieldValue, { FieldValueProps } from './FieldValue';
 export interface FieldValueDisplayClasses {
   /** Styles applied to the root element. */
   root: string;
+  label: string;
+  description: string;
+  value: string;
 }
 
 export type FieldValueDisplayClassKey = keyof FieldValueDisplayClasses;
@@ -30,7 +33,12 @@ export function getFieldValueDisplayUtilityClass(slot: string): string {
 }
 
 export const fieldValueDisplayClasses: FieldValueDisplayClasses =
-  generateUtilityClasses('MuiFieldValueDisplay', ['root']);
+  generateUtilityClasses('MuiFieldValueDisplay', [
+    'root',
+    'label',
+    'description',
+    'value',
+  ]);
 
 // Adding theme prop types
 declare module '@mui/material/styles/props' {
@@ -60,8 +68,11 @@ declare module '@mui/material/styles/components' {
 const useUtilityClasses = (ownerState: any) => {
   const { classes } = ownerState;
 
-  const slots = {
+  const slots: Record<FieldValueDisplayClassKey, string[]> = {
     root: ['root'],
+    label: ['label'],
+    description: ['description'],
+    value: ['value'],
   };
 
   return composeClasses(slots, getFieldValueDisplayUtilityClass, classes);
@@ -71,8 +82,10 @@ export interface FieldValueDisplayProps
   extends Partial<BoxProps>,
     Pick<FieldLabelProps, 'required'> {
   label: ReactNode;
+  description?: ReactNode;
   value?: ReactNode;
-  LabelProps?: FieldLabelProps;
+  LabelProps?: Partial<FieldLabelProps>;
+  DescriptionProps?: Partial<FieldLabelProps>;
   ValueProps?: Partial<FieldValueProps>;
 }
 
@@ -80,8 +93,10 @@ export const FieldValueDisplay: FC<FieldValueDisplayProps> = (inProps) => {
   const props = useThemeProps({ props: inProps, name: 'MuiFieldValueDisplay' });
   const {
     label,
+    description,
     value = '-',
     LabelProps = {},
+    DescriptionProps = {},
     ValueProps = {},
     required,
     sx,
@@ -92,8 +107,14 @@ export const FieldValueDisplay: FC<FieldValueDisplayProps> = (inProps) => {
     ...props,
   });
 
-  const { ...LabelPropsRest } = LabelProps;
-  const { sx: ValuePropsSx, ...ValuePropsRest } = ValueProps;
+  const { className: LabelPropsClassName, ...LabelPropsRest } = LabelProps;
+  const { className: DescriptionPropsClassName, ...DescriptionPropsRest } =
+    DescriptionProps;
+  const {
+    className: ValuePropsClassName,
+    sx: ValuePropsSx,
+    ...ValuePropsRest
+  } = ValueProps;
 
   const { components } = useTheme();
   const { loading, errorMessage } = useLoadingContext();
@@ -151,10 +172,26 @@ export const FieldValueDisplay: FC<FieldValueDisplayProps> = (inProps) => {
         ...sx,
       }}
     >
-      <FieldLabel {...{ required }} {...LabelPropsRest}>
+      <FieldLabel
+        className={clsx(classes.label, LabelPropsClassName)}
+        {...{ required }}
+        {...LabelPropsRest}
+      >
         {label}
       </FieldLabel>
-      <FieldValue {...ValuePropsRest} sx={{ mt: 0.5, ...ValuePropsSx }}>
+      {description && (
+        <FieldLabel
+          className={clsx(classes.description, DescriptionPropsClassName)}
+          {...DescriptionPropsRest}
+        >
+          {description}
+        </FieldLabel>
+      )}
+      <FieldValue
+        className={clsx(classes.value, ValuePropsClassName)}
+        {...ValuePropsRest}
+        sx={{ mt: 0.5, ...ValuePropsSx }}
+      >
         {value}
       </FieldValue>
     </Box>
