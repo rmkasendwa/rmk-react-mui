@@ -10,7 +10,7 @@ import {
 } from '@mui/material';
 import Typography, { TypographyProps } from '@mui/material/Typography';
 import clsx from 'clsx';
-import { FC } from 'react';
+import { forwardRef } from 'react';
 
 export interface FieldLabelClasses {
   /** Styles applied to the root element. */
@@ -18,13 +18,6 @@ export interface FieldLabelClasses {
 }
 
 export type FieldLabelClassKey = keyof FieldLabelClasses;
-
-export function getFieldLabelUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiFieldLabel', slot);
-}
-
-export const fieldValueDisplayClasses: FieldLabelClasses =
-  generateUtilityClasses('MuiFieldLabel', ['root']);
 
 // Adding theme prop types
 declare module '@mui/material/styles/props' {
@@ -51,56 +44,71 @@ declare module '@mui/material/styles/components' {
   }
 }
 
-const useUtilityClasses = (ownerState: any) => {
-  const { classes } = ownerState;
-
-  const slots = {
-    root: ['root'],
-  };
-
-  return composeClasses(slots, getFieldLabelUtilityClass, classes);
-};
-
 export interface FieldLabelProps extends TypographyProps {
   required?: boolean;
 }
 
-export const FieldLabel: FC<FieldLabelProps> = (inProps) => {
-  const props = useThemeProps({ props: inProps, name: 'MuiFieldLabel' });
-  const { required, children, sx, ...rest } = props;
+export function getFieldLabelUtilityClass(slot: string): string {
+  return generateUtilityClass('MuiFieldLabel', slot);
+}
 
-  const classes = useUtilityClasses({
-    ...props,
-  });
+export const fieldLabelClasses: FieldLabelClasses = generateUtilityClasses(
+  'MuiFieldLabel',
+  ['root']
+);
 
-  const { palette, components } = useTheme();
-  return (
-    <Typography
-      className={clsx(classes.root)}
-      component={'div' as any}
-      variant="body2"
-      noWrap
-      {...rest}
-      sx={{
-        fontWeight: 500,
-        ...(() => {
-          if (required) {
-            return {
-              '&:after': {
-                content: '"*"',
-                ml: 0.2,
-                color: palette.error.main,
-              },
-            };
-          }
-        })(),
-        ...((components?.MuiFieldLabel?.styleOverrides?.root as any) || {}),
-        ...sx,
-      }}
-    >
-      {children}
-    </Typography>
-  );
+const slots = {
+  root: ['root'],
 };
+
+export const FieldLabel = forwardRef<HTMLElement, FieldLabelProps>(
+  function FieldLabel(inProps, ref) {
+    const props = useThemeProps({ props: inProps, name: 'MuiFieldLabel' });
+    const { required, children, className, sx, ...rest } = props;
+
+    const classes = composeClasses(
+      slots,
+      getFieldLabelUtilityClass,
+      (() => {
+        if (className) {
+          return {
+            root: className,
+          };
+        }
+      })()
+    );
+
+    const { palette, components } = useTheme();
+
+    return (
+      <Typography
+        ref={ref}
+        className={clsx(classes.root, className)}
+        component={'div' as any}
+        variant="body2"
+        noWrap
+        {...rest}
+        sx={{
+          fontWeight: 500,
+          ...(() => {
+            if (required) {
+              return {
+                '&:after': {
+                  content: '"*"',
+                  ml: 0.2,
+                  color: palette.error.main,
+                },
+              };
+            }
+          })(),
+          ...((components?.MuiFieldLabel?.styleOverrides?.root as any) || {}),
+          ...sx,
+        }}
+      >
+        {children}
+      </Typography>
+    );
+  }
+);
 
 export default FieldLabel;
