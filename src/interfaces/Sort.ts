@@ -28,4 +28,5 @@ export type SortOptions<T> = Pick<
   'id' | 'type' | 'sortDirection' | 'getSortValue'
 >[];
 
-export type SortBy<T> = Pick<SelectedSortOption<T>, 'id' | 'sortDirection'>[];
+export type SortBy<T> = (Pick<SelectedSortOption<T>, 'id'> &
+  Partial<Pick<SelectedSortOption<T>, 'sortDirection'>>)[];
