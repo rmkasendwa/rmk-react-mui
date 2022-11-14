@@ -155,7 +155,7 @@ export const TableBodyRow = <T extends BaseTableRow>(
             id,
             defaultColumnValue,
             getColumnValue,
-            textTransform: columnTextTransform = false,
+            textTransform: columnTextTransform = textTransform,
           } = column;
           let columnValue = (() => {
             if (getColumnValue) {
@@ -290,7 +290,7 @@ export const TableBodyRow = <T extends BaseTableRow>(
                 }
                 break;
               case 'enum':
-                if (textTransform || columnTextTransform) {
+                if (columnTextTransform) {
                   columnValue = String(columnValue).toTitleCase(true);
                 }
                 break;
