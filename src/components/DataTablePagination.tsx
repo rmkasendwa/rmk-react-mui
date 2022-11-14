@@ -8,12 +8,11 @@ import DataDropdownField from './InputFields/DataDropdownField';
 
 export interface DataTablePaginationProps
   extends GridProps,
-    Pick<
-      TablePaginationProps,
-      'rowsPerPage' | 'rowsPerPageOptions' | 'onRowsPerPageChange' | 'page'
-    > {
+    Pick<TablePaginationProps, 'rowsPerPageOptions' | 'onRowsPerPageChange'> {
   filteredCount: number;
   totalCount: number;
+  page?: number;
+  rowsPerPage?: number;
   labelPlural: string;
   lowercaseLabelPlural?: string;
   labelSingular?: string;
