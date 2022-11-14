@@ -150,7 +150,13 @@ export const TableBodyRow = <T extends BaseTableRow>(
     return {
       ...columns.reduce(
         (accumulator, column) => {
-          const { type, id, defaultColumnValue, getColumnValue } = column;
+          const {
+            type,
+            id,
+            defaultColumnValue,
+            getColumnValue,
+            textTransform: columnTextTransform = false,
+          } = column;
           let columnValue = (() => {
             if (getColumnValue) {
               if (type === 'ellipsisMenuTool') {
@@ -284,7 +290,7 @@ export const TableBodyRow = <T extends BaseTableRow>(
                 }
                 break;
               case 'enum':
-                if (textTransform) {
+                if (textTransform || columnTextTransform) {
                   columnValue = String(columnValue).toTitleCase(true);
                 }
                 break;

@@ -82,7 +82,7 @@ export const FieldLabel: FC<FieldLabelProps> = (inProps) => {
       noWrap
       {...rest}
       sx={{
-        fontWeight: 'bold',
+        fontWeight: 500,
         ...(() => {
           if (required) {
             return {
