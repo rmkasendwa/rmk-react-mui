@@ -197,9 +197,6 @@ FixedHeader.args = {
   }),
   paging: false,
   stickyHeader: true,
-  sx: {
-    height: '100%',
-  },
 } as TableProps;
 
 export const WithDynamicRowData = Template.bind({});

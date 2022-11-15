@@ -23,7 +23,12 @@ export const EllipsisMenuIconButton = forwardRef<
   HTMLButtonElement,
   EllipsisMenuIconButtonProps
 >(function EllipsisMenuIconButton(
-  { options, PaginatedDropdownOptionListProps = {}, ...rest },
+  {
+    children = <MoreVertIcon />,
+    options,
+    PaginatedDropdownOptionListProps = {},
+    ...rest
+  },
   ref
 ) {
   const anchorRef = useRef(null);
@@ -40,7 +45,7 @@ export const EllipsisMenuIconButton = forwardRef<
           setOpen((prevOpen) => !prevOpen);
         }}
       >
-        <MoreVertIcon />
+        {children}
       </IconButton>
       <Popper
         open={open}
