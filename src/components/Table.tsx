@@ -50,6 +50,7 @@ import { getColumnWidthStyles, getTableMinWidth } from '../utils/Table';
 import DataTablePagination from './DataTablePagination';
 import RenderIfVisible, { RenderIfVisibleProps } from './RenderIfVisible';
 import TableBodyRow from './TableBodyRow';
+import TableColumnToggleIconButton from './TableColumnToggleIconButton';
 
 export type {
   ForEachDerivedColumnConfiguration,
@@ -138,6 +139,9 @@ export interface TableProps<T = any>
   handleSortOperations?: boolean;
   sortBy?: SortBy<T>;
   onChangeSortBy?: (sortOptions: SortOptions<T>) => void;
+
+  // Removable columns
+  enableColumnDisplayToggle?: boolean;
 }
 
 const OPAQUE_BG_CLASS_NAME = `MuiTableCell-opaque`;
@@ -196,6 +200,7 @@ export const BaseTable = <T extends BaseTableRow>(
     handleSortOperations = true,
     sortBy: sortByProp,
     onChangeSortBy,
+    enableColumnDisplayToggle = false,
     sx,
     ...rest
   } = props;
@@ -243,7 +248,8 @@ export const BaseTable = <T extends BaseTableRow>(
 
   // Setting default column properties
   const columns = useMemo(() => {
-    return columnsProp.map((column) => {
+    return columnsProp.map((column, index) => {
+      const isLastColumn = index === columnsProp.length - 1;
       const nextColumn = { ...column } as typeof column;
       nextColumn.type || (nextColumn.type = 'string');
       nextColumn.className = clsx(
@@ -316,9 +322,19 @@ export const BaseTable = <T extends BaseTableRow>(
       nextColumn.className = clsx(
         nextColumn.opaque ? OPAQUE_BG_CLASS_NAME : null
       );
+      const extraWidth = (() => {
+        if (isLastColumn && enableColumnDisplayToggle) {
+          return 44;
+        }
+        return 0;
+      })();
+
+      nextColumn.minWidth && (nextColumn.minWidth += extraWidth);
+      nextColumn.width && (nextColumn.width += extraWidth);
+
       return nextColumn;
     });
-  }, [columnsProp, currencyCode]);
+  }, [columnsProp, currencyCode, enableColumnDisplayToggle]);
 
   const minWidth = useMemo(() => {
     return getTableMinWidth(
@@ -591,6 +607,7 @@ export const BaseTable = <T extends BaseTableRow>(
                 sx,
                 getColumnValue,
               } = column;
+              const isLastColumn = index === columns.length - 1;
               let label = column.label;
               column.headerTextAfter &&
                 (label = (
@@ -622,6 +639,8 @@ export const BaseTable = <T extends BaseTableRow>(
                 >
                   <Box
                     sx={{
+                      display: 'flex',
+                      alignItems: 'center',
                       pl: align === 'center' || index <= 0 ? 3 : 1.5,
                       pr: columnSortable
                         ? 3
@@ -665,7 +684,15 @@ export const BaseTable = <T extends BaseTableRow>(
                                 sx={{
                                   position: 'absolute',
                                   top: 0,
-                                  right: 0,
+                                  right: (() => {
+                                    if (
+                                      isLastColumn &&
+                                      enableColumnDisplayToggle
+                                    ) {
+                                      return 32;
+                                    }
+                                    return 0;
+                                  })(),
                                   height: '100%',
                                   fontSize: 10,
                                   lineHeight: 1,
@@ -780,6 +807,33 @@ export const BaseTable = <T extends BaseTableRow>(
                         })()}
                       </>
                     ) : null}
+                    <Box component="span" sx={{ flex: 1 }} />
+                    {(() => {
+                      if (enableColumnDisplayToggle && isLastColumn) {
+                        return (
+                          <Box
+                            sx={{
+                              height: 0,
+                              position: 'sticky',
+                              right: 6,
+                              mr: '-20px',
+                            }}
+                          >
+                            <TableColumnToggleIconButton
+                              sx={{
+                                mt: '-25px',
+                                p: 0.2,
+                                '&,&:hover': {
+                                  bgcolor: (palette.mode === 'light'
+                                    ? darken
+                                    : lighten)(parentBackgroundColor!, 0.15),
+                                },
+                              }}
+                            />
+                          </Box>
+                        );
+                      }
+                    })()}
                   </Box>
                 </TableCell>
               );
