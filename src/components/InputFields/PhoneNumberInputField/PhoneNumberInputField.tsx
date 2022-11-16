@@ -99,10 +99,10 @@ export const PhoneNumberInputField = forwardRef<
   const { palette } = useTheme();
 
   const [regionalCode, setRegionalCode] = useState<CountryCode | undefined>(
-    undefined
+    regionalCodeProp
   );
   const [selectedCountry, setSelectedCountry] = useState<Country | undefined>(
-    undefined
+    regionalCodeProp ? flags[regionalCodeProp] : undefined
   );
 
   const [phoneCountryListOpen, setPhoneCountryListOpen] = useState(false);
