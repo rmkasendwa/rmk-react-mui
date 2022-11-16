@@ -1,9 +1,10 @@
+import 'flag-icons/css/flag-icons.min.css';
+
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { useTheme } from '@mui/material';
+import { Tooltip, useTheme } from '@mui/material';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import InputAdornment from '@mui/material/InputAdornment';
-import Typography from '@mui/material/Typography';
 import { forwardRef, useCallback, useEffect, useRef, useState } from 'react';
 
 import { CountryCode } from '../../../interfaces/Countries';
@@ -12,14 +13,11 @@ import PhoneNumberUtil, {
   systemStandardPhoneNumberFormat,
 } from '../../../utils/PhoneNumberUtil';
 import TextField, { TextFieldProps } from '../TextField';
-import { BASE_64_FLAG_IMAGE } from './base64Flags';
 import { Country, countries } from './countries';
 import CountryList from './CountryList';
-import { phoneNumberFlags } from './phoneNumberFlags';
 
 export interface PhoneNumberInputFieldProps extends TextFieldProps {
   value?: string;
-  displaySelectedFlagLabel?: boolean;
   displayPhoneNumberCountry?: boolean;
   displayRegionalCodeOnEmptyFocus?: boolean;
   regionalCode?: CountryCode;
@@ -43,7 +41,6 @@ export const PhoneNumberInputField = forwardRef<
   PhoneNumberInputFieldProps
 >(function PhoneNumberInputField(
   {
-    displaySelectedFlagLabel = true,
     displayPhoneNumberCountry = true,
     displayRegionalCodeOnEmptyFocus = true,
     label,
@@ -188,7 +185,12 @@ export const PhoneNumberInputField = forwardRef<
       InputProps={{
         ...InputProps,
         startAdornment: displayPhoneNumberCountry ? (
-          <InputAdornment position="start">
+          <InputAdornment
+            position="start"
+            sx={{
+              maxWidth: 200,
+            }}
+          >
             <Button
               color="inherit"
               ref={anchorRef}
@@ -198,46 +200,37 @@ export const PhoneNumberInputField = forwardRef<
               }}
               sx={{ gap: 0, pr: 0, pl: 2 }}
             >
-              <Box
-                component="span"
-                className="phone-field-flag-country"
-                sx={{ display: 'inline-flex', alignItems: 'center' }}
-              >
-                <Box
-                  component="i"
-                  sx={{
-                    mr: `4px`,
-                    display: 'inline-block',
-                    width: 16,
-                    height: 11,
-                    bgcolor: palette.divider,
-                    backgroundImage: `url(${BASE_64_FLAG_IMAGE})`,
-                    backgroundRepeat: 'no-repeat',
-                    ...(() => {
+              {(() => {
+                const flagElement = (
+                  <Box
+                    component="i"
+                    className={`fi fi-${(() => {
                       if (selectedCountry) {
-                        return phoneNumberFlags[
-                          selectedCountry.regionalCode.toLowerCase()
-                        ];
+                        return selectedCountry.regionalCode.toLowerCase();
                       }
-                    })(),
-                  }}
-                />
-                {displaySelectedFlagLabel && selectedCountry ? (
-                  <Typography
-                    className="phone-field-flag-country-name"
-                    variant="body2"
-                    component="span"
+                    })()}`}
                     sx={{
-                      fontSize: 14,
-                      display: { sm: 'inline-block', xs: 'none' },
-                      width: 60,
+                      fontSize: 20,
+                      height: '1em',
+                      mr: `4px`,
+                      display: 'inline-block',
+                      bgcolor: palette.divider,
                     }}
-                    noWrap
-                  >
-                    {selectedCountry.name}
-                  </Typography>
-                ) : null}
-              </Box>
+                  />
+                );
+
+                if (selectedCountry) {
+                  return (
+                    <Tooltip
+                      title={`${selectedCountry.name} (+${selectedCountry.countryCode})`}
+                    >
+                      {flagElement}
+                    </Tooltip>
+                  );
+                }
+
+                return flagElement;
+              })()}
               <ExpandMoreIcon />
             </Button>
             <CountryList

@@ -5,16 +5,15 @@ import Card from '@mui/material/Card';
 import ClickAwayListener from '@mui/material/ClickAwayListener';
 import Grow from '@mui/material/Grow';
 import Popper from '@mui/material/Popper';
-import Typography from '@mui/material/Typography';
 import React, { useEffect, useMemo, useState } from 'react';
 
+import { CountryCode } from '../../../interfaces/Countries';
+import CountryFieldValue from '../../CountryFieldValue';
 import PaginatedDropdownOptionList, {
   DropdownOption,
 } from '../../PaginatedDropdownOptionList';
 import TextField from '../TextField';
-import { BASE_64_FLAG_IMAGE } from './base64Flags';
 import { Country, countries } from './countries';
-import { phoneNumberFlags } from './phoneNumberFlags';
 
 export interface CountryListProps {
   open: boolean;
@@ -27,23 +26,18 @@ export interface CountryListProps {
 const getCountryOption = ({ regionalCode, name, countryCode }: Country) => {
   return {
     label: (
-      <>
-        <Box
-          component="i"
-          sx={{
-            mr: 1,
-            display: 'inline-block',
-            width: 16,
-            height: 11,
-            backgroundImage: `url(${BASE_64_FLAG_IMAGE})`,
-            backgroundRepeat: 'no-repeat',
-            ...phoneNumberFlags[regionalCode.toLowerCase()],
-          }}
-        />
-        <Typography variant="body2" component="span">
-          {name} +{countryCode}
-        </Typography>
-      </>
+      <CountryFieldValue
+        countryCode={regionalCode as CountryCode}
+        countryLabel={`${name} +${countryCode}`}
+        FieldValueProps={{
+          noWrap: true,
+          sx: {
+            fontWeight: 'normal',
+            whiteSpace: 'nowrap',
+            color: 'inherit',
+          },
+        }}
+      />
     ),
     searchableLabel: name,
     value: regionalCode,
