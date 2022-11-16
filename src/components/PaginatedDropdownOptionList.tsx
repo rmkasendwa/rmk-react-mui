@@ -1,4 +1,11 @@
-import { Divider, Grid, Tooltip, iconButtonClasses } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
+import {
+  Divider,
+  Grid,
+  Tooltip,
+  iconButtonClasses,
+  outlinedInputClasses,
+} from '@mui/material';
 import Box from '@mui/material/Box';
 import Card, { CardProps } from '@mui/material/Card';
 import MenuItem, { MenuItemProps } from '@mui/material/MenuItem';
@@ -21,6 +28,7 @@ import DropdownOption, {
   DEFAULT_DROPDOWN_OPTION_HEIGHT,
   DropdownOptionVariant,
 } from './DropdownOption';
+import TextField, { TextFieldProps } from './InputFields/TextField';
 import ReloadIconButton from './ReloadIconButton';
 
 export interface DropdownOption
@@ -43,6 +51,8 @@ export interface PaginatedDropdownOptionListProps {
   onChangeSelectedOption?: (selectedOptions: DropdownOption[]) => void;
   CardProps?: CardProps;
   optionVariant?: DropdownOptionVariant;
+  searchable?: boolean;
+  SearchFieldProps?: Partial<TextFieldProps>;
 }
 
 const DEFAULT_DROPDOWN_MENU_MAX_HEIGHT = 200;
@@ -67,15 +77,19 @@ export const PaginatedDropdownOptionList = forwardRef<
     onChangeSelectedOption,
     CardProps,
     optionVariant,
+    searchable = false,
+    SearchFieldProps = {},
   },
   ref
 ) {
+  const { sx: SearchFieldPropsSx, ...SearchFieldPropsRest } = SearchFieldProps;
+
+  // Refs
   const optionsRef = useRef(options);
   const onCloseRef = useRef(onClose);
   const loadOptionsRef = useRef(loadOptions);
   const onSelectOptionRef = useRef(onSelectOption);
   const onChangeSelectedOptionRef = useRef(onChangeSelectedOption);
-
   useEffect(() => {
     optionsRef.current = options;
     onCloseRef.current = onClose;
@@ -87,16 +101,35 @@ export const PaginatedDropdownOptionList = forwardRef<
   const { palette, typography } = useTheme();
   const [scrollableDropdownWrapper, setScrollableDropdownWrapper] =
     useState<HTMLDivElement | null>(null);
+
   const [limit, setLimit] = useState(0);
   const [offset, setOffset] = useState(0);
+
+  // Options state
+  const [filteredOptions, setFilteredOptions] = useState<DropdownOption[]>([]); // Filtered options state
   const [selectedOptions, setSelectedOptions] = useState<DropdownOption[]>(
     selectedOptionsProp || []
-  );
+  ); // Selected options state
   const [focusedOptionIndex, setFocusedOptionIndex] = useState<number | null>(
     null
   );
+
+  const [searchTerm, setSearchTerm] = useState(''); // Search state
   const [scrolledToSelectedOption, setScrolledToSelectedOption] =
     useState(false);
+
+  // Filtering options
+  useEffect(() => {
+    setFilteredOptions(
+      options.filter(({ searchableLabel }) => {
+        return (
+          !searchTerm ||
+          (searchableLabel &&
+            searchableLabel.toLowerCase().match(searchTerm.toLowerCase()))
+        );
+      })
+    );
+  }, [options, searchTerm]);
 
   const triggerChangeEvent = useCallback(
     (option: DropdownOption) => {
@@ -164,18 +197,22 @@ export const PaginatedDropdownOptionList = forwardRef<
           case 'ArrowUp':
             if (focusedOptionIndex != null) {
               return (
-                (!!focusedOptionIndex ? focusedOptionIndex : options.length) - 1
+                (!!focusedOptionIndex
+                  ? focusedOptionIndex
+                  : filteredOptions.length) - 1
               );
             }
-            return options.length - 1;
+            return filteredOptions.length - 1;
           case 'ArrowDown':
             if (focusedOptionIndex != null) {
-              return (focusedOptionIndex + 1) % options.length;
+              return (focusedOptionIndex + 1) % filteredOptions.length;
             }
             return 0;
           case 'Enter':
             if (focusedOptionIndex != null) {
-              triggerChangeEvent(options[focusedOptionIndex]);
+              onSelectOptionRef.current &&
+                onSelectOptionRef.current(filteredOptions[focusedOptionIndex]);
+              triggerChangeEvent(filteredOptions[focusedOptionIndex]);
             }
             break;
           case 'Escape':
@@ -206,12 +243,12 @@ export const PaginatedDropdownOptionList = forwardRef<
       window.removeEventListener('keydown', keydownCallback);
     };
   }, [
+    filteredOptions,
     focusedOptionIndex,
     limit,
     maxHeight,
     offset,
     optionHeight,
-    options,
     scrollableDropdownWrapper,
     triggerChangeEvent,
   ]);
@@ -241,7 +278,7 @@ export const PaginatedDropdownOptionList = forwardRef<
     ) {
       const selectedOptionIndices = selectedOptionsProp
         .map(({ value: selectedOptionValue }) => {
-          return options.findIndex(({ value }) => {
+          return filteredOptions.findIndex(({ value }) => {
             return value === selectedOptionValue;
           });
         })
@@ -255,19 +292,57 @@ export const PaginatedDropdownOptionList = forwardRef<
     }
   }, [
     optionHeight,
-    options,
+    filteredOptions,
     scrollableDropdownWrapper,
     scrolledToSelectedOption,
     selectedOptionsProp,
   ]);
 
   const displayOptions = paging
-    ? options.slice(offset, offset + limit)
-    : options;
-  const hasAllOptionsSelected = options.length === selectedOptions.length;
+    ? filteredOptions.slice(offset, offset + limit)
+    : filteredOptions;
+  const hasAllOptionsSelected =
+    filteredOptions.length === selectedOptions.length;
 
   return (
     <Card {...CardProps} ref={ref} tabIndex={-1}>
+      {(() => {
+        if (searchable) {
+          return (
+            <>
+              <Box
+                sx={{
+                  py: 1,
+                  px: 2,
+                }}
+              >
+                <TextField
+                  size="small"
+                  placeholder="Search"
+                  {...SearchFieldPropsRest}
+                  InputProps={{
+                    startAdornment: (
+                      <SearchIcon sx={{ pointerEvents: 'none', mr: 1 }} />
+                    ),
+                    ...SearchFieldPropsRest.InputProps,
+                  }}
+                  value={searchTerm}
+                  onChange={(event) => setSearchTerm(event.target.value)}
+                  fullWidth
+                  sx={{
+                    [`.${outlinedInputClasses.root}`]: {
+                      borderRadius: '20px',
+                      bgcolor: palette.divider,
+                    },
+                    ...SearchFieldPropsSx,
+                  }}
+                />
+              </Box>
+              <Divider />
+            </>
+          );
+        }
+      })()}
       <Box
         ref={(scrollableDropdownWrapper: HTMLDivElement) => {
           setScrollableDropdownWrapper(scrollableDropdownWrapper);
@@ -285,7 +360,9 @@ export const PaginatedDropdownOptionList = forwardRef<
           sx={{
             m: 0,
             p: 0,
-            minHeight: paging ? options.length * optionHeight : undefined,
+            minHeight: paging
+              ? filteredOptions.length * optionHeight
+              : undefined,
           }}
           onClick={() => {
             if (!multiple && onCloseRef.current) {
@@ -309,7 +386,7 @@ export const PaginatedDropdownOptionList = forwardRef<
               if (isDropdownOption && isDropdownOptionWrapped) {
                 const classNames = [];
                 const isFocused =
-                  options.indexOf(option) === focusedOptionIndex;
+                  filteredOptions.indexOf(option) === focusedOptionIndex;
                 if (isFocused) {
                   classNames.push('Mui-focusVisible');
                 }
@@ -357,7 +434,7 @@ export const PaginatedDropdownOptionList = forwardRef<
           ) : null}
         </Box>
       </Box>
-      {multiple && options.length > 1 ? (
+      {multiple && filteredOptions.length > 1 ? (
         <>
           <Divider />
           <DropdownOption
@@ -366,7 +443,7 @@ export const PaginatedDropdownOptionList = forwardRef<
                 if (hasAllOptionsSelected) {
                   return [];
                 }
-                return options.filter((option) => {
+                return filteredOptions.filter((option) => {
                   const { selectable = true } = option;
                   return selectable;
                 });
