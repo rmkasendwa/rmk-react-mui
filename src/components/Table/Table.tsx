@@ -54,7 +54,9 @@ import { getColumnWidthStyles, getTableMinWidth } from '../../utils/Table';
 import DataTablePagination from '../DataTablePagination';
 import RenderIfVisible, { RenderIfVisibleProps } from '../RenderIfVisible';
 import TableBodyRow from './TableBodyRow';
-import TableColumnToggleIconButton from './TableColumnToggleIconButton';
+import TableColumnToggleIconButton, {
+  TableColumnToggleIconButtonProps,
+} from './TableColumnToggleIconButton';
 
 export type {
   ForEachDerivedColumnConfiguration,
@@ -112,6 +114,10 @@ export interface TableProps<T = any>
       | 'defaultColumnValue'
       | 'columnTypographyProps'
       | 'minColumnWidth'
+    >,
+    Pick<
+      TableColumnToggleIconButtonProps,
+      'selectedColumnIds' | 'onChangeSelectedColumnIds'
     > {
   rows: T[];
   rowStartIndex?: number;
@@ -205,6 +211,8 @@ export const BaseTable = <T extends BaseTableRow>(
     sortBy: sortByProp,
     onChangeSortBy,
     enableColumnDisplayToggle = false,
+    selectedColumnIds: selectedColumnIdsProp,
+    onChangeSelectedColumnIds,
     sx,
     ...rest
   } = props;
@@ -232,6 +240,7 @@ export const BaseTable = <T extends BaseTableRow>(
     ...PaginatedTableWrapperPropsRest
   } = PaginatedTableWrapperProps;
   lowercaseLabelPlural || (lowercaseLabelPlural = labelPlural.toLowerCase());
+
   // Refs
   const columnsRef = useRef(columnsProp);
   useEffect(() => {
@@ -340,9 +349,19 @@ export const BaseTable = <T extends BaseTableRow>(
     });
   }, [columnsProp, currencyCode, enableColumnDisplayToggle]);
 
+  const [selectedColumnIds, setSelectedColumnIds] = useState<string[]>(
+    selectedColumnIdsProp || columns.map(({ id }) => String(id))
+  );
+
+  const displayingColumns = useMemo(() => {
+    return columns.filter(({ id }) => {
+      return selectedColumnIds.includes(String(id));
+    });
+  }, [columns, selectedColumnIds]);
+
   const minWidth = useMemo(() => {
     return getTableMinWidth(
-      columns.map((column) => {
+      displayingColumns.map((column) => {
         const { minWidth } = column;
         return {
           ...column,
@@ -350,7 +369,7 @@ export const BaseTable = <T extends BaseTableRow>(
         };
       })
     );
-  }, [columns, minColumnWidth]);
+  }, [displayingColumns, minColumnWidth]);
 
   const pageRows: typeof rows = useMemo(() => {
     const sortedRows = (() => {
@@ -377,6 +396,10 @@ export const BaseTable = <T extends BaseTableRow>(
     sortBy,
     totalRowCount,
   ]);
+
+  useEffect(() => {
+    onChangeSelectedColumnIds && onChangeSelectedColumnIds(selectedColumnIds);
+  }, [onChangeSelectedColumnIds, selectedColumnIds]);
 
   useEffect(() => {
     setPageIndex(pageIndexProp);
@@ -598,7 +621,7 @@ export const BaseTable = <T extends BaseTableRow>(
           }}
         >
           <TableRow {...restHeaderRowProps} sx={{ ...headerRowPropsSx }}>
-            {columns.map((column, index) => {
+            {displayingColumns.map((column, index) => {
               const {
                 id,
                 align,
@@ -611,7 +634,7 @@ export const BaseTable = <T extends BaseTableRow>(
                 sx,
                 getColumnValue,
               } = column;
-              const isLastColumn = index === columns.length - 1;
+              const isLastColumn = index === displayingColumns.length - 1;
               let label = column.label;
               column.headerTextAfter &&
                 (label = (
@@ -648,7 +671,7 @@ export const BaseTable = <T extends BaseTableRow>(
                       pl: align === 'center' || index <= 0 ? 3 : 1.5,
                       pr: columnSortable
                         ? 3
-                        : index < columns.length - 1
+                        : index < displayingColumns.length - 1
                         ? 1.5
                         : 3,
                       py: 1.5,
@@ -824,7 +847,12 @@ export const BaseTable = <T extends BaseTableRow>(
                             }}
                           >
                             <TableColumnToggleIconButton
-                              {...{ columns }}
+                              {...{ columns, selectedColumnIds }}
+                              onChangeSelectedColumnIds={(
+                                selectedColumnIds
+                              ) => {
+                                setSelectedColumnIds(selectedColumnIds);
+                              }}
                               sx={{
                                 mt: '-25px',
                                 p: 0.2,
@@ -872,7 +900,6 @@ export const BaseTable = <T extends BaseTableRow>(
                   >
                     <TableBodyRow
                       {...{
-                        columns,
                         row,
                         decimalPlaces,
                         textTransform,
@@ -882,6 +909,7 @@ export const BaseTable = <T extends BaseTableRow>(
                         columnTypographyProps,
                         minColumnWidth,
                       }}
+                      columns={displayingColumns}
                       getRowProps={forEachRowProps}
                       className={classNames.join(' ')}
                     />
@@ -891,7 +919,7 @@ export const BaseTable = <T extends BaseTableRow>(
             }
             return (
               <TableRow>
-                <TableCell colSpan={columns.length} align="center">
+                <TableCell colSpan={displayingColumns.length} align="center">
                   <Typography variant="body2">
                     No {lowercaseLabelPlural} found
                   </Typography>

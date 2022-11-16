@@ -9,7 +9,7 @@ import {
   useThemeProps,
 } from '@mui/material';
 import clsx from 'clsx';
-import { forwardRef, useMemo } from 'react';
+import { forwardRef, useEffect, useMemo, useState } from 'react';
 
 import { TableColumn } from '../../interfaces/Table';
 import { DropdownOption } from '../../interfaces/Utils';
@@ -53,6 +53,8 @@ declare module '@mui/material/styles/components' {
 export interface TableColumnToggleIconButtonProps
   extends Partial<Omit<EllipsisMenuIconButtonProps, 'options'>> {
   columns: TableColumn[];
+  selectedColumnIds?: string[];
+  onChangeSelectedColumnIds?: (selectedColumnIds: string[]) => void;
 }
 
 export function getTableColumnToggleIconButtonUtilityClass(
@@ -76,8 +78,14 @@ export const TableColumnToggleIconButton = forwardRef<
     props: inProps,
     name: 'MuiTableColumnToggleIconButton',
   });
-  const { className, columns, PaginatedDropdownOptionListProps, ...rest } =
-    props;
+  const {
+    className,
+    columns,
+    selectedColumnIds: selectedColumnIdsProp,
+    onChangeSelectedColumnIds,
+    PaginatedDropdownOptionListProps,
+    ...rest
+  } = props;
 
   const classes = composeClasses(
     slots,
@@ -91,6 +99,10 @@ export const TableColumnToggleIconButton = forwardRef<
     })()
   );
 
+  const [selectedColumnIds, setSelectedColumnIds] = useState<string[]>(
+    selectedColumnIdsProp || []
+  );
+
   const options = useMemo(() => {
     return columns.map(({ id, label }) => {
       return {
@@ -99,6 +111,16 @@ export const TableColumnToggleIconButton = forwardRef<
       } as DropdownOption;
     });
   }, [columns]);
+
+  useEffect(() => {
+    if (selectedColumnIdsProp) {
+      setSelectedColumnIds(selectedColumnIdsProp);
+    }
+  }, [selectedColumnIdsProp]);
+
+  useEffect(() => {
+    onChangeSelectedColumnIds && onChangeSelectedColumnIds(selectedColumnIds);
+  }, [onChangeSelectedColumnIds, selectedColumnIds]);
 
   return (
     <EllipsisMenuIconButton
@@ -110,6 +132,14 @@ export const TableColumnToggleIconButton = forwardRef<
         searchable: true,
         optionVariant: 'checkbox',
         ...PaginatedDropdownOptionListProps,
+        selectedOptions: options.filter(({ value }) => {
+          return selectedColumnIds.includes(String(value));
+        }),
+        onChangeSelectedOption: (selectedOptions) => {
+          setSelectedColumnIds(
+            selectedOptions.map(({ value }) => String(value))
+          );
+        },
         multiple: true,
       }}
       closeOnSelectOption={false}
