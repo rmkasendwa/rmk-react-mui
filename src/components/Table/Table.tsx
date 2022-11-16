@@ -278,15 +278,15 @@ export const BaseTable = <T extends BaseTableRow>(
         case 'percentage':
         case 'number':
           nextColumn.align = 'right';
-          if (!nextColumn.noHeaderTextAfter) {
+          if (!nextColumn.noHeaderTextSuffix) {
             switch (nextColumn.type) {
               case 'currency':
                 if (currencyCode) {
-                  nextColumn.headerTextAfter = ` (${currencyCode})`;
+                  nextColumn.headerTextSuffix = ` (${currencyCode})`;
                 }
                 break;
               case 'percentage':
-                nextColumn.headerTextAfter = ' (%)';
+                nextColumn.headerTextSuffix = ' (%)';
                 break;
             }
           }
@@ -310,7 +310,7 @@ export const BaseTable = <T extends BaseTableRow>(
         case 'currencyInput':
           nextColumn.align = 'right';
           if (currencyCode) {
-            nextColumn.headerTextAfter = ` (${currencyCode})`;
+            nextColumn.headerTextSuffix = ` (${currencyCode})`;
           }
           break;
         case 'tool':
@@ -335,8 +335,15 @@ export const BaseTable = <T extends BaseTableRow>(
       nextColumn.className = clsx(
         nextColumn.opaque ? OPAQUE_BG_CLASS_NAME : null
       );
+
+      const { showHeaderText, label } = nextColumn;
       const extraWidth = (() => {
-        if (isLastColumn && enableColumnDisplayToggle) {
+        if (
+          isLastColumn &&
+          enableColumnDisplayToggle &&
+          showHeaderText &&
+          label
+        ) {
           return 44;
         }
         return 0;
@@ -635,13 +642,14 @@ export const BaseTable = <T extends BaseTableRow>(
                 type,
                 sx,
                 getColumnValue,
+                showHeaderText = true,
               } = column;
               const isLastColumn = index === displayingColumns.length - 1;
               let label = column.label;
-              column.headerTextAfter &&
+              column.headerTextSuffix &&
                 (label = (
                   <>
-                    {label} {column.headerTextAfter}
+                    {label} {column.headerTextSuffix}
                   </>
                 ));
               return (
@@ -678,7 +686,7 @@ export const BaseTable = <T extends BaseTableRow>(
                         : 3,
                       py: 1.5,
                       ...(() => {
-                        if (!label) {
+                        if (!showHeaderText || !label) {
                           return {
                             position: 'absolute',
                             top: 0,
@@ -687,11 +695,10 @@ export const BaseTable = <T extends BaseTableRow>(
                             left: 0,
                           };
                         }
-                        return {};
                       })(),
                     }}
                   >
-                    {label ? (
+                    {showHeaderText && label ? (
                       <>
                         <Typography
                           component="div"
@@ -718,7 +725,7 @@ export const BaseTable = <T extends BaseTableRow>(
                                       isLastColumn &&
                                       enableColumnDisplayToggle
                                     ) {
-                                      return 32;
+                                      return 48;
                                     }
                                     return 0;
                                   })(),
@@ -845,7 +852,6 @@ export const BaseTable = <T extends BaseTableRow>(
                               height: 0,
                               position: 'sticky',
                               right: 6,
-                              mr: '-20px',
                             }}
                           >
                             <TableColumnToggleIconButton
