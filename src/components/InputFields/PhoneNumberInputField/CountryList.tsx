@@ -1,5 +1,6 @@
 import ClearIcon from '@mui/icons-material/Clear';
 import SearchIcon from '@mui/icons-material/Search';
+import { Divider, outlinedInputClasses, useTheme } from '@mui/material';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import ClickAwayListener from '@mui/material/ClickAwayListener';
@@ -51,6 +52,7 @@ const CountryList: React.FC<CountryListProps> = ({
   selectedCountry,
   anchor,
 }) => {
+  const { palette } = useTheme();
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredOptions, setFilteredOptions] = useState<DropdownOption[]>([]);
   const [selectedOptions, setSelectedOptions] = useState<DropdownOption[]>([]);
@@ -103,31 +105,39 @@ const CountryList: React.FC<CountryListProps> = ({
               <Box tabIndex={-1}>
                 <ClickAwayListener onClickAway={handleClose}>
                   <Card>
-                    <TextField
-                      variant="filled"
-                      size="small"
-                      placeholder="Search"
-                      value={searchTerm}
-                      InputProps={{
-                        startAdornment: (
-                          <SearchIcon sx={{ pointerEvents: 'none', mr: 1 }} />
-                        ),
-                        endAdornment: searchTerm ? (
-                          <ClearIcon
-                            onClick={() => setSearchTerm('')}
-                            fontSize="small"
-                            sx={{ cursor: 'pointer' }}
-                          />
-                        ) : null,
+                    <Box
+                      sx={{
+                        py: 1,
+                        px: 2,
                       }}
-                      inputProps={{
-                        sx: {
-                          py: 1.5,
-                        },
-                      }}
-                      onChange={(event) => setSearchTerm(event.target.value)}
-                      fullWidth
-                    />
+                    >
+                      <TextField
+                        size="small"
+                        placeholder="Search"
+                        value={searchTerm}
+                        InputProps={{
+                          startAdornment: (
+                            <SearchIcon sx={{ pointerEvents: 'none', mr: 1 }} />
+                          ),
+                          endAdornment: searchTerm ? (
+                            <ClearIcon
+                              onClick={() => setSearchTerm('')}
+                              fontSize="small"
+                              sx={{ cursor: 'pointer' }}
+                            />
+                          ) : null,
+                        }}
+                        onChange={(event) => setSearchTerm(event.target.value)}
+                        fullWidth
+                        sx={{
+                          [`.${outlinedInputClasses.root}`]: {
+                            borderRadius: '20px',
+                            bgcolor: palette.divider,
+                          },
+                        }}
+                      />
+                    </Box>
+                    <Divider />
                     <PaginatedDropdownOptionList
                       options={filteredOptions}
                       minWidth={anchor ? anchor.offsetWidth : undefined}
