@@ -11,6 +11,12 @@ import { FC, useEffect } from 'react';
 
 import { PageHistory } from '../interfaces/Page';
 
+export const getRouteHistory = (): PageHistory => {
+  return StorageManager.get('page-history') || [];
+};
+
+export const clearRouteHistory = () => StorageManager.remove('page-history');
+
 export interface HtmlHeadClasses {
   /** Styles applied to the root element. */
   root: string;

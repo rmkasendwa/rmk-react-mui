@@ -1,6 +1,6 @@
 {
   "name": "@infinite-debugger/react-mui",
-  "version": "0.3.0-alpha.71",
+  "version": "0.3.0-alpha.73",
   "description": "RMK React MUI is a React UI library of utility components, hooks and contexts",
   "keywords": [
     "react",
@@ -137,12 +137,9 @@
     "react-dom": "^18.2.0",
     "react-fast-compare": "^3.2.0",
     "react-intersection-observer": "^9.4.0",
-    "react-redux": "^8.0.5",
     "react-router-dom": "^6.4.3",
     "react-scripts": "^5.0.1",
     "react-side-effect": "^2.1.2",
-    "redux": "^4.2.0",
-    "redux-thunk": "^2.4.2",
     "sass-loader": "^13.1.0",
     "style-loader": "^3.3.1",
     "typescript": "^4.8.4",
@@ -165,10 +162,7 @@
     "next": ">=13.0.2",
     "react": ">=18.2.0",
     "react-intersection-observer": ">=9.4.0",
-    "react-redux": ">=8.0.5",
-    "react-router-dom": ">=6.4.3",
-    "redux": ">=4.2.0",
-    "redux-thunk": ">=2.4.2"
+    "react-router-dom": ">=6.4.3"
   },
   "importSort": {
     ".js, .jsx, .ts, .tsx": {

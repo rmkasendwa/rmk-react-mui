@@ -5,12 +5,10 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { withThemes } from '@react-theming/storybook-addon';
 import { addDecorator } from '@storybook/react';
 import React, { useEffect } from 'react';
-import { Provider as ReduxProvider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
 
 import { APIProvider } from '../src/contexts/APIContext';
 import { GlobalConfigurationProvider } from '../src/contexts/GlobalConfigurationContext';
-import store from '../src/redux/store';
 import { darkTheme, defaultTheme } from '../src/theme';
 
 const providerFn = ({ theme: { theme }, children }) => {
@@ -30,12 +28,10 @@ const providerFn = ({ theme: { theme }, children }) => {
     <BrowserRouter>
       <GlobalConfigurationProvider>
         <APIProvider>
-          <ReduxProvider store={store}>
-            <ThemeProvider theme={muiTheme}>
-              <CssBaseline />
-              {children}
-            </ThemeProvider>
-          </ReduxProvider>
+          <ThemeProvider theme={muiTheme}>
+            <CssBaseline />
+            {children}
+          </ThemeProvider>
         </APIProvider>
       </GlobalConfigurationProvider>
     </BrowserRouter>
