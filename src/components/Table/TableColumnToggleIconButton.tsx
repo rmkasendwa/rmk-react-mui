@@ -9,8 +9,10 @@ import {
   useThemeProps,
 } from '@mui/material';
 import clsx from 'clsx';
-import { forwardRef } from 'react';
+import { forwardRef, useMemo } from 'react';
 
+import { TableColumn } from '../../interfaces/Table';
+import { DropdownOption } from '../../interfaces/Utils';
 import EllipsisMenuIconButton, {
   EllipsisMenuIconButtonProps,
 } from '../EllipsisMenuIconButton';
@@ -49,7 +51,9 @@ declare module '@mui/material/styles/components' {
 }
 
 export interface TableColumnToggleIconButtonProps
-  extends Partial<Omit<EllipsisMenuIconButtonProps, 'options'>> {}
+  extends Partial<Omit<EllipsisMenuIconButtonProps, 'options'>> {
+  columns: TableColumn[];
+}
 
 export function getTableColumnToggleIconButtonUtilityClass(
   slot: string
@@ -72,7 +76,8 @@ export const TableColumnToggleIconButton = forwardRef<
     props: inProps,
     name: 'MuiTableColumnToggleIconButton',
   });
-  const { className, ...rest } = props;
+  const { className, columns, PaginatedDropdownOptionListProps, ...rest } =
+    props;
 
   const classes = composeClasses(
     slots,
@@ -86,12 +91,28 @@ export const TableColumnToggleIconButton = forwardRef<
     })()
   );
 
+  const options = useMemo(() => {
+    return columns.map(({ id, label }) => {
+      return {
+        value: id,
+        label,
+      } as DropdownOption;
+    });
+  }, [columns]);
+
   return (
     <EllipsisMenuIconButton
       ref={ref}
       {...rest}
+      {...{ options }}
       className={clsx(classes.root)}
-      options={[]}
+      PaginatedDropdownOptionListProps={{
+        searchable: true,
+        optionVariant: 'checkbox',
+        ...PaginatedDropdownOptionListProps,
+        multiple: true,
+      }}
+      closeOnSelectOption={false}
     >
       <AddIcon />
     </EllipsisMenuIconButton>

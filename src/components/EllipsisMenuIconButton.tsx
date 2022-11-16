@@ -17,6 +17,7 @@ export interface EllipsisMenuIconButtonProps
   extends IconButtonProps,
     EllipsisMenuToolProps {
   PaginatedDropdownOptionListProps?: Partial<PaginatedDropdownOptionListProps>;
+  closeOnSelectOption?: boolean;
 }
 
 export const EllipsisMenuIconButton = forwardRef<
@@ -27,6 +28,7 @@ export const EllipsisMenuIconButton = forwardRef<
     children = <MoreVertIcon />,
     options,
     PaginatedDropdownOptionListProps = {},
+    closeOnSelectOption = true,
     ...rest
   },
   ref
@@ -71,7 +73,11 @@ export const EllipsisMenuIconButton = forwardRef<
               <Box>
                 <ClickAwayListener onClickAway={close}>
                   <PaginatedDropdownOptionList
-                    onSelectOption={close}
+                    onSelectOption={() => {
+                      if (closeOnSelectOption) {
+                        close();
+                      }
+                    }}
                     {...{ options }}
                     {...PaginatedDropdownOptionListProps}
                   />

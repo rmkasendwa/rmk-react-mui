@@ -824,6 +824,7 @@ export const BaseTable = <T extends BaseTableRow>(
                             }}
                           >
                             <TableColumnToggleIconButton
+                              {...{ columns }}
                               sx={{
                                 mt: '-25px',
                                 p: 0.2,
