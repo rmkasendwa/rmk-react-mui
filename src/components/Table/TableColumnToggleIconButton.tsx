@@ -13,7 +13,7 @@ import { forwardRef } from 'react';
 
 import EllipsisMenuIconButton, {
   EllipsisMenuIconButtonProps,
-} from './EllipsisMenuIconButton';
+} from '../EllipsisMenuIconButton';
 
 export interface TableColumnToggleIconButtonClasses {
   /** Styles applied to the root element. */
