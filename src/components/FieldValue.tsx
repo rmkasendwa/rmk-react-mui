@@ -50,6 +50,7 @@ declare module '@mui/material/styles/components' {
 export interface FieldValueProps extends TypographyProps {
   icon?: ReactNode;
   endIcon?: ReactNode;
+  IconContainerProps?: Partial<GridProps>;
   EndIconContainerProps?: Partial<GridProps>;
   ContainerGridProps?: Partial<GridProps>;
 }
@@ -73,6 +74,7 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
     const {
       icon,
       endIcon,
+      IconContainerProps = {},
       EndIconContainerProps = {},
       ContainerGridProps = {},
       children,
@@ -93,10 +95,12 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
       })()
     );
 
-    const { sx: ContainerGridPropsSx, ...ContainerGridPropsRest } =
-      ContainerGridProps;
+    const { sx: IconContainerPropsSx, ...IconContainerPropsRest } =
+      IconContainerProps;
     const { sx: EndIconContainerPropsSx, ...EndIconContainerPropsRest } =
       EndIconContainerProps;
+    const { sx: ContainerGridPropsSx, ...ContainerGridPropsRest } =
+      ContainerGridProps;
 
     const { palette, components } = useTheme();
 
@@ -109,12 +113,15 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
       >
         {icon ? (
           <Grid
+            {...IconContainerPropsRest}
             item
             sx={{
               display: 'flex',
               maxWidth: 24,
               height: 24,
               justifyContent: 'center',
+              alignItems: 'center',
+              ...IconContainerPropsSx,
             }}
           >
             {icon}
