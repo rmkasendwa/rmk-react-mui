@@ -5,6 +5,7 @@ export interface PaginatedRequestParams {
   limit?: number;
   offset?: number;
   showRecords?: boolean;
+  searchTerm?: string;
 }
 
 export interface PaginatedResponseData<T> {
