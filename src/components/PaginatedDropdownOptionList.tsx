@@ -122,7 +122,8 @@ export const PaginatedDropdownOptionList = forwardRef<
   // Filtering options
   useEffect(() => {
     setFilteredOptions(
-      options.filter(({ searchableLabel }) => {
+      options.filter(({ searchableLabel: baseSearchableLabel, label }) => {
+        const searchableLabel = baseSearchableLabel || String(label);
         return (
           !searchTerm ||
           (searchableLabel &&
@@ -148,7 +149,22 @@ export const PaginatedDropdownOptionList = forwardRef<
           } else {
             options.push(option);
           }
-          return options;
+          return options.sort((a, b) => {
+            const aOption = optionsRef.current.find(
+              ({ value }) => value === a.value
+            );
+            const bOption = optionsRef.current.find(
+              ({ value }) => value === b.value
+            );
+
+            if (aOption && bOption) {
+              return (
+                optionsRef.current.indexOf(aOption) -
+                optionsRef.current.indexOf(bOption)
+              );
+            }
+            return 0;
+          });
         }
         return [option];
       })();

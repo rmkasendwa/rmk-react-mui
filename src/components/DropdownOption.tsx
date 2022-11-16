@@ -1,7 +1,7 @@
 import CheckIcon from '@mui/icons-material/Check';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
-import { Grid } from '@mui/material';
+import { Grid, alpha, useTheme } from '@mui/material';
 import Box from '@mui/material/Box';
 import MenuItem, { MenuItemProps } from '@mui/material/MenuItem';
 import { forwardRef } from 'react';
@@ -29,6 +29,7 @@ export const DropdownOption = forwardRef<HTMLLIElement, DropdownOptionProps>(
     },
     ref
   ) {
+    const { palette } = useTheme();
     return (
       <MenuItem
         ref={ref}
@@ -42,7 +43,27 @@ export const DropdownOption = forwardRef<HTMLLIElement, DropdownOptionProps>(
           p: 0,
           display: 'flex',
           alignItems: 'center',
+          '&.Mui-selected': {
+            bgcolor: alpha(palette.primary.main, 0.08),
+            ...(() => {
+              if (selectable) {
+                return {
+                  '&:hover': {
+                    bgcolor: alpha(palette.primary.main, 0.12),
+                  },
+                };
+              } else {
+                return {
+                  cursor: 'inherit',
+                  '&:hover': {
+                    bgcolor: alpha(palette.primary.main, 0.08),
+                  },
+                };
+              }
+            })(),
+          },
         }}
+        disableRipple={!selectable}
       >
         <Box
           sx={{

@@ -354,9 +354,11 @@ export const BaseTable = <T extends BaseTableRow>(
   );
 
   const displayingColumns = useMemo(() => {
-    return columns.filter(({ id }) => {
-      return selectedColumnIds.includes(String(id));
-    });
+    return selectedColumnIds
+      .map((selectedColumnId) => {
+        return columns.find(({ id }) => id === selectedColumnId)!;
+      })
+      .filter((column) => column != null);
   }, [columns, selectedColumnIds]);
 
   const minWidth = useMemo(() => {

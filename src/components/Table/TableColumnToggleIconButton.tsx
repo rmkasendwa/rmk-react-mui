@@ -104,10 +104,11 @@ export const TableColumnToggleIconButton = forwardRef<
   );
 
   const options = useMemo(() => {
-    return columns.map(({ id, label }) => {
+    return columns.map(({ id, label }, index) => {
       return {
         value: id,
         label,
+        selectable: index > 0 && index < columns.length - 1,
       } as DropdownOption;
     });
   }, [columns]);
