@@ -1,9 +1,31 @@
 import { forwardRef } from 'react';
+import * as Yup from 'yup';
 
 import { useAggregatedFormikContext } from '../../hooks/Formik';
+import { isValidPhoneNumber } from '../../utils/PhoneNumberUtil';
 import PhoneNumberInputField, {
   PhoneNumberInputFieldProps,
 } from '../InputFields/PhoneNumberInputField';
+
+declare module 'yup' {
+  interface StringSchema {
+    phoneNumber(): StringSchema;
+  }
+}
+
+Yup.addMethod(Yup.mixed, 'phoneNumber', function () {
+  return this.test(
+    'phoneNumber',
+    'Please enter a valid phone number',
+    function (value) {
+      return (
+        value == null ||
+        String(value).trim() == '' ||
+        (typeof value === 'string' && Boolean(isValidPhoneNumber(value)))
+      );
+    }
+  );
+});
 
 export interface FormikPhoneNumberInputFieldProps
   extends PhoneNumberInputFieldProps {}
