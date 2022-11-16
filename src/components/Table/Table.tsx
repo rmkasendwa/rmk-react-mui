@@ -42,13 +42,17 @@ import {
   useState,
 } from 'react';
 
-import { GlobalConfigurationContext } from '../contexts/GlobalConfigurationContext';
-import { SortBy, SortDirection, SortOptions } from '../interfaces/Sort';
-import { BaseTableRow, GetRowProps, TableRowProps } from '../interfaces/Table';
-import { sort } from '../utils/Sort';
-import { getColumnWidthStyles, getTableMinWidth } from '../utils/Table';
-import DataTablePagination from './DataTablePagination';
-import RenderIfVisible, { RenderIfVisibleProps } from './RenderIfVisible';
+import { GlobalConfigurationContext } from '../../contexts/GlobalConfigurationContext';
+import { SortBy, SortDirection, SortOptions } from '../../interfaces/Sort';
+import {
+  BaseTableRow,
+  GetRowProps,
+  TableRowProps,
+} from '../../interfaces/Table';
+import { sort } from '../../utils/Sort';
+import { getColumnWidthStyles, getTableMinWidth } from '../../utils/Table';
+import DataTablePagination from '../DataTablePagination';
+import RenderIfVisible, { RenderIfVisibleProps } from '../RenderIfVisible';
 import TableBodyRow from './TableBodyRow';
 import TableColumnToggleIconButton from './TableColumnToggleIconButton';
 
@@ -56,7 +60,7 @@ export type {
   ForEachDerivedColumnConfiguration,
   TableColumn,
   TableColumnEnumValue,
-} from '../interfaces/Table';
+} from '../../interfaces/Table';
 
 export interface TableClasses {
   /** Styles applied to the root element. */

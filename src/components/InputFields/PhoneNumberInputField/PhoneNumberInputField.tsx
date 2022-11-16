@@ -1,14 +1,14 @@
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { useTheme } from '@mui/material';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import InputAdornment from '@mui/material/InputAdornment';
 import Typography from '@mui/material/Typography';
 import { forwardRef, useCallback, useEffect, useRef, useState } from 'react';
 
-import { useGlobalConfiguration } from '../../../contexts/GlobalConfigurationContext';
 import { CountryCode } from '../../../interfaces/Countries';
-import {
-  getRegionalCode,
+import PhoneNumberUtil, {
+  isValidPhoneNumber,
   systemStandardPhoneNumberFormat,
 } from '../../../utils/PhoneNumberUtil';
 import TextField, { TextFieldProps } from '../TextField';
@@ -44,8 +44,8 @@ export const PhoneNumberInputField = forwardRef<
 >(function PhoneNumberInputField(
   {
     displaySelectedFlagLabel = true,
-    displayPhoneNumberCountry = false,
-    displayRegionalCodeOnEmptyFocus = false,
+    displayPhoneNumberCountry = true,
+    displayRegionalCodeOnEmptyFocus = true,
     label,
     placeholder,
     onFocus,
@@ -63,37 +63,52 @@ export const PhoneNumberInputField = forwardRef<
 ) {
   const { InputProps = {} } = rest;
   const initialRenderRef = useRef(true);
-  const { countryCode } = useGlobalConfiguration();
-  const [regionalCode, setRegionalCode] = useState(countryCode);
-  const [selectedCountry, setSelectedCountry] = useState(flags[regionalCode]);
-
   const anchorRef = useRef(null);
-  const [menuOpen, setMenuOpen] = useState(false);
+
+  const { palette } = useTheme();
+
+  const [regionalCode, setRegionalCode] = useState<CountryCode | undefined>(
+    undefined
+  );
+  const [selectedCountry, setSelectedCountry] = useState<Country | undefined>(
+    undefined
+  );
+
+  const [phoneCountryListOpen, setPhoneCountryListOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
 
-  const setSanitizedInputValue = useCallback(
-    (value: string) => {
-      const validCharacters = value.match(/^\+|[\d-\s]/g);
-      if (validCharacters) {
+  const setSanitizedInputValueRef = useRef((value: string) => {
+    const validCharacterMatch = value.match(/^\+|[\d-\s]/g);
+    if (validCharacterMatch) {
+      const validCharacters = validCharacterMatch.join('');
+      const phoneNumber = isValidPhoneNumber(value);
+      const { localRegionalCode, phoneNumberValid } = (() => {
+        if (phoneNumber) {
+          return {
+            localRegionalCode: PhoneNumberUtil.getRegionCodeForCountryCode(
+              phoneNumber.getCountryCode()!
+            ) as CountryCode,
+            phoneNumberValid: true,
+          };
+        }
+        return { localRegionalCode: regionalCode, phoneNumberValid: false };
+      })();
+      if (phoneNumberValid) {
         const sanitizedValue = systemStandardPhoneNumberFormat(
-          validCharacters.join(''),
-          regionalCode
+          validCharacters,
+          localRegionalCode
         );
-        const sanitizedValueRegionalCode = getRegionalCode(sanitizedValue);
-        if (
-          sanitizedValueRegionalCode &&
-          regionalCode &&
-          sanitizedValueRegionalCode !== regionalCode
-        ) {
-          setRegionalCode(sanitizedValueRegionalCode);
+        if (localRegionalCode !== regionalCode) {
+          setRegionalCode(localRegionalCode);
         }
         setInputValue(sanitizedValue);
       } else {
-        setInputValue('');
+        setInputValue(validCharacters);
       }
-    },
-    [regionalCode]
-  );
+    } else {
+      setInputValue('');
+    }
+  });
 
   const triggerChangeEvent = useCallback(() => {
     const event: any = new Event('change', { bubbles: true });
@@ -110,11 +125,11 @@ export const PhoneNumberInputField = forwardRef<
 
   useEffect(() => {
     if (value) {
-      setSanitizedInputValue(value);
+      setSanitizedInputValueRef.current(value);
     } else {
-      setSanitizedInputValue('');
+      setSanitizedInputValueRef.current('');
     }
-  }, [setSanitizedInputValue, value]);
+  }, [value]);
 
   useEffect(() => {
     if (regionalCodeProp) {
@@ -123,7 +138,9 @@ export const PhoneNumberInputField = forwardRef<
   }, [regionalCodeProp]);
 
   useEffect(() => {
-    setSelectedCountry(flags[regionalCode]);
+    if (regionalCode) {
+      setSelectedCountry(flags[regionalCode]);
+    }
   }, [regionalCode]);
 
   useEffect(() => {
@@ -145,19 +162,26 @@ export const PhoneNumberInputField = forwardRef<
       label={label}
       value={inputValue}
       onFocus={(event) => {
-        if (displayRegionalCodeOnEmptyFocus && inputValue.length === 0) {
+        if (
+          displayRegionalCodeOnEmptyFocus &&
+          selectedCountry &&
+          inputValue.length === 0
+        ) {
           setInputValue(`+${selectedCountry.countryCode}`);
         }
         onFocus && onFocus(event);
       }}
       onBlur={(event) => {
-        if (inputValue === `+${selectedCountry.countryCode}`) {
+        if (
+          selectedCountry &&
+          inputValue === `+${selectedCountry.countryCode}`
+        ) {
           setInputValue('');
         }
         onBlur && onBlur(event);
       }}
       onChange={(event) => {
-        setSanitizedInputValue(event.target.value);
+        setSanitizedInputValueRef.current(event.target.value);
       }}
       {...rest}
       {...{ name, id, placeholder, disabled }}
@@ -170,7 +194,7 @@ export const PhoneNumberInputField = forwardRef<
               ref={anchorRef}
               {...{ disabled }}
               onClick={() => {
-                setMenuOpen((prevOpen) => !prevOpen);
+                setPhoneCountryListOpen((prevOpen) => !prevOpen);
               }}
               sx={{ gap: 0, pr: 0, pl: 2 }}
             >
@@ -178,7 +202,6 @@ export const PhoneNumberInputField = forwardRef<
                 component="span"
                 className="phone-field-flag-country"
                 sx={{ display: 'inline-flex', alignItems: 'center' }}
-                title={selectedCountry.name}
               >
                 <Box
                   component="i"
@@ -187,14 +210,19 @@ export const PhoneNumberInputField = forwardRef<
                     display: 'inline-block',
                     width: 16,
                     height: 11,
+                    bgcolor: palette.divider,
                     backgroundImage: `url(${BASE_64_FLAG_IMAGE})`,
                     backgroundRepeat: 'no-repeat',
-                    ...phoneNumberFlags[
-                      selectedCountry.regionalCode.toLowerCase()
-                    ],
+                    ...(() => {
+                      if (selectedCountry) {
+                        return phoneNumberFlags[
+                          selectedCountry.regionalCode.toLowerCase()
+                        ];
+                      }
+                    })(),
                   }}
                 />
-                {displaySelectedFlagLabel && (
+                {displaySelectedFlagLabel && selectedCountry ? (
                   <Typography
                     className="phone-field-flag-country-name"
                     variant="body2"
@@ -208,19 +236,19 @@ export const PhoneNumberInputField = forwardRef<
                   >
                     {selectedCountry.name}
                   </Typography>
-                )}
+                ) : null}
               </Box>
               <ExpandMoreIcon />
             </Button>
             <CountryList
-              open={menuOpen}
+              open={phoneCountryListOpen}
               onClose={() => {
-                setMenuOpen(false);
+                setPhoneCountryListOpen(false);
               }}
               onSelectCountry={(selectedCountry) => {
                 setSelectedCountry(selectedCountry);
               }}
-              selectedCountry={selectedCountry}
+              {...{ selectedCountry }}
               anchor={anchorRef.current}
             />
           </InputAdornment>

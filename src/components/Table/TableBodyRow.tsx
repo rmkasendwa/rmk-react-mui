@@ -22,17 +22,20 @@ import { format } from 'date-fns';
 import { isValidElement, useEffect, useMemo, useRef } from 'react';
 import * as yup from 'yup';
 
-import { CountryCode } from '../interfaces/Countries';
-import { BaseTableRow, TableRowProps } from '../interfaces/Table';
+import { CountryCode } from '../../interfaces/Countries';
+import { BaseTableRow, TableRowProps } from '../../interfaces/Table';
 import PhoneNumberUtil, {
   isValidPhoneNumber,
   systemStandardPhoneNumberFormat,
-} from '../utils/PhoneNumberUtil';
-import { getColumnPaddingStyles, getColumnWidthStyles } from '../utils/Table';
-import CountryFieldValue from './CountryFieldValue';
+} from '../../utils/PhoneNumberUtil';
+import {
+  getColumnPaddingStyles,
+  getColumnWidthStyles,
+} from '../../utils/Table';
+import CountryFieldValue from '../CountryFieldValue';
 import EllipsisMenuIconButton, {
   EllipsisMenuIconButtonProps,
-} from './EllipsisMenuIconButton';
+} from '../EllipsisMenuIconButton';
 
 const allowedDataTypes = ['number', 'string', 'boolean'];
 
