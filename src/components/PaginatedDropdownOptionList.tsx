@@ -106,7 +106,8 @@ export const PaginatedDropdownOptionList = forwardRef<
   const [offset, setOffset] = useState(0);
 
   // Options state
-  const [filteredOptions, setFilteredOptions] = useState<DropdownOption[]>([]); // Filtered options state
+  const [filteredOptions, setFilteredOptions] =
+    useState<DropdownOption[]>(options); // Filtered options state
   const [selectedOptions, setSelectedOptions] = useState<DropdownOption[]>(
     selectedOptionsProp || []
   ); // Selected options state
