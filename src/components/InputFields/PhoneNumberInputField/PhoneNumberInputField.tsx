@@ -104,11 +104,13 @@ export const PhoneNumberInputField = forwardRef<
   const [selectedCountry, setSelectedCountry] = useState<Country | undefined>(
     regionalCodeProp ? flags[regionalCodeProp] : undefined
   );
+  const [selectedOptions, setSelectedOptions] = useState<DropdownOption[]>(
+    selectedCountry ? [getCountryOption(selectedCountry)] : []
+  );
 
   const [phoneCountryListOpen, setPhoneCountryListOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
 
-  const [selectedOptions, setSelectedOptions] = useState<DropdownOption[]>([]);
   const options = useMemo(() => {
     return countries.map((country) => getCountryOption(country));
   }, []);
