@@ -21,9 +21,8 @@ import {
   useState,
 } from 'react';
 
-import { useAPIDataContext } from '../../contexts/APIDataContext';
 import { LoadingProvider } from '../../contexts/LoadingContext';
-import { useAPIService } from '../../hooks/Utils';
+import { useRecords } from '../../hooks/Utils';
 import { TAPIFunction } from '../../interfaces/Utils';
 import PaginatedDropdownOptionList, {
   DropdownOption,
@@ -34,9 +33,10 @@ import TextField, { TextFieldProps } from './TextField';
 
 export interface DataDropdownFieldProps
   extends Omit<TextFieldProps, 'value'>,
-    Pick<PaginatedDropdownOptionListProps, 'optionVariant'> {
+    Partial<
+      Pick<PaginatedDropdownOptionListProps, 'optionVariant' | 'onSelectOption'>
+    > {
   disableEmptyOption?: boolean;
-  getDropdownOptions?: TAPIFunction<DropdownOption[]>;
   options?: DropdownOption[];
   dataKey?: string;
   sortOptions?: boolean;
@@ -47,6 +47,11 @@ export interface DataDropdownFieldProps
   onChangeSearchTerm?: (searchTerm: string) => void;
   SelectedOptionPillProps?: Partial<BoxProps>;
   searchable?: boolean;
+  PaginatedDropdownOptionListProps?: Partial<PaginatedDropdownOptionListProps>;
+
+  // Async options
+  getDropdownOptions?: TAPIFunction<DropdownOption[]>;
+  callGetDropdownOptions?: 'always' | 'whenNoOptions';
 }
 
 export const DataDropdownField = forwardRef<
@@ -55,7 +60,6 @@ export const DataDropdownField = forwardRef<
 >(function DataDropdownField(
   {
     SelectProps,
-    getDropdownOptions,
     name,
     id,
     value,
@@ -73,43 +77,86 @@ export const DataDropdownField = forwardRef<
     optionVariant,
     sx,
     SelectedOptionPillProps = {},
+    PaginatedDropdownOptionListProps = {},
     WrapperProps = {},
     disabled,
     showClearButton = true,
     searchable = true,
+    getDropdownOptions,
+    callGetDropdownOptions = 'whenNoOptions',
+    onSelectOption,
     ...rest
   },
   ref
 ) {
   const { sx: SelectedOptionPillPropsSx, ...SelectedOptionPillPropsRest } =
     SelectedOptionPillProps;
+  const { ...PaginatedDropdownOptionListPropsRest } =
+    PaginatedDropdownOptionListProps;
   const { sx: WrapperPropsSx, ...WrapperPropsRest } = WrapperProps;
 
   const multiple = SelectProps?.multiple;
-  const { preferStale } = useAPIDataContext();
   const { palette } = useTheme();
 
-  const [options, setOptions] = useState<DropdownOption[]>([]);
+  const [options, setOptions] = useState<DropdownOption[]>(propOptions || []);
 
+  // Refs
+  const anchorRef = useRef<HTMLInputElement>(null);
   const onChangeRef = useRef(onChange);
   const getDropdownOptionsRef = useRef(getDropdownOptions);
   const optionsRef = useRef(options);
-
   useEffect(() => {
     onChangeRef.current = onChange;
     getDropdownOptionsRef.current = getDropdownOptions;
     optionsRef.current = options;
   }, [getDropdownOptions, onChange, options]);
 
-  const {
-    load,
-    loaded,
-    loading,
-    record: dropdownRecords,
-    errorMessage,
-  } = useAPIService<DropdownOption[]>([], dataKey);
+  const sortOptionsRef = useRef(
+    (
+      { label: aLabel, searchableLabel: aSearchableLabel }: DropdownOption,
+      { label: bLabel, searchableLabel: bSearchableLabel }: DropdownOption
+    ) => {
+      if (typeof aLabel === 'string' && typeof bLabel === 'string') {
+        return aLabel.localeCompare(bLabel);
+      }
+      if (
+        typeof aSearchableLabel === 'string' &&
+        typeof bSearchableLabel === 'string'
+      ) {
+        return aSearchableLabel.localeCompare(bSearchableLabel);
+      }
+      return 0;
+    }
+  );
 
-  const anchorRef = useRef<HTMLInputElement>(null);
+  const {
+    load: loadOptions,
+    loading,
+    records: dropdownRecords,
+    errorMessage,
+  } = useRecords(
+    async () => {
+      const shouldGetOptions = (() => {
+        switch (callGetDropdownOptions) {
+          case 'whenNoOptions':
+            return options.length <= 0;
+          case 'always':
+          default:
+            return true;
+        }
+      })();
+      if (getDropdownOptions && shouldGetOptions) {
+        return await getDropdownOptions();
+      }
+      return options;
+    },
+    {
+      loadOnMount: false,
+      autoSync: false,
+      key: dataKey,
+    }
+  );
+
   const [searchTerm, setSearchTerm] = useState('');
   const [open, setOpen] = useState(false);
   const [focused, setFocused] = useState(false);
@@ -144,20 +191,6 @@ export const DataDropdownField = forwardRef<
     [multiple, id, name]
   );
 
-  const loadOptions = useCallback(
-    async (reloadOptions = false) => {
-      if (
-        !loading &&
-        (!loaded || reloadOptions) &&
-        (!preferStale || options.length <= 0 || reloadOptions) &&
-        getDropdownOptionsRef.current
-      ) {
-        load(getDropdownOptionsRef.current);
-      }
-    },
-    [load, loaded, loading, options.length, preferStale]
-  );
-
   const selectedOptionDisplayString = useMemo(() => {
     return selectedOptions
       .filter(({ label, searchableLabel }) => {
@@ -168,6 +201,12 @@ export const DataDropdownField = forwardRef<
   }, [selectedOptions]);
 
   const handleClose = () => setOpen(false);
+
+  useEffect(() => {
+    if (open) {
+      loadOptions();
+    }
+  }, [loadOptions, open]);
 
   useEffect(() => {
     if (value) {
@@ -194,36 +233,18 @@ export const DataDropdownField = forwardRef<
           prevPropOptions.map(({ value }) => value).join('') !==
           propOptions.map(({ value }) => value).join('')
         ) {
-          return propOptions;
+          return propOptions.sort(
+            sortOptions ? sortOptionsRef.current : () => 0
+          );
         }
         return prevPropOptions;
       });
     } else {
-      setOptions(dropdownRecords);
-    }
-  }, [dropdownRecords, propOptions]);
-
-  useEffect(() => {
-    if (sortOptions) {
-      options.sort(
-        (
-          { label: aLabel, searchableLabel: aSearchableLabel },
-          { label: bLabel, searchableLabel: bSearchableLabel }
-        ) => {
-          if (typeof aLabel === 'string' && typeof bLabel === 'string') {
-            return aLabel.localeCompare(bLabel);
-          }
-          if (
-            typeof aSearchableLabel === 'string' &&
-            typeof bSearchableLabel === 'string'
-          ) {
-            return aSearchableLabel.localeCompare(bSearchableLabel);
-          }
-          return 0;
-        }
+      setOptions(
+        dropdownRecords.sort(sortOptions ? sortOptionsRef.current : () => 0)
       );
     }
-  }, [options, sortOptions]);
+  }, [dropdownRecords, propOptions, sortOptions]);
 
   useEffect(() => {
     const fieldValues = Array.isArray(value) ? value : [value];
@@ -252,7 +273,9 @@ export const DataDropdownField = forwardRef<
       );
       if (!existingOption) {
         setOptions((prevOptions) => {
-          return [...prevOptions, selectedOption];
+          return [...prevOptions, selectedOption].sort(
+            sortOptions ? sortOptionsRef.current : () => 0
+          );
         });
       }
       setSelectedOptions((prevSelectedOptions) => {
@@ -266,7 +289,7 @@ export const DataDropdownField = forwardRef<
         return prevSelectedOptions;
       });
     }
-  }, [selectedOption]);
+  }, [selectedOption, sortOptions]);
 
   const filteredOptions = useMemo(() => {
     if (searchTerm && searchTerm !== selectedOptionDisplayString) {
@@ -309,8 +332,7 @@ export const DataDropdownField = forwardRef<
       <TextField
         ref={ref}
         onClick={() => {
-          setTimeout(() => setOpen(true), 200);
-          loadOptions();
+          setOpen(true);
         }}
         onFocus={(event) => {
           setFocused(true);
@@ -492,10 +514,11 @@ export const DataDropdownField = forwardRef<
       >
         {({ TransitionProps }) => {
           return (
-            <Grow {...TransitionProps}>
+            <Grow {...TransitionProps} style={{ transformOrigin: '0 0 0' }}>
               <Box tabIndex={-1}>
                 <ClickAwayListener onClickAway={handleClose}>
                   <PaginatedDropdownOptionList
+                    {...PaginatedDropdownOptionListPropsRest}
                     options={filteredOptions}
                     minWidth={
                       anchorRef.current
@@ -515,6 +538,7 @@ export const DataDropdownField = forwardRef<
                       loading,
                       optionVariant,
                       multiple,
+                      onSelectOption,
                     }}
                   />
                 </ClickAwayListener>
