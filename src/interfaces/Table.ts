@@ -58,8 +58,8 @@ export interface TableColumn<
   align?: 'left' | 'center' | 'right';
   width?: number;
   minWidth?: number;
-  noHeaderTextAfter?: boolean;
-  headerTextAfter?: ReactNode;
+  noHeaderTextSuffix?: boolean;
+  headerTextSuffix?: ReactNode;
   enumValues?: TableColumnEnumValue[];
   searchKeyMapper?: (displayingColumnValue: string) => any;
   columnClassName?: string;
@@ -73,6 +73,7 @@ export interface TableColumn<
   opaque?: boolean;
   propagateClickToParentRowClickEvent?: boolean;
   textTransform?: boolean;
+  showHeaderText?: boolean;
 }
 
 export interface ForEachDerivedColumnConfiguration<T> {
