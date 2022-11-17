@@ -20,7 +20,12 @@ export const FormikRadioButtonsField = forwardRef<
   },
   ref
 ) {
-  const { value, onChange, error, helperText } = useAggregatedFormikContext({
+  const {
+    value = '',
+    onChange,
+    error,
+    helperText,
+  } = useAggregatedFormikContext({
     value: valueProp,
     name,
     error: errorProp,

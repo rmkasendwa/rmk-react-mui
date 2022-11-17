@@ -1,4 +1,6 @@
 import { addThousandCommas } from '@infinite-debugger/rmk-utils/numbers';
+import { useTheme } from '@mui/material';
+import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { forwardRef, useEffect, useState } from 'react';
 
@@ -10,6 +12,7 @@ export interface TextAreaFieldProps extends TextFieldProps {
 
 export const TextAreaField = forwardRef<HTMLDivElement, TextAreaFieldProps>(
   function TextAreaField({ value, onChange, inputProps, ...rest }, ref) {
+    const { spacing } = useTheme();
     const { maxLength } = inputProps ?? {};
     const [inputValue, setInputValue] = useState('');
 
@@ -32,21 +35,35 @@ export const TextAreaField = forwardRef<HTMLDivElement, TextAreaFieldProps>(
         InputProps={{
           sx: {
             alignItems: 'flex-end',
+            pb: 3,
           },
           endAdornment: (() => {
             if (inputValue.length > 0) {
-              if (maxLength) {
-                return (
-                  <Typography variant="body2">
-                    {addThousandCommas(inputValue.length)}/
-                    {addThousandCommas(maxLength)}
-                  </Typography>
-                );
-              }
               return (
-                <Typography variant="body2">
-                  {addThousandCommas(inputValue.length)}
-                </Typography>
+                <Box
+                  sx={{
+                    pointerEvents: 'none',
+                    position: 'absolute',
+                    right: spacing(2),
+                    bottom: spacing(1),
+                  }}
+                >
+                  {(() => {
+                    if (maxLength) {
+                      return (
+                        <Typography component="div" variant="body2">
+                          {addThousandCommas(inputValue.length)}/
+                          {addThousandCommas(maxLength)}
+                        </Typography>
+                      );
+                    }
+                    return (
+                      <Typography component="div" variant="body2">
+                        {addThousandCommas(inputValue.length)}
+                      </Typography>
+                    );
+                  })()}
+                </Box>
               );
             }
           })(),

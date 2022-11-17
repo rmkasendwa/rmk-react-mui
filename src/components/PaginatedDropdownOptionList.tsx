@@ -493,7 +493,7 @@ export const PaginatedDropdownOptionList = forwardRef<
               <Grid item xs sx={{ minWidth: 0 }}>
                 {(() => {
                   if (loading) {
-                    return 'Refreshing...';
+                    return 'Please wait...';
                   }
                   return 'Refresh';
                 })()}
