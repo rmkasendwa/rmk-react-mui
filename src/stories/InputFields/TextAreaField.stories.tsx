@@ -2,7 +2,9 @@ import Container from '@mui/material/Container';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import React from 'react';
 
-import { TextAreaField } from '../../components/InputFields/TextAreaField';
+import TextAreaField, {
+  TextAreaFieldProps,
+} from '../../components/InputFields/TextAreaField';
 
 export default {
   title: 'Components/Input Fields/Text Area Field',
@@ -12,14 +14,7 @@ export default {
 const Template: ComponentStory<typeof TextAreaField> = (props) => {
   return (
     <Container maxWidth="md" sx={{ pt: 6 }}>
-      <TextAreaField
-        label="Long Text"
-        inputProps={{
-          maxLength: 200,
-        }}
-        {...props}
-        fullWidth
-      />
+      <TextAreaField label="Long Text" {...props} />
     </Container>
   );
 };
@@ -27,4 +22,8 @@ const Template: ComponentStory<typeof TextAreaField> = (props) => {
 export const Default = Template.bind({});
 Default.args = {
   required: true,
-};
+  inputProps: {
+    maxLength: 200,
+  },
+  fullWidth: true,
+} as TextAreaFieldProps;
