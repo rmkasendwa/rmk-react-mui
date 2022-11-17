@@ -36,9 +36,7 @@ export interface DataDropdownFieldProps
   extends Omit<TextFieldProps, 'value'>,
     Pick<PaginatedDropdownOptionListProps, 'optionVariant'> {
   disableEmptyOption?: boolean;
-  getDropdownEntities?: TAPIFunction;
-  filterDropdownEntities?: (entities: any[]) => any[];
-  getDropdownOptions?: (options: any[]) => DropdownOption[];
+  getDropdownOptions?: TAPIFunction<DropdownOption[]>;
   options?: DropdownOption[];
   dataKey?: string;
   sortOptions?: boolean;
@@ -57,8 +55,6 @@ export const DataDropdownField = forwardRef<
 >(function DataDropdownField(
   {
     SelectProps,
-    getDropdownEntities,
-    filterDropdownEntities,
     getDropdownOptions,
     name,
     id,
@@ -96,33 +92,22 @@ export const DataDropdownField = forwardRef<
   const [options, setOptions] = useState<DropdownOption[]>([]);
 
   const onChangeRef = useRef(onChange);
-  const getDropdownEntitiesRef = useRef(getDropdownEntities);
-  const filterDropdownEntitiesRef = useRef(filterDropdownEntities);
   const getDropdownOptionsRef = useRef(getDropdownOptions);
   const optionsRef = useRef(options);
 
   useEffect(() => {
     onChangeRef.current = onChange;
-    getDropdownEntitiesRef.current = getDropdownEntities;
-    filterDropdownEntitiesRef.current = filterDropdownEntities;
     getDropdownOptionsRef.current = getDropdownOptions;
     optionsRef.current = options;
-  }, [
-    filterDropdownEntities,
-    getDropdownEntities,
-    getDropdownOptions,
-    onChange,
-    options,
-    propOptions,
-  ]);
+  }, [getDropdownOptions, onChange, options]);
 
   const {
     load,
     loaded,
     loading,
-    record: dropdownEntities,
+    record: dropdownRecords,
     errorMessage,
-  } = useAPIService<any[]>([], dataKey);
+  } = useAPIService<DropdownOption[]>([], dataKey);
 
   const anchorRef = useRef<HTMLInputElement>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -165,15 +150,9 @@ export const DataDropdownField = forwardRef<
         !loading &&
         (!loaded || reloadOptions) &&
         (!preferStale || options.length <= 0 || reloadOptions) &&
-        getDropdownEntitiesRef.current
+        getDropdownOptionsRef.current
       ) {
-        load(async () => {
-          const entities = await getDropdownEntitiesRef.current!();
-          if (filterDropdownEntitiesRef.current) {
-            return filterDropdownEntitiesRef.current(entities);
-          }
-          return entities;
-        });
+        load(getDropdownOptionsRef.current);
       }
     },
     [load, loaded, loading, options.length, preferStale]
@@ -220,13 +199,9 @@ export const DataDropdownField = forwardRef<
         return prevPropOptions;
       });
     } else {
-      setOptions(
-        getDropdownOptionsRef.current
-          ? getDropdownOptionsRef.current(dropdownEntities)
-          : dropdownEntities
-      );
+      setOptions(dropdownRecords);
     }
-  }, [dropdownEntities, propOptions]);
+  }, [dropdownRecords, propOptions]);
 
   useEffect(() => {
     if (sortOptions) {
@@ -531,7 +506,7 @@ export const DataDropdownField = forwardRef<
                     paging={optionPaging}
                     onClose={handleClose}
                     loadOptions={
-                      getDropdownEntities ? () => loadOptions(true) : undefined
+                      getDropdownOptions ? () => loadOptions(true) : undefined
                     }
                     onChangeSelectedOption={triggerChangeEvent}
                     {...{
