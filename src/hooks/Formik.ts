@@ -1,7 +1,7 @@
 import { TextFieldProps } from '@mui/material';
 import { FormikContextType, useFormikContext } from 'formik';
 import { get } from 'lodash';
-import { ChangeEvent, FocusEvent, useCallback } from 'react';
+import { useCallback } from 'react';
 
 interface UseAggregatedFormikContextProps
   extends Pick<
@@ -20,16 +20,16 @@ export const useAggregatedFormikContext = ({
   const { values, handleBlur, handleChange, touched, errors } =
     (useFormikContext() as FormikContextType<any>) || {};
 
-  const onChange = useCallback(
-    (event: ChangeEvent<any>) => {
+  const onChange = useCallback<NonNullable<typeof onChangeProp>>(
+    (event) => {
       onChangeProp && onChangeProp(event);
       handleChange && handleChange(event);
     },
     [handleChange, onChangeProp]
   );
 
-  const onBlur = useCallback(
-    (event: FocusEvent<any>) => {
+  const onBlur = useCallback<NonNullable<typeof onBlurProp>>(
+    (event) => {
       onBlurProp && onBlurProp(event);
       handleBlur && handleBlur(event);
     },
@@ -53,12 +53,11 @@ export const useAggregatedFormikContext = ({
           return Boolean(get(errors, name));
         }
       })(),
-    helperText:
-      helperText ??
+    helperText: (helperText ??
       (() => {
         if (errors && touched && name && get(touched, name)) {
           return get(errors, name);
         }
-      })(),
+      })()) as typeof helperText,
   };
 };
