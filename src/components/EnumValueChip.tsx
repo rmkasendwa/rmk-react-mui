@@ -1,21 +1,88 @@
-import { Tooltip } from '@mui/material';
+import {
+  ComponentsOverrides,
+  ComponentsProps,
+  ComponentsVariants,
+  Tooltip,
+  unstable_composeClasses as composeClasses,
+  generateUtilityClass,
+  generateUtilityClasses,
+  useThemeProps,
+} from '@mui/material';
 import Chip, { ChipProps } from '@mui/material/Chip';
 import useTheme from '@mui/material/styles/useTheme';
-import { FC } from 'react';
+import clsx from 'clsx';
+import { ReactElement, Ref, forwardRef } from 'react';
 
-export interface EnumValueChipProps extends ChipProps {
-  label?: string;
-  value: string;
-  colors: Record<string, string>;
+export interface EnumValueChipClasses {
+  /** Styles applied to the root element. */
+  root: string;
 }
 
-export const EnumValueChip: FC<EnumValueChipProps> = ({
-  value,
-  label,
-  colors,
-  sx,
-  ...rest
-}) => {
+export type EnumValueChipClassKey = keyof EnumValueChipClasses;
+
+// Adding theme prop types
+declare module '@mui/material/styles/props' {
+  interface ComponentsPropsList {
+    MuiEnumValueChip: EnumValueChipProps;
+  }
+}
+
+// Adding theme override types
+declare module '@mui/material/styles/overrides' {
+  interface ComponentNameToClassKey {
+    MuiEnumValueChip: keyof EnumValueChipClasses;
+  }
+}
+
+// Adding theme component types
+declare module '@mui/material/styles/components' {
+  interface Components<Theme = unknown> {
+    MuiEnumValueChip?: {
+      defaultProps?: ComponentsProps['MuiEnumValueChip'];
+      styleOverrides?: ComponentsOverrides<Theme>['MuiEnumValueChip'];
+      variants?: ComponentsVariants['MuiEnumValueChip'];
+    };
+  }
+}
+
+export interface EnumValueChipProps<Value extends string = string>
+  extends ChipProps {
+  label?: string;
+  value: Value;
+  colors: Record<Value, string>;
+}
+
+export function getEnumValueChipUtilityClass(slot: string): string {
+  return generateUtilityClass('MuiEnumValueChip', slot);
+}
+
+export const enumValueChipClasses: EnumValueChipClasses =
+  generateUtilityClasses('MuiEnumValueChip', ['root']);
+
+const slots = {
+  root: ['root'],
+};
+
+export const BaseEnumValueChip = <Value extends string = string>(
+  inProps: EnumValueChipProps<Value>,
+  ref: Ref<HTMLDivElement>
+) => {
+  const props = useThemeProps({ props: inProps, name: 'MuiEnumValueChip' });
+  const { className, value, colors, sx, ...rest } = props;
+  let { label } = props;
+
+  const classes = composeClasses(
+    slots,
+    getEnumValueChipUtilityClass,
+    (() => {
+      if (className) {
+        return {
+          root: className,
+        };
+      }
+    })()
+  );
+
   label || (label = value);
   const { palette } = useTheme();
 
@@ -35,9 +102,11 @@ export const EnumValueChip: FC<EnumValueChipProps> = ({
   return (
     <Tooltip title={label}>
       <Chip
-        label={label}
         size="small"
         {...rest}
+        ref={ref}
+        className={clsx(classes.root)}
+        label={label}
         sx={{
           ...sx,
           color,
@@ -47,5 +116,11 @@ export const EnumValueChip: FC<EnumValueChipProps> = ({
     </Tooltip>
   );
 };
+
+export const EnumValueChip = forwardRef(BaseEnumValueChip) as <
+  Value extends string = string
+>(
+  props: EnumValueChipProps<Value> & { ref?: Ref<HTMLDivElement> }
+) => ReactElement;
 
 export default EnumValueChip;
