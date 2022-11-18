@@ -99,11 +99,15 @@ export const PaginatedDropdownOptionList = forwardRef<
     onChangeSelectedOptionRef.current = onChangeSelectedOption;
   }, [loadOptions, onChangeSelectedOption, onClose, onSelectOption, options]);
 
+  const defaultLimit = useMemo(() => {
+    return Math.ceil(maxHeight / optionHeight) + 1;
+  }, [maxHeight, optionHeight]);
+
   const { palette, typography } = useTheme();
   const [scrollableDropdownWrapper, setScrollableDropdownWrapper] =
     useState<HTMLDivElement | null>(null);
 
-  const [limit, setLimit] = useState(0);
+  const [limit, setLimit] = useState(defaultLimit);
   const [offset, setOffset] = useState(0);
 
   // Options state

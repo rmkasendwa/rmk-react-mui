@@ -1,4 +1,4 @@
-import NewspaperIcon from '@mui/icons-material/Newspaper';
+import CloudSyncIcon from '@mui/icons-material/CloudSync';
 import { Box, Button, Stack, Typography, useTheme } from '@mui/material';
 import { FC } from 'react';
 import { Link } from 'react-router-dom';
@@ -24,7 +24,7 @@ export const IconLoadingScreen: FC<IconLoadingScreenProps> = ({
   noRecordsStatement,
   recordsCount,
   pathToAddNew = '',
-  Icon = NewspaperIcon,
+  Icon = CloudSyncIcon,
   LoadingIcon,
   loading,
   errorMessage,
