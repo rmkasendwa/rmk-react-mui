@@ -3,6 +3,7 @@ import {
   Divider,
   Grid,
   Tooltip,
+  alpha,
   iconButtonClasses,
   outlinedInputClasses,
 } from '@mui/material';
@@ -318,8 +319,11 @@ export const PaginatedDropdownOptionList = forwardRef<
   const displayOptions = paging
     ? filteredOptions.slice(offset, offset + limit)
     : filteredOptions;
-  const hasAllOptionsSelected =
-    filteredOptions.length === selectedOptions.length;
+  const hasAllOptionsSelected = filteredOptions.every(({ value }) => {
+    return selectedOptions.find(
+      ({ value: selectedOptionValue }) => value === selectedOptionValue
+    );
+  });
 
   return (
     <Card {...CardProps} ref={ref} tabIndex={-1}>
@@ -349,7 +353,11 @@ export const PaginatedDropdownOptionList = forwardRef<
                   sx={{
                     [`.${outlinedInputClasses.root}`]: {
                       borderRadius: '20px',
-                      bgcolor: palette.divider,
+                      bgcolor: alpha(palette.divider, 0.1),
+                      height: 38,
+                    },
+                    [`.${outlinedInputClasses.notchedOutline}`]: {
+                      borderWidth: 0,
                     },
                     ...SearchFieldPropsSx,
                   }}
@@ -457,12 +465,35 @@ export const PaginatedDropdownOptionList = forwardRef<
           <DropdownOption
             onClick={() => {
               const selectableOptions = (() => {
+                const selectedLockedOptions = selectedOptions
+                  .map(({ value: selectedOptionValue }) => {
+                    return options.find(
+                      ({ value }) => value === selectedOptionValue
+                    )!;
+                  })
+                  .filter((option) => {
+                    return option?.selectable === false;
+                  });
+                const selectedOptionsNotInFilter = selectedOptions
+                  .map(({ value: selectedOptionValue }) => {
+                    return options.find(
+                      ({ value }) => value === selectedOptionValue
+                    )!;
+                  })
+                  .filter((option) => {
+                    return !filteredOptions.includes(option);
+                  });
                 if (hasAllOptionsSelected) {
-                  return [];
+                  return options.filter((option) => {
+                    return (
+                      selectedLockedOptions.includes(option) ||
+                      selectedOptionsNotInFilter.includes(option)
+                    );
+                  });
                 }
                 return filteredOptions.filter((option) => {
                   const { selectable = true } = option;
-                  return selectable;
+                  return selectable || selectedLockedOptions.includes(option);
                 });
               })();
               setSelectedOptions(selectableOptions);
