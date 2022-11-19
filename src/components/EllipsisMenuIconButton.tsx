@@ -92,6 +92,7 @@ export const EllipsisMenuIconButton = forwardRef<
     options,
     PaginatedDropdownOptionListProps = {},
     closeOnSelectOption = true,
+    sx,
     ...rest
   } = props;
 
@@ -123,6 +124,7 @@ export const EllipsisMenuIconButton = forwardRef<
           setOpen((prevOpen) => !prevOpen);
         }}
         sx={{
+          ...sx,
           ...(() => {
             if (open) {
               return {
