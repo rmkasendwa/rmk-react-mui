@@ -862,7 +862,14 @@ export const BaseTable = <T extends BaseTableRow>(
                               right: 6,
                             }}
                           >
-                            <Tooltip title="Edit columns">
+                            <Tooltip
+                              title="Edit columns"
+                              PopperProps={{
+                                sx: {
+                                  pointerEvents: 'none',
+                                },
+                              }}
+                            >
                               <TableColumnToggleIconButton
                                 {...{ columns, selectedColumnIds }}
                                 onChangeSelectedColumnIds={(
