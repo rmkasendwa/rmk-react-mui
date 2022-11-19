@@ -4,6 +4,7 @@ import {
   ComponentsVariants,
   Divider,
   Stack,
+  Tooltip,
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
   generateUtilityClasses,
@@ -686,6 +687,13 @@ export const BaseTable = <T extends BaseTableRow>(
                         : 3,
                       py: 1.5,
                       ...(() => {
+                        if (enableColumnDisplayToggle && isLastColumn) {
+                          return {
+                            pr: 0,
+                          };
+                        }
+                      })(),
+                      ...(() => {
                         if (!showHeaderText || !label) {
                           return {
                             position: 'absolute',
@@ -725,7 +733,7 @@ export const BaseTable = <T extends BaseTableRow>(
                                       isLastColumn &&
                                       enableColumnDisplayToggle
                                     ) {
-                                      return 48;
+                                      return 42;
                                     }
                                     return 0;
                                   })(),
@@ -854,23 +862,19 @@ export const BaseTable = <T extends BaseTableRow>(
                               right: 6,
                             }}
                           >
-                            <TableColumnToggleIconButton
-                              {...{ columns, selectedColumnIds }}
-                              onChangeSelectedColumnIds={(
-                                selectedColumnIds
-                              ) => {
-                                setSelectedColumnIds(selectedColumnIds);
-                              }}
-                              sx={{
-                                mt: '-25px',
-                                p: 0.2,
-                                '&,&:hover': {
-                                  bgcolor: (palette.mode === 'light'
-                                    ? darken
-                                    : lighten)(parentBackgroundColor!, 0.15),
-                                },
-                              }}
-                            />
+                            <Tooltip title="Edit columns">
+                              <TableColumnToggleIconButton
+                                {...{ columns, selectedColumnIds }}
+                                onChangeSelectedColumnIds={(
+                                  selectedColumnIds
+                                ) => {
+                                  setSelectedColumnIds(selectedColumnIds);
+                                }}
+                                sx={{
+                                  mt: '-25px',
+                                }}
+                              />
+                            </Tooltip>
                           </Box>
                         );
                       }
