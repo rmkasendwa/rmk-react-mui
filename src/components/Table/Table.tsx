@@ -858,30 +858,35 @@ export const BaseTable = <T extends BaseTableRow>(
                           <Box
                             sx={{
                               height: 0,
-                              position: 'sticky',
-                              right: 6,
+                              position: 'absolute',
+                              right: 0,
                             }}
                           >
-                            <Tooltip
-                              title="Edit columns"
-                              PopperProps={{
-                                sx: {
-                                  pointerEvents: 'none',
-                                },
+                            <Box
+                              sx={{
+                                mt: '-20px',
+                                bgcolor: parentBackgroundColor,
+                                borderRadius: '50%',
                               }}
                             >
-                              <TableColumnToggleIconButton
-                                {...{ columns, selectedColumnIds }}
-                                onChangeSelectedColumnIds={(
-                                  selectedColumnIds
-                                ) => {
-                                  setSelectedColumnIds(selectedColumnIds);
+                              <Tooltip
+                                title="Edit columns"
+                                PopperProps={{
+                                  sx: {
+                                    pointerEvents: 'none',
+                                  },
                                 }}
-                                sx={{
-                                  mt: '-25px',
-                                }}
-                              />
-                            </Tooltip>
+                              >
+                                <TableColumnToggleIconButton
+                                  {...{ columns, selectedColumnIds }}
+                                  onChangeSelectedColumnIds={(
+                                    selectedColumnIds
+                                  ) => {
+                                    setSelectedColumnIds(selectedColumnIds);
+                                  }}
+                                />
+                              </Tooltip>
+                            </Box>
                           </Box>
                         );
                       }
