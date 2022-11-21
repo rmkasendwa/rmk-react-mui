@@ -8,7 +8,7 @@ import { TableCellProps } from '@mui/material/TableCell';
 import { ReactNode } from 'react';
 
 import { EllipsisMenuIconButtonProps } from '../components/EllipsisMenuIconButton';
-import { PrimitiveDataType } from './Utils';
+import { DropdownOption, PrimitiveDataType } from './Utils';
 
 export type TableColumnEnumValue =
   | {
@@ -51,9 +51,9 @@ export type GetColumnValue<
 export interface TableColumn<
   RowObject = any,
   ColumnType extends TableColumnType = TableColumnType
-> extends Partial<Omit<TableCellProps, 'defaultValue' | 'id'>> {
+> extends Partial<Omit<TableCellProps, 'defaultValue' | 'id'>>,
+    Partial<Pick<DropdownOption, 'label' | 'searchableLabel' | 'description'>> {
   id: keyof RowObject;
-  label?: ReactNode;
   type?: ColumnType;
   align?: 'left' | 'center' | 'right';
   width?: number;

@@ -117,7 +117,7 @@ export interface TableProps<T = any>
       | 'minColumnWidth'
     >,
     Pick<
-      TableColumnToggleIconButtonProps,
+      TableColumnToggleIconButtonProps<T>,
       'selectedColumnIds' | 'onChangeSelectedColumnIds'
     > {
   rows: T[];
@@ -357,9 +357,20 @@ export const BaseTable = <T extends BaseTableRow>(
     });
   }, [columnsProp, currencyCode, enableColumnDisplayToggle]);
 
-  const [selectedColumnIds, setSelectedColumnIds] = useState<string[]>(
-    selectedColumnIdsProp || columns.map(({ id }) => String(id))
-  );
+  const [selectedColumnIds, setSelectedColumnIds] = useState<
+    NonNullable<typeof selectedColumnIdsProp>
+  >(selectedColumnIdsProp || columns.map(({ id }) => String(id) as any));
+
+  useEffect(() => {
+    if (selectedColumnIdsProp) {
+      setSelectedColumnIds((prevSelectedColumnIds) => {
+        if (prevSelectedColumnIds.join('') !== selectedColumnIdsProp.join('')) {
+          return selectedColumnIdsProp;
+        }
+        return prevSelectedColumnIds;
+      });
+    }
+  }, [selectedColumnIdsProp]);
 
   const displayingColumns = useMemo(() => {
     return selectedColumnIds
