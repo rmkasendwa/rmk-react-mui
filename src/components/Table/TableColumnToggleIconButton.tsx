@@ -9,9 +9,16 @@ import {
   useThemeProps,
 } from '@mui/material';
 import clsx from 'clsx';
-import { forwardRef, useEffect, useMemo, useState } from 'react';
+import {
+  ReactElement,
+  Ref,
+  forwardRef,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 
-import { TableColumn } from '../../interfaces/Table';
+import { BaseTableRow, TableColumn } from '../../interfaces/Table';
 import { DropdownOption } from '../../interfaces/Utils';
 import EllipsisMenuIconButton, {
   EllipsisMenuIconButtonProps,
@@ -50,11 +57,11 @@ declare module '@mui/material/styles/components' {
   }
 }
 
-export interface TableColumnToggleIconButtonProps
+export interface TableColumnToggleIconButtonProps<T = BaseTableRow>
   extends Partial<Omit<EllipsisMenuIconButtonProps, 'options'>> {
   columns: TableColumn[];
-  selectedColumnIds?: string[];
-  onChangeSelectedColumnIds?: (selectedColumnIds: string[]) => void;
+  selectedColumnIds?: (keyof T)[];
+  onChangeSelectedColumnIds?: (selectedColumnIds: (keyof T)[]) => void;
 }
 
 export function getTableColumnToggleIconButtonUtilityClass(
@@ -70,10 +77,10 @@ const slots = {
   root: ['root'],
 };
 
-export const TableColumnToggleIconButton = forwardRef<
-  HTMLButtonElement,
-  TableColumnToggleIconButtonProps
->(function TableColumnToggleIconButton(inProps, ref) {
+const BaseTableColumnToggleIconButton = <T extends BaseTableRow>(
+  inProps: TableColumnToggleIconButtonProps<T>,
+  ref: Ref<HTMLButtonElement>
+) => {
   const props = useThemeProps({
     props: inProps,
     name: 'MuiTableColumnToggleIconButton',
@@ -99,15 +106,16 @@ export const TableColumnToggleIconButton = forwardRef<
     })()
   );
 
-  const [selectedColumnIds, setSelectedColumnIds] = useState<string[]>(
-    selectedColumnIdsProp || []
-  );
+  const [selectedColumnIds, setSelectedColumnIds] = useState<
+    NonNullable<typeof selectedColumnIdsProp>
+  >(selectedColumnIdsProp || []);
 
   const options = useMemo(() => {
-    return columns.map(({ id, label }, index) => {
+    return columns.map(({ id, label, searchableLabel }, index) => {
       return {
         value: id,
-        label,
+        label: searchableLabel || label,
+        searchableLabel,
         selectable: index > 0 && index < columns.length - 1,
       } as DropdownOption;
     });
@@ -134,11 +142,11 @@ export const TableColumnToggleIconButton = forwardRef<
         optionVariant: 'checkbox',
         ...PaginatedDropdownOptionListProps,
         selectedOptions: options.filter(({ value }) => {
-          return selectedColumnIds.includes(String(value));
+          return selectedColumnIds.includes(String(value) as any);
         }),
         onChangeSelectedOption: (selectedOptions) => {
           setSelectedColumnIds(
-            selectedOptions.map(({ value }) => String(value))
+            selectedOptions.map(({ value }) => String(value) as any)
           );
         },
         multiple: true,
@@ -148,6 +156,12 @@ export const TableColumnToggleIconButton = forwardRef<
       <AddIcon />
     </EllipsisMenuIconButton>
   );
-});
+};
+
+export const TableColumnToggleIconButton = forwardRef(
+  BaseTableColumnToggleIconButton
+) as <T>(
+  p: TableColumnToggleIconButtonProps<T> & { ref?: Ref<HTMLButtonElement> }
+) => ReactElement;
 
 export default TableColumnToggleIconButton;
