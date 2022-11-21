@@ -75,7 +75,7 @@ export const IconLoadingScreen: FC<IconLoadingScreenProps> = ({
           if (loading) {
             return (
               <Typography align="center" variant="body2">
-                Loading {lowercaseRecordLabelPlural}...
+                Loading {lowercaseRecordLabelPlural}, please wait...
               </Typography>
             );
           }
