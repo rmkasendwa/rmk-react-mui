@@ -1,6 +1,6 @@
 {
   "name": "@infinite-debugger/react-mui",
-  "version": "0.3.0-alpha.106",
+  "version": "0.3.0-alpha.113",
   "description": "RMK React MUI is a React UI library of utility components, hooks and contexts",
   "keywords": [
     "react",
@@ -25,9 +25,11 @@
   },
   "scripts": {
     "prebuild": "rm -rf lib",
-    "build": "npm run tsc && copy-and-watch src/**/*.{png,jpg,css,scss,sass,json} lib",
+    "build": "npm run build:esm && npm run build:cjs",
     "postbuild": "node ./scripts/postbuild",
     "build-storybook": "build-storybook -s public -o docs",
+    "build:cjs": "tsc --project tsconfig-cjs.compile.json && copy-and-watch src/**/*.{png,jpg,css,scss,sass,json} lib",
+    "build:esm": "tsc && copy-and-watch src/**/*.{png,jpg,css,scss,sass,json} lib",
     "eslint": "eslint --fix",
     "format": "prettier --write \"./**/*.{js,jsx,ts,tsx,html,htm,json,css,scss,md}\"",
     "postinstall": "npm run prepare",

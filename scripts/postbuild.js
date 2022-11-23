@@ -8,8 +8,13 @@ const outputDirectory = `${currentWorkingDirectory}/lib`;
 const packageFile = require(`${currentWorkingDirectory}/package.json`);
 const project = {
   ...omit(packageFile, 'devDependencies', 'jest', 'scripts'),
-  main: './index.js',
+  module: 'index.js',
   types: './index.d.ts',
+  // exports: {
+  //   import: './index.js',
+  //   require: './cjs/index.js',
+  //   default: './index.js',
+  // },
 };
 
 try {
@@ -41,7 +46,7 @@ try {
     buildNumber,
   });
 } catch (exception) {
-  console.error(exception);
+  console.error(String(exception));
 }
 fs.writeFileSync(
   `${outputDirectory}/package.json`,
