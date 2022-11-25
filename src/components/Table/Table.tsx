@@ -68,6 +68,7 @@ export type {
 export interface TableClasses {
   /** Styles applied to the root element. */
   root: string;
+  columnDisplayToggle: string;
 }
 
 export type TableClassKey = keyof TableClasses;
@@ -153,6 +154,7 @@ export interface TableProps<T = any>
 
   // Removable columns
   enableColumnDisplayToggle?: boolean;
+  ColumnDisplayToggleProps?: Partial<BoxProps>;
 }
 
 const OPAQUE_BG_CLASS_NAME = `MuiTableCell-opaque`;
@@ -164,11 +166,12 @@ export function getTableUtilityClass(slot: string): string {
 
 export const tableClasses: TableClasses = generateUtilityClasses(
   'MuiTableExtended',
-  ['root']
+  ['root', 'columnDisplayToggle']
 );
 
 const slots = {
   root: ['root'],
+  columnDisplayToggle: ['columnDisplayToggle'],
 };
 
 export const BaseTable = <T extends BaseTableRow>(
@@ -203,6 +206,7 @@ export const BaseTable = <T extends BaseTableRow>(
     stickyHeader = false,
     TableBodyRowPlaceholderProps = {},
     PaginatedTableWrapperProps = {},
+    ColumnDisplayToggleProps = {},
     defaultColumnValue,
     columnTypographyProps,
     minColumnWidth,
@@ -240,6 +244,8 @@ export const BaseTable = <T extends BaseTableRow>(
     sx: PaginatedTableWrapperPropsSx,
     ...PaginatedTableWrapperPropsRest
   } = PaginatedTableWrapperProps;
+  const { sx: ColumnDisplayTogglePropsSx, ...ColumnDisplayTogglePropsRest } =
+    ColumnDisplayToggleProps;
   lowercaseLabelPlural || (lowercaseLabelPlural = labelPlural.toLowerCase());
 
   // Refs
@@ -932,6 +938,11 @@ export const BaseTable = <T extends BaseTableRow>(
     if (showHeaderRow && enableColumnDisplayToggle) {
       return (
         <Box
+          {...ColumnDisplayTogglePropsRest}
+          className={clsx(
+            classes.columnDisplayToggle,
+            ColumnDisplayTogglePropsRest.className
+          )}
           sx={{
             position: 'sticky',
             left: 0,
@@ -941,8 +952,9 @@ export const BaseTable = <T extends BaseTableRow>(
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'end',
-            zIndex: 5,
+            zIndex: 99,
             pointerEvents: 'none',
+            ...ColumnDisplayTogglePropsSx,
           }}
         >
           <Box
@@ -1048,16 +1060,16 @@ export const BaseTable = <T extends BaseTableRow>(
     );
   }
 
-  return (
-    <Box
-      sx={{
-        position: 'relative',
-      }}
-    >
-      {columnDisplayToggle}
-      {tableElement}
-    </Box>
-  );
+  if (showHeaderRow && enableColumnDisplayToggle) {
+    return (
+      <>
+        {columnDisplayToggle}
+        {tableElement}
+      </>
+    );
+  }
+
+  return tableElement;
 };
 
 export const Table = forwardRef(BaseTable) as <T>(
