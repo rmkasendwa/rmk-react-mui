@@ -863,45 +863,6 @@ export const BaseTable = <T extends BaseTableRow>(
                       </>
                     ) : null}
                     <Box component="span" sx={{ flex: 1 }} />
-                    {(() => {
-                      if (enableColumnDisplayToggle && isLastColumn) {
-                        return (
-                          <Box
-                            sx={{
-                              height: 0,
-                              position: 'absolute',
-                              right: 0,
-                            }}
-                          >
-                            <Box
-                              sx={{
-                                mt: '-20px',
-                                bgcolor: parentBackgroundColor,
-                                borderRadius: '50%',
-                              }}
-                            >
-                              <Tooltip
-                                title="Edit columns"
-                                PopperProps={{
-                                  sx: {
-                                    pointerEvents: 'none',
-                                  },
-                                }}
-                              >
-                                <TableColumnToggleIconButton
-                                  {...{ columns, selectedColumnIds }}
-                                  onChangeSelectedColumnIds={(
-                                    selectedColumnIds
-                                  ) => {
-                                    setSelectedColumnIds(selectedColumnIds);
-                                  }}
-                                />
-                              </Tooltip>
-                            </Box>
-                          </Box>
-                        );
-                      }
-                    })()}
                   </Box>
                 </TableCell>
               );
@@ -967,6 +928,51 @@ export const BaseTable = <T extends BaseTableRow>(
     </MuiBaseTable>
   );
 
+  const columnDisplayToggle = (() => {
+    if (showHeaderRow && enableColumnDisplayToggle) {
+      return (
+        <Box
+          sx={{
+            position: 'sticky',
+            left: 0,
+            top: 0,
+            height: 45,
+            mb: '-45px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'end',
+            zIndex: 5,
+            pointerEvents: 'none',
+          }}
+        >
+          <Box
+            sx={{
+              bgcolor: parentBackgroundColor,
+              borderRadius: '50%',
+              pointerEvents: 'auto',
+            }}
+          >
+            <Tooltip
+              title="Edit columns"
+              PopperProps={{
+                sx: {
+                  pointerEvents: 'none',
+                },
+              }}
+            >
+              <TableColumnToggleIconButton
+                {...{ columns, selectedColumnIds }}
+                onChangeSelectedColumnIds={(selectedColumnIds) => {
+                  setSelectedColumnIds(selectedColumnIds);
+                }}
+              />
+            </Tooltip>
+          </Box>
+        </Box>
+      );
+    }
+  })();
+
   if (paging) {
     return (
       <Box
@@ -982,8 +988,10 @@ export const BaseTable = <T extends BaseTableRow>(
             overflow: 'auto',
             flex: 1,
             minHeight: 0,
+            position: 'relative',
           }}
         >
+          {columnDisplayToggle}
           {tableElement}
         </Box>
         <Divider />
@@ -1040,7 +1048,16 @@ export const BaseTable = <T extends BaseTableRow>(
     );
   }
 
-  return tableElement;
+  return (
+    <Box
+      sx={{
+        position: 'relative',
+      }}
+    >
+      {columnDisplayToggle}
+      {tableElement}
+    </Box>
+  );
 };
 
 export const Table = forwardRef(BaseTable) as <T>(
