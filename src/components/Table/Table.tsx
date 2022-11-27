@@ -954,6 +954,7 @@ export const BaseTable = <T extends BaseTableRow>(
             justifyContent: 'end',
             zIndex: 99,
             pointerEvents: 'none',
+            minWidth,
             ...ColumnDisplayTogglePropsSx,
           }}
         >
@@ -962,6 +963,8 @@ export const BaseTable = <T extends BaseTableRow>(
               bgcolor: parentBackgroundColor,
               borderRadius: '50%',
               pointerEvents: 'auto',
+              position: 'sticky',
+              right: 0,
             }}
           >
             <Tooltip
