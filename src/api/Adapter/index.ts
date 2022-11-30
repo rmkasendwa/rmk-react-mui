@@ -112,8 +112,8 @@ const fetchData = async <T = any>(
                 1
               );
               const cancelPendingRequests = () => {
-                pendingRequestCancelTokenSources.forEach((cancelTokenSource) =>
-                  cancelTokenSource.cancel()
+                [...pendingRequestCancelTokenSources].forEach(
+                  (cancelTokenSource) => cancelTokenSource.cancel()
                 );
               };
               if (RequestController.processResponseError) {
@@ -151,11 +151,6 @@ const fetchData = async <T = any>(
                   Error(`Error: '${label}' failed with message "${message}"`)
                 );
               }
-              if (message === 'Session timed out') {
-                cancelPendingRequests();
-                return reject(Error(message));
-              }
-
               if (message && !String(message).match(/request\sfailed/gi)) {
                 return reject(
                   Error(`Error: '${label}' failed with message "${message}"`)
