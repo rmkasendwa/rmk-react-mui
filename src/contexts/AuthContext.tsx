@@ -6,10 +6,10 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from 'react';
 
-import { logout as apiLogout } from '../api';
 import { useAPIService } from '../hooks/Utils';
 import { PermissionCode } from '../interfaces/Users';
 import { TAPIFunction } from '../interfaces/Utils';
@@ -17,7 +17,7 @@ import { useAPIContext } from './APIContext';
 
 export interface AuthContext<T = any> {
   login: (loginFunction: TAPIFunction<T>) => Promise<void>;
-  logout: () => Promise<void>;
+  logout: (logout?: () => void) => Promise<void>;
   loggedInUser: T | null;
   updateLoggedInUser: (user: T) => void;
   authenticated: boolean;
@@ -72,12 +72,12 @@ export const AuthProvider: FC<{
     [clearLoggedInUserSession, load]
   );
 
-  const logout = useCallback(async () => {
+  const logoutRef = useRef(async (logout?: () => void) => {
     clearLoggedInUserSession();
-    apiLogout();
+    logout && logout();
     StorageManager.clear();
     setLoggedInUser(null);
-  }, [clearLoggedInUserSession]);
+  });
 
   const updateLoggedInUser = useCallback(
     (user: any) => {
@@ -127,7 +127,7 @@ export const AuthProvider: FC<{
       value={{
         loggedInUser,
         login,
-        logout,
+        logout: logoutRef.current,
         updateLoggedInUser,
         clearLoggedInUserSession,
         authenticated: loggedInUser !== null,

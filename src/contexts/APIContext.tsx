@@ -7,6 +7,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from 'react';
 
@@ -24,8 +25,13 @@ export const APIProvider: FC<{
   children: ReactNode;
   onSessionExpired: () => void;
 }> = ({ children, onSessionExpired }) => {
-  const [sessionExpired, setSessionExpired] = useState(false);
+  // Refs
+  const onSessionExpiredRef = useRef(onSessionExpired);
+  useEffect(() => {
+    onSessionExpiredRef.current = onSessionExpired;
+  }, [onSessionExpired]);
 
+  const [sessionExpired, setSessionExpired] = useState(false);
   const call = useCallback(
     async (apiCallback: TAPIFunction) => {
       return apiCallback().catch((err) => {
@@ -41,9 +47,9 @@ export const APIProvider: FC<{
 
   useEffect(() => {
     if (sessionExpired) {
-      onSessionExpired();
+      onSessionExpiredRef.current();
     }
-  }, [onSessionExpired, sessionExpired]);
+  }, [sessionExpired]);
 
   return (
     <APIContext.Provider value={{ call, sessionExpired, setSessionExpired }}>
