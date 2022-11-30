@@ -151,9 +151,9 @@ const fetchData = async <T = any>(
                   Error(`Error: '${label}' failed with message "${message}"`)
                 );
               }
-              if (response?.status === 401) {
+              if (message === 'Session timed out') {
                 cancelPendingRequests();
-                return reject(Error('Session timed out'));
+                return reject(Error(message));
               }
 
               if (message && !String(message).match(/request\sfailed/gi)) {

@@ -647,10 +647,15 @@ export const BaseTable = <T extends BaseTableRow>(
           palette.text.primary,
           0.8
         ),
-        [`&:not(:last-of-type)`]: {
+        [`&:not(:nth-last-of-type(2)):not(:nth-last-of-type(1))`]: {
           borderRightWidth: 1,
           borderRightStyle: 'solid',
           borderRightColor: alpha(palette.divider, 0.04),
+        },
+        [`&:last-of-type`]: {
+          borderLeftWidth: 1,
+          borderLeftStyle: 'solid',
+          borderLeftColor: alpha(palette.divider, 0.04),
         },
       },
       [`th,td`]: {
