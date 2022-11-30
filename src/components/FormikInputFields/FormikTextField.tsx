@@ -32,7 +32,7 @@ export const FormikTextField = forwardRef<HTMLDivElement, FormikTextFieldProps>(
       <TextField
         ref={ref}
         {...rest}
-        {...({ name, value, onChange, onBlur, error, helperText } as any)}
+        {...{ name, value, onChange, onBlur, error, helperText }}
       />
     );
   }

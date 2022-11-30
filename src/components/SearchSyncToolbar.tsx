@@ -8,7 +8,7 @@ import {
 } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import Toolbar, { ToolbarProps } from '@mui/material/Toolbar';
-import { Children, FC, ReactNode, useEffect, useState } from 'react';
+import { Children, FC, ReactNode, useEffect, useRef, useState } from 'react';
 
 import TextField, { TextFieldProps } from './InputFields/TextField';
 import ReloadIconButton, { ReloadIconButtonProps } from './ReloadIconButton';
@@ -69,8 +69,14 @@ export const SearchSyncToolbar: FC<SearchSyncToolbarProps> = ({
   ...rest
 }) => {
   tools || (tools = children);
-
   const { ...SearchFieldPropsRest } = SearchFieldProps;
+
+  // Refs
+  const onSearchRef = useRef(onSearch);
+  const isInitialMountRef = useRef(true);
+  useEffect(() => {
+    onSearchRef.current = onSearch;
+  }, [onSearch]);
 
   const { sx: titlePropsSx, ...titlePropsRest } = TitleProps;
   const [searchTerm, setSearchTerm] = useState('');
@@ -79,14 +85,21 @@ export const SearchSyncToolbar: FC<SearchSyncToolbarProps> = ({
   );
 
   useEffect(() => {
-    if (searchTerm.length <= 0) {
-      onSearch && onSearch(searchTerm);
+    if (searchTerm.length <= 0 && !isInitialMountRef.current) {
+      onSearchRef.current && onSearchRef.current(searchTerm);
     }
-  }, [onSearch, searchTerm]);
+  }, [searchTerm]);
 
   useEffect(() => {
     setSearchTerm(searchTermProp);
   }, [searchTermProp]);
+
+  useEffect(() => {
+    isInitialMountRef.current = false;
+    return () => {
+      isInitialMountRef.current = true;
+    };
+  }, []);
 
   return (
     <Toolbar {...rest}>

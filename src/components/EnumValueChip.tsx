@@ -3,7 +3,9 @@ import {
   ComponentsProps,
   ComponentsVariants,
   Tooltip,
+  alpha,
   unstable_composeClasses as composeClasses,
+  darken,
   generateUtilityClass,
   generateUtilityClasses,
   useThemeProps,
@@ -68,7 +70,7 @@ export const BaseEnumValueChip = <Value extends string = string>(
   ref: Ref<HTMLDivElement>
 ) => {
   const props = useThemeProps({ props: inProps, name: 'MuiEnumValueChip' });
-  const { className, value, colors, sx, ...rest } = props;
+  const { className, value, colors, variant = 'filled', sx, ...rest } = props;
   let { label } = props;
 
   const classes = composeClasses(
@@ -106,11 +108,21 @@ export const BaseEnumValueChip = <Value extends string = string>(
         {...rest}
         ref={ref}
         className={clsx(classes.root)}
-        label={label}
+        {...{ variant, label }}
         sx={{
+          ...(() => {
+            switch (variant) {
+              case 'filled':
+                return { color, bgcolor };
+              case 'outlined':
+                return {
+                  color: darken(bgcolor, 0.3),
+                  borderColor: bgcolor,
+                  bgcolor: alpha(bgcolor, 0.2),
+                };
+            }
+          })(),
           ...sx,
-          color,
-          bgcolor,
         }}
       />
     </Tooltip>
