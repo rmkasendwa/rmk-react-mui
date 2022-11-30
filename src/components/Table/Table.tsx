@@ -1,3 +1,5 @@
+import '../../extensions/Object';
+
 import {
   ComponentsOverrides,
   ComponentsProps,
@@ -104,6 +106,8 @@ export type TableVariant =
   | 'stripped-columns'
   | 'plain';
 
+export type TableBordersVariant = 'square' | 'rows' | 'columns' | 'none';
+
 export interface TableProps<T = any>
   extends Partial<Pick<MuiBaseTableProps, 'onClick' | 'sx' | 'className'>>,
     Pick<
@@ -131,6 +135,7 @@ export interface TableProps<T = any>
   labelSingular?: string;
   lowercaseLabelPlural?: string;
   variant?: TableVariant;
+  bordersVariant?: TableBordersVariant;
   onChangePage?: (pageIndex: number) => void;
   onRowsPerPageChange?: (rowsPerPage: number) => void;
   forEachRowProps?: GetRowProps;
@@ -195,6 +200,7 @@ export const BaseTable = <T extends BaseTableRow>(
     forEachRowProps,
     generateRowData,
     variant = 'plain',
+    bordersVariant = 'rows',
     paging = true,
     showHeaderRow = true,
     showDataRows = true,
@@ -460,6 +466,10 @@ export const BaseTable = <T extends BaseTableRow>(
     onChangePage && onChangePage(newPage);
   };
 
+  /************
+   * Variants *
+   * **********
+   */
   const variantStyles: SxProps<Theme> = {
     [`.${tableBodyClasses.root} tr.${tableRowClasses.hover}:hover`]: {
       bgcolor: 'transparent',
@@ -473,7 +483,7 @@ export const BaseTable = <T extends BaseTableRow>(
     case 'plain':
       break;
     case 'stripped':
-      Object.assign(variantStyles, {
+      Object.merge(variantStyles, {
         [`.${tableBodyClasses.root} tr.${tableRowClasses.root}.odd:not(:hover)`]:
           {
             bgcolor: alpha(palette.text.primary, 0.02),
@@ -556,7 +566,7 @@ export const BaseTable = <T extends BaseTableRow>(
       });
       break;
     case 'stripped-rows':
-      Object.assign(variantStyles, {
+      Object.merge(variantStyles, {
         [`tr.${tableRowClasses.root}`]: {
           [`&.odd`]: {
             bgcolor: alpha(palette.text.primary, 0.02),
@@ -576,7 +586,7 @@ export const BaseTable = <T extends BaseTableRow>(
       });
       break;
     case 'stripped-columns':
-      Object.assign(variantStyles, {
+      Object.merge(variantStyles, {
         [`
           th.${tableCellClasses.root}:nth-of-type(odd)>div
         `]: {
@@ -620,6 +630,69 @@ export const BaseTable = <T extends BaseTableRow>(
       break;
   }
 
+  /*******************
+   * Border variants *
+   * *****************
+   */
+  const borderVariantStyles: SxProps<Theme> = {
+    [`.${tableBodyClasses.root}>.${tableRowClasses.root}:last-of-type`]: {
+      [`th,td`]: {
+        borderBottomWidth: 0,
+      },
+    },
+  };
+
+  if (
+    (['square', 'columns'] as typeof bordersVariant[]).includes(bordersVariant)
+  ) {
+    Object.merge(borderVariantStyles, {
+      [`
+        th.${tableCellClasses.root},
+        td.${tableCellClasses.root}
+      `]: {
+        borderBottomColor: (palette.mode === 'dark' ? darken : lighten)(
+          palette.text.primary,
+          0.8
+        ),
+        [`&:not(:last-of-type)`]: {
+          borderRightWidth: 1,
+          borderRightStyle: 'solid',
+          borderRightColor: alpha(palette.divider, 0.04),
+        },
+        [`&:last-of-type:before`]: {
+          borderLeftWidth: 1,
+          borderLeftStyle: 'solid',
+          borderLeftColor: alpha(palette.divider, 0.04),
+        },
+      },
+      [`
+        th.${tableCellClasses.root}:last-of-type,
+        td.${tableCellClasses.root}:last-of-type:before
+      `]: {
+        borderLeftWidth: 1,
+        borderLeftStyle: 'solid',
+        borderLeftColor: alpha(palette.divider, 0.04),
+      },
+      [`th,td`]: {
+        [`&.${tableCellClasses.root}:first-of-type`]: {
+          borderRightColor: palette.divider,
+        },
+      },
+    });
+  }
+  if (
+    (['columns', 'none'] as typeof bordersVariant[]).includes(bordersVariant)
+  ) {
+    Object.merge(borderVariantStyles, {
+      [`
+        th.${tableCellClasses.root},
+        td.${tableCellClasses.root}
+      `]: {
+        borderBottomWidth: 0,
+      },
+    });
+  }
+
   const tableElement = (
     <MuiBaseTable
       {...omit(
@@ -635,6 +708,7 @@ export const BaseTable = <T extends BaseTableRow>(
         tableLayout: 'fixed',
         minWidth,
         ...variantStyles,
+        ...borderVariantStyles,
         ...sx,
         [`.${OPAQUE_BG_CLASS_NAME}`]: {
           bgcolor: parentBackgroundColor,
