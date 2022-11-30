@@ -4,7 +4,6 @@ import {
   ComponentsOverrides,
   ComponentsProps,
   ComponentsVariants,
-  Divider,
   Stack,
   Tooltip,
   unstable_composeClasses as composeClasses,
@@ -125,7 +124,7 @@ export interface TableProps<T = any>
       TableColumnToggleIconButtonProps<T>,
       'selectedColumnIds' | 'onChangeSelectedColumnIds'
     > {
-  rows: T[];
+  rows?: T[];
   rowStartIndex?: number;
   rowsPerPage?: number;
   pageIndex?: number;
@@ -187,7 +186,7 @@ export const BaseTable = <T extends BaseTableRow>(
   const {
     onClickRow,
     columns: columnsProp,
-    rows,
+    rows = [],
     filterdRowCount,
     totalRowCount,
     rowStartIndex = 0,
@@ -634,13 +633,7 @@ export const BaseTable = <T extends BaseTableRow>(
    * Border variants *
    * *****************
    */
-  const borderVariantStyles: SxProps<Theme> = {
-    [`.${tableBodyClasses.root}>.${tableRowClasses.root}:last-of-type`]: {
-      [`th,td`]: {
-        borderBottomWidth: 0,
-      },
-    },
-  };
+  const borderVariantStyles: SxProps<Theme> = {};
 
   if (
     (['square', 'columns'] as typeof bordersVariant[]).includes(bordersVariant)
@@ -659,19 +652,6 @@ export const BaseTable = <T extends BaseTableRow>(
           borderRightStyle: 'solid',
           borderRightColor: alpha(palette.divider, 0.04),
         },
-        [`&:last-of-type:before`]: {
-          borderLeftWidth: 1,
-          borderLeftStyle: 'solid',
-          borderLeftColor: alpha(palette.divider, 0.04),
-        },
-      },
-      [`
-        th.${tableCellClasses.root}:last-of-type,
-        td.${tableCellClasses.root}:last-of-type:before
-      `]: {
-        borderLeftWidth: 1,
-        borderLeftStyle: 'solid',
-        borderLeftColor: alpha(palette.divider, 0.04),
       },
       [`th,td`]: {
         [`&.${tableCellClasses.root}:first-of-type`]: {
@@ -1083,7 +1063,6 @@ export const BaseTable = <T extends BaseTableRow>(
           {columnDisplayToggle}
           {tableElement}
         </Box>
-        <Divider />
         {(() => {
           const paginationProps: Pick<
             TablePaginationProps,
