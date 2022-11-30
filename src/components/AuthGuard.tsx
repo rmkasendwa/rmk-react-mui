@@ -2,6 +2,7 @@ import * as queryString from 'query-string';
 import { FC, useEffect } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 
+import { useAPIContext } from '../contexts/APIContext';
 import { useAuth } from '../contexts/AuthContext';
 import {
   INDEX_PAGE_ROUTE_PATH,
@@ -21,8 +22,9 @@ const authenticationRoutePaths = [
 ];
 
 export const AuthGuard: FC<AuthGuardProps> = ({ variant }) => {
-  const { pathname, search } = useLocation();
   const navigate = useNavigate();
+  const { pathname, search } = useLocation();
+  const { sessionExpired } = useAPIContext();
   const { loggedInUser, authenticated, loadingCurrentSession } = useAuth();
 
   useEffect(() => {
@@ -43,6 +45,18 @@ export const AuthGuard: FC<AuthGuardProps> = ({ variant }) => {
                   }
                   return '';
                 })()
+            );
+          } else if (
+            pathname === SESSION_LOGIN_PAGE_ROUTE_PATH &&
+            !sessionExpired
+          ) {
+            navigate(
+              (() => {
+                if (search) {
+                  return (queryString.parse(search || '') as any).return_to;
+                }
+                return INDEX_PAGE_ROUTE_PATH;
+              })()
             );
           }
           break;
@@ -67,6 +81,7 @@ export const AuthGuard: FC<AuthGuardProps> = ({ variant }) => {
     navigate,
     pathname,
     search,
+    sessionExpired,
     variant,
   ]);
 
