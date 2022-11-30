@@ -103,7 +103,7 @@ export const PaginatedDropdownOptionList = forwardRef<
     return Math.ceil(maxHeight / optionHeight) + 1;
   }, [maxHeight, optionHeight]);
 
-  const { palette, typography } = useTheme();
+  const { palette } = useTheme();
   const [scrollableDropdownWrapper, setScrollableDropdownWrapper] =
     useState<HTMLDivElement | null>(null);
 
@@ -182,23 +182,6 @@ export const PaginatedDropdownOptionList = forwardRef<
     },
     [multiple, selectedOptions]
   );
-
-  const { minOptionWidth } = useMemo(() => {
-    return options.reduce(
-      (accumulator, { label, searchableLabel }) => {
-        const labelWidth = Math.ceil(
-          (String(searchableLabel || label).length * typography.htmlFontSize) /
-            2
-        );
-        labelWidth > accumulator.minOptionWidth &&
-          (accumulator.minOptionWidth = labelWidth);
-        return accumulator;
-      },
-      {
-        minOptionWidth: minWidth,
-      }
-    );
-  }, [minWidth, options, typography.htmlFontSize]);
 
   useEffect(() => {
     if (selectedOptionsProp) {
@@ -377,7 +360,7 @@ export const PaginatedDropdownOptionList = forwardRef<
           setScrollableDropdownWrapper(scrollableDropdownWrapper);
         }}
         sx={{
-          minWidth: minOptionWidth || minWidth,
+          minWidth,
           maxHeight,
           boxSizing: 'border-box',
           overflowY: 'auto',
