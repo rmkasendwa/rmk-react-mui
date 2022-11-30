@@ -1,14 +1,59 @@
 import CheckIcon from '@mui/icons-material/Check';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
-import { Grid, alpha, useTheme } from '@mui/material';
+import LockIcon from '@mui/icons-material/Lock';
+import {
+  ComponentsOverrides,
+  ComponentsProps,
+  ComponentsVariants,
+  Grid,
+  alpha,
+  unstable_composeClasses as composeClasses,
+  generateUtilityClass,
+  generateUtilityClasses,
+  useTheme,
+  useThemeProps,
+} from '@mui/material';
 import Box from '@mui/material/Box';
 import MenuItem, { MenuItemProps } from '@mui/material/MenuItem';
+import clsx from 'clsx';
 import { forwardRef } from 'react';
 
 export const DEFAULT_DROPDOWN_OPTION_HEIGHT = 36;
 
 export type DropdownOptionVariant = 'text' | 'checkbox' | 'check';
+
+export interface DropdownOptionClasses {
+  /** Styles applied to the root element. */
+  root: string;
+}
+
+export type DropdownOptionClassKey = keyof DropdownOptionClasses;
+
+// Adding theme prop types
+declare module '@mui/material/styles/props' {
+  interface ComponentsPropsList {
+    MuiDropdownOption: DropdownOptionProps;
+  }
+}
+
+// Adding theme override types
+declare module '@mui/material/styles/overrides' {
+  interface ComponentNameToClassKey {
+    MuiDropdownOption: keyof DropdownOptionClasses;
+  }
+}
+
+// Adding theme component types
+declare module '@mui/material/styles/components' {
+  interface Components<Theme = unknown> {
+    MuiDropdownOption?: {
+      defaultProps?: ComponentsProps['MuiDropdownOption'];
+      styleOverrides?: ComponentsOverrides<Theme>['MuiDropdownOption'];
+      variants?: ComponentsVariants['MuiDropdownOption'];
+    };
+  }
+}
 
 export interface DropdownOptionProps extends MenuItemProps {
   height?: number;
@@ -16,9 +61,22 @@ export interface DropdownOptionProps extends MenuItemProps {
   variant?: DropdownOptionVariant;
 }
 
+export function getDropdownOptionUtilityClass(slot: string): string {
+  return generateUtilityClass('MuiDropdownOption', slot);
+}
+
+export const dropdownOptionClasses: DropdownOptionClasses =
+  generateUtilityClasses('MuiDropdownOption', ['root']);
+
+const slots = {
+  root: ['root'],
+};
+
 export const DropdownOption = forwardRef<HTMLLIElement, DropdownOptionProps>(
-  function DropdownOption(
-    {
+  function DropdownOption(inProps, ref) {
+    const props = useThemeProps({ props: inProps, name: 'MuiDropdownOption' });
+    const {
+      className,
       height = DEFAULT_DROPDOWN_OPTION_HEIGHT,
       selectable = true,
       onClick,
@@ -26,15 +84,27 @@ export const DropdownOption = forwardRef<HTMLLIElement, DropdownOptionProps>(
       selected,
       children,
       ...rest
-    },
-    ref
-  ) {
+    } = props;
+
+    const classes = composeClasses(
+      slots,
+      getDropdownOptionUtilityClass,
+      (() => {
+        if (className) {
+          return {
+            root: className,
+          };
+        }
+      })()
+    );
+
     const { palette } = useTheme();
     return (
       <MenuItem
         ref={ref}
         {...rest}
         {...{ selected }}
+        className={clsx(classes.root)}
         onClick={selectable ? onClick : undefined}
         sx={{
           minHeight: `${height}px !important`,
@@ -78,14 +148,20 @@ export const DropdownOption = forwardRef<HTMLLIElement, DropdownOptionProps>(
                 return (
                   <Grid container sx={{ alignItems: 'center' }}>
                     <Grid item sx={{ display: 'flex', width: 30 }}>
-                      {selected ? (
-                        <CheckBoxIcon color="inherit" />
-                      ) : (
-                        <CheckBoxOutlineBlankIcon
-                          color="inherit"
-                          sx={{ opacity: 0.15 }}
-                        />
-                      )}
+                      {(() => {
+                        if (selectable) {
+                          if (selected) {
+                            return <CheckBoxIcon color="inherit" />;
+                          }
+                          return (
+                            <CheckBoxOutlineBlankIcon
+                              color="inherit"
+                              sx={{ opacity: 0.15 }}
+                            />
+                          );
+                        }
+                        return <LockIcon color="inherit" />;
+                      })()}
                     </Grid>
                     <Grid item xs sx={{ minWidth: 0 }}>
                       {children}
@@ -96,14 +172,20 @@ export const DropdownOption = forwardRef<HTMLLIElement, DropdownOptionProps>(
                 return (
                   <Grid container sx={{ alignItems: 'center' }}>
                     <Grid item sx={{ display: 'flex', width: 30 }}>
-                      {selected ? (
-                        <CheckIcon color="inherit" />
-                      ) : (
-                        <CheckBoxOutlineBlankIcon
-                          color="inherit"
-                          sx={{ opacity: 0.05 }}
-                        />
-                      )}
+                      {(() => {
+                        if (selectable) {
+                          if (selected) {
+                            return <CheckIcon color="inherit" />;
+                          }
+                          return (
+                            <CheckBoxOutlineBlankIcon
+                              color="inherit"
+                              sx={{ opacity: 0.15 }}
+                            />
+                          );
+                        }
+                        return <LockIcon color="inherit" />;
+                      })()}
                     </Grid>
                     <Grid item xs sx={{ minWidth: 0 }}>
                       {children}
