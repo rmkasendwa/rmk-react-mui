@@ -64,7 +64,7 @@ export const DataDropdownField = forwardRef<
     id,
     value,
     dataKey,
-    options: propOptions,
+    options: optionsProp,
     sortOptions = false,
     onChange,
     onFocus,
@@ -98,7 +98,7 @@ export const DataDropdownField = forwardRef<
   const multiple = SelectProps?.multiple;
   const { palette } = useTheme();
 
-  const [options, setOptions] = useState<DropdownOption[]>(propOptions || []);
+  const [options, setOptions] = useState<DropdownOption[]>(optionsProp || []);
 
   // Refs
   const anchorRef = useRef<HTMLInputElement>(null);
@@ -227,24 +227,25 @@ export const DataDropdownField = forwardRef<
   }, [errorMessage, loadOptions, missingOptionValues.length]);
 
   useEffect(() => {
-    if (propOptions) {
-      setOptions((prevPropOptions) => {
+    if (optionsProp) {
+      setOptions((prevOptions) => {
+        const nextOptions = optionsProp.sort(
+          sortOptions ? sortOptionsRef.current : () => 0
+        );
         if (
-          prevPropOptions.map(({ value }) => value).join('') !==
-          propOptions.map(({ value }) => value).join('')
+          prevOptions.map(({ value }) => value).join('') !==
+          nextOptions.map(({ value }) => value).join('')
         ) {
-          return propOptions.sort(
-            sortOptions ? sortOptionsRef.current : () => 0
-          );
+          return nextOptions;
         }
-        return prevPropOptions;
+        return prevOptions;
       });
     } else {
       setOptions(
         dropdownRecords.sort(sortOptions ? sortOptionsRef.current : () => 0)
       );
     }
-  }, [dropdownRecords, propOptions, sortOptions]);
+  }, [dropdownRecords, optionsProp, sortOptions]);
 
   useEffect(() => {
     const fieldValues = Array.isArray(value) ? value : [value];

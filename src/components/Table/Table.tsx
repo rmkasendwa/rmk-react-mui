@@ -1028,7 +1028,8 @@ export const BaseTable = <T extends BaseTableRow>(
           <Box
             sx={{
               bgcolor: parentBackgroundColor,
-              borderRadius: '50%',
+              borderTopLeftRadius: '50%',
+              borderBottomLeftRadius: '50%',
               pointerEvents: 'auto',
               position: 'sticky',
               right: 0,
@@ -1046,6 +1047,10 @@ export const BaseTable = <T extends BaseTableRow>(
                 {...{ columns, selectedColumnIds }}
                 onChangeSelectedColumnIds={(selectedColumnIds) => {
                   setSelectedColumnIds(selectedColumnIds);
+                }}
+                sx={{
+                  borderTopRightRadius: 0,
+                  borderBottomRightRadius: 0,
                 }}
               />
             </Tooltip>
