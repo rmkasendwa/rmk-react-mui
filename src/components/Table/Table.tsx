@@ -643,24 +643,32 @@ export const BaseTable = <T extends BaseTableRow>(
         th.${tableCellClasses.root},
         td.${tableCellClasses.root}
       `]: {
-        borderBottomColor: (palette.mode === 'dark' ? darken : lighten)(
-          palette.text.primary,
-          0.8
-        ),
         [`&:not(:nth-last-of-type(2)):not(:nth-last-of-type(1))`]: {
           borderRightWidth: 1,
           borderRightStyle: 'solid',
-          borderRightColor: alpha(palette.divider, 0.04),
         },
+        [`&:not(:nth-last-of-type(2)):not(:nth-last-of-type(1)):not(:first-of-type)`]:
+          {
+            borderRightColor: alpha(palette.divider, 0.04),
+          },
         [`&:last-of-type`]: {
           borderLeftWidth: 1,
           borderLeftStyle: 'solid',
           borderLeftColor: alpha(palette.divider, 0.04),
         },
+        [`&:first-of-type`]: {
+          borderRightColor: alpha(palette.divider, 0.1),
+        },
       },
-      [`th,td`]: {
-        [`&.${tableCellClasses.root}:first-of-type`]: {
-          borderRightColor: palette.divider,
+      [`
+        th.${tableCellClasses.root}
+      `]: {
+        [`&:not(:nth-last-of-type(2)):not(:nth-last-of-type(1)):not(:first-of-type)`]:
+          {
+            borderRightColor: alpha(palette.divider, 0.08),
+          },
+        [`&:last-of-type`]: {
+          borderLeftColor: alpha(palette.divider, 0.08),
         },
       },
     });
