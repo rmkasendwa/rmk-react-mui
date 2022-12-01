@@ -71,7 +71,7 @@ declare module '@mui/material/styles/components' {
   }
 }
 
-export interface ModalFormProps<Values extends FormikValues>
+export interface ModalFormProps<Values extends FormikValues = any>
   extends Partial<Omit<ModalProps, 'children'>>,
     NonNullable<Pick<FormikConfig<Values>, 'validationSchema' | 'children'>> {
   initialValues: Values;
