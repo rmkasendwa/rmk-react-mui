@@ -233,8 +233,20 @@ export const DataDropdownField = forwardRef<
           sortOptions ? sortOptionsRef.current : () => 0
         );
         if (
-          prevOptions.map(({ value }) => value).join('') !==
-          nextOptions.map(({ value }) => value).join('')
+          JSON.stringify(
+            prevOptions.map(({ value, label, searchableLabel }) => ({
+              value,
+              label: String(label),
+              searchableLabel,
+            }))
+          ) !==
+          JSON.stringify(
+            nextOptions.map(({ value, label, searchableLabel }) => ({
+              value,
+              label: String(label),
+              searchableLabel,
+            }))
+          )
         ) {
           return nextOptions;
         }
