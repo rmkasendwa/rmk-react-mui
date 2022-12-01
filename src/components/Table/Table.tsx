@@ -255,9 +255,11 @@ export const BaseTable = <T extends BaseTableRow>(
 
   // Refs
   const columnsRef = useRef(columnsProp);
+  const onChangeSelectedColumnIdsRef = useRef(onChangeSelectedColumnIds);
   useEffect(() => {
     columnsRef.current = columnsProp;
-  }, [columnsProp]);
+    onChangeSelectedColumnIdsRef.current = onChangeSelectedColumnIds;
+  }, [columnsProp, onChangeSelectedColumnIds]);
 
   const { palette } = useTheme();
   const { sx: headerRowPropsSx, ...restHeaderRowProps } = HeaderRowProps;
@@ -270,6 +272,17 @@ export const BaseTable = <T extends BaseTableRow>(
 
   parentBackgroundColor || (parentBackgroundColor = palette.background.paper);
   currencyCode || (currencyCode = defaultCurrencyCode);
+
+  const baseSelectedColumnIds = useMemo(() => {
+    if (selectedColumnIdsProp) {
+      return selectedColumnIdsProp;
+    }
+    return columnsProp.map(({ id }) => String(id) as any);
+  }, [columnsProp, selectedColumnIdsProp]);
+
+  const [selectedColumnIds, setSelectedColumnIds] = useState<
+    NonNullable<typeof selectedColumnIdsProp>
+  >(baseSelectedColumnIds);
 
   // Setting default column properties
   const columns = useMemo(() => {
@@ -368,12 +381,8 @@ export const BaseTable = <T extends BaseTableRow>(
     });
   }, [columnsProp, currencyCode, enableColumnDisplayToggle]);
 
-  const [selectedColumnIds, setSelectedColumnIds] = useState<
-    NonNullable<typeof selectedColumnIdsProp>
-  >(selectedColumnIdsProp || columns.map(({ id }) => String(id) as any));
-
   useEffect(() => {
-    if (selectedColumnIdsProp) {
+    if (selectedColumnIdsProp && !onChangeSelectedColumnIdsRef.current) {
       setSelectedColumnIds((prevSelectedColumnIds) => {
         if (prevSelectedColumnIds.join('') !== selectedColumnIdsProp.join('')) {
           return selectedColumnIdsProp;
@@ -383,27 +392,28 @@ export const BaseTable = <T extends BaseTableRow>(
     }
   }, [selectedColumnIdsProp]);
 
-  const displayingColumns = useMemo(() => {
-    return selectedColumnIds
-      .map((selectedColumnId) => {
-        return columns.find(({ id }) => id === selectedColumnId)!;
-      })
-      .filter((column) => column != null);
-  }, [columns, selectedColumnIds]);
+  const displayingColumns = (() => {
+    if (selectedColumnIdsProp && onChangeSelectedColumnIds) {
+      return selectedColumnIdsProp;
+    }
+    return selectedColumnIds;
+  })()
+    .map((selectedColumnId) => {
+      return columns.find(({ id }) => id === selectedColumnId)!;
+    })
+    .filter((column) => column != null);
 
-  const minWidth = useMemo(() => {
-    return getTableMinWidth(
-      displayingColumns.map((column) => {
-        const { minWidth } = column;
-        return {
-          ...column,
-          minWidth: minWidth ?? minColumnWidth,
-        };
-      })
-    );
-  }, [displayingColumns, minColumnWidth]);
+  const minWidth = getTableMinWidth(
+    displayingColumns.map((column) => {
+      const { minWidth } = column;
+      return {
+        ...column,
+        minWidth: minWidth ?? minColumnWidth,
+      };
+    })
+  );
 
-  const pageRows: typeof rows = useMemo(() => {
+  const pageRows: typeof rows = (() => {
     const sortedRows = (() => {
       if (handleSortOperations && sortBy.length > 0) {
         return rows.sort((a, b) => {
@@ -419,19 +429,12 @@ export const BaseTable = <T extends BaseTableRow>(
           pageIndex * rowsPerPage,
           pageIndex * rowsPerPage + rowsPerPage
         );
-  }, [
-    handleSortOperations,
-    pageIndex,
-    paging,
-    rows,
-    rowsPerPage,
-    sortBy,
-    totalRowCount,
-  ]);
+  })();
 
   useEffect(() => {
-    onChangeSelectedColumnIds && onChangeSelectedColumnIds(selectedColumnIds);
-  }, [onChangeSelectedColumnIds, selectedColumnIds]);
+    onChangeSelectedColumnIdsRef.current &&
+      onChangeSelectedColumnIdsRef.current(selectedColumnIds);
+  }, [selectedColumnIds]);
 
   useEffect(() => {
     setPageIndex(pageIndexProp);
@@ -1046,7 +1049,11 @@ export const BaseTable = <T extends BaseTableRow>(
               <TableColumnToggleIconButton
                 {...{ columns, selectedColumnIds }}
                 onChangeSelectedColumnIds={(selectedColumnIds) => {
-                  setSelectedColumnIds(selectedColumnIds);
+                  if (selectedColumnIdsProp && onChangeSelectedColumnIds) {
+                    onChangeSelectedColumnIds(selectedColumnIds);
+                  } else {
+                    setSelectedColumnIds(selectedColumnIds);
+                  }
                 }}
                 sx={{
                   borderTopRightRadius: 0,

@@ -15,6 +15,7 @@ import {
   forwardRef,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 
@@ -106,6 +107,12 @@ const BaseTableColumnToggleIconButton = <T extends BaseTableRow>(
     })()
   );
 
+  // Refs
+  const onChangeSelectedColumnIdsRef = useRef(onChangeSelectedColumnIds);
+  useEffect(() => {
+    onChangeSelectedColumnIdsRef.current = onChangeSelectedColumnIds;
+  }, [onChangeSelectedColumnIds]);
+
   const [selectedColumnIds, setSelectedColumnIds] = useState<
     NonNullable<typeof selectedColumnIdsProp>
   >(selectedColumnIdsProp || []);
@@ -123,13 +130,19 @@ const BaseTableColumnToggleIconButton = <T extends BaseTableRow>(
 
   useEffect(() => {
     if (selectedColumnIdsProp) {
-      setSelectedColumnIds(selectedColumnIdsProp);
+      setSelectedColumnIds((prevSelectedColumnIds) => {
+        if (prevSelectedColumnIds.join('') !== selectedColumnIdsProp.join('')) {
+          return selectedColumnIdsProp;
+        }
+        return prevSelectedColumnIds;
+      });
     }
   }, [selectedColumnIdsProp]);
 
   useEffect(() => {
-    onChangeSelectedColumnIds && onChangeSelectedColumnIds(selectedColumnIds);
-  }, [onChangeSelectedColumnIds, selectedColumnIds]);
+    onChangeSelectedColumnIdsRef.current &&
+      onChangeSelectedColumnIdsRef.current(selectedColumnIds);
+  }, [selectedColumnIds]);
 
   return (
     <EllipsisMenuIconButton
