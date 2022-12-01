@@ -23,9 +23,17 @@ import {
   useThemeProps,
 } from '@mui/material';
 import clsx from 'clsx';
-import { Form, Formik, FormikConfig, FormikProps, FormikValues } from 'formik';
+import { Form, Formik, FormikConfig, FormikValues } from 'formik';
 import { isEmpty } from 'lodash';
-import { Children, ReactElement, ReactNode, useEffect, useRef } from 'react';
+import {
+  Children,
+  ReactElement,
+  ReactNode,
+  Ref,
+  forwardRef,
+  useEffect,
+  useRef,
+} from 'react';
 
 import ErrorAlert from './ErrorAlert';
 import ErrorFieldHighlighter from './ErrorFieldHighlighter';
@@ -38,19 +46,10 @@ export interface ModalFormClasses {
 
 export type ModalFormClassKey = keyof ModalFormClasses;
 
-export function getModalFormUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiModalForm', slot);
-}
-
-export const modalFormClasses: ModalFormClasses = generateUtilityClasses(
-  'MuiModalForm',
-  ['root']
-);
-
 // Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
-    MuiModalForm: ModalFormProps;
+    MuiModalForm: ModalFormProps<FormikValues>;
   }
 }
 
@@ -72,22 +71,11 @@ declare module '@mui/material/styles/components' {
   }
 }
 
-const useUtilityClasses = (ownerState: any) => {
-  const { classes } = ownerState;
-
-  const slots = {
-    root: ['root'],
-  };
-
-  return composeClasses(slots, getModalFormUtilityClass, classes);
-};
-
-export interface ModalFormProps<Values extends FormikValues = FormikValues>
-  extends Partial<Omit<ModalProps, 'children'>> {
+export interface ModalFormProps<Values extends FormikValues>
+  extends Partial<Omit<ModalProps, 'children'>>,
+    NonNullable<Pick<FormikConfig<Values>, 'validationSchema' | 'children'>> {
   initialValues: Values;
-  validationSchema: any;
   title: string;
-  children: ((props: FormikProps<Values>) => ReactNode) | ReactNode;
   errorMessage?: string;
   successMessage?: string;
   submitted?: boolean;
@@ -118,11 +106,26 @@ export interface ModalFormProps<Values extends FormikValues = FormikValues>
   getModalElement?: (modalElement: ReactElement) => ReactElement;
 }
 
-export const ModalForm = <Values extends FormikValues = FormikValues>(
-  inProps: ModalFormProps<Values>
+export function getModalFormUtilityClass(slot: string): string {
+  return generateUtilityClass('MuiModalForm', slot);
+}
+
+export const modalFormClasses: ModalFormClasses = generateUtilityClasses(
+  'MuiModalForm',
+  ['root']
+);
+
+const slots = {
+  root: ['root'],
+};
+
+export const BaseModalForm = <Values extends FormikValues>(
+  inProps: ModalFormProps<Values>,
+  ref: Ref<HTMLTableElement>
 ) => {
   const props = useThemeProps({ props: inProps, name: 'MuiModalForm' });
   const {
+    className,
     initialValues,
     validationSchema,
     FormikProps = {},
@@ -153,9 +156,17 @@ export const ModalForm = <Values extends FormikValues = FormikValues>(
     ...rest
   } = props;
 
-  const classes = useUtilityClasses({
-    ...props,
-  });
+  const classes = composeClasses(
+    slots,
+    getModalFormUtilityClass,
+    (() => {
+      if (className) {
+        return {
+          root: className,
+        };
+      }
+    })()
+  );
 
   const { palette, components } = useTheme();
 
@@ -373,6 +384,7 @@ export const ModalForm = <Values extends FormikValues = FormikValues>(
       disableEscapeKeyDown
       disableAutoFocus
       {...rest}
+      ref={ref}
       className={clsx(classes.root)}
       open={open}
       onClose={(_, reason) => {
@@ -398,5 +410,11 @@ export const ModalForm = <Values extends FormikValues = FormikValues>(
     </Modal>
   );
 };
+
+export const ModalForm = forwardRef(BaseModalForm) as <
+  Values extends FormikValues
+>(
+  p: ModalFormProps<Values> & { ref?: Ref<HTMLDivElement> }
+) => ReactElement;
 
 export default ModalForm;
