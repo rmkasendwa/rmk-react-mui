@@ -8,7 +8,7 @@ import { queueRequest } from './RequestQueue';
 
 const HOST_URL = typeof window !== 'undefined' ? window.location.origin : '';
 
-const FAILED_REQUEST_RETRY_STATUS_BLACKLIST: number[] = [400, 401, 404, 500];
+const FAILED_REQUEST_RETRY_STATUS_BLACKLIST: number[] = [400, 401, 500];
 const MAX_REQUEST_RETRY_COUNT = 2;
 
 export interface IAPIAdapterConfiguration {
@@ -120,69 +120,65 @@ const fetchData = async <T = any>(
                 err = await RequestController.processResponseError(err);
               }
               const { response, message } = err as any;
-              if (response?.data) {
-                // Extracting server side error message
-                const message = (() => {
-                  if (typeof response.data.message === 'string') {
-                    return response.data.message;
+              const errorMessage = (() => {
+                if (response?.data) {
+                  // Extracting server side error message
+                  const message = (() => {
+                    if (typeof response.data.message === 'string') {
+                      return response.data.message;
+                    }
+                    if (Array.isArray(response.data.message)) {
+                      return response.data.message
+                        .filter((message: any) => typeof message === 'string')
+                        .join('\n');
+                    }
+                    if (
+                      Array.isArray(response.data.errors) &&
+                      response.data.errors.length > 0
+                    ) {
+                      return response.data.errors
+                        .map((err: any) => {
+                          return err.message;
+                        })
+                        .join('\n');
+                    }
+                    return 'Something went wrong';
+                  })();
+                  if (REDIRECTION_ERROR_MESSAGES.includes(message)) {
+                    cancelPendingRequests();
+                    return message;
                   }
-                  if (Array.isArray(response.data.message)) {
-                    return response.data.message
-                      .filter((message: any) => typeof message === 'string')
-                      .join('\n');
-                  }
-                  if (
-                    Array.isArray(response.data.errors) &&
-                    response.data.errors.length > 0
-                  ) {
-                    return response.data.errors
-                      .map((err: any) => {
-                        return err.message;
-                      })
-                      .join('\n');
-                  }
-                  return 'Something went wrong';
-                })();
-                if (REDIRECTION_ERROR_MESSAGES.includes(message)) {
-                  cancelPendingRequests();
-                  return reject(Error(message));
+                  return `Error: '${label}' failed with message "${message}"`;
                 }
-                return reject(
-                  Error(`Error: '${label}' failed with message "${message}"`)
-                );
+                if (message && !String(message).match(/request\sfailed/gi)) {
+                  return `Error: '${label}' failed with message "${message}"`;
+                }
+                return `Error: '${label}' failed. Something went wrong`;
+              })();
+              if (
+                !FAILED_REQUEST_RETRY_STATUS_BLACKLIST.includes(
+                  response.status
+                ) &&
+                retryCount < MAX_REQUEST_RETRY_COUNT
+              ) {
+                return fetchData(retryCount + 1);
               }
-              if (message && !String(message).match(/request\sfailed/gi)) {
-                return reject(
-                  Error(`Error: '${label}' failed with message "${message}"`)
-                );
-              }
-              return reject(
-                Error(`Error: '${label}' failed. Something went wrong`)
-              );
+              return reject(errorMessage);
             });
           if (response) {
             pendingRequestCancelTokenSources.splice(
               pendingRequestCancelTokenSources.indexOf(cancelTokenSource),
               1
             );
-            if (!Array.isArray(response.data.errors)) {
-              if (RequestController.rotateHeaders) {
-                patchDefaultRequestHeaders(
-                  RequestController.rotateHeaders(
-                    response.headers as any,
-                    defaultHeaders
-                  )
-                );
-              }
-              return resolve(response);
-            } else if (
-              !FAILED_REQUEST_RETRY_STATUS_BLACKLIST.includes(
-                response.status
-              ) &&
-              retryCount < MAX_REQUEST_RETRY_COUNT
-            ) {
-              return fetchData(retryCount + 1);
+            if (RequestController.rotateHeaders) {
+              patchDefaultRequestHeaders(
+                RequestController.rotateHeaders(
+                  response.headers as any,
+                  defaultHeaders
+                )
+              );
             }
+            return resolve(response);
           }
         };
         fetchData();
