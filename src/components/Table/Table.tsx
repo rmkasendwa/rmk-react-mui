@@ -123,7 +123,8 @@ export interface TableProps<T = any>
     Pick<
       TableColumnToggleIconButtonProps<T>,
       'selectedColumnIds' | 'onChangeSelectedColumnIds'
-    > {
+    >,
+    Partial<Pick<TablePaginationProps, 'rowsPerPageOptions'>> {
   rows?: T[];
   rowStartIndex?: number;
   rowsPerPage?: number;
@@ -223,6 +224,7 @@ export const BaseTable = <T extends BaseTableRow>(
     enableColumnDisplayToggle = false,
     selectedColumnIds: selectedColumnIdsProp,
     onChangeSelectedColumnIds,
+    rowsPerPageOptions: rowsPerPageOptionsProp = [10, 25, 50, 100],
     sx,
     ...rest
   } = props;
@@ -264,7 +266,7 @@ export const BaseTable = <T extends BaseTableRow>(
   const { palette } = useTheme();
   const { sx: headerRowPropsSx, ...restHeaderRowProps } = HeaderRowProps;
   const [pageIndex, setPageIndex] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rowsPerPage, setRowsPerPage] = useState(rowsPerPageProp);
   const { currencyCode: defaultCurrencyCode } = useContext(
     GlobalConfigurationContext
   );
@@ -1041,7 +1043,14 @@ export const BaseTable = <T extends BaseTableRow>(
               | 'onRowsPerPageChange'
             > = {
               page: pageIndex,
-              rowsPerPageOptions: [10, 25, 50, 100],
+              rowsPerPageOptions: [
+                ...new Set([...rowsPerPageOptionsProp, rowsPerPageProp]),
+              ].sort((a, b) => {
+                if (typeof a === 'number' && typeof b === 'number') {
+                  return a - b;
+                }
+                return 0;
+              }),
               rowsPerPage,
               onRowsPerPageChange: (event) => {
                 handleChangePage(null, 0);
@@ -1071,7 +1080,6 @@ export const BaseTable = <T extends BaseTableRow>(
             }
             return (
               <TablePagination
-                rowsPerPageOptions={[10, 25, 50, 100]}
                 component="div"
                 count={totalRowCount || rows.length}
                 {...paginationProps}
