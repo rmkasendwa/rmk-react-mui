@@ -83,6 +83,7 @@ export const DropdownOption = forwardRef<HTMLLIElement, DropdownOptionProps>(
       variant = 'text',
       selected,
       children,
+      sx,
       ...rest
     } = props;
 
@@ -105,7 +106,13 @@ export const DropdownOption = forwardRef<HTMLLIElement, DropdownOptionProps>(
         {...rest}
         {...{ selected }}
         className={clsx(classes.root)}
-        onClick={selectable ? onClick : undefined}
+        onClick={(event) => {
+          if (selectable) {
+            onClick && onClick(event);
+          } else {
+            event.stopPropagation();
+          }
+        }}
         sx={{
           minHeight: `${height}px !important`,
           fontSize: 14,
@@ -132,6 +139,15 @@ export const DropdownOption = forwardRef<HTMLLIElement, DropdownOptionProps>(
               }
             })(),
           },
+          ...(() => {
+            if (selectable) {
+              return {
+                cursor: 'pointer',
+              };
+            }
+            return { cursor: 'inherit' };
+          })(),
+          ...sx,
         }}
         disableRipple={!selectable}
       >

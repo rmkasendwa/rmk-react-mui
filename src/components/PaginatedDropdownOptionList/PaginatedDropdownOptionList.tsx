@@ -24,13 +24,13 @@ import {
   useState,
 } from 'react';
 
-import { DropdownOption as BaseDropdownOption } from '../interfaces/Utils';
+import { DropdownOption as BaseDropdownOption } from '../../interfaces/Utils';
+import TextField, { TextFieldProps } from '../InputFields/TextField';
+import ReloadIconButton from '../ReloadIconButton';
 import DropdownOption, {
   DEFAULT_DROPDOWN_OPTION_HEIGHT,
   DropdownOptionVariant,
 } from './DropdownOption';
-import TextField, { TextFieldProps } from './InputFields/TextField';
-import ReloadIconButton from './ReloadIconButton';
 
 export interface DropdownOption
   extends Pick<MenuItemProps, 'onClick'>,
@@ -394,6 +394,7 @@ export const PaginatedDropdownOptionList = forwardRef<
                 isDropdownOption = true,
                 isDropdownOptionWrapped = true,
                 onClick,
+                sx,
               } = option;
               if (isDropdownOption && isDropdownOptionWrapped) {
                 const classNames = [];
@@ -421,7 +422,7 @@ export const PaginatedDropdownOptionList = forwardRef<
                     tabIndex={isFocused ? 0 : -1}
                     height={optionHeight}
                     variant={optionVariant}
-                    {...{ selectable }}
+                    {...{ selectable, sx }}
                   >
                     {label}
                   </DropdownOption>

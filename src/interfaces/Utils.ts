@@ -1,3 +1,4 @@
+import { MenuItemProps } from '@mui/material/MenuItem';
 import { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { ReactNode } from 'react';
 
@@ -102,7 +103,7 @@ export type PrimitiveDataType =
 
 export type DropdownOptionValue = string | number;
 
-export interface DropdownOption {
+export interface DropdownOption extends Partial<Pick<MenuItemProps, 'sx'>> {
   value: DropdownOptionValue;
   label: ReactNode;
   description?: ReactNode;
