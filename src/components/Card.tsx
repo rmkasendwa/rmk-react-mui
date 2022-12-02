@@ -122,7 +122,16 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(function Card(
       hasSearchTool={false}
       {...SearchSyncToolbarPropsRest}
       sx={{
-        pr: `${spacing(1.75)} !important`,
+        ...(() => {
+          if (layoutVariant === 'card') {
+            return {
+              px: '0 !important',
+            };
+          }
+          return {
+            pr: `${spacing(1.75)} !important`,
+          };
+        })(),
         [`&>.${gridClasses.container}`]: {
           columnGap: 1,
         },
