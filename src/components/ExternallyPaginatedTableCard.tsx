@@ -17,7 +17,6 @@ import {
 import { BaseTableRow } from '../interfaces/Table';
 import { PaginatedResponseData } from '../interfaces/Utils';
 import Card, { CardProps } from './Card';
-import { PageTitleProps } from './PageTitle';
 import Table, { TableProps } from './Table';
 
 export interface ExternallyPaginatedTableCardClasses {
@@ -56,7 +55,7 @@ declare module '@mui/material/styles/components' {
 export interface ExternallyPaginatedTableCardProps<
   RecordRow extends BaseTableRow = any
 > extends Omit<TableProps<RecordRow>, 'rows'>,
-    Pick<PageTitleProps, 'title'>,
+    NonNullable<Pick<CardProps, 'title'>>,
     Pick<UsePaginatedRecordsOptions, 'revalidationKey'> {
   recordsFinder: (
     options: Pick<UsePaginatedRecordsOptions, 'limit' | 'offset'> & {
@@ -100,6 +99,8 @@ export const ExternallyPaginatedTableCard = forwardRef<
     ...rest
   } = props;
 
+  let { labelPlural, labelSingular } = props;
+
   const classes = composeClasses(
     slots,
     getExternallyPaginatedTableCardUtilityClass,
@@ -118,6 +119,11 @@ export const ExternallyPaginatedTableCard = forwardRef<
     ...CardPropsRest
   } = CardProps;
   const { sx: CardBodyPropsSx, ...CardBodyPropsRest } = CardBodyProps;
+
+  !labelPlural && typeof title === 'string' && (labelPlural = title);
+  !labelSingular &&
+    labelPlural &&
+    (labelSingular = labelPlural.replace(/s$/gi, ''));
 
   const [offset, setOffset] = useState(0);
   const [limit, setLimit] = useState(limitProp);
@@ -164,6 +170,7 @@ export const ExternallyPaginatedTableCard = forwardRef<
       <Table
         ref={ref}
         {...rest}
+        {...{ labelPlural, labelSingular }}
         className={clsx(classes.root)}
         rows={currentPageRecords}
         totalRowCount={recordsTotalCount}
