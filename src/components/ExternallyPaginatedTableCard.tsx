@@ -1,5 +1,4 @@
 import {
-  Card,
   ComponentsOverrides,
   ComponentsProps,
   ComponentsVariants,
@@ -8,7 +7,6 @@ import {
   generateUtilityClasses,
   useThemeProps,
 } from '@mui/material';
-import Box from '@mui/material/Box';
 import clsx from 'clsx';
 import { forwardRef, useEffect, useState } from 'react';
 
@@ -18,7 +16,8 @@ import {
 } from '../hooks/Utils';
 import { BaseTableRow } from '../interfaces/Table';
 import { PaginatedResponseData } from '../interfaces/Utils';
-import PageTitle, { PageTitleProps } from './PageTitle';
+import Card, { CardProps } from './Card';
+import { PageTitleProps } from './PageTitle';
 import Table, { TableProps } from './Table';
 
 export interface ExternallyPaginatedTableCardClasses {
@@ -66,7 +65,7 @@ export interface ExternallyPaginatedTableCardProps<
   ) => Promise<PaginatedResponseData<RecordRow>>;
   recordKey?: string;
   limit?: number;
-  PageTitleProps?: Partial<PageTitleProps>;
+  CardProps?: Partial<CardProps>;
 }
 
 export function getExternallyPaginatedTableCardUtilityClass(
@@ -96,7 +95,7 @@ export const ExternallyPaginatedTableCard = forwardRef<
     recordsFinder,
     recordKey,
     revalidationKey,
-    PageTitleProps = {},
+    CardProps = {},
     limit: limitProp = 100,
     ...rest
   } = props;
@@ -113,7 +112,12 @@ export const ExternallyPaginatedTableCard = forwardRef<
     })()
   );
 
-  const { ...PageTitlePropsRest } = PageTitleProps;
+  const {
+    SearchSyncToolbarProps,
+    CardBodyProps = {},
+    ...CardPropsRest
+  } = CardProps;
+  const { sx: CardBodyPropsSx, ...CardBodyPropsRest } = CardBodyProps;
 
   const [offset, setOffset] = useState(0);
   const [limit, setLimit] = useState(limitProp);
@@ -142,29 +146,36 @@ export const ExternallyPaginatedTableCard = forwardRef<
     );
 
   return (
-    <Box>
-      <PageTitle
-        {...PageTitlePropsRest}
-        {...{ title, load, loading, errorMessage }}
-        onSearch={(searchTerm) => setSearchTerm(searchTerm)}
+    <Card
+      {...CardPropsRest}
+      {...{ title, load, loading, errorMessage }}
+      SearchSyncToolbarProps={{
+        ...SearchSyncToolbarProps,
+        onSearch: (searchTerm) => setSearchTerm(searchTerm),
+      }}
+      CardBodyProps={{
+        ...CardBodyPropsRest,
+        sx: {
+          p: 0,
+          ...CardBodyPropsSx,
+        },
+      }}
+    >
+      <Table
+        ref={ref}
+        {...rest}
+        className={clsx(classes.root)}
+        rows={currentPageRecords}
+        totalRowCount={recordsTotalCount}
+        rowsPerPage={limit}
+        onRowsPerPageChange={(rowsPerPage) => {
+          setLimit(rowsPerPage);
+        }}
+        onChangePage={(pageIndex) => {
+          setOffset(limit * pageIndex);
+        }}
       />
-      <Card>
-        <Table
-          ref={ref}
-          {...rest}
-          className={clsx(classes.root)}
-          rows={currentPageRecords}
-          totalRowCount={recordsTotalCount}
-          rowsPerPage={limit}
-          onRowsPerPageChange={(rowsPerPage) => {
-            setLimit(rowsPerPage);
-          }}
-          onChangePage={(pageIndex) => {
-            setOffset(limit * pageIndex);
-          }}
-        />
-      </Card>
-    </Box>
+    </Card>
   );
 });
 
