@@ -491,24 +491,11 @@ export const BaseTable = <T extends BaseTableRow>(
             bgcolor: alpha(palette.text.primary, 0.02),
           },
         [`
-          th.${tableCellClasses.root}:nth-of-type(odd)>div
-        `]: {
-          bgcolor: alpha(palette.text.primary, 0.02 + TABLE_HEAD_ALPHA),
-        },
-        [`
           td.${tableCellClasses.root}:nth-of-type(odd)
         `]: {
           bgcolor: alpha(palette.text.primary, 0.02),
         },
         [`tr.${tableRowClasses.root}`]: {
-          [`
-            th.${tableCellClasses.root}:nth-of-type(odd).${OPAQUE_BG_CLASS_NAME}>div
-          `]: {
-            bgcolor: (palette.mode === 'light' ? darken : lighten)(
-              parentBackgroundColor,
-              0.02 + TABLE_HEAD_ALPHA
-            ),
-          },
           [`
             td.${tableCellClasses.root}:nth-of-type(odd).${OPAQUE_BG_CLASS_NAME}
           `]: {
@@ -518,41 +505,17 @@ export const BaseTable = <T extends BaseTableRow>(
             ),
           },
           [`
-            th.${tableCellClasses.root}:nth-of-type(even).${OPAQUE_BG_CLASS_NAME}>div
-          `]: {
-            bgcolor: (palette.mode === 'light' ? darken : lighten)(
-              parentBackgroundColor,
-              TABLE_HEAD_ALPHA
-            ),
-          },
-          [`
             td.${tableCellClasses.root}:nth-of-type(even).${OPAQUE_BG_CLASS_NAME}
           `]: {
             bgcolor: parentBackgroundColor,
           },
           [`&.odd`]: {
             [`
-              th.${tableCellClasses.root}:nth-of-type(odd).${OPAQUE_BG_CLASS_NAME}>div
-            `]: {
-              bgcolor: (palette.mode === 'light' ? darken : lighten)(
-                parentBackgroundColor,
-                0.04 + TABLE_HEAD_ALPHA
-              ),
-            },
-            [`
               td.${tableCellClasses.root}:nth-of-type(odd).${OPAQUE_BG_CLASS_NAME}
             `]: {
               bgcolor: (palette.mode === 'light' ? darken : lighten)(
                 parentBackgroundColor,
                 0.04
-              ),
-            },
-            [`
-              th.${tableCellClasses.root}:nth-of-type(even).${OPAQUE_BG_CLASS_NAME}>div
-            `]: {
-              bgcolor: (palette.mode === 'light' ? darken : lighten)(
-                parentBackgroundColor,
-                0.02 + TABLE_HEAD_ALPHA
               ),
             },
             [`
@@ -590,22 +553,9 @@ export const BaseTable = <T extends BaseTableRow>(
     case 'stripped-columns':
       Object.merge(variantStyles, {
         [`
-          th.${tableCellClasses.root}:nth-of-type(odd)>div
-        `]: {
-          bgcolor: alpha(palette.text.primary, 0.02 + TABLE_HEAD_ALPHA),
-        },
-        [`
           td.${tableCellClasses.root}:nth-of-type(odd)
         `]: {
           bgcolor: alpha(palette.text.primary, 0.02),
-        },
-        [`
-          th.${tableCellClasses.root}:nth-of-type(odd).${OPAQUE_BG_CLASS_NAME}>div
-        `]: {
-          bgcolor: (palette.mode === 'light' ? darken : lighten)(
-            parentBackgroundColor,
-            0.02 + TABLE_HEAD_ALPHA
-          ),
         },
         [`
           td.${tableCellClasses.root}:nth-of-type(odd).${OPAQUE_BG_CLASS_NAME}
@@ -613,14 +563,6 @@ export const BaseTable = <T extends BaseTableRow>(
           bgcolor: (palette.mode === 'light' ? darken : lighten)(
             parentBackgroundColor,
             0.02
-          ),
-        },
-        [`
-          th.${tableCellClasses.root}:nth-of-type(even).${OPAQUE_BG_CLASS_NAME}>div
-        `]: {
-          bgcolor: (palette.mode === 'light' ? darken : lighten)(
-            parentBackgroundColor,
-            TABLE_HEAD_ALPHA
           ),
         },
         [`
@@ -1089,53 +1031,56 @@ export const BaseTable = <T extends BaseTableRow>(
           {tableElement}
         </Box>
         {(() => {
-          const paginationProps: Pick<
-            TablePaginationProps,
-            | 'page'
-            | 'rowsPerPageOptions'
-            | 'rowsPerPage'
-            | 'onRowsPerPageChange'
-          > = {
-            page: pageIndex,
-            rowsPerPageOptions: [10, 25, 50, 100],
-            rowsPerPage,
-            onRowsPerPageChange: (event) => {
-              handleChangePage(null, 0);
-              setRowsPerPage(+event.target.value);
-              onRowsPerPageChange && onRowsPerPageChange(+event.target.value);
-            },
-          };
-          if (paginationType === 'classic') {
+          const filteredCount = filterdRowCount || totalRowCount || rows.length;
+          if (filteredCount >= 0) {
+            const paginationProps: Pick<
+              TablePaginationProps,
+              | 'page'
+              | 'rowsPerPageOptions'
+              | 'rowsPerPage'
+              | 'onRowsPerPageChange'
+            > = {
+              page: pageIndex,
+              rowsPerPageOptions: [10, 25, 50, 100],
+              rowsPerPage,
+              onRowsPerPageChange: (event) => {
+                handleChangePage(null, 0);
+                setRowsPerPage(+event.target.value);
+                onRowsPerPageChange && onRowsPerPageChange(+event.target.value);
+              },
+            };
+            if (paginationType === 'classic') {
+              return (
+                <DataTablePagination
+                  {...{
+                    labelPlural,
+                    labelSingular,
+                    lowercaseLabelPlural,
+                    filteredCount,
+                  }}
+                  totalCount={totalRowCount || rows.length}
+                  {...paginationProps}
+                  PaginationProps={{
+                    ...PaginationProps,
+                    onChange: (e, pageNumber) => {
+                      handleChangePage(e, pageNumber - 1);
+                    },
+                  }}
+                />
+              );
+            }
             return (
-              <DataTablePagination
-                {...{
-                  labelPlural,
-                  labelSingular,
-                  lowercaseLabelPlural,
-                }}
-                filteredCount={filterdRowCount || totalRowCount || rows.length}
-                totalCount={totalRowCount || rows.length}
+              <TablePagination
+                rowsPerPageOptions={[10, 25, 50, 100]}
+                component="div"
+                count={totalRowCount || rows.length}
                 {...paginationProps}
-                PaginationProps={{
-                  ...PaginationProps,
-                  onChange: (e, pageNumber) => {
-                    handleChangePage(e, pageNumber - 1);
-                  },
-                }}
+                onPageChange={handleChangePage}
+                showFirstButton
+                showLastButton
               />
             );
           }
-          return (
-            <TablePagination
-              rowsPerPageOptions={[10, 25, 50, 100]}
-              component="div"
-              count={totalRowCount || rows.length}
-              {...paginationProps}
-              onPageChange={handleChangePage}
-              showFirstButton
-              showLastButton
-            />
-          );
         })()}
       </Box>
     );
