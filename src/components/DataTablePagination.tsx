@@ -53,6 +53,7 @@ export const DataTablePagination = forwardRef<
       container
       sx={{
         alignItems: 'center',
+        justifyContent: 'center',
         pl: 3,
         pr: 2,
         py: 1,
@@ -111,9 +112,13 @@ export const DataTablePagination = forwardRef<
           </Typography>
         </Grid>
       ) : null}
-      <Grid item xs />
       {rowsPerPage != null && page != null ? (
-        <Grid item>
+        <Grid
+          item
+          sx={{
+            ml: 'auto',
+          }}
+        >
           <Pagination
             count={Math.ceil(totalCount / rowsPerPage)}
             page={page + 1}
