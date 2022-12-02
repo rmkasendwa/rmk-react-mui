@@ -1,6 +1,7 @@
 import '../../extensions/Object';
 
 import {
+  Checkbox,
   ComponentsOverrides,
   ComponentsProps,
   ComponentsVariants,
@@ -49,6 +50,7 @@ import { SortBy, SortDirection, SortOptions } from '../../interfaces/Sort';
 import {
   BaseTableRow,
   GetRowProps,
+  TableColumn,
   TableRowProps,
 } from '../../interfaces/Table';
 import { sort } from '../../utils/Sort';
@@ -160,6 +162,16 @@ export interface TableProps<T = any>
   // Removable columns
   enableColumnDisplayToggle?: boolean;
   ColumnDisplayToggleProps?: Partial<BoxProps>;
+
+  // Checkboxes
+  enableCheckboxRowSelectors?: boolean;
+  enableCheckboxAllRowSelector?: boolean;
+  allRowsChecked?: boolean;
+  checkedRowIds?: string[];
+  onChangeCheckedRowIds?: (
+    checkedRowIds: string[],
+    allRowsChecked: boolean
+  ) => void;
 }
 
 const OPAQUE_BG_CLASS_NAME = `MuiTableCell-opaque`;
@@ -224,6 +236,11 @@ export const BaseTable = <T extends BaseTableRow>(
     enableColumnDisplayToggle = false,
     selectedColumnIds: selectedColumnIdsProp,
     onChangeSelectedColumnIds,
+    enableCheckboxRowSelectors = false,
+    enableCheckboxAllRowSelector = false,
+    allRowsChecked: allRowsCheckedProp = false,
+    checkedRowIds: checkedRowIdsProp,
+    onChangeCheckedRowIds: onChangeCheckedRowIdsProp,
     rowsPerPageOptions: rowsPerPageOptionsProp = [10, 25, 50, 100],
     sx,
     ...rest
@@ -258,10 +275,12 @@ export const BaseTable = <T extends BaseTableRow>(
   // Refs
   const columnsRef = useRef(columnsProp);
   const onChangeSelectedColumnIdsRef = useRef(onChangeSelectedColumnIds);
+  const onChangeCheckedRowIdsRef = useRef(onChangeCheckedRowIdsProp);
   useEffect(() => {
     columnsRef.current = columnsProp;
     onChangeSelectedColumnIdsRef.current = onChangeSelectedColumnIds;
-  }, [columnsProp, onChangeSelectedColumnIds]);
+    onChangeCheckedRowIdsRef.current = onChangeCheckedRowIdsProp;
+  }, [columnsProp, onChangeCheckedRowIdsProp, onChangeSelectedColumnIds]);
 
   const { palette } = useTheme();
   const { sx: headerRowPropsSx, ...restHeaderRowProps } = HeaderRowProps;
@@ -272,19 +291,104 @@ export const BaseTable = <T extends BaseTableRow>(
   );
   const [sortBy, setSortBy] = useState<SortOptions<T>>([]);
 
-  parentBackgroundColor || (parentBackgroundColor = palette.background.paper);
-  currencyCode || (currencyCode = defaultCurrencyCode);
+  /*******************
+   * Checkbox state. *
+   * *****************
+   */
+  const [allRowsChecked, setAllRowsChecked] = useState(allRowsCheckedProp);
+  const [checkedRowIds, setCheckedRowIds] = useState<string[]>(
+    checkedRowIdsProp || []
+  );
+  const checkboxColumn: TableColumn<T> = {
+    id: 'checkbox' as any,
+    label: enableCheckboxAllRowSelector ? (
+      <Checkbox
+        checked={allRowsChecked}
+        onChange={(event) => {
+          setAllRowsChecked(event.target.checked);
+          setCheckedRowIds([]);
+        }}
+        color="default"
+      />
+    ) : null,
+    getColumnValue: ({ id: baseId }) => {
+      const id = String(baseId);
+      const checked = allRowsChecked || checkedRowIds.includes(id);
+      return (
+        <Checkbox
+          {...{ checked }}
+          color="default"
+          onChange={(event) => {
+            setCheckedRowIds((prevCheckedRowIds) => {
+              if (event.target.checked) {
+                if (!prevCheckedRowIds.includes(id)) {
+                  prevCheckedRowIds.push(id);
+                }
+              } else {
+                if (prevCheckedRowIds.includes(id)) {
+                  prevCheckedRowIds.splice(prevCheckedRowIds.indexOf(id), 1);
+                }
+              }
+              return [...prevCheckedRowIds];
+            });
+          }}
+        />
+      );
+    },
+    width: 40,
+    sx: {
+      '&,>div': {
+        p: 0,
+      },
+    },
+  };
+  useEffect(() => {
+    setAllRowsChecked(allRowsCheckedProp);
+  }, [allRowsCheckedProp]);
+  useEffect(() => {
+    if (checkedRowIdsProp && !onChangeCheckedRowIdsRef.current) {
+      setCheckedRowIds((prevCheckedRowIds) => {
+        if (prevCheckedRowIds.join('') !== checkedRowIdsProp.join('')) {
+          return checkedRowIdsProp;
+        }
+        return prevCheckedRowIds;
+      });
+    }
+  }, [checkedRowIdsProp]);
+  useEffect(() => {
+    onChangeCheckedRowIdsRef.current &&
+      onChangeCheckedRowIdsRef.current(checkedRowIds, allRowsChecked);
+  }, [allRowsChecked, checkedRowIds]);
 
+  /********************************
+   * Column toggling state state. *
+   * *******************************/
   const baseSelectedColumnIds = useMemo(() => {
     if (selectedColumnIdsProp) {
       return selectedColumnIdsProp;
     }
     return columnsProp.map(({ id }) => String(id) as any);
   }, [columnsProp, selectedColumnIdsProp]);
-
   const [selectedColumnIds, setSelectedColumnIds] = useState<
     NonNullable<typeof selectedColumnIdsProp>
   >(baseSelectedColumnIds);
+  useEffect(() => {
+    if (selectedColumnIdsProp && !onChangeSelectedColumnIdsRef.current) {
+      setSelectedColumnIds((prevSelectedColumnIds) => {
+        if (prevSelectedColumnIds.join('') !== selectedColumnIdsProp.join('')) {
+          return selectedColumnIdsProp;
+        }
+        return prevSelectedColumnIds;
+      });
+    }
+  }, [selectedColumnIdsProp]);
+  useEffect(() => {
+    onChangeSelectedColumnIdsRef.current &&
+      onChangeSelectedColumnIdsRef.current(selectedColumnIds);
+  }, [selectedColumnIds]);
+
+  parentBackgroundColor || (parentBackgroundColor = palette.background.paper);
+  currencyCode || (currencyCode = defaultCurrencyCode);
 
   // Setting default column properties
   const columns = useMemo(() => {
@@ -383,27 +487,24 @@ export const BaseTable = <T extends BaseTableRow>(
     });
   }, [columnsProp, currencyCode, enableColumnDisplayToggle]);
 
-  useEffect(() => {
-    if (selectedColumnIdsProp && !onChangeSelectedColumnIdsRef.current) {
-      setSelectedColumnIds((prevSelectedColumnIds) => {
-        if (prevSelectedColumnIds.join('') !== selectedColumnIdsProp.join('')) {
-          return selectedColumnIdsProp;
-        }
-        return prevSelectedColumnIds;
-      });
-    }
-  }, [selectedColumnIdsProp]);
-
-  const displayingColumns = (() => {
-    if (selectedColumnIdsProp && onChangeSelectedColumnIds) {
-      return selectedColumnIdsProp;
-    }
-    return selectedColumnIds;
-  })()
-    .map((selectedColumnId) => {
-      return columns.find(({ id }) => id === selectedColumnId)!;
-    })
-    .filter((column) => column != null);
+  const displayingColumns = [
+    ...(() => {
+      if (enableCheckboxRowSelectors) {
+        return [checkboxColumn];
+      }
+      return [];
+    })(),
+    ...(() => {
+      if (selectedColumnIdsProp && onChangeSelectedColumnIds) {
+        return selectedColumnIdsProp;
+      }
+      return selectedColumnIds;
+    })()
+      .map((selectedColumnId) => {
+        return columns.find(({ id }) => id === selectedColumnId)!;
+      })
+      .filter((column) => column != null),
+  ];
 
   const minWidth = getTableMinWidth(
     displayingColumns.map((column) => {
@@ -432,11 +533,6 @@ export const BaseTable = <T extends BaseTableRow>(
           pageIndex * rowsPerPage + rowsPerPage
         );
   })();
-
-  useEffect(() => {
-    onChangeSelectedColumnIdsRef.current &&
-      onChangeSelectedColumnIdsRef.current(selectedColumnIds);
-  }, [selectedColumnIds]);
 
   useEffect(() => {
     setPageIndex(pageIndexProp);
