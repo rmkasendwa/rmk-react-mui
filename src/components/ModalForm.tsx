@@ -36,7 +36,7 @@ import {
 import ErrorAlert from './ErrorAlert';
 import ErrorFieldHighlighter from './ErrorFieldHighlighter';
 import { ModalPopupProps } from './ModalPopup';
-import SearchSyncToolbar, { SearchSyncToolbarProps } from './SearchSyncToolbar';
+import SearchSyncToolbar from './SearchSyncToolbar';
 
 export interface ModalFormClasses {
   /** Styles applied to the root element. */
@@ -100,9 +100,6 @@ export interface ModalFormProps<Values extends FormikValues = any>
   onClickEdit?: () => void;
   SubmitButtonProps?: Partial<LoadingButtonProps>;
   FormikProps?: Partial<FormikConfig<Values>>;
-  loading?: boolean;
-  ToolbarProps?: Partial<SearchSyncToolbarProps>;
-  getModalElement?: (modalElement: ReactElement) => ReactElement;
 }
 
 export function getModalFormUtilityClass(slot: string): string {
@@ -147,7 +144,7 @@ export const BaseModalForm = <Values extends FormikValues>(
     lockSubmitIfFormInvalid = false,
     CardProps = {},
     SubmitButtonProps = {},
-    ToolbarProps = {},
+    SearchSyncToolbarProps = {},
     showCloseButton = true,
     loading,
     getModalElement,
@@ -171,7 +168,7 @@ export const BaseModalForm = <Values extends FormikValues>(
 
   const { sx: CardPropsSx, ...CardPropsRest } = CardProps;
   const { ...SubmitButtonPropsRest } = SubmitButtonProps;
-  const { ...ToolbarPropsRest } = ToolbarProps;
+  const { ...SearchSyncToolbarPropsRest } = SearchSyncToolbarProps;
 
   const onSubmitSuccessRef = useRef(onSubmitSuccess);
   const onCloseRef = useRef(onClose);
@@ -216,13 +213,13 @@ export const BaseModalForm = <Values extends FormikValues>(
               <SearchSyncToolbar
                 hasSearchTool={false}
                 hasSyncTool={false}
-                {...ToolbarPropsRest}
+                {...SearchSyncToolbarPropsRest}
                 title={title}
               >
                 {(() => {
                   if (showCloseButton && !isSubmitting) {
                     return (
-                      <IconButton onClick={onClose} sx={{ p: 0.5 }}>
+                      <IconButton onClick={onClose}>
                         <CloseIcon />
                       </IconButton>
                     );
