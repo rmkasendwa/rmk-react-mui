@@ -76,6 +76,7 @@ export interface ModalPopupProps
   SearchSyncToolbarProps?: Partial<SearchSyncToolbarProps>;
   CardProps?: Partial<CardProps>;
   CloseActionButtonProps?: Partial<ButtonProps>;
+  showCloseButton?: boolean;
 }
 
 export function getModalPopupUtilityClass(slot: string): string {
@@ -106,6 +107,7 @@ export const ModalPopup = forwardRef<HTMLDivElement, ModalPopupProps>(
       CloseActionButtonProps = {},
       sx,
       className,
+      showCloseButton = true,
       ...rest
     } = props;
 
@@ -227,8 +229,7 @@ export const ModalPopup = forwardRef<HTMLDivElement, ModalPopupProps>(
           >
             {(() => {
               if (actionButtons) {
-                const toolsList = Children.toArray(actionButtons);
-                return toolsList.map((tool, index) => {
+                return Children.toArray(actionButtons).map((tool, index) => {
                   return (
                     <Grid item key={index} sx={{ minWidth: 0 }}>
                       {tool}
@@ -237,20 +238,26 @@ export const ModalPopup = forwardRef<HTMLDivElement, ModalPopupProps>(
                 });
               }
             })()}
-            <Grid item>
-              <Button
-                variant="outlined"
-                color="inherit"
-                {...closeActionButtonPropsRest}
-                onClick={onClose}
-                sx={{
-                  color: alpha(palette.text.primary, 0.5),
-                  ...closeActionButtonPropsSx,
-                }}
-              >
-                {closeActionButtonPropsChildren ?? 'Close'}
-              </Button>
-            </Grid>
+            {(() => {
+              if (showCloseButton) {
+                return (
+                  <Grid item>
+                    <Button
+                      variant="outlined"
+                      color="inherit"
+                      {...closeActionButtonPropsRest}
+                      onClick={onClose}
+                      sx={{
+                        color: alpha(palette.text.primary, 0.5),
+                        ...closeActionButtonPropsSx,
+                      }}
+                    >
+                      {closeActionButtonPropsChildren ?? 'Close'}
+                    </Button>
+                  </Grid>
+                );
+              }
+            })()}
           </Grid>
         </Card>
       </Modal>

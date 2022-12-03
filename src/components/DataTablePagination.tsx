@@ -191,6 +191,7 @@ export const DataTablePagination = forwardRef<
               }}
               showClearButton={false}
               searchable={false}
+              enableLoadingState={false}
               variant="outlined"
               sx={{
                 [`.${inputBaseClasses.root}`]: {

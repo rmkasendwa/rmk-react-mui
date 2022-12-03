@@ -102,7 +102,6 @@ export interface ModalFormProps<Values extends FormikValues = any>
   FormikProps?: Partial<FormikConfig<Values>>;
   loading?: boolean;
   ToolbarProps?: Partial<SearchSyncToolbarProps>;
-  showCloseButton?: boolean;
   getModalElement?: (modalElement: ReactElement) => ReactElement;
 }
 
