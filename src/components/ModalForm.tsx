@@ -23,7 +23,7 @@ import {
   useThemeProps,
 } from '@mui/material';
 import clsx from 'clsx';
-import { Form, Formik, FormikConfig, FormikValues } from 'formik';
+import { Form, Formik, FormikConfig, FormikProps, FormikValues } from 'formik';
 import { isEmpty } from 'lodash';
 import {
   Children,
@@ -71,10 +71,16 @@ declare module '@mui/material/styles/components' {
   }
 }
 
+export type ModalFormFunctionChildren<
+  Values extends FormikValues = any,
+  ExtraProps = Record<string, unknown>
+> = (props: FormikProps<Values> & ExtraProps) => ReactNode;
+
 export interface ModalFormProps<Values extends FormikValues = any>
   extends Partial<Omit<ModalProps, 'children' | 'title'>>,
-    NonNullable<Pick<FormikConfig<Values>, 'validationSchema' | 'children'>> {
+    NonNullable<Pick<FormikConfig<Values>, 'validationSchema'>> {
   initialValues: Values;
+  children: ModalFormFunctionChildren | ReactNode;
   title: ReactNode;
   errorMessage?: string;
   successMessage?: string;
