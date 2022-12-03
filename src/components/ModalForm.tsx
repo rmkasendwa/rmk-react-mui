@@ -6,7 +6,6 @@ import {
   Box,
   Button,
   Card,
-  CardProps,
   ComponentsOverrides,
   ComponentsProps,
   ComponentsVariants,
@@ -14,7 +13,6 @@ import {
   Grid,
   IconButton,
   Modal,
-  ModalProps,
   alpha,
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
@@ -37,6 +35,7 @@ import {
 
 import ErrorAlert from './ErrorAlert';
 import ErrorFieldHighlighter from './ErrorFieldHighlighter';
+import { ModalPopupProps } from './ModalPopup';
 import SearchSyncToolbar, { SearchSyncToolbarProps } from './SearchSyncToolbar';
 
 export interface ModalFormClasses {
@@ -77,16 +76,13 @@ export type ModalFormFunctionChildren<
 > = (props: FormikProps<Values> & ExtraProps) => ReactNode;
 
 export interface ModalFormProps<Values extends FormikValues = any>
-  extends Partial<Omit<ModalProps, 'children' | 'title'>>,
+  extends Omit<ModalPopupProps, 'children'>,
     NonNullable<Pick<FormikConfig<Values>, 'validationSchema'>> {
   initialValues: Values;
   children: ModalFormFunctionChildren | ReactNode;
-  title: ReactNode;
-  errorMessage?: string;
   successMessage?: string;
   submitted?: boolean;
   submitButtonText?: string;
-  open: boolean;
   staticEntityDetails?: ReactNode;
   editMode?: boolean;
   showForm?: boolean;
@@ -101,9 +97,7 @@ export interface ModalFormProps<Values extends FormikValues = any>
   lockSubmitIfFormInvalid?: boolean;
   onSubmit: (values: any) => void;
   onSubmitSuccess?: () => void;
-  onClose?: () => void;
   onClickEdit?: () => void;
-  CardProps?: Partial<CardProps>;
   SubmitButtonProps?: Partial<LoadingButtonProps>;
   FormikProps?: Partial<FormikConfig<Values>>;
   loading?: boolean;

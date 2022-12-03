@@ -30,7 +30,7 @@ import {
   useState,
 } from 'react';
 
-import SearchSyncToolbar from './SearchSyncToolbar';
+import SearchSyncToolbar, { SearchSyncToolbarProps } from './SearchSyncToolbar';
 
 export interface ModalPopupClasses {
   /** Styles applied to the root element. */
@@ -64,14 +64,16 @@ declare module '@mui/material/styles/components' {
   }
 }
 
-export interface ModalPopupProps extends Partial<Omit<ModalProps, 'children'>> {
-  title: string;
+export interface ModalPopupProps
+  extends Partial<Omit<ModalProps, 'children' | 'title'>> {
+  title: ReactNode;
   children?: ReactNode;
   loading?: boolean;
   errorMessage?: string;
   open: boolean;
   actionButtons?: ReactNode | ReactNode[];
   onClose?: () => void;
+  SearchSyncToolbarProps?: Partial<SearchSyncToolbarProps>;
   CardProps?: Partial<CardProps>;
   CloseActionButtonProps?: Partial<ButtonProps>;
 }
@@ -98,6 +100,7 @@ export const ModalPopup = forwardRef<HTMLDivElement, ModalPopupProps>(
       open,
       onClose,
       actionButtons,
+      SearchSyncToolbarProps = {},
       CardProps = {},
       loading = false,
       CloseActionButtonProps = {},
@@ -118,8 +121,10 @@ export const ModalPopup = forwardRef<HTMLDivElement, ModalPopupProps>(
       })()
     );
 
-    const { palette, components } = useTheme();
+    const { palette, components, spacing } = useTheme();
 
+    const { sx: SearchSyncToolbarPropsSx, ...SearchSyncToolbarPropsRest } =
+      SearchSyncToolbarProps;
     const { sx: CardPropsSx, ...CardPropsRest } = CardProps;
     const {
       children: closeActionButtonPropsChildren,
@@ -184,12 +189,17 @@ export const ModalPopup = forwardRef<HTMLDivElement, ModalPopupProps>(
           }}
         >
           <SearchSyncToolbar
-            title={title}
             hasSearchTool={false}
             hasSyncTool={false}
+            {...SearchSyncToolbarPropsRest}
+            title={title}
+            sx={{
+              pr: `${spacing(2)} !important`,
+              ...SearchSyncToolbarPropsSx,
+            }}
           >
             {!loading ? (
-              <IconButton onClick={onClose} sx={{ p: 0.5 }}>
+              <IconButton onClick={onClose}>
                 <CloseIcon />
               </IconButton>
             ) : null}

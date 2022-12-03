@@ -47,6 +47,7 @@ export interface TextFieldProps
   endChildren?: ReactNode;
   WrapperProps?: Partial<BoxProps>;
   showClearButton?: boolean;
+  enableLoadingState?: boolean;
 }
 
 export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
@@ -67,6 +68,7 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
       required,
       labelWrapped = false,
       endAdornment: endAdornmentProp,
+      enableLoadingState = true,
       endChildren,
       WrapperProps = {},
       showClearButton = true,
@@ -109,29 +111,31 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
     const labelSkeletonWidth = typeof label === 'string' ? label.length * 7 : 0;
 
     const textField = (() => {
-      if (errorMessage) {
-        return (
-          <MuiTextField
-            {...{ size, variant, multiline, rows, fullWidth }}
-            label={<ErrorSkeleton width={labelSkeletonWidth} />}
-            value=""
-            disabled
-          />
-        );
-      }
+      if (enableLoadingState) {
+        if (errorMessage) {
+          return (
+            <MuiTextField
+              {...{ size, variant, multiline, rows, fullWidth, sx }}
+              label={<ErrorSkeleton width={labelSkeletonWidth} />}
+              value=""
+              disabled
+            />
+          );
+        }
 
-      if (loading) {
-        return (
-          <MuiTextField
-            {...{ size, variant, multiline, rows, fullWidth }}
-            label={<Skeleton width={labelSkeletonWidth} />}
-            value=""
-            disabled
-            InputProps={{
-              endAdornment: <CircularProgress size={18} color="inherit" />,
-            }}
-          />
-        );
+        if (loading) {
+          return (
+            <MuiTextField
+              {...{ size, variant, multiline, rows, fullWidth, sx }}
+              label={<Skeleton width={labelSkeletonWidth} />}
+              value=""
+              disabled
+              InputProps={{
+                endAdornment: <CircularProgress size={18} color="inherit" />,
+              }}
+            />
+          );
+        }
       }
 
       return (
