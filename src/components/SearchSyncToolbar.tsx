@@ -39,6 +39,7 @@ export interface SearchSyncToolbarProps
    *
    */
   tools?: ReactNode | ReactNode[];
+  preTitleTools?: ReactNode | ReactNode[];
   /**
    * Extra tools to be added to the toolbar.
    * Note: Tools will always over-write children.
@@ -62,6 +63,7 @@ export const SearchSyncToolbar: FC<SearchSyncToolbarProps> = ({
   onChangeSearchTerm,
   onSearch,
   tools,
+  preTitleTools,
   children,
   TitleProps = {},
   searchFieldOpen: searchFieldOpenProp,
@@ -104,6 +106,17 @@ export const SearchSyncToolbar: FC<SearchSyncToolbarProps> = ({
   return (
     <Toolbar {...rest}>
       <Grid container sx={{ alignItems: 'center', columnGap: 1 }}>
+        {(() => {
+          if (preTitleTools) {
+            return Children.toArray(preTitleTools).map((tool, index) => {
+              return (
+                <Grid item key={index} sx={{ minWidth: 0 }}>
+                  {tool}
+                </Grid>
+              );
+            });
+          }
+        })()}
         {title ? (
           <>
             <Grid item xs sx={{ minWidth: 0 }}>
@@ -231,8 +244,7 @@ export const SearchSyncToolbar: FC<SearchSyncToolbarProps> = ({
         ) : null}
         {(() => {
           if (tools) {
-            const toolsList = Children.toArray(tools);
-            return toolsList.map((tool, index) => {
+            return Children.toArray(tools).map((tool, index) => {
               return (
                 <Grid item key={index} sx={{ minWidth: 0 }}>
                   {tool}
