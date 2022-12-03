@@ -17,6 +17,7 @@ import {
 import { BaseTableRow } from '../interfaces/Table';
 import { PaginatedResponseData } from '../interfaces/Utils';
 import Card, { CardProps } from './Card';
+import IconLoadingScreen from './IconLoadingScreen';
 import Table, { TableProps } from './Table';
 
 export interface ExternallyPaginatedTableCardClasses {
@@ -65,6 +66,7 @@ export interface ExternallyPaginatedTableCardProps<
   recordKey?: string;
   limit?: number;
   CardProps?: Partial<CardProps>;
+  pathToAddNew?: string;
 }
 
 export function getExternallyPaginatedTableCardUtilityClass(
@@ -95,6 +97,7 @@ export const ExternallyPaginatedTableCard = forwardRef<
     recordKey,
     revalidationKey,
     CardProps = {},
+    pathToAddNew,
     limit: limitProp = 100,
     ...rest
   } = props;
@@ -167,21 +170,35 @@ export const ExternallyPaginatedTableCard = forwardRef<
         },
       }}
     >
-      <Table
-        ref={ref}
-        {...rest}
-        {...{ labelPlural, labelSingular }}
-        className={clsx(classes.root)}
-        rows={currentPageRecords}
-        totalRowCount={recordsTotalCount}
-        rowsPerPage={limit}
-        onRowsPerPageChange={(rowsPerPage) => {
-          setLimit(rowsPerPage);
-        }}
-        onChangePage={(pageIndex) => {
-          setOffset(limit * pageIndex);
-        }}
-      />
+      {(() => {
+        if (recordsTotalCount <= 0 && (loading || errorMessage)) {
+          return (
+            <IconLoadingScreen
+              {...{ errorMessage, load, loading }}
+              recordLabelPlural={labelPlural}
+              recordLabelSingular={labelSingular}
+              pathToAddNew={pathToAddNew}
+            />
+          );
+        }
+        return (
+          <Table
+            ref={ref}
+            {...rest}
+            {...{ labelPlural, labelSingular }}
+            className={clsx(classes.root)}
+            rows={currentPageRecords}
+            totalRowCount={recordsTotalCount}
+            rowsPerPage={limit}
+            onRowsPerPageChange={(rowsPerPage) => {
+              setLimit(rowsPerPage);
+            }}
+            onChangePage={(pageIndex) => {
+              setOffset(limit * pageIndex);
+            }}
+          />
+        );
+      })()}
     </Card>
   );
 });

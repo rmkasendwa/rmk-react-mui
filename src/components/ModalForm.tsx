@@ -72,10 +72,10 @@ declare module '@mui/material/styles/components' {
 }
 
 export interface ModalFormProps<Values extends FormikValues = any>
-  extends Partial<Omit<ModalProps, 'children'>>,
+  extends Partial<Omit<ModalProps, 'children' | 'title'>>,
     NonNullable<Pick<FormikConfig<Values>, 'validationSchema' | 'children'>> {
   initialValues: Values;
-  title: string;
+  title: ReactNode;
   errorMessage?: string;
   successMessage?: string;
   submitted?: boolean;
