@@ -163,7 +163,7 @@ const fetchData = async <T = any>(
               ) {
                 return fetchData(retryCount + 1);
               }
-              return reject(errorMessage);
+              return reject(Error(errorMessage));
             });
           if (response) {
             pendingRequestCancelTokenSources.splice(
