@@ -78,7 +78,8 @@ export interface ModalPopupProps
   SearchSyncToolbarProps?: Partial<SearchSyncToolbarProps>;
   CardProps?: Partial<CardProps>;
   CloseActionButtonProps?: Partial<ButtonProps>;
-  showCloseButton?: boolean;
+  showCloseIconButton?: boolean;
+  showCloseActionButton?: boolean;
   modalElement?: ReactElement;
   getModalElement?: (modalElement: ReactElement) => ReactElement;
 }
@@ -111,7 +112,8 @@ export const ModalPopup = forwardRef<HTMLDivElement, ModalPopupProps>(
       CloseActionButtonProps = {},
       sx,
       className,
-      showCloseButton = true,
+      showCloseIconButton = true,
+      showCloseActionButton = true,
       getModalElement,
       ...rest
     } = props;
@@ -188,7 +190,7 @@ export const ModalPopup = forwardRef<HTMLDivElement, ModalPopupProps>(
             }}
           >
             {(() => {
-              if (showCloseButton && !loading) {
+              if (showCloseIconButton && !loading) {
                 return (
                   <IconButton onClick={onClose}>
                     <CloseIcon />
@@ -230,7 +232,7 @@ export const ModalPopup = forwardRef<HTMLDivElement, ModalPopupProps>(
               }
             })()}
             {(() => {
-              if (showCloseButton) {
+              if (showCloseActionButton) {
                 return (
                   <Grid item>
                     <Button
