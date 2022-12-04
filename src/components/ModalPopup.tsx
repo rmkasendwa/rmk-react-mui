@@ -23,6 +23,7 @@ import {
 import clsx from 'clsx';
 import {
   Children,
+  ReactElement,
   ReactNode,
   forwardRef,
   useEffect,
@@ -77,6 +78,7 @@ export interface ModalPopupProps
   CardProps?: Partial<CardProps>;
   CloseActionButtonProps?: Partial<ButtonProps>;
   showCloseButton?: boolean;
+  getModalElement?: (modalElement: ReactElement) => ReactElement;
 }
 
 export function getModalPopupUtilityClass(slot: string): string {
@@ -108,6 +110,7 @@ export const ModalPopup = forwardRef<HTMLDivElement, ModalPopupProps>(
       sx,
       className,
       showCloseButton = true,
+      getModalElement,
       ...rest
     } = props;
 
@@ -157,6 +160,94 @@ export const ModalPopup = forwardRef<HTMLDivElement, ModalPopupProps>(
       }
     }, [detailsContainerElement]);
 
+    const modalElement = (
+      <Card
+        {...CardPropsRest}
+        sx={{
+          maxWidth: 640,
+          width: `100%`,
+          maxHeight: `75%`,
+          display: 'flex',
+          flexDirection: 'column',
+          ...CardPropsSx,
+        }}
+      >
+        <SearchSyncToolbar
+          hasSearchTool={false}
+          hasSyncTool={false}
+          {...SearchSyncToolbarPropsRest}
+          title={title}
+          sx={{
+            pr: `${spacing(2)} !important`,
+            ...SearchSyncToolbarPropsSx,
+          }}
+        >
+          {(() => {
+            if (showCloseButton && !loading) {
+              return (
+                <IconButton onClick={onClose}>
+                  <CloseIcon />
+                </IconButton>
+              );
+            }
+          })()}
+        </SearchSyncToolbar>
+        <Divider />
+        <Box sx={{ py: 0, px: 3, overflowY: 'auto', flex: 1 }}>
+          {children ? (
+            <Box
+              ref={(detailsContainerElement: HTMLDivElement | null) => {
+                setDetailsContainerElement(detailsContainerElement);
+              }}
+              sx={{
+                py: 2,
+              }}
+            >
+              {children}
+            </Box>
+          ) : null}
+        </Box>
+        <Divider />
+        <Grid
+          container
+          spacing={2}
+          sx={{ py: 2, px: 3, flexDirection: 'row-reverse' }}
+        >
+          {(() => {
+            if (actionButtons) {
+              return Children.toArray(actionButtons).map((tool, index) => {
+                return (
+                  <Grid item key={index} sx={{ minWidth: 0 }}>
+                    {tool}
+                  </Grid>
+                );
+              });
+            }
+          })()}
+          {(() => {
+            if (showCloseButton) {
+              return (
+                <Grid item>
+                  <Button
+                    variant="outlined"
+                    color="inherit"
+                    {...closeActionButtonPropsRest}
+                    onClick={onClose}
+                    sx={{
+                      color: alpha(palette.text.primary, 0.5),
+                      ...closeActionButtonPropsSx,
+                    }}
+                  >
+                    {closeActionButtonPropsChildren ?? 'Close'}
+                  </Button>
+                </Grid>
+              );
+            }
+          })()}
+        </Grid>
+      </Card>
+    );
+
     return (
       <Modal
         {...rest}
@@ -179,87 +270,12 @@ export const ModalPopup = forwardRef<HTMLDivElement, ModalPopupProps>(
         disableEscapeKeyDown
         disableAutoFocus
       >
-        <Card
-          {...CardPropsRest}
-          sx={{
-            maxWidth: 640,
-            width: `100%`,
-            maxHeight: `75%`,
-            display: 'flex',
-            flexDirection: 'column',
-            ...CardPropsSx,
-          }}
-        >
-          <SearchSyncToolbar
-            hasSearchTool={false}
-            hasSyncTool={false}
-            {...SearchSyncToolbarPropsRest}
-            title={title}
-            sx={{
-              pr: `${spacing(2)} !important`,
-              ...SearchSyncToolbarPropsSx,
-            }}
-          >
-            {!loading ? (
-              <IconButton onClick={onClose}>
-                <CloseIcon />
-              </IconButton>
-            ) : null}
-          </SearchSyncToolbar>
-          <Divider />
-          <Box sx={{ py: 0, px: 3, overflowY: 'auto', flex: 1 }}>
-            {children ? (
-              <Box
-                ref={(detailsContainerElement: HTMLDivElement | null) => {
-                  setDetailsContainerElement(detailsContainerElement);
-                }}
-                sx={{
-                  py: 2,
-                }}
-              >
-                {children}
-              </Box>
-            ) : null}
-          </Box>
-          <Divider />
-          <Grid
-            container
-            spacing={2}
-            sx={{ py: 2, px: 3, flexDirection: 'row-reverse' }}
-          >
-            {(() => {
-              if (actionButtons) {
-                return Children.toArray(actionButtons).map((tool, index) => {
-                  return (
-                    <Grid item key={index} sx={{ minWidth: 0 }}>
-                      {tool}
-                    </Grid>
-                  );
-                });
-              }
-            })()}
-            {(() => {
-              if (showCloseButton) {
-                return (
-                  <Grid item>
-                    <Button
-                      variant="outlined"
-                      color="inherit"
-                      {...closeActionButtonPropsRest}
-                      onClick={onClose}
-                      sx={{
-                        color: alpha(palette.text.primary, 0.5),
-                        ...closeActionButtonPropsSx,
-                      }}
-                    >
-                      {closeActionButtonPropsChildren ?? 'Close'}
-                    </Button>
-                  </Grid>
-                );
-              }
-            })()}
-          </Grid>
-        </Card>
+        {(() => {
+          if (getModalElement) {
+            return getModalElement(modalElement);
+          }
+          return modalElement;
+        })()}
       </Modal>
     );
   }
