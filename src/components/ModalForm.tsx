@@ -85,6 +85,8 @@ export interface ModalFormProps<Values extends FormikValues = any>
   submitButtonText?: string;
   staticEntityDetails?: ReactNode;
   editMode?: boolean;
+  showEditButton?: boolean;
+  showFormActionButtons?: boolean;
   showForm?: boolean;
   viewModeTools?: ReactNode | ReactNode[];
   /**
@@ -137,6 +139,8 @@ export const BaseModalForm = <Values extends FormikValues>(
     onClose,
     staticEntityDetails,
     editMode = true,
+    showEditButton = true,
+    showFormActionButtons = true,
     showForm = true,
     onClickEdit,
     viewModeTools,
@@ -148,6 +152,8 @@ export const BaseModalForm = <Values extends FormikValues>(
     showCloseButton = true,
     loading,
     getModalElement,
+    actionButtons,
+    CloseActionButtonProps = {},
     sx,
     ...rest
   } = props;
@@ -164,11 +170,17 @@ export const BaseModalForm = <Values extends FormikValues>(
     })()
   );
 
-  const { palette, components } = useTheme();
+  const { palette, components, spacing } = useTheme();
 
-  const { sx: CardPropsSx, ...CardPropsRest } = CardProps;
   const { ...SubmitButtonPropsRest } = SubmitButtonProps;
-  const { ...SearchSyncToolbarPropsRest } = SearchSyncToolbarProps;
+  const { sx: SearchSyncToolbarPropsSx, ...SearchSyncToolbarPropsRest } =
+    SearchSyncToolbarProps;
+  const { sx: CardPropsSx, ...CardPropsRest } = CardProps;
+  const {
+    children: closeActionButtonPropsChildren,
+    sx: closeActionButtonPropsSx,
+    ...closeActionButtonPropsRest
+  } = CloseActionButtonProps;
 
   const onSubmitSuccessRef = useRef(onSubmitSuccess);
   const onCloseRef = useRef(onClose);
@@ -215,6 +227,10 @@ export const BaseModalForm = <Values extends FormikValues>(
                 hasSyncTool={false}
                 {...SearchSyncToolbarPropsRest}
                 title={title}
+                sx={{
+                  pr: `${spacing(2)} !important`,
+                  ...SearchSyncToolbarPropsSx,
+                }}
               >
                 {(() => {
                   if (showCloseButton && !isSubmitting) {
@@ -295,78 +311,138 @@ export const BaseModalForm = <Values extends FormikValues>(
                 spacing={2}
                 sx={{ py: 2, px: 3, flexDirection: 'row-reverse' }}
               >
-                {editMode
-                  ? null
-                  : (() => {
-                      if (viewModeTools) {
-                        const toolsList = Children.toArray(viewModeTools);
-                        return toolsList.map((tool, index) => {
-                          return (
-                            <Grid item key={index} sx={{ minWidth: 0 }}>
-                              {tool}
-                            </Grid>
-                          );
-                        });
-                      }
-                      return (
-                        <Grid item>
-                          <Button
-                            variant="contained"
-                            onClick={() => {
-                              onClickEdit && onClickEdit();
-                            }}
-                          >
-                            Edit
-                          </Button>
-                        </Grid>
-                      );
-                    })()}
-                {submitted || !showForm ? (
-                  <Grid item>
-                    <Button
-                      onClick={onClose}
-                      variant="outlined"
-                      color="inherit"
-                    >
-                      Close
-                    </Button>
-                  </Grid>
-                ) : (
-                  <>
-                    <Grid item>
-                      <LoadingButton
-                        loading={loading || isSubmitting}
-                        variant="contained"
-                        type="submit"
-                        disabled={(() => {
-                          if (lockSubmitIfNoChange) {
-                            return !formHasChanges;
-                          }
-                          if (lockSubmitIfFormInvalid) {
-                            return !isValid;
+                {(() => {
+                  if (showFormActionButtons) {
+                    return (
+                      <>
+                        {editMode
+                          ? null
+                          : (() => {
+                              if (viewModeTools) {
+                                return Children.toArray(viewModeTools).map(
+                                  (tool, index) => {
+                                    return (
+                                      <Grid
+                                        item
+                                        key={index}
+                                        sx={{ minWidth: 0 }}
+                                      >
+                                        {tool}
+                                      </Grid>
+                                    );
+                                  }
+                                );
+                              }
+                              if (showEditButton) {
+                                return (
+                                  <Grid item>
+                                    <Button
+                                      variant="contained"
+                                      onClick={() => {
+                                        onClickEdit && onClickEdit();
+                                      }}
+                                    >
+                                      Edit
+                                    </Button>
+                                  </Grid>
+                                );
+                              }
+                            })()}
+                        {(() => {
+                          if (submitted || !showForm) {
+                            if (showCloseButton) {
+                              return (
+                                <Grid item>
+                                  <Button
+                                    onClick={onClose}
+                                    variant="outlined"
+                                    color="inherit"
+                                  >
+                                    Close
+                                  </Button>
+                                </Grid>
+                              );
+                            }
+                          } else {
+                            return (
+                              <>
+                                <Grid item>
+                                  <LoadingButton
+                                    loading={loading || isSubmitting}
+                                    variant="contained"
+                                    type="submit"
+                                    disabled={(() => {
+                                      if (lockSubmitIfNoChange) {
+                                        return !formHasChanges;
+                                      }
+                                      if (lockSubmitIfFormInvalid) {
+                                        return !isValid;
+                                      }
+                                    })()}
+                                    {...SubmitButtonPropsRest}
+                                  >
+                                    {submitButtonText}
+                                  </LoadingButton>
+                                </Grid>
+                                {!isSubmitting ? (
+                                  <Grid item>
+                                    <Button
+                                      onClick={onClose}
+                                      variant="outlined"
+                                      color="inherit"
+                                      sx={{
+                                        color: alpha(palette.text.primary, 0.5),
+                                      }}
+                                    >
+                                      Cancel
+                                    </Button>
+                                  </Grid>
+                                ) : null}
+                              </>
+                            );
                           }
                         })()}
-                        {...SubmitButtonPropsRest}
-                      >
-                        {submitButtonText}
-                      </LoadingButton>
-                    </Grid>
-                    {!isSubmitting ? (
-                      <Grid item>
-                        <Button
-                          onClick={onClose}
-                          variant="outlined"
-                          color="inherit"
-                          sx={{
-                            color: alpha(palette.text.primary, 0.5),
-                          }}
-                        >
-                          Cancel
-                        </Button>
-                      </Grid>
-                    ) : null}
-                  </>
-                )}
+                      </>
+                    );
+                  }
+                  return (
+                    <>
+                      {(() => {
+                        if (actionButtons) {
+                          return Children.toArray(actionButtons).map(
+                            (tool, index) => {
+                              return (
+                                <Grid item key={index} sx={{ minWidth: 0 }}>
+                                  {tool}
+                                </Grid>
+                              );
+                            }
+                          );
+                        }
+                      })()}
+                      {(() => {
+                        if (showCloseButton) {
+                          return (
+                            <Grid item>
+                              <Button
+                                variant="outlined"
+                                color="inherit"
+                                {...closeActionButtonPropsRest}
+                                onClick={onClose}
+                                sx={{
+                                  color: alpha(palette.text.primary, 0.5),
+                                  ...closeActionButtonPropsSx,
+                                }}
+                              >
+                                {closeActionButtonPropsChildren ?? 'Close'}
+                              </Button>
+                            </Grid>
+                          );
+                        }
+                      })()}
+                    </>
+                  );
+                })()}
               </Grid>
             </Form>
           );
