@@ -85,7 +85,7 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
     const { InputProps = {} } = rest;
     const { endAdornment, ...restInputProps } = InputProps;
 
-    const { loading, errorMessage } = useLoadingContext();
+    const { loading, errorMessage, locked } = useLoadingContext();
     const [inputValue, setInputValue] = useState('');
 
     const triggerChangeEvent = useCallback(
@@ -107,6 +107,15 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
     useEffect(() => {
       setInputValue(value ?? '');
     }, [value]);
+
+    if (locked) {
+      return (
+        <FieldValueDisplay
+          {...FieldValueDisplayPropsRest}
+          {...{ label, value }}
+        />
+      );
+    }
 
     const labelSkeletonWidth = typeof label === 'string' ? label.length * 7 : 0;
 

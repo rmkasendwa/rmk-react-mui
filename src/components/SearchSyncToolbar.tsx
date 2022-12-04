@@ -177,6 +177,7 @@ export const SearchSyncToolbar: FC<SearchSyncToolbarProps> = ({
                         onBlur={() => {
                           onSearch && onSearch(searchTerm);
                         }}
+                        enableLoadingState={false}
                       />
                     );
                     return (
@@ -239,6 +240,7 @@ export const SearchSyncToolbar: FC<SearchSyncToolbarProps> = ({
               onBlur={() => {
                 onSearch && onSearch(searchTerm);
               }}
+              enableLoadingState={false}
             />
           </Grid>
         ) : null}

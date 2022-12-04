@@ -318,18 +318,15 @@ export const BaseTable = <T extends BaseTableRow>(
         <Checkbox
           {...{ checked }}
           color="default"
-          onChange={(event) => {
+          onChange={() => {
             setCheckedRowIds((prevCheckedRowIds) => {
-              if (event.target.checked) {
-                if (!prevCheckedRowIds.includes(id)) {
-                  prevCheckedRowIds.push(id);
-                }
+              const nextCheckedRowIds = [...prevCheckedRowIds];
+              if (nextCheckedRowIds.includes(id)) {
+                nextCheckedRowIds.splice(nextCheckedRowIds.indexOf(id), 1);
               } else {
-                if (prevCheckedRowIds.includes(id)) {
-                  prevCheckedRowIds.splice(prevCheckedRowIds.indexOf(id), 1);
-                }
+                nextCheckedRowIds.push(id);
               }
-              return [...prevCheckedRowIds];
+              return nextCheckedRowIds;
             });
           }}
         />
