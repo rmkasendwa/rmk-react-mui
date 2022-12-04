@@ -12,7 +12,6 @@ import {
   Divider,
   Grid,
   IconButton,
-  Modal,
   alpha,
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
@@ -35,7 +34,7 @@ import {
 
 import ErrorAlert from './ErrorAlert';
 import ErrorFieldHighlighter from './ErrorFieldHighlighter';
-import { ModalPopupProps } from './ModalPopup';
+import ModalPopup, { ModalPopupProps } from './ModalPopup';
 import SearchSyncToolbar from './SearchSyncToolbar';
 
 export interface ModalFormClasses {
@@ -135,7 +134,6 @@ export const BaseModalForm = <Values extends FormikValues>(
     title,
     submitted = false,
     submitButtonText = 'Submit',
-    open,
     onClose,
     staticEntityDetails,
     editMode = true,
@@ -151,10 +149,8 @@ export const BaseModalForm = <Values extends FormikValues>(
     SearchSyncToolbarProps = {},
     showCloseButton = true,
     loading,
-    getModalElement,
     actionButtons,
     CloseActionButtonProps = {},
-    sx,
     ...rest
   } = props;
 
@@ -170,7 +166,7 @@ export const BaseModalForm = <Values extends FormikValues>(
     })()
   );
 
-  const { palette, components, spacing } = useTheme();
+  const { palette, spacing } = useTheme();
 
   const { ...SubmitButtonPropsRest } = SubmitButtonProps;
   const { sx: SearchSyncToolbarPropsSx, ...SearchSyncToolbarPropsRest } =
@@ -452,34 +448,12 @@ export const BaseModalForm = <Values extends FormikValues>(
   );
 
   return (
-    <Modal
-      disableEscapeKeyDown
-      disableAutoFocus
+    <ModalPopup
       {...rest}
+      {...{ modalElement, title }}
       ref={ref}
       className={clsx(classes.root)}
-      open={open}
-      onClose={(_, reason) => {
-        if (reason !== 'backdropClick' && onClose) {
-          onClose();
-        }
-      }}
-      sx={{
-        display: 'flex',
-        p: 4,
-        justifyContent: 'center',
-        alignItems: 'center',
-        ...(components?.MuiModalForm?.styleOverrides?.root as any),
-        ...sx,
-      }}
-    >
-      {(() => {
-        if (getModalElement) {
-          return getModalElement(modalElement);
-        }
-        return modalElement;
-      })()}
-    </Modal>
+    />
   );
 };
 
