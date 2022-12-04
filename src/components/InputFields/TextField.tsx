@@ -58,6 +58,7 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
       variant,
       size,
       multiline,
+      minRows,
       rows,
       fullWidth,
       name,
@@ -108,7 +109,7 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
       setInputValue(value ?? '');
     }, [value]);
 
-    if (locked) {
+    if (enableLoadingState && locked) {
       return (
         <FieldValueDisplay
           {...FieldValueDisplayPropsRest}
@@ -124,7 +125,7 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
         if (errorMessage) {
           return (
             <MuiTextField
-              {...{ size, variant, multiline, rows, fullWidth, sx }}
+              {...{ size, variant, multiline, minRows, rows, fullWidth, sx }}
               label={<ErrorSkeleton width={labelSkeletonWidth} />}
               value=""
               disabled
@@ -135,12 +136,19 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
         if (loading) {
           return (
             <MuiTextField
-              {...{ size, variant, multiline, rows, fullWidth, sx }}
+              {...{ size, variant, multiline, minRows, rows, fullWidth, sx }}
               label={<Skeleton width={labelSkeletonWidth} />}
               value=""
               disabled
               InputProps={{
-                endAdornment: <CircularProgress size={18} color="inherit" />,
+                endAdornment: (
+                  <Box>
+                    <CircularProgress size={18} color="inherit" />
+                  </Box>
+                ),
+                sx: {
+                  alignItems: 'start',
+                },
               }}
             />
           );
@@ -168,6 +176,7 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
               size,
               variant,
               multiline,
+              minRows,
               rows,
               fullWidth,
               id,
