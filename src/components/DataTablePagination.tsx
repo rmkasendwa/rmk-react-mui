@@ -136,6 +136,8 @@ export const DataTablePagination = forwardRef<
     return null;
   }
 
+  const pageCount = rowsPerPage ? Math.ceil(totalCount / rowsPerPage) : 0;
+
   return (
     <Grid
       ref={mergeRefs([
@@ -149,11 +151,17 @@ export const DataTablePagination = forwardRef<
       container
       sx={{
         alignItems: 'center',
-        justifyContent: 'center',
         pl: 3,
         pr: 2,
         py: 1,
-        gap: 3,
+        gap: 2,
+        ...(() => {
+          if (isSmallScreen) {
+            return {
+              justifyContent: 'center',
+            };
+          }
+        })(),
         ...sx,
       }}
     >
@@ -184,7 +192,12 @@ export const DataTablePagination = forwardRef<
           <Typography
             component="div"
             variant="body2"
-            sx={{ fontSize: 'inherit' }}
+            sx={{
+              fontSize: 'inherit',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+            }}
           >
             Show{' '}
             <DataDropdownField
@@ -220,7 +233,7 @@ export const DataTablePagination = forwardRef<
           </Typography>
         </Grid>
       ) : null}
-      {rowsPerPage != null && page != null ? (
+      {rowsPerPage != null && page != null && pageCount > 1 ? (
         <Grid
           item
           sx={{
@@ -234,7 +247,7 @@ export const DataTablePagination = forwardRef<
           }}
         >
           <Pagination
-            count={Math.ceil(totalCount / rowsPerPage)}
+            count={pageCount}
             page={page + 1}
             shape="rounded"
             showFirstButton

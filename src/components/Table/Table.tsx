@@ -5,6 +5,7 @@ import {
   ComponentsOverrides,
   ComponentsProps,
   ComponentsVariants,
+  Divider,
   Stack,
   Tooltip,
   unstable_composeClasses as composeClasses,
@@ -1125,6 +1126,7 @@ export const BaseTable = <T extends BaseTableRow>(
           {columnDisplayToggle}
           {tableElement}
         </Box>
+        {stickyHeader ? <Divider /> : null}
         {(() => {
           const filteredCount = filterdRowCount || totalRowCount || rows.length;
           if (filteredCount >= 0) {
