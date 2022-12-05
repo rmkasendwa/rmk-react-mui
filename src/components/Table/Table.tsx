@@ -1168,6 +1168,22 @@ export const BaseTable = <T extends BaseTableRow>(
                       handleChangePage(e, pageNumber - 1);
                     },
                   }}
+                  postCountTools={[
+                    ...(() => {
+                      if (checkedRowIds.length > 0) {
+                        return [
+                          <Typography
+                            key="selectedItems"
+                            variant="body2"
+                            sx={{ fontSize: 'inherit' }}
+                          >
+                            {checkedRowIds.length} selected
+                          </Typography>,
+                        ];
+                      }
+                      return [];
+                    })(),
+                  ]}
                 />
               );
             }
