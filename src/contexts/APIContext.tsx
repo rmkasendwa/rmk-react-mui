@@ -35,7 +35,13 @@ export const APIProvider: FC<{
   const call = useCallback(
     async (apiCallback: TAPIFunction) => {
       return apiCallback().catch((err) => {
-        if (REDIRECTION_ERROR_MESSAGES.includes(err.message)) {
+        if (
+          REDIRECTION_ERROR_MESSAGES.some((message) => {
+            return String(err.message)
+              .toLowerCase()
+              .match(String(message).toLowerCase());
+          })
+        ) {
           setSessionExpired(true);
         } else {
           throw err;

@@ -14,7 +14,7 @@ import Pagination, { PaginationProps } from '@mui/material/Pagination';
 import Typography from '@mui/material/Typography';
 import clsx from 'clsx';
 import { omit } from 'lodash';
-import { forwardRef, useEffect, useState } from 'react';
+import { Children, ReactNode, forwardRef, useEffect, useState } from 'react';
 import { mergeRefs } from 'react-merge-refs';
 
 import DataDropdownField from './InputFields/DataDropdownField';
@@ -62,6 +62,7 @@ export interface DataTablePaginationProps
   lowercaseLabelPlural?: string;
   labelSingular?: string;
   PaginationProps?: Partial<PaginationProps>;
+  postCountTools?: ReactNode | ReactNode[];
 }
 
 export function getDataTablePaginationUtilityClass(slot: string): string {
@@ -93,6 +94,7 @@ export const DataTablePagination = forwardRef<
     rowsPerPageOptions = [10, 25, 50, 100],
     rowsPerPage,
     onRowsPerPageChange,
+    postCountTools,
     sx,
     ...rest
   } = props;
@@ -166,6 +168,17 @@ export const DataTablePagination = forwardRef<
           </Typography>
         )}
       </Grid>
+      {(() => {
+        if (postCountTools) {
+          return Children.toArray(postCountTools).map((tool, index) => {
+            return (
+              <Grid item key={index} sx={{ minWidth: 0 }}>
+                {tool}
+              </Grid>
+            );
+          });
+        }
+      })()}
       {rowsPerPage != null ? (
         <Grid item>
           <Typography
