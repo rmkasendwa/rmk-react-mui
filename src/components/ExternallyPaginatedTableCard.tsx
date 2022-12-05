@@ -5,6 +5,8 @@ import {
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
   generateUtilityClasses,
+  outlinedInputClasses,
+  useTheme,
   useThemeProps,
 } from '@mui/material';
 import clsx from 'clsx';
@@ -99,6 +101,7 @@ export const ExternallyPaginatedTableCard = forwardRef<
     CardProps = {},
     pathToAddNew,
     limit: limitProp = 100,
+    parentBackgroundColor,
     ...rest
   } = props;
 
@@ -117,6 +120,7 @@ export const ExternallyPaginatedTableCard = forwardRef<
   );
 
   const {
+    sx: CardPropsSx,
     SearchSyncToolbarProps,
     CardBodyProps = {},
     ...CardPropsRest
@@ -128,6 +132,7 @@ export const ExternallyPaginatedTableCard = forwardRef<
     labelPlural &&
     (labelSingular = labelPlural.replace(/s$/gi, ''));
 
+  const { palette } = useTheme();
   const [offset, setOffset] = useState(0);
   const [limit, setLimit] = useState(limitProp);
   const [searchTerm, setSearchTerm] = useState('');
@@ -169,6 +174,12 @@ export const ExternallyPaginatedTableCard = forwardRef<
           ...CardBodyPropsSx,
         },
       }}
+      sx={{
+        [`.${outlinedInputClasses.root}`]: {
+          bgcolor: parentBackgroundColor || palette.background.paper,
+        },
+        ...CardPropsSx,
+      }}
     >
       {(() => {
         if (recordsTotalCount <= 0 && (loading || errorMessage)) {
@@ -185,7 +196,7 @@ export const ExternallyPaginatedTableCard = forwardRef<
           <Table
             ref={ref}
             {...rest}
-            {...{ labelPlural, labelSingular }}
+            {...{ labelPlural, labelSingular, parentBackgroundColor }}
             className={clsx(classes.root)}
             rows={currentPageRecords}
             totalRowCount={recordsTotalCount}
