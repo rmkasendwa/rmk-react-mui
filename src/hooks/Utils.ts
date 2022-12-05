@@ -132,20 +132,45 @@ export const useAPIService = <T>(
   };
 };
 
-export const useCreate = <T>() => {
-  const { load, loading, record, ...rest } = useAPIService<T | null>(null);
-  const [created, setCreated] = useState(false);
+export const useMutation = <T>() => {
+  const {
+    load: mutate,
+    loading: mutating,
+    record: mutatedRecord,
+    ...rest
+  } = useAPIService<T | null>(null);
+  const [mutated, setMutated] = useState(false);
 
   useEffect(() => {
-    setCreated(record != null);
-  }, [record]);
+    setMutated(mutatedRecord != null);
+  }, [mutatedRecord]);
 
   return {
-    create: load,
-    creating: loading,
+    mutate,
+    mutating,
+    mutated,
+    setMutated,
+    mutatedRecord,
+    ...rest,
+  };
+};
+
+export const useCreate = <T>() => {
+  const {
+    mutate: create,
+    mutating: creating,
+    mutated: created,
+    setMutated: setCreated,
+    mutatedRecord: createdRecord,
+    ...rest
+  } = useMutation<T>();
+
+  return {
+    create,
+    creating,
     created,
     setCreated,
-    createdRecord: record,
+    createdRecord,
     ...rest,
   };
 };
@@ -160,6 +185,26 @@ export const useUpdate = <T>() => {
     updated: created,
     updatedRecord: createdRecord,
     setUpdated: setCreated,
+    ...rest,
+  };
+};
+
+export const useDelete = <T>() => {
+  const {
+    mutate: deleteEntity,
+    mutating: deleting,
+    mutated: deleted,
+    setMutated: setDeleted,
+    mutatedRecord: deletedRecord,
+    ...rest
+  } = useMutation<T>();
+
+  return {
+    deleteEntity,
+    deleting,
+    deleted,
+    setDeleted,
+    deletedRecord,
     ...rest,
   };
 };
