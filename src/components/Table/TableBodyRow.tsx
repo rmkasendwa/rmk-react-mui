@@ -217,16 +217,22 @@ export const TableBodyRow = <T extends BaseTableRow>(
           ) {
             switch (type) {
               case 'date':
-                columnValue = formatDate(columnValue);
+                if (columnTextTransform) {
+                  columnValue = formatDate(columnValue);
+                }
                 break;
               case 'dateTime':
-                columnValue = formatDate(columnValue, true);
+                if (columnTextTransform) {
+                  columnValue = formatDate(columnValue, true);
+                }
                 break;
               case 'time':
-                const date = new Date(columnValue);
-                columnValue = isNaN(date.getTime())
-                  ? ''
-                  : format(date, 'hh:mm aa');
+                if (columnTextTransform) {
+                  const date = new Date(columnValue);
+                  columnValue = isNaN(date.getTime())
+                    ? ''
+                    : format(date, 'hh:mm aa');
+                }
                 break;
               case 'currency':
               case 'percentage':
@@ -298,7 +304,9 @@ export const TableBodyRow = <T extends BaseTableRow>(
                 }
                 break;
               case 'boolean':
-                columnValue = columnValue ? 'Yes' : 'No';
+                if (columnTextTransform) {
+                  columnValue = columnValue ? 'Yes' : 'No';
+                }
                 break;
             }
           }
