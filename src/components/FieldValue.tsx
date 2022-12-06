@@ -201,83 +201,101 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
               {({ isSubmitting }) => {
                 return (
                   <Form noValidate>
-                    {(() => {
-                      if (editField) {
-                        return editField;
-                      }
-                      switch (type) {
-                        case 'date':
-                          return <FormikDateInputField name="value" />;
-                        default:
-                          return <FormikTextField name="value" />;
-                      }
-                    })()}
-                    <Grid
-                      container
+                    <Box
                       sx={{
-                        py: 0.5,
-                        gap: 0.5,
-                        justifyContent: 'end',
-                        svg: {
-                          fontSize: 16,
-                        },
+                        position: 'relative',
                       }}
                     >
-                      <Grid item>
-                        {isSubmitting || updating ? null : (
-                          <Tooltip title="Cancel">
+                      {(() => {
+                        if (editField) {
+                          return editField;
+                        }
+                        switch (type) {
+                          case 'date':
+                            return (
+                              <FormikDateInputField
+                                name="value"
+                                placeholder="Enter a value"
+                              />
+                            );
+                          default:
+                            return (
+                              <FormikTextField
+                                name="value"
+                                placeholder="Enter a value"
+                              />
+                            );
+                        }
+                      })()}
+                      <Grid
+                        container
+                        sx={{
+                          py: 0.5,
+                          gap: 0.5,
+                          justifyContent: 'end',
+                          position: 'absolute',
+                          top: '100%',
+                          svg: {
+                            fontSize: 16,
+                          },
+                        }}
+                      >
+                        <Grid item>
+                          {isSubmitting || updating ? null : (
+                            <Tooltip title="Cancel">
+                              <IconButton
+                                size="small"
+                                onClick={() => {
+                                  setEditMode(false);
+                                  onCancelEdit && onCancelEdit();
+                                }}
+                                sx={{
+                                  p: 0.4,
+                                  '&,&:hover': {
+                                    bgcolor: palette.error.main,
+                                    color: palette.getContrastText(
+                                      palette.error.main
+                                    ),
+                                  },
+                                }}
+                              >
+                                <CloseIcon />
+                              </IconButton>
+                            </Tooltip>
+                          )}
+                        </Grid>
+                        <Grid item>
+                          {isSubmitting || updating ? (
                             <IconButton
-                              size="small"
-                              onClick={() => {
-                                setEditMode(false);
-                                onCancelEdit && onCancelEdit();
-                              }}
+                              disabled
                               sx={{
                                 p: 0.4,
-                                '&,&:hover': {
-                                  bgcolor: palette.error.main,
-                                  color: palette.getContrastText(
-                                    palette.error.main
-                                  ),
-                                },
                               }}
                             >
-                              <CloseIcon />
+                              <CircularProgress color="inherit" size={16} />
                             </IconButton>
-                          </Tooltip>
-                        )}
+                          ) : (
+                            <Tooltip title="Update">
+                              <IconButton
+                                size="small"
+                                type="submit"
+                                sx={{
+                                  p: 0.4,
+                                  '&,&:hover': {
+                                    bgcolor: palette.success.main,
+                                    color: palette.getContrastText(
+                                      palette.success.main
+                                    ),
+                                  },
+                                }}
+                              >
+                                <CheckIcon />
+                              </IconButton>
+                            </Tooltip>
+                          )}
+                        </Grid>
                       </Grid>
-                      <Grid item>
-                        {isSubmitting || updating ? (
-                          <IconButton
-                            disabled
-                            sx={{
-                              p: 0.4,
-                            }}
-                          >
-                            <CircularProgress color="inherit" size={16} />
-                          </IconButton>
-                        ) : (
-                          <Tooltip title="Update">
-                            <IconButton
-                              size="small"
-                              type="submit"
-                              sx={{
-                                p: 0.4,
-                                '&,&:hover': {
-                                  bgcolor: palette.success.main,
-                                  color: palette.getContrastText(
-                                    palette.success.main
-                                  ),
-                                },
-                              }}
-                            >
-                              <CheckIcon />
-                            </IconButton>
-                          </Tooltip>
-                        )}
-                      </Grid>
-                    </Grid>
+                    </Box>
                   </Form>
                 );
               }}
