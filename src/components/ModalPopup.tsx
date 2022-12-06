@@ -173,7 +173,7 @@ export const ModalPopup = forwardRef<HTMLDivElement, ModalPopupProps>(
           sx={{
             maxWidth: 640,
             width: `100%`,
-            maxHeight: `75%`,
+            maxHeight: `80%`,
             display: 'flex',
             flexDirection: 'column',
             ...CardPropsSx,
