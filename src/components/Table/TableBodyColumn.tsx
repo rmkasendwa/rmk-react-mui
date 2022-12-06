@@ -24,7 +24,7 @@ import PhoneNumberUtil, {
   isValidPhoneNumber,
   systemStandardPhoneNumberFormat,
 } from '../../utils/PhoneNumberUtil';
-import { mapTableColumnTypeToPrimitiveDataType } from '../../utils/Table';
+import { mapTableColumnTypeToExoticDataType } from '../../utils/Table';
 import CountryFieldValue from '../CountryFieldValue';
 import EllipsisMenuIconButton, {
   EllipsisMenuIconButtonProps,
@@ -139,8 +139,8 @@ export const TableBodyColumn = forwardRef<
   const [editMode, setEditMode] = useState(false);
   const { palette } = useTheme();
 
-  const columnValue = (() => {
-    let columnValue = (() => {
+  const { baseColumnValue, formattedColumnValue } = (() => {
+    let formattedColumnValue = (() => {
       if (getColumnValue) {
         if (type === 'ellipsisMenuTool') {
           const { options, ...rest } =
@@ -189,41 +189,46 @@ export const TableBodyColumn = forwardRef<
           break;
       }
     } else if (
-      columnValue != null &&
-      allowedDataTypes.includes(typeof columnValue)
+      formattedColumnValue != null &&
+      allowedDataTypes.includes(typeof formattedColumnValue)
     ) {
       switch (type) {
         case 'date':
           if (textTransform) {
-            columnValue = formatDate(columnValue);
+            formattedColumnValue = formatDate(formattedColumnValue);
           }
           break;
         case 'dateTime':
           if (textTransform) {
-            columnValue = formatDate(columnValue, true);
+            formattedColumnValue = formatDate(formattedColumnValue, true);
           }
           break;
         case 'time':
           if (textTransform) {
-            const date = new Date(columnValue);
-            columnValue = isNaN(date.getTime()) ? '' : format(date, 'hh:mm aa');
+            const date = new Date(formattedColumnValue);
+            formattedColumnValue = isNaN(date.getTime())
+              ? ''
+              : format(date, 'hh:mm aa');
           }
           break;
         case 'currency':
         case 'percentage':
-          columnValue = parseFloat(columnValue);
-          columnValue = addThousandCommas(columnValue, decimalPlaces || true);
+          formattedColumnValue = parseFloat(formattedColumnValue);
+          formattedColumnValue = addThousandCommas(
+            formattedColumnValue,
+            decimalPlaces || true
+          );
           break;
         case 'number':
-          columnValue = addThousandCommas(columnValue);
+          formattedColumnValue = addThousandCommas(formattedColumnValue);
           break;
         case 'phoneNumber':
-          if (typeof columnValue === 'string') {
-            const phoneNumber = isValidPhoneNumber(columnValue);
+          if (typeof formattedColumnValue === 'string') {
+            const phoneNumber = isValidPhoneNumber(formattedColumnValue);
             if (phoneNumber) {
-              columnValue = (
+              formattedColumnValue = (
                 <Link
-                  href={`tel://${columnValue}`}
+                  href={`tel://${formattedColumnValue}`}
                   underline="none"
                   color="inherit"
                   noWrap
@@ -235,7 +240,9 @@ export const TableBodyColumn = forwardRef<
                         phoneNumber.getCountryCode()!
                       ) as CountryCode
                     }
-                    countryLabel={systemStandardPhoneNumberFormat(columnValue)}
+                    countryLabel={systemStandardPhoneNumberFormat(
+                      formattedColumnValue
+                    )}
                     FieldValueProps={{
                       noWrap: true,
                       sx: {
@@ -252,53 +259,54 @@ export const TableBodyColumn = forwardRef<
           break;
         case 'email':
           if (
-            typeof columnValue === 'string' &&
-            yup.string().email().isValidSync(columnValue)
+            typeof formattedColumnValue === 'string' &&
+            yup.string().email().isValidSync(formattedColumnValue)
           ) {
-            columnValue = (
+            formattedColumnValue = (
               <Link
-                href={`mailto:${columnValue}`}
+                href={`mailto:${formattedColumnValue}`}
                 underline="hover"
                 color="inherit"
                 noWrap
                 sx={{ display: 'block', maxWidth: '100%' }}
               >
-                {columnValue}
+                {formattedColumnValue}
               </Link>
             );
           }
           break;
         case 'enum':
           if (textTransform) {
-            columnValue = String(columnValue).toTitleCase(true);
+            formattedColumnValue =
+              String(formattedColumnValue).toTitleCase(true);
           }
           break;
         case 'boolean':
           if (textTransform) {
-            columnValue = columnValue ? 'Yes' : 'No';
+            formattedColumnValue = formattedColumnValue ? 'Yes' : 'No';
           }
           break;
       }
     }
-    if (columnValue == null) {
-      columnValue = defaultColumnValue ?? <>&nbsp;</>;
+    if (formattedColumnValue == null) {
+      formattedColumnValue = defaultColumnValue ?? <>&nbsp;</>;
     }
-    return columnValue;
+    return { formattedColumnValue, baseColumnValue: (row as any)[id] };
   })();
 
-  const columnValueElement = (() => {
-    if (isValidElement(columnValue)) {
+  const formattedColumnValueElement = (() => {
+    if (isValidElement(formattedColumnValue)) {
       return (
         <Box
           display="flex"
           flexDirection="column"
           alignItems={({ left: 'start', right: 'end' } as any)[align] || align}
         >
-          {columnValue}
+          {formattedColumnValue}
         </Box>
       );
     }
-    return columnValue;
+    return formattedColumnValue;
   })();
 
   return (
@@ -346,10 +354,11 @@ export const TableBodyColumn = forwardRef<
       <FieldValue
         {...columnTypographyPropsRest}
         {...{ editable, editMode }}
+        editableValue={baseColumnValue}
         onChangeEditMode={(editMode) => setEditMode(editMode)}
-        type={mapTableColumnTypeToPrimitiveDataType(type)}
+        type={mapTableColumnTypeToExoticDataType(type)}
       >
-        {columnValueElement}
+        {formattedColumnValueElement}
       </FieldValue>
     </TableCell>
   );

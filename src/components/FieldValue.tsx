@@ -22,6 +22,7 @@ import Popper from '@mui/material/Popper';
 import Typography, { TypographyProps } from '@mui/material/Typography';
 import clsx from 'clsx';
 import { Form, Formik } from 'formik';
+import { omit } from 'lodash';
 import {
   ReactNode,
   forwardRef,
@@ -32,9 +33,12 @@ import {
 } from 'react';
 import * as Yup from 'yup';
 
-import { PrimitiveDataType } from '../interfaces/Utils';
+import { ExoticDataType } from '../interfaces/Utils';
+import FormikCurrencyInputField from './FormikInputFields/FormikCurrencyInputField';
 import FormikDateInputField from './FormikInputFields/FormikDateInputField';
 import FormikNumberInputField from './FormikInputFields/FormikNumberInputField';
+import FormikPercentageInputField from './FormikInputFields/FormikPercentageInputField';
+import FormikPhoneNumberInputField from './FormikInputFields/FormikPhoneNumberInputField';
 import FormikTextField from './FormikInputFields/FormikTextField';
 
 export interface FieldValueClasses {
@@ -80,7 +84,7 @@ export interface FieldValueProps extends TypographyProps {
   onEdit?: (value: string) => void;
   onCancelEdit?: () => void;
   onChangeEditMode?: (editMode: boolean) => void;
-  type?: PrimitiveDataType;
+  type?: ExoticDataType;
   validationRules?: Yup.BaseSchema;
   editField?: ReactNode;
   editMode?: boolean;
@@ -153,7 +157,7 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
 
     // Refs
     const isComponentMountedRef = useRef(true);
-    const anchorRef = useRef<HTMLButtonElement>(null);
+    const anchorRef = useRef<HTMLDivElement>(null);
     const onChangeEditModeRef = useRef(onChangeEditMode);
     useEffect(() => {
       onChangeEditModeRef.current = onChangeEditMode;
@@ -205,22 +209,43 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
               {({ isSubmitting }) => {
                 return (
                   <Form noValidate>
-                    <Box ref={anchorRef}>
+                    <Box>
                       {(() => {
                         if (editField) {
                           return editField;
                         }
                         switch (type) {
-                          case 'date':
+                          case 'number':
                             return (
-                              <FormikDateInputField
+                              <FormikNumberInputField
                                 name="value"
                                 placeholder="Enter a value"
                               />
                             );
-                          case 'number':
+                          case 'percentage':
                             return (
-                              <FormikNumberInputField
+                              <FormikPercentageInputField
+                                name="value"
+                                placeholder="Enter a value"
+                              />
+                            );
+                          case 'currency':
+                            return (
+                              <FormikCurrencyInputField
+                                name="value"
+                                placeholder="Enter a value"
+                              />
+                            );
+                          case 'phoneNumber':
+                            return (
+                              <FormikPhoneNumberInputField
+                                name="value"
+                                placeholder="Enter a value"
+                              />
+                            );
+                          case 'date':
+                            return (
+                              <FormikDateInputField
                                 name="value"
                                 placeholder="Enter a value"
                               />
@@ -379,6 +404,7 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
           </Grid>
         ) : null}
         <Grid
+          ref={anchorRef}
           item
           xs
           sx={{
@@ -391,7 +417,7 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
             className={clsx(classes.root)}
             variant="body2"
             component={'div' as any}
-            {...rest}
+            {...omit(rest, 'editableValue')}
             sx={{
               wordBreak: 'break-word',
               whiteSpace: 'pre-line',
