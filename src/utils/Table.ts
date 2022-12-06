@@ -1,5 +1,5 @@
 import { TableColumn, TableColumnType } from '../interfaces/Table';
-import { PrimitiveDataType } from '../interfaces/Utils';
+import { ExoticDataType, PrimitiveDataType } from '../interfaces/Utils';
 
 /**
  * Gets the table column element widths.
@@ -82,5 +82,23 @@ export const mapTableColumnTypeToPrimitiveDataType = (
       return 'boolean';
     default:
       return 'string';
+  }
+};
+
+export const mapTableColumnTypeToExoticDataType = (
+  columnType?: TableColumnType
+): ExoticDataType => {
+  switch (columnType) {
+    case 'number':
+    case 'numberInput':
+      return 'number';
+    case 'percentage':
+    case 'percentageInput':
+      return 'percentage';
+    case 'currency':
+    case 'currencyInput':
+      return 'currency';
+    default:
+      return mapTableColumnTypeToPrimitiveDataType(columnType);
   }
 };

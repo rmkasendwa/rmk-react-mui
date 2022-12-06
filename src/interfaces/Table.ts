@@ -8,7 +8,7 @@ import { TableCellProps } from '@mui/material/TableCell';
 import { ReactNode } from 'react';
 
 import { EllipsisMenuIconButtonProps } from '../components/EllipsisMenuIconButton';
-import { DropdownOption, PrimitiveDataType } from './Utils';
+import { DropdownOption, ExoticDataType } from './Utils';
 
 export type TableColumnEnumValue =
   | {
@@ -18,23 +18,16 @@ export type TableColumnEnumValue =
   | string;
 
 export type TableColumnType =
-  | PrimitiveDataType
-  | 'checkbox'
-  | 'currency'
+  | ExoticDataType
   | 'currencyInput'
   | 'dateInput'
-  | 'dateTime'
   | 'dropdownInput'
   | 'id'
   | 'input'
   | 'numberInput'
-  | 'percentage'
   | 'percentageInput'
-  | 'phoneNumber'
   | 'phonenumberInput'
   | 'rowAdder'
-  | 'time'
-  | 'email'
   | 'tool'
   | 'ellipsisMenuTool';
 

@@ -101,6 +101,16 @@ export type PrimitiveDataType =
   | 'date'
   | 'enum';
 
+export type ExoticDataType =
+  | PrimitiveDataType
+  | 'checkbox'
+  | 'currency'
+  | 'dateTime'
+  | 'percentage'
+  | 'phoneNumber'
+  | 'time'
+  | 'email';
+
 export type DropdownOptionValue = string | number;
 
 export interface DropdownOption extends Partial<Pick<MenuItemProps, 'sx'>> {
