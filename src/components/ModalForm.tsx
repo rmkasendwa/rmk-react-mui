@@ -198,6 +198,8 @@ export const BaseModalForm = <Values extends FormikValues>(
     <Card
       {...CardPropsRest}
       sx={{
+        display: 'flex',
+        flexDirection: 'column',
         width: '100%',
         maxWidth: 640,
         maxHeight: '80%',
@@ -205,6 +207,7 @@ export const BaseModalForm = <Values extends FormikValues>(
           display: 'flex',
           flexDirection: 'column',
           height: '100%',
+          minHeight: 0,
         },
         ...CardPropsSx,
       }}
