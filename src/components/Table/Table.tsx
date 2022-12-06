@@ -55,7 +55,11 @@ import {
   TableRowProps,
 } from '../../interfaces/Table';
 import { sort } from '../../utils/Sort';
-import { getColumnWidthStyles, getTableMinWidth } from '../../utils/Table';
+import {
+  getColumnWidthStyles,
+  getTableMinWidth,
+  mapTableColumnTypeToPrimitiveDataType,
+} from '../../utils/Table';
 import DataTablePagination from '../DataTablePagination';
 import RenderIfVisible, { RenderIfVisibleProps } from '../RenderIfVisible';
 import TableBodyRow from './TableBodyRow';
@@ -884,26 +888,9 @@ export const BaseTable = <T extends BaseTableRow>(
                                           {
                                             id,
                                             sortDirection: baseSortDirection,
-                                            type: (() => {
-                                              switch (type) {
-                                                case 'number':
-                                                case 'numberInput':
-                                                case 'percentage':
-                                                case 'percentageInput':
-                                                case 'currency':
-                                                case 'currencyInput':
-                                                  return 'number';
-                                                case 'date':
-                                                case 'time':
-                                                case 'dateTime':
-                                                case 'dateInput':
-                                                  return 'date';
-                                                case 'boolean':
-                                                  return 'boolean';
-                                                default:
-                                                  return 'string';
-                                              }
-                                            })(),
+                                            type: mapTableColumnTypeToPrimitiveDataType(
+                                              type
+                                            ),
                                             getSortValue: (row) => {
                                               const columnValue = (() => {
                                                 if (getColumnValue) {

@@ -24,6 +24,7 @@ import PhoneNumberUtil, {
   isValidPhoneNumber,
   systemStandardPhoneNumberFormat,
 } from '../../utils/PhoneNumberUtil';
+import { mapTableColumnTypeToPrimitiveDataType } from '../../utils/Table';
 import CountryFieldValue from '../CountryFieldValue';
 import EllipsisMenuIconButton, {
   EllipsisMenuIconButtonProps,
@@ -285,6 +286,21 @@ export const TableBodyColumn = forwardRef<
     return columnValue;
   })();
 
+  const columnValueElement = (() => {
+    if (isValidElement(columnValue)) {
+      return (
+        <Box
+          display="flex"
+          flexDirection="column"
+          alignItems={({ left: 'start', right: 'end' } as any)[align] || align}
+        >
+          {columnValue}
+        </Box>
+      );
+    }
+    return columnValue;
+  })();
+
   return (
     <TableCell
       ref={ref}
@@ -327,30 +343,14 @@ export const TableBodyColumn = forwardRef<
         ...(bodySx as any),
       }}
     >
-      {(() => {
-        if (isValidElement(columnValue)) {
-          return (
-            <Box
-              display="flex"
-              flexDirection="column"
-              alignItems={
-                ({ left: 'start', right: 'end' } as any)[align] || align
-              }
-            >
-              {columnValue}
-            </Box>
-          );
-        }
-        return (
-          <FieldValue
-            {...columnTypographyPropsRest}
-            {...{ editable, editMode }}
-            onChangeEditMode={(editMode) => setEditMode(editMode)}
-          >
-            {columnValue}
-          </FieldValue>
-        );
-      })()}
+      <FieldValue
+        {...columnTypographyPropsRest}
+        {...{ editable, editMode }}
+        onChangeEditMode={(editMode) => setEditMode(editMode)}
+        type={mapTableColumnTypeToPrimitiveDataType(type)}
+      >
+        {columnValueElement}
+      </FieldValue>
     </TableCell>
   );
 });

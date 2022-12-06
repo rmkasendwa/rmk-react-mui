@@ -1,4 +1,5 @@
-import { TableColumn } from '../interfaces/Table';
+import { TableColumn, TableColumnType } from '../interfaces/Table';
+import { PrimitiveDataType } from '../interfaces/Utils';
 
 /**
  * Gets the table column element widths.
@@ -59,4 +60,27 @@ export const getTableMinWidth = (tableColumns: TableColumn[]) => {
   return tableColumns.reduce((accumulator, tableColumn) => {
     return accumulator + getColumnWidthStyles(tableColumn).minWidth;
   }, 0);
+};
+
+export const mapTableColumnTypeToPrimitiveDataType = (
+  columnType?: TableColumnType
+): PrimitiveDataType => {
+  switch (columnType) {
+    case 'number':
+    case 'numberInput':
+    case 'percentage':
+    case 'percentageInput':
+    case 'currency':
+    case 'currencyInput':
+      return 'number';
+    case 'date':
+    case 'time':
+    case 'dateTime':
+    case 'dateInput':
+      return 'date';
+    case 'boolean':
+      return 'boolean';
+    default:
+      return 'string';
+  }
 };

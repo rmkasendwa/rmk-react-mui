@@ -32,7 +32,9 @@ import {
 } from 'react';
 import * as Yup from 'yup';
 
+import { PrimitiveDataType } from '../interfaces/Utils';
 import FormikDateInputField from './FormikInputFields/FormikDateInputField';
+import FormikNumberInputField from './FormikInputFields/FormikNumberInputField';
 import FormikTextField from './FormikInputFields/FormikTextField';
 
 export interface FieldValueClasses {
@@ -78,7 +80,7 @@ export interface FieldValueProps extends TypographyProps {
   onEdit?: (value: string) => void;
   onCancelEdit?: () => void;
   onChangeEditMode?: (editMode: boolean) => void;
-  type?: 'date' | 'string' | 'number' | 'enum';
+  type?: PrimitiveDataType;
   validationRules?: Yup.BaseSchema;
   editField?: ReactNode;
   editMode?: boolean;
@@ -216,6 +218,13 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
                                 placeholder="Enter a value"
                               />
                             );
+                          case 'number':
+                            return (
+                              <FormikNumberInputField
+                                name="value"
+                                placeholder="Enter a value"
+                              />
+                            );
                           default:
                             return (
                               <FormikTextField
@@ -230,12 +239,6 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
                         anchorEl={anchorRef.current}
                         transition
                         placement="bottom-end"
-                        ref={(element) => {
-                          if (element) {
-                            element.style.zIndex = '1400';
-                          }
-                        }}
-                        tabIndex={-1}
                       >
                         {({ TransitionProps }) => {
                           return (
@@ -328,7 +331,7 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
               gap: 0.5,
             }}
           >
-            {isValidElement(valueProp) ? valueProp : <>{valueProp || '-'}</>}
+            {isValidElement(valueProp) ? valueProp : <>{valueProp}</>}
             <Tooltip title="Edit">
               <EditIcon
                 sx={{
@@ -399,7 +402,7 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
               ...sx,
             }}
           >
-            {value}
+            {value ?? '-'}
           </Typography>
         </Grid>
         {!editMode && endIcon ? (
