@@ -86,6 +86,7 @@ export interface FieldValueDisplayProps
       | 'editable'
       | 'onEdit'
       | 'onCancelEdit'
+      | 'editableValue'
       | 'type'
       | 'validationRules'
       | 'editField'
@@ -108,7 +109,7 @@ export const FieldValueDisplay: FC<FieldValueDisplayProps> = (inProps) => {
   const {
     label,
     description,
-    value = '-',
+    value,
     LabelProps = {},
     DescriptionProps = {},
     ValueProps = {},
@@ -119,6 +120,7 @@ export const FieldValueDisplay: FC<FieldValueDisplayProps> = (inProps) => {
     type,
     validationRules,
     editField,
+    editableValue,
     editMode: editModeProp,
     updating,
     updated,
@@ -242,6 +244,7 @@ export const FieldValueDisplay: FC<FieldValueDisplayProps> = (inProps) => {
           validationRules,
           editField,
           editMode,
+          editableValue,
           updating,
           updated,
         }}
