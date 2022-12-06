@@ -2,6 +2,7 @@ import {
   ComponentsOverrides,
   ComponentsProps,
   ComponentsVariants,
+  alpha,
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
   generateUtilityClasses,
@@ -101,7 +102,7 @@ export interface FieldValueDisplayProps
   value?: ReactNode;
   LabelProps?: Partial<FieldLabelProps>;
   DescriptionProps?: Partial<FieldLabelProps>;
-  ValueProps?: Partial<FieldValueProps>;
+  FieldValueProps?: Partial<FieldValueProps>;
 }
 
 export const FieldValueDisplay: FC<FieldValueDisplayProps> = (inProps) => {
@@ -112,7 +113,7 @@ export const FieldValueDisplay: FC<FieldValueDisplayProps> = (inProps) => {
     value,
     LabelProps = {},
     DescriptionProps = {},
-    ValueProps = {},
+    FieldValueProps = {},
     required,
     editable,
     onEdit,
@@ -140,9 +141,9 @@ export const FieldValueDisplay: FC<FieldValueDisplayProps> = (inProps) => {
     DescriptionProps;
   const {
     className: ValuePropsClassName,
-    sx: ValuePropsSx,
-    ...ValuePropsRest
-  } = ValueProps;
+    sx: FieldValuePropsSx,
+    ...FieldValuePropsRest
+  } = FieldValueProps;
 
   editLabel ?? (editLabel = label);
 
@@ -151,7 +152,7 @@ export const FieldValueDisplay: FC<FieldValueDisplayProps> = (inProps) => {
     onChangeEditModeRef.current = onChangeEditMode;
   }, [onChangeEditMode]);
 
-  const { components } = useTheme();
+  const { components, palette } = useTheme();
   const { loading, errorMessage } = useLoadingContext();
 
   const [editMode, setEditMode] = useState(editModeProp || false);
@@ -235,7 +236,7 @@ export const FieldValueDisplay: FC<FieldValueDisplayProps> = (inProps) => {
       )}
       <FieldValue
         className={clsx(classes.value, ValuePropsClassName)}
-        {...ValuePropsRest}
+        {...FieldValuePropsRest}
         {...{
           editable,
           onEdit,
@@ -249,7 +250,11 @@ export const FieldValueDisplay: FC<FieldValueDisplayProps> = (inProps) => {
           updated,
         }}
         onChangeEditMode={(editMode) => setEditMode(editMode)}
-        sx={{ mt: 0.5, ...ValuePropsSx }}
+        sx={{
+          color: alpha(palette.text.primary, 0.5),
+          mt: 0.5,
+          ...FieldValuePropsSx,
+        }}
       >
         {value}
       </FieldValue>

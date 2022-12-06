@@ -72,8 +72,11 @@ export interface TableColumn<
   sortable?: boolean;
   opaque?: boolean;
   propagateClickToParentRowClickEvent?: boolean;
+  columnTypographyProps?: Partial<TypographyProps>;
+  decimalPlaces?: number;
   textTransform?: boolean;
   showHeaderText?: boolean;
+  editable?: boolean;
 }
 
 export interface ForEachDerivedColumnConfiguration<T> {
@@ -87,16 +90,20 @@ export interface BaseTableRow {
   id: string | number;
 }
 
-export interface TableRowProps<T = any> {
-  columns: Array<TableColumn<T>>;
-  row: T;
-  generateRowData?: (currentEntity: T) => any;
+export interface TableRowProps<RowObject = any>
+  extends Pick<
+    TableColumn<RowObject>,
+    | 'decimalPlaces'
+    | 'columnTypographyProps'
+    | 'editable'
+    | 'opaque'
+    | 'textTransform'
+    | 'defaultColumnValue'
+  > {
+  columns: Array<TableColumn<RowObject>>;
+  row: RowObject;
+  generateRowData?: (currentEntity: RowObject) => any;
   getRowProps?: GetRowProps;
-  decimalPlaces?: number;
-  textTransform?: boolean;
-  onClickRow?: (currentEntity: T) => void;
-  defaultColumnValue?: ReactNode;
-  columnTypographyProps?: Partial<TypographyProps>;
+  onClickRow?: (currentEntity: RowObject) => void;
   minColumnWidth?: number;
-  opaque?: boolean;
 }
