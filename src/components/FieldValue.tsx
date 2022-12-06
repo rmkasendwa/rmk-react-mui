@@ -1,9 +1,16 @@
+import CheckIcon from '@mui/icons-material/Check';
+import CloseIcon from '@mui/icons-material/Close';
+import EditIcon from '@mui/icons-material/Edit';
 import {
+  Box,
+  CircularProgress,
   ComponentsOverrides,
   ComponentsProps,
   ComponentsVariants,
   Grid,
   GridProps,
+  IconButton,
+  Tooltip,
   alpha,
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
@@ -13,7 +20,19 @@ import {
 } from '@mui/material';
 import Typography, { TypographyProps } from '@mui/material/Typography';
 import clsx from 'clsx';
-import { ReactNode, forwardRef } from 'react';
+import { Form, Formik } from 'formik';
+import {
+  ReactNode,
+  forwardRef,
+  isValidElement,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
+import * as Yup from 'yup';
+
+import FormikDateInputField from './FormikInputFields/FormikDateInputField';
+import FormikTextField from './FormikInputFields/FormikTextField';
 
 export interface FieldValueClasses {
   /** Styles applied to the root element. */
@@ -53,6 +72,17 @@ export interface FieldValueProps extends TypographyProps {
   IconContainerProps?: Partial<GridProps>;
   EndIconContainerProps?: Partial<GridProps>;
   ContainerGridProps?: Partial<GridProps>;
+  editable?: boolean;
+  editableValue?: string;
+  onEdit?: (value: string) => void;
+  onCancelEdit?: () => void;
+  onChangeEditMode?: (editMode: boolean) => void;
+  type?: 'date' | 'string' | 'number' | 'enum';
+  validationRules?: Yup.BaseSchema;
+  editField?: ReactNode;
+  editMode?: boolean;
+  updating?: boolean;
+  updated?: boolean;
 }
 
 export function getFieldValueUtilityClass(slot: string): string {
@@ -77,11 +107,23 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
       IconContainerProps = {},
       EndIconContainerProps = {},
       ContainerGridProps = {},
-      children,
-      sx,
       className,
+      children: valueProp,
+      onEdit,
+      onCancelEdit,
+      type = 'string',
+      editable = false,
+      validationRules = Yup.string(),
+      editField,
+      editMode: editModeProp,
+      updating,
+      updated: updatedProp,
+      onChangeEditMode,
+      sx,
       ...rest
     } = props;
+
+    let { editableValue } = props;
 
     const classes = composeClasses(
       slots,
@@ -102,7 +144,189 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
     const { sx: ContainerGridPropsSx, ...ContainerGridPropsRest } =
       ContainerGridProps;
 
-    const { palette, components } = useTheme();
+    if (editableValue == null && typeof valueProp === 'string') {
+      editableValue = valueProp;
+    }
+
+    // Refs
+    const isComponentMountedRef = useRef(true);
+    const onChangeEditModeRef = useRef(onChangeEditMode);
+    useEffect(() => {
+      onChangeEditModeRef.current = onChangeEditMode;
+    }, [onChangeEditMode]);
+
+    const { palette, components, spacing } = useTheme();
+
+    const [editMode, setEditMode] = useState(editModeProp || false);
+    const [updated, setUpdated] = useState(updatedProp || false);
+
+    useEffect(() => {
+      onChangeEditModeRef.current && onChangeEditModeRef.current(editMode);
+    }, [editMode]);
+
+    useEffect(() => {
+      if (editModeProp != null) {
+        setEditMode(editModeProp);
+      }
+    }, [editModeProp]);
+
+    useEffect(() => {
+      if (updatedProp != null) {
+        setUpdated(updatedProp);
+      }
+    }, [updatedProp]);
+
+    useEffect(() => {
+      if (updated && isComponentMountedRef.current) {
+        setEditMode(false);
+        setUpdated(false);
+      }
+    }, [updated]);
+
+    const value = (() => {
+      if (editable) {
+        if (editMode) {
+          return (
+            <Formik
+              validationSchema={Yup.object({
+                value: validationRules,
+              })}
+              initialValues={{
+                value: editableValue || '',
+              }}
+              onSubmit={async ({ value }) => {
+                onEdit && (await onEdit(value));
+              }}
+            >
+              {({ isSubmitting }) => {
+                return (
+                  <Form noValidate>
+                    {(() => {
+                      if (editField) {
+                        return editField;
+                      }
+                      switch (type) {
+                        case 'date':
+                          return <FormikDateInputField name="value" />;
+                        default:
+                          return <FormikTextField name="value" />;
+                      }
+                    })()}
+                    <Grid
+                      container
+                      sx={{
+                        py: 0.5,
+                        gap: 0.5,
+                        justifyContent: 'end',
+                        svg: {
+                          fontSize: 16,
+                        },
+                      }}
+                    >
+                      <Grid item>
+                        {isSubmitting || updating ? null : (
+                          <Tooltip title="Cancel">
+                            <IconButton
+                              size="small"
+                              onClick={() => {
+                                setEditMode(false);
+                                onCancelEdit && onCancelEdit();
+                              }}
+                              sx={{
+                                p: 0.4,
+                                '&,&:hover': {
+                                  bgcolor: palette.error.main,
+                                  color: palette.getContrastText(
+                                    palette.error.main
+                                  ),
+                                },
+                              }}
+                            >
+                              <CloseIcon />
+                            </IconButton>
+                          </Tooltip>
+                        )}
+                      </Grid>
+                      <Grid item>
+                        {isSubmitting || updating ? (
+                          <IconButton
+                            disabled
+                            sx={{
+                              p: 0.4,
+                            }}
+                          >
+                            <CircularProgress color="inherit" size={16} />
+                          </IconButton>
+                        ) : (
+                          <Tooltip title="Update">
+                            <IconButton
+                              size="small"
+                              type="submit"
+                              sx={{
+                                p: 0.4,
+                                '&,&:hover': {
+                                  bgcolor: palette.success.main,
+                                  color: palette.getContrastText(
+                                    palette.success.main
+                                  ),
+                                },
+                              }}
+                            >
+                              <CheckIcon />
+                            </IconButton>
+                          </Tooltip>
+                        )}
+                      </Grid>
+                    </Grid>
+                  </Form>
+                );
+              }}
+            </Formik>
+          );
+        }
+        return (
+          <Box>
+            {isValidElement(valueProp) ? (
+              valueProp
+            ) : (
+              <Typography
+                variant="body2"
+                {...(rest as any)}
+                sx={{
+                  wordBreak: 'break-word',
+                  whiteSpace: 'pre-line',
+                  fontWeight: 'bold',
+                  color: palette.text.primary,
+                  display: 'inline-block',
+                  ...sx,
+                }}
+              >
+                {valueProp || '-'}
+              </Typography>
+            )}
+            <Tooltip title="Edit">
+              <EditIcon
+                sx={{
+                  cursor: 'pointer',
+                  ml: 1,
+                  mt: -1,
+                  transform: `translateY(${spacing(1)})`,
+                }}
+                onClick={() => setEditMode(true)}
+              />
+            </Tooltip>
+          </Box>
+        );
+      }
+      return valueProp;
+    })();
+
+    useEffect(() => {
+      isComponentMountedRef.current = true;
+      return () => {
+        isComponentMountedRef.current = false;
+      };
+    }, []);
 
     return (
       <Grid
@@ -111,7 +335,7 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
         className={clsx(classes.root, className)}
         sx={{ gap: 1, ...ContainerGridPropsSx }}
       >
-        {icon ? (
+        {!editMode && icon ? (
           <Grid
             {...IconContainerPropsRest}
             item
@@ -152,10 +376,10 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
               ...sx,
             }}
           >
-            {children}
+            {value}
           </Typography>
         </Grid>
-        {endIcon ? (
+        {!editMode && endIcon ? (
           <Grid
             {...EndIconContainerPropsRest}
             item
