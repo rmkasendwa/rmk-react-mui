@@ -1,5 +1,6 @@
 import Chip from '@mui/material/Chip';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
+import React from 'react';
 
 import FieldValueDisplay from '../components/FieldValueDisplay';
 
@@ -12,23 +13,31 @@ export default {
 } as ComponentMeta<typeof FieldValueDisplay>;
 
 const Template: ComponentStory<typeof FieldValueDisplay> = (props) => {
-  return <FieldValueDisplay label="The Label" {...props} />;
+  return <FieldValueDisplay {...props} />;
 };
 
-export const Default = Template.bind({});
+export const Default = Template.bind({
+  label: 'The Label',
+});
 
-export const WithStringValue = Template.bind({});
+export const WithStringValue = Template.bind({
+  label: 'The Label',
+});
+
 WithStringValue.args = {
+  label: 'The Label',
   value: 'This is the value',
 };
 
 export const WithNumericValue = Template.bind({});
 WithNumericValue.args = {
+  label: 'The Label',
   value: 2000,
 };
 
 export const WithElementValue = Template.bind({});
 WithElementValue.args = {
+  label: 'The Label',
   value: <Chip label="A reasonably long value" color="success" size="small" />,
 };
 
@@ -41,7 +50,7 @@ StyledDifferently.args = {
       fontWeight: 'normal',
     },
   },
-  ValueProps: {
+  FieldValueProps: {
     sx: {
       fontWeight: 'bold',
     },
