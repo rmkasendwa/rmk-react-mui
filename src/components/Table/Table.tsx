@@ -122,6 +122,7 @@ export interface TableProps<T = any>
       | 'defaultColumnValue'
       | 'columnTypographyProps'
       | 'minColumnWidth'
+      | 'editable'
     >,
     Pick<
       TableColumnToggleIconButtonProps<T>,
@@ -229,6 +230,7 @@ export const BaseTable = <T extends BaseTableRow>(
     defaultColumnValue,
     columnTypographyProps,
     minColumnWidth,
+    editable,
     className,
     sortable = false,
     handleSortOperations = true,
@@ -1018,6 +1020,7 @@ export const BaseTable = <T extends BaseTableRow>(
                         defaultColumnValue,
                         columnTypographyProps,
                         minColumnWidth,
+                        editable,
                       }}
                       columns={displayingColumns}
                       getRowProps={forEachRowProps}

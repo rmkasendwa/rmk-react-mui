@@ -11,13 +11,14 @@ import {
   GridProps,
   IconButton,
   Tooltip,
-  alpha,
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
   generateUtilityClasses,
   useTheme,
   useThemeProps,
 } from '@mui/material';
+import Grow from '@mui/material/Grow';
+import Popper from '@mui/material/Popper';
 import Typography, { TypographyProps } from '@mui/material/Typography';
 import clsx from 'clsx';
 import { Form, Formik } from 'formik';
@@ -150,12 +151,13 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
 
     // Refs
     const isComponentMountedRef = useRef(true);
+    const anchorRef = useRef<HTMLButtonElement>(null);
     const onChangeEditModeRef = useRef(onChangeEditMode);
     useEffect(() => {
       onChangeEditModeRef.current = onChangeEditMode;
     }, [onChangeEditMode]);
 
-    const { palette, components, spacing } = useTheme();
+    const { palette, components } = useTheme();
 
     const [editMode, setEditMode] = useState(editModeProp || false);
     const [updated, setUpdated] = useState(updatedProp || false);
@@ -201,11 +203,7 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
               {({ isSubmitting }) => {
                 return (
                   <Form noValidate>
-                    <Box
-                      sx={{
-                        position: 'relative',
-                      }}
-                    >
+                    <Box ref={anchorRef}>
                       {(() => {
                         if (editField) {
                           return editField;
@@ -227,74 +225,94 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
                             );
                         }
                       })()}
-                      <Grid
-                        container
-                        sx={{
-                          py: 0.5,
-                          gap: 0.5,
-                          justifyContent: 'end',
-                          position: 'absolute',
-                          top: '100%',
-                          svg: {
-                            fontSize: 16,
-                          },
+                      <Popper
+                        open
+                        anchorEl={anchorRef.current}
+                        transition
+                        placement="bottom-end"
+                        ref={(element) => {
+                          if (element) {
+                            element.style.zIndex = '1400';
+                          }
                         }}
+                        tabIndex={-1}
                       >
-                        <Grid item>
-                          {isSubmitting || updating ? null : (
-                            <Tooltip title="Cancel">
-                              <IconButton
-                                size="small"
-                                onClick={() => {
-                                  setEditMode(false);
-                                  onCancelEdit && onCancelEdit();
-                                }}
+                        {({ TransitionProps }) => {
+                          return (
+                            <Grow {...TransitionProps}>
+                              <Grid
+                                container
                                 sx={{
-                                  p: 0.4,
-                                  '&,&:hover': {
-                                    bgcolor: palette.error.main,
-                                    color: palette.getContrastText(
-                                      palette.error.main
-                                    ),
+                                  py: 0.5,
+                                  gap: 0.5,
+                                  justifyContent: 'end',
+                                  svg: {
+                                    fontSize: 16,
                                   },
                                 }}
                               >
-                                <CloseIcon />
-                              </IconButton>
-                            </Tooltip>
-                          )}
-                        </Grid>
-                        <Grid item>
-                          {isSubmitting || updating ? (
-                            <IconButton
-                              disabled
-                              sx={{
-                                p: 0.4,
-                              }}
-                            >
-                              <CircularProgress color="inherit" size={16} />
-                            </IconButton>
-                          ) : (
-                            <Tooltip title="Update">
-                              <IconButton
-                                size="small"
-                                type="submit"
-                                sx={{
-                                  p: 0.4,
-                                  '&,&:hover': {
-                                    bgcolor: palette.success.main,
-                                    color: palette.getContrastText(
-                                      palette.success.main
-                                    ),
-                                  },
-                                }}
-                              >
-                                <CheckIcon />
-                              </IconButton>
-                            </Tooltip>
-                          )}
-                        </Grid>
-                      </Grid>
+                                <Grid item>
+                                  {isSubmitting || updating ? null : (
+                                    <Tooltip title="Cancel">
+                                      <IconButton
+                                        size="small"
+                                        onClick={() => {
+                                          setEditMode(false);
+                                          onCancelEdit && onCancelEdit();
+                                        }}
+                                        sx={{
+                                          p: 0.4,
+                                          '&,&:hover': {
+                                            bgcolor: palette.error.main,
+                                            color: palette.getContrastText(
+                                              palette.error.main
+                                            ),
+                                          },
+                                        }}
+                                      >
+                                        <CloseIcon />
+                                      </IconButton>
+                                    </Tooltip>
+                                  )}
+                                </Grid>
+                                <Grid item>
+                                  {isSubmitting || updating ? (
+                                    <IconButton
+                                      disabled
+                                      sx={{
+                                        p: 0.4,
+                                      }}
+                                    >
+                                      <CircularProgress
+                                        color="inherit"
+                                        size={16}
+                                      />
+                                    </IconButton>
+                                  ) : (
+                                    <Tooltip title="Update">
+                                      <IconButton
+                                        size="small"
+                                        type="submit"
+                                        sx={{
+                                          p: 0.4,
+                                          '&,&:hover': {
+                                            bgcolor: palette.success.main,
+                                            color: palette.getContrastText(
+                                              palette.success.main
+                                            ),
+                                          },
+                                        }}
+                                      >
+                                        <CheckIcon />
+                                      </IconButton>
+                                    </Tooltip>
+                                  )}
+                                </Grid>
+                              </Grid>
+                            </Grow>
+                          );
+                        }}
+                      </Popper>
                     </Box>
                   </Form>
                 );
@@ -303,32 +321,20 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
           );
         }
         return (
-          <Box>
-            {isValidElement(valueProp) ? (
-              valueProp
-            ) : (
-              <Typography
-                variant="body2"
-                {...(rest as any)}
-                sx={{
-                  wordBreak: 'break-word',
-                  whiteSpace: 'pre-line',
-                  fontWeight: 'bold',
-                  color: palette.text.primary,
-                  display: 'inline-block',
-                  ...sx,
-                }}
-              >
-                {valueProp || '-'}
-              </Typography>
-            )}
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 0.5,
+            }}
+          >
+            {isValidElement(valueProp) ? valueProp : <>{valueProp || '-'}</>}
             <Tooltip title="Edit">
               <EditIcon
                 sx={{
                   cursor: 'pointer',
-                  ml: 1,
-                  mt: -1,
-                  transform: `translateY(${spacing(1)})`,
+                  fontSize: 18,
+                  opacity: 0.5,
                 }}
                 onClick={() => setEditMode(true)}
               />
@@ -386,7 +392,6 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
             sx={{
               wordBreak: 'break-word',
               whiteSpace: 'pre-line',
-              color: alpha(palette.text.primary, 0.5),
               width: '100%',
               lineHeight: 'inherit',
               ...((components?.MuiFieldValue?.styleOverrides?.root as any) ||

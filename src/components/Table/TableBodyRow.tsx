@@ -1,57 +1,25 @@
-import { formatDate } from '@infinite-debugger/rmk-utils/dates';
-import { addThousandCommas } from '@infinite-debugger/rmk-utils/numbers';
 import {
   ComponentsOverrides,
   ComponentsProps,
   ComponentsVariants,
-  Link,
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
   generateUtilityClasses,
   useTheme,
   useThemeProps,
 } from '@mui/material';
-import Box from '@mui/material/Box';
-import TableCell from '@mui/material/TableCell';
 import TableRow, {
   TableRowProps as MuiTableRowProps,
 } from '@mui/material/TableRow';
-import Typography from '@mui/material/Typography';
 import clsx from 'clsx';
-import { format } from 'date-fns';
-import { isValidElement, useEffect, useMemo, useRef } from 'react';
-import * as yup from 'yup';
+import { useEffect, useMemo, useRef } from 'react';
 
-import { CountryCode } from '../../interfaces/Countries';
 import { BaseTableRow, TableRowProps } from '../../interfaces/Table';
-import PhoneNumberUtil, {
-  isValidPhoneNumber,
-  systemStandardPhoneNumberFormat,
-} from '../../utils/PhoneNumberUtil';
 import {
   getColumnPaddingStyles,
   getColumnWidthStyles,
 } from '../../utils/Table';
-import CountryFieldValue from '../CountryFieldValue';
-import EllipsisMenuIconButton, {
-  EllipsisMenuIconButtonProps,
-} from '../EllipsisMenuIconButton';
-
-const allowedDataTypes = ['number', 'string', 'boolean'];
-
-const toolTypes = [
-  'tool',
-  'input',
-  'currencyInput',
-  'selectInput',
-  'dateInput',
-  'phoneInput',
-  'rowAdder',
-  'percentageInput',
-  'numberInput',
-  'fragment',
-  'checkbox',
-];
+import TableBodyColumn from './TableBodyColumn';
 
 export interface TableBodyRowClasses {
   /** Styles applied to the root element. */
@@ -111,11 +79,12 @@ export const TableBodyRow = <T extends BaseTableRow>(
     row,
     getRowProps,
     generateRowData,
-    decimalPlaces,
-    textTransform = false,
+    decimalPlaces: rowDecimalPlaces,
+    textTransform: rowTextTransform = false,
+    editable: rowEditable,
     onClickRow,
     sx,
-    defaultColumnValue: baseDefaultColumnValue,
+    defaultColumnValue: rowDefaultColumnValue,
     columnTypographyProps = {},
     minColumnWidth,
     className,
@@ -144,190 +113,16 @@ export const TableBodyRow = <T extends BaseTableRow>(
     generateRowDataRef.current = generateRowData;
   }, [columns, generateRowData, getRowProps]);
 
-  const { palette, components } = useTheme();
+  const { components } = useTheme();
 
-  const formattedRow: any & {
-    currentEntity: T;
-    rowProps: any;
-  } = useMemo(() => {
+  const { rowProps } = useMemo(() => {
     return {
-      ...columns.reduce(
-        (accumulator, column) => {
-          const {
-            type,
-            id,
-            defaultColumnValue,
-            getColumnValue,
-            textTransform: columnTextTransform = textTransform,
-          } = column;
-          let columnValue = (() => {
-            if (getColumnValue) {
-              if (type === 'ellipsisMenuTool') {
-                const { options, ...rest } =
-                  (getColumnValue(
-                    row,
-                    column
-                  ) as EllipsisMenuIconButtonProps) || {};
-                if (options && options.length > 0) {
-                  return (
-                    <Box>
-                      <EllipsisMenuIconButton options={options} {...rest} />
-                    </Box>
-                  );
-                }
-                return defaultColumnValue;
-              }
-              return getColumnValue(row, column);
-            }
-            return (row as any)[id];
-          })();
-          if (type && toolTypes.includes(type)) {
-            switch (type) {
-              case 'input':
-                // TODO: Implment this
-                break;
-              case 'currencyInput':
-                // TODO: Implment this
-                break;
-              case 'percentageInput':
-                // TODO: Implment this
-                break;
-              case 'numberInput':
-                // TODO: Implment this
-                break;
-              case 'dropdownInput':
-                // TODO: Implment this
-                break;
-              case 'dateInput':
-                // TODO: Implment this
-                break;
-              case 'phonenumberInput':
-                // TODO: Implment this
-                break;
-              case 'rowAdder':
-                // TODO: Implment this
-                break;
-              case 'checkbox':
-                // TODO: Implment this
-                break;
-            }
-          } else if (
-            columnValue != null &&
-            allowedDataTypes.includes(typeof columnValue)
-          ) {
-            switch (type) {
-              case 'date':
-                if (columnTextTransform) {
-                  columnValue = formatDate(columnValue);
-                }
-                break;
-              case 'dateTime':
-                if (columnTextTransform) {
-                  columnValue = formatDate(columnValue, true);
-                }
-                break;
-              case 'time':
-                if (columnTextTransform) {
-                  const date = new Date(columnValue);
-                  columnValue = isNaN(date.getTime())
-                    ? ''
-                    : format(date, 'hh:mm aa');
-                }
-                break;
-              case 'currency':
-              case 'percentage':
-                columnValue = parseFloat(columnValue);
-                columnValue = addThousandCommas(
-                  columnValue,
-                  decimalPlaces || true
-                );
-                break;
-              case 'number':
-                columnValue = addThousandCommas(columnValue);
-                break;
-              case 'phoneNumber':
-                if (typeof columnValue === 'string') {
-                  const phoneNumber = isValidPhoneNumber(columnValue);
-                  if (phoneNumber) {
-                    columnValue = (
-                      <Link
-                        href={`tel://${columnValue}`}
-                        underline="none"
-                        color="inherit"
-                        noWrap
-                        sx={{ display: 'block', maxWidth: '100%' }}
-                      >
-                        <CountryFieldValue
-                          countryCode={
-                            PhoneNumberUtil.getRegionCodeForCountryCode(
-                              phoneNumber.getCountryCode()!
-                            ) as CountryCode
-                          }
-                          countryLabel={systemStandardPhoneNumberFormat(
-                            columnValue
-                          )}
-                          FieldValueProps={{
-                            noWrap: true,
-                            sx: {
-                              fontWeight: 'normal',
-                              whiteSpace: 'nowrap',
-                              color: 'inherit',
-                            },
-                          }}
-                        />
-                      </Link>
-                    );
-                  }
-                }
-                break;
-              case 'email':
-                if (
-                  typeof columnValue === 'string' &&
-                  yup.string().email().isValidSync(columnValue)
-                ) {
-                  columnValue = (
-                    <Link
-                      href={`mailto:${columnValue}`}
-                      underline="hover"
-                      color="inherit"
-                      noWrap
-                      sx={{ display: 'block', maxWidth: '100%' }}
-                    >
-                      {columnValue}
-                    </Link>
-                  );
-                }
-                break;
-              case 'enum':
-                if (columnTextTransform) {
-                  columnValue = String(columnValue).toTitleCase(true);
-                }
-                break;
-              case 'boolean':
-                if (columnTextTransform) {
-                  columnValue = columnValue ? 'Yes' : 'No';
-                }
-                break;
-            }
-          }
-          if (columnValue == null) {
-            columnValue = defaultColumnValue ?? baseDefaultColumnValue ?? (
-              <>&nbsp;</>
-            );
-          }
-          accumulator[id] = columnValue;
-          return accumulator;
-        },
-        {
-          currentEntity: row,
-          rowProps: (() => {
-            if (getRowPropsRef.current) {
-              return getRowPropsRef.current(row);
-            }
-            return {};
-          })(),
-        } as Record<keyof T, MuiTableRowProps>
-      ),
+      rowProps: (() => {
+        if (getRowPropsRef.current) {
+          return getRowPropsRef.current(row);
+        }
+        return {};
+      })(),
       ...(() => {
         if (generateRowDataRef.current) {
           return Object.fromEntries(
@@ -339,12 +134,12 @@ export const TableBodyRow = <T extends BaseTableRow>(
         return {};
       })(),
     };
-  }, [columns, row, decimalPlaces, textTransform, baseDefaultColumnValue]);
+  }, [row]);
 
-  const { sx: rowPropsSx, ...restRowProps }: any = formattedRow.rowProps;
+  const { sx: rowPropsSx, ...rowPropsRest } = rowProps;
   return (
     <TableRow
-      {...restRowProps}
+      {...rowPropsRest}
       {...rest}
       className={clsx(classes.root)}
       tabIndex={-1}
@@ -360,45 +155,34 @@ export const TableBodyRow = <T extends BaseTableRow>(
       {columns.map((column, index) => {
         const {
           id,
-          align = 'left',
           sx,
-          style,
-          onClick,
-          onClickColumn,
-          bodySx,
           minWidth,
-          type,
-          className,
           propagateClickToParentRowClickEvent = true,
+          decimalPlaces = rowDecimalPlaces,
+          textTransform = rowTextTransform,
+          defaultColumnValue = rowDefaultColumnValue,
+          editable = rowEditable,
         } = column;
-        const columnValue = formattedRow[column.id];
         return (
-          <TableCell
+          <TableBodyColumn
             key={String(id)}
-            {...{ style, className }}
-            onClick={(event) => {
-              onClickColumn && onClickColumn(formattedRow.currentEntity);
+            {...({} as any)}
+            {...column}
+            {...{
+              column,
+              row,
+              columnTypographyProps,
+              decimalPlaces,
+              textTransform,
+              defaultColumnValue,
+              editable,
+            }}
+            onClick={() => {
               propagateClickToParentRowClickEvent &&
                 onClickRow &&
-                onClickRow(formattedRow.currentEntity);
-              onClick && onClick(event);
+                onClickRow(row);
             }}
-            align={align}
             sx={{
-              py: 1,
-              px: 3,
-              cursor: onClickColumn ? 'pointer' : 'inherit',
-              position: 'relative',
-              overflow: 'hidden',
-              ['&:before']: {
-                content: '""',
-                position: 'absolute',
-                top: 0,
-                bottom: 0,
-                left: 0,
-                width: `calc(100% + 1px)`,
-                pointerEvents: 'none',
-              },
               ...getColumnPaddingStyles({
                 index,
                 columnCount: columns.length,
@@ -407,42 +191,9 @@ export const TableBodyRow = <T extends BaseTableRow>(
                 ...column,
                 minWidth: minWidth ?? minColumnWidth,
               }),
-              ...(() => {
-                if (type === 'ellipsisMenuTool') {
-                  return {
-                    bgcolor: palette.background.paper,
-                  };
-                }
-              })(),
               ...sx,
-              ...(bodySx as any),
             }}
-          >
-            {(() => {
-              if (isValidElement(columnValue)) {
-                return (
-                  <Box
-                    display="flex"
-                    flexDirection="column"
-                    alignItems={
-                      ({ left: 'start', right: 'end' } as any)[align] || align
-                    }
-                  >
-                    {columnValue}
-                  </Box>
-                );
-              }
-              return (
-                <Typography
-                  component={'div' as any}
-                  variant="body2"
-                  {...columnTypographyProps}
-                >
-                  {columnValue}
-                </Typography>
-              );
-            })()}
-          </TableCell>
+          />
         );
       })}
     </TableRow>
