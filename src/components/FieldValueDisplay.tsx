@@ -11,7 +11,7 @@ import {
 import Box, { BoxProps } from '@mui/material/Box';
 import Skeleton from '@mui/material/Skeleton';
 import clsx from 'clsx';
-import { FC, ReactNode } from 'react';
+import { FC, ReactNode, useEffect, useRef, useState } from 'react';
 
 import { useLoadingContext } from '../contexts/LoadingContext';
 import ErrorSkeleton from './ErrorSkeleton';
@@ -80,8 +80,22 @@ const useUtilityClasses = (ownerState: any) => {
 
 export interface FieldValueDisplayProps
   extends Partial<BoxProps>,
-    Pick<FieldLabelProps, 'required'> {
+    Pick<FieldLabelProps, 'required'>,
+    Pick<
+      FieldValueProps,
+      | 'editable'
+      | 'onEdit'
+      | 'onCancelEdit'
+      | 'type'
+      | 'validationRules'
+      | 'editField'
+      | 'editMode'
+      | 'updating'
+      | 'updated'
+      | 'onChangeEditMode'
+    > {
   label: ReactNode;
+  editLabel?: ReactNode;
   description?: ReactNode;
   value?: ReactNode;
   LabelProps?: Partial<FieldLabelProps>;
@@ -99,9 +113,21 @@ export const FieldValueDisplay: FC<FieldValueDisplayProps> = (inProps) => {
     DescriptionProps = {},
     ValueProps = {},
     required,
+    editable,
+    onEdit,
+    onCancelEdit,
+    type,
+    validationRules,
+    editField,
+    editMode: editModeProp,
+    updating,
+    updated,
+    onChangeEditMode,
     sx,
     ...rest
   } = props;
+
+  let { editLabel } = props;
 
   const classes = useUtilityClasses({
     ...props,
@@ -116,10 +142,23 @@ export const FieldValueDisplay: FC<FieldValueDisplayProps> = (inProps) => {
     ...ValuePropsRest
   } = ValueProps;
 
+  editLabel ?? (editLabel = label);
+
+  const onChangeEditModeRef = useRef(onChangeEditMode);
+  useEffect(() => {
+    onChangeEditModeRef.current = onChangeEditMode;
+  }, [onChangeEditMode]);
+
   const { components } = useTheme();
   const { loading, errorMessage } = useLoadingContext();
+
+  const [editMode, setEditMode] = useState(editModeProp || false);
   const labelSkeletonWidth = String(label).length * 7;
   const valueSkeletonWidth = `${20 + Math.round(Math.random() * 60)}%`;
+
+  useEffect(() => {
+    onChangeEditModeRef.current && onChangeEditModeRef.current(editMode);
+  }, [editMode]);
 
   if (errorMessage) {
     return (
@@ -177,7 +216,12 @@ export const FieldValueDisplay: FC<FieldValueDisplayProps> = (inProps) => {
         {...{ required }}
         {...LabelPropsRest}
       >
-        {label}
+        {(() => {
+          if (editable && editMode) {
+            return editLabel;
+          }
+          return label;
+        })()}
       </FieldLabel>
       {description && (
         <FieldLabel
@@ -190,6 +234,18 @@ export const FieldValueDisplay: FC<FieldValueDisplayProps> = (inProps) => {
       <FieldValue
         className={clsx(classes.value, ValuePropsClassName)}
         {...ValuePropsRest}
+        {...{
+          editable,
+          onEdit,
+          onCancelEdit,
+          type,
+          validationRules,
+          editField,
+          editMode,
+          updating,
+          updated,
+        }}
+        onChangeEditMode={(editMode) => setEditMode(editMode)}
         sx={{ mt: 0.5, ...ValuePropsSx }}
       >
         {value}
