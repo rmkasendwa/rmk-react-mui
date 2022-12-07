@@ -131,7 +131,6 @@ export const BaseFieldValueDisplay = <FieldValue extends ReactNode>(
     fieldValueEditor,
     onFieldValueUpdated,
     className,
-    sx,
     ...rest
   } = props;
 
@@ -181,10 +180,8 @@ export const BaseFieldValueDisplay = <FieldValue extends ReactNode>(
       <Box
         className={clsx(classes.root)}
         {...rest}
-        sx={{
-          ...((components?.MuiFieldValueDisplay?.styleOverrides?.root as any) ||
-            {}),
-          ...sx,
+        style={{
+          ...(components?.MuiFieldValueDisplay?.styleOverrides?.root as any),
         }}
       >
         <ErrorSkeleton
@@ -206,10 +203,8 @@ export const BaseFieldValueDisplay = <FieldValue extends ReactNode>(
       <Box
         className={clsx(classes.root)}
         {...rest}
-        sx={{
-          ...((components?.MuiFieldValueDisplay?.styleOverrides?.root as any) ||
-            {}),
-          ...sx,
+        style={{
+          ...(components?.MuiFieldValueDisplay?.styleOverrides?.root as any),
         }}
       >
         <Skeleton sx={{ width: labelSkeletonWidth }} />
@@ -223,15 +218,17 @@ export const BaseFieldValueDisplay = <FieldValue extends ReactNode>(
       ref={ref}
       className={clsx(classes.root, className)}
       {...rest}
-      sx={{
+      style={{
         ...(components?.MuiFieldValueDisplay?.styleOverrides?.root as any),
-        ...sx,
       }}
     >
       <FieldLabel
         className={clsx(classes.label, LabelPropsClassName)}
         {...{ required }}
         {...LabelPropsRest}
+        style={{
+          ...(components?.MuiFieldValueDisplay?.styleOverrides?.label as any),
+        }}
       >
         {(() => {
           if (editable && editMode) {
@@ -244,6 +241,10 @@ export const BaseFieldValueDisplay = <FieldValue extends ReactNode>(
         <FieldLabel
           className={clsx(classes.description, DescriptionPropsClassName)}
           {...DescriptionPropsRest}
+          style={{
+            ...(components?.MuiFieldValueDisplay?.styleOverrides
+              ?.description as any),
+          }}
         >
           {description}
         </FieldLabel>
@@ -262,6 +263,9 @@ export const BaseFieldValueDisplay = <FieldValue extends ReactNode>(
           editableValue,
           fieldValueEditor,
           onFieldValueUpdated,
+        }}
+        style={{
+          ...(components?.MuiFieldValueDisplay?.styleOverrides?.value as any),
         }}
         onChangeEditMode={(editMode) => setEditMode(editMode)}
         sx={{
