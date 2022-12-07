@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 import clsx from 'clsx';
 import { format } from 'date-fns';
-import { forwardRef, isValidElement, useState } from 'react';
+import { forwardRef, isValidElement, useEffect, useState } from 'react';
 import * as yup from 'yup';
 
 import { CountryCode } from '../../interfaces/Countries';
@@ -117,11 +117,14 @@ export const TableBodyColumn = forwardRef<
     defaultColumnValue,
     decimalPlaces,
     column,
-    editable = false,
     onClick,
     row,
     fieldValueUpdater,
     onFieldValueUpdated,
+    editable = false,
+    editField,
+    editMode: editModeProp,
+    validationRules,
   } = props;
 
   const classes = composeClasses(
@@ -138,8 +141,14 @@ export const TableBodyColumn = forwardRef<
 
   const { ...columnTypographyPropsRest } = columnTypographyProps;
 
-  const [editMode, setEditMode] = useState(false);
+  const [editMode, setEditMode] = useState(editModeProp ?? false);
   const { palette } = useTheme();
+
+  useEffect(() => {
+    if (editModeProp != null) {
+      setEditMode(editModeProp);
+    }
+  }, [editModeProp]);
 
   const { baseColumnValue, formattedColumnValue } = (() => {
     let formattedColumnValue = (() => {
@@ -355,7 +364,14 @@ export const TableBodyColumn = forwardRef<
     >
       <FieldValue
         {...columnTypographyPropsRest}
-        {...{ editable, editMode, fieldValueUpdater, onFieldValueUpdated }}
+        {...{
+          editable,
+          editMode,
+          fieldValueUpdater,
+          onFieldValueUpdated,
+          editField,
+          validationRules,
+        }}
         editableValue={baseColumnValue}
         onChangeEditMode={(editMode) => setEditMode(editMode)}
         type={mapTableColumnTypeToExoticDataType(type)}

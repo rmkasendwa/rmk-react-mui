@@ -168,7 +168,7 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
     }, [onChangeEditMode, onFieldValueUpdated]);
 
     const { palette, components } = useTheme();
-    const [editMode, setEditMode] = useState(editModeProp || false);
+    const [editMode, setEditMode] = useState(editModeProp ?? false);
     const { update, updating, updated, setUpdated } = useUpdate();
 
     useEffect(() => {
