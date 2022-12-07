@@ -112,6 +112,7 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
     if (enableLoadingState && locked) {
       return (
         <FieldValueDisplay
+          {...({} as any)}
           {...FieldValueDisplayPropsRest}
           {...{ label, value }}
         />
@@ -256,6 +257,7 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
       return (
         <FieldValueDisplay
           {...FieldValueDisplayPropsRest}
+          {...({} as any)}
           {...{ label, required }}
           value={textField}
         />

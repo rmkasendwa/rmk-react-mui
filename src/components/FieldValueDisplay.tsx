@@ -12,7 +12,15 @@ import {
 import Box, { BoxProps } from '@mui/material/Box';
 import Skeleton from '@mui/material/Skeleton';
 import clsx from 'clsx';
-import { FC, ReactNode, useEffect, useRef, useState } from 'react';
+import {
+  ReactElement,
+  ReactNode,
+  Ref,
+  forwardRef,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
 import { useLoadingContext } from '../contexts/LoadingContext';
 import ErrorSkeleton from './ErrorSkeleton';
@@ -28,18 +36,6 @@ export interface FieldValueDisplayClasses {
 }
 
 export type FieldValueDisplayClassKey = keyof FieldValueDisplayClasses;
-
-export function getFieldValueDisplayUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiFieldValueDisplay', slot);
-}
-
-export const fieldValueDisplayClasses: FieldValueDisplayClasses =
-  generateUtilityClasses('MuiFieldValueDisplay', [
-    'root',
-    'label',
-    'description',
-    'value',
-  ]);
 
 // Adding theme prop types
 declare module '@mui/material/styles/props' {
@@ -66,24 +62,12 @@ declare module '@mui/material/styles/components' {
   }
 }
 
-const useUtilityClasses = (ownerState: any) => {
-  const { classes } = ownerState;
-
-  const slots: Record<FieldValueDisplayClassKey, string[]> = {
-    root: ['root'],
-    label: ['label'],
-    description: ['description'],
-    value: ['value'],
-  };
-
-  return composeClasses(slots, getFieldValueDisplayUtilityClass, classes);
-};
-
-export interface FieldValueDisplayProps
-  extends Partial<BoxProps>,
+export interface FieldValueDisplayProps<
+  FieldValue extends ReactNode = ReactNode
+> extends Partial<BoxProps>,
     Pick<FieldLabelProps, 'required'>,
     Pick<
-      FieldValueProps,
+      FieldValueProps<FieldValue>,
       | 'editable'
       | 'onCancelEdit'
       | 'editableValue'
@@ -92,19 +76,41 @@ export interface FieldValueDisplayProps
       | 'editField'
       | 'editMode'
       | 'onChangeEditMode'
-      | 'fieldValueUpdater'
+      | 'fieldValueEditor'
       | 'onFieldValueUpdated'
     > {
   label: ReactNode;
   editLabel?: ReactNode;
   description?: ReactNode;
-  value?: ReactNode;
+  value?: FieldValue;
   LabelProps?: Partial<FieldLabelProps>;
   DescriptionProps?: Partial<FieldLabelProps>;
   FieldValueProps?: Partial<FieldValueProps>;
 }
 
-export const FieldValueDisplay: FC<FieldValueDisplayProps> = (inProps) => {
+export function getFieldValueDisplayUtilityClass(slot: string): string {
+  return generateUtilityClass('MuiFieldValueDisplay', slot);
+}
+
+export const fieldValueDisplayClasses: FieldValueDisplayClasses =
+  generateUtilityClasses('MuiFieldValueDisplay', [
+    'root',
+    'label',
+    'description',
+    'value',
+  ]);
+
+const slots = {
+  root: ['root'],
+  label: ['label'],
+  description: ['description'],
+  value: ['value'],
+};
+
+export const BaseFieldValueDisplay = <FieldValue extends ReactNode>(
+  inProps: FieldValueDisplayProps<FieldValue>,
+  ref: Ref<HTMLDivElement>
+) => {
   const props = useThemeProps({ props: inProps, name: 'MuiFieldValueDisplay' });
   const {
     label,
@@ -122,17 +128,26 @@ export const FieldValueDisplay: FC<FieldValueDisplayProps> = (inProps) => {
     editableValue,
     editMode: editModeProp,
     onChangeEditMode,
-    fieldValueUpdater,
+    fieldValueEditor,
     onFieldValueUpdated,
+    className,
     sx,
     ...rest
   } = props;
 
   let { editLabel } = props;
 
-  const classes = useUtilityClasses({
-    ...props,
-  });
+  const classes = composeClasses(
+    slots,
+    getFieldValueDisplayUtilityClass,
+    (() => {
+      if (className) {
+        return {
+          root: className,
+        };
+      }
+    })()
+  );
 
   const { className: LabelPropsClassName, ...LabelPropsRest } = LabelProps;
   const { className: DescriptionPropsClassName, ...DescriptionPropsRest } =
@@ -205,7 +220,8 @@ export const FieldValueDisplay: FC<FieldValueDisplayProps> = (inProps) => {
 
   return (
     <Box
-      className={clsx(classes.root)}
+      ref={ref}
+      className={clsx(classes.root, className)}
       {...rest}
       sx={{
         ...(components?.MuiFieldValueDisplay?.styleOverrides?.root as any),
@@ -234,6 +250,7 @@ export const FieldValueDisplay: FC<FieldValueDisplayProps> = (inProps) => {
       )}
       <FieldValue
         className={clsx(classes.value, ValuePropsClassName)}
+        {...({} as any)}
         {...FieldValuePropsRest}
         {...{
           editable,
@@ -243,7 +260,7 @@ export const FieldValueDisplay: FC<FieldValueDisplayProps> = (inProps) => {
           editField,
           editMode,
           editableValue,
-          fieldValueUpdater,
+          fieldValueEditor,
           onFieldValueUpdated,
         }}
         onChangeEditMode={(editMode) => setEditMode(editMode)}
@@ -258,5 +275,11 @@ export const FieldValueDisplay: FC<FieldValueDisplayProps> = (inProps) => {
     </Box>
   );
 };
+
+export const FieldValueDisplay = forwardRef(BaseFieldValueDisplay) as <
+  FieldValue extends ReactNode = ReactNode
+>(
+  p: FieldValueDisplayProps<FieldValue> & { ref?: Ref<HTMLDivElement> }
+) => ReactElement;
 
 export default FieldValueDisplay;

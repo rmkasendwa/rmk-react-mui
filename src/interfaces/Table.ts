@@ -50,7 +50,7 @@ export interface TableColumn<
     Partial<
       Pick<
         FieldValueProps,
-        | 'fieldValueUpdater'
+        | 'fieldValueEditor'
         | 'onFieldValueUpdated'
         | 'editField'
         | 'editMode'

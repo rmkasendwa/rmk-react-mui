@@ -40,7 +40,7 @@ export const WithEditableFieldValue = Template.bind({});
 WithEditableFieldValue.args = {
   label: 'Numeric Field',
   value: 2000,
-  fieldValueUpdater: async (value) => {
+  fieldValueEditor: async (value) => {
     console.log({ value });
     return new Promise((resolve) => {
       setTimeout(() => {
