@@ -765,7 +765,6 @@ export const BaseTable = <T extends BaseTableRow>(
             {displayingColumns.map((column, index) => {
               const {
                 id,
-                align,
                 style,
                 minWidth,
                 sortable: columnSortable = sortable,
@@ -810,7 +809,7 @@ export const BaseTable = <T extends BaseTableRow>(
                     sx={{
                       display: 'flex',
                       alignItems: 'center',
-                      pl: align === 'center' || index <= 0 ? 3 : 1.5,
+                      pl: 1.5,
                       pr: columnSortable
                         ? 3
                         : index < displayingColumns.length - 1
