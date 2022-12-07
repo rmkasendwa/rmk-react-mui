@@ -83,6 +83,7 @@ export interface FieldValueProps extends TypographyProps {
   editable?: boolean;
   editableValue?: string | boolean | number;
   fieldValueUpdater?: (value: string | boolean | number) => any;
+  onFieldValueUpdated?: () => void;
   onCancelEdit?: () => void;
   onChangeEditMode?: (editMode: boolean) => void;
   type?: ExoticDataType;
@@ -116,6 +117,7 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
       className,
       children: valueProp,
       fieldValueUpdater,
+      onFieldValueUpdated,
       onCancelEdit,
       type = 'string',
       editable = false,
@@ -159,9 +161,11 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
     const isComponentMountedRef = useRef(true);
     const anchorRef = useRef<HTMLDivElement>(null);
     const onChangeEditModeRef = useRef(onChangeEditMode);
+    const onFieldValueUpdatedRef = useRef(onFieldValueUpdated);
     useEffect(() => {
       onChangeEditModeRef.current = onChangeEditMode;
-    }, [onChangeEditMode]);
+      onFieldValueUpdatedRef.current = onFieldValueUpdated;
+    }, [onChangeEditMode, onFieldValueUpdated]);
 
     const { palette, components } = useTheme();
     const [editMode, setEditMode] = useState(editModeProp || false);
@@ -181,6 +185,7 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
       if (updated && isComponentMountedRef.current) {
         setEditMode(false);
         setUpdated(false);
+        onFieldValueUpdatedRef.current && onFieldValueUpdatedRef.current();
       }
     }, [setUpdated, updated]);
 

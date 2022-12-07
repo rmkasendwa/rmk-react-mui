@@ -47,7 +47,9 @@ export interface TableColumn<
   ColumnType extends TableColumnType = TableColumnType
 > extends Partial<Omit<TableCellProps, 'defaultValue' | 'id'>>,
     Partial<Pick<DropdownOption, 'label' | 'searchableLabel' | 'description'>>,
-    Partial<Pick<FieldValueProps, 'fieldValueUpdater'>> {
+    Partial<
+      Pick<FieldValueProps, 'fieldValueUpdater' | 'onFieldValueUpdated'>
+    > {
   id: keyof RowObject;
   type?: ColumnType;
   align?: 'left' | 'center' | 'right';

@@ -48,6 +48,9 @@ WithEditableFieldValue.args = {
       }, 3000);
     });
   },
+  onFieldValueUpdated: () => {
+    console.log('Updated!');
+  },
   type: 'number',
   editable: true,
 } as FieldValueDisplayProps;

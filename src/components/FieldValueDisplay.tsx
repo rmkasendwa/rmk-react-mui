@@ -93,6 +93,7 @@ export interface FieldValueDisplayProps
       | 'editMode'
       | 'onChangeEditMode'
       | 'fieldValueUpdater'
+      | 'onFieldValueUpdated'
     > {
   label: ReactNode;
   editLabel?: ReactNode;
@@ -122,6 +123,7 @@ export const FieldValueDisplay: FC<FieldValueDisplayProps> = (inProps) => {
     editMode: editModeProp,
     onChangeEditMode,
     fieldValueUpdater,
+    onFieldValueUpdated,
     sx,
     ...rest
   } = props;
@@ -242,6 +244,7 @@ export const FieldValueDisplay: FC<FieldValueDisplayProps> = (inProps) => {
           editMode,
           editableValue,
           fieldValueUpdater,
+          onFieldValueUpdated,
         }}
         onChangeEditMode={(editMode) => setEditMode(editMode)}
         sx={{
