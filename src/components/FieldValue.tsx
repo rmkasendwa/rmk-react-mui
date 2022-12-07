@@ -74,7 +74,8 @@ declare module '@mui/material/styles/components' {
   }
 }
 
-export interface FieldValueProps extends TypographyProps {
+export interface FieldValueProps<T extends ReactNode = ReactNode>
+  extends TypographyProps {
   icon?: ReactNode;
   endIcon?: ReactNode;
   IconContainerProps?: Partial<GridProps>;
@@ -82,7 +83,7 @@ export interface FieldValueProps extends TypographyProps {
   ContainerGridProps?: Partial<GridProps>;
   editable?: boolean;
   editableValue?: string | boolean | number;
-  fieldValueUpdater?: (value: string | boolean | number) => any;
+  fieldValueEditor?: (value: T) => any;
   onFieldValueUpdated?: () => void;
   onCancelEdit?: () => void;
   onChangeEditMode?: (editMode: boolean) => void;
@@ -90,6 +91,7 @@ export interface FieldValueProps extends TypographyProps {
   validationRules?: Yup.BaseSchema;
   editField?: ReactNode;
   editMode?: boolean;
+  children?: T;
 }
 
 export function getFieldValueUtilityClass(slot: string): string {
@@ -116,7 +118,7 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
       ContainerGridProps = {},
       className,
       children: valueProp,
-      fieldValueUpdater,
+      fieldValueEditor,
       onFieldValueUpdated,
       onCancelEdit,
       type = 'string',
@@ -202,8 +204,8 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
               }}
               onSubmit={({ value }) => {
                 update(async () => {
-                  if (fieldValueUpdater) {
-                    return fieldValueUpdater(value);
+                  if (fieldValueEditor) {
+                    return fieldValueEditor(value);
                   }
                 });
               }}

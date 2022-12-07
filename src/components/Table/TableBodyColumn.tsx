@@ -119,7 +119,7 @@ export const TableBodyColumn = forwardRef<
     column,
     onClick,
     row,
-    fieldValueUpdater,
+    fieldValueEditor,
     onFieldValueUpdated,
     editable = false,
     editField,
@@ -367,7 +367,7 @@ export const TableBodyColumn = forwardRef<
         {...{
           editable,
           editMode,
-          fieldValueUpdater,
+          fieldValueEditor,
           onFieldValueUpdated,
           editField,
           validationRules,
