@@ -118,15 +118,17 @@ const BaseTableColumnToggleIconButton = <T extends BaseTableRow>(
   >(selectedColumnIdsProp || []);
 
   const options = useMemo(() => {
-    return columns.map(({ id, label, searchableLabel }, index) => {
+    return columns.map(({ id, label, searchableLabel, locked }) => {
+      const isColumnSelected = selectedColumnIds.includes(id as any);
       return {
         value: id,
         label: searchableLabel || label,
         searchableLabel,
-        selectable: index > 0 && index < columns.length - 1,
+        selectable:
+          !locked && (!isColumnSelected || selectedColumnIds.length > 2),
       } as DropdownOption;
     });
-  }, [columns]);
+  }, [columns, selectedColumnIds]);
 
   useEffect(() => {
     if (selectedColumnIdsProp) {

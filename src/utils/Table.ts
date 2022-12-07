@@ -7,18 +7,22 @@ import { ExoticDataType, PrimitiveDataType } from '../interfaces/Utils';
  * @param options Table column.
  * @returns Table column element widths.
  */
-export const getColumnWidthStyles = ({ width, minWidth }: TableColumn) => {
+export const getColumnWidthStyles = ({
+  width,
+  minWidth: inputMinWidth,
+}: TableColumn) => {
+  const minWidth = (() => {
+    if (inputMinWidth) {
+      if (width && width < inputMinWidth) {
+        return width;
+      }
+      return inputMinWidth;
+    }
+    return 100;
+  })();
   return {
     width,
-    minWidth: (() => {
-      if (minWidth) {
-        if (width && width < minWidth) {
-          return width;
-        }
-        return minWidth;
-      }
-      return 100;
-    })(),
+    minWidth,
     maxWidth: width || (!minWidth || minWidth < 200 ? 200 : minWidth),
   };
 };
@@ -58,7 +62,8 @@ export const getColumnPaddingStyles = ({
  */
 export const getTableMinWidth = (tableColumns: TableColumn[]) => {
   return tableColumns.reduce((accumulator, tableColumn) => {
-    return accumulator + getColumnWidthStyles(tableColumn).minWidth;
+    const { minWidth, width } = getColumnWidthStyles(tableColumn);
+    return accumulator + (width ?? minWidth);
   }, 0);
 };
 
