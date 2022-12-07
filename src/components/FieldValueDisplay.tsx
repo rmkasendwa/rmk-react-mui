@@ -24,7 +24,7 @@ export interface FieldValueDisplayClasses {
   root: string;
   label: string;
   description: string;
-  value: string;
+  value: ReactNode;
 }
 
 export type FieldValueDisplayClassKey = keyof FieldValueDisplayClasses;
@@ -85,16 +85,14 @@ export interface FieldValueDisplayProps
     Pick<
       FieldValueProps,
       | 'editable'
-      | 'onEdit'
       | 'onCancelEdit'
       | 'editableValue'
       | 'type'
       | 'validationRules'
       | 'editField'
       | 'editMode'
-      | 'updating'
-      | 'updated'
       | 'onChangeEditMode'
+      | 'fieldValueUpdater'
     > {
   label: ReactNode;
   editLabel?: ReactNode;
@@ -116,16 +114,14 @@ export const FieldValueDisplay: FC<FieldValueDisplayProps> = (inProps) => {
     FieldValueProps = {},
     required,
     editable,
-    onEdit,
     onCancelEdit,
     type,
     validationRules,
     editField,
     editableValue,
     editMode: editModeProp,
-    updating,
-    updated,
     onChangeEditMode,
+    fieldValueUpdater,
     sx,
     ...rest
   } = props;
@@ -239,15 +235,13 @@ export const FieldValueDisplay: FC<FieldValueDisplayProps> = (inProps) => {
         {...FieldValuePropsRest}
         {...{
           editable,
-          onEdit,
           onCancelEdit,
           type,
           validationRules,
           editField,
           editMode,
           editableValue,
-          updating,
-          updated,
+          fieldValueUpdater,
         }}
         onChangeEditMode={(editMode) => setEditMode(editMode)}
         sx={{

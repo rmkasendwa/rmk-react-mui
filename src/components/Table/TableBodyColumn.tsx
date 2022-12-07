@@ -120,6 +120,7 @@ export const TableBodyColumn = forwardRef<
     editable = false,
     onClick,
     row,
+    fieldValueUpdater,
   } = props;
 
   const classes = composeClasses(
@@ -353,7 +354,7 @@ export const TableBodyColumn = forwardRef<
     >
       <FieldValue
         {...columnTypographyPropsRest}
-        {...{ editable, editMode }}
+        {...{ editable, editMode, fieldValueUpdater }}
         editableValue={baseColumnValue}
         onChangeEditMode={(editMode) => setEditMode(editMode)}
         type={mapTableColumnTypeToExoticDataType(type)}
