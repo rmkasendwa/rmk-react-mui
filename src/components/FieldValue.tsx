@@ -268,6 +268,9 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
                         anchorEl={anchorRef.current}
                         transition
                         placement="bottom-end"
+                        sx={{
+                          zIndex: 999,
+                        }}
                       >
                         {({ TransitionProps }) => {
                           return (
@@ -389,7 +392,19 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
         {...ContainerGridPropsRest}
         container
         className={clsx(classes.root, className)}
-        sx={{ gap: 1, ...ContainerGridPropsSx }}
+        sx={{
+          gap: 1,
+          ...(() => {
+            if (!editMode) {
+              return {
+                display: 'inline-flex',
+                width: 'auto',
+                maxWidth: '100%',
+              };
+            }
+          })(),
+          ...ContainerGridPropsSx,
+        }}
       >
         {!editMode && icon ? (
           <Grid
