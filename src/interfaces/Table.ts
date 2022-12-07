@@ -48,7 +48,15 @@ export interface TableColumn<
 > extends Partial<Omit<TableCellProps, 'defaultValue' | 'id'>>,
     Partial<Pick<DropdownOption, 'label' | 'searchableLabel' | 'description'>>,
     Partial<
-      Pick<FieldValueProps, 'fieldValueUpdater' | 'onFieldValueUpdated'>
+      Pick<
+        FieldValueProps,
+        | 'fieldValueUpdater'
+        | 'onFieldValueUpdated'
+        | 'editField'
+        | 'editMode'
+        | 'editable'
+        | 'validationRules'
+      >
     > {
   id: keyof RowObject;
   type?: ColumnType;
@@ -73,7 +81,6 @@ export interface TableColumn<
   decimalPlaces?: number;
   textTransform?: boolean;
   showHeaderText?: boolean;
-  editable?: boolean;
 }
 
 export interface ForEachDerivedColumnConfiguration<T> {

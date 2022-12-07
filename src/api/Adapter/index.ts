@@ -156,6 +156,7 @@ const fetchData = async <T = any>(
                 return `Error: '${label}' failed. Something went wrong`;
               })();
               if (
+                response &&
                 !FAILED_REQUEST_RETRY_STATUS_BLACKLIST.includes(
                   response.status
                 ) &&
