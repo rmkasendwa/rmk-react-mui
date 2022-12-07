@@ -33,6 +33,7 @@ import {
 } from 'react';
 import * as Yup from 'yup';
 
+import { useUpdate } from '../hooks/Utils';
 import { ExoticDataType } from '../interfaces/Utils';
 import FormikCurrencyInputField from './FormikInputFields/FormikCurrencyInputField';
 import FormikDateInputField from './FormikInputFields/FormikDateInputField';
@@ -80,16 +81,14 @@ export interface FieldValueProps extends TypographyProps {
   EndIconContainerProps?: Partial<GridProps>;
   ContainerGridProps?: Partial<GridProps>;
   editable?: boolean;
-  editableValue?: string;
-  onEdit?: (value: string) => void;
+  editableValue?: string | boolean | number;
+  fieldValueUpdater?: (value: string | boolean | number) => any;
   onCancelEdit?: () => void;
   onChangeEditMode?: (editMode: boolean) => void;
   type?: ExoticDataType;
   validationRules?: Yup.BaseSchema;
   editField?: ReactNode;
   editMode?: boolean;
-  updating?: boolean;
-  updated?: boolean;
 }
 
 export function getFieldValueUtilityClass(slot: string): string {
@@ -116,15 +115,13 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
       ContainerGridProps = {},
       className,
       children: valueProp,
-      onEdit,
+      fieldValueUpdater,
       onCancelEdit,
       type = 'string',
       editable = false,
       validationRules = Yup.string(),
       editField,
       editMode: editModeProp,
-      updating,
-      updated: updatedProp,
       onChangeEditMode,
       sx,
       ...rest
@@ -151,8 +148,11 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
     const { sx: ContainerGridPropsSx, ...ContainerGridPropsRest } =
       ContainerGridProps;
 
-    if (editableValue == null && typeof valueProp === 'string') {
-      editableValue = valueProp;
+    if (
+      editableValue == null &&
+      ['string', 'boolean', 'number'].includes(typeof valueProp)
+    ) {
+      editableValue = valueProp as any;
     }
 
     // Refs
@@ -164,9 +164,8 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
     }, [onChangeEditMode]);
 
     const { palette, components } = useTheme();
-
     const [editMode, setEditMode] = useState(editModeProp || false);
-    const [updated, setUpdated] = useState(updatedProp || false);
+    const { update, updating, updated, setUpdated } = useUpdate();
 
     useEffect(() => {
       onChangeEditModeRef.current && onChangeEditModeRef.current(editMode);
@@ -179,17 +178,11 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
     }, [editModeProp]);
 
     useEffect(() => {
-      if (updatedProp != null) {
-        setUpdated(updatedProp);
-      }
-    }, [updatedProp]);
-
-    useEffect(() => {
       if (updated && isComponentMountedRef.current) {
         setEditMode(false);
         setUpdated(false);
       }
-    }, [updated]);
+    }, [setUpdated, updated]);
 
     const value = (() => {
       if (editable) {
@@ -202,11 +195,15 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
               initialValues={{
                 value: editableValue || '',
               }}
-              onSubmit={async ({ value }) => {
-                onEdit && (await onEdit(value));
+              onSubmit={({ value }) => {
+                update(async () => {
+                  if (fieldValueUpdater) {
+                    return fieldValueUpdater(value);
+                  }
+                });
               }}
             >
-              {({ isSubmitting }) => {
+              {({ submitForm }) => {
                 return (
                   <Form noValidate>
                     <Box>
@@ -280,7 +277,7 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
                                 }}
                               >
                                 <Grid item>
-                                  {isSubmitting || updating ? null : (
+                                  {updating ? null : (
                                     <Tooltip title="Cancel">
                                       <IconButton
                                         size="small"
@@ -304,7 +301,7 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
                                   )}
                                 </Grid>
                                 <Grid item>
-                                  {isSubmitting || updating ? (
+                                  {updating ? (
                                     <IconButton
                                       disabled
                                       sx={{
@@ -320,7 +317,7 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
                                     <Tooltip title="Update">
                                       <IconButton
                                         size="small"
-                                        type="submit"
+                                        onClick={() => submitForm()}
                                         sx={{
                                           p: 0.4,
                                           '&,&:hover': {

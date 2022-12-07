@@ -2,7 +2,9 @@ import Chip from '@mui/material/Chip';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import React from 'react';
 
-import FieldValueDisplay from '../components/FieldValueDisplay';
+import FieldValueDisplay, {
+  FieldValueDisplayProps,
+} from '../components/FieldValueDisplay';
 
 export default {
   title: 'Components/Field Value Display',
@@ -16,30 +18,45 @@ const Template: ComponentStory<typeof FieldValueDisplay> = (props) => {
   return <FieldValueDisplay {...props} />;
 };
 
-export const Default = Template.bind({
+export const Default = Template.bind({});
+Default.args = {
   label: 'The Label',
-});
+  value: 'This is the value',
+} as FieldValueDisplayProps;
 
-export const WithStringValue = Template.bind({
-  label: 'The Label',
-});
-
+export const WithStringValue = Template.bind({});
 WithStringValue.args = {
   label: 'The Label',
   value: 'This is the value',
-};
+} as FieldValueDisplayProps;
 
 export const WithNumericValue = Template.bind({});
 WithNumericValue.args = {
-  label: 'The Label',
+  label: 'Numeric Field',
   value: 2000,
-};
+} as FieldValueDisplayProps;
+
+export const WithEditableFieldValue = Template.bind({});
+WithEditableFieldValue.args = {
+  label: 'Numeric Field',
+  value: 2000,
+  fieldValueUpdater: async (value) => {
+    console.log({ value });
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({ value });
+      }, 3000);
+    });
+  },
+  type: 'number',
+  editable: true,
+} as FieldValueDisplayProps;
 
 export const WithElementValue = Template.bind({});
 WithElementValue.args = {
   label: 'The Label',
   value: <Chip label="A reasonably long value" color="success" size="small" />,
-};
+} as FieldValueDisplayProps;
 
 export const StyledDifferently = Template.bind({});
 StyledDifferently.args = {
@@ -55,4 +72,4 @@ StyledDifferently.args = {
       fontWeight: 'bold',
     },
   },
-};
+} as FieldValueDisplayProps;
