@@ -791,7 +791,7 @@ export const BaseTable = <T extends BaseTableRow>(
                     className,
                     stickyHeader && OPAQUE_BG_CLASS_NAME
                   )}
-                  {...{ style, align }}
+                  {...{ style }}
                   sx={{
                     fontWeight: 'bold',
                     p: 0,

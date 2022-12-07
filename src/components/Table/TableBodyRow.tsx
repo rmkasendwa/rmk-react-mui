@@ -85,7 +85,7 @@ export const TableBodyRow = <T extends BaseTableRow>(
     onClickRow,
     sx,
     defaultColumnValue: rowDefaultColumnValue,
-    columnTypographyProps = {},
+    columnTypographyProps,
     minColumnWidth,
     className,
     ...rest
@@ -167,7 +167,6 @@ export const TableBodyRow = <T extends BaseTableRow>(
           <TableBodyColumn
             key={String(id)}
             {...({} as any)}
-            {...column}
             {...{
               column,
               row,
@@ -177,6 +176,7 @@ export const TableBodyRow = <T extends BaseTableRow>(
               defaultColumnValue,
               editable,
             }}
+            {...column}
             onClick={() => {
               propagateClickToParentRowClickEvent &&
                 onClickRow &&
