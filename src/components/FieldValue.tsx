@@ -439,8 +439,7 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
             {...omit(rest, 'editableValue')}
             sx={{
               wordBreak: 'break-word',
-              whiteSpace: 'pre-line',
-              width: '100%',
+              maxWidth: '100%',
               lineHeight: 'inherit',
               ...((components?.MuiFieldValue?.styleOverrides?.root as any) ||
                 {}),
