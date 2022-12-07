@@ -42,6 +42,16 @@ export type GetColumnValue<
   ? EllipsisMenuIconButtonProps
   : ReactNode;
 
+export type GetEditField<
+  RowObject = any,
+  ColumnType extends TableColumnType = TableColumnType
+> = (row: RowObject, column: TableColumn<RowObject, ColumnType>) => ReactNode;
+
+export type OnClickColumn<
+  RowObject = any,
+  ColumnType extends TableColumnType = TableColumnType
+> = (row: RowObject, column: TableColumn<RowObject, ColumnType>) => void;
+
 export interface TableColumn<
   RowObject = any,
   ColumnType extends TableColumnType = TableColumnType
@@ -71,7 +81,8 @@ export interface TableColumn<
   locked?: boolean;
   defaultColumnValue?: ReactNode;
   getColumnValue?: GetColumnValue<RowObject, ColumnType>;
-  onClickColumn?: (currentEntity: RowObject) => void;
+  getEditField?: GetEditField<RowObject, ColumnType>;
+  onClickColumn?: OnClickColumn<RowObject, ColumnType>;
   headerSx?: SxProps<Theme>;
   bodySx?: SxProps<Theme>;
   sortable?: boolean;

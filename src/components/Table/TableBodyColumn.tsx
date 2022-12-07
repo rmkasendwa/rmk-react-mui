@@ -123,6 +123,7 @@ export const TableBodyColumn = forwardRef<
     onFieldValueUpdated,
     editable = false,
     editField,
+    getEditField,
     editMode: editModeProp,
     validationRules,
   } = props;
@@ -326,7 +327,7 @@ export const TableBodyColumn = forwardRef<
       {...{ align }}
       className={clsx(classes.root)}
       onClick={(event) => {
-        onClickColumn && onClickColumn(row);
+        onClickColumn && onClickColumn(row, column);
         onClick && onClick(event);
       }}
       sx={{
@@ -372,6 +373,12 @@ export const TableBodyColumn = forwardRef<
           editField,
           validationRules,
         }}
+        editField={(() => {
+          if (getEditField) {
+            return getEditField(row, column);
+          }
+          return editField;
+        })()}
         editableValue={baseColumnValue}
         onChangeEditMode={(editMode) => setEditMode(editMode)}
         type={mapTableColumnTypeToExoticDataType(type)}

@@ -1,3 +1,4 @@
+import LockOpenIcon from '@mui/icons-material/LockOpen';
 import Chip from '@mui/material/Chip';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import React from 'react';
@@ -74,5 +75,14 @@ StyledDifferently.args = {
     sx: {
       fontWeight: 'bold',
     },
+  },
+} as FieldValueDisplayProps;
+
+export const WithIcons = Template.bind({});
+WithIcons.args = {
+  label: 'The Label',
+  value: <Chip label="A reasonably long value" color="success" size="small" />,
+  FieldValueProps: {
+    endIcon: <LockOpenIcon />,
   },
 } as FieldValueDisplayProps;

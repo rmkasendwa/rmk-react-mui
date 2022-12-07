@@ -154,8 +154,13 @@ export const BaseFieldValueDisplay = <FieldValue extends ReactNode>(
   const {
     className: ValuePropsClassName,
     sx: FieldValuePropsSx,
+    ContainerGridProps: FieldValuePropsContainerGripProps = {},
     ...FieldValuePropsRest
   } = FieldValueProps;
+  const {
+    sx: FieldValuePropsContainerGripPropsSx,
+    ...FieldValuePropsContainerGripPropsRest
+  } = FieldValuePropsContainerGripProps;
 
   editLabel ?? (editLabel = label);
 
@@ -268,9 +273,15 @@ export const BaseFieldValueDisplay = <FieldValue extends ReactNode>(
           ...(components?.MuiFieldValueDisplay?.styleOverrides?.value as any),
         }}
         onChangeEditMode={(editMode) => setEditMode(editMode)}
+        ContainerGridProps={{
+          ...FieldValuePropsContainerGripPropsRest,
+          sx: {
+            mt: 0.5,
+            ...FieldValuePropsContainerGripPropsSx,
+          },
+        }}
         sx={{
           color: alpha(palette.text.primary, 0.5),
-          mt: 0.5,
           ...FieldValuePropsSx,
         }}
       >
