@@ -60,13 +60,28 @@ export const getColumnPaddingStyles = ({
  * @param tableColumns The table columns.
  * @returns Minimum table width.
  */
-export const getTableMinWidth = (tableColumns: TableColumn[]) => {
-  return tableColumns.reduce((accumulator, tableColumn) => {
+export const getTableMinWidth = (
+  tableColumns: TableColumn[],
+  {
+    enableColumnDisplayToggle,
+  }: {
+    enableColumnDisplayToggle: boolean;
+  }
+) => {
+  return expandTableColumnWidths(tableColumns, {
+    enableColumnDisplayToggle,
+  }).reduce((accumulator, tableColumn) => {
     const { minWidth, width } = getColumnWidthStyles(tableColumn);
     return accumulator + (width ?? minWidth);
   }, 0);
 };
 
+/**
+ * Maps table column type to primitive data type.
+ *
+ * @param columnType The table column type.
+ * @returns primitive data type.
+ */
 export const mapTableColumnTypeToPrimitiveDataType = (
   columnType?: TableColumnType
 ): PrimitiveDataType => {
@@ -90,6 +105,12 @@ export const mapTableColumnTypeToPrimitiveDataType = (
   }
 };
 
+/**
+ * Maps table column type to exotic data type.
+ *
+ * @param columnType The table column type.
+ * @returns Exotic data type.
+ */
 export const mapTableColumnTypeToExoticDataType = (
   columnType?: TableColumnType
 ): ExoticDataType => {
@@ -106,4 +127,61 @@ export const mapTableColumnTypeToExoticDataType = (
     default:
       return mapTableColumnTypeToPrimitiveDataType(columnType);
   }
+};
+
+/**
+ * Adds default widths to table columns.
+ *
+ * @param tableColumns The table columns.
+ * @param param1 Expansion options.
+ * @returns Table columns with expanded widths.
+ */
+export const expandTableColumnWidths = (
+  tableColumns: TableColumn[],
+  {
+    enableColumnDisplayToggle,
+  }: {
+    enableColumnDisplayToggle: boolean;
+  }
+) => {
+  return tableColumns.map((column, index) => {
+    const isLastColumn = index === tableColumns.length - 1;
+    const nextColumn = { ...column } as typeof column;
+    switch (nextColumn.type) {
+      case 'date':
+      case 'time':
+        nextColumn.width || (nextColumn.width = 150);
+        break;
+      case 'boolean':
+        nextColumn.width || (nextColumn.width = 150);
+        break;
+      case 'id':
+        nextColumn.width || (nextColumn.width = 100);
+        break;
+      case 'phoneNumber':
+        nextColumn.width || (nextColumn.width = 195);
+        break;
+      case 'ellipsisMenuTool':
+        nextColumn.width = 40;
+        break;
+    }
+
+    const { showHeaderText, label } = nextColumn;
+    const extraWidth = (() => {
+      if (
+        isLastColumn &&
+        enableColumnDisplayToggle &&
+        showHeaderText &&
+        label
+      ) {
+        return 44;
+      }
+      return 0;
+    })();
+
+    nextColumn.minWidth && (nextColumn.minWidth += extraWidth);
+    nextColumn.width && (nextColumn.width += extraWidth);
+
+    return nextColumn;
+  });
 };
