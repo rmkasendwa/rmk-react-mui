@@ -369,7 +369,6 @@ export const TableBodyColumn = forwardRef<
         {...{
           editable,
           editMode,
-          fieldValueEditor,
           onFieldValueUpdated,
           editField,
           validationRules,
@@ -381,10 +380,20 @@ export const TableBodyColumn = forwardRef<
           return editField;
         })()}
         editableValue={(() => {
-          if (getEditableColumnValue) {
-            return getEditableColumnValue(row, column);
+          const editableValue = (() => {
+            if (getEditableColumnValue) {
+              return getEditableColumnValue(row, column);
+            }
+            return baseColumnValue;
+          })();
+          return editableValue ?? null;
+        })()}
+        fieldValueEditor={(() => {
+          if (fieldValueEditor) {
+            return (updatedValue) => {
+              return fieldValueEditor(row, updatedValue, column);
+            };
           }
-          return baseColumnValue || null;
         })()}
         onChangeEditMode={(editMode) => setEditMode(editMode)}
         type={mapTableColumnTypeToExoticDataType(type)}

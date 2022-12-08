@@ -148,7 +148,12 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
                   </Box>
                 ),
                 sx: {
-                  alignItems: 'start',
+                  ...(() => {
+                    if (multiline && (minRows || rows)) {
+                      return { alignItems: 'start' };
+                    }
+                    return { alignItems: 'center' };
+                  })(),
                 },
               }}
             />

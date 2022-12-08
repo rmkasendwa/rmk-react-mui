@@ -187,7 +187,6 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
       if (updated && isComponentMountedRef.current) {
         setEditMode(false);
         setUpdated(false);
-        onFieldValueUpdatedRef.current && onFieldValueUpdatedRef.current();
       }
     }, [setUpdated, updated]);
 
@@ -205,12 +204,16 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
               onSubmit={({ value }) => {
                 update(async () => {
                   if (fieldValueEditor) {
-                    return fieldValueEditor(value);
+                    const response = await fieldValueEditor(value);
+                    onFieldValueUpdatedRef.current &&
+                      (await onFieldValueUpdatedRef.current());
+                    setEditMode(false);
+                    return response;
                   }
                 });
               }}
             >
-              {({ submitForm }) => {
+              {({ submitForm, touched }) => {
                 return (
                   <Form noValidate>
                     <Box>
@@ -337,6 +340,7 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
                                             ),
                                           },
                                         }}
+                                        disabled={!touched}
                                       >
                                         <CheckIcon />
                                       </IconButton>
