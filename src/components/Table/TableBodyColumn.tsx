@@ -125,6 +125,7 @@ export const TableBodyColumn = forwardRef<
     editField,
     getEditField,
     editMode: editModeProp,
+    getEditableColumnValue,
     validationRules,
   } = props;
 
@@ -379,7 +380,12 @@ export const TableBodyColumn = forwardRef<
           }
           return editField;
         })()}
-        editableValue={baseColumnValue}
+        editableValue={(() => {
+          if (getEditableColumnValue) {
+            return getEditableColumnValue(row, column);
+          }
+          return baseColumnValue || null;
+        })()}
         onChangeEditMode={(editMode) => setEditMode(editMode)}
         type={mapTableColumnTypeToExoticDataType(type)}
       >
