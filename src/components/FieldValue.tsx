@@ -153,7 +153,7 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
       ContainerGridProps;
 
     if (
-      editableValue == null &&
+      editableValue === undefined &&
       ['string', 'boolean', 'number'].includes(typeof valueProp)
     ) {
       editableValue = valueProp as any;
@@ -397,7 +397,6 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
           ...(() => {
             if (!editMode) {
               return {
-                display: 'inline-flex',
                 width: 'auto',
                 maxWidth: '100%',
               };
@@ -412,10 +411,12 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
             item
             sx={{
               display: 'flex',
-              maxWidth: 24,
-              height: 24,
+              maxWidth: 20,
+              height: 20,
               justifyContent: 'center',
-              alignItems: 'center',
+              svg: {
+                fontSize: 20,
+              },
               ...IconContainerPropsSx,
             }}
           >
@@ -455,9 +456,12 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
             item
             sx={{
               display: 'flex',
-              maxWidth: 24,
-              height: 24,
+              maxWidth: 20,
+              height: 20,
               justifyContent: 'center',
+              svg: {
+                fontSize: 20,
+              },
               ...EndIconContainerPropsSx,
             }}
           >

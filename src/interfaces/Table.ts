@@ -47,6 +47,14 @@ export type GetEditField<
   ColumnType extends TableColumnType = TableColumnType
 > = (row: RowObject, column: TableColumn<RowObject, ColumnType>) => ReactNode;
 
+export type GetEditableColumnValue<
+  RowObject = any,
+  ColumnType extends TableColumnType = TableColumnType
+> = (
+  row: RowObject,
+  column: TableColumn<RowObject, ColumnType>
+) => string | number | boolean | (string | number | boolean)[];
+
 export type OnClickColumn<
   RowObject = any,
   ColumnType extends TableColumnType = TableColumnType
@@ -81,6 +89,7 @@ export interface TableColumn<
   locked?: boolean;
   defaultColumnValue?: ReactNode;
   getColumnValue?: GetColumnValue<RowObject, ColumnType>;
+  getEditableColumnValue?: GetEditableColumnValue<RowObject, ColumnType>;
   getEditField?: GetEditField<RowObject, ColumnType>;
   onClickColumn?: OnClickColumn<RowObject, ColumnType>;
   headerSx?: SxProps<Theme>;
