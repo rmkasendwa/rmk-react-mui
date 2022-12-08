@@ -53,7 +53,17 @@ export type GetEditableColumnValue<
 > = (
   row: RowObject,
   column: TableColumn<RowObject, ColumnType>
-) => string | number | boolean | (string | number | boolean)[];
+) => string | number | boolean | (string | number | boolean)[] | undefined;
+
+export type FieldValueEditor<
+  RowObject = any,
+  ColumnType extends TableColumnType = TableColumnType,
+  UpdatedValue extends ReactNode = ReactNode
+> = (
+  row: RowObject,
+  updatedValue: UpdatedValue,
+  column: TableColumn<RowObject, ColumnType>
+) => any;
 
 export type OnClickColumn<
   RowObject = any,
@@ -68,7 +78,6 @@ export interface TableColumn<
     Partial<
       Pick<
         FieldValueProps,
-        | 'fieldValueEditor'
         | 'onFieldValueUpdated'
         | 'editField'
         | 'editMode'
@@ -91,6 +100,7 @@ export interface TableColumn<
   getColumnValue?: GetColumnValue<RowObject, ColumnType>;
   getEditableColumnValue?: GetEditableColumnValue<RowObject, ColumnType>;
   getEditField?: GetEditField<RowObject, ColumnType>;
+  fieldValueEditor?: FieldValueEditor<RowObject, ColumnType>;
   onClickColumn?: OnClickColumn<RowObject, ColumnType>;
   headerSx?: SxProps<Theme>;
   bodySx?: SxProps<Theme>;

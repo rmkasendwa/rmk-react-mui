@@ -68,7 +68,7 @@ export const useAPIService = <T>(
           }
         })();
         taggedAPIRequest && taggedAPIRequestsRef.current.push(taggedAPIRequest);
-        const data = await call(() => (apiFunction as TAPIFunction)())
+        const response = await call(() => (apiFunction as TAPIFunction)())
           .then((payload) => {
             if (isComponentMountedRef.current) {
               setLoaded(true);
@@ -92,19 +92,20 @@ export const useAPIService = <T>(
             1
           );
         }
-        if (data) {
+        if (response) {
           if (isComponentMountedRef.current) {
-            setRecord(data);
+            setRecord(response);
           }
           if (key) {
             updateData({
-              [key]: data,
+              [key]: response,
             });
           }
         }
         if (isComponentMountedRef.current) {
           setLoading(false);
         }
+        return response;
       }
     },
     [call, key, updateData]
@@ -241,7 +242,7 @@ export const useRecord = <T>(
 
   const load = useCallback(
     (polling = false) => {
-      apiServiceLoad(recordFinderRef.current, undefined, polling);
+      return apiServiceLoad(recordFinderRef.current, undefined, polling);
     },
     [apiServiceLoad]
   );
@@ -390,7 +391,7 @@ export const usePaginatedRecords = <T>(
       params.offset || (params.offset = defaultPaginationParams.offset);
       params.limit || (params.limit = defaultPaginationParams.limit);
       setLoadingPaginationParams(pick(params, 'offset', 'limit'));
-      loadFromAPIService(async () => {
+      return loadFromAPIService(async () => {
         const responseData = await recordFinderRef.current();
         const { records, recordsTotalCount } = responseData;
         setCurrentPageRecords(records);
@@ -425,9 +426,7 @@ export const usePaginatedRecords = <T>(
   ]);
 
   useEffect(() => {
-    if (loadOnMount) {
-      load();
-    }
+    loadOnMount && load();
   }, [load, loadOnMount]);
 
   return {
