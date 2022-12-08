@@ -781,7 +781,6 @@ export const BaseTable = <T extends BaseTableRow>(
                     }),
                     position: stickyHeader ? 'sticky' : 'relative',
                     bgcolor: 'transparent',
-                    ...style,
                     ...sx,
                     ...(headerSx as any),
                   }}
