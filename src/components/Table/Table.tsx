@@ -56,6 +56,7 @@ import {
 } from '../../interfaces/Table';
 import { sort } from '../../utils/Sort';
 import {
+  expandTableColumnWidths,
   getColumnWidthStyles,
   getTableMinWidth,
   mapTableColumnTypeToPrimitiveDataType,
@@ -396,8 +397,9 @@ export const BaseTable = <T extends BaseTableRow>(
 
   // Setting default column properties
   const columns = useMemo(() => {
-    return columnsProp.map((column, index) => {
-      const isLastColumn = index === columnsProp.length - 1;
+    return expandTableColumnWidths(columnsProp, {
+      enableColumnDisplayToggle,
+    }).map((column) => {
       const nextColumn = { ...column } as typeof column;
       nextColumn.type || (nextColumn.type = 'string');
       nextColumn.className = clsx(
@@ -405,10 +407,6 @@ export const BaseTable = <T extends BaseTableRow>(
         nextColumn.className
       );
       switch (nextColumn.type) {
-        case 'date':
-        case 'time':
-          nextColumn.width || (nextColumn.width = 150);
-          break;
         case 'currency':
         case 'percentage':
         case 'number':
@@ -429,17 +427,14 @@ export const BaseTable = <T extends BaseTableRow>(
         case 'boolean':
           nextColumn.align = 'center';
           nextColumn.enumValues = ['Yes', 'No'];
-          nextColumn.width || (nextColumn.width = 150);
           nextColumn.searchKeyMapper ||
             (nextColumn.searchKeyMapper = (searchValue) =>
               searchValue === 'Yes');
           break;
         case 'id':
           nextColumn.align = 'center';
-          nextColumn.width || (nextColumn.width = 100);
           break;
         case 'phoneNumber':
-          nextColumn.width || (nextColumn.width = 195);
           nextColumn.columnClassName = 'phone-number-column';
           break;
         case 'currencyInput':
@@ -454,7 +449,6 @@ export const BaseTable = <T extends BaseTableRow>(
           nextColumn.align = 'center';
           break;
         case 'ellipsisMenuTool':
-          nextColumn.width = 40;
           nextColumn.opaque = true;
           nextColumn.defaultColumnValue ||
             (nextColumn.defaultColumnValue = <>&nbsp;</>);
@@ -470,22 +464,6 @@ export const BaseTable = <T extends BaseTableRow>(
       nextColumn.className = clsx(
         nextColumn.opaque ? OPAQUE_BG_CLASS_NAME : null
       );
-
-      const { showHeaderText, label } = nextColumn;
-      const extraWidth = (() => {
-        if (
-          isLastColumn &&
-          enableColumnDisplayToggle &&
-          showHeaderText &&
-          label
-        ) {
-          return 44;
-        }
-        return 0;
-      })();
-
-      nextColumn.minWidth && (nextColumn.minWidth += extraWidth);
-      nextColumn.width && (nextColumn.width += extraWidth);
 
       return nextColumn;
     });
@@ -517,7 +495,10 @@ export const BaseTable = <T extends BaseTableRow>(
         ...column,
         minWidth: minWidth ?? minColumnWidth,
       };
-    })
+    }),
+    {
+      enableColumnDisplayToggle,
+    }
   );
 
   const pageRows: typeof rows = (() => {
