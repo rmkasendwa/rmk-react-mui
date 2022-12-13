@@ -27,7 +27,12 @@ export const ReloadIconButton: FC<ReloadIconButtonProps> = ({
           return (
             <Tooltip title="Loading...">
               <Box component="span">
-                <IconButton disabled>
+                <IconButton
+                  disabled
+                  sx={{
+                    color: 'inherit !important',
+                  }}
+                >
                   <CircularProgress size={24} color="inherit" />
                 </IconButton>
               </Box>
@@ -37,7 +42,12 @@ export const ReloadIconButton: FC<ReloadIconButtonProps> = ({
         const refreshButton = (
           <Tooltip title="Reload">
             <Box component="span">
-              <IconButton onClick={() => load && load()}>
+              <IconButton
+                onClick={() => load && load()}
+                sx={{
+                  color: 'inherit !important',
+                }}
+              >
                 <RefreshIcon color="inherit" sx={{ display: 'block' }} />
               </IconButton>
             </Box>
