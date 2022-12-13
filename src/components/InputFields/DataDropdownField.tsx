@@ -531,6 +531,11 @@ export const DataDropdownField = forwardRef<
               <Box tabIndex={-1}>
                 <ClickAwayListener onClickAway={handleClose}>
                   <PaginatedDropdownOptionList
+                    {...{
+                      optionVariant,
+                      multiple,
+                      onSelectOption,
+                    }}
                     {...PaginatedDropdownOptionListPropsRest}
                     options={filteredOptions}
                     minWidth={
@@ -549,9 +554,6 @@ export const DataDropdownField = forwardRef<
                       selectedOptions,
                       setSelectedOptions,
                       loading,
-                      optionVariant,
-                      multiple,
-                      onSelectOption,
                     }}
                   />
                 </ClickAwayListener>

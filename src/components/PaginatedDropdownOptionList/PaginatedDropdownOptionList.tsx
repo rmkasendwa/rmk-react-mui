@@ -429,7 +429,14 @@ export const PaginatedDropdownOptionList = forwardRef<
                 );
                 if (description) {
                   return (
-                    <Tooltip title={description} key={value}>
+                    <Tooltip
+                      title={description}
+                      key={value}
+                      placement="left"
+                      sx={{
+                        pointerEvents: 'none',
+                      }}
+                    >
                       {dropdownOptionElement}
                     </Tooltip>
                   );
