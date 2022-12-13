@@ -37,7 +37,7 @@ export const AuthProvider: FC<{
 }> = ({ children, value }) => {
   const [loggedInUser, setLoggedInUser] = useState<any | null>(null);
   const [loadingCurrentSession, setLoadingCurrentSession] = useState(true);
-  const { sessionExpired, setSessionExpired } = useAPIContext();
+  const { setSessionExpired } = useAPIContext();
   const {
     record: user,
     load,
@@ -115,12 +115,6 @@ export const AuthProvider: FC<{
       updateLoggedInUserSession(user);
     }
   }, [user, updateLoggedInUserSession]);
-
-  useEffect(() => {
-    if (sessionExpired) {
-      clearLoggedInUserSession();
-    }
-  }, [clearLoggedInUserSession, sessionExpired]);
 
   return (
     <AuthContext.Provider

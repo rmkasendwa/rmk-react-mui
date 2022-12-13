@@ -2,7 +2,6 @@ import {
   ComponentsOverrides,
   ComponentsProps,
   ComponentsVariants,
-  alpha,
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
   generateUtilityClasses,
@@ -177,7 +176,7 @@ export const BaseFieldValueDisplay = <FieldValue extends ReactNode>(
     onChangeEditModeRef.current = onChangeEditMode;
   }, [onChangeEditMode]);
 
-  const { components, palette } = useTheme();
+  const { components } = useTheme();
   const { loading, errorMessage } = useLoadingContext();
 
   const [editMode, setEditMode] = useState(editModeProp || false);
@@ -291,7 +290,7 @@ export const BaseFieldValueDisplay = <FieldValue extends ReactNode>(
           },
         }}
         sx={{
-          color: alpha(palette.text.primary, 0.5),
+          opacity: 0.5,
           ...(components?.MuiFieldValueDisplay?.styleOverrides?.value as any),
           ...FieldValuePropsSx,
         }}

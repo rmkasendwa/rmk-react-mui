@@ -272,7 +272,7 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
                         transition
                         placement="bottom-end"
                         sx={{
-                          zIndex: 999,
+                          zIndex: 9999,
                         }}
                       >
                         {({ TransitionProps }) => {

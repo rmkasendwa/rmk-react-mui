@@ -1,5 +1,5 @@
 import hash from 'object-hash';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import uniqid from 'uniqid';
 
 import { TextFieldProps } from '../components/InputFields/TextField';
@@ -36,36 +36,150 @@ export const useFileUpload = ({
     number[]
   >([]);
 
-  const getLoadableFiles = useCallback(
-    (files: FileContainer[]) => {
-      return files.map((file) => {
-        const loadableFile: LoadableFile = { ...file };
-        const { originalFile, id, extraParams } = file;
+  // Refs
+  const isInitialMount = useRef(true);
+  const onChangeRef = useRef(onChange);
+  const downloadRef = useRef(download);
+  const uploadRef = useRef(upload);
+  useEffect(() => {
+    isInitialMount.current = false;
+    onChangeRef.current = onChange;
+    downloadRef.current = download;
+    uploadRef.current = upload;
+  }, [download, onChange, upload]);
 
-        if (upload) {
-          const retryFileUpload = () => {
-            setFiles((prevFiles) => {
-              const stateFile = prevFiles.find(
-                ({ originalFile: stateFile }) => stateFile === originalFile
-              );
-              if (stateFile) {
-                stateFile.uploadError = '';
-                delete stateFile.retryUpload;
-                Object.assign(stateFile, uploadFile());
-                return [...prevFiles];
-              }
-              return prevFiles;
-            });
-          };
-          const uploadFile = () => {
-            const { cancel } = upload(originalFile, {
-              onProgress: (progress) => {
+  const getLoadableFiles = useCallback((files: FileContainer[]) => {
+    return files.map((file) => {
+      const loadableFile: LoadableFile = { ...file };
+      const { originalFile, id, extraParams } = file;
+
+      const upload = uploadRef.current;
+      if (upload) {
+        const retryFileUpload = () => {
+          setFiles((prevFiles) => {
+            const stateFile = prevFiles.find(
+              ({ originalFile: stateFile }) => stateFile === originalFile
+            );
+            if (stateFile) {
+              stateFile.uploadError = '';
+              delete stateFile.retryUpload;
+              Object.assign(stateFile, uploadFile());
+              return [...prevFiles];
+            }
+            return prevFiles;
+          });
+        };
+        const uploadFile = () => {
+          const { cancel } = upload(originalFile, {
+            onProgress: (progress) => {
+              setFiles((prevFiles) => {
+                const stateFile = prevFiles.find(
+                  ({ originalFile: stateFile }) => stateFile === originalFile
+                );
+                if (stateFile) {
+                  stateFile.uploadProgress = progress;
+                  return [...prevFiles];
+                }
+                return prevFiles;
+              });
+            },
+            onError: (err) => {
+              setFiles((prevFiles) => {
+                const stateFile = prevFiles.find(
+                  ({ originalFile: stateFile }) => stateFile === originalFile
+                );
+                if (stateFile) {
+                  stateFile.uploadError = err.message;
+                  stateFile.retryUpload = retryFileUpload;
+                  return [...prevFiles];
+                }
+                return prevFiles;
+              });
+            },
+            onSuccess: (payload) => {
+              if (payload.id) {
                 setFiles((prevFiles) => {
                   const stateFile = prevFiles.find(
                     ({ originalFile: stateFile }) => stateFile === originalFile
                   );
                   if (stateFile) {
-                    stateFile.uploadProgress = progress;
+                    stateFile.id = payload.id;
+                    return [...prevFiles];
+                  }
+                  return prevFiles;
+                });
+              }
+            },
+            onComplete: () => {
+              setFiles((prevFiles) => {
+                const stateFile = prevFiles.find(
+                  ({ originalFile: stateFile }) => stateFile === originalFile
+                );
+                if (stateFile) {
+                  stateFile.uploading = false;
+                  return [...prevFiles];
+                }
+                return prevFiles;
+              });
+            },
+          });
+          setFiles((prevFiles) => {
+            const stateFile = prevFiles.find(
+              ({ originalFile: stateFile }) => stateFile === originalFile
+            );
+            if (stateFile) {
+              stateFile.uploading = true;
+              stateFile.cancelUpload = () => {
+                cancel();
+                setFiles((prevFiles) => {
+                  const stateFile = prevFiles.find(
+                    ({ originalFile: stateFile }) => stateFile === originalFile
+                  );
+                  if (stateFile) {
+                    stateFile.uploading = false;
+                    delete stateFile.cancelUpload;
+                    delete stateFile.uploadError;
+                    delete stateFile.uploadProgress;
+                    return [...prevFiles];
+                  }
+                  return prevFiles;
+                });
+              };
+              return [...prevFiles];
+            }
+            return prevFiles;
+          });
+        };
+        loadableFile.upload = uploadFile;
+      }
+
+      const download = downloadRef.current;
+      if (download) {
+        const retryFileDownload = () => {
+          setFiles((prevFiles) => {
+            const stateFile = prevFiles.find(
+              ({ id: stateId }) => stateId === id
+            );
+            if (stateFile) {
+              stateFile.downloadError = '';
+              delete stateFile.retryDownload;
+              Object.assign(stateFile, downloadFile());
+              return [...prevFiles];
+            }
+            return prevFiles;
+          });
+        };
+        const downloadFile = () => {
+          const { cancel } = download(
+            { id, extraParams },
+            {
+              onProgress: (progress) => {
+                setFiles((prevFiles) => {
+                  const stateFile = prevFiles.find(
+                    ({ id: stateId }) => stateId === id
+                  );
+                  if (stateFile) {
+                    stateFile.downloadProgress = progress;
                     return [...prevFiles];
                   }
                   return prevFiles;
@@ -74,11 +188,11 @@ export const useFileUpload = ({
               onError: (err) => {
                 setFiles((prevFiles) => {
                   const stateFile = prevFiles.find(
-                    ({ originalFile: stateFile }) => stateFile === originalFile
+                    ({ id: stateId }) => stateId === id
                   );
                   if (stateFile) {
-                    stateFile.uploadError = err.message;
-                    stateFile.retryUpload = retryFileUpload;
+                    stateFile.downloadError = err.message;
+                    stateFile.retryDownload = retryFileDownload;
                     return [...prevFiles];
                   }
                   return prevFiles;
@@ -88,8 +202,7 @@ export const useFileUpload = ({
                 if (payload.id) {
                   setFiles((prevFiles) => {
                     const stateFile = prevFiles.find(
-                      ({ originalFile: stateFile }) =>
-                        stateFile === originalFile
+                      ({ id: stateId }) => stateId === id
                     );
                     if (stateFile) {
                       stateFile.id = payload.id;
@@ -102,152 +215,48 @@ export const useFileUpload = ({
               onComplete: () => {
                 setFiles((prevFiles) => {
                   const stateFile = prevFiles.find(
-                    ({ originalFile: stateFile }) => stateFile === originalFile
+                    ({ id: stateId }) => stateId === id
                   );
                   if (stateFile) {
-                    stateFile.uploading = false;
+                    stateFile.downloading = false;
                     return [...prevFiles];
                   }
                   return prevFiles;
                 });
               },
-            });
-            setFiles((prevFiles) => {
-              const stateFile = prevFiles.find(
-                ({ originalFile: stateFile }) => stateFile === originalFile
-              );
-              if (stateFile) {
-                stateFile.uploading = true;
-                stateFile.cancelUpload = () => {
-                  cancel();
-                  setFiles((prevFiles) => {
-                    const stateFile = prevFiles.find(
-                      ({ originalFile: stateFile }) =>
-                        stateFile === originalFile
-                    );
-                    if (stateFile) {
-                      stateFile.uploading = false;
-                      delete stateFile.cancelUpload;
-                      delete stateFile.uploadError;
-                      delete stateFile.uploadProgress;
-                      return [...prevFiles];
-                    }
-                    return prevFiles;
-                  });
-                };
-                return [...prevFiles];
-              }
-              return prevFiles;
-            });
-          };
-          loadableFile.upload = uploadFile;
-        }
-
-        if (download) {
-          const retryFileDownload = () => {
-            setFiles((prevFiles) => {
-              const stateFile = prevFiles.find(
-                ({ id: stateId }) => stateId === id
-              );
-              if (stateFile) {
-                stateFile.downloadError = '';
-                delete stateFile.retryDownload;
-                Object.assign(stateFile, downloadFile());
-                return [...prevFiles];
-              }
-              return prevFiles;
-            });
-          };
-          const downloadFile = () => {
-            const { cancel } = download(
-              { id, extraParams },
-              {
-                onProgress: (progress) => {
-                  setFiles((prevFiles) => {
-                    const stateFile = prevFiles.find(
-                      ({ id: stateId }) => stateId === id
-                    );
-                    if (stateFile) {
-                      stateFile.downloadProgress = progress;
-                      return [...prevFiles];
-                    }
-                    return prevFiles;
-                  });
-                },
-                onError: (err) => {
-                  setFiles((prevFiles) => {
-                    const stateFile = prevFiles.find(
-                      ({ id: stateId }) => stateId === id
-                    );
-                    if (stateFile) {
-                      stateFile.downloadError = err.message;
-                      stateFile.retryDownload = retryFileDownload;
-                      return [...prevFiles];
-                    }
-                    return prevFiles;
-                  });
-                },
-                onSuccess: (payload) => {
-                  if (payload.id) {
-                    setFiles((prevFiles) => {
-                      const stateFile = prevFiles.find(
-                        ({ id: stateId }) => stateId === id
-                      );
-                      if (stateFile) {
-                        stateFile.id = payload.id;
-                        return [...prevFiles];
-                      }
-                      return prevFiles;
-                    });
-                  }
-                },
-                onComplete: () => {
-                  setFiles((prevFiles) => {
-                    const stateFile = prevFiles.find(
-                      ({ id: stateId }) => stateId === id
-                    );
-                    if (stateFile) {
-                      stateFile.downloading = false;
-                      return [...prevFiles];
-                    }
-                    return prevFiles;
-                  });
-                },
-              }
+            }
+          );
+          setFiles((prevFiles) => {
+            const stateFile = prevFiles.find(
+              ({ id: stateId }) => stateId === id
             );
-            setFiles((prevFiles) => {
-              const stateFile = prevFiles.find(
-                ({ id: stateId }) => stateId === id
-              );
-              if (stateFile) {
-                stateFile.downloading = true;
-                stateFile.cancelDownload = () => {
-                  cancel();
-                  setFiles((prevFiles) => {
-                    const stateFile = prevFiles.find(
-                      ({ id: stateId }) => stateId === id
-                    );
-                    if (stateFile) {
-                      stateFile.downloading = false;
-                      delete stateFile.downloadError;
-                      delete stateFile.downloadProgress;
-                      return [...prevFiles];
-                    }
-                    return prevFiles;
-                  });
-                };
-                return [...prevFiles];
-              }
-              return prevFiles;
-            });
-          };
-          loadableFile.download = downloadFile;
-        }
-        return loadableFile;
-      });
-    },
-    [download, upload]
-  );
+            if (stateFile) {
+              stateFile.downloading = true;
+              stateFile.cancelDownload = () => {
+                cancel();
+                setFiles((prevFiles) => {
+                  const stateFile = prevFiles.find(
+                    ({ id: stateId }) => stateId === id
+                  );
+                  if (stateFile) {
+                    stateFile.downloading = false;
+                    delete stateFile.downloadError;
+                    delete stateFile.downloadProgress;
+                    return [...prevFiles];
+                  }
+                  return prevFiles;
+                });
+              };
+              return [...prevFiles];
+            }
+            return prevFiles;
+          });
+        };
+        loadableFile.download = downloadFile;
+      }
+      return loadableFile;
+    });
+  }, []);
 
   useEffect(() => {
     if (fileField) {
@@ -326,7 +335,7 @@ export const useFileUpload = ({
   }, [value]);
 
   useEffect(() => {
-    if (onChange) {
+    if (onChangeRef.current && !isInitialMount.current) {
       const event: any = new Event('change', { bubbles: true });
       Object.defineProperty(event, 'target', {
         writable: false,
@@ -347,9 +356,9 @@ export const useFileUpload = ({
           ),
         },
       });
-      onChange(event);
+      onChangeRef.current(event);
     }
-  }, [files, id, name, onChange]);
+  }, [files, id, name]);
 
   return { files, duplicateFileSelections, setFiles };
 };
