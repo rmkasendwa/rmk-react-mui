@@ -128,6 +128,8 @@ export interface TableProps<T = any>
       | 'columnTypographyProps'
       | 'minColumnWidth'
       | 'editable'
+      | 'defaultDateFormat'
+      | 'defaultDateTimeFormat'
     >,
     Pick<
       TableColumnToggleIconButtonProps<T>,
@@ -147,7 +149,7 @@ export interface TableProps<T = any>
   bordersVariant?: TableBordersVariant;
   onChangePage?: (pageIndex: number) => void;
   onRowsPerPageChange?: (rowsPerPage: number) => void;
-  forEachRowProps?: GetRowProps;
+  forEachRowProps?: GetRowProps<T>;
   paging?: boolean;
   showHeaderRow?: boolean;
   showDataRows?: boolean;
@@ -250,6 +252,8 @@ export const BaseTable = <T extends BaseTableRow>(
     checkedRowIds: checkedRowIdsProp,
     onChangeCheckedRowIds: onChangeCheckedRowIdsProp,
     rowsPerPageOptions: rowsPerPageOptionsProp = [10, 25, 50, 100],
+    defaultDateFormat = 'MMM dd, yyyy',
+    defaultDateTimeFormat = 'MMM dd, yyyy hh:mm aa',
     sx,
     ...rest
   } = props;
@@ -987,6 +991,8 @@ export const BaseTable = <T extends BaseTableRow>(
                         columnTypographyProps,
                         minColumnWidth,
                         editable,
+                        defaultDateFormat,
+                        defaultDateTimeFormat,
                       }}
                       columns={displayingColumns}
                       getRowProps={forEachRowProps}

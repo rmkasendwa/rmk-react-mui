@@ -1,4 +1,3 @@
-import { formatDate } from '@infinite-debugger/rmk-utils/dates';
 import { addThousandCommas } from '@infinite-debugger/rmk-utils/numbers';
 import {
   Box,
@@ -15,7 +14,7 @@ import {
   useThemeProps,
 } from '@mui/material';
 import clsx from 'clsx';
-import { format } from 'date-fns';
+import formatDate from 'date-fns/format';
 import { forwardRef, isValidElement, useEffect, useState } from 'react';
 import * as yup from 'yup';
 
@@ -127,6 +126,8 @@ export const TableBodyColumn = forwardRef<
     editMode: editModeProp,
     getEditableColumnValue,
     validationRules,
+    dateFormat,
+    dateTimeFormat,
   } = props;
 
   const classes = composeClasses(
@@ -207,13 +208,19 @@ export const TableBodyColumn = forwardRef<
     ) {
       switch (type) {
         case 'date':
-          if (textTransform) {
-            formattedColumnValue = formatDate(formattedColumnValue);
+          if (textTransform && dateFormat) {
+            formattedColumnValue = formatDate(
+              new Date(formattedColumnValue),
+              dateFormat
+            );
           }
           break;
         case 'dateTime':
-          if (textTransform) {
-            formattedColumnValue = formatDate(formattedColumnValue, true);
+          if (textTransform && dateTimeFormat) {
+            formattedColumnValue = formatDate(
+              new Date(formattedColumnValue),
+              dateTimeFormat
+            );
           }
           break;
         case 'time':
@@ -221,7 +228,7 @@ export const TableBodyColumn = forwardRef<
             const date = new Date(formattedColumnValue);
             formattedColumnValue = isNaN(date.getTime())
               ? ''
-              : format(date, 'hh:mm aa');
+              : formatDate(date, 'hh:mm aa');
           }
           break;
         case 'currency':

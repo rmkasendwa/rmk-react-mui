@@ -111,6 +111,8 @@ export interface TableColumn<
   decimalPlaces?: number;
   textTransform?: boolean;
   showHeaderText?: boolean;
+  dateFormat?: string;
+  dateTimeFormat?: string;
 }
 
 export interface ForEachDerivedColumnConfiguration<T> {
@@ -118,7 +120,9 @@ export interface ForEachDerivedColumnConfiguration<T> {
   currentEntity: T;
 }
 
-export type GetRowProps<T = any> = (currentEntity: T) => MuiTableRowProps;
+export type GetRowProps<T = any> = (
+  currentEntity: T
+) => Partial<MuiTableRowProps> | undefined;
 
 export interface BaseTableRow {
   id: string | number;
@@ -140,4 +144,6 @@ export interface TableRowProps<RowObject = any>
   getRowProps?: GetRowProps;
   onClickRow?: (currentEntity: RowObject) => void;
   minColumnWidth?: number;
+  defaultDateFormat?: string;
+  defaultDateTimeFormat?: string;
 }

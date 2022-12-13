@@ -88,6 +88,8 @@ export const TableBodyRow = <T extends BaseTableRow>(
     columnTypographyProps,
     minColumnWidth,
     className,
+    defaultDateFormat,
+    defaultDateTimeFormat,
     ...rest
   } = props;
 
@@ -119,7 +121,7 @@ export const TableBodyRow = <T extends BaseTableRow>(
     return {
       rowProps: (() => {
         if (getRowPropsRef.current) {
-          return getRowPropsRef.current(row);
+          return getRowPropsRef.current(row) || {};
         }
         return {};
       })(),
@@ -162,6 +164,8 @@ export const TableBodyRow = <T extends BaseTableRow>(
           textTransform = rowTextTransform,
           defaultColumnValue = rowDefaultColumnValue,
           editable = rowEditable,
+          dateFormat = defaultDateFormat,
+          dateTimeFormat = defaultDateTimeFormat,
         } = column;
         return (
           <TableBodyColumn
@@ -175,6 +179,8 @@ export const TableBodyRow = <T extends BaseTableRow>(
               textTransform,
               defaultColumnValue,
               editable,
+              dateFormat,
+              dateTimeFormat,
             }}
             {...column}
             onClick={() => {
