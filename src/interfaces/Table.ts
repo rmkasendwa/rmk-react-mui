@@ -9,6 +9,7 @@ import { ReactNode } from 'react';
 
 import { EllipsisMenuIconButtonProps } from '../components/EllipsisMenuIconButton';
 import { FieldValueProps } from '../components/FieldValue';
+import { CountryCode } from './Countries';
 import { DropdownOption, ExoticDataType } from './Utils';
 
 export type TableColumnEnumValue =
@@ -113,6 +114,7 @@ export interface TableColumn<
   showHeaderText?: boolean;
   dateFormat?: string;
   dateTimeFormat?: string;
+  defaultCountryCode?: CountryCode;
 }
 
 export interface ForEachDerivedColumnConfiguration<T> {
@@ -137,6 +139,7 @@ export interface TableRowProps<RowObject = any>
     | 'opaque'
     | 'textTransform'
     | 'defaultColumnValue'
+    | 'defaultCountryCode'
   > {
   columns: Array<TableColumn<RowObject>>;
   row: RowObject;

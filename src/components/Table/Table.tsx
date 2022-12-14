@@ -130,6 +130,7 @@ export interface TableProps<T = any>
       | 'editable'
       | 'defaultDateFormat'
       | 'defaultDateTimeFormat'
+      | 'defaultCountryCode'
     >,
     Pick<
       TableColumnToggleIconButtonProps<T>,
@@ -254,6 +255,7 @@ export const BaseTable = <T extends BaseTableRow>(
     rowsPerPageOptions: rowsPerPageOptionsProp = [10, 25, 50, 100],
     defaultDateFormat = 'MMM dd, yyyy',
     defaultDateTimeFormat = 'MMM dd, yyyy hh:mm aa',
+    defaultCountryCode,
     sx,
     ...rest
   } = props;
@@ -993,6 +995,7 @@ export const BaseTable = <T extends BaseTableRow>(
                         editable,
                         defaultDateFormat,
                         defaultDateTimeFormat,
+                        defaultCountryCode,
                       }}
                       columns={displayingColumns}
                       getRowProps={forEachRowProps}

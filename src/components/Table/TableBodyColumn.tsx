@@ -128,6 +128,7 @@ export const TableBodyColumn = forwardRef<
     validationRules,
     dateFormat,
     dateTimeFormat,
+    defaultCountryCode,
   } = props;
 
   const classes = composeClasses(
@@ -244,7 +245,10 @@ export const TableBodyColumn = forwardRef<
           break;
         case 'phoneNumber':
           if (typeof formattedColumnValue === 'string') {
-            const phoneNumber = isValidPhoneNumber(formattedColumnValue);
+            const phoneNumber = isValidPhoneNumber(
+              formattedColumnValue,
+              defaultCountryCode
+            );
             if (phoneNumber) {
               formattedColumnValue = (
                 <Link
@@ -261,7 +265,8 @@ export const TableBodyColumn = forwardRef<
                       ) as CountryCode
                     }
                     countryLabel={systemStandardPhoneNumberFormat(
-                      formattedColumnValue
+                      formattedColumnValue,
+                      defaultCountryCode
                     )}
                     FieldValueProps={{
                       noWrap: true,
