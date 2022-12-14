@@ -90,6 +90,7 @@ export const TableBodyRow = <T extends BaseTableRow>(
     className,
     defaultDateFormat,
     defaultDateTimeFormat,
+    defaultCountryCode: rowDefaultCountryCode,
     ...rest
   } = props;
 
@@ -166,6 +167,7 @@ export const TableBodyRow = <T extends BaseTableRow>(
           editable = rowEditable,
           dateFormat = defaultDateFormat,
           dateTimeFormat = defaultDateTimeFormat,
+          defaultCountryCode = rowDefaultCountryCode,
         } = column;
         return (
           <TableBodyColumn
@@ -181,6 +183,7 @@ export const TableBodyRow = <T extends BaseTableRow>(
               editable,
               dateFormat,
               dateTimeFormat,
+              defaultCountryCode,
             }}
             {...column}
             onClick={() => {
