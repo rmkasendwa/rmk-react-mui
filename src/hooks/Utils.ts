@@ -69,7 +69,18 @@ export const useAPIService = <T>(
         })();
         taggedAPIRequest && taggedAPIRequestsRef.current.push(taggedAPIRequest);
         const response = await call(() => (apiFunction as TAPIFunction)())
-          .then((payload) => {
+          .then(async (payload) => {
+            const response = await payload;
+            if (response) {
+              if (isComponentMountedRef.current) {
+                setRecord(response);
+              }
+              if (key) {
+                updateData({
+                  [key]: response,
+                });
+              }
+            }
             if (isComponentMountedRef.current) {
               setLoaded(true);
             }
@@ -91,16 +102,6 @@ export const useAPIService = <T>(
             taggedAPIRequestsRef.current.indexOf(taggedAPIRequest),
             1
           );
-        }
-        if (response) {
-          if (isComponentMountedRef.current) {
-            setRecord(response);
-          }
-          if (key) {
-            updateData({
-              [key]: response,
-            });
-          }
         }
         if (isComponentMountedRef.current) {
           setLoading(false);
