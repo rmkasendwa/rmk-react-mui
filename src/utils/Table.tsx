@@ -148,10 +148,6 @@ export const expandTableColumnWidths = (
     const isLastColumn = index === tableColumns.length - 1;
     const nextColumn = { ...column } as typeof column;
     switch (nextColumn.type) {
-      case 'date':
-      case 'time':
-        nextColumn.width || (nextColumn.width = 150);
-        break;
       case 'boolean':
         nextColumn.width || (nextColumn.width = 150);
         break;

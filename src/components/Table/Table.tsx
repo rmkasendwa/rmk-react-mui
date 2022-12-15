@@ -795,7 +795,7 @@ export const BaseTable = <T extends BaseTableRow>(
                     sx={{
                       display: 'flex',
                       alignItems: 'center',
-                      pl: 1.5,
+                      pl: index <= 0 ? 3 : 1.5,
                       pr: columnSortable
                         ? 3
                         : index < displayingColumns.length - 1
