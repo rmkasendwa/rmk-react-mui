@@ -69,6 +69,7 @@ export interface ExternallyPaginatedTableCardProps<
   limit?: number;
   CardProps?: Partial<CardProps>;
   pathToAddNew?: string;
+  enableExternalPagination?: boolean;
 }
 
 export function getExternallyPaginatedTableCardUtilityClass(
@@ -102,6 +103,7 @@ export const ExternallyPaginatedTableCard = forwardRef<
     pathToAddNew,
     limit: limitProp = 100,
     parentBackgroundColor,
+    enableExternalPagination = true,
     ...rest
   } = props;
 
@@ -196,17 +198,27 @@ export const ExternallyPaginatedTableCard = forwardRef<
           <Table
             ref={ref}
             {...rest}
-            {...{ labelPlural, labelSingular, parentBackgroundColor }}
+            {...{
+              labelPlural,
+              labelSingular,
+              parentBackgroundColor,
+              rowsPerPage: limit,
+              ...(() => {
+                if (enableExternalPagination) {
+                  return {
+                    totalRowCount: recordsTotalCount,
+                    onRowsPerPageChange: (rowsPerPage) => {
+                      setLimit(rowsPerPage);
+                    },
+                    onChangePage: (pageIndex) => {
+                      setOffset(limit * pageIndex);
+                    },
+                  };
+                }
+              })(),
+            }}
             className={clsx(classes.root)}
             rows={currentPageRecords}
-            totalRowCount={recordsTotalCount}
-            rowsPerPage={limit}
-            onRowsPerPageChange={(rowsPerPage) => {
-              setLimit(rowsPerPage);
-            }}
-            onChangePage={(pageIndex) => {
-              setOffset(limit * pageIndex);
-            }}
           />
         );
       })()}

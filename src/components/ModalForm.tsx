@@ -21,7 +21,7 @@ import {
 } from '@mui/material';
 import clsx from 'clsx';
 import { Form, Formik, FormikConfig, FormikProps, FormikValues } from 'formik';
-import { isEmpty } from 'lodash';
+import { isEmpty, pick } from 'lodash';
 import {
   Children,
   ReactElement,
@@ -101,6 +101,7 @@ export interface ModalFormProps<Values extends FormikValues = any>
   onClickEdit?: () => void;
   SubmitButtonProps?: Partial<LoadingButtonProps>;
   FormikProps?: Partial<FormikConfig<Values>>;
+  editableFields?: (keyof Values)[];
 }
 
 export function getModalFormUtilityClass(slot: string): string {
@@ -152,6 +153,7 @@ export const BaseModalForm = <Values extends FormikValues>(
     loading,
     actionButtons,
     CloseActionButtonProps = {},
+    editableFields,
     ...rest
   } = props;
 
@@ -218,7 +220,17 @@ export const BaseModalForm = <Values extends FormikValues>(
         enableReinitialize
       >
         {({ isSubmitting, values, isValid, ...rest }) => {
-          const formHasChanges = !isEmpty(diff(values, initialValues));
+          const formHasChanges = !isEmpty(
+            (() => {
+              if (editableFields && editableFields.length > 0) {
+                return diff(
+                  pick(values, editableFields),
+                  pick(initialValues, editableFields)
+                );
+              }
+              return diff(values, initialValues);
+            })()
+          );
           return (
             <Form noValidate>
               <ErrorFieldHighlighter />

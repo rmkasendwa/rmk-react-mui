@@ -55,7 +55,13 @@ export const ReloadIconButton: FC<ReloadIconButtonProps> = ({
         );
         if (errorMessage) {
           return (
-            <Grid container alignItems="center">
+            <Grid
+              container
+              sx={{
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
               <Grid item display="flex">
                 <Tooltip title={errorMessage}>
                   <ErrorIcon color="error" />
