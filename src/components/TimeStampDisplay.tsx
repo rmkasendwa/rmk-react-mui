@@ -94,9 +94,9 @@ export const TimeStampDisplay = forwardRef<
       return formatRelative(date, today);
     }
     if (date.getFullYear() !== today.getFullYear()) {
-      return formatDate(date, "MMM do, yyyy 'at' hh:mm aa");
+      return formatDate(date, "MMM dd, yyyy 'at' hh:mm aa");
     }
-    return formatDate(date, "MMM do 'at' hh:mm aa");
+    return formatDate(date, "MMM dd 'at' hh:mm aa");
   })();
   const displayElement = (
     <Typography
@@ -116,7 +116,7 @@ export const TimeStampDisplay = forwardRef<
 
   if (showTooltip) {
     return (
-      <Tooltip title={formatDate(date, "EEEE MMM do, yyyy 'at' hh:mm:ss aa")}>
+      <Tooltip title={formatDate(date, "EEEE MMM dd, yyyy 'at' hh:mm:ss aa")}>
         {displayElement}
       </Tooltip>
     );

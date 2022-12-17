@@ -886,14 +886,27 @@ export const BaseTable = <T extends BaseTableRow>(
                                                 }
                                                 return row[id];
                                               })();
+                                              const acceptableTypes = [
+                                                'number',
+                                                'string',
+                                                'boolean',
+                                              ];
                                               if (
-                                                [
-                                                  'number',
-                                                  'string',
-                                                  'boolean',
-                                                ].includes(typeof columnValue)
+                                                acceptableTypes.includes(
+                                                  typeof columnValue
+                                                )
                                               ) {
                                                 return columnValue as
+                                                  | number
+                                                  | string
+                                                  | boolean;
+                                              }
+                                              if (
+                                                acceptableTypes.includes(
+                                                  typeof row[id]
+                                                )
+                                              ) {
+                                                return row[id] as
                                                   | number
                                                   | string
                                                   | boolean;
