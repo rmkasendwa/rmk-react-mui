@@ -13,4 +13,5 @@ module.exports = {
   features: {
     emotionAlias: false,
   },
+  staticDirs: ['../public'],
 };
