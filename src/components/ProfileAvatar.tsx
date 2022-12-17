@@ -151,6 +151,7 @@ export const ProfileAvatar = forwardRef<HTMLDivElement, ProfileAvatarProps>(
           sx={{
             width: size,
             height: size,
+            ...sx,
           }}
         />
       );
@@ -163,6 +164,7 @@ export const ProfileAvatar = forwardRef<HTMLDivElement, ProfileAvatarProps>(
           sx={{
             width: size,
             height: size,
+            ...sx,
           }}
         />
       );
