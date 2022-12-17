@@ -290,7 +290,6 @@ export const BaseFieldValueDisplay = <FieldValue extends ReactNode>(
           },
         }}
         sx={{
-          opacity: 0.5,
           ...(components?.MuiFieldValueDisplay?.styleOverrides?.value as any),
           ...FieldValuePropsSx,
         }}

@@ -1,5 +1,52 @@
-import { Avatar, AvatarProps } from '@mui/material';
+import {
+  Avatar,
+  AvatarProps,
+  ComponentsOverrides,
+  ComponentsProps,
+  ComponentsVariants,
+  Skeleton,
+  unstable_composeClasses as composeClasses,
+  generateUtilityClass,
+  generateUtilityClasses,
+  useThemeProps,
+} from '@mui/material';
+import clsx from 'clsx';
 import { forwardRef, useMemo } from 'react';
+
+import { useLoadingContext } from '../contexts/LoadingContext';
+import ErrorSkeleton from './ErrorSkeleton';
+
+export interface ProfileAvatarClasses {
+  /** Styles applied to the root element. */
+  root: string;
+}
+
+export type ProfileAvatarClassKey = keyof ProfileAvatarClasses;
+
+// Adding theme prop types
+declare module '@mui/material/styles/props' {
+  interface ComponentsPropsList {
+    MuiProfileAvatar: ProfileAvatarProps;
+  }
+}
+
+// Adding theme override types
+declare module '@mui/material/styles/overrides' {
+  interface ComponentNameToClassKey {
+    MuiProfileAvatar: keyof ProfileAvatarClasses;
+  }
+}
+
+// Adding theme component types
+declare module '@mui/material/styles/components' {
+  interface Components<Theme = unknown> {
+    MuiProfileAvatar?: {
+      defaultProps?: ComponentsProps['MuiProfileAvatar'];
+      styleOverrides?: ComponentsOverrides<Theme>['MuiProfileAvatar'];
+      variants?: ComponentsVariants['MuiProfileAvatar'];
+    };
+  }
+}
 
 export type DefaultAvatar =
   | 'standard'
@@ -12,11 +59,42 @@ export interface ProfileAvatarProps extends AvatarProps {
   size?: number;
 }
 
+export function getProfileAvatarUtilityClass(slot: string): string {
+  return generateUtilityClass('MuiProfileAvatar', slot);
+}
+
+export const profileAvatarClasses: ProfileAvatarClasses =
+  generateUtilityClasses('MuiProfileAvatar', ['root']);
+
+const slots = {
+  root: ['root'],
+};
+
 export const ProfileAvatar = forwardRef<HTMLDivElement, ProfileAvatarProps>(
-  function ProfileAvatar(
-    { label, sx, size = 32, defaultAvatar = 'standard', children, ...rest },
-    ref
-  ) {
+  function ProfileAvatar(inProps, ref) {
+    const props = useThemeProps({ props: inProps, name: 'MuiProfileAvatar' });
+    const {
+      label,
+      sx,
+      size = 32,
+      defaultAvatar = 'standard',
+      children,
+      className,
+      ...rest
+    } = props;
+
+    const classes = composeClasses(
+      slots,
+      getProfileAvatarUtilityClass,
+      (() => {
+        if (className) {
+          return {
+            root: className,
+          };
+        }
+      })()
+    );
+
     const { bgcolor, color } = useMemo(() => {
       if (label) {
         if (
@@ -64,9 +142,36 @@ export const ProfileAvatar = forwardRef<HTMLDivElement, ProfileAvatarProps>(
       return {};
     }, [defaultAvatar, label]);
 
+    const { loading, errorMessage } = useLoadingContext();
+
+    if (loading) {
+      return (
+        <Skeleton
+          variant="circular"
+          sx={{
+            width: size,
+            height: size,
+          }}
+        />
+      );
+    }
+
+    if (errorMessage) {
+      return (
+        <ErrorSkeleton
+          variant="circular"
+          sx={{
+            width: size,
+            height: size,
+          }}
+        />
+      );
+    }
+
     return (
       <Avatar
         {...rest}
+        className={clsx(classes.root)}
         ref={ref}
         sx={{
           fontSize: Math.round(size / 2.5),
