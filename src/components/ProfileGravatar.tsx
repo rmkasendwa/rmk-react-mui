@@ -17,6 +17,7 @@ import { MD5 } from 'crypto-js';
 import { forwardRef } from 'react';
 
 import { GRAVATAR_URL } from '../constants';
+import { useLoadingContext } from '../contexts/LoadingContext';
 import ProfileAvatar, { ProfileAvatarProps } from './ProfileAvatar';
 
 export interface ProfileGravatarClasses {
@@ -83,6 +84,8 @@ export const ProfileGravatar = forwardRef<HTMLDivElement, ProfileGravatarProps>(
       })()
     );
 
+    const { loading, errorMessage } = useLoadingContext();
+
     return (
       <Box
         ref={ref}
@@ -92,7 +95,7 @@ export const ProfileGravatar = forwardRef<HTMLDivElement, ProfileGravatarProps>(
         }}
       >
         <ProfileAvatar {...{ size, defaultAvatar }} {...rest} sx={{ ...sx }} />
-        {email ? (
+        {email && !loading && !errorMessage ? (
           <ProfileAvatar
             {...{ size }}
             {...rest}
