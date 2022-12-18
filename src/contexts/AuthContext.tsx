@@ -15,11 +15,16 @@ import { PermissionCode } from '../interfaces/Users';
 import { TAPIFunction } from '../interfaces/Utils';
 import { useAPIContext } from './APIContext';
 
-export interface AuthContext<T = any> {
-  login: (loginFunction: TAPIFunction<T>) => Promise<void>;
+export interface LoggedInUser {
+  id: string;
+  permissions: PermissionCode[];
+}
+
+export interface AuthContext {
+  login: (loginFunction: TAPIFunction<LoggedInUser>) => Promise<void>;
   logout: (logout?: () => void) => Promise<void>;
-  loggedInUser: T | null;
-  updateLoggedInUser: (user: T) => void;
+  loggedInUser: LoggedInUser | null;
+  updateLoggedInUser: (user: LoggedInUser) => void;
   authenticated: boolean;
   clearLoggedInUserSession: () => void;
   loggedInUserHasPermission: (
@@ -35,7 +40,7 @@ export const AuthProvider: FC<{
   children: ReactNode;
   value?: Record<string, any>;
 }> = ({ children, value }) => {
-  const [loggedInUser, setLoggedInUser] = useState<any | null>(null);
+  const [loggedInUser, setLoggedInUser] = useState<LoggedInUser | null>(null);
   const [loadingCurrentSession, setLoadingCurrentSession] = useState(true);
   const { setSessionExpired } = useAPIContext();
   const {
@@ -52,7 +57,7 @@ export const AuthProvider: FC<{
   }, []);
 
   const updateLoggedInUserSession = useCallback(
-    (user: any) => {
+    (user: LoggedInUser) => {
       setSessionExpired(false);
       StorageManager.add('user', user);
       setLoggedInUser(user);
@@ -65,7 +70,7 @@ export const AuthProvider: FC<{
   }, []);
 
   const login = useCallback(
-    async (loginFunction: TAPIFunction): Promise<void> => {
+    async (loginFunction: TAPIFunction<LoggedInUser>) => {
       clearLoggedInUserSession();
       load(loginFunction);
     },
@@ -74,13 +79,13 @@ export const AuthProvider: FC<{
 
   const logoutRef = useRef(async (logout?: () => void) => {
     clearLoggedInUserSession();
-    logout && logout();
+    logout && (await logout());
     StorageManager.clear();
     setLoggedInUser(null);
   });
 
   const updateLoggedInUser = useCallback(
-    (user: any) => {
+    (user: LoggedInUser) => {
       updateLoggedInUserSession(user);
     },
     [updateLoggedInUserSession]
