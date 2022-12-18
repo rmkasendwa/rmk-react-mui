@@ -51,6 +51,7 @@ declare module '@mui/material/styles/components' {
 
 export interface HtmlHeadProps {
   title: string;
+  description?: string;
   applicationName?: string;
   showApplicationName?: boolean;
 }
@@ -68,6 +69,7 @@ export const HtmlHead: FC<HtmlHeadProps> = (inProps) => {
   const props = useThemeProps({ props: inProps, name: 'MuiHtmlHead' });
   const {
     title,
+    description,
     showApplicationName = false,
     applicationName = 'Application',
   } = props;
@@ -97,6 +99,20 @@ export const HtmlHead: FC<HtmlHeadProps> = (inProps) => {
       }
     }
   }, [applicationName, showApplicationName, title]);
+
+  useEffect(() => {
+    if (description) {
+      let descriptionMetaElement = document.head.querySelector(
+        'meta[name="description"]'
+      );
+      if (!descriptionMetaElement) {
+        descriptionMetaElement = document.createElement('meta');
+        descriptionMetaElement.setAttribute('name', 'description');
+        document.head.append(descriptionMetaElement);
+      }
+      descriptionMetaElement.setAttribute('content', description);
+    }
+  }, [description]);
 
   return null;
 };
