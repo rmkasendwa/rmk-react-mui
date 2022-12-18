@@ -61,6 +61,7 @@ export interface CardProps
   SearchSyncToolbarProps?: Partial<SearchSyncToolbarProps>;
   CardBodyProps?: Partial<BoxProps>;
   layoutVariant?: 'paper' | 'card';
+  wrapToolbarInCard?: boolean;
 }
 
 export function getCardUtilityClass(slot: string): string {
@@ -91,6 +92,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(function Card(
     SearchSyncToolbarProps = {},
     CardBodyProps = {},
     layoutVariant = 'paper',
+    wrapToolbarInCard = false,
     ...rest
   } = props;
 
@@ -141,6 +143,22 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(function Card(
   );
 
   if (layoutVariant === 'card') {
+    if (wrapToolbarInCard) {
+      return (
+        <MuiCard ref={ref} {...rest} className={clsx(classes.root)}>
+          <Box
+            sx={{
+              pl: 3,
+              pr: 2,
+            }}
+          >
+            {searchSyncToolBar}
+          </Box>
+          <Divider />
+          {children}
+        </MuiCard>
+      );
+    }
     return (
       <Box ref={ref} {...rest} className={clsx(classes.root)}>
         {searchSyncToolBar}

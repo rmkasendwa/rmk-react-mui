@@ -7,6 +7,7 @@ import {
   generateUtilityClass,
   generateUtilityClasses,
   inputBaseClasses,
+  useTheme,
   useThemeProps,
 } from '@mui/material';
 import Grid, { GridProps } from '@mui/material/Grid';
@@ -116,6 +117,8 @@ export const DataTablePagination = forwardRef<
   labelSingular ?? (labelSingular = labelPlural.replace(/s$/g, ''));
   lowercaseLabelPlural || (lowercaseLabelPlural = labelPlural.toLowerCase());
 
+  const { typography } = useTheme();
+
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const [isSmallScreen, setIsSmallScreen] = useState(false);
 
@@ -155,6 +158,7 @@ export const DataTablePagination = forwardRef<
         pr: 2,
         py: 1,
         gap: 2,
+        fontSize: typography.body2.fontSize,
         ...(() => {
           if (isSmallScreen) {
             return {
