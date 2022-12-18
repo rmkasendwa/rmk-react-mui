@@ -1,5 +1,5 @@
 import * as queryString from 'query-string';
-import { FC, useEffect } from 'react';
+import { FC, useEffect, useMemo } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 
 import { useAPIContext } from '../contexts/APIContext';
@@ -13,19 +13,27 @@ import {
 
 export interface AuthGuardProps {
   variant?: 'PROTECTED' | 'PUBLIC_ONLY' | 'PUBLIC';
+  indexPageRoutePath?: string;
+  loginPageRoutePath?: string;
+  sessionLoginPageRoutePath?: string;
+  logoutPageRoutePath?: string;
 }
 
-const authenticationRoutePaths = [
-  LOGIN_PAGE_ROUTE_PATH,
-  SESSION_LOGIN_PAGE_ROUTE_PATH,
-  LOGOUT_PAGE_ROUTE_PATH,
-];
-
-export const AuthGuard: FC<AuthGuardProps> = ({ variant }) => {
+export const AuthGuard: FC<AuthGuardProps> = ({
+  variant,
+  indexPageRoutePath = INDEX_PAGE_ROUTE_PATH,
+  loginPageRoutePath = LOGIN_PAGE_ROUTE_PATH,
+  sessionLoginPageRoutePath = SESSION_LOGIN_PAGE_ROUTE_PATH,
+  logoutPageRoutePath = LOGOUT_PAGE_ROUTE_PATH,
+}) => {
   const navigate = useNavigate();
   const { pathname, search } = useLocation();
   const { sessionExpired } = useAPIContext();
-  const { loggedInUser, authenticated, loadingCurrentSession } = useAuth();
+  const { loggedInUser, loadingCurrentSession } = useAuth();
+
+  const authenticationRoutePaths = useMemo(() => {
+    return [loginPageRoutePath, sessionLoginPageRoutePath, logoutPageRoutePath];
+  }, [loginPageRoutePath, logoutPageRoutePath, sessionLoginPageRoutePath]);
 
   useEffect(() => {
     if (!loadingCurrentSession) {
@@ -33,7 +41,7 @@ export const AuthGuard: FC<AuthGuardProps> = ({ variant }) => {
         case 'PROTECTED':
           if (!loggedInUser) {
             navigate(
-              LOGIN_PAGE_ROUTE_PATH +
+              loginPageRoutePath +
                 (() => {
                   if (
                     pathname.length > 1 &&
@@ -47,7 +55,7 @@ export const AuthGuard: FC<AuthGuardProps> = ({ variant }) => {
                 })()
             );
           } else if (
-            pathname === SESSION_LOGIN_PAGE_ROUTE_PATH &&
+            pathname === sessionLoginPageRoutePath &&
             !sessionExpired
           ) {
             navigate(
@@ -55,19 +63,19 @@ export const AuthGuard: FC<AuthGuardProps> = ({ variant }) => {
                 if (search) {
                   return (queryString.parse(search || '') as any).return_to;
                 }
-                return INDEX_PAGE_ROUTE_PATH;
+                return indexPageRoutePath;
               })()
             );
           }
           break;
         case 'PUBLIC_ONLY':
-          if (authenticated) {
+          if (loggedInUser) {
             navigate(
               (() => {
                 if (search) {
                   return (queryString.parse(search || '') as any).return_to;
                 }
-                return INDEX_PAGE_ROUTE_PATH;
+                return indexPageRoutePath;
               })()
             );
           }
@@ -75,19 +83,22 @@ export const AuthGuard: FC<AuthGuardProps> = ({ variant }) => {
       }
     }
   }, [
-    authenticated,
+    authenticationRoutePaths,
+    indexPageRoutePath,
     loadingCurrentSession,
     loggedInUser,
+    loginPageRoutePath,
     navigate,
     pathname,
     search,
     sessionExpired,
+    sessionLoginPageRoutePath,
     variant,
   ]);
 
   if (
     (variant === 'PROTECTED' && !loggedInUser) ||
-    (variant === 'PUBLIC_ONLY' && authenticated)
+    (variant === 'PUBLIC_ONLY' && loggedInUser)
   ) {
     return null;
   }
