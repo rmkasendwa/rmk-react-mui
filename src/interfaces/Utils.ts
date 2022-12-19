@@ -1,6 +1,6 @@
 import { MenuItemProps } from '@mui/material/MenuItem';
 import { AxiosRequestConfig, AxiosResponse } from 'axios';
-import { ReactNode } from 'react';
+import { ElementType, ReactNode } from 'react';
 
 export interface PaginatedRequestParams {
   limit?: number;
@@ -122,6 +122,7 @@ export interface DropdownOption extends Partial<Pick<MenuItemProps, 'sx'>> {
   selectable?: boolean;
   isDropdownOption?: boolean;
   isDropdownOptionWrapped?: boolean;
+  component?: ElementType;
 }
 
 export interface EllipsisMenuToolProps {

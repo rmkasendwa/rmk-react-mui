@@ -18,17 +18,12 @@ import formatDate from 'date-fns/format';
 import { forwardRef, isValidElement, useEffect, useState } from 'react';
 import * as yup from 'yup';
 
-import { CountryCode } from '../../interfaces/Countries';
-import PhoneNumberUtil, {
-  isValidPhoneNumber,
-  systemStandardPhoneNumberFormat,
-} from '../../utils/PhoneNumberUtil';
 import { mapTableColumnTypeToExoticDataType } from '../../utils/Table';
-import CountryFieldValue from '../CountryFieldValue';
 import EllipsisMenuIconButton, {
   EllipsisMenuIconButtonProps,
 } from '../EllipsisMenuIconButton';
 import FieldValue from '../FieldValue';
+import PhoneNumberFieldValue from '../PhoneNumberFieldValue';
 import { TableColumn } from './Table';
 
 export interface TableBodyColumnClasses {
@@ -245,41 +240,12 @@ export const TableBodyColumn = forwardRef<
           break;
         case 'phoneNumber':
           if (typeof formattedColumnValue === 'string') {
-            const phoneNumber = isValidPhoneNumber(
-              formattedColumnValue,
-              defaultCountryCode
+            formattedColumnValue = (
+              <PhoneNumberFieldValue
+                phoneNumber={formattedColumnValue}
+                countryCode={defaultCountryCode}
+              />
             );
-            if (phoneNumber) {
-              formattedColumnValue = (
-                <Link
-                  href={`tel://${formattedColumnValue}`}
-                  underline="none"
-                  color="inherit"
-                  noWrap
-                  sx={{ display: 'block', maxWidth: '100%' }}
-                >
-                  <CountryFieldValue
-                    countryCode={
-                      PhoneNumberUtil.getRegionCodeForCountryCode(
-                        phoneNumber.getCountryCode()!
-                      ) as CountryCode
-                    }
-                    countryLabel={systemStandardPhoneNumberFormat(
-                      formattedColumnValue,
-                      defaultCountryCode
-                    )}
-                    FieldValueProps={{
-                      noWrap: true,
-                      sx: {
-                        fontWeight: 'normal',
-                        whiteSpace: 'nowrap',
-                        color: 'inherit',
-                      },
-                    }}
-                  />
-                </Link>
-              );
-            }
           }
           break;
         case 'email':
