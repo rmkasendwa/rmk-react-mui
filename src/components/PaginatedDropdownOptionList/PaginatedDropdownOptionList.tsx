@@ -394,6 +394,7 @@ export const PaginatedDropdownOptionList = forwardRef<
                 isDropdownOption = true,
                 isDropdownOptionWrapped = true,
                 onClick,
+                component,
                 sx,
               } = option;
               if (isDropdownOption && isDropdownOptionWrapped) {
@@ -422,7 +423,7 @@ export const PaginatedDropdownOptionList = forwardRef<
                     tabIndex={isFocused ? 0 : -1}
                     height={optionHeight}
                     variant={optionVariant}
-                    {...{ selectable, sx }}
+                    {...{ selectable, component, sx }}
                   >
                     {label}
                   </DropdownOption>

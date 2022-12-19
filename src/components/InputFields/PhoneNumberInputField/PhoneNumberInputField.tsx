@@ -35,14 +35,6 @@ const getCountryOption = ({ regionalCode, name, countryCode }: Country) => {
       <CountryFieldValue
         countryCode={regionalCode as CountryCode}
         countryLabel={`${name} (+${countryCode})`}
-        FieldValueProps={{
-          noWrap: true,
-          sx: {
-            fontWeight: 'normal',
-            whiteSpace: 'nowrap',
-            color: 'inherit',
-          },
-        }}
       />
     ),
     searchableLabel: name,
