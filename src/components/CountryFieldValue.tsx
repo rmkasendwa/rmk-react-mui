@@ -104,19 +104,25 @@ export const CountryFieldValue = forwardRef<
       className={clsx(classes.root)}
       icon={
         <Box
-          component="i"
           {...FlagIconPropsRest}
-          className={`fi fi-${(() => {
-            if (countryCode) {
-              return countryCode.toLowerCase();
-            }
-          })()}`}
+          className={clsx(
+            'fi',
+            (() => {
+              if (countryCode) {
+                return `fi-${countryCode.toLowerCase()}`;
+              }
+            })()
+          )}
           sx={{
             fontSize: 20,
             height: '1em',
-            mr: `4px`,
-            display: 'inline-block',
-            bgcolor: palette.divider,
+            ...(() => {
+              if (!countryCode) {
+                return {
+                  bgcolor: palette.divider,
+                };
+              }
+            })(),
             ...FlagIconPropsSx,
           }}
         />
