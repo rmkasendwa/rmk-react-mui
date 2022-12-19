@@ -1,5 +1,4 @@
-import hash from 'object-hash';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import uniqid from 'uniqid';
 
 import { TextFieldProps } from '../components/InputFields/TextField';
@@ -31,7 +30,7 @@ export const useFileUpload = ({
   onChange,
   convertFilesToBase64 = true,
 }: UseFileUploadOptions) => {
-  const [files, setFiles] = useState<LoadableFile[]>([]);
+  const [files, setFiles] = useState<LoadableFile[]>(value || []);
   const [duplicateFileSelections, setDuplicateFileSelections] = useState<
     number[]
   >([]);
@@ -41,14 +40,16 @@ export const useFileUpload = ({
   const onChangeRef = useRef(onChange);
   const downloadRef = useRef(download);
   const uploadRef = useRef(upload);
+  const filesRef = useRef(files);
   useEffect(() => {
     isInitialMount.current = false;
     onChangeRef.current = onChange;
     downloadRef.current = download;
     uploadRef.current = upload;
-  }, [download, onChange, upload]);
+    filesRef.current = files;
+  }, [download, files, onChange, upload]);
 
-  const getLoadableFiles = useCallback((files: FileContainer[]) => {
+  const getLoadableFilesRef = useRef((files: FileContainer[]) => {
     return files.map((file) => {
       const loadableFile: LoadableFile = { ...file };
       const { originalFile, id, extraParams } = file;
@@ -256,7 +257,7 @@ export const useFileUpload = ({
       }
       return loadableFile;
     });
-  }, []);
+  });
 
   useEffect(() => {
     if (fileField) {
@@ -266,11 +267,11 @@ export const useFileUpload = ({
             ...fileField.files,
           ].reduce(
             (accumulator, file) => {
-              const existingFile = files.find(({ name, size }) => {
+              const existingFile = filesRef.current.find(({ name, size }) => {
                 return file.name === name && file.size === size;
               });
               if (existingFile) {
-                accumulator[1].push(files.indexOf(existingFile));
+                accumulator[1].push(filesRef.current.indexOf(existingFile));
               } else {
                 accumulator[0].push(file);
               }
@@ -305,8 +306,8 @@ export const useFileUpload = ({
             })
           );
           fileField.value = '';
-          const newLoadableFiles = getLoadableFiles(newFiles);
-          const nextFiles = [...files, ...newLoadableFiles];
+          const newLoadableFiles = getLoadableFilesRef.current(newFiles);
+          const nextFiles = [...filesRef.current, ...newLoadableFiles];
           setFiles(nextFiles);
           setDuplicateFileSelections(duplicateFileSelections);
           newLoadableFiles.forEach(({ upload }) => {
@@ -319,14 +320,18 @@ export const useFileUpload = ({
         fileField.removeEventListener('change', changeEventCallback);
       };
     }
-  }, [convertFilesToBase64, fileField, files, getLoadableFiles]);
+  }, [convertFilesToBase64, fileField]);
 
   useEffect(() => {
     setFiles((prevFiles) => {
       if (
         value &&
-        hash(value.map(({ id, name, size }) => ({ id, name, size }))) !==
-          hash(prevFiles.map(({ id, name, size }) => ({ id, name, size })))
+        JSON.stringify(
+          value.map(({ id, name, size }) => ({ id, name, size }))
+        ) !==
+          JSON.stringify(
+            prevFiles.map(({ id, name, size }) => ({ id, name, size }))
+          )
       ) {
         return value;
       }

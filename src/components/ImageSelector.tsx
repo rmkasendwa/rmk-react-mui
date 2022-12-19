@@ -1,5 +1,14 @@
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
 import ReplayIcon from '@mui/icons-material/Replay';
+import {
+  ComponentsOverrides,
+  ComponentsProps,
+  ComponentsVariants,
+  unstable_composeClasses as composeClasses,
+  generateUtilityClass,
+  generateUtilityClasses,
+  useThemeProps,
+} from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -10,6 +19,7 @@ import Grid from '@mui/material/Grid';
 import useTheme from '@mui/material/styles/useTheme';
 import Typography from '@mui/material/Typography';
 import { darken } from '@mui/system/colorManipulator';
+import clsx from 'clsx';
 import { CSSProperties, forwardRef, useEffect, useState } from 'react';
 
 import { useFileUpload } from '../hooks/Files';
@@ -23,25 +33,91 @@ import CloseButton from './CloseButton';
 import ImagePreview from './ImagePreview';
 import { TextFieldProps } from './InputFields/TextField';
 
+export interface ImageSelectorClasses {
+  /** Styles applied to the root element. */
+  root: string;
+}
+
+export type ImageSelectorClassKey = keyof ImageSelectorClasses;
+
+// Adding theme prop types
+declare module '@mui/material/styles/props' {
+  interface ComponentsPropsList {
+    MuiImageSelector: ImageSelectorProps;
+  }
+}
+
+// Adding theme override types
+declare module '@mui/material/styles/overrides' {
+  interface ComponentNameToClassKey {
+    MuiImageSelector: keyof ImageSelectorClasses;
+  }
+}
+
+// Adding theme component types
+declare module '@mui/material/styles/components' {
+  interface Components<Theme = unknown> {
+    MuiImageSelector?: {
+      defaultProps?: ComponentsProps['MuiImageSelector'];
+      styleOverrides?: ComponentsOverrides<Theme>['MuiImageSelector'];
+      variants?: ComponentsVariants['MuiImageSelector'];
+    };
+  }
+}
+
 export interface ImageSelectorProps
   extends Pick<
     TextFieldProps,
-    'helperText' | 'error' | 'onChange' | 'name' | 'id'
+    'helperText' | 'error' | 'onChange' | 'name' | 'id' | 'className'
   > {
   value?: FileContainer[];
   upload?: FileUploadFunction;
 }
 
+export function getImageSelectorUtilityClass(slot: string): string {
+  return generateUtilityClass('MuiImageSelector', slot);
+}
+
+export const imageSelectorClasses: ImageSelectorClasses =
+  generateUtilityClasses('MuiImageSelector', ['root']);
+
+const slots = {
+  root: ['root'],
+};
+
 export const ImageSelector = forwardRef<HTMLDivElement, ImageSelectorProps>(
-  function ImageSelector(
-    { helperText, error, onChange, name, id, value, upload },
-    ref
-  ) {
+  function ImageSelector(inProps, ref) {
+    const props = useThemeProps({ props: inProps, name: 'MuiImageSelector' });
+    const {
+      className,
+      helperText,
+      error,
+      onChange,
+      name,
+      id,
+      value,
+      upload,
+      ...rest
+    } = props;
+
+    const classes = composeClasses(
+      slots,
+      getImageSelectorUtilityClass,
+      (() => {
+        if (className) {
+          return {
+            root: className,
+          };
+        }
+      })()
+    );
+
     const [imageThumbnailContainer, setImageThumbnailContainer] =
       useState<HTMLDivElement | null>(null);
     const [selectedImageFile, setSelectedImageFile] =
       useState<LoadableFile | null>(null);
     const [fileField, setFileField] = useState<HTMLInputElement | null>(null);
+
     const {
       files: images,
       setFiles: setImages,
@@ -56,8 +132,10 @@ export const ImageSelector = forwardRef<HTMLDivElement, ImageSelectorProps>(
     });
 
     const handleClickImageRemoveButton = (index: number) => {
-      images.splice(index, 1);
-      setImages([...images]);
+      setImages((prevImages) => {
+        prevImages.splice(index, 1);
+        return [...prevImages];
+      });
     };
 
     useEffect(() => {
@@ -80,7 +158,13 @@ export const ImageSelector = forwardRef<HTMLDivElement, ImageSelectorProps>(
 
     return (
       <>
-        <FormControl ref={ref} fullWidth error={error}>
+        <FormControl
+          ref={ref}
+          {...rest}
+          className={clsx(classes.root)}
+          fullWidth
+          error={error}
+        >
           <Card
             sx={{
               p: 1.5,

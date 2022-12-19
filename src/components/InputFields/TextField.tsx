@@ -2,8 +2,13 @@ import CloseIcon from '@mui/icons-material/Close';
 import {
   Box,
   BoxProps,
+  ComponentsOverrides,
+  ComponentsProps,
+  ComponentsVariants,
+  unstable_composeClasses as composeClasses,
   generateUtilityClass,
   generateUtilityClasses,
+  useThemeProps,
 } from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
 import IconButton from '@mui/material/IconButton';
@@ -12,6 +17,7 @@ import MuiTextField, {
   TextFieldProps as MuiTextFieldProps,
 } from '@mui/material/TextField';
 import Tooltip from '@mui/material/Tooltip';
+import clsx from 'clsx';
 import { ReactNode, forwardRef, useCallback, useEffect, useState } from 'react';
 
 import { useLoadingContext } from '../../contexts/LoadingContext';
@@ -27,14 +33,30 @@ export interface TextFieldClasses {
 
 export type TextFieldClassKey = keyof TextFieldClasses;
 
-export function getTextFieldUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiTextField', slot);
+// Adding theme prop types
+declare module '@mui/material/styles/props' {
+  interface ComponentsPropsList {
+    MuiTextFieldExtended: TextFieldProps;
+  }
 }
 
-export const textFieldClasses: TextFieldClasses = generateUtilityClasses(
-  'MuiTextField',
-  ['root']
-);
+// Adding theme override types
+declare module '@mui/material/styles/overrides' {
+  interface ComponentNameToClassKey {
+    MuiTextFieldExtended: keyof TextFieldClasses;
+  }
+}
+
+// Adding theme component types
+declare module '@mui/material/styles/components' {
+  interface Components<Theme = unknown> {
+    MuiTextFieldExtended?: {
+      defaultProps?: ComponentsProps['MuiTextFieldExtended'];
+      styleOverrides?: ComponentsOverrides<Theme>['MuiTextFieldExtended'];
+      variants?: ComponentsVariants['MuiTextFieldExtended'];
+    };
+  }
+}
 
 export interface TextFieldProps
   extends Omit<MuiTextFieldProps, 'variant'>,
@@ -50,9 +72,27 @@ export interface TextFieldProps
   enableLoadingState?: boolean;
 }
 
+export function getTextFieldUtilityClass(slot: string): string {
+  return generateUtilityClass('MuiTextFieldExtended', slot);
+}
+
+export const textFieldClasses: TextFieldClasses = generateUtilityClasses(
+  'MuiTextFieldExtended',
+  ['root']
+);
+
+const slots = {
+  root: ['root'],
+};
+
 export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
-  function TextField(
-    {
+  function TextField(inProps, ref) {
+    const props = useThemeProps({
+      props: inProps,
+      name: 'MuiTextFieldExtended',
+    });
+    const {
+      className,
       label,
       placeholder,
       variant,
@@ -77,9 +117,20 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
       FieldValueDisplayProps = {},
       sx,
       ...rest
-    },
-    ref
-  ) {
+    } = props;
+
+    const classes = composeClasses(
+      slots,
+      getTextFieldUtilityClass,
+      (() => {
+        if (className) {
+          return {
+            root: className,
+          };
+        }
+      })()
+    );
+
     const { sx: WrapperPropsSx, ...WrapperPropsRest } = WrapperProps;
     const { ...FieldValueDisplayPropsRest } = FieldValueDisplayProps;
 
@@ -126,6 +177,8 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
         if (errorMessage) {
           return (
             <MuiTextField
+              ref={ref}
+              className={clsx(classes.root)}
               {...{ size, variant, multiline, minRows, rows, fullWidth, sx }}
               label={<ErrorSkeleton width={labelSkeletonWidth} />}
               value=""
@@ -137,6 +190,8 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
         if (loading) {
           return (
             <MuiTextField
+              ref={ref}
+              className={clsx(classes.root)}
               {...{ size, variant, multiline, minRows, rows, fullWidth, sx }}
               label={<Skeleton width={labelSkeletonWidth} />}
               value=""
@@ -178,6 +233,7 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
         >
           <MuiTextField
             ref={ref}
+            className={clsx(classes.root)}
             {...{
               size,
               variant,
