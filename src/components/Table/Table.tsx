@@ -1,4 +1,4 @@
-import '../../extensions/Object';
+import '@infinite-debugger/rmk-js-extensions/Object';
 
 import {
   Checkbox,
