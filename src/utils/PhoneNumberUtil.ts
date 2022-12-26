@@ -1,4 +1,4 @@
-import '../extensions/String';
+import '@infinite-debugger/rmk-js-extensions/String';
 
 import {
   PhoneNumber,
