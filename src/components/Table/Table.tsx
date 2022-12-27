@@ -37,6 +37,7 @@ import clsx from 'clsx';
 import { omit } from 'lodash';
 import {
   ReactElement,
+  ReactNode,
   Ref,
   forwardRef,
   useContext,
@@ -146,6 +147,7 @@ export interface TableProps<T = any>
   labelPlural?: string;
   labelSingular?: string;
   lowercaseLabelPlural?: string;
+  emptyRowsLabel?: ReactNode;
   variant?: TableVariant;
   bordersVariant?: TableBordersVariant;
   onChangePage?: (pageIndex: number) => void;
@@ -260,7 +262,12 @@ export const BaseTable = <T extends BaseTableRow>(
     ...rest
   } = props;
 
-  let { lowercaseLabelPlural, parentBackgroundColor, currencyCode } = props;
+  let {
+    lowercaseLabelPlural,
+    parentBackgroundColor,
+    currencyCode,
+    emptyRowsLabel,
+  } = props;
 
   const classes = composeClasses(
     slots,
@@ -285,6 +292,7 @@ export const BaseTable = <T extends BaseTableRow>(
   const { sx: ColumnDisplayTogglePropsSx, ...ColumnDisplayTogglePropsRest } =
     ColumnDisplayToggleProps;
   lowercaseLabelPlural || (lowercaseLabelPlural = labelPlural.toLowerCase());
+  emptyRowsLabel || (emptyRowsLabel = `No ${lowercaseLabelPlural} found`);
 
   // Refs
   const columnsRef = useRef(columnsProp);
@@ -726,7 +734,8 @@ export const BaseTable = <T extends BaseTableRow>(
         rest,
         'lowercaseLabelPlural',
         'parentBackgroundColor',
-        'currencyCode'
+        'currencyCode',
+        'emptyRowsLabel'
       )}
       ref={ref}
       {...{ stickyHeader }}
@@ -1021,9 +1030,7 @@ export const BaseTable = <T extends BaseTableRow>(
             return (
               <TableRow>
                 <TableCell colSpan={displayingColumns.length} align="center">
-                  <Typography variant="body2">
-                    No {lowercaseLabelPlural} found
-                  </Typography>
+                  <Typography variant="body2">{emptyRowsLabel}</Typography>
                 </TableCell>
               </TableRow>
             );
