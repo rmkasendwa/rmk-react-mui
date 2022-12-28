@@ -30,6 +30,7 @@ export const TextAreaField = forwardRef<HTMLDivElement, TextAreaFieldProps>(
           setInputValue(event.target.value);
           onChange && onChange(event);
         }}
+        minRows={4}
         {...{ inputProps }}
         {...rest}
         InputProps={{
@@ -68,7 +69,6 @@ export const TextAreaField = forwardRef<HTMLDivElement, TextAreaFieldProps>(
             }
           })(),
         }}
-        minRows={4}
         multiline
       />
     );

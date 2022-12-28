@@ -60,7 +60,7 @@ export interface CardProps
   load?: () => void;
   SearchSyncToolbarProps?: Partial<SearchSyncToolbarProps>;
   CardBodyProps?: Partial<BoxProps>;
-  layoutVariant?: 'paper' | 'card';
+  layoutVariant?: 'paper' | 'card' | 'inherit';
   wrapToolbarInCard?: boolean;
 }
 
@@ -125,7 +125,11 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(function Card(
       {...SearchSyncToolbarPropsRest}
       sx={{
         ...(() => {
-          if (layoutVariant === 'card') {
+          if (
+            (['card', 'inherit'] as typeof layoutVariant[]).includes(
+              layoutVariant
+            )
+          ) {
             return {
               px: '0 !important',
             };
@@ -163,6 +167,23 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(function Card(
       <Box ref={ref} {...rest} className={clsx(classes.root)}>
         {searchSyncToolBar}
         <MuiCard>{children}</MuiCard>
+      </Box>
+    );
+  }
+
+  if (layoutVariant === 'inherit') {
+    return (
+      <Box ref={ref} {...rest} className={clsx(classes.root)}>
+        <Box
+          sx={{
+            pl: 3,
+            pr: 2,
+          }}
+        >
+          {searchSyncToolBar}
+        </Box>
+        <Divider />
+        {children}
       </Box>
     );
   }
