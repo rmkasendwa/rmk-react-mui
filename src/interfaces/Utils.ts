@@ -113,10 +113,12 @@ export type ExoticDataType =
 
 export type DropdownOptionValue = string | number;
 
-export interface DropdownOption extends Partial<Pick<MenuItemProps, 'sx'>> {
+export interface DropdownOption
+  extends Partial<Pick<MenuItemProps, 'onClick' | 'sx'>> {
   value: DropdownOptionValue;
   label: ReactNode;
   description?: ReactNode;
+  icon?: ReactNode;
   fieldValueLabel?: string;
   searchableLabel?: string;
   selectable?: boolean;
