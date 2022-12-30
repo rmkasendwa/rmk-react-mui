@@ -17,7 +17,7 @@ import differenceInHours from 'date-fns/differenceInHours';
 import formatDate from 'date-fns/format';
 import formatDistance from 'date-fns/formatDistance';
 import formatRelative from 'date-fns/formatRelative';
-import { forwardRef, useEffect, useMemo, useState } from 'react';
+import { forwardRef, useEffect, useState } from 'react';
 
 export interface TimeStampDisplayClasses {
   /** Styles applied to the root element. */
@@ -96,11 +96,11 @@ export const TimeStampDisplay = forwardRef<
     })()
   );
 
-  const baseDate = useMemo(() => {
-    return new Date(timestamp);
-  }, [timestamp]);
+  const [date, setDate] = useState(new Date(timestamp));
 
-  const [date, setDate] = useState(baseDate);
+  useEffect(() => {
+    setDate(new Date(timestamp));
+  }, [timestamp]);
 
   useEffect(() => {
     if (
