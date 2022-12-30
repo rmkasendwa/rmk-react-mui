@@ -108,7 +108,7 @@ export interface TableCrudProps<
     >,
     Pick<PageTitleProps, 'tools'>,
     Pick<UsePaginatedRecordsOptions, 'revalidationKey'> {
-  title: string;
+  title?: string;
   children?:
     | ModalFormFunctionChildren<
         InitialValues,
@@ -226,10 +226,14 @@ export const BaseTableCrud = <
     })()
   );
 
-  labelPlural || (labelPlural = title);
-  labelSingular || (labelSingular = labelPlural.replace(/s$/gi, ''));
+  if (!labelPlural && title) {
+    labelPlural = title;
+  }
+  if (!labelSingular && labelPlural) {
+    labelSingular = labelPlural.replace(/s$/gi, '');
+  }
 
-  const lowercaseLabelSingular = labelSingular.toLowerCase();
+  const lowercaseLabelSingular = (labelSingular || '').toLowerCase();
 
   const {
     sx: PaginatedTableWrapperPropsSx,
@@ -443,18 +447,22 @@ export const BaseTableCrud = <
   const toolbarElement = (
     <SearchSyncToolbar
       {...{ load, loading, errorMessage, searchTerm }}
-      title={
-        <Grid
-          container
-          sx={{
-            alignItems: 'center',
-            gap: 1,
-          }}
-        >
-          <Grid item>{title}</Grid>
-          {descriptionElement}
-        </Grid>
-      }
+      title={(() => {
+        if (title) {
+          return (
+            <Grid
+              container
+              sx={{
+                alignItems: 'center',
+                gap: 1,
+              }}
+            >
+              <Grid item>{title}</Grid>
+              {descriptionElement}
+            </Grid>
+          );
+        }
+      })()}
       hasSearchTool
       searchFieldOpen
       onSearch={(searchTerm) => setSearchTerm(searchTerm)}
