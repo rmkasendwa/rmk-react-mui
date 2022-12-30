@@ -106,6 +106,7 @@ export type ExoticDataType =
   | 'checkbox'
   | 'currency'
   | 'dateTime'
+  | 'timestamp'
   | 'percentage'
   | 'phoneNumber'
   | 'time'
