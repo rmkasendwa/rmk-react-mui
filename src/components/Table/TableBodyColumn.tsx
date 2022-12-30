@@ -24,6 +24,7 @@ import EllipsisMenuIconButton, {
 } from '../EllipsisMenuIconButton';
 import FieldValue from '../FieldValue';
 import PhoneNumberFieldValue from '../PhoneNumberFieldValue';
+import TimeStampDisplay from '../TimeStampDisplay';
 import { TableColumn } from './Table';
 
 export interface TableBodyColumnClasses {
@@ -225,6 +226,16 @@ export const TableBodyColumn = forwardRef<
             formattedColumnValue = isNaN(date.getTime())
               ? ''
               : formatDate(date, 'hh:mm aa');
+          }
+          break;
+        case 'timestamp':
+          if (
+            (textTransform && typeof formattedColumnValue === 'string') ||
+            typeof formattedColumnValue === 'number'
+          ) {
+            formattedColumnValue = (
+              <TimeStampDisplay timestamp={formattedColumnValue} sentenceCase />
+            );
           }
           break;
         case 'currency':

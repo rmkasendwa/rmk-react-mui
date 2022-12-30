@@ -97,6 +97,7 @@ export const mapTableColumnTypeToPrimitiveDataType = (
     case 'time':
     case 'dateTime':
     case 'dateInput':
+    case 'timestamp':
       return 'date';
     case 'boolean':
       return 'boolean';
