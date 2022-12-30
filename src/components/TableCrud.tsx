@@ -107,7 +107,7 @@ export interface TableCrudProps<
       Pick<ModalFormProps<InitialValues>, 'validationSchema' | 'editableFields'>
     >,
     Pick<PageTitleProps, 'tools'>,
-    Pick<UsePaginatedRecordsOptions, 'revalidationKey'> {
+    Pick<UsePaginatedRecordsOptions, 'revalidationKey' | 'autoSync'> {
   title?: string;
   children?:
     | ModalFormFunctionChildren<
@@ -137,6 +137,7 @@ export interface TableCrudProps<
   pathToAddNew?: string;
   getTableDataReloadFunction?: (reloadFunction: () => void) => void;
   getEditFunction?: (editFunction: (record: RecordRow) => void) => void;
+  onEditRecord?: () => void;
   getToolbarElement?: (toolbarElement: ReactElement) => ReactElement;
 
   // View Path
@@ -206,9 +207,11 @@ export const BaseTableCrud = <
     getTableDataReloadFunction,
     getEditFunction,
     getToolbarElement,
+    onEditRecord,
     sx,
     className,
     showRecords = true,
+    autoSync = true,
     ...rest
   } = omit(props, 'labelPlural', 'labelSingular');
 
@@ -253,7 +256,7 @@ export const BaseTableCrud = <
     viewRecordSearchParamKey,
     editRecordSearchParamKey,
   } = useMemo(() => {
-    const key = labelSingular!.replace(/\s/g, '');
+    const key = (labelSingular || 'Record').replace(/\s/g, '');
     return {
       createRecordSearchParamKey: `create${key}`,
       viewRecordSearchParamKey: `selected${key}`,
@@ -324,6 +327,7 @@ export const BaseTableCrud = <
         key: recordKey,
         revalidationKey: `${revalidationKey}${searchTerm}`,
         loadOnMount: showRecords,
+        autoSync,
       }
     );
 
@@ -786,7 +790,7 @@ export const BaseTableCrud = <
                 onClose={() => {
                   if (created) {
                     setCreated(false);
-                    load();
+                    autoSync && load();
                   }
                   if (defaultPath) {
                     navigate(defaultPath);
@@ -877,7 +881,8 @@ export const BaseTableCrud = <
                       onClose={() => {
                         if (updated) {
                           setUpdated(false);
-                          load();
+                          onEditRecord && onEditRecord();
+                          autoSync && load();
                         }
                         if (defaultPath) {
                           navigate(defaultPath);
@@ -991,7 +996,7 @@ export const BaseTableCrud = <
                 setDeleteErrorMessage('');
                 if (deleted) {
                   setDeleted(false);
-                  load();
+                  autoSync && load();
                 }
               }}
               CloseActionButtonProps={{
