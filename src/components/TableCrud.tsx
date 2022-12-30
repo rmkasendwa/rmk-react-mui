@@ -136,6 +136,7 @@ export interface TableCrudProps<
   defaultPath?: string;
   pathToAddNew?: string;
   getTableDataReloadFunction?: (reloadFunction: () => void) => void;
+  getEditFunction?: (editFunction: (record: RecordRow) => void) => void;
   getToolbarElement?: (toolbarElement: ReactElement) => ReactElement;
 
   // View Path
@@ -148,6 +149,8 @@ export interface TableCrudProps<
   templatePathToEdit?: string;
   pathToEdit?: string;
   getPathToEdit?: (record: RecordRow) => string;
+
+  showRecords?: boolean;
 }
 
 export function getTableCrudUtilityClass(slot: string): string {
@@ -201,9 +204,11 @@ export const BaseTableCrud = <
     viewableRecordIdPathParamKey,
     editValidationSchema,
     getTableDataReloadFunction,
+    getEditFunction,
     getToolbarElement,
     sx,
     className,
+    showRecords = true,
     ...rest
   } = omit(props, 'labelPlural', 'labelSingular');
 
@@ -314,14 +319,39 @@ export const BaseTableCrud = <
         offset,
         key: recordKey,
         revalidationKey: `${revalidationKey}${searchTerm}`,
+        loadOnMount: showRecords,
       }
     );
+
+  const editFunctionRef = useRef((record: RecordRow) => {
+    navigate(
+      (() => {
+        if (pathToEdit) {
+          return pathToEdit;
+        }
+        if (getPathToEdit) {
+          return getPathToEdit(record);
+        }
+        return addSearchParams(pathname, {
+          ...allSearchParams,
+          [viewRecordSearchParamKey]: String(record.id),
+          [editRecordSearchParamKey]: 'true',
+        });
+      })()
+    );
+  });
 
   useEffect(() => {
     if (getTableDataReloadFunction) {
       getTableDataReloadFunction(load);
     }
   }, [getTableDataReloadFunction, load]);
+
+  useEffect(() => {
+    if (getEditFunction) {
+      getEditFunction(editFunctionRef.current);
+    }
+  }, [getEditFunction]);
 
   // Record editing state
   const {
@@ -458,238 +488,232 @@ export const BaseTableCrud = <
 
   return (
     <>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%',
-        }}
-      >
-        {(() => {
-          if (getToolbarElement) {
-            return getToolbarElement(toolbarElement);
-          }
-          return toolbarElement;
-        })()}
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            flex: 1,
-            minHeight: 0,
-          }}
-        >
-          <Divider />
-          {(() => {
-            if (recordsTotalCount <= 0 && (loading || errorMessage)) {
-              return (
-                <IconLoadingScreen
-                  {...{ errorMessage, load, loading }}
-                  recordLabelPlural={labelPlural}
-                  recordLabelSingular={labelSingular}
-                  pathToAddNew={pathToAddNewRecord}
-                />
-              );
-            }
-            return (
-              <Table
-                stickyHeader
-                minColumnWidth={220}
-                enableColumnDisplayToggle
-                textTransform
-                ref={ref}
-                {...rest}
-                className={clsx(classes.root)}
-                {...{ labelPlural, labelSingular }}
-                columns={[
-                  {
-                    id: 'number' as any,
-                    label: 'Number',
-                    width: 60,
-                    getColumnValue: (record) => {
-                      return `${
-                        1 + currentPageRecords.indexOf(record) + offset
-                      }.`;
-                    },
-                    align: 'right',
-                    showHeaderText: false,
-                    opaque: true,
-                    sx: {
-                      position: 'sticky',
-                      left: 0,
-                      zIndex: 1,
-                    },
-                    headerSx: {
-                      zIndex: 5,
-                    },
-                  },
-                  ...columns,
-                  ...(() => {
-                    if (isEditable || isDeletable) {
-                      return [
+      {(() => {
+        if (showRecords) {
+          return (
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                height: '100%',
+              }}
+            >
+              {(() => {
+                if (getToolbarElement) {
+                  return getToolbarElement(toolbarElement);
+                }
+                return toolbarElement;
+              })()}
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  flex: 1,
+                  minHeight: 0,
+                }}
+              >
+                <Divider />
+                {(() => {
+                  if (recordsTotalCount <= 0 && (loading || errorMessage)) {
+                    return (
+                      <IconLoadingScreen
+                        {...{ errorMessage, load, loading }}
+                        recordLabelPlural={labelPlural}
+                        recordLabelSingular={labelSingular}
+                        pathToAddNew={pathToAddNewRecord}
+                      />
+                    );
+                  }
+                  return (
+                    <Table
+                      stickyHeader
+                      minColumnWidth={220}
+                      enableColumnDisplayToggle
+                      textTransform
+                      ref={ref}
+                      {...rest}
+                      className={clsx(classes.root)}
+                      {...{ labelPlural, labelSingular }}
+                      columns={[
                         {
-                          id: 'actions' as any,
-                          label: 'Actions',
-                          width: (() => {
-                            let width = 0;
-                            isEditable && (width += 42);
-                            isDeletable && (width += 42);
-                            return width;
-                          })(),
+                          id: 'number' as any,
+                          label: 'Number',
+                          width: 60,
                           getColumnValue: (record) => {
-                            const { id } = record;
-                            return (
-                              <Grid
-                                className="row-tools"
-                                container
-                                sx={{
-                                  justifyContent: 'end',
-                                  visibility: 'hidden',
-                                }}
-                              >
-                                {(() => {
-                                  if (isEditable) {
-                                    const pathToEditRecord = (() => {
-                                      if (pathToEdit) {
-                                        return pathToEdit;
-                                      }
-                                      if (getPathToEdit) {
-                                        return getPathToEdit(record);
-                                      }
-                                      return addSearchParams(pathname, {
-                                        ...allSearchParams,
-                                        [viewRecordSearchParamKey]: String(id),
-                                        [editRecordSearchParamKey]: 'true',
-                                      });
-                                    })();
-                                    return (
-                                      <Grid item>
-                                        <Tooltip
-                                          title="Edit"
-                                          PopperProps={{
-                                            sx: {
-                                              pointerEvents: 'none',
-                                            },
-                                          }}
-                                        >
-                                          <IconButton
-                                            onClick={() => {
-                                              navigate(pathToEditRecord);
-                                            }}
-                                          >
-                                            <EditIcon color="inherit" />
-                                          </IconButton>
-                                        </Tooltip>
-                                      </Grid>
-                                    );
-                                  }
-                                })()}
-                                {isDeletable ? (
-                                  <Grid item>
-                                    <Tooltip
-                                      title="Delete"
-                                      PopperProps={{
-                                        sx: {
-                                          pointerEvents: 'none',
-                                        },
-                                      }}
-                                    >
-                                      <IconButton
-                                        onClick={() => {
-                                          setDeletableRecordId(record.id);
-                                          setSelectedRecord(record);
-                                        }}
-                                      >
-                                        <DeleteOutlineIcon color="error" />
-                                      </IconButton>
-                                    </Tooltip>
-                                  </Grid>
-                                ) : null}
-                              </Grid>
-                            );
+                            return `${
+                              1 + currentPageRecords.indexOf(record) + offset
+                            }.`;
                           },
+                          align: 'right',
                           showHeaderText: false,
                           opaque: true,
-                          propagateClickToParentRowClickEvent: false,
                           sx: {
                             position: 'sticky',
-                            right: 0,
-                            '&,&>div': {
-                              p: 0,
-                            },
+                            left: 0,
+                            zIndex: 1,
+                          },
+                          headerSx: {
+                            zIndex: 5,
                           },
                         },
-                      ] as typeof columns;
-                    }
-                    return [];
-                  })(),
-                ]}
-                selectedColumnIds={(() => {
-                  if (selectedColumnIds) {
-                    return [
-                      'number',
-                      ...(() => {
+                        ...columns,
+                        ...(() => {
+                          if (isEditable || isDeletable) {
+                            return [
+                              {
+                                id: 'actions' as any,
+                                label: 'Actions',
+                                width: (() => {
+                                  let width = 0;
+                                  isEditable && (width += 42);
+                                  isDeletable && (width += 42);
+                                  return width;
+                                })(),
+                                getColumnValue: (record) => {
+                                  return (
+                                    <Grid
+                                      className="row-tools"
+                                      container
+                                      sx={{
+                                        justifyContent: 'end',
+                                        visibility: 'hidden',
+                                      }}
+                                    >
+                                      {(() => {
+                                        if (isEditable) {
+                                          return (
+                                            <Grid item>
+                                              <Tooltip
+                                                title="Edit"
+                                                PopperProps={{
+                                                  sx: {
+                                                    pointerEvents: 'none',
+                                                  },
+                                                }}
+                                              >
+                                                <IconButton
+                                                  onClick={() => {
+                                                    editFunctionRef.current(
+                                                      record
+                                                    );
+                                                  }}
+                                                >
+                                                  <EditIcon color="inherit" />
+                                                </IconButton>
+                                              </Tooltip>
+                                            </Grid>
+                                          );
+                                        }
+                                      })()}
+                                      {isDeletable ? (
+                                        <Grid item>
+                                          <Tooltip
+                                            title="Delete"
+                                            PopperProps={{
+                                              sx: {
+                                                pointerEvents: 'none',
+                                              },
+                                            }}
+                                          >
+                                            <IconButton
+                                              onClick={() => {
+                                                setDeletableRecordId(record.id);
+                                                setSelectedRecord(record);
+                                              }}
+                                            >
+                                              <DeleteOutlineIcon color="error" />
+                                            </IconButton>
+                                          </Tooltip>
+                                        </Grid>
+                                      ) : null}
+                                    </Grid>
+                                  );
+                                },
+                                showHeaderText: false,
+                                opaque: true,
+                                propagateClickToParentRowClickEvent: false,
+                                sx: {
+                                  position: 'sticky',
+                                  right: 0,
+                                  '&,&>div': {
+                                    p: 0,
+                                  },
+                                },
+                              },
+                            ] as typeof columns;
+                          }
+                          return [];
+                        })(),
+                      ]}
+                      selectedColumnIds={(() => {
                         if (selectedColumnIds) {
-                          return selectedColumnIds;
+                          return [
+                            'number',
+                            ...(() => {
+                              if (selectedColumnIds) {
+                                return selectedColumnIds;
+                              }
+                              return [];
+                            })(),
+                            'actions',
+                          ] as any;
                         }
-                        return [];
-                      })(),
-                      'actions',
-                    ] as any;
-                  }
+                      })()}
+                      rows={currentPageRecords}
+                      onClickRow={
+                        onClickRow ??
+                        ((record) => {
+                          const { id } = record;
+                          const pathToViewRecord = (() => {
+                            if (pathToView) {
+                              return pathToView;
+                            }
+                            if (getPathToView) {
+                              return getPathToView(record);
+                            }
+                            return addSearchParams(pathname, {
+                              ...allSearchParams,
+                              [viewRecordSearchParamKey]: String(id),
+                            });
+                          })();
+                          navigate(pathToViewRecord);
+                        })
+                      }
+                      totalRowCount={recordsTotalCount}
+                      rowsPerPage={limit}
+                      onRowsPerPageChange={(rowsPerPage) => {
+                        setLimit(rowsPerPage);
+                      }}
+                      onChangePage={(pageIndex) => {
+                        setOffset(limit * pageIndex);
+                      }}
+                      PaginatedTableWrapperProps={{
+                        ...PaginatedTableWrapperPropsRest,
+                        sx: {
+                          bgcolor: palette.background.paper,
+                          ...PaginatedTableWrapperPropsSx,
+                          flex: 1,
+                          minHeight: 0,
+                          overflow: 'hidden',
+                        },
+                      }}
+                      sx={{
+                        ...sx,
+                        tr: {
+                          ...(sx as any)?.tr,
+                          '&:hover .row-tools': {
+                            visibility: 'visible',
+                          },
+                        },
+                      }}
+                    />
+                  );
                 })()}
-                rows={currentPageRecords}
-                onClickRow={
-                  onClickRow ??
-                  ((record) => {
-                    const { id } = record;
-                    const pathToViewRecord = (() => {
-                      if (pathToView) {
-                        return pathToView;
-                      }
-                      if (getPathToView) {
-                        return getPathToView(record);
-                      }
-                      return addSearchParams(pathname, {
-                        ...allSearchParams,
-                        [viewRecordSearchParamKey]: String(id),
-                      });
-                    })();
-                    navigate(pathToViewRecord);
-                  })
-                }
-                totalRowCount={recordsTotalCount}
-                rowsPerPage={limit}
-                onRowsPerPageChange={(rowsPerPage) => {
-                  setLimit(rowsPerPage);
-                }}
-                onChangePage={(pageIndex) => {
-                  setOffset(limit * pageIndex);
-                }}
-                PaginatedTableWrapperProps={{
-                  ...PaginatedTableWrapperPropsRest,
-                  sx: {
-                    bgcolor: palette.background.paper,
-                    ...PaginatedTableWrapperPropsSx,
-                    flex: 1,
-                    minHeight: 0,
-                    overflow: 'hidden',
-                  },
-                }}
-                sx={{
-                  ...sx,
-                  tr: {
-                    ...(sx as any)?.tr,
-                    '&:hover .row-tools': {
-                      visibility: 'visible',
-                    },
-                  },
-                }}
-              />
-            );
-          })()}
-        </Box>
-      </Box>
+              </Box>
+            </Box>
+          );
+        }
+      })()}
       {(() => {
         if (validationSchema && initialValues && children) {
           const modalFormProps: Partial<ModalFormProps<typeof initialValues>> =
