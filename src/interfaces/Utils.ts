@@ -131,3 +131,5 @@ export interface DropdownOption
 export interface EllipsisMenuToolProps {
   options: DropdownOption[];
 }
+
+export type CrudMode = 'create' | 'view' | 'edit' | 'delete';
