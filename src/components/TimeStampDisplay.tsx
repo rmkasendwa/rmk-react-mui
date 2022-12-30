@@ -17,7 +17,7 @@ import differenceInHours from 'date-fns/differenceInHours';
 import formatDate from 'date-fns/format';
 import formatDistance from 'date-fns/formatDistance';
 import formatRelative from 'date-fns/formatRelative';
-import { forwardRef } from 'react';
+import { forwardRef, useEffect, useMemo, useState } from 'react';
 
 export interface TimeStampDisplayClasses {
   /** Styles applied to the root element. */
@@ -55,6 +55,7 @@ export interface TimeStampDisplayProps extends TypographyProps {
   timestamp: number | string;
   showTooltip?: boolean;
   sentenceCase?: boolean;
+  refreshTimeout?: number;
 }
 
 export function getTimeStampDisplayUtilityClass(slot: string): string {
@@ -79,6 +80,7 @@ export const TimeStampDisplay = forwardRef<
     sentenceCase = false,
     sx,
     className,
+    refreshTimeout = 30000,
     ...rest
   } = props;
 
@@ -94,9 +96,31 @@ export const TimeStampDisplay = forwardRef<
     })()
   );
 
-  const date = new Date(timestamp);
-  const today = new Date();
+  const baseDate = useMemo(() => {
+    return new Date(timestamp);
+  }, [timestamp]);
+
+  const [date, setDate] = useState(baseDate);
+
+  useEffect(() => {
+    if (
+      refreshTimeout > 0 &&
+      Math.abs(differenceInHours(new Date(), new Date(timestamp))) <= 30
+    ) {
+      const interval = setInterval(() => {
+        setDate(new Date(timestamp));
+        if (Math.abs(differenceInHours(new Date(), new Date(timestamp))) > 30) {
+          clearInterval(interval);
+        }
+      }, refreshTimeout);
+      return () => {
+        clearInterval(interval);
+      };
+    }
+  }, [refreshTimeout, timestamp]);
+
   const formattedTimestamp = (() => {
+    const today = new Date();
     if (Math.abs(differenceInHours(today, date)) <= 6) {
       return formatDistance(date, today, { addSuffix: true });
     }
@@ -108,6 +132,7 @@ export const TimeStampDisplay = forwardRef<
     }
     return formatDate(date, "MMM dd 'at' hh:mm aa");
   })();
+
   const displayElement = (
     <Typography
       ref={ref}

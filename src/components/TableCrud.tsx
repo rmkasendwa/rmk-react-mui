@@ -167,7 +167,7 @@ const slots = {
   root: ['root'],
 };
 
-export const BaseTableCrud = <
+const BaseTableCrud = <
   RecordRow extends BaseTableRow,
   InitialValues extends FormikValues
 >(
