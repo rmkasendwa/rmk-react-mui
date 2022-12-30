@@ -1,3 +1,5 @@
+import '@infinite-debugger/rmk-js-extensions/String';
+
 import {
   ComponentsOverrides,
   ComponentsProps,
@@ -52,6 +54,7 @@ declare module '@mui/material/styles/components' {
 export interface TimeStampDisplayProps extends TypographyProps {
   timestamp: number | string;
   showTooltip?: boolean;
+  sentenceCase?: boolean;
 }
 
 export function getTimeStampDisplayUtilityClass(slot: string): string {
@@ -70,7 +73,14 @@ export const TimeStampDisplay = forwardRef<
   TimeStampDisplayProps
 >(function TimeStampDisplay(inProps, ref) {
   const props = useThemeProps({ props: inProps, name: 'MuiTimeStampDisplay' });
-  const { timestamp, showTooltip = true, sx, className, ...rest } = props;
+  const {
+    timestamp,
+    showTooltip = true,
+    sentenceCase = false,
+    sx,
+    className,
+    ...rest
+  } = props;
 
   const classes = composeClasses(
     slots,
@@ -110,7 +120,7 @@ export const TimeStampDisplay = forwardRef<
         ...sx,
       }}
     >
-      {formattedTimestamp}
+      {sentenceCase ? formattedTimestamp.toSentenceCase() : formattedTimestamp}
     </Typography>
   );
 
