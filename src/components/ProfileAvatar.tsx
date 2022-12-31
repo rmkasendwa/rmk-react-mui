@@ -189,14 +189,16 @@ export const ProfileAvatar = forwardRef<HTMLDivElement, ProfileAvatarProps>(
       >
         {(() => {
           if (label) {
-            const labelWords = label.split(/\s+/g);
-            if (labelWords.length > 1) {
-              return (
-                labelWords[0].charAt(0) +
-                labelWords[labelWords.length - 1].charAt(0)
-              );
-            }
-            return labelWords[0].charAt(0);
+            return (() => {
+              const labelWords = label.split(/\s+/g);
+              if (labelWords.length > 1) {
+                return (
+                  labelWords[0].charAt(0) +
+                  labelWords[labelWords.length - 1].charAt(0)
+                );
+              }
+              return labelWords[0].charAt(0);
+            })().toUpperCase();
           }
           return children;
         })()}
