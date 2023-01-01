@@ -588,7 +588,6 @@ const BaseTableCrud = <
                                       container
                                       sx={{
                                         justifyContent: 'end',
-                                        visibility: 'hidden',
                                       }}
                                     >
                                       {(() => {
@@ -713,9 +712,6 @@ const BaseTableCrud = <
                         ...sx,
                         tr: {
                           ...(sx as any)?.tr,
-                          '&:hover .row-tools': {
-                            visibility: 'visible',
-                          },
                         },
                       }}
                     />
