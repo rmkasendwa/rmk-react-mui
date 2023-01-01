@@ -307,8 +307,8 @@ const BaseTableCrud = <
     create,
     creating,
     created,
-    setCreated,
     errorMessage: createErrorMessage,
+    reset: resetCreation,
   } = useCreate();
 
   // Record loading
@@ -366,8 +366,8 @@ const BaseTableCrud = <
     update,
     updating,
     updated,
-    setUpdated,
     errorMessage: updateErrorMessage,
+    reset: resetUpdate,
   } = useUpdate();
 
   // Record deleting state
@@ -784,8 +784,8 @@ const BaseTableCrud = <
                   }
                 }}
                 onClose={() => {
+                  resetCreation();
                   if (created) {
-                    setCreated(false);
                     autoSync && load();
                   }
                   if (defaultPath) {
@@ -875,8 +875,8 @@ const BaseTableCrud = <
                         }
                       }}
                       onClose={() => {
+                        resetUpdate();
                         if (updated) {
-                          setUpdated(false);
                           onEditRecord && onEditRecord();
                           autoSync && load();
                         }
