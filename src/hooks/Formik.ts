@@ -1,7 +1,7 @@
 import { TextFieldProps } from '@mui/material';
 import { FormikContextType, useFormikContext } from 'formik';
 import { get } from 'lodash';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 
 interface UseAggregatedFormikContextProps
   extends Pick<
@@ -36,12 +36,25 @@ export const useAggregatedFormikContext = ({
     [handleBlur, onBlurProp]
   );
 
+  const { rootPropertyPath, propertyPath } = useMemo((): {
+    rootPropertyPath?: string;
+    propertyPath?: string;
+  } => {
+    if (name) {
+      return {
+        rootPropertyPath: name.split('.')[0],
+        propertyPath: name,
+      };
+    }
+    return {};
+  }, [name]);
+
   return {
     value:
       value ??
       (() => {
-        if (values && name && get(values, name) != null) {
-          return get(values, name);
+        if (values && propertyPath && get(values, propertyPath) != null) {
+          return get(values, propertyPath);
         }
       })(),
     onChange,
@@ -49,14 +62,26 @@ export const useAggregatedFormikContext = ({
     error:
       error ??
       (() => {
-        if (errors && touched && name && get(touched, name)) {
-          return Boolean(get(errors, name));
+        if (
+          errors &&
+          touched &&
+          rootPropertyPath &&
+          propertyPath &&
+          get(touched, rootPropertyPath)
+        ) {
+          return Boolean(get(errors, propertyPath));
         }
       })(),
     helperText: (helperText ??
       (() => {
-        if (errors && touched && name && get(touched, name)) {
-          return get(errors, name);
+        if (
+          errors &&
+          touched &&
+          rootPropertyPath &&
+          propertyPath &&
+          get(touched, rootPropertyPath)
+        ) {
+          return get(errors, propertyPath);
         }
       })()) as typeof helperText,
   };
