@@ -15,6 +15,7 @@ import {
 } from '@mui/material';
 import clsx from 'clsx';
 import formatDate from 'date-fns/format';
+import { result } from 'lodash';
 import { forwardRef, isValidElement, useEffect, useState } from 'react';
 import * as yup from 'yup';
 
@@ -75,8 +76,9 @@ const toolTypes = [
   'checkbox',
 ];
 
-export interface TableBodyColumnProps<RowObject = any>
-  extends TableColumn,
+export interface TableBodyColumnProps<
+  RowObject extends Record<string, any> = any
+> extends TableColumn,
     Partial<Pick<TableCellProps, 'onClick'>> {
   column: TableColumn<RowObject>;
   row: RowObject;
@@ -167,7 +169,7 @@ export const TableBodyColumn = forwardRef<
         }
         return getColumnValue(row, column);
       }
-      return (row as any)[id];
+      return result(row, id) as any;
     })();
     if (type && toolTypes.includes(type)) {
       switch (type) {
