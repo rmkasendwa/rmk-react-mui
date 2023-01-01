@@ -53,7 +53,7 @@ declare module '@mui/material/styles/components' {
   }
 }
 
-export interface TableBodyRowProps<T = any>
+export interface TableBodyRowProps<T extends Record<string, any> = any>
   extends Partial<Omit<MuiTableRowProps, 'defaultValue'>>,
     TableRowProps<T> {}
 

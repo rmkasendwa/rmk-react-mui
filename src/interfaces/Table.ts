@@ -34,7 +34,7 @@ export type TableColumnType =
   | 'ellipsisMenuTool';
 
 export type GetColumnValue<
-  RowObject = any,
+  RowObject extends Record<string, any> = any,
   ColumnType extends TableColumnType = TableColumnType
 > = (
   row: RowObject,
@@ -44,12 +44,12 @@ export type GetColumnValue<
   : ReactNode;
 
 export type GetEditField<
-  RowObject = any,
+  RowObject extends Record<string, any> = any,
   ColumnType extends TableColumnType = TableColumnType
 > = (row: RowObject, column: TableColumn<RowObject, ColumnType>) => ReactNode;
 
 export type GetEditableColumnValue<
-  RowObject = any,
+  RowObject extends Record<string, any> = any,
   ColumnType extends TableColumnType = TableColumnType
 > = (
   row: RowObject,
@@ -57,7 +57,7 @@ export type GetEditableColumnValue<
 ) => string | number | boolean | (string | number | boolean)[] | undefined;
 
 export type FieldValueEditor<
-  RowObject = any,
+  RowObject extends Record<string, any> = any,
   ColumnType extends TableColumnType = TableColumnType,
   UpdatedValue extends ReactNode = ReactNode
 > = (
@@ -67,12 +67,12 @@ export type FieldValueEditor<
 ) => any;
 
 export type OnClickColumn<
-  RowObject = any,
+  RowObject extends Record<string, any> = any,
   ColumnType extends TableColumnType = TableColumnType
 > = (row: RowObject, column: TableColumn<RowObject, ColumnType>) => void;
 
 export interface TableColumn<
-  RowObject = any,
+  RowObject extends Record<string, any> = any,
   ColumnType extends TableColumnType = TableColumnType
 > extends Partial<Omit<TableCellProps, 'defaultValue' | 'id'>>,
     Partial<Pick<DropdownOption, 'label' | 'searchableLabel' | 'description'>>,
@@ -130,7 +130,7 @@ export interface BaseTableRow {
   id: string | number;
 }
 
-export interface TableRowProps<RowObject = any>
+export interface TableRowProps<RowObject extends Record<string, any> = any>
   extends Pick<
     TableColumn<RowObject>,
     | 'decimalPlaces'

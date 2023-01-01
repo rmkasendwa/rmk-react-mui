@@ -116,10 +116,10 @@ export type TableVariant =
 
 export type TableBordersVariant = 'square' | 'rows' | 'columns' | 'none';
 
-export interface TableProps<T = any>
+export interface TableProps<RowObject extends Record<string, any> = any>
   extends Partial<Pick<MuiBaseTableProps, 'onClick' | 'sx' | 'className'>>,
     Pick<
-      TableRowProps<T>,
+      TableRowProps<RowObject>,
       | 'columns'
       | 'generateRowData'
       | 'decimalPlaces'
@@ -134,11 +134,11 @@ export interface TableProps<T = any>
       | 'defaultCountryCode'
     >,
     Pick<
-      TableColumnToggleIconButtonProps<T>,
+      TableColumnToggleIconButtonProps<RowObject>,
       'selectedColumnIds' | 'onChangeSelectedColumnIds'
     >,
     Partial<Pick<TablePaginationProps, 'rowsPerPageOptions'>> {
-  rows?: T[];
+  rows?: RowObject[];
   rowStartIndex?: number;
   rowsPerPage?: number;
   pageIndex?: number;
@@ -152,7 +152,7 @@ export interface TableProps<T = any>
   bordersVariant?: TableBordersVariant;
   onChangePage?: (pageIndex: number) => void;
   onRowsPerPageChange?: (rowsPerPage: number) => void;
-  forEachRowProps?: GetRowProps<T>;
+  forEachRowProps?: GetRowProps<RowObject>;
   paging?: boolean;
   showHeaderRow?: boolean;
   showDataRows?: boolean;
@@ -168,8 +168,8 @@ export interface TableProps<T = any>
   // Sort props
   sortable?: boolean;
   handleSortOperations?: boolean;
-  sortBy?: SortBy<T>;
-  onChangeSortBy?: (sortOptions: SortOptions<T>) => void;
+  sortBy?: SortBy<RowObject>;
+  onChangeSortBy?: (sortOptions: SortOptions<RowObject>) => void;
 
   // Removable columns
   enableColumnDisplayToggle?: boolean;
@@ -1215,7 +1215,7 @@ export const BaseTable = <T extends BaseTableRow>(
   return tableElement;
 };
 
-export const Table = forwardRef(BaseTable) as <T>(
+export const Table = forwardRef(BaseTable) as <T extends Record<string, any>>(
   p: TableProps<T> & { ref?: Ref<HTMLDivElement> }
 ) => ReactElement;
 
