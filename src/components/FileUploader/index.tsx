@@ -166,8 +166,7 @@ export const FileUploader = forwardRef<HTMLDivElement, FileUploaderProps>(
               sx={{
                 backgroundColor: alpha(palette.text.primary, 0.1),
                 cursor: 'pointer',
-                borderStyle: error ? 'dashed' : 'solid',
-                borderColor: error ? palette.error.main : 'divider',
+                border: 'none',
               }}
               onClick={() => {
                 fileField?.click();
