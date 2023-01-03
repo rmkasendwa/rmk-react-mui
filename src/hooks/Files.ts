@@ -133,14 +133,8 @@ export const useFileUpload = ({
               stateFile.cancelUpload = () => {
                 cancel();
                 setFiles((prevFiles) => {
-                  const stateFile = prevFiles.find(
-                    ({ originalFile: stateFile }) => stateFile === originalFile
-                  );
-                  if (stateFile) {
-                    stateFile.uploading = false;
-                    delete stateFile.cancelUpload;
-                    delete stateFile.uploadError;
-                    delete stateFile.uploadProgress;
+                  if (prevFiles.includes(stateFile)) {
+                    prevFiles.splice(prevFiles.indexOf(stateFile), 1);
                     return [...prevFiles];
                   }
                   return prevFiles;

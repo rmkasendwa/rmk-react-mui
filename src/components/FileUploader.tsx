@@ -3,7 +3,6 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import DeleteIcon from '@mui/icons-material/Delete';
-import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import ReplayIcon from '@mui/icons-material/Replay';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -20,24 +19,18 @@ import useTheme from '@mui/material/styles/useTheme';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import { alpha } from '@mui/system/colorManipulator';
-import {
-  CSSProperties,
-  Fragment,
-  forwardRef,
-  useEffect,
-  useState,
-} from 'react';
+import { Fragment, forwardRef, useEffect, useState } from 'react';
 
-import { useFileUpload } from '../../hooks/Files';
+import { useFileUpload } from '../hooks/Files';
 import {
   FileContainer,
   FileDownloadFunction,
   FileUploadFunction,
-} from '../../interfaces/Utils';
-import { flickerElement } from '../../utils/page';
-import Card from '../Card';
-import { TextFieldProps } from '../InputFields/TextField';
-import fileTypeIcons from './img/file-type-icons.png';
+} from '../interfaces/Utils';
+import { flickerElement } from '../utils/page';
+import Card from './Card';
+import FileIcon from './FileIcon';
+import { TextFieldProps } from './InputFields/TextField';
 
 export interface FileUploaderProps
   extends Pick<
@@ -48,65 +41,6 @@ export interface FileUploaderProps
   upload?: FileUploadFunction;
   download?: FileDownloadFunction;
 }
-
-const supportedFileIcons = [
-  'pdf',
-  'jpg',
-  'png',
-  'ppt',
-  'doc',
-  'zip',
-  'exe',
-  'wav',
-  'mpg',
-  'mp4',
-  'mov',
-  'html',
-  'xlsx',
-  'svg',
-  'docx',
-  'jar',
-  'json',
-  'csv',
-  'py',
-  'xml',
-  'mp3',
-  'css',
-  'js',
-  'txt',
-  'reg',
-  'psd',
-  'ink',
-  'inf',
-];
-
-const supportedSmallFileIconStyles = supportedFileIcons.reduce(
-  (accumulator, fileExtension, index) => {
-    const columnIndex = index % 12;
-    const rowIndex = Math.floor(index / 12);
-    accumulator[fileExtension] = {
-      backgroundPosition: `${-columnIndex * 68}px ${-rowIndex * 90}px`,
-    };
-    return accumulator;
-  },
-  {} as Record<string, CSSProperties>
-);
-
-const iconGroups: Record<string, string[]> = {
-  jpg: ['jpeg'],
-  zip: ['rar', '7z', 'gz', 'tar'],
-  jar: ['war', 'jad'],
-  xlsx: ['xltx'],
-  ink: ['lnk'],
-  inf: ['nfo'],
-};
-
-const fileIconAliases = Object.keys(iconGroups).reduce((accumlator, key) => {
-  iconGroups[key].forEach((alias) => (accumlator[alias] = key));
-  return accumlator;
-}, {} as Record<string, string>);
-
-supportedFileIcons.push(...Object.keys(fileIconAliases));
 
 export const FileUploader = forwardRef<HTMLDivElement, FileUploaderProps>(
   function FileUploader(
@@ -254,20 +188,6 @@ export const FileUploader = forwardRef<HTMLDivElement, FileUploaderProps>(
                     },
                     index
                   ) => {
-                    const fileExtension = (() => {
-                      const fileExtensionMatch = /\.(\w+)$/g.exec(name);
-                      if (
-                        fileExtensionMatch &&
-                        supportedFileIcons.includes(
-                          fileExtensionMatch[1].toLowerCase()
-                        )
-                      ) {
-                        const fileExtension =
-                          fileExtensionMatch[1].toLowerCase();
-                        return fileIconAliases[fileExtension] || fileExtension;
-                      }
-                      return false;
-                    })();
                     return (
                       <Fragment key={index}>
                         {index === 0 ? null : <Divider />}
@@ -280,36 +200,18 @@ export const FileUploader = forwardRef<HTMLDivElement, FileUploaderProps>(
                             '&:hover': {
                               backgroundColor: alpha(palette.primary.main, 0.1),
                             },
+                            gap: 2,
                           }}
                         >
                           <ListItemAvatar sx={{ minWidth: 40 }}>
-                            {fileExtension ? (
-                              <Box
-                                sx={{
-                                  width: 30,
-                                  height: 40,
-                                  '&:after': {
-                                    content: '""',
-                                    display: `block`,
-                                    width: 68,
-                                    height: 90,
-                                    position: `absolute`,
-                                    top: 14,
-                                    left: 7,
-                                    backgroundImage: `url('${fileTypeIcons}')`,
-                                    backgroundSize: 816,
-                                    backgroundRepeat: `no-repeat`,
-                                    transformOrigin: `top left`,
-                                    transform: `scale(0.36)`,
-                                    ...supportedSmallFileIconStyles[
-                                      fileExtension
-                                    ],
-                                  },
-                                }}
-                              />
-                            ) : (
-                              <InsertDriveFileIcon sx={{ fontSize: 36 }} />
-                            )}
+                            <FileIcon
+                              fileName={name}
+                              sx={{
+                                svg: {
+                                  width: 40,
+                                },
+                              }}
+                            />
                           </ListItemAvatar>
                           <ListItemText
                             primary={name}
