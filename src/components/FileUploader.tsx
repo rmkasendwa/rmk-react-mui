@@ -1,9 +1,10 @@
 import { formatBytes } from '@infinite-debugger/rmk-utils/bytes';
-import CancelIcon from '@mui/icons-material/Cancel';
+import CloseIcon from '@mui/icons-material/Close';
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import DeleteIcon from '@mui/icons-material/Delete';
-import ReplayIcon from '@mui/icons-material/Replay';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import { Card, IconButton } from '@mui/material';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
@@ -28,7 +29,6 @@ import {
   FileUploadFunction,
 } from '../interfaces/Utils';
 import { flickerElement } from '../utils/page';
-import Card from './Card';
 import FileIcon from './FileIcon';
 import { TextFieldProps } from './InputFields/TextField';
 
@@ -98,9 +98,10 @@ export const FileUploader = forwardRef<HTMLDivElement, FileUploaderProps>(
           >
             <Card
               sx={{
-                backgroundColor: alpha(palette.text.primary, 0.1),
+                bgcolor: alpha(palette.text.primary, 0.1),
                 cursor: 'pointer',
-                border: 'none',
+                borderWidth: 2,
+                borderStyle: 'dashed',
               }}
               onClick={() => {
                 fileField?.click();
@@ -194,8 +195,7 @@ export const FileUploader = forwardRef<HTMLDivElement, FileUploaderProps>(
                         <ListItem
                           className="file-uploader-file-list-item"
                           sx={{
-                            pl: 0,
-                            pr: 1,
+                            px: 0,
                             py: 0.5,
                             '&:hover': {
                               backgroundColor: alpha(palette.primary.main, 0.1),
@@ -215,6 +215,9 @@ export const FileUploader = forwardRef<HTMLDivElement, FileUploaderProps>(
                           </ListItemAvatar>
                           <ListItemText
                             primary={name}
+                            primaryTypographyProps={{
+                              noWrap: true,
+                            }}
                             secondary={formatBytes(size)}
                             secondaryTypographyProps={{
                               sx: {
@@ -227,94 +230,74 @@ export const FileUploader = forwardRef<HTMLDivElement, FileUploaderProps>(
                               wordBreak: 'break-all',
                             }}
                           />
-                          <Box sx={{ display: 'flex', gap: 1 }}>
+                          <Box sx={{ display: 'flex' }}>
                             {download &&
                             !uploading &&
                             !uploadError &&
                             !downloading &&
                             !downloadError ? (
-                              <Button
-                                startIcon={<CloudDownloadIcon />}
-                                variant="outlined"
-                                color="success"
-                                onClick={() => download()}
-                              >
-                                Download
-                              </Button>
+                              <Tooltip title="Dowload">
+                                <IconButton onClick={() => download()}>
+                                  <CloudDownloadIcon />
+                                </IconButton>
+                              </Tooltip>
                             ) : null}
                             {!uploading &&
                             !uploadError &&
                             !downloading &&
                             !downloadError ? (
-                              <Button
-                                startIcon={<DeleteIcon />}
-                                variant="outlined"
-                                color="error"
-                                onClick={() => {
-                                  removeFile(index);
-                                  cancelUpload && cancelUpload();
-                                  cancelDownload && cancelDownload();
-                                }}
-                              >
-                                Delete
-                              </Button>
+                              <Tooltip title="Delete">
+                                <IconButton
+                                  onClick={() => {
+                                    removeFile(index);
+                                    cancelUpload && cancelUpload();
+                                    cancelDownload && cancelDownload();
+                                  }}
+                                >
+                                  <DeleteIcon />
+                                </IconButton>
+                              </Tooltip>
                             ) : null}
 
                             {/* Upload components */}
                             {uploadError && retryUpload ? (
                               <Tooltip title={uploadError}>
-                                <Button
-                                  startIcon={<ReplayIcon />}
-                                  variant="outlined"
-                                  color="info"
-                                  onClick={() => {
-                                    retryUpload();
-                                  }}
-                                >
-                                  Try Again
-                                </Button>
+                                <IconButton onClick={() => retryUpload()}>
+                                  <RefreshIcon />
+                                </IconButton>
                               </Tooltip>
                             ) : null}
                             {uploading || uploadError ? (
-                              <Button
-                                startIcon={<CancelIcon />}
-                                variant="outlined"
-                                color="warning"
-                                onClick={() => {
-                                  removeFile(index);
-                                  cancelUpload && cancelUpload();
-                                }}
-                              >
-                                Cancel Upload
-                              </Button>
+                              <Tooltip title="Cancel Upload">
+                                <IconButton
+                                  onClick={() => {
+                                    removeFile(index);
+                                    cancelUpload && cancelUpload();
+                                  }}
+                                >
+                                  <CloseIcon />
+                                </IconButton>
+                              </Tooltip>
                             ) : null}
 
                             {/* Download components */}
                             {downloadError && retryDownload ? (
                               <Tooltip title={downloadError}>
-                                <Button
-                                  startIcon={<ReplayIcon />}
-                                  variant="outlined"
-                                  color="info"
-                                  onClick={() => {
-                                    retryDownload();
-                                  }}
-                                >
-                                  Try Again
-                                </Button>
+                                <IconButton onClick={() => retryDownload()}>
+                                  <RefreshIcon />
+                                </IconButton>
                               </Tooltip>
                             ) : null}
                             {downloading || downloadError ? (
-                              <Button
-                                startIcon={<CancelIcon />}
-                                variant="outlined"
-                                color="warning"
-                                onClick={() => {
-                                  cancelDownload && cancelDownload();
-                                }}
-                              >
-                                Cancel Download
-                              </Button>
+                              <Tooltip title="Cancel Download">
+                                <IconButton
+                                  onClick={() => {
+                                    cancelDownload && cancelDownload();
+                                  }}
+                                >
+                                  <CloseIcon />
+                                </IconButton>
+                              </Tooltip>
                             ) : null}
                           </Box>
                         </ListItem>
