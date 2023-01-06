@@ -16,7 +16,7 @@ import {
 import clsx from 'clsx';
 import formatDate from 'date-fns/format';
 import { result } from 'lodash';
-import { forwardRef, isValidElement, useEffect, useState } from 'react';
+import { forwardRef, useEffect, useState } from 'react';
 import * as yup from 'yup';
 
 import { mapTableColumnTypeToExoticDataType } from '../../utils/Table';
@@ -298,20 +298,15 @@ export const TableBodyColumn = forwardRef<
     return { formattedColumnValue, baseColumnValue: (row as any)[id] };
   })();
 
-  const formattedColumnValueElement = (() => {
-    if (isValidElement(formattedColumnValue)) {
-      return (
-        <Box
-          display="flex"
-          flexDirection="column"
-          alignItems={({ left: 'start', right: 'end' } as any)[align] || align}
-        >
-          {formattedColumnValue}
-        </Box>
-      );
-    }
-    return formattedColumnValue;
-  })();
+  const formattedColumnValueElement = (
+    <Box
+      display="flex"
+      flexDirection="column"
+      alignItems={({ left: 'start', right: 'end' } as any)[align] || align}
+    >
+      {formattedColumnValue}
+    </Box>
+  );
 
   return (
     <TableCell

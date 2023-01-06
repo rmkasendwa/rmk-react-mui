@@ -108,7 +108,7 @@ export interface TableCrudProps<
     >,
     Pick<PageTitleProps, 'tools'>,
     Pick<UsePaginatedRecordsOptions, 'revalidationKey' | 'autoSync'> {
-  title?: string;
+  title?: ReactNode;
   children?:
     | ModalFormFunctionChildren<
         InitialValues,
@@ -229,7 +229,7 @@ const BaseTableCrud = <
     })()
   );
 
-  if (!labelPlural && title) {
+  if (!labelPlural && typeof title === 'string') {
     labelPlural = title;
   }
   if (!labelSingular && labelPlural) {
