@@ -1,17 +1,26 @@
 import CloseIcon from '@mui/icons-material/Close';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {
+  ComponentsOverrides,
+  ComponentsProps,
+  ComponentsVariants,
   IconButton,
+  Stack,
   Tooltip,
   Typography,
   alpha,
+  unstable_composeClasses as composeClasses,
+  generateUtilityClass,
+  generateUtilityClasses,
   inputBaseClasses,
   useTheme,
+  useThemeProps,
 } from '@mui/material';
 import Box, { BoxProps } from '@mui/material/Box';
 import ClickAwayListener from '@mui/material/ClickAwayListener';
 import Grow from '@mui/material/Grow';
 import Popper from '@mui/material/Popper';
+import clsx from 'clsx';
 import {
   forwardRef,
   useCallback,
@@ -20,10 +29,12 @@ import {
   useRef,
   useState,
 } from 'react';
+import { mergeRefs } from 'react-merge-refs';
 
 import { LoadingProvider } from '../../contexts/LoadingContext';
 import { useRecords } from '../../hooks/Utils';
 import { TAPIFunction } from '../../interfaces/Utils';
+import FieldValueDisplay from '../FieldValueDisplay';
 import PaginatedDropdownOptionList, {
   DropdownOption,
   PaginatedDropdownOptionListProps,
@@ -31,8 +42,40 @@ import PaginatedDropdownOptionList, {
 import RetryErrorMessage from '../RetryErrorMessage';
 import TextField, { TextFieldProps } from './TextField';
 
+export interface DataDropdownFieldClasses {
+  /** Styles applied to the root element. */
+  root: string;
+}
+
+export type DataDropdownFieldClassKey = keyof DataDropdownFieldClasses;
+
+// Adding theme prop types
+declare module '@mui/material/styles/props' {
+  interface ComponentsPropsList {
+    MuiDataDropdownField: DataDropdownFieldProps;
+  }
+}
+
+// Adding theme override types
+declare module '@mui/material/styles/overrides' {
+  interface ComponentNameToClassKey {
+    MuiDataDropdownField: keyof DataDropdownFieldClasses;
+  }
+}
+
+// Adding theme component types
+declare module '@mui/material/styles/components' {
+  interface Components<Theme = unknown> {
+    MuiDataDropdownField?: {
+      defaultProps?: ComponentsProps['MuiDataDropdownField'];
+      styleOverrides?: ComponentsOverrides<Theme>['MuiDataDropdownField'];
+      variants?: ComponentsVariants['MuiDataDropdownField'];
+    };
+  }
+}
+
 export interface DataDropdownFieldProps
-  extends Omit<TextFieldProps, 'value'>,
+  extends Omit<TextFieldProps, 'value' | 'variant'>,
     Partial<
       Pick<PaginatedDropdownOptionListProps, 'optionVariant' | 'onSelectOption'>
     > {
@@ -52,13 +95,28 @@ export interface DataDropdownFieldProps
   // Async options
   getDropdownOptions?: TAPIFunction<DropdownOption[]>;
   callGetDropdownOptions?: 'always' | 'whenNoOptions';
+
+  variant?: 'standard' | 'filled' | 'outlined' | 'text';
 }
+
+export function getDataDropdownFieldUtilityClass(slot: string): string {
+  return generateUtilityClass('MuiDataDropdownField', slot);
+}
+
+export const dataDropdownFieldClasses: DataDropdownFieldClasses =
+  generateUtilityClasses('MuiDataDropdownField', ['root']);
+
+const slots = {
+  root: ['root'],
+};
 
 export const DataDropdownField = forwardRef<
   HTMLDivElement,
   DataDropdownFieldProps
->(function DataDropdownField(
-  {
+>(function DataDropdownField(inProps, ref) {
+  const props = useThemeProps({ props: inProps, name: 'MuiDataDropdownField' });
+  const {
+    className,
     SelectProps,
     name,
     id,
@@ -85,10 +143,30 @@ export const DataDropdownField = forwardRef<
     getDropdownOptions,
     callGetDropdownOptions = 'whenNoOptions',
     onSelectOption,
+    variant: variantProp,
+    label,
     ...rest
-  },
-  ref
-) {
+  } = props;
+
+  const classes = composeClasses(
+    slots,
+    getDataDropdownFieldUtilityClass,
+    (() => {
+      if (className) {
+        return {
+          root: className,
+        };
+      }
+    })()
+  );
+
+  const isTextVariant = variantProp === 'text';
+  const variant = (() => {
+    if (variantProp !== 'text') {
+      return variantProp;
+    }
+  })();
+
   const { sx: SelectedOptionPillPropsSx, ...SelectedOptionPillPropsRest } =
     SelectedOptionPillProps;
   const { ...PaginatedDropdownOptionListPropsRest } =
@@ -325,9 +403,12 @@ export const DataDropdownField = forwardRef<
   }, [options, searchTerm, selectedOptionDisplayString]);
 
   if (value && loading && missingOptionValues.length > 0) {
+    if (isTextVariant) {
+      return <FieldValueDisplay {...{ label, value }} />;
+    }
     return (
       <LoadingProvider value={{ loading, errorMessage }}>
-        <TextField {...rest} />
+        <TextField {...rest} {...{ label, variant }} />
       </LoadingProvider>
     );
   }
@@ -340,181 +421,220 @@ export const DataDropdownField = forwardRef<
     );
   }
 
+  const endAdornment = (
+    <>
+      {showClearButton && selectedOptions.length > 0 && !disabled ? (
+        <Tooltip title="Clear">
+          <IconButton
+            className="data-dropdown-input-clear-button"
+            onClick={(event) => {
+              event.stopPropagation();
+              setSearchTerm('');
+              const options: DropdownOption[] = [];
+              setSelectedOptions(options);
+              triggerChangeEvent(options);
+            }}
+            sx={{ p: 0.4 }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </Tooltip>
+      ) : null}
+      <ExpandMoreIcon />
+    </>
+  );
+
   return (
     <>
-      <TextField
-        ref={ref}
-        onClick={() => {
-          setOpen(true);
-        }}
-        onFocus={(event) => {
-          setFocused(true);
-          onFocus && onFocus(event);
-        }}
-        onBlur={() => {
-          setFocused(false);
-          if (onBlur) {
-            const event: any = new Event('blur', { bubbles: true });
-            Object.defineProperty(event, 'target', {
-              writable: false,
-              value: {
-                name,
-                id,
-                value: selectedOptionValue,
-              },
-            });
-            onBlur(event);
-          }
-        }}
-        onChange={(event) => {
-          if (searchable) {
-            setSearchTerm(event.target.value);
-            onChangeSearchTerm && onChangeSearchTerm(event.target.value);
-          }
-        }}
-        InputProps={{
-          endAdornment: (
-            <>
-              {showClearButton && selectedOptions.length > 0 && !disabled ? (
-                <Tooltip title="Clear">
-                  <IconButton
-                    className="data-dropdown-input-clear-button"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      setSearchTerm('');
-                      const options: DropdownOption[] = [];
-                      setSelectedOptions(options);
-                      triggerChangeEvent(options);
+      {(() => {
+        if (isTextVariant) {
+          return (
+            <FieldValueDisplay
+              ref={mergeRefs([ref, anchorRef])}
+              {...{ label }}
+              FieldValueProps={{
+                variant: 'inherit',
+                noWrap: true,
+                sx: {
+                  cursor: 'pointer',
+                },
+              }}
+              value={
+                <Stack
+                  sx={{
+                    alignItems: 'center',
+                    gap: 1,
+                  }}
+                  direction="row"
+                >
+                  {selectedOptions[0]?.label}
+                  {endAdornment}
+                </Stack>
+              }
+              onClick={() => {
+                setOpen(true);
+              }}
+            />
+          );
+        }
+        return (
+          <TextField
+            ref={ref}
+            onClick={() => {
+              setOpen(true);
+            }}
+            onFocus={(event) => {
+              setFocused(true);
+              onFocus && onFocus(event);
+            }}
+            onBlur={() => {
+              setFocused(false);
+              if (onBlur) {
+                const event: any = new Event('blur', { bubbles: true });
+                Object.defineProperty(event, 'target', {
+                  writable: false,
+                  value: {
+                    name,
+                    id,
+                    value: selectedOptionValue,
+                  },
+                });
+                onBlur(event);
+              }
+            }}
+            onChange={(event) => {
+              if (searchable) {
+                setSearchTerm(event.target.value);
+                onChangeSearchTerm && onChangeSearchTerm(event.target.value);
+              }
+            }}
+            InputProps={{
+              endAdornment,
+              ...InputProps,
+              ...(() => {
+                const props: Partial<typeof InputProps> = {};
+                if (selectedOptions.length > 0) {
+                  props.placeholder = '';
+                }
+                return props;
+              })(),
+              ref: anchorRef,
+              readOnly: !searchable,
+            }}
+            value={(() => {
+              if (focused && searchable) {
+                return searchTerm;
+              } else {
+                return selectedOptionDisplayString;
+              }
+            })()}
+            className={clsx(classes.root)}
+            {...{ variant, label, disabled }}
+            {...rest}
+            {...errorProps}
+            endChildren={(() => {
+              if (searchable && !focused && selectedOptions.length > 0) {
+                return (
+                  <Box
+                    className="data-dropdown-field-selected-option-wrapper"
+                    sx={{
+                      position: 'absolute',
+                      bottom: 0,
+                      left: 0,
+                      height: '100%',
+                      pointerEvents: 'none',
+                      display: 'flex',
+                      alignItems: 'center',
+                      pl: '14px',
+                      whiteSpace: 'nowrap',
+                      gap: 0.5,
+                      overflow: 'hidden',
                     }}
-                    sx={{ p: 0.4 }}
                   >
-                    <CloseIcon />
-                  </IconButton>
-                </Tooltip>
-              ) : null}
-              <ExpandMoreIcon />
-            </>
-          ),
-          ...InputProps,
-          ...(() => {
-            const props: Partial<typeof InputProps> = {};
-            if (selectedOptions.length > 0) {
-              props.placeholder = '';
-            }
-            return props;
-          })(),
-          ref: anchorRef,
-          readOnly: !searchable,
-        }}
-        value={(() => {
-          if (focused && searchable) {
-            return searchTerm;
-          } else {
-            return selectedOptionDisplayString;
-          }
-        })()}
-        {...{ disabled }}
-        {...rest}
-        {...errorProps}
-        endChildren={(() => {
-          if (searchable && !focused && selectedOptions.length > 0) {
-            return (
-              <Box
-                className="data-dropdown-field-selected-option-wrapper"
-                sx={{
-                  position: 'absolute',
-                  bottom: 0,
-                  left: 0,
-                  height: '100%',
-                  pointerEvents: 'none',
-                  display: 'flex',
-                  alignItems: 'center',
-                  pl: '14px',
-                  whiteSpace: 'nowrap',
-                  gap: 0.5,
-                  overflow: 'hidden',
-                }}
-              >
-                {multiple ? (
-                  selectedOptions.map(({ label, value }) => {
-                    return (
-                      <Box
-                        key={value}
-                        {...SelectedOptionPillPropsRest}
+                    {multiple ? (
+                      selectedOptions.map(({ label, value }) => {
+                        return (
+                          <Box
+                            key={value}
+                            {...SelectedOptionPillPropsRest}
+                            sx={{
+                              fontSize: 14,
+                              bgcolor: alpha(palette.primary.main, 0.1),
+                              borderRadius: '20px',
+                              height: 25,
+                              py: 0.25,
+                              pl: (() => {
+                                if (
+                                  ['string', 'number'].includes(typeof label)
+                                ) {
+                                  return 1;
+                                }
+                                return 0.25;
+                              })(),
+                              pr: 1,
+                              mr: 0.5,
+                              ...SelectedOptionPillPropsSx,
+                            }}
+                          >
+                            {label}
+                          </Box>
+                        );
+                      })
+                    ) : (
+                      <Typography
+                        component="div"
                         sx={{
                           fontSize: 14,
-                          bgcolor: alpha(palette.primary.main, 0.1),
-                          borderRadius: '20px',
-                          height: 25,
-                          py: 0.25,
-                          pl: (() => {
-                            if (['string', 'number'].includes(typeof label)) {
-                              return 1;
-                            }
-                            return 0.25;
-                          })(),
-                          pr: 1,
-                          mr: 0.5,
-                          ...SelectedOptionPillPropsSx,
                         }}
                       >
-                        {label}
-                      </Box>
-                    );
-                  })
-                ) : (
-                  <Typography
-                    component="div"
-                    sx={{
-                      fontSize: 14,
-                    }}
-                  >
-                    {selectedOptions[0]?.label}
-                  </Typography>
-                )}
-              </Box>
-            );
-          }
-        })()}
-        WrapperProps={{
-          ...WrapperPropsRest,
-          sx: {
-            width: '100%',
-            ...WrapperPropsSx,
-            [`& .${inputBaseClasses.input}`]: (() => {
-              if (
-                searchable &&
-                !focused &&
-                selectedOptionDisplayString.length > 0
-              ) {
-                return { color: 'transparent' };
+                        {selectedOptions[0]?.label}
+                      </Typography>
+                    )}
+                  </Box>
+                );
               }
-              return {};
-            })(),
-            '&>.data-dropdown-field-selected-option-wrapper': {
-              width: 'calc(100% - 40px)',
-            },
-            ...(() => {
-              if (showClearButton) {
-                return {
-                  '&:hover>.data-dropdown-field-selected-option-wrapper': {
-                    width: 'calc(100% - 72px)',
-                  },
-                };
-              }
-            })(),
-          },
-        }}
-        sx={{
-          '& .data-dropdown-input-clear-button': {
-            visibility: 'hidden',
-          },
-          '&:hover .data-dropdown-input-clear-button': {
-            visibility: 'visible',
-          },
-          ...sx,
-        }}
-      />
+            })()}
+            WrapperProps={{
+              ...WrapperPropsRest,
+              sx: {
+                width: '100%',
+                ...WrapperPropsSx,
+                [`& .${inputBaseClasses.input}`]: (() => {
+                  if (
+                    searchable &&
+                    !focused &&
+                    selectedOptionDisplayString.length > 0
+                  ) {
+                    return { color: 'transparent' };
+                  }
+                  return {};
+                })(),
+                '&>.data-dropdown-field-selected-option-wrapper': {
+                  width: 'calc(100% - 40px)',
+                },
+                ...(() => {
+                  if (showClearButton) {
+                    return {
+                      '&:hover>.data-dropdown-field-selected-option-wrapper': {
+                        width: 'calc(100% - 72px)',
+                      },
+                    };
+                  }
+                })(),
+              },
+            }}
+            sx={{
+              '& .data-dropdown-input-clear-button': {
+                visibility: 'hidden',
+              },
+              '&:hover .data-dropdown-input-clear-button': {
+                visibility: 'visible',
+              },
+              ...sx,
+            }}
+          />
+        );
+      })()}
       <Popper
         open={open}
         anchorEl={anchorRef.current}

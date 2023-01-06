@@ -227,6 +227,13 @@ export const BaseFieldValueDisplay = <FieldValue extends ReactNode>(
     );
   }
 
+  const displayLabel = (() => {
+    if (editable && editMode) {
+      return editLabel;
+    }
+    return label;
+  })();
+
   return (
     <Box
       ref={ref}
@@ -237,22 +244,19 @@ export const BaseFieldValueDisplay = <FieldValue extends ReactNode>(
         ...sx,
       }}
     >
-      <FieldLabel
-        className={clsx(classes.label, LabelPropsClassName)}
-        {...{ required }}
-        {...LabelPropsRest}
-        sx={{
-          ...(components?.MuiFieldValueDisplay?.styleOverrides?.label as any),
-          ...LabelPropsSx,
-        }}
-      >
-        {(() => {
-          if (editable && editMode) {
-            return editLabel;
-          }
-          return label;
-        })()}
-      </FieldLabel>
+      {displayLabel && (
+        <FieldLabel
+          className={clsx(classes.label, LabelPropsClassName)}
+          {...{ required }}
+          {...LabelPropsRest}
+          sx={{
+            ...(components?.MuiFieldValueDisplay?.styleOverrides?.label as any),
+            ...LabelPropsSx,
+          }}
+        >
+          {displayLabel}
+        </FieldLabel>
+      )}
       {description && (
         <FieldLabel
           className={clsx(classes.description, DescriptionPropsClassName)}
