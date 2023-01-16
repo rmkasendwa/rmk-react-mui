@@ -382,7 +382,6 @@ const BaseTableCrud = <
   useEffect(() => {
     if (deleted) {
       setDeletableRecordId('');
-      resetDeletionState();
       autoSync && load();
     }
   }, [autoSync, deleted, load, resetDeletionState]);
@@ -996,6 +995,7 @@ const BaseTableCrud = <
               }}
               onClose={() => {
                 setDeletableRecordId('');
+                resetDeletionState();
               }}
               CloseActionButtonProps={{
                 children: 'Cancel',
