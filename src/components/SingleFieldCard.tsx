@@ -10,7 +10,7 @@ import FieldLabel from './FieldLabel';
 
 export interface SingleFieldCardProps {
   label: string;
-  value: string | number;
+  value?: string | number;
 }
 
 export const SingleFieldCard: FC<SingleFieldCardProps> = ({ label, value }) => {
