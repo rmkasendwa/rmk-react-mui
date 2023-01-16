@@ -375,10 +375,15 @@ const BaseTableCrud = <
     deleteEntity,
     deleting,
     deleted,
-    setDeleted,
     errorMessage: deleteErrorMessage,
-    setErrorMessage: setDeleteErrorMessage,
+    reset: resetDeletionState,
   } = useDelete();
+
+  useEffect(() => {
+    if (deleted) {
+      setDeletableRecordId('');
+    }
+  }, [deleted, resetDeletionState]);
 
   const {
     load: loadRecordDetails,
@@ -988,10 +993,8 @@ const BaseTableCrud = <
                 }
               }}
               onClose={() => {
-                setDeletableRecordId('');
-                setDeleteErrorMessage('');
                 if (deleted) {
-                  setDeleted(false);
+                  resetDeletionState();
                   autoSync && load();
                 }
               }}
@@ -1016,6 +1019,7 @@ const BaseTableCrud = <
                   {lowercaseLabelSingular}.
                 </Typography>
               }
+              lockSubmitIfNoChange={false}
             >
               {({ ...rest }) => {
                 return (
