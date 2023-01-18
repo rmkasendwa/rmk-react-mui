@@ -14,7 +14,7 @@ export interface PaginatedResponseData<T> {
   records: T[];
 }
 
-export type TAPIFunction<T = any> = () => Promise<T>;
+export type TAPIFunction<T = any> = (...args: any) => Promise<T>;
 
 export interface ReduxAction {
   type: string;

@@ -309,7 +309,7 @@ const BaseTableCrud = <
     created,
     errorMessage: createErrorMessage,
     reset: resetCreation,
-  } = useCreate();
+  } = useCreate(recordCreator!);
 
   // Record loading
   const { currentPageRecords, load, loading, errorMessage, recordsTotalCount } =
@@ -368,16 +368,16 @@ const BaseTableCrud = <
     updated,
     errorMessage: updateErrorMessage,
     reset: resetUpdate,
-  } = useUpdate();
+  } = useUpdate(recordEditor!);
 
   // Record deleting state
   const {
-    deleteEntity,
+    _delete,
     deleting,
     deleted,
     errorMessage: deleteErrorMessage,
     reset: resetDeletionState,
-  } = useDelete();
+  } = useDelete(recordDeletor!);
 
   useEffect(() => {
     if (deleted) {
@@ -784,9 +784,7 @@ const BaseTableCrud = <
                 loading={creating}
                 onSubmit={async (values) => {
                   if (recordCreator) {
-                    await create(() => {
-                      return recordCreator(values);
-                    });
+                    await create(values);
                   }
                 }}
                 onClose={() => {
@@ -875,9 +873,7 @@ const BaseTableCrud = <
                       loading={updating}
                       onSubmit={async (values) => {
                         if (recordEditor && selectedRecord) {
-                          await update(() => {
-                            return recordEditor(selectedRecord, values);
-                          });
+                          await update(selectedRecord, values);
                         }
                       }}
                       onClose={() => {
@@ -988,9 +984,7 @@ const BaseTableCrud = <
               )}
               onSubmit={async () => {
                 if (recordDeletor && selectedRecord) {
-                  await deleteEntity(() => {
-                    return recordDeletor(selectedRecord);
-                  });
+                  await _delete(selectedRecord);
                 }
               }}
               onClose={() => {

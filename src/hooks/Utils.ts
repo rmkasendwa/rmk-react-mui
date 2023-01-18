@@ -143,18 +143,31 @@ export const useAPIService = <T>(
   };
 };
 
-export const useMutation = <T>() => {
+type Awaited<T> = T extends PromiseLike<infer U> ? U : T;
+
+export const useMutation = <MutateFunction extends TAPIFunction>(
+  inputMutate: MutateFunction
+) => {
   const {
-    load: mutate,
+    load: baseMutate,
     loading: mutating,
     record: mutatedRecord,
+    loaded: mutated,
+    setLoaded: setMutated,
     ...rest
-  } = useAPIService<T | null>(null);
-  const [mutated, setMutated] = useState(false);
+  } = useAPIService<Awaited<ReturnType<MutateFunction>> | null>(null);
 
+  const inputMutateRef = useRef(inputMutate);
   useEffect(() => {
-    setMutated(mutatedRecord != null);
-  }, [mutatedRecord]);
+    inputMutateRef.current = inputMutate;
+  }, [inputMutate]);
+
+  const mutate = useCallback(
+    (...args: any) => {
+      return baseMutate(() => inputMutateRef.current(...args));
+    },
+    [baseMutate]
+  ) as MutateFunction;
 
   return {
     mutate,
@@ -166,7 +179,9 @@ export const useMutation = <T>() => {
   };
 };
 
-export const useCreate = <T>() => {
+export const useCreate = <CreateFunction extends TAPIFunction>(
+  inputCreate: CreateFunction
+) => {
   const {
     mutate: create,
     mutating: creating,
@@ -174,7 +189,7 @@ export const useCreate = <T>() => {
     setMutated: setCreated,
     mutatedRecord: createdRecord,
     ...rest
-  } = useMutation<T>();
+  } = useMutation(inputCreate);
 
   return {
     create,
@@ -186,9 +201,11 @@ export const useCreate = <T>() => {
   };
 };
 
-export const useUpdate = <T>() => {
+export const useUpdate = <UpdateFunction extends TAPIFunction>(
+  inputUpdate: UpdateFunction
+) => {
   const { create, creating, created, createdRecord, setCreated, ...rest } =
-    useCreate<T>();
+    useCreate(inputUpdate);
 
   return {
     update: create,
@@ -200,18 +217,20 @@ export const useUpdate = <T>() => {
   };
 };
 
-export const useDelete = <T>() => {
+export const useDelete = <DeleteFunction extends TAPIFunction>(
+  inputDelete: DeleteFunction
+) => {
   const {
-    mutate: deleteEntity,
+    mutate: _delete,
     mutating: deleting,
     mutated: deleted,
     setMutated: setDeleted,
     mutatedRecord: deletedRecord,
     ...rest
-  } = useMutation<T>();
+  } = useMutation(inputDelete);
 
   return {
-    deleteEntity,
+    _delete,
     deleting,
     deleted,
     setDeleted,
