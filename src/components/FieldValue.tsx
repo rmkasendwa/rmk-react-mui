@@ -171,7 +171,9 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
 
     const { palette, components } = useTheme();
     const [editMode, setEditMode] = useState(editModeProp ?? false);
-    const { update, updating, updated, setUpdated } = useUpdate();
+    const { update, updating, updated, setUpdated } = useUpdate(
+      fieldValueEditor!
+    );
 
     useEffect(() => {
       onChangeEditModeRef.current && onChangeEditModeRef.current(editMode);
@@ -201,16 +203,13 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
               initialValues={{
                 value: editableValue || '',
               }}
-              onSubmit={({ value }) => {
-                update(async () => {
-                  if (fieldValueEditor) {
-                    const response = await fieldValueEditor(value);
-                    onFieldValueUpdatedRef.current &&
-                      (await onFieldValueUpdatedRef.current());
-                    setEditMode(false);
-                    return response;
-                  }
-                });
+              onSubmit={async ({ value }) => {
+                if (fieldValueEditor) {
+                  await update(value);
+                  onFieldValueUpdatedRef.current &&
+                    (await onFieldValueUpdatedRef.current());
+                  setEditMode(false);
+                }
               }}
             >
               {({ submitForm, touched }) => {
