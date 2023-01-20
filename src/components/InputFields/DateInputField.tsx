@@ -7,18 +7,21 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { DatePickerProps } from '@mui/x-date-pickers/DatePicker';
 import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
+import { DesktopDateTimePicker } from '@mui/x-date-pickers/DesktopDateTimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { MobileDatePicker } from '@mui/x-date-pickers/MobileDatePicker';
+import { MobileDateTimePicker } from '@mui/x-date-pickers/MobileDateTimePicker';
 import { format } from 'date-fns';
 import { forwardRef, useCallback, useEffect, useMemo, useState } from 'react';
 
-import { DEFAULT_DATE_FORMAT } from '../../constants';
 import TextField, { TextFieldProps } from './TextField';
 
 export interface DateInputFieldProps extends TextFieldProps {
   value?: string;
   minDate?: string;
   maxDate?: string;
+  enableTimeSelector?: boolean;
+  displayFormat?: string;
 }
 
 export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
@@ -32,12 +35,21 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
       minDate: minDateProp,
       maxDate: maxDateProp,
       showClearButton = true,
+      enableTimeSelector = false,
+      displayFormat = '',
       disabled,
       sx,
       ...rest
     },
     ref
   ) {
+    if (!displayFormat) {
+      if (enableTimeSelector) {
+        displayFormat = 'MMM dd, yyyy hh:mm aa';
+      } else {
+        displayFormat = 'MMM dd, yyyy';
+      }
+    }
     const { breakpoints } = useTheme();
     const smallScreen = useMediaQuery(breakpoints.down('sm'));
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -87,13 +99,21 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
             : null;
         setSelectedDate(selectedDate);
         triggerChangeEvent(
-          selectedDate ? format(selectedDate, 'yyyy-MM-dd') : ''
+          (() => {
+            if (selectedDate) {
+              if (enableTimeSelector) {
+                return selectedDate.toISOString();
+              }
+              return format(selectedDate, 'yyyy-MM-dd');
+            }
+            return '';
+          })()
         );
       },
       renderInput: ({ value, ...params }) => {
         if (params.inputProps) {
           if (selectedDate) {
-            params.inputProps.value = format(selectedDate, DEFAULT_DATE_FORMAT);
+            params.inputProps.value = format(selectedDate, displayFormat);
           } else {
             params.inputProps.value = '';
           }
@@ -173,11 +193,19 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
 
     return (
       <LocalizationProvider dateAdapter={AdapterDateFns}>
-        {smallScreen ? (
-          <MobileDatePicker {...datePickerProps} />
-        ) : (
-          <DesktopDatePicker {...datePickerProps} />
-        )}
+        {(() => {
+          if (enableTimeSelector) {
+            if (smallScreen) {
+              return <MobileDateTimePicker {...(datePickerProps as any)} />;
+            }
+            return <DesktopDateTimePicker {...(datePickerProps as any)} />;
+          } else {
+            if (smallScreen) {
+              return <MobileDatePicker {...datePickerProps} />;
+            }
+            return <DesktopDatePicker {...datePickerProps} />;
+          }
+        })()}
       </LocalizationProvider>
     );
   }
