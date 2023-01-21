@@ -111,6 +111,7 @@ export const TableBodyColumn = forwardRef<
     textTransform,
     type,
     columnTypographyProps = {},
+    getColumnTypographyProps,
     defaultColumnValue,
     decimalPlaces,
     column,
@@ -141,7 +142,14 @@ export const TableBodyColumn = forwardRef<
     })()
   );
 
-  const { ...columnTypographyPropsRest } = columnTypographyProps;
+  const { ...columnTypographyPropsRest } = {
+    ...columnTypographyProps,
+    ...(() => {
+      if (getColumnTypographyProps) {
+        return getColumnTypographyProps(row);
+      }
+    })(),
+  };
 
   const [editMode, setEditMode] = useState(editModeProp ?? false);
   const { palette } = useTheme();

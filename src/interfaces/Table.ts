@@ -109,6 +109,7 @@ export interface TableColumn<
   opaque?: boolean;
   propagateClickToParentRowClickEvent?: boolean;
   columnTypographyProps?: Partial<TypographyProps>;
+  getColumnTypographyProps?: (row: RowObject) => Partial<TypographyProps>;
   decimalPlaces?: number;
   textTransform?: boolean;
   showHeaderText?: boolean;
