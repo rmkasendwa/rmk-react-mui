@@ -479,9 +479,6 @@ export const DataDropdownField = forwardRef<
         return (
           <TextField
             ref={mergeRefs([ref, anchorRef])}
-            onClick={() => {
-              setOpen(true);
-            }}
             onFocus={(event) => {
               setOpen(true);
               setFocused(true);
