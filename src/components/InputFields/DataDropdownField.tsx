@@ -34,6 +34,7 @@ import { mergeRefs } from 'react-merge-refs';
 import { LoadingProvider } from '../../contexts/LoadingContext';
 import { useRecords } from '../../hooks/Utils';
 import { TAPIFunction } from '../../interfaces/Utils';
+import { isDescendant } from '../../utils/html';
 import FieldValueDisplay from '../FieldValueDisplay';
 import PaginatedDropdownOptionList, {
   DropdownOption,
@@ -278,8 +279,6 @@ export const DataDropdownField = forwardRef<
       .join(', ');
   }, [selectedOptions]);
 
-  const handleClose = () => setOpen(false);
-
   useEffect(() => {
     if (open) {
       loadOptions();
@@ -479,11 +478,12 @@ export const DataDropdownField = forwardRef<
         }
         return (
           <TextField
-            ref={ref}
+            ref={mergeRefs([ref, anchorRef])}
             onClick={() => {
               setOpen(true);
             }}
             onFocus={(event) => {
+              setOpen(true);
               setFocused(true);
               onFocus && onFocus(event);
             }}
@@ -518,7 +518,6 @@ export const DataDropdownField = forwardRef<
                 }
                 return props;
               })(),
-              ref: anchorRef,
               readOnly: !searchable,
             }}
             value={(() => {
@@ -649,7 +648,15 @@ export const DataDropdownField = forwardRef<
           return (
             <Grow {...TransitionProps} style={{ transformOrigin: '0 0 0' }}>
               <Box tabIndex={-1}>
-                <ClickAwayListener onClickAway={handleClose}>
+                <ClickAwayListener
+                  onClickAway={(event) => {
+                    if (anchorRef.current) {
+                      setOpen(
+                        isDescendant(anchorRef.current, event.target as any)
+                      );
+                    }
+                  }}
+                >
                   <PaginatedDropdownOptionList
                     {...{
                       optionVariant,
@@ -665,7 +672,9 @@ export const DataDropdownField = forwardRef<
                     }
                     maxHeight={dropdownListMaxHeight}
                     paging={optionPaging}
-                    onClose={handleClose}
+                    onClose={() => {
+                      setOpen(false);
+                    }}
                     loadOptions={
                       getDropdownOptions ? () => loadOptions(true) : undefined
                     }
