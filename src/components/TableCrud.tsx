@@ -136,7 +136,9 @@ export interface TableCrudProps<
   defaultPath?: string;
   pathToAddNew?: string;
   getTableDataReloadFunction?: (reloadFunction: () => void) => void;
+  getCreateFunction?: (createFunction: () => void) => void;
   getEditFunction?: (editFunction: (record: RecordRow) => void) => void;
+  getDeleteFunction?: (editFunction: (record: RecordRow) => void) => void;
   onEditRecord?: () => void;
   getToolbarElement?: (toolbarElement: ReactElement) => ReactElement;
 
@@ -205,7 +207,9 @@ const BaseTableCrud = <
     viewableRecordIdPathParamKey,
     editValidationSchema,
     getTableDataReloadFunction,
+    getCreateFunction,
     getEditFunction,
+    getDeleteFunction,
     getToolbarElement,
     onEditRecord,
     sx,
@@ -331,6 +335,12 @@ const BaseTableCrud = <
       }
     );
 
+  const createFunctionRef = useRef(() => {
+    if (pathToAddNewRecord) {
+      navigate(pathToAddNewRecord);
+    }
+  });
+
   const editFunctionRef = useRef((record: RecordRow) => {
     navigate(
       (() => {
@@ -349,6 +359,11 @@ const BaseTableCrud = <
     );
   });
 
+  const deleteFunctionRef = useRef((record: RecordRow) => {
+    setDeletableRecordId(record.id);
+    setSelectedRecord(record);
+  });
+
   useEffect(() => {
     if (getTableDataReloadFunction) {
       getTableDataReloadFunction(load);
@@ -356,10 +371,22 @@ const BaseTableCrud = <
   }, [getTableDataReloadFunction, load]);
 
   useEffect(() => {
+    if (getCreateFunction) {
+      getCreateFunction(createFunctionRef.current);
+    }
+  }, [getCreateFunction]);
+
+  useEffect(() => {
     if (getEditFunction) {
       getEditFunction(editFunctionRef.current);
     }
   }, [getEditFunction]);
+
+  useEffect(() => {
+    if (getDeleteFunction) {
+      getDeleteFunction(deleteFunctionRef.current);
+    }
+  }, [getDeleteFunction]);
 
   // Record editing state
   const {
@@ -634,8 +661,9 @@ const BaseTableCrud = <
                                           >
                                             <IconButton
                                               onClick={() => {
-                                                setDeletableRecordId(record.id);
-                                                setSelectedRecord(record);
+                                                deleteFunctionRef.current(
+                                                  record
+                                                );
                                               }}
                                             >
                                               <DeleteOutlineIcon color="error" />
