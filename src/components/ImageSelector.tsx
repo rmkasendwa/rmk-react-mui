@@ -193,6 +193,7 @@ export const ImageSelector = forwardRef<HTMLDivElement, ImageSelectorProps>(
               {images.map((image, index) => {
                 const {
                   base64,
+                  url,
                   uploading,
                   uploadProgress,
                   uploadError,
@@ -218,7 +219,7 @@ export const ImageSelector = forwardRef<HTMLDivElement, ImageSelectorProps>(
                           bgcolor: '#fff',
                           opacity: uploading || uploadError ? 0.3 : 1,
                         }}
-                        src={base64}
+                        src={base64 || url}
                       />
                       <Box
                         sx={{
@@ -302,7 +303,7 @@ export const ImageSelector = forwardRef<HTMLDivElement, ImageSelectorProps>(
         <ImagePreview
           open={Boolean(selectedImageFile)}
           onClose={() => setSelectedImageFile(null)}
-          imageSource={selectedImageFile?.base64}
+          imageSource={selectedImageFile?.base64 || selectedImageFile?.url}
         />
       </>
     );
