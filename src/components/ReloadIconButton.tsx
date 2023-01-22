@@ -120,6 +120,7 @@ export const ReloadIconButton = forwardRef<
               sx={{
                 alignItems: 'center',
                 justifyContent: 'center',
+                flexWrap: 'nowrap',
               }}
             >
               <Grid item display="flex">
