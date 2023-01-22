@@ -5,12 +5,14 @@ import {
   Alert,
   Box,
   Button,
+  ButtonProps,
   Card,
   ComponentsOverrides,
   ComponentsProps,
   ComponentsVariants,
   Divider,
   Grid,
+  GridProps,
   IconButton,
   alpha,
   unstable_composeClasses as composeClasses,
@@ -100,6 +102,8 @@ export interface ModalFormProps<Values extends FormikValues = any>
   onSubmitSuccess?: () => void;
   onClickEdit?: () => void;
   SubmitButtonProps?: Partial<LoadingButtonProps>;
+  ActionButtonProps?: Partial<ButtonProps>;
+  ActionButtonAreaProps?: Partial<GridProps>;
   FormikProps?: Partial<FormikConfig<Values>>;
   editableFields?: (keyof Values)[];
 }
@@ -147,6 +151,8 @@ export const BaseModalForm = <Values extends FormikValues>(
     lockSubmitIfFormInvalid = false,
     CardProps = {},
     SubmitButtonProps = {},
+    ActionButtonProps = {},
+    ActionButtonAreaProps = {},
     SearchSyncToolbarProps = {},
     showCloseIconButton = true,
     showCloseActionButton = true,
@@ -171,14 +177,19 @@ export const BaseModalForm = <Values extends FormikValues>(
 
   const { palette, spacing } = useTheme();
 
+  const { sx: ActionButtonPropsSx, ...ActionButtonPropsRest } =
+    ActionButtonProps;
+  const { sx: ActionButtonAreaPropsSx, ...ActionButtonAreaPropsRest } =
+    ActionButtonAreaProps;
+
   const { ...SubmitButtonPropsRest } = SubmitButtonProps;
   const { sx: SearchSyncToolbarPropsSx, ...SearchSyncToolbarPropsRest } =
     SearchSyncToolbarProps;
   const { sx: CardPropsSx, ...CardPropsRest } = CardProps;
   const {
-    children: closeActionButtonPropsChildren,
-    sx: closeActionButtonPropsSx,
-    ...closeActionButtonPropsRest
+    children: CloseActionButtonPropsChildren,
+    sx: CloseActionButtonPropsSx,
+    ...CloseActionButtonPropsRest
   } = CloseActionButtonProps;
 
   const onSubmitSuccessRef = useRef(onSubmitSuccess);
@@ -321,7 +332,13 @@ export const BaseModalForm = <Values extends FormikValues>(
               <Grid
                 container
                 spacing={2}
-                sx={{ py: 2, px: 3, flexDirection: 'row-reverse' }}
+                {...ActionButtonAreaPropsRest}
+                sx={{
+                  py: 2,
+                  px: 3,
+                  flexDirection: 'row-reverse',
+                  ...ActionButtonAreaPropsSx,
+                }}
               >
                 {(() => {
                   if (showFormActionButtons) {
@@ -334,9 +351,11 @@ export const BaseModalForm = <Values extends FormikValues>(
                                   return (
                                     <Grid item>
                                       <Button
-                                        onClick={onClose}
                                         variant="outlined"
                                         color="inherit"
+                                        {...ActionButtonPropsRest}
+                                        onClick={onClose}
+                                        sx={ActionButtonPropsSx}
                                       >
                                         Close
                                       </Button>
@@ -348,9 +367,11 @@ export const BaseModalForm = <Values extends FormikValues>(
                                   <>
                                     <Grid item>
                                       <LoadingButton
-                                        loading={loading || isSubmitting}
                                         variant="contained"
+                                        {...ActionButtonPropsRest}
+                                        {...SubmitButtonPropsRest}
                                         type="submit"
+                                        loading={loading || isSubmitting}
                                         disabled={(() => {
                                           if (lockSubmitIfNoChange) {
                                             return !formHasChanges;
@@ -359,7 +380,7 @@ export const BaseModalForm = <Values extends FormikValues>(
                                             return !isValid;
                                           }
                                         })()}
-                                        {...SubmitButtonPropsRest}
+                                        sx={ActionButtonPropsSx}
                                       >
                                         {submitButtonText}
                                       </LoadingButton>
@@ -367,14 +388,16 @@ export const BaseModalForm = <Values extends FormikValues>(
                                     {!isSubmitting ? (
                                       <Grid item>
                                         <Button
-                                          onClick={onClose}
                                           variant="outlined"
                                           color="inherit"
+                                          {...ActionButtonPropsRest}
+                                          onClick={onClose}
                                           sx={{
                                             color: alpha(
                                               palette.text.primary,
                                               0.5
                                             ),
+                                            ...ActionButtonPropsSx,
                                           }}
                                         >
                                           Cancel
@@ -411,9 +434,11 @@ export const BaseModalForm = <Values extends FormikValues>(
                                         <Grid item>
                                           <Button
                                             variant="contained"
+                                            {...ActionButtonPropsRest}
                                             onClick={() => {
                                               onClickEdit && onClickEdit();
                                             }}
+                                            sx={ActionButtonPropsSx}
                                           >
                                             Edit
                                           </Button>
@@ -426,9 +451,11 @@ export const BaseModalForm = <Values extends FormikValues>(
                                       return (
                                         <Grid item>
                                           <Button
-                                            onClick={onClose}
                                             variant="outlined"
                                             color="inherit"
+                                            {...ActionButtonPropsRest}
+                                            onClick={onClose}
+                                            sx={ActionButtonPropsSx}
                                           >
                                             Close
                                           </Button>
@@ -464,14 +491,18 @@ export const BaseModalForm = <Values extends FormikValues>(
                               <Button
                                 variant="outlined"
                                 color="inherit"
-                                {...closeActionButtonPropsRest}
+                                {...ActionButtonPropsRest}
+                                {...CloseActionButtonPropsRest}
                                 onClick={onClose}
-                                sx={{
-                                  color: alpha(palette.text.primary, 0.5),
-                                  ...closeActionButtonPropsSx,
-                                }}
+                                sx={
+                                  {
+                                    color: alpha(palette.text.primary, 0.5),
+                                    ...ActionButtonPropsSx,
+                                    ...CloseActionButtonPropsSx,
+                                  } as any
+                                }
                               >
-                                {closeActionButtonPropsChildren ?? 'Close'}
+                                {CloseActionButtonPropsChildren ?? 'Close'}
                               </Button>
                             </Grid>
                           );
