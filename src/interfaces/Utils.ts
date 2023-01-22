@@ -43,6 +43,7 @@ export interface LoadingProps {
 export interface FileContainer {
   id?: string;
   base64?: string;
+  url?: string;
   name: string;
   size: number;
   originalFile: File;
