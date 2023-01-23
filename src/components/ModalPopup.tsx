@@ -132,7 +132,7 @@ export const ModalPopup = forwardRef<HTMLDivElement, ModalPopupProps>(
       })()
     );
 
-    const { palette, components, spacing } = useTheme();
+    const { palette, components } = useTheme();
 
     const { sx: SearchSyncToolbarPropsSx, ...SearchSyncToolbarPropsRest } =
       SearchSyncToolbarProps;
@@ -184,10 +184,7 @@ export const ModalPopup = forwardRef<HTMLDivElement, ModalPopupProps>(
             hasSyncTool={false}
             {...SearchSyncToolbarPropsRest}
             title={title}
-            sx={{
-              pr: `${spacing(2)} !important`,
-              ...SearchSyncToolbarPropsSx,
-            }}
+            sx={SearchSyncToolbarPropsSx}
           >
             {(() => {
               if (showCloseIconButton && !loading) {

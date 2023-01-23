@@ -1,5 +1,7 @@
 import SearchIcon from '@mui/icons-material/Search';
 import {
+  Box,
+  BoxProps,
   ClickAwayListener,
   IconButton,
   Tooltip,
@@ -7,14 +9,13 @@ import {
   TypographyProps,
 } from '@mui/material';
 import Grid from '@mui/material/Grid';
-import Toolbar, { ToolbarProps } from '@mui/material/Toolbar';
 import { Children, FC, ReactNode, useEffect, useRef, useState } from 'react';
 
 import TextField, { TextFieldProps } from './InputFields/TextField';
 import ReloadIconButton, { ReloadIconButtonProps } from './ReloadIconButton';
 
 export interface SearchSyncToolbarProps
-  extends Omit<ToolbarProps, 'title'>,
+  extends Omit<BoxProps, 'title'>,
     Partial<Pick<ReloadIconButtonProps, 'load' | 'loading' | 'errorMessage'>> {
   title?: ReactNode;
   /**
@@ -68,6 +69,7 @@ export const SearchSyncToolbar: FC<SearchSyncToolbarProps> = ({
   TitleProps = {},
   searchFieldOpen: searchFieldOpenProp,
   SearchFieldProps = {},
+  sx,
   ...rest
 }) => {
   tools || (tools = children);
@@ -104,7 +106,14 @@ export const SearchSyncToolbar: FC<SearchSyncToolbarProps> = ({
   }, []);
 
   return (
-    <Toolbar {...rest}>
+    <Box
+      {...rest}
+      sx={{
+        pl: 3,
+        pr: 2,
+        ...sx,
+      }}
+    >
       <Grid container sx={{ alignItems: 'center', columnGap: 1 }}>
         {(() => {
           if (preTitleTools) {
@@ -261,7 +270,7 @@ export const SearchSyncToolbar: FC<SearchSyncToolbarProps> = ({
           </Grid>
         ) : null}
       </Grid>
-    </Toolbar>
+    </Box>
   );
 };
 
