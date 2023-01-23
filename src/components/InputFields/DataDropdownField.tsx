@@ -516,6 +516,11 @@ export const DataDropdownField = forwardRef<
                 return props;
               })(),
               readOnly: !searchable,
+              // inputComponent: forwardRef<HTMLInputElement, any>(
+              //   function ParentInput(inputProps, ref) {
+              //     return <input {...inputProps} ref={ref} />;
+              //   }
+              // ),
             }}
             value={(() => {
               if (focused && searchable) {
@@ -537,14 +542,31 @@ export const DataDropdownField = forwardRef<
                       position: 'absolute',
                       bottom: 0,
                       left: 0,
-                      height: '100%',
                       pointerEvents: 'none',
                       display: 'flex',
-                      alignItems: 'center',
-                      pl: '14px',
                       whiteSpace: 'nowrap',
                       gap: 0.5,
                       overflow: 'hidden',
+                      ...(() => {
+                        if (variant === 'standard') {
+                          return {
+                            pb: '5px',
+                            bottom: 2,
+                          };
+                        }
+                        if (variant === 'filled') {
+                          return {
+                            pb: '4px',
+                            pl: '12px',
+                            bottom: -1,
+                          };
+                        }
+                        return {
+                          height: '100%',
+                          pl: '14px',
+                          alignItems: 'center',
+                        };
+                      })(),
                     }}
                   >
                     {multiple ? (
