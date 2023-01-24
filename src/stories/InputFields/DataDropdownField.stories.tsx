@@ -31,7 +31,7 @@ WithStaticOptions.args = {
   label: 'Dropdown With Options',
   required: true,
   options: ['One', 'Two', 'Three'].map((value) => ({ label: value, value })),
-};
+} as DataDropdownFieldProps;
 
 export const WithOverflowingOptions = Template.bind({});
 WithOverflowingOptions.args = {
@@ -41,7 +41,7 @@ WithOverflowingOptions.args = {
     label: `${index + 1}. ${lorem.generateWords(4)}`,
     value: index,
   })),
-};
+} as DataDropdownFieldProps;
 
 export const MultipleSelect = Template.bind({});
 MultipleSelect.args = {
@@ -54,7 +54,7 @@ MultipleSelect.args = {
   SelectProps: {
     multiple: true,
   },
-};
+} as DataDropdownFieldProps;
 
 export const MultipleSelectWithValue = Template.bind({});
 MultipleSelectWithValue.args = {
@@ -71,7 +71,7 @@ MultipleSelectWithValue.args = {
   SelectProps: {
     multiple: true,
   },
-};
+} as DataDropdownFieldProps;
 
 export const WithSelectedOptionProp = Template.bind({});
 WithSelectedOptionProp.args = {
@@ -81,7 +81,7 @@ WithSelectedOptionProp.args = {
     label: 'Selected Option',
     value: 'Selected Value',
   },
-};
+} as DataDropdownFieldProps;
 
 export const ListeningToSearchEvent = Template.bind({});
 ListeningToSearchEvent.args = {
@@ -90,7 +90,7 @@ ListeningToSearchEvent.args = {
   onChangeSearchTerm: (searchTerm) => {
     console.log(searchTerm);
   },
-};
+} as DataDropdownFieldProps;
 
 export const WithReactElementOptionLabels = Template.bind({});
 WithReactElementOptionLabels.args = {
@@ -108,7 +108,7 @@ WithReactElementOptionLabels.args = {
   SelectProps: {
     multiple: true,
   },
-};
+} as DataDropdownFieldProps;
 
 export const WithSelectedOptionPillProps = Template.bind({});
 WithSelectedOptionPillProps.args = {
@@ -130,5 +130,31 @@ WithSelectedOptionPillProps.args = {
       px: 0,
       mr: 1,
     },
+  },
+} as DataDropdownFieldProps;
+
+export const WithAsyncOptions = Template.bind({});
+WithAsyncOptions.args = {
+  label: 'Dropdown With Async Options',
+  required: true,
+  getDropdownOptions: async () => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(
+          [
+            'One',
+            'Two',
+            'Three',
+            'Four',
+            'Five',
+            'Six',
+            'Seven',
+            'Eight',
+            'Nine',
+            'Ten',
+          ].map((value) => ({ label: value, value }))
+        );
+      }, 5000);
+    });
   },
 } as DataDropdownFieldProps;

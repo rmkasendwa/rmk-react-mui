@@ -665,7 +665,7 @@ export const DataDropdownField = forwardRef<
       >
         {({ TransitionProps }) => {
           return (
-            <Grow {...TransitionProps} style={{ transformOrigin: '0 0 0' }}>
+            <Grow {...TransitionProps}>
               <Box tabIndex={-1}>
                 <ClickAwayListener
                   onClickAway={(event) => {

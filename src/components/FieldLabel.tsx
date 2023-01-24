@@ -8,9 +8,10 @@ import {
   useTheme,
   useThemeProps,
 } from '@mui/material';
-import Typography, { TypographyProps } from '@mui/material/Typography';
 import clsx from 'clsx';
 import { forwardRef } from 'react';
+
+import LoadingTypography, { LoadingTypographyProps } from './LoadingTypography';
 
 export interface FieldLabelClasses {
   /** Styles applied to the root element. */
@@ -44,7 +45,7 @@ declare module '@mui/material/styles/components' {
   }
 }
 
-export interface FieldLabelProps extends TypographyProps {
+export interface FieldLabelProps extends LoadingTypographyProps {
   required?: boolean;
 }
 
@@ -81,10 +82,10 @@ export const FieldLabel = forwardRef<HTMLElement, FieldLabelProps>(
     const { palette, components } = useTheme();
 
     return (
-      <Typography
-        ref={ref}
+      <LoadingTypography
+        ref={ref as any}
         className={clsx(classes.root, className)}
-        component={'div' as any}
+        {...{ component: 'div' }}
         variant="body2"
         noWrap
         {...rest}
@@ -106,7 +107,7 @@ export const FieldLabel = forwardRef<HTMLElement, FieldLabelProps>(
         }}
       >
         {children}
-      </Typography>
+      </LoadingTypography>
     );
   }
 );
