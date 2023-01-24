@@ -19,7 +19,6 @@ import {
 } from '@mui/material';
 import Grow from '@mui/material/Grow';
 import Popper from '@mui/material/Popper';
-import Typography, { TypographyProps } from '@mui/material/Typography';
 import clsx from 'clsx';
 import { Form, Formik } from 'formik';
 import { omit } from 'lodash';
@@ -41,6 +40,7 @@ import FormikNumberInputField from './FormikInputFields/FormikNumberInputField';
 import FormikPercentageInputField from './FormikInputFields/FormikPercentageInputField';
 import FormikPhoneNumberInputField from './FormikInputFields/FormikPhoneNumberInputField';
 import FormikTextField from './FormikInputFields/FormikTextField';
+import LoadingTypography, { LoadingTypographyProps } from './LoadingTypography';
 
 export interface FieldValueClasses {
   /** Styles applied to the root element. */
@@ -75,7 +75,7 @@ declare module '@mui/material/styles/components' {
 }
 
 export interface FieldValueProps<T extends ReactNode = ReactNode>
-  extends TypographyProps {
+  extends LoadingTypographyProps {
   icon?: ReactNode;
   endIcon?: ReactNode;
   IconContainerProps?: Partial<GridProps>;
@@ -435,11 +435,11 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
             maxWidth: 'none !important',
           }}
         >
-          <Typography
-            ref={ref}
+          <LoadingTypography
+            ref={ref as any}
             className={clsx(classes.root)}
             variant="body2"
-            component={'div' as any}
+            {...{ component: 'div' }}
             {...omit(rest, 'editableValue')}
             sx={{
               wordBreak: 'break-word',
@@ -451,7 +451,7 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
             }}
           >
             {value ?? '-'}
-          </Typography>
+          </LoadingTypography>
         </Grid>
         {!editMode && endIcon ? (
           <Grid

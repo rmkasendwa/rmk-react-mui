@@ -376,11 +376,6 @@ export const PaginatedDropdownOptionList = forwardRef<
               ? filteredOptions.length * optionHeight
               : undefined,
           }}
-          onClick={() => {
-            if (!multiple && onCloseRef.current) {
-              onCloseRef.current();
-            }
-          }}
           tabIndex={-1}
         >
           <Box sx={{ height: offset * optionHeight }} />
