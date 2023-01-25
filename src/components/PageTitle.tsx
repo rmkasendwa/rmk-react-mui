@@ -10,7 +10,6 @@ export const PageTitle: FC<PageTitleProps> = ({
   tools,
   title,
   TitleProps = {},
-  sx,
   ...rest
 }) => {
   const { sx: titlePropsSx, ...titlePropsRest } = TitleProps;
@@ -34,10 +33,6 @@ export const PageTitle: FC<PageTitleProps> = ({
           },
           ...titlePropsSx,
         },
-      }}
-      sx={{
-        px: '0 !important',
-        ...sx,
       }}
     />
   );
