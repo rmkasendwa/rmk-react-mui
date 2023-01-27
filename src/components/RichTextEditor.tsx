@@ -32,7 +32,9 @@ import {
   convertToRaw,
 } from 'draft-js';
 import draftToHtml from 'draftjs-to-html';
-import { forwardRef, useState } from 'react';
+import { forwardRef, useEffect, useState } from 'react';
+
+import { useLoadingContext } from '../contexts/LoadingContext';
 
 const INLINE_STYLES = [
   { label: <FormatBoldIcon />, style: 'BOLD' },
@@ -86,6 +88,8 @@ export interface RichTextEditorProps
     | 'required'
   > {
   value?: string;
+  disabled?: boolean;
+  readOnly?: boolean;
 }
 
 export function getRichTextEditorUtilityClass(slot: string): string {
@@ -112,6 +116,8 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
       name,
       id,
       onChange,
+      disabled = false,
+      readOnly = false,
     } = props;
 
     const classes = composeClasses(
@@ -127,6 +133,8 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
     );
 
     const { palette } = useTheme();
+    const { locked } = useLoadingContext();
+
     const [editorState, setEditorState] = useState(() => {
       if (value) {
         const { contentBlocks, entityMap } = convertFromHTML(value);
@@ -138,6 +146,23 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
     });
     const currentStyle = editorState.getCurrentInlineStyle();
 
+    useEffect(() => {
+      if (value) {
+        setEditorState((prevEditorState) => {
+          const selectionState = prevEditorState.getSelection();
+          const hasFocus = selectionState.getHasFocus();
+          if (hasFocus) {
+            return prevEditorState;
+          }
+          const { contentBlocks, entityMap } = convertFromHTML(value);
+          const nextEditorState = EditorState.createWithContent(
+            ContentState.createFromBlockArray(contentBlocks, entityMap)
+          );
+          return nextEditorState;
+        });
+      }
+    }, [value]);
+
     return (
       <FormControl
         ref={ref}
@@ -145,64 +170,25 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
         className={clsx(classes.root)}
         fullWidth
       >
-        <Box
-          sx={{
-            display: 'flex',
-            boxShadow: `0 0 5px ${alpha(palette.text.primary, 0.1)}`,
-            p: 0.5,
-            borderRadius: '4px',
-          }}
-        >
-          <Box className={classes.toolGroup}>
-            <Button
-              color="inherit"
-              onMouseDown={() => {
-                setEditorState((prevEditorState) => {
-                  return EditorState.undo(prevEditorState);
-                });
-              }}
-              size="small"
+        {(() => {
+          if (readOnly || disabled || locked) {
+            return null;
+          }
+          return (
+            <Box
               sx={{
-                minWidth: 'auto',
+                display: 'flex',
+                boxShadow: `0 0 5px ${alpha(palette.text.primary, 0.1)}`,
+                p: 0.5,
+                borderRadius: '4px',
               }}
             >
-              <UndoIcon />
-            </Button>
-            <Button
-              color="inherit"
-              onMouseDown={() => {
-                setEditorState((prevEditorState) => {
-                  return EditorState.redo(prevEditorState);
-                });
-              }}
-              size="small"
-              sx={{
-                minWidth: 'auto',
-              }}
-            >
-              <RedoIcon />
-            </Button>
-          </Box>
-          <Divider
-            orientation="vertical"
-            variant="middle"
-            flexItem
-            sx={{
-              mx: 1,
-            }}
-          />
-          <Box className={classes.toolGroup}>
-            {INLINE_STYLES.map(({ label, style }) => {
-              return (
+              <Box className={classes.toolGroup}>
                 <Button
-                  key={style}
-                  color={currentStyle.has(style) ? 'primary' : 'inherit'}
+                  color="inherit"
                   onMouseDown={() => {
                     setEditorState((prevEditorState) => {
-                      return RichUtils.toggleInlineStyle(
-                        prevEditorState,
-                        style
-                      );
+                      return EditorState.undo(prevEditorState);
                     });
                   }}
                   size="small"
@@ -210,21 +196,75 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
                     minWidth: 'auto',
                   }}
                 >
-                  {label}
+                  <UndoIcon />
                 </Button>
-              );
-            })}
-          </Box>
-        </Box>
+                <Button
+                  color="inherit"
+                  onMouseDown={() => {
+                    setEditorState((prevEditorState) => {
+                      return EditorState.redo(prevEditorState);
+                    });
+                  }}
+                  size="small"
+                  sx={{
+                    minWidth: 'auto',
+                  }}
+                >
+                  <RedoIcon />
+                </Button>
+              </Box>
+              <Divider
+                orientation="vertical"
+                variant="middle"
+                flexItem
+                sx={{
+                  mx: 1,
+                }}
+              />
+              <Box className={classes.toolGroup}>
+                {INLINE_STYLES.map(({ label, style }) => {
+                  return (
+                    <Button
+                      key={style}
+                      color={currentStyle.has(style) ? 'primary' : 'inherit'}
+                      onMouseDown={() => {
+                        setEditorState((prevEditorState) => {
+                          return RichUtils.toggleInlineStyle(
+                            prevEditorState,
+                            style
+                          );
+                        });
+                      }}
+                      size="small"
+                      sx={{
+                        minWidth: 'auto',
+                      }}
+                    >
+                      {label}
+                    </Button>
+                  );
+                })}
+              </Box>
+            </Box>
+          );
+        })()}
         <Box
           sx={{
             py: 1,
+            ...(() => {
+              if (disabled) {
+                return {
+                  bgcolor: palette.divider,
+                };
+              }
+            })(),
             '[data-contents]': {
               minHeight: 200,
             },
           }}
         >
           <Editor
+            {...{ placeholder }}
             editorState={editorState}
             onChange={(nextEditorState) => {
               setEditorState(nextEditorState);
@@ -238,7 +278,7 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
               });
               onChange && onChange(event);
             }}
-            {...{ placeholder }}
+            readOnly={readOnly || disabled || locked}
           />
         </Box>
         {helperText && <FormHelperText>{helperText}</FormHelperText>}
