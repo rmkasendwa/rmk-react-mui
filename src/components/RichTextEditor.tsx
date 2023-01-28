@@ -266,7 +266,13 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
                   value: {
                     id,
                     name,
-                    value: convertToHTML(nextEditorState.getCurrentContent()),
+                    value: convertToHTML({
+                      blockToHTML: ({ type, text }) => {
+                        if (text.length <= 0 && type === 'unstyled') {
+                          return <br />;
+                        }
+                      },
+                    })(nextEditorState.getCurrentContent()),
                   },
                 });
                 onChange(event);

@@ -27,4 +27,7 @@ WithValue.args = {
     <p>This is a paragaph</p>
     <p>This is another <strong>paragraph</strong></p>
   `,
+  onChange: (event) => {
+    console.log({ event });
+  },
 } as RichTextEditorProps;
