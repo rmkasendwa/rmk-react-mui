@@ -1,3 +1,5 @@
+import '@infinite-debugger/rmk-js-extensions/String';
+
 import Container from '@mui/material/Container';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import React from 'react';
@@ -21,5 +23,8 @@ export const Default = Template.bind({});
 
 export const WithValue = Template.bind({});
 WithValue.args = {
-  value: `<p>This is a paragaph</p><p>This is another <strong>paragraph</srong></p>`,
+  value: `
+    <p>This is a paragaph</p>
+    <p>This is another <strong>paragraph</strong></p>
+  `,
 } as RichTextEditorProps;

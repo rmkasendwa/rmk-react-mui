@@ -4,6 +4,7 @@ import FormatBoldIcon from '@mui/icons-material/FormatBold';
 import FormatItalicIcon from '@mui/icons-material/FormatItalic';
 import FormatUnderlinedIcon from '@mui/icons-material/FormatUnderlined';
 import RedoIcon from '@mui/icons-material/Redo';
+import StrikethroughSIcon from '@mui/icons-material/StrikethroughS';
 import UndoIcon from '@mui/icons-material/Undo';
 import {
   Box,
@@ -23,15 +24,8 @@ import {
   useThemeProps,
 } from '@mui/material';
 import clsx from 'clsx';
-import {
-  ContentState,
-  Editor,
-  EditorState,
-  RichUtils,
-  convertFromHTML,
-  convertToRaw,
-} from 'draft-js';
-import draftToHtml from 'draftjs-to-html';
+import { convertFromHTML, convertToHTML } from 'draft-convert';
+import { Editor, EditorState, RichUtils } from 'draft-js';
 import { forwardRef, useEffect, useState } from 'react';
 
 import { useLoadingContext } from '../contexts/LoadingContext';
@@ -40,6 +34,7 @@ const INLINE_STYLES = [
   { label: <FormatBoldIcon />, style: 'BOLD' },
   { label: <FormatItalicIcon />, style: 'ITALIC' },
   { label: <FormatUnderlinedIcon />, style: 'UNDERLINE' },
+  { label: <StrikethroughSIcon />, style: 'STRIKETHROUGH' },
 ];
 
 export interface RichTextEditorClasses {
@@ -137,10 +132,7 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
 
     const [editorState, setEditorState] = useState(() => {
       if (value) {
-        const { contentBlocks, entityMap } = convertFromHTML(value);
-        return EditorState.createWithContent(
-          ContentState.createFromBlockArray(contentBlocks, entityMap)
-        );
+        return EditorState.createWithContent(convertFromHTML(value));
       }
       return EditorState.createEmpty();
     });
@@ -154,9 +146,8 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
           if (hasFocus) {
             return prevEditorState;
           }
-          const { contentBlocks, entityMap } = convertFromHTML(value);
           const nextEditorState = EditorState.createWithContent(
-            ContentState.createFromBlockArray(contentBlocks, entityMap)
+            convertFromHTML(value)
           );
           return nextEditorState;
         });
@@ -259,7 +250,7 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
               }
             })(),
             '[data-contents]': {
-              minHeight: 200,
+              minHeight: 100,
             },
           }}
         >
@@ -268,15 +259,18 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
             editorState={editorState}
             onChange={(nextEditorState) => {
               setEditorState(nextEditorState);
-              const rawContentState = convertToRaw(
-                nextEditorState.getCurrentContent()
-              );
-              const event: any = new Event('change', { bubbles: true });
-              Object.defineProperty(event, 'target', {
-                writable: false,
-                value: { id, name, value: draftToHtml(rawContentState) },
-              });
-              onChange && onChange(event);
+              if (onChange) {
+                const event: any = new Event('change', { bubbles: true });
+                Object.defineProperty(event, 'target', {
+                  writable: false,
+                  value: {
+                    id,
+                    name,
+                    value: convertToHTML(nextEditorState.getCurrentContent()),
+                  },
+                });
+                onChange(event);
+              }
             }}
             readOnly={readOnly || disabled || locked}
           />
