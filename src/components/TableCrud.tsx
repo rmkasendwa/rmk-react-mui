@@ -154,6 +154,9 @@ export interface TableCrudProps<
   getPathToEdit?: (record: RecordRow) => string;
 
   showRecords?: boolean;
+
+  getExtraRowTools?: (record: RecordRow) => ReactNode;
+  extraActionsColumnWidth?: number;
 }
 
 export function getTableCrudUtilityClass(slot: string): string {
@@ -216,6 +219,8 @@ const BaseTableCrud = <
     className,
     showRecords = true,
     autoSync = true,
+    getExtraRowTools,
+    extraActionsColumnWidth,
     ...rest
   } = omit(props, 'labelPlural', 'labelSingular');
 
@@ -251,9 +256,11 @@ const BaseTableCrud = <
   const getEditableRecordInitialValuesRef = useRef(
     getEditableRecordInitialValues
   );
+  const getExtraRowToolsRef = useRef(getExtraRowTools);
   useEffect(() => {
     getEditableRecordInitialValuesRef.current = getEditableRecordInitialValues;
-  }, [getEditableRecordInitialValues]);
+    getExtraRowToolsRef.current = getExtraRowTools;
+  }, [getEditableRecordInitialValues, getExtraRowTools]);
 
   const {
     createRecordSearchParamKey,
@@ -603,7 +610,11 @@ const BaseTableCrud = <
                         },
                         ...columns,
                         ...(() => {
-                          if (isEditable || isDeletable) {
+                          if (
+                            isEditable ||
+                            isDeletable ||
+                            getExtraRowToolsRef.current
+                          ) {
                             return [
                               {
                                 id: 'actions' as any,
@@ -612,6 +623,8 @@ const BaseTableCrud = <
                                   let width = 0;
                                   isEditable && (width += 42);
                                   isDeletable && (width += 42);
+                                  extraActionsColumnWidth &&
+                                    (width += extraActionsColumnWidth);
                                   return width;
                                 })(),
                                 getColumnValue: (record) => {
@@ -623,6 +636,11 @@ const BaseTableCrud = <
                                         justifyContent: 'end',
                                       }}
                                     >
+                                      {getExtraRowToolsRef.current ? (
+                                        <Grid item>
+                                          {getExtraRowToolsRef.current(record)}
+                                        </Grid>
+                                      ) : null}
                                       {(() => {
                                         if (isEditable) {
                                           return (
