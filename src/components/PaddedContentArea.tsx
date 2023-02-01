@@ -19,9 +19,10 @@ export const PaddedContentArea: FC<PaddedContentAreaProps> = ({
   sx,
   tools,
   breadcrumbs,
-  PageTitleProps,
+  PageTitleProps = {},
   ...rest
 }) => {
+  const { sx: PageTitlePropsSx, ...PageTitlePropsRest } = PageTitleProps;
   const { breakpoints } = useTheme();
   const smallScreenBreakpoint = breakpoints.down('sm');
   const largeScreen = useMediaQuery(breakpoints.up('sm'));
@@ -40,7 +41,14 @@ export const PaddedContentArea: FC<PaddedContentAreaProps> = ({
     >
       {breadcrumbs && largeScreen ? breadcrumbs : null}
       {(title && largeScreen) || tools ? (
-        <PageTitle {...{ title, tools }} {...PageTitleProps} />
+        <PageTitle
+          {...{ title, tools }}
+          {...PageTitlePropsRest}
+          sx={{
+            px: 0,
+            ...PageTitlePropsSx,
+          }}
+        />
       ) : null}
       {children}
     </Box>
