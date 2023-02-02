@@ -102,7 +102,14 @@ export const BaseEnumValueChip = <Value extends string = string>(
   })();
 
   return (
-    <Tooltip title={label}>
+    <Tooltip
+      title={label}
+      PopperProps={{
+        sx: {
+          pointerEvents: 'none',
+        },
+      }}
+    >
       <Chip
         size="small"
         {...rest}

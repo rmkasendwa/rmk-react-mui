@@ -1,6 +1,8 @@
 import SaveIcon from '@mui/icons-material/Save';
 import LoadingButton from '@mui/lab/LoadingButton';
 import {
+  Button,
+  ButtonProps,
   ComponentsOverrides,
   ComponentsProps,
   ComponentsVariants,
@@ -65,6 +67,7 @@ export interface FormWrapperProps<Values extends FormikValues = FormikValues>
   ) => void | Promise<any>;
   children?: ((props: FormikProps<Values>) => ReactNode) | ReactNode;
   formTools?: ReactNode | ReactNode[];
+  SubmitButtonProps?: Partial<ButtonProps>;
 }
 
 export function getFormWrapperUtilityClass(slot: string): string {
@@ -93,6 +96,7 @@ export const FormWrapper = forwardRef<HTMLDivElement, FormWrapperProps>(
       onSubmit,
       tools,
       formTools,
+      SubmitButtonProps = {},
       ...rest
     } = props;
 
@@ -107,6 +111,8 @@ export const FormWrapper = forwardRef<HTMLDivElement, FormWrapperProps>(
         }
       })()
     );
+
+    const { ...SubmitButtonPropsRest } = SubmitButtonProps;
 
     const { breakpoints } = useTheme();
     const smallScreen = useMediaQuery(breakpoints.down('sm'));
@@ -140,8 +146,19 @@ export const FormWrapper = forwardRef<HTMLDivElement, FormWrapperProps>(
                   ? children({ isSubmitting, ...rest })
                   : children}
                 {!loading && !errorMessage ? (
-                  <Grid container sx={{ mt: 2 }}>
+                  <Grid container spacing={1} sx={{ mt: 2 }}>
                     {smallScreen ? null : <Grid item xs />}
+                    <Grid item xs={smallScreen}>
+                      <Button
+                        color="inherit"
+                        variant="contained"
+                        onClick={() => {
+                          window.history.back();
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                    </Grid>
                     {(() => {
                       if (formTools) {
                         return Children.toArray(formTools).map(
@@ -163,6 +180,7 @@ export const FormWrapper = forwardRef<HTMLDivElement, FormWrapperProps>(
                         fullWidth={smallScreen}
                         type="submit"
                         loading={isSubmitting}
+                        {...SubmitButtonPropsRest}
                       >
                         Save Changes
                       </LoadingButton>
