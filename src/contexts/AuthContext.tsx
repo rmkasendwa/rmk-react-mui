@@ -82,6 +82,7 @@ export const AuthProvider: FC<{
     logout && (await logout());
     StorageManager.clear();
     setLoggedInUser(null);
+    window.location.reload();
   });
 
   const updateLoggedInUser = useCallback(

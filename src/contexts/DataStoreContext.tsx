@@ -57,13 +57,29 @@ const updateData = (data: Record<string, any>): Record<string, any> => {
   return baseData;
 };
 
+const reset = () => {
+  // Clear local storage
+  dataKeys.forEach((key) => {
+    StorageManager.remove(`${CACHED_DATA_PREFIX}-${key}`);
+  });
+  StorageManager.remove(`${CACHED_DATA_PREFIX}-keys`);
+
+  // Clear memory
+  dataKeys.splice(0);
+  Object.keys(baseData).forEach((key) => {
+    delete baseData[key];
+  });
+};
+
 export interface DataStoreContext {
   data: Record<string, any>;
   updateData: (data: Record<string, any>) => void;
+  reset: () => void;
 }
 export const DataStoreContext = createContext<DataStoreContext>({
   data: baseData,
   updateData,
+  reset,
 });
 
 export interface DataStoreProviderProps {
@@ -77,11 +93,17 @@ export const DataStoreProvider: FC<DataStoreProviderProps> = ({ children }) => {
     setData({ ...updateData(data) });
   }, []);
 
+  const localReset = useCallback(() => {
+    reset();
+    setData({ ...baseData });
+  }, []);
+
   return (
     <DataStoreContext.Provider
       value={{
         data,
         updateData: updateLocalData,
+        reset: localReset,
       }}
     >
       {children}
