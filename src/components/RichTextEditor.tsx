@@ -1,5 +1,6 @@
 import 'draft-js/dist/Draft.css';
 
+import CodeIcon from '@mui/icons-material/Code';
 import FormatAlignCenterIcon from '@mui/icons-material/FormatAlignCenter';
 import FormatAlignLeftIcon from '@mui/icons-material/FormatAlignLeft';
 import FormatAlignRightIcon from '@mui/icons-material/FormatAlignRight';
@@ -49,6 +50,7 @@ export type RichTextEditorTools = {
   ITALIC: Tool;
   UNDERLINE: Tool;
   STRIKETHROUGH: Tool;
+  CODE: Tool;
   ALIGN_LEFT: Tool;
   ALIGN_CENTER: Tool;
   ALIGN_RIGHT: Tool;
@@ -59,6 +61,7 @@ const INLINE_STYLES = [
   { label: <FormatItalicIcon />, style: 'ITALIC' },
   { label: <FormatUnderlinedIcon />, style: 'UNDERLINE' },
   { label: <StrikethroughSIcon />, style: 'STRIKETHROUGH' },
+  { label: <CodeIcon />, style: 'CODE' },
 ] as const;
 
 const ALIGNMENTS: { label: ReactNode; alignment: DraftTextAlignment }[] = [
@@ -177,6 +180,7 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
         ALIGN_LEFT,
         ALIGN_RIGHT,
         BOLD,
+        CODE,
         ITALIC,
         REDO,
         STRIKETHROUGH,
@@ -238,7 +242,7 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
       } as RichTextEditorTools;
       return [
         [UNDO, REDO],
-        [BOLD, ITALIC, UNDERLINE, STRIKETHROUGH],
+        [BOLD, ITALIC, UNDERLINE, STRIKETHROUGH, CODE],
         [ALIGN_LEFT, ALIGN_CENTER, ALIGN_RIGHT],
       ];
     })();
