@@ -1,5 +1,8 @@
 import 'draft-js/dist/Draft.css';
 
+import FormatAlignCenterIcon from '@mui/icons-material/FormatAlignCenter';
+import FormatAlignLeftIcon from '@mui/icons-material/FormatAlignLeft';
+import FormatAlignRightIcon from '@mui/icons-material/FormatAlignRight';
 import FormatBoldIcon from '@mui/icons-material/FormatBold';
 import FormatItalicIcon from '@mui/icons-material/FormatItalic';
 import FormatUnderlinedIcon from '@mui/icons-material/FormatUnderlined';
@@ -36,6 +39,8 @@ const INLINE_STYLES = [
   { label: <FormatUnderlinedIcon />, style: 'UNDERLINE' },
   { label: <StrikethroughSIcon />, style: 'STRIKETHROUGH' },
 ];
+
+type DraftTextAlignment = 'left' | 'center' | 'right';
 
 export interface RichTextEditorClasses {
   /** Styles applied to the root element. */
@@ -138,6 +143,9 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
     });
     const currentStyle = editorState.getCurrentInlineStyle();
 
+    const [textAlignment, setTextAlignment] =
+      useState<DraftTextAlignment>('left');
+
     useEffect(() => {
       if (value) {
         setEditorState((prevEditorState) => {
@@ -236,6 +244,52 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
                   );
                 })}
               </Box>
+              <Divider
+                orientation="vertical"
+                variant="middle"
+                flexItem
+                sx={{
+                  mx: 1,
+                }}
+              />
+              <Box className={classes.toolGroup}>
+                <Button
+                  size="small"
+                  color="inherit"
+                  onMouseDown={() => {
+                    setTextAlignment('left');
+                  }}
+                  sx={{
+                    minWidth: 'auto',
+                  }}
+                >
+                  <FormatAlignLeftIcon />
+                </Button>
+                <Button
+                  size="small"
+                  color="inherit"
+                  onMouseDown={() => {
+                    setTextAlignment('center');
+                  }}
+                  sx={{
+                    minWidth: 'auto',
+                  }}
+                >
+                  <FormatAlignCenterIcon />
+                </Button>
+                <Button
+                  size="small"
+                  color="inherit"
+                  onMouseDown={() => {
+                    setTextAlignment('right');
+                  }}
+                  sx={{
+                    minWidth: 'auto',
+                  }}
+                >
+                  <FormatAlignRightIcon />
+                </Button>
+              </Box>
             </Box>
           );
         })()}
@@ -255,7 +309,7 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
           }}
         >
           <Editor
-            {...{ placeholder }}
+            {...{ placeholder, textAlignment }}
             editorState={editorState}
             onChange={(nextEditorState) => {
               setEditorState(nextEditorState);
