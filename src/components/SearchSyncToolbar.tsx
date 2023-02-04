@@ -50,6 +50,7 @@ export interface SearchSyncToolbarProps
   TitleProps?: Partial<Omit<TypographyProps, 'ref'>>;
   searchFieldOpen?: boolean;
   SearchFieldProps?: Partial<TextFieldProps>;
+  searchVelocity?: 'slow' | 'fast';
 }
 
 export const SearchSyncToolbar: FC<SearchSyncToolbarProps> = ({
@@ -69,6 +70,7 @@ export const SearchSyncToolbar: FC<SearchSyncToolbarProps> = ({
   TitleProps = {},
   searchFieldOpen: searchFieldOpenProp,
   SearchFieldProps = {},
+  searchVelocity = 'slow',
   sx,
   ...rest
 }) => {
@@ -177,6 +179,9 @@ export const SearchSyncToolbar: FC<SearchSyncToolbarProps> = ({
                           setSearchTerm(event.target.value);
                           onChangeSearchTerm &&
                             onChangeSearchTerm(event.target.value);
+                          if (onSearch && searchVelocity === 'fast') {
+                            onSearch(event.target.value);
+                          }
                         }}
                         onKeyUp={(event) => {
                           if (event.key === 'Enter' && onSearch) {
@@ -240,6 +245,9 @@ export const SearchSyncToolbar: FC<SearchSyncToolbarProps> = ({
               onChange={(event) => {
                 setSearchTerm(event.target.value);
                 onChangeSearchTerm && onChangeSearchTerm(event.target.value);
+                if (onSearch && searchVelocity === 'fast') {
+                  onSearch(event.target.value);
+                }
               }}
               onKeyUp={(event) => {
                 if (event.key === 'Enter' && onSearch) {
