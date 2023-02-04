@@ -6,12 +6,11 @@ import FormatAlignRightIcon from '@mui/icons-material/FormatAlignRight';
 import FormatBoldIcon from '@mui/icons-material/FormatBold';
 import FormatItalicIcon from '@mui/icons-material/FormatItalic';
 import FormatUnderlinedIcon from '@mui/icons-material/FormatUnderlined';
-import RedoIcon from '@mui/icons-material/Redo';
 import StrikethroughSIcon from '@mui/icons-material/StrikethroughS';
-import UndoIcon from '@mui/icons-material/Undo';
 import {
   Box,
   Button,
+  ButtonProps,
   ComponentsOverrides,
   ComponentsProps,
   ComponentsVariants,
@@ -29,16 +28,11 @@ import {
 import clsx from 'clsx';
 import { convertFromHTML, convertToHTML } from 'draft-convert';
 import { Editor, EditorState, RichUtils } from 'draft-js';
-import {
-  Fragment,
-  ReactNode,
-  forwardRef,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+import { Fragment, ReactNode, forwardRef, useEffect, useState } from 'react';
 
 import { useLoadingContext } from '../contexts/LoadingContext';
+import RedoIcon from './Icons/RedoIcon';
+import UndoIcon from './Icons/UndoIcon';
 
 export type DraftTextAlignment = 'left' | 'center' | 'right';
 
@@ -46,7 +40,7 @@ export type Tool = {
   label: ReactNode;
   isActive?: boolean;
   onMouseDown: () => void;
-};
+} & Pick<ButtonProps, 'onMouseDown' | 'className' | 'disabled' | 'sx'>;
 
 export type RichTextEditorTools = {
   UNDO: Tool;
@@ -177,7 +171,7 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
     const [textAlignment, setTextAlignment] =
       useState<DraftTextAlignment>('left');
 
-    const toolGroups = useMemo(() => {
+    const toolGroups = (() => {
       const {
         ALIGN_CENTER,
         ALIGN_LEFT,
@@ -190,20 +184,34 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
         UNDO,
       } = {
         UNDO: {
-          label: <UndoIcon />,
+          label: (
+            <UndoIcon
+              sx={{
+                fontSize: 16,
+              }}
+            />
+          ),
           onMouseDown: () => {
             setEditorState((prevEditorState) => {
               return EditorState.undo(prevEditorState);
             });
           },
+          disabled: editorState.getUndoStack().size <= 0,
         },
         REDO: {
-          label: <RedoIcon />,
+          label: (
+            <RedoIcon
+              sx={{
+                fontSize: 16,
+              }}
+            />
+          ),
           onMouseDown: () => {
             setEditorState((prevEditorState) => {
               return EditorState.redo(prevEditorState);
             });
           },
+          disabled: editorState.getRedoStack().size <= 0,
         },
         ...INLINE_STYLES.reduce((accumulator, { label, style }) => {
           accumulator[style] = {
@@ -233,7 +241,7 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
         [BOLD, ITALIC, UNDERLINE, STRIKETHROUGH],
         [ALIGN_LEFT, ALIGN_CENTER, ALIGN_RIGHT],
       ];
-    }, [currentStyle, textAlignment]);
+    })();
 
     useEffect(() => {
       if (value) {
@@ -286,15 +294,18 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
                     ) : null}
                     <Box className={classes.toolGroup}>
                       {toolGroup.map(
-                        ({ label, onMouseDown, isActive = false }, index) => {
+                        ({ label, isActive = false, sx, ...rest }, index) => {
                           return (
                             <Button
                               key={index}
                               color={isActive ? 'primary' : 'inherit'}
                               size="small"
-                              {...{ onMouseDown }}
+                              {...rest}
                               sx={{
                                 minWidth: 'auto',
+                                ...sx,
+                                width: 32,
+                                height: 32,
                               }}
                             >
                               {label}
