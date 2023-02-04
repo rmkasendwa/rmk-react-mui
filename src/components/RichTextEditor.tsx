@@ -29,18 +29,49 @@ import {
 import clsx from 'clsx';
 import { convertFromHTML, convertToHTML } from 'draft-convert';
 import { Editor, EditorState, RichUtils } from 'draft-js';
-import { forwardRef, useEffect, useState } from 'react';
+import {
+  Fragment,
+  ReactNode,
+  forwardRef,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 
 import { useLoadingContext } from '../contexts/LoadingContext';
+
+export type DraftTextAlignment = 'left' | 'center' | 'right';
+
+export type Tool = {
+  label: ReactNode;
+  isActive?: boolean;
+  onMouseDown: () => void;
+};
+
+export type RichTextEditorTools = {
+  UNDO: Tool;
+  REDO: Tool;
+  BOLD: Tool;
+  ITALIC: Tool;
+  UNDERLINE: Tool;
+  STRIKETHROUGH: Tool;
+  ALIGN_LEFT: Tool;
+  ALIGN_CENTER: Tool;
+  ALIGN_RIGHT: Tool;
+};
 
 const INLINE_STYLES = [
   { label: <FormatBoldIcon />, style: 'BOLD' },
   { label: <FormatItalicIcon />, style: 'ITALIC' },
   { label: <FormatUnderlinedIcon />, style: 'UNDERLINE' },
   { label: <StrikethroughSIcon />, style: 'STRIKETHROUGH' },
-];
+] as const;
 
-type DraftTextAlignment = 'left' | 'center' | 'right';
+const ALIGNMENTS: { label: ReactNode; alignment: DraftTextAlignment }[] = [
+  { label: <FormatAlignLeftIcon />, alignment: 'left' },
+  { label: <FormatAlignCenterIcon />, alignment: 'center' },
+  { label: <FormatAlignRightIcon />, alignment: 'right' },
+];
 
 export interface RichTextEditorClasses {
   /** Styles applied to the root element. */
@@ -146,6 +177,64 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
     const [textAlignment, setTextAlignment] =
       useState<DraftTextAlignment>('left');
 
+    const toolGroups = useMemo(() => {
+      const {
+        ALIGN_CENTER,
+        ALIGN_LEFT,
+        ALIGN_RIGHT,
+        BOLD,
+        ITALIC,
+        REDO,
+        STRIKETHROUGH,
+        UNDERLINE,
+        UNDO,
+      } = {
+        UNDO: {
+          label: <UndoIcon />,
+          onMouseDown: () => {
+            setEditorState((prevEditorState) => {
+              return EditorState.undo(prevEditorState);
+            });
+          },
+        },
+        REDO: {
+          label: <RedoIcon />,
+          onMouseDown: () => {
+            setEditorState((prevEditorState) => {
+              return EditorState.redo(prevEditorState);
+            });
+          },
+        },
+        ...INLINE_STYLES.reduce((accumulator, { label, style }) => {
+          accumulator[style] = {
+            label,
+            isActive: currentStyle.has(style),
+            onMouseDown: () => {
+              setEditorState((prevEditorState) => {
+                return RichUtils.toggleInlineStyle(prevEditorState, style);
+              });
+            },
+          };
+          return accumulator;
+        }, {} as Record<string, Tool>),
+        ...ALIGNMENTS.reduce((accumulator, { label, alignment }) => {
+          accumulator[`ALIGN_${alignment.toUpperCase()}`] = {
+            label,
+            isActive: textAlignment === alignment,
+            onMouseDown: () => {
+              setTextAlignment(alignment);
+            },
+          };
+          return accumulator;
+        }, {} as Record<string, Tool>),
+      } as RichTextEditorTools;
+      return [
+        [UNDO, REDO],
+        [BOLD, ITALIC, UNDERLINE, STRIKETHROUGH],
+        [ALIGN_LEFT, ALIGN_CENTER, ALIGN_RIGHT],
+      ];
+    }, [currentStyle, textAlignment]);
+
     useEffect(() => {
       if (value) {
         setEditorState((prevEditorState) => {
@@ -182,114 +271,41 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
                 borderRadius: '4px',
               }}
             >
-              <Box className={classes.toolGroup}>
-                <Button
-                  color="inherit"
-                  onMouseDown={() => {
-                    setEditorState((prevEditorState) => {
-                      return EditorState.undo(prevEditorState);
-                    });
-                  }}
-                  size="small"
-                  sx={{
-                    minWidth: 'auto',
-                  }}
-                >
-                  <UndoIcon />
-                </Button>
-                <Button
-                  color="inherit"
-                  onMouseDown={() => {
-                    setEditorState((prevEditorState) => {
-                      return EditorState.redo(prevEditorState);
-                    });
-                  }}
-                  size="small"
-                  sx={{
-                    minWidth: 'auto',
-                  }}
-                >
-                  <RedoIcon />
-                </Button>
-              </Box>
-              <Divider
-                orientation="vertical"
-                variant="middle"
-                flexItem
-                sx={{
-                  mx: 1,
-                }}
-              />
-              <Box className={classes.toolGroup}>
-                {INLINE_STYLES.map(({ label, style }) => {
-                  return (
-                    <Button
-                      key={style}
-                      color={currentStyle.has(style) ? 'primary' : 'inherit'}
-                      onMouseDown={() => {
-                        setEditorState((prevEditorState) => {
-                          return RichUtils.toggleInlineStyle(
-                            prevEditorState,
-                            style
+              {toolGroups.map((toolGroup, index) => {
+                return (
+                  <Fragment key={index}>
+                    {index > 0 ? (
+                      <Divider
+                        orientation="vertical"
+                        variant="middle"
+                        flexItem
+                        sx={{
+                          mx: 1,
+                        }}
+                      />
+                    ) : null}
+                    <Box className={classes.toolGroup}>
+                      {toolGroup.map(
+                        ({ label, onMouseDown, isActive = false }, index) => {
+                          return (
+                            <Button
+                              key={index}
+                              color={isActive ? 'primary' : 'inherit'}
+                              size="small"
+                              {...{ onMouseDown }}
+                              sx={{
+                                minWidth: 'auto',
+                              }}
+                            >
+                              {label}
+                            </Button>
                           );
-                        });
-                      }}
-                      size="small"
-                      sx={{
-                        minWidth: 'auto',
-                      }}
-                    >
-                      {label}
-                    </Button>
-                  );
-                })}
-              </Box>
-              <Divider
-                orientation="vertical"
-                variant="middle"
-                flexItem
-                sx={{
-                  mx: 1,
-                }}
-              />
-              <Box className={classes.toolGroup}>
-                <Button
-                  size="small"
-                  color="inherit"
-                  onMouseDown={() => {
-                    setTextAlignment('left');
-                  }}
-                  sx={{
-                    minWidth: 'auto',
-                  }}
-                >
-                  <FormatAlignLeftIcon />
-                </Button>
-                <Button
-                  size="small"
-                  color="inherit"
-                  onMouseDown={() => {
-                    setTextAlignment('center');
-                  }}
-                  sx={{
-                    minWidth: 'auto',
-                  }}
-                >
-                  <FormatAlignCenterIcon />
-                </Button>
-                <Button
-                  size="small"
-                  color="inherit"
-                  onMouseDown={() => {
-                    setTextAlignment('right');
-                  }}
-                  sx={{
-                    minWidth: 'auto',
-                  }}
-                >
-                  <FormatAlignRightIcon />
-                </Button>
-              </Box>
+                        }
+                      )}
+                    </Box>
+                  </Fragment>
+                );
+              })}
             </Box>
           );
         })()}
