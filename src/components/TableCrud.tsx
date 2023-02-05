@@ -634,10 +634,17 @@ const BaseTableCrud = <
                                       container
                                       sx={{
                                         justifyContent: 'end',
+                                        alignItems: 'center',
                                       }}
                                     >
                                       {getExtraRowToolsRef.current ? (
-                                        <Grid item>
+                                        <Grid
+                                          item
+                                          xs
+                                          sx={{
+                                            minWidth: 0,
+                                          }}
+                                        >
                                           {getExtraRowToolsRef.current(record)}
                                         </Grid>
                                       ) : null}
