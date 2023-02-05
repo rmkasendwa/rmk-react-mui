@@ -5,6 +5,8 @@ import FormatAlignLeftIcon from '@mui/icons-material/FormatAlignLeft';
 import FormatAlignRightIcon from '@mui/icons-material/FormatAlignRight';
 import FormatBoldIcon from '@mui/icons-material/FormatBold';
 import FormatItalicIcon from '@mui/icons-material/FormatItalic';
+import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
+import FormatListNumberedIcon from '@mui/icons-material/FormatListNumbered';
 import FormatUnderlinedIcon from '@mui/icons-material/FormatUnderlined';
 import StrikethroughSIcon from '@mui/icons-material/StrikethroughS';
 import {
@@ -18,6 +20,7 @@ import {
   FormControl,
   FormHelperText,
   TextFieldProps,
+  Tooltip,
   alpha,
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
@@ -39,6 +42,7 @@ import UndoIcon from './Icons/UndoIcon';
 export type DraftTextAlignment = 'left' | 'center' | 'right';
 
 export type Tool = {
+  label: ReactNode;
   icon: ReactNode;
   isActive?: boolean;
   onMouseDown: () => void;
@@ -56,25 +60,52 @@ export type RichTextEditorTools = {
   ALIGN_CENTER: Tool;
   ALIGN_RIGHT: Tool;
   CODE_BLOCK: Tool;
+  UNORDERED_LIST: Tool;
+  ORDERED_LIST: Tool;
 };
 
 const INLINE_STYLES = [
-  { icon: <FormatBoldIcon />, style: 'BOLD' },
-  { icon: <FormatItalicIcon />, style: 'ITALIC' },
-  { icon: <FormatUnderlinedIcon />, style: 'UNDERLINE' },
-  { icon: <StrikethroughSIcon />, style: 'STRIKETHROUGH' },
-  { icon: <CodeIcon />, style: 'CODE' },
+  { icon: <FormatBoldIcon />, style: 'BOLD', label: 'Bold' },
+  { icon: <FormatItalicIcon />, style: 'ITALIC', label: 'Italic' },
+  { icon: <FormatUnderlinedIcon />, style: 'UNDERLINE', label: 'Underline' },
+  {
+    icon: <StrikethroughSIcon />,
+    style: 'STRIKETHROUGH',
+    label: 'Strikethrough',
+  },
+  { icon: <CodeIcon />, style: 'CODE', label: 'Code' },
 ] as const;
 
 const BLOCK_TYPES = [
-  { icon: <CodeBlockIcon />, style: 'code-block', key: 'CODE_BLOCK' },
+  {
+    icon: <CodeBlockIcon />,
+    style: 'code-block',
+    key: 'CODE_BLOCK',
+    label: 'Code block',
+  },
+  {
+    icon: <FormatListBulletedIcon />,
+    style: 'unordered-list-item',
+    key: 'UNORDERED_LIST',
+    label: 'Unordered list',
+  },
+  {
+    icon: <FormatListNumberedIcon />,
+    style: 'ordered-list-item',
+    key: 'ORDERED_LIST',
+    label: 'Ordered list',
+  },
 ] as const;
 
-const ALIGNMENTS: { icon: ReactNode; alignment: DraftTextAlignment }[] = [
-  { icon: <FormatAlignLeftIcon />, alignment: 'left' },
-  { icon: <FormatAlignCenterIcon />, alignment: 'center' },
-  { icon: <FormatAlignRightIcon />, alignment: 'right' },
-];
+const ALIGNMENTS = [
+  { icon: <FormatAlignLeftIcon />, alignment: 'left', label: 'Align left' },
+  {
+    icon: <FormatAlignCenterIcon />,
+    alignment: 'center',
+    label: 'Align center',
+  },
+  { icon: <FormatAlignRightIcon />, alignment: 'right', label: 'Align right' },
+] as const;
 
 export interface RichTextEditorClasses {
   /** Styles applied to the root element. */
@@ -200,6 +231,8 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
         UNDERLINE,
         UNDO,
         CODE_BLOCK,
+        ORDERED_LIST,
+        UNORDERED_LIST,
       } = {
         UNDO: {
           icon: (
@@ -231,7 +264,7 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
           },
           disabled: editorState.getRedoStack().size <= 0,
         },
-        ...INLINE_STYLES.reduce((accumulator, { icon, style }) => {
+        ...INLINE_STYLES.reduce((accumulator, { icon, style, label }) => {
           accumulator[style] = {
             icon,
             isActive: currentInlineStyle.has(style),
@@ -240,10 +273,11 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
                 return RichUtils.toggleInlineStyle(prevEditorState, style);
               });
             },
+            label,
           };
           return accumulator;
         }, {} as Record<string, Tool>),
-        ...BLOCK_TYPES.reduce((accumulator, { icon, style, key }) => {
+        ...BLOCK_TYPES.reduce((accumulator, { icon, style, key, label }) => {
           accumulator[key] = {
             icon,
             isActive: blockType === style,
@@ -252,16 +286,18 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
                 return RichUtils.toggleBlockType(prevEditorState, style);
               });
             },
+            label,
           };
           return accumulator;
         }, {} as Record<string, Tool>),
-        ...ALIGNMENTS.reduce((accumulator, { icon, alignment }) => {
+        ...ALIGNMENTS.reduce((accumulator, { icon, alignment, label }) => {
           accumulator[`ALIGN_${alignment.toUpperCase()}`] = {
             icon,
             isActive: textAlignment === alignment,
             onMouseDown: () => {
               setTextAlignment(alignment);
             },
+            label,
           };
           return accumulator;
         }, {} as Record<string, Tool>),
@@ -270,6 +306,7 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
         [UNDO, REDO],
         [BOLD, ITALIC, UNDERLINE, STRIKETHROUGH],
         [ALIGN_LEFT, ALIGN_CENTER, ALIGN_RIGHT],
+        [UNORDERED_LIST, ORDERED_LIST],
         [CODE, CODE_BLOCK],
       ];
     })();
@@ -305,6 +342,8 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
             <Box
               sx={{
                 display: 'flex',
+                flexWrap: 'nowrap',
+                overflow: 'hidden',
                 boxShadow: `0 0 5px ${alpha(palette.text.primary, 0.1)}`,
                 p: 0.5,
                 borderRadius: '4px',
@@ -323,40 +362,58 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
                         }}
                       />
                     ) : null}
-                    <Box className={classes.toolGroup}>
+                    <Box
+                      className={classes.toolGroup}
+                      sx={{
+                        display: 'flex',
+                        flexWrap: 'nowrap',
+                      }}
+                    >
                       {toolGroup.map(
-                        ({ icon, isActive = false, sx, ...rest }, index) => {
+                        (
+                          { icon, isActive = false, label, sx, ...rest },
+                          index
+                        ) => {
                           return (
-                            <Button
+                            <Tooltip
                               key={index}
-                              color="inherit"
-                              variant={isActive ? 'contained' : 'text'}
-                              size="small"
-                              {...rest}
-                              sx={{
-                                minWidth: 'auto',
-                                ...sx,
-                                width: 32,
-                                height: 32,
-                                ...(() => {
-                                  if (!hasFocus) {
-                                    return {
-                                      '&:not(:hover)': {
-                                        color: alpha(
-                                          palette.text.primary,
-                                          0.26
-                                        ),
-                                      },
-                                    };
-                                  }
-                                })(),
-                                svg: {
-                                  fontSize: 20,
+                              title={label}
+                              PopperProps={{
+                                sx: {
+                                  pointerEvents: 'none',
                                 },
                               }}
                             >
-                              {icon}
-                            </Button>
+                              <Button
+                                color="inherit"
+                                variant={isActive ? 'contained' : 'text'}
+                                size="small"
+                                {...rest}
+                                sx={{
+                                  minWidth: 'auto',
+                                  ...sx,
+                                  width: 32,
+                                  height: 32,
+                                  ...(() => {
+                                    if (!hasFocus) {
+                                      return {
+                                        '&:not(:hover)': {
+                                          color: alpha(
+                                            palette.text.primary,
+                                            0.26
+                                          ),
+                                        },
+                                      };
+                                    }
+                                  })(),
+                                  svg: {
+                                    fontSize: 20,
+                                  },
+                                }}
+                              >
+                                {icon}
+                              </Button>
+                            </Tooltip>
                           );
                         }
                       )}
