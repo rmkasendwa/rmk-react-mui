@@ -1,6 +1,5 @@
 import 'draft-js/dist/Draft.css';
 
-import CodeIcon from '@mui/icons-material/Code';
 import FormatAlignCenterIcon from '@mui/icons-material/FormatAlignCenter';
 import FormatAlignLeftIcon from '@mui/icons-material/FormatAlignLeft';
 import FormatAlignRightIcon from '@mui/icons-material/FormatAlignRight';
@@ -32,13 +31,15 @@ import { Editor, EditorState, RichUtils } from 'draft-js';
 import { Fragment, ReactNode, forwardRef, useEffect, useState } from 'react';
 
 import { useLoadingContext } from '../contexts/LoadingContext';
+import CodeBlockIcon from './Icons/CodeBlockIcon';
+import CodeIcon from './Icons/CodeIcon';
 import RedoIcon from './Icons/RedoIcon';
 import UndoIcon from './Icons/UndoIcon';
 
 export type DraftTextAlignment = 'left' | 'center' | 'right';
 
 export type Tool = {
-  label: ReactNode;
+  icon: ReactNode;
   isActive?: boolean;
   onMouseDown: () => void;
 } & Pick<ButtonProps, 'onMouseDown' | 'className' | 'disabled' | 'sx'>;
@@ -54,20 +55,25 @@ export type RichTextEditorTools = {
   ALIGN_LEFT: Tool;
   ALIGN_CENTER: Tool;
   ALIGN_RIGHT: Tool;
+  CODE_BLOCK: Tool;
 };
 
 const INLINE_STYLES = [
-  { label: <FormatBoldIcon />, style: 'BOLD' },
-  { label: <FormatItalicIcon />, style: 'ITALIC' },
-  { label: <FormatUnderlinedIcon />, style: 'UNDERLINE' },
-  { label: <StrikethroughSIcon />, style: 'STRIKETHROUGH' },
-  { label: <CodeIcon />, style: 'CODE' },
+  { icon: <FormatBoldIcon />, style: 'BOLD' },
+  { icon: <FormatItalicIcon />, style: 'ITALIC' },
+  { icon: <FormatUnderlinedIcon />, style: 'UNDERLINE' },
+  { icon: <StrikethroughSIcon />, style: 'STRIKETHROUGH' },
+  { icon: <CodeIcon />, style: 'CODE' },
 ] as const;
 
-const ALIGNMENTS: { label: ReactNode; alignment: DraftTextAlignment }[] = [
-  { label: <FormatAlignLeftIcon />, alignment: 'left' },
-  { label: <FormatAlignCenterIcon />, alignment: 'center' },
-  { label: <FormatAlignRightIcon />, alignment: 'right' },
+const BLOCK_TYPES = [
+  { icon: <CodeBlockIcon />, style: 'code-block', key: 'CODE_BLOCK' },
+] as const;
+
+const ALIGNMENTS: { icon: ReactNode; alignment: DraftTextAlignment }[] = [
+  { icon: <FormatAlignLeftIcon />, alignment: 'left' },
+  { icon: <FormatAlignCenterIcon />, alignment: 'center' },
+  { icon: <FormatAlignRightIcon />, alignment: 'right' },
 ];
 
 export interface RichTextEditorClasses {
@@ -169,7 +175,14 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
       }
       return EditorState.createEmpty();
     });
-    const currentStyle = editorState.getCurrentInlineStyle();
+    const selectionState = editorState.getSelection();
+    const currentInlineStyle = editorState.getCurrentInlineStyle();
+    const blockType = editorState
+      .getCurrentContent()
+      .getBlockForKey(selectionState.getStartKey())
+      .getType();
+
+    const hasFocus = selectionState.getHasFocus();
 
     const [textAlignment, setTextAlignment] =
       useState<DraftTextAlignment>('left');
@@ -186,9 +199,10 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
         STRIKETHROUGH,
         UNDERLINE,
         UNDO,
+        CODE_BLOCK,
       } = {
         UNDO: {
-          label: (
+          icon: (
             <UndoIcon
               sx={{
                 fontSize: 16,
@@ -203,7 +217,7 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
           disabled: editorState.getUndoStack().size <= 0,
         },
         REDO: {
-          label: (
+          icon: (
             <RedoIcon
               sx={{
                 fontSize: 16,
@@ -217,10 +231,10 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
           },
           disabled: editorState.getRedoStack().size <= 0,
         },
-        ...INLINE_STYLES.reduce((accumulator, { label, style }) => {
+        ...INLINE_STYLES.reduce((accumulator, { icon, style }) => {
           accumulator[style] = {
-            label,
-            isActive: currentStyle.has(style),
+            icon,
+            isActive: currentInlineStyle.has(style),
             onMouseDown: () => {
               setEditorState((prevEditorState) => {
                 return RichUtils.toggleInlineStyle(prevEditorState, style);
@@ -229,9 +243,21 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
           };
           return accumulator;
         }, {} as Record<string, Tool>),
-        ...ALIGNMENTS.reduce((accumulator, { label, alignment }) => {
+        ...BLOCK_TYPES.reduce((accumulator, { icon, style, key }) => {
+          accumulator[key] = {
+            icon,
+            isActive: blockType === style,
+            onMouseDown: () => {
+              setEditorState((prevEditorState) => {
+                return RichUtils.toggleBlockType(prevEditorState, style);
+              });
+            },
+          };
+          return accumulator;
+        }, {} as Record<string, Tool>),
+        ...ALIGNMENTS.reduce((accumulator, { icon, alignment }) => {
           accumulator[`ALIGN_${alignment.toUpperCase()}`] = {
-            label,
+            icon,
             isActive: textAlignment === alignment,
             onMouseDown: () => {
               setTextAlignment(alignment);
@@ -242,8 +268,9 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
       } as RichTextEditorTools;
       return [
         [UNDO, REDO],
-        [BOLD, ITALIC, UNDERLINE, STRIKETHROUGH, CODE],
+        [BOLD, ITALIC, UNDERLINE, STRIKETHROUGH],
         [ALIGN_LEFT, ALIGN_CENTER, ALIGN_RIGHT],
+        [CODE, CODE_BLOCK],
       ];
     })();
 
@@ -298,11 +325,12 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
                     ) : null}
                     <Box className={classes.toolGroup}>
                       {toolGroup.map(
-                        ({ label, isActive = false, sx, ...rest }, index) => {
+                        ({ icon, isActive = false, sx, ...rest }, index) => {
                           return (
                             <Button
                               key={index}
-                              color={isActive ? 'primary' : 'inherit'}
+                              color="inherit"
+                              variant={isActive ? 'contained' : 'text'}
                               size="small"
                               {...rest}
                               sx={{
@@ -310,9 +338,24 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
                                 ...sx,
                                 width: 32,
                                 height: 32,
+                                ...(() => {
+                                  if (!hasFocus) {
+                                    return {
+                                      '&:not(:hover)': {
+                                        color: alpha(
+                                          palette.text.primary,
+                                          0.26
+                                        ),
+                                      },
+                                    };
+                                  }
+                                })(),
+                                svg: {
+                                  fontSize: 20,
+                                },
                               }}
                             >
-                              {label}
+                              {icon}
                             </Button>
                           );
                         }
