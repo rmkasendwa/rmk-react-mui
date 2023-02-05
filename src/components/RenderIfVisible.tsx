@@ -65,6 +65,7 @@ export interface RenderIfVisibleProps extends Partial<BoxProps> {
    * @default 600
    */
   visibilityDelay?: number;
+  onChangeVisibility?: (isVisible: boolean) => void;
 }
 
 export const RenderIfVisible: FC<RenderIfVisibleProps> = ({
@@ -75,6 +76,7 @@ export const RenderIfVisible: FC<RenderIfVisibleProps> = ({
   PlaceholderProps = {},
   unWrapChildrenIfVisible = false,
   displayPlaceholder = true,
+  onChangeVisibility,
   ...rest
 }) => {
   const { sx: placeholderPropsSx, ...placeholderPropsRest } = PlaceholderProps;
@@ -83,6 +85,10 @@ export const RenderIfVisible: FC<RenderIfVisibleProps> = ({
   const isComponentMountedRef = useRef(true);
   const wasVisibleRef = useRef(initialVisible);
   const placeholderDimensionsRef = useRef(defaultPlaceholderDimensions);
+  const onChangeVisibilityRef = useRef(onChangeVisibility);
+  useEffect(() => {
+    onChangeVisibilityRef.current = onChangeVisibility;
+  }, [onChangeVisibility]);
 
   const { ref, inView: isVisible } = useInView({
     threshold: 0,
@@ -93,6 +99,7 @@ export const RenderIfVisible: FC<RenderIfVisibleProps> = ({
     if (isVisible) {
       wasVisibleRef.current = true;
     }
+    onChangeVisibilityRef.current && onChangeVisibilityRef.current(isVisible);
   }, [isVisible]);
 
   useEffect(() => {

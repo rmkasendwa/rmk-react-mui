@@ -8,6 +8,7 @@ import FormatItalicIcon from '@mui/icons-material/FormatItalic';
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 import FormatListNumberedIcon from '@mui/icons-material/FormatListNumbered';
 import FormatUnderlinedIcon from '@mui/icons-material/FormatUnderlined';
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import StrikethroughSIcon from '@mui/icons-material/StrikethroughS';
 import {
   Box,
@@ -34,14 +35,19 @@ import { Editor, EditorState, RichUtils } from 'draft-js';
 import { Fragment, ReactNode, forwardRef, useEffect, useState } from 'react';
 
 import { useLoadingContext } from '../contexts/LoadingContext';
+import EllipsisMenuIconButton from './EllipsisMenuIconButton';
 import CodeBlockIcon from './Icons/CodeBlockIcon';
 import CodeIcon from './Icons/CodeIcon';
 import RedoIcon from './Icons/RedoIcon';
 import UndoIcon from './Icons/UndoIcon';
+import RenderIfVisible from './RenderIfVisible';
+
+export const SQUARE_TOOL_DIMENSION = 32;
 
 export type DraftTextAlignment = 'left' | 'center' | 'right';
 
 export type Tool = {
+  id: string;
   label: ReactNode;
   icon: ReactNode;
   isActive?: boolean;
@@ -200,6 +206,10 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
     const { palette } = useTheme();
     const { locked } = useLoadingContext();
 
+    const [invisibleToolsMap, setInvisibleToolsMap] = useState<
+      Record<string, Tool>
+    >({});
+
     const [editorState, setEditorState] = useState(() => {
       if (value) {
         return EditorState.createWithContent(convertFromHTML(value));
@@ -248,6 +258,8 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
             });
           },
           disabled: editorState.getUndoStack().size <= 0,
+          label: 'Undo',
+          id: 'UNDO',
         },
         REDO: {
           icon: (
@@ -263,6 +275,8 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
             });
           },
           disabled: editorState.getRedoStack().size <= 0,
+          label: 'Redo',
+          id: 'REDO',
         },
         ...INLINE_STYLES.reduce((accumulator, { icon, style, label }) => {
           accumulator[style] = {
@@ -274,6 +288,7 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
               });
             },
             label,
+            id: style,
           };
           return accumulator;
         }, {} as Record<string, Tool>),
@@ -287,17 +302,20 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
               });
             },
             label,
+            id: style,
           };
           return accumulator;
         }, {} as Record<string, Tool>),
         ...ALIGNMENTS.reduce((accumulator, { icon, alignment, label }) => {
-          accumulator[`ALIGN_${alignment.toUpperCase()}`] = {
+          const id = `ALIGN_${alignment.toUpperCase()}`;
+          accumulator[id] = {
             icon,
             isActive: textAlignment === alignment,
             onMouseDown: () => {
               setTextAlignment(alignment);
             },
             label,
+            id,
           };
           return accumulator;
         }, {} as Record<string, Tool>),
@@ -327,6 +345,17 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
       }
     }, [value]);
 
+    const toolGroupDivider = (
+      <Divider
+        orientation="vertical"
+        variant="middle"
+        flexItem
+        sx={{
+          mx: 1,
+        }}
+      />
+    );
+
     return (
       <FormControl
         ref={ref}
@@ -343,84 +372,167 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
               sx={{
                 display: 'flex',
                 flexWrap: 'nowrap',
-                overflow: 'hidden',
                 boxShadow: `0 0 5px ${alpha(palette.text.primary, 0.1)}`,
                 p: 0.5,
                 borderRadius: '4px',
               }}
             >
-              {toolGroups.map((toolGroup, index) => {
-                return (
-                  <Fragment key={index}>
-                    {index > 0 ? (
-                      <Divider
-                        orientation="vertical"
-                        variant="middle"
-                        flexItem
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexWrap: 'nowrap',
+                  overflow: 'hidden',
+                  maxWidth: 'calc(100% - 32px)',
+                }}
+              >
+                {toolGroups.map((toolGroup, toolGroupIndex) => {
+                  return (
+                    <Fragment key={toolGroupIndex}>
+                      {toolGroupIndex > 0 ? toolGroupDivider : null}
+                      <Box
+                        className={classes.toolGroup}
                         sx={{
-                          mx: 1,
+                          display: 'flex',
+                          flexWrap: 'nowrap',
                         }}
-                      />
-                    ) : null}
-                    <Box
-                      className={classes.toolGroup}
-                      sx={{
-                        display: 'flex',
-                        flexWrap: 'nowrap',
-                      }}
-                    >
-                      {toolGroup.map(
-                        (
-                          { icon, isActive = false, label, sx, ...rest },
-                          index
-                        ) => {
+                      >
+                        {toolGroup.map((tool, toolIndex) => {
+                          const {
+                            icon,
+                            isActive = false,
+                            label,
+                            sx,
+                            ...rest
+                          } = tool;
                           return (
-                            <Tooltip
-                              key={index}
-                              title={label}
-                              PopperProps={{
-                                sx: {
-                                  pointerEvents: 'none',
-                                },
+                            <RenderIfVisible
+                              key={toolIndex}
+                              defaultPlaceholderDimensions={{
+                                width: SQUARE_TOOL_DIMENSION,
+                                height: SQUARE_TOOL_DIMENSION,
+                              }}
+                              onChangeVisibility={(isVisible) => {
+                                setInvisibleToolsMap(
+                                  (prevInvisibleToolsMap) => {
+                                    const index = `${toolGroupIndex}${toolIndex}`;
+                                    const nextInvisibleToolsMap = {
+                                      ...prevInvisibleToolsMap,
+                                    };
+                                    if (isVisible) {
+                                      delete nextInvisibleToolsMap[index];
+                                    } else {
+                                      nextInvisibleToolsMap[index] = tool;
+                                    }
+                                    return nextInvisibleToolsMap;
+                                  }
+                                );
                               }}
                             >
-                              <Button
-                                color="inherit"
-                                variant={isActive ? 'contained' : 'text'}
-                                size="small"
-                                {...rest}
-                                sx={{
-                                  minWidth: 'auto',
-                                  ...sx,
-                                  width: 32,
-                                  height: 32,
-                                  ...(() => {
-                                    if (!hasFocus) {
-                                      return {
-                                        '&:not(:hover)': {
-                                          color: alpha(
-                                            palette.text.primary,
-                                            0.26
-                                          ),
-                                        },
-                                      };
-                                    }
-                                  })(),
-                                  svg: {
-                                    fontSize: 20,
+                              <Tooltip
+                                title={label}
+                                PopperProps={{
+                                  sx: {
+                                    pointerEvents: 'none',
                                   },
                                 }}
                               >
-                                {icon}
-                              </Button>
-                            </Tooltip>
+                                <Box
+                                  sx={{
+                                    width: SQUARE_TOOL_DIMENSION,
+                                    height: SQUARE_TOOL_DIMENSION,
+                                  }}
+                                >
+                                  <Button
+                                    color="inherit"
+                                    variant={isActive ? 'contained' : 'text'}
+                                    size="small"
+                                    {...rest}
+                                    sx={{
+                                      minWidth: 'auto',
+                                      ...sx,
+                                      width: SQUARE_TOOL_DIMENSION,
+                                      height: SQUARE_TOOL_DIMENSION,
+                                      ...(() => {
+                                        if (!hasFocus) {
+                                          return {
+                                            '&:not(:hover)': {
+                                              color: alpha(
+                                                palette.text.primary,
+                                                0.26
+                                              ),
+                                            },
+                                          };
+                                        }
+                                      })(),
+                                      svg: {
+                                        fontSize: 20,
+                                      },
+                                    }}
+                                  >
+                                    {icon}
+                                  </Button>
+                                </Box>
+                              </Tooltip>
+                            </RenderIfVisible>
                           );
-                        }
-                      )}
-                    </Box>
-                  </Fragment>
-                );
-              })}
+                        })}
+                      </Box>
+                    </Fragment>
+                  );
+                })}
+              </Box>
+              {(() => {
+                const invisibleTools = Object.values(invisibleToolsMap);
+                if (invisibleTools.length > 0) {
+                  return (
+                    <>
+                      {toolGroupDivider}
+                      <Tooltip
+                        title="More formatting options"
+                        PopperProps={{
+                          sx: {
+                            pointerEvents: 'none',
+                          },
+                        }}
+                      >
+                        <EllipsisMenuIconButton
+                          color="inherit"
+                          size="small"
+                          options={invisibleTools.map(
+                            ({ icon, label, id, onMouseDown }) => {
+                              return {
+                                label,
+                                value: id,
+                                icon,
+                                onClick: onMouseDown,
+                              };
+                            }
+                          )}
+                          sx={{
+                            minWidth: 'auto',
+                            width: SQUARE_TOOL_DIMENSION,
+                            height: SQUARE_TOOL_DIMENSION,
+                            ...(() => {
+                              if (!hasFocus) {
+                                return {
+                                  '&:not(:hover)': {
+                                    color: alpha(palette.text.primary, 0.26),
+                                  },
+                                };
+                              }
+                            })(),
+                            svg: {
+                              fontSize: 20,
+                            },
+                          }}
+                        >
+                          <MoreHorizIcon />
+                        </EllipsisMenuIconButton>
+                      </Tooltip>
+                    </>
+                  );
+                }
+              })()}
             </Box>
           );
         })()}
