@@ -62,7 +62,7 @@ declare module '@mui/material/styles/components' {
 
 export interface EllipsisMenuIconButtonProps
   extends IconButtonProps,
-    EllipsisMenuToolProps {
+    Omit<EllipsisMenuToolProps, 'variant'> {
   PaginatedDropdownOptionListProps?: Partial<PaginatedDropdownOptionListProps>;
   closeOnSelectOption?: boolean;
 }
