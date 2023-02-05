@@ -1,13 +1,15 @@
 import Box, { BoxProps } from '@mui/material/Box';
 import { FC, ReactNode, useEffect, useRef } from 'react';
-import { useInView } from 'react-intersection-observer';
+import { IntersectionOptions, useInView } from 'react-intersection-observer';
 
 export interface DefaultPlaceholderDimensions {
   height: number;
   width?: number;
 }
 
-export interface RenderIfVisibleProps extends Partial<BoxProps> {
+export interface RenderIfVisibleProps
+  extends Partial<BoxProps>,
+    Partial<Pick<IntersectionOptions, 'threshold'>> {
   /**
    * Whether the element should be visible initially or not.
    * Useful e.g. for always setting the first N items to visible.
@@ -77,6 +79,7 @@ export const RenderIfVisible: FC<RenderIfVisibleProps> = ({
   unWrapChildrenIfVisible = false,
   displayPlaceholder = true,
   onChangeVisibility,
+  threshold = 0,
   ...rest
 }) => {
   const { sx: placeholderPropsSx, ...placeholderPropsRest } = PlaceholderProps;
@@ -91,8 +94,8 @@ export const RenderIfVisible: FC<RenderIfVisibleProps> = ({
   }, [onChangeVisibility]);
 
   const { ref, inView: isVisible } = useInView({
-    threshold: 0,
     initialInView: initialVisible,
+    threshold,
   });
 
   useEffect(() => {
