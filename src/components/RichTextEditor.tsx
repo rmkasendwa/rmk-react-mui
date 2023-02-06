@@ -39,6 +39,7 @@ import { useLoadingContext } from '../contexts/LoadingContext';
 import EllipsisMenuIconButton, {
   DropdownOption,
 } from './EllipsisMenuIconButton';
+import BlockquoteIcon from './Icons/BlockquoteIcon';
 import CodeBlockIcon from './Icons/CodeBlockIcon';
 import CodeIcon from './Icons/CodeIcon';
 import RedoIcon from './Icons/RedoIcon';
@@ -58,19 +59,20 @@ export type Tool = {
 } & Pick<ButtonProps, 'onMouseDown' | 'className' | 'disabled' | 'sx'>;
 
 export type RichTextEditorTools = {
-  UNDO: Tool;
-  REDO: Tool;
-  BOLD: Tool;
-  ITALIC: Tool;
-  UNDERLINE: Tool;
-  STRIKETHROUGH: Tool;
-  CODE: Tool;
-  ALIGN_LEFT: Tool;
   ALIGN_CENTER: Tool;
+  ALIGN_LEFT: Tool;
   ALIGN_RIGHT: Tool;
+  BLOCK_QUOTE: Tool;
+  BOLD: Tool;
+  CODE: Tool;
   CODE_BLOCK: Tool;
-  UNORDERED_LIST: Tool;
+  ITALIC: Tool;
   ORDERED_LIST: Tool;
+  REDO: Tool;
+  STRIKETHROUGH: Tool;
+  UNDERLINE: Tool;
+  UNDO: Tool;
+  UNORDERED_LIST: Tool;
 };
 
 const INLINE_STYLES = [
@@ -103,6 +105,12 @@ const BLOCK_TYPES = [
     style: 'ordered-list-item',
     key: 'ORDERED_LIST',
     label: 'Ordered list',
+  },
+  {
+    icon: <BlockquoteIcon />,
+    style: 'blockquote',
+    key: 'BLOCK_QUOTE',
+    label: 'Blockquote',
   },
 ] as const;
 
@@ -236,15 +244,16 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
         ALIGN_CENTER,
         ALIGN_LEFT,
         ALIGN_RIGHT,
+        BLOCK_QUOTE,
         BOLD,
         CODE,
+        CODE_BLOCK,
         ITALIC,
+        ORDERED_LIST,
         REDO,
         STRIKETHROUGH,
         UNDERLINE,
         UNDO,
-        CODE_BLOCK,
-        ORDERED_LIST,
         UNORDERED_LIST,
       } = {
         UNDO: {
@@ -328,6 +337,7 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
         [BOLD, ITALIC, UNDERLINE, STRIKETHROUGH],
         [ALIGN_LEFT, ALIGN_CENTER, ALIGN_RIGHT],
         [UNORDERED_LIST, ORDERED_LIST],
+        [BLOCK_QUOTE],
         [CODE, CODE_BLOCK],
       ];
     })();
@@ -651,6 +661,16 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
                   m: 0,
                 },
               },
+              blockquote: {
+                borderLeft: `5px solid ${palette.divider}`,
+                color: palette.text.secondary,
+                fontFamily: `'Hoefler Text', 'Georgia', serif`,
+                fontStyle: 'italic',
+                mx: 0,
+                my: 2,
+                px: 1.5,
+                py: 1,
+              },
             }}
           >
             <Editor
@@ -686,6 +706,7 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
                   padding: 2,
                 },
               }}
+              spellCheck
             />
           </Box>
         </Box>
