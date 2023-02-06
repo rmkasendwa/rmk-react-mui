@@ -32,10 +32,13 @@ import {
 import clsx from 'clsx';
 import { convertFromHTML, convertToHTML } from 'draft-convert';
 import { Editor, EditorState, RichUtils } from 'draft-js';
+import { isEmpty } from 'lodash';
 import { Fragment, ReactNode, forwardRef, useEffect, useState } from 'react';
 
 import { useLoadingContext } from '../contexts/LoadingContext';
-import EllipsisMenuIconButton from './EllipsisMenuIconButton';
+import EllipsisMenuIconButton, {
+  DropdownOption,
+} from './EllipsisMenuIconButton';
 import CodeBlockIcon from './Icons/CodeBlockIcon';
 import CodeIcon from './Icons/CodeIcon';
 import RedoIcon from './Icons/RedoIcon';
@@ -207,7 +210,7 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
     const { locked } = useLoadingContext();
 
     const [invisibleToolsMap, setInvisibleToolsMap] = useState<
-      Record<string, Tool>
+      Record<number, Record<number, Tool>>
     >({});
 
     const [editorState, setEditorState] = useState(() => {
@@ -373,23 +376,28 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
             if (readOnly || disabled || locked) {
               return null;
             }
-            // const toolsContainerWidth = (() => {
-            //   return toolGroups.reduce(
-            //     (accumulator, toolGroup, toolGroupIndex) => {
-            //       if (toolGroupIndex > 0) {
-            //         accumulator += 17;
-            //       }
-            //       toolGroup.forEach((_, toolIndex) => {
-            //         const index = `${toolGroupIndex}${toolIndex}`;
-            //         if (!invisibleToolsMap[index]) {
-            //           accumulator += 32;
-            //         }
-            //       });
-            //       return accumulator;
-            //     },
-            //     0
-            //   );
-            // })();
+            const ellipsisToolWidth = 32 + 17;
+            const visibleToolsWidth = (() => {
+              return toolGroups.reduce(
+                (accumulator, toolGroup, toolGroupIndex) => {
+                  if (
+                    toolGroupIndex > 0 &&
+                    (!invisibleToolsMap[toolGroupIndex] ||
+                      Object.keys(invisibleToolsMap[toolGroupIndex]).length !==
+                        toolGroup.length)
+                  ) {
+                    accumulator += 17;
+                  }
+                  toolGroup.forEach((_, toolIndex) => {
+                    if (!invisibleToolsMap[toolGroupIndex]?.[toolIndex]) {
+                      accumulator += 32;
+                    }
+                  });
+                  return accumulator;
+                },
+                0
+              );
+            })();
             return (
               <Box
                 sx={{
@@ -398,6 +406,7 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
                   boxShadow: `0 0 5px ${alpha(palette.text.primary, 0.1)}`,
                   p: 0.5,
                   borderRadius: '4px',
+                  position: 'relative',
                 }}
               >
                 <Box
@@ -406,13 +415,24 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
                     flexWrap: 'nowrap',
                     overflow: 'hidden',
                     minWidth: 0,
-                    // maxWidth: `${toolsContainerWidth}px`,
+                    width: `calc(100% - ${ellipsisToolWidth}px)`,
                   }}
                 >
                   {toolGroups.map((toolGroup, toolGroupIndex) => {
                     return (
                       <Fragment key={toolGroupIndex}>
-                        {toolGroupIndex > 0 ? toolGroupDivider : null}
+                        {(() => {
+                          if (toolGroupIndex > 0) {
+                            if (
+                              invisibleToolsMap[toolGroupIndex] &&
+                              Object.keys(invisibleToolsMap[toolGroupIndex])
+                                .length >= toolGroup.length
+                            ) {
+                              return <Box sx={{ pl: '17px' }} />;
+                            }
+                            return toolGroupDivider;
+                          }
+                        })()}
                         <Box
                           className={classes.toolGroup}
                           sx={{
@@ -438,20 +458,45 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
                                 onChangeVisibility={(isVisible) => {
                                   setInvisibleToolsMap(
                                     (prevInvisibleToolsMap) => {
-                                      const index = `${toolGroupIndex}${toolIndex}`;
                                       const nextInvisibleToolsMap = {
                                         ...prevInvisibleToolsMap,
                                       };
                                       if (isVisible) {
-                                        delete nextInvisibleToolsMap[index];
+                                        if (
+                                          nextInvisibleToolsMap[toolGroupIndex]
+                                        ) {
+                                          delete nextInvisibleToolsMap[
+                                            toolGroupIndex
+                                          ][toolIndex];
+                                        }
+                                        if (
+                                          isEmpty(
+                                            nextInvisibleToolsMap[
+                                              toolGroupIndex
+                                            ]
+                                          )
+                                        ) {
+                                          delete nextInvisibleToolsMap[
+                                            toolGroupIndex
+                                          ];
+                                        }
                                       } else {
-                                        nextInvisibleToolsMap[index] = tool;
+                                        if (
+                                          !nextInvisibleToolsMap[toolGroupIndex]
+                                        ) {
+                                          nextInvisibleToolsMap[
+                                            toolGroupIndex
+                                          ] = {};
+                                        }
+                                        nextInvisibleToolsMap[toolGroupIndex][
+                                          toolIndex
+                                        ] = tool;
                                       }
                                       return nextInvisibleToolsMap;
                                     }
                                   );
                                 }}
-                                threshold={0.4}
+                                threshold={1}
                                 initialVisible
                               >
                                 <Tooltip
@@ -510,8 +555,39 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
                 {(() => {
                   const invisibleTools = Object.values(invisibleToolsMap);
                   if (invisibleTools.length > 0) {
+                    const options: DropdownOption[] = [];
+                    Object.values(invisibleToolsMap).forEach(
+                      (toolGroupMap, index) => {
+                        if (index > 0) {
+                          options.push({
+                            label: <Divider />,
+                            value: '$$Divider$$',
+                            selectable: false,
+                            isDropdownOption: false,
+                          });
+                        }
+                        Object.values(toolGroupMap).forEach(
+                          ({ icon, label, id, onMouseDown }) => {
+                            options.push({
+                              label,
+                              value: id,
+                              icon,
+                              onClick: onMouseDown,
+                            });
+                          }
+                        );
+                      }
+                    );
                     return (
-                      <>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          position: 'absolute',
+                          top: 0,
+                          left: visibleToolsWidth,
+                          py: 0.5,
+                        }}
+                      >
                         {toolGroupDivider}
                         <Tooltip
                           title="More formatting options"
@@ -524,16 +600,7 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
                           <EllipsisMenuIconButton
                             color="inherit"
                             size="small"
-                            options={invisibleTools.map(
-                              ({ icon, label, id, onMouseDown }) => {
-                                return {
-                                  label,
-                                  value: id,
-                                  icon,
-                                  onClick: onMouseDown,
-                                };
-                              }
-                            )}
+                            {...{ options }}
                             sx={{
                               minWidth: 'auto',
                               width: SQUARE_TOOL_DIMENSION,
@@ -555,7 +622,7 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
                             <MoreHorizIcon />
                           </EllipsisMenuIconButton>
                         </Tooltip>
-                      </>
+                      </Box>
                     );
                   }
                 })()}
