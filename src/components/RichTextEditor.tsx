@@ -455,6 +455,7 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
                               icon,
                               isActive = false,
                               label,
+                              onMouseDown,
                               sx,
                               ...rest
                             } = tool;
@@ -527,6 +528,10 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
                                       color="inherit"
                                       variant={isActive ? 'contained' : 'text'}
                                       size="small"
+                                      onMouseDown={(event) => {
+                                        event.preventDefault();
+                                        onMouseDown && onMouseDown(event);
+                                      }}
                                       {...rest}
                                       sx={{
                                         minWidth: 'auto',
