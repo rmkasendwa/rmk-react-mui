@@ -32,10 +32,13 @@ import {
 import clsx from 'clsx';
 import { convertFromHTML, convertToHTML } from 'draft-convert';
 import { Editor, EditorState, RichUtils } from 'draft-js';
+import { isEmpty } from 'lodash';
 import { Fragment, ReactNode, forwardRef, useEffect, useState } from 'react';
 
 import { useLoadingContext } from '../contexts/LoadingContext';
-import EllipsisMenuIconButton from './EllipsisMenuIconButton';
+import EllipsisMenuIconButton, {
+  DropdownOption,
+} from './EllipsisMenuIconButton';
 import CodeBlockIcon from './Icons/CodeBlockIcon';
 import CodeIcon from './Icons/CodeIcon';
 import RedoIcon from './Icons/RedoIcon';
@@ -207,7 +210,7 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
     const { locked } = useLoadingContext();
 
     const [invisibleToolsMap, setInvisibleToolsMap] = useState<
-      Record<string, Tool>
+      Record<number, Record<number, Tool>>
     >({});
 
     const [editorState, setEditorState] = useState(() => {
@@ -363,220 +366,311 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
         className={clsx(classes.root)}
         fullWidth
       >
-        {(() => {
-          if (readOnly || disabled || locked) {
-            return null;
-          }
-          return (
-            <Box
-              sx={{
-                display: 'flex',
-                flexWrap: 'nowrap',
-                boxShadow: `0 0 5px ${alpha(palette.text.primary, 0.1)}`,
-                p: 0.5,
-                borderRadius: '4px',
-              }}
-            >
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        >
+          {(() => {
+            if (readOnly || disabled || locked) {
+              return null;
+            }
+            const ellipsisToolWidth = 32 + 17;
+            const visibleToolsWidth = (() => {
+              return toolGroups.reduce(
+                (accumulator, toolGroup, toolGroupIndex) => {
+                  if (
+                    toolGroupIndex > 0 &&
+                    (!invisibleToolsMap[toolGroupIndex] ||
+                      Object.keys(invisibleToolsMap[toolGroupIndex]).length !==
+                        toolGroup.length)
+                  ) {
+                    accumulator += 17;
+                  }
+                  toolGroup.forEach((_, toolIndex) => {
+                    if (!invisibleToolsMap[toolGroupIndex]?.[toolIndex]) {
+                      accumulator += 32;
+                    }
+                  });
+                  return accumulator;
+                },
+                0
+              );
+            })();
+            return (
               <Box
                 sx={{
                   display: 'flex',
                   flexWrap: 'nowrap',
-                  overflow: 'hidden',
-                  maxWidth: 'calc(100% - 32px)',
+                  boxShadow: `0 0 5px ${alpha(palette.text.primary, 0.1)}`,
+                  p: 0.5,
+                  borderRadius: '4px',
+                  position: 'relative',
                 }}
               >
-                {toolGroups.map((toolGroup, toolGroupIndex) => {
-                  return (
-                    <Fragment key={toolGroupIndex}>
-                      {toolGroupIndex > 0 ? toolGroupDivider : null}
-                      <Box
-                        className={classes.toolGroup}
-                        sx={{
-                          display: 'flex',
-                          flexWrap: 'nowrap',
-                        }}
-                      >
-                        {toolGroup.map((tool, toolIndex) => {
-                          const {
-                            icon,
-                            isActive = false,
-                            label,
-                            sx,
-                            ...rest
-                          } = tool;
-                          return (
-                            <RenderIfVisible
-                              key={toolIndex}
-                              defaultPlaceholderDimensions={{
-                                width: SQUARE_TOOL_DIMENSION,
-                                height: SQUARE_TOOL_DIMENSION,
-                              }}
-                              onChangeVisibility={(isVisible) => {
-                                setInvisibleToolsMap(
-                                  (prevInvisibleToolsMap) => {
-                                    const index = `${toolGroupIndex}${toolIndex}`;
-                                    const nextInvisibleToolsMap = {
-                                      ...prevInvisibleToolsMap,
-                                    };
-                                    if (isVisible) {
-                                      delete nextInvisibleToolsMap[index];
-                                    } else {
-                                      nextInvisibleToolsMap[index] = tool;
-                                    }
-                                    return nextInvisibleToolsMap;
-                                  }
-                                );
-                              }}
-                            >
-                              <Tooltip
-                                title={label}
-                                PopperProps={{
-                                  sx: {
-                                    pointerEvents: 'none',
-                                  },
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexWrap: 'nowrap',
+                    overflow: 'hidden',
+                    minWidth: 0,
+                    width: `calc(100% - ${ellipsisToolWidth}px)`,
+                  }}
+                >
+                  {toolGroups.map((toolGroup, toolGroupIndex) => {
+                    return (
+                      <Fragment key={toolGroupIndex}>
+                        {(() => {
+                          if (toolGroupIndex > 0) {
+                            if (
+                              invisibleToolsMap[toolGroupIndex] &&
+                              Object.keys(invisibleToolsMap[toolGroupIndex])
+                                .length >= toolGroup.length
+                            ) {
+                              return <Box sx={{ pl: '17px' }} />;
+                            }
+                            return toolGroupDivider;
+                          }
+                        })()}
+                        <Box
+                          className={classes.toolGroup}
+                          sx={{
+                            display: 'flex',
+                            flexWrap: 'nowrap',
+                          }}
+                        >
+                          {toolGroup.map((tool, toolIndex) => {
+                            const {
+                              icon,
+                              isActive = false,
+                              label,
+                              sx,
+                              ...rest
+                            } = tool;
+                            return (
+                              <RenderIfVisible
+                                key={toolIndex}
+                                defaultPlaceholderDimensions={{
+                                  width: SQUARE_TOOL_DIMENSION,
+                                  height: SQUARE_TOOL_DIMENSION,
                                 }}
+                                onChangeVisibility={(isVisible) => {
+                                  setInvisibleToolsMap(
+                                    (prevInvisibleToolsMap) => {
+                                      const nextInvisibleToolsMap = {
+                                        ...prevInvisibleToolsMap,
+                                      };
+                                      if (isVisible) {
+                                        if (
+                                          nextInvisibleToolsMap[toolGroupIndex]
+                                        ) {
+                                          delete nextInvisibleToolsMap[
+                                            toolGroupIndex
+                                          ][toolIndex];
+                                        }
+                                        if (
+                                          isEmpty(
+                                            nextInvisibleToolsMap[
+                                              toolGroupIndex
+                                            ]
+                                          )
+                                        ) {
+                                          delete nextInvisibleToolsMap[
+                                            toolGroupIndex
+                                          ];
+                                        }
+                                      } else {
+                                        if (
+                                          !nextInvisibleToolsMap[toolGroupIndex]
+                                        ) {
+                                          nextInvisibleToolsMap[
+                                            toolGroupIndex
+                                          ] = {};
+                                        }
+                                        nextInvisibleToolsMap[toolGroupIndex][
+                                          toolIndex
+                                        ] = tool;
+                                      }
+                                      return nextInvisibleToolsMap;
+                                    }
+                                  );
+                                }}
+                                threshold={1}
+                                initialVisible
                               >
-                                <Box
-                                  sx={{
-                                    width: SQUARE_TOOL_DIMENSION,
-                                    height: SQUARE_TOOL_DIMENSION,
+                                <Tooltip
+                                  title={label}
+                                  PopperProps={{
+                                    sx: {
+                                      pointerEvents: 'none',
+                                    },
                                   }}
                                 >
-                                  <Button
-                                    color="inherit"
-                                    variant={isActive ? 'contained' : 'text'}
-                                    size="small"
-                                    {...rest}
+                                  <Box
                                     sx={{
-                                      minWidth: 'auto',
-                                      ...sx,
                                       width: SQUARE_TOOL_DIMENSION,
                                       height: SQUARE_TOOL_DIMENSION,
-                                      ...(() => {
-                                        if (!hasFocus) {
-                                          return {
-                                            '&:not(:hover)': {
-                                              color: alpha(
-                                                palette.text.primary,
-                                                0.26
-                                              ),
-                                            },
-                                          };
-                                        }
-                                      })(),
-                                      svg: {
-                                        fontSize: 20,
-                                      },
                                     }}
                                   >
-                                    {icon}
-                                  </Button>
-                                </Box>
-                              </Tooltip>
-                            </RenderIfVisible>
-                          );
-                        })}
-                      </Box>
-                    </Fragment>
-                  );
-                })}
-              </Box>
-              {(() => {
-                const invisibleTools = Object.values(invisibleToolsMap);
-                if (invisibleTools.length > 0) {
-                  return (
-                    <>
-                      {toolGroupDivider}
-                      <Tooltip
-                        title="More formatting options"
-                        PopperProps={{
-                          sx: {
-                            pointerEvents: 'none',
-                          },
+                                    <Button
+                                      color="inherit"
+                                      variant={isActive ? 'contained' : 'text'}
+                                      size="small"
+                                      {...rest}
+                                      sx={{
+                                        minWidth: 'auto',
+                                        ...sx,
+                                        width: SQUARE_TOOL_DIMENSION,
+                                        height: SQUARE_TOOL_DIMENSION,
+                                        ...(() => {
+                                          if (!hasFocus) {
+                                            return {
+                                              '&:not(:hover)': {
+                                                color: alpha(
+                                                  palette.text.primary,
+                                                  0.26
+                                                ),
+                                              },
+                                            };
+                                          }
+                                        })(),
+                                        svg: {
+                                          fontSize: 20,
+                                        },
+                                      }}
+                                    >
+                                      {icon}
+                                    </Button>
+                                  </Box>
+                                </Tooltip>
+                              </RenderIfVisible>
+                            );
+                          })}
+                        </Box>
+                      </Fragment>
+                    );
+                  })}
+                </Box>
+                {(() => {
+                  const invisibleTools = Object.values(invisibleToolsMap);
+                  if (invisibleTools.length > 0) {
+                    const options: DropdownOption[] = [];
+                    Object.values(invisibleToolsMap).forEach(
+                      (toolGroupMap, index) => {
+                        if (index > 0) {
+                          options.push({
+                            label: <Divider />,
+                            value: '$$Divider$$',
+                            selectable: false,
+                            isDropdownOption: false,
+                          });
+                        }
+                        Object.values(toolGroupMap).forEach(
+                          ({ icon, label, id, onMouseDown }) => {
+                            options.push({
+                              label,
+                              value: id,
+                              icon,
+                              onClick: onMouseDown,
+                            });
+                          }
+                        );
+                      }
+                    );
+                    return (
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          position: 'absolute',
+                          top: 0,
+                          left: visibleToolsWidth,
+                          py: 0.5,
                         }}
                       >
-                        <EllipsisMenuIconButton
-                          color="inherit"
-                          size="small"
-                          options={invisibleTools.map(
-                            ({ icon, label, id, onMouseDown }) => {
-                              return {
-                                label,
-                                value: id,
-                                icon,
-                                onClick: onMouseDown,
-                              };
-                            }
-                          )}
-                          sx={{
-                            minWidth: 'auto',
-                            width: SQUARE_TOOL_DIMENSION,
-                            height: SQUARE_TOOL_DIMENSION,
-                            ...(() => {
-                              if (!hasFocus) {
-                                return {
-                                  '&:not(:hover)': {
-                                    color: alpha(palette.text.primary, 0.26),
-                                  },
-                                };
-                              }
-                            })(),
-                            svg: {
-                              fontSize: 20,
+                        {toolGroupDivider}
+                        <Tooltip
+                          title="More formatting options"
+                          PopperProps={{
+                            sx: {
+                              pointerEvents: 'none',
                             },
                           }}
                         >
-                          <MoreHorizIcon />
-                        </EllipsisMenuIconButton>
-                      </Tooltip>
-                    </>
-                  );
+                          <EllipsisMenuIconButton
+                            color="inherit"
+                            size="small"
+                            {...{ options }}
+                            sx={{
+                              minWidth: 'auto',
+                              width: SQUARE_TOOL_DIMENSION,
+                              height: SQUARE_TOOL_DIMENSION,
+                              ...(() => {
+                                if (!hasFocus) {
+                                  return {
+                                    '&:not(:hover)': {
+                                      color: alpha(palette.text.primary, 0.26),
+                                    },
+                                  };
+                                }
+                              })(),
+                              svg: {
+                                fontSize: 20,
+                              },
+                            }}
+                          >
+                            <MoreHorizIcon />
+                          </EllipsisMenuIconButton>
+                        </Tooltip>
+                      </Box>
+                    );
+                  }
+                })()}
+              </Box>
+            );
+          })()}
+          <Box
+            sx={{
+              py: 1,
+              ...(() => {
+                if (disabled) {
+                  return {
+                    bgcolor: palette.divider,
+                  };
                 }
-              })()}
-            </Box>
-          );
-        })()}
-        <Box
-          sx={{
-            py: 1,
-            ...(() => {
-              if (disabled) {
-                return {
-                  bgcolor: palette.divider,
-                };
-              }
-            })(),
-            '[data-contents]': {
-              minHeight: 100,
-            },
-          }}
-        >
-          <Editor
-            {...{ placeholder, textAlignment }}
-            editorState={editorState}
-            onChange={(nextEditorState) => {
-              setEditorState(nextEditorState);
-              if (onChange) {
-                const event: any = new Event('change', { bubbles: true });
-                Object.defineProperty(event, 'target', {
-                  writable: false,
-                  value: {
-                    id,
-                    name,
-                    value: convertToHTML({
-                      blockToHTML: ({ type, text }) => {
-                        if (text.length <= 0 && type === 'unstyled') {
-                          return <br />;
-                        }
-                      },
-                    })(nextEditorState.getCurrentContent()),
-                  },
-                });
-                onChange(event);
-              }
+              })(),
+              '[data-contents]': {
+                minHeight: 100,
+              },
             }}
-            readOnly={readOnly || disabled || locked}
-          />
+          >
+            <Editor
+              {...{ placeholder, textAlignment }}
+              editorState={editorState}
+              onChange={(nextEditorState) => {
+                setEditorState(nextEditorState);
+                if (onChange) {
+                  const event: any = new Event('change', { bubbles: true });
+                  Object.defineProperty(event, 'target', {
+                    writable: false,
+                    value: {
+                      id,
+                      name,
+                      value: convertToHTML({
+                        blockToHTML: ({ type, text }) => {
+                          if (text.length <= 0 && type === 'unstyled') {
+                            return <br />;
+                          }
+                        },
+                      })(nextEditorState.getCurrentContent()),
+                    },
+                  });
+                  onChange(event);
+                }
+              }}
+              readOnly={readOnly || disabled || locked}
+            />
+          </Box>
         </Box>
         {helperText && <FormHelperText>{helperText}</FormHelperText>}
       </FormControl>
