@@ -642,6 +642,15 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
               '[data-contents]': {
                 minHeight: 100,
               },
+              '.public-DraftStyleDefault-pre': {
+                bgcolor: alpha(palette.text.primary, 0.05),
+                fontFamily: `'Inconsolata', 'Menlo', 'Consolas', monospace`,
+                fontSize: 14,
+                p: 2,
+                pre: {
+                  m: 0,
+                },
+              },
             }}
           >
             <Editor
@@ -669,6 +678,14 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
                 }
               }}
               readOnly={readOnly || disabled || locked}
+              customStyleMap={{
+                CODE: {
+                  backgroundColor: 'rgba(0, 0, 0, 0.05)',
+                  fontFamily: '"Inconsolata", "Menlo", "Consolas", monospace',
+                  fontSize: 16,
+                  padding: 2,
+                },
+              }}
             />
           </Box>
         </Box>
