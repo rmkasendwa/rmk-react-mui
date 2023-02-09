@@ -20,6 +20,7 @@ import {
   Divider,
   FormControl,
   FormHelperText,
+  Grid,
   TextFieldProps,
   Tooltip,
   alpha,
@@ -31,19 +32,32 @@ import {
 } from '@mui/material';
 import clsx from 'clsx';
 import { convertFromHTML, convertToHTML } from 'draft-convert';
-import { Editor, EditorState, RichUtils } from 'draft-js';
+import {
+  CompositeDecorator,
+  ContentBlock,
+  ContentState,
+  Editor,
+  EditorState,
+  Modifier,
+  RichUtils,
+} from 'draft-js';
 import { isEmpty } from 'lodash';
 import { Fragment, ReactNode, forwardRef, useEffect, useState } from 'react';
+import * as Yup from 'yup';
 
 import { useLoadingContext } from '../contexts/LoadingContext';
 import EllipsisMenuIconButton, {
   DropdownOption,
 } from './EllipsisMenuIconButton';
+import FormikTextAreaField from './FormikInputFields/FormikTextAreaField';
+import FormikTextField from './FormikInputFields/FormikTextField';
 import BlockquoteIcon from './Icons/BlockquoteIcon';
 import CodeBlockIcon from './Icons/CodeBlockIcon';
 import CodeIcon from './Icons/CodeIcon';
+import LinkIcon from './Icons/LinkIcon';
 import RedoIcon from './Icons/RedoIcon';
 import UndoIcon from './Icons/UndoIcon';
+import ModalForm from './ModalForm';
 import RenderIfVisible from './RenderIfVisible';
 
 export const SQUARE_TOOL_DIMENSION = 32;
@@ -58,22 +72,63 @@ export type Tool = {
   onMouseDown: () => void;
 } & Pick<ButtonProps, 'onMouseDown' | 'className' | 'disabled' | 'sx'>;
 
-export type RichTextEditorTools = {
-  ALIGN_CENTER: Tool;
-  ALIGN_LEFT: Tool;
-  ALIGN_RIGHT: Tool;
-  BLOCK_QUOTE: Tool;
-  BOLD: Tool;
-  CODE: Tool;
-  CODE_BLOCK: Tool;
-  ITALIC: Tool;
-  ORDERED_LIST: Tool;
-  REDO: Tool;
-  STRIKETHROUGH: Tool;
-  UNDERLINE: Tool;
-  UNDO: Tool;
-  UNORDERED_LIST: Tool;
+const Link = ({
+  entityKey,
+  contentState,
+  children,
+}: {
+  entityKey: string;
+  contentState: ContentState;
+  children?: ReactNode;
+}) => {
+  const { url } = contentState.getEntity(entityKey).getData();
+  return (
+    <a href={url} target="_blank" rel="noreferrer">
+      {children}
+    </a>
+  );
 };
+
+const findLinkEntities = (
+  contentBlock: ContentBlock,
+  callback: (start: number, end: number) => void,
+  contentState: ContentState
+) => {
+  contentBlock.findEntityRanges((character) => {
+    const entityKey = character.getEntity();
+    return (
+      entityKey !== null &&
+      contentState.getEntity(entityKey).getType() === 'LINK'
+    );
+  }, callback);
+};
+
+export const createLinkDecorator = () =>
+  new CompositeDecorator([
+    {
+      strategy: findLinkEntities,
+      component: Link,
+    },
+  ]);
+
+export type RichTextEditorTools = Record<
+  | 'ALIGN_CENTER'
+  | 'ALIGN_LEFT'
+  | 'ALIGN_RIGHT'
+  | 'BLOCK_QUOTE'
+  | 'BOLD'
+  | 'CODE'
+  | 'CODE_BLOCK'
+  | 'ITALIC'
+  | 'LINK'
+  | 'ORDERED_LIST'
+  | 'REDO'
+  | 'STRIKETHROUGH'
+  | 'UNDERLINE'
+  | 'UNDO'
+  | 'UNORDERED_LIST',
+  Tool
+>;
 
 const INLINE_STYLES = [
   { icon: <FormatBoldIcon />, style: 'BOLD', label: 'Bold' },
@@ -123,6 +178,18 @@ const ALIGNMENTS = [
   },
   { icon: <FormatAlignRightIcon />, alignment: 'right', label: 'Align right' },
 ] as const;
+
+const addLinkFormValidationSchema = Yup.object({
+  linkText: Yup.string().required('Please enter the link text'),
+  href: Yup.string().required('Please enter the link URL'),
+});
+
+type AddLinkFormValues = Yup.InferType<typeof addLinkFormValidationSchema>;
+
+const addLinkFormInitialValues: AddLinkFormValues = {
+  linkText: '',
+  href: '',
+};
 
 export interface RichTextEditorClasses {
   /** Styles applied to the root element. */
@@ -221,6 +288,8 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
       Record<number, Record<number, Tool>>
     >({});
 
+    const [addLinkModalOpen, setAddLinkModalOpen] = useState(false);
+
     const [editorState, setEditorState] = useState(() => {
       if (value) {
         return EditorState.createWithContent(convertFromHTML(value));
@@ -255,6 +324,7 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
         UNDERLINE,
         UNDO,
         UNORDERED_LIST,
+        LINK,
       } = {
         UNDO: {
           icon: (
@@ -289,6 +359,14 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
           disabled: editorState.getRedoStack().size <= 0,
           label: 'Redo',
           id: 'REDO',
+        },
+        LINK: {
+          icon: <LinkIcon />,
+          onMouseDown: () => {
+            setAddLinkModalOpen(true);
+          },
+          label: 'Link',
+          id: 'LINK',
         },
         ...INLINE_STYLES.reduce((accumulator, { icon, style, label }) => {
           accumulator[style] = {
@@ -336,6 +414,7 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
         [UNDO, REDO],
         [BOLD, ITALIC, UNDERLINE, STRIKETHROUGH],
         [ALIGN_LEFT, ALIGN_CENTER, ALIGN_RIGHT],
+        [LINK],
         [UNORDERED_LIST, ORDERED_LIST],
         [BLOCK_QUOTE],
         [CODE, CODE_BLOCK],
@@ -714,6 +793,51 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
               spellCheck
             />
           </Box>
+          <ModalForm
+            title="Add link"
+            open={addLinkModalOpen}
+            onClose={() => setAddLinkModalOpen(false)}
+            initialValues={addLinkFormInitialValues}
+            validationSchema={addLinkFormValidationSchema}
+            onSubmit={({ href, linkText }) => {
+              setEditorState((prevEditorState) => {
+                const decorator = createLinkDecorator();
+                const contentState = prevEditorState.getCurrentContent();
+                const contentStateWithEntity = contentState.createEntity(
+                  'LINK',
+                  'MUTABLE',
+                  {
+                    url: href,
+                  }
+                );
+
+                const entityKey =
+                  contentStateWithEntity.getLastCreatedEntityKey();
+                const selection = editorState.getSelection();
+
+                const textWithEntity = Modifier.insertText(
+                  contentState,
+                  selection,
+                  linkText,
+                  undefined,
+                  entityKey
+                );
+
+                return EditorState.createWithContent(textWithEntity, decorator);
+              });
+              setAddLinkModalOpen(false);
+            }}
+            submitButtonText="Save"
+          >
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <FormikTextField label="Text" name="linkText" required />
+              </Grid>
+              <Grid item xs={12}>
+                <FormikTextAreaField label="Link" name="href" required />
+              </Grid>
+            </Grid>
+          </ModalForm>
         </Box>
         {helperText && <FormHelperText>{helperText}</FormHelperText>}
       </FormControl>
