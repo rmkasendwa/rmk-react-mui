@@ -40,14 +40,12 @@ import {
   ReactNode,
   Ref,
   forwardRef,
-  useContext,
   useEffect,
   useMemo,
   useRef,
   useState,
 } from 'react';
 
-import { GlobalConfigurationContext } from '../../contexts/GlobalConfigurationContext';
 import { SortBy, SortDirection, SortOptions } from '../../interfaces/Sort';
 import {
   BaseTableRow,
@@ -258,16 +256,12 @@ export const BaseTable = <T extends BaseTableRow>(
     defaultDateFormat = 'MMM dd, yyyy',
     defaultDateTimeFormat = 'MMM dd, yyyy hh:mm aa',
     defaultCountryCode,
+    currencyCode,
     sx,
     ...rest
   } = props;
 
-  let {
-    lowercaseLabelPlural,
-    parentBackgroundColor,
-    currencyCode,
-    emptyRowsLabel,
-  } = props;
+  let { lowercaseLabelPlural, parentBackgroundColor, emptyRowsLabel } = props;
 
   const classes = composeClasses(
     slots,
@@ -308,9 +302,6 @@ export const BaseTable = <T extends BaseTableRow>(
   const { sx: headerRowPropsSx, ...restHeaderRowProps } = HeaderRowProps;
   const [pageIndex, setPageIndex] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(rowsPerPageProp);
-  const { currencyCode: defaultCurrencyCode } = useContext(
-    GlobalConfigurationContext
-  );
   const [sortBy, setSortBy] = useState<SortOptions<T>>([]);
 
   /*******************
@@ -407,7 +398,6 @@ export const BaseTable = <T extends BaseTableRow>(
   }, [selectedColumnIds]);
 
   parentBackgroundColor || (parentBackgroundColor = palette.background.paper);
-  currencyCode || (currencyCode = defaultCurrencyCode);
 
   // Setting default column properties
   const columns = useMemo(() => {
