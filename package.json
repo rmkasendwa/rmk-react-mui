@@ -119,6 +119,8 @@
     "copy-and-watch": "^0.1.6",
     "draft-convert": "^2.1.13",
     "draft-js": "^0.11.7",
+    "draft-js-image-plugin": "^2.0.7",
+    "draft-js-plugins-editor": "^3.0.0",
     "eslint": "^8.26.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-eslint-comments": "^3.2.0",
