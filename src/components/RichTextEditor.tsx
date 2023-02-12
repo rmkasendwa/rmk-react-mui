@@ -8,6 +8,7 @@ import FormatItalicIcon from '@mui/icons-material/FormatItalic';
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 import FormatListNumberedIcon from '@mui/icons-material/FormatListNumbered';
 import FormatUnderlinedIcon from '@mui/icons-material/FormatUnderlined';
+import ImageIcon from '@mui/icons-material/Image';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import StrikethroughSIcon from '@mui/icons-material/StrikethroughS';
 import {
@@ -33,16 +34,25 @@ import {
 import clsx from 'clsx';
 import { convertFromHTML, convertToHTML } from 'draft-convert';
 import {
+  AtomicBlockUtils,
   CompositeDecorator,
   ContentBlock,
   ContentState,
-  Editor,
   EditorState,
   Modifier,
   RichUtils,
 } from 'draft-js';
+import createImagePlugin from 'draft-js-image-plugin';
+import Editor from 'draft-js-plugins-editor';
 import { isEmpty } from 'lodash';
-import { Fragment, ReactNode, forwardRef, useEffect, useState } from 'react';
+import {
+  Fragment,
+  ReactNode,
+  forwardRef,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import * as Yup from 'yup';
 
 import { useLoadingContext } from '../contexts/LoadingContext';
@@ -59,6 +69,9 @@ import RedoIcon from './Icons/RedoIcon';
 import UndoIcon from './Icons/UndoIcon';
 import ModalForm from './ModalForm';
 import RenderIfVisible from './RenderIfVisible';
+
+const imagePlugin = createImagePlugin();
+const plugins = [imagePlugin];
 
 export const SQUARE_TOOL_DIMENSION = 32;
 
@@ -119,6 +132,7 @@ export type RichTextEditorTools = Record<
   | 'BOLD'
   | 'CODE'
   | 'CODE_BLOCK'
+  | 'IMAGE'
   | 'ITALIC'
   | 'LINK'
   | 'ORDERED_LIST'
@@ -284,6 +298,8 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
     const { palette } = useTheme();
     const { locked } = useLoadingContext();
 
+    const inputFieldRef = useRef<HTMLInputElement | null>(null);
+
     const [invisibleToolsMap, setInvisibleToolsMap] = useState<
       Record<number, Record<number, Tool>>
     >({});
@@ -317,14 +333,15 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
         BOLD,
         CODE,
         CODE_BLOCK,
+        IMAGE,
         ITALIC,
+        LINK,
         ORDERED_LIST,
         REDO,
         STRIKETHROUGH,
         UNDERLINE,
         UNDO,
         UNORDERED_LIST,
-        LINK,
       } = {
         UNDO: {
           icon: (
@@ -367,6 +384,14 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
           },
           label: 'Link',
           id: 'LINK',
+        },
+        IMAGE: {
+          icon: <ImageIcon />,
+          onMouseDown: () => {
+            inputFieldRef.current?.click();
+          },
+          label: 'Image',
+          id: 'IMAGE',
         },
         ...INLINE_STYLES.reduce((accumulator, { icon, style, label }) => {
           accumulator[style] = {
@@ -415,6 +440,7 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
         [BOLD, ITALIC, UNDERLINE, STRIKETHROUGH],
         [ALIGN_LEFT, ALIGN_CENTER, ALIGN_RIGHT],
         [LINK],
+        [IMAGE],
         [UNORDERED_LIST, ORDERED_LIST],
         [BLOCK_QUOTE],
         [CODE, CODE_BLOCK],
@@ -758,7 +784,7 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
             }}
           >
             <Editor
-              {...{ placeholder, textAlignment }}
+              {...{ placeholder, textAlignment, plugins }}
               editorState={editorState}
               onChange={(nextEditorState) => {
                 setEditorState(nextEditorState);
@@ -838,6 +864,43 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
               </Grid>
             </Grid>
           </ModalForm>
+          <input
+            ref={inputFieldRef}
+            type="file"
+            style={{ display: 'none' }}
+            onChange={async (event) => {
+              if (event.target.files && event.target.files.length > 0) {
+                const contentState = editorState.getCurrentContent();
+                const src = await (async () => {
+                  return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(event.target.files![0]);
+                    reader.onload = () => resolve(reader.result as string);
+                    reader.onerror = (error) => reject(error);
+                  });
+                })();
+                const contentStateWithEntity = contentState.createEntity(
+                  'image',
+                  'IMMUTABLE',
+                  {
+                    src,
+                  }
+                );
+                const entityKey =
+                  contentStateWithEntity.getLastCreatedEntityKey();
+                const nextContentState = EditorState.set(editorState, {
+                  currentContent: contentStateWithEntity,
+                });
+                setEditorState(
+                  AtomicBlockUtils.insertAtomicBlock(
+                    nextContentState,
+                    entityKey,
+                    ' '
+                  )
+                );
+              }
+            }}
+          />
         </Box>
         {helperText && <FormHelperText>{helperText}</FormHelperText>}
       </FormControl>
