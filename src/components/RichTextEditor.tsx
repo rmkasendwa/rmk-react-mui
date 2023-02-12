@@ -1,5 +1,7 @@
 import 'draft-js/dist/Draft.css';
 
+import Editor from '@draft-js-plugins/editor';
+import createImagePlugin from '@draft-js-plugins/image';
 import FormatAlignCenterIcon from '@mui/icons-material/FormatAlignCenter';
 import FormatAlignLeftIcon from '@mui/icons-material/FormatAlignLeft';
 import FormatAlignRightIcon from '@mui/icons-material/FormatAlignRight';
@@ -42,8 +44,6 @@ import {
   Modifier,
   RichUtils,
 } from 'draft-js';
-import createImagePlugin from 'draft-js-image-plugin';
-import Editor from 'draft-js-plugins-editor';
 import { isEmpty } from 'lodash';
 import {
   Fragment,
@@ -801,6 +801,13 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
                             return <br />;
                           }
                         },
+                        entityToHTML: ({ data, type }, originalText) => {
+                          switch (type.toUpperCase()) {
+                            case 'IMAGE':
+                              return <img src={data.src} alt="" />;
+                          }
+                          return originalText;
+                        },
                       })(nextEditorState.getCurrentContent()),
                     },
                   });
@@ -880,7 +887,7 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
                   });
                 })();
                 const contentStateWithEntity = contentState.createEntity(
-                  'image',
+                  'IMAGE',
                   'IMMUTABLE',
                   {
                     src,
