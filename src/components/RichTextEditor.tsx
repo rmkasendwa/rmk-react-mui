@@ -309,6 +309,7 @@ export interface RichTextEditorProps
   value?: string;
   disabled?: boolean;
   readOnly?: boolean;
+  getToolGroups?: (tools: RichTextEditorTools) => Tool[][] | undefined;
 }
 
 export function getRichTextEditorUtilityClass(slot: string): string {
@@ -337,6 +338,7 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
       onChange,
       disabled = false,
       readOnly = false,
+      getToolGroups,
     } = props;
 
     const classes = composeClasses(
@@ -392,24 +394,7 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
       useState<DraftTextAlignment>('left');
 
     const toolGroups = (() => {
-      const {
-        ALIGN_CENTER,
-        ALIGN_LEFT,
-        ALIGN_RIGHT,
-        BLOCK_QUOTE,
-        BOLD,
-        CODE,
-        CODE_BLOCK,
-        IMAGE,
-        ITALIC,
-        LINK,
-        ORDERED_LIST,
-        REDO,
-        STRIKETHROUGH,
-        UNDERLINE,
-        UNDO,
-        UNORDERED_LIST,
-      } = {
+      const tools = {
         UNDO: {
           icon: (
             <UndoIcon
@@ -503,6 +488,33 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
           return accumulator;
         }, {} as Record<string, Tool>),
       } as RichTextEditorTools;
+
+      if (getToolGroups) {
+        const toolGroups = getToolGroups(tools);
+        if (toolGroups) {
+          return toolGroups;
+        }
+      }
+
+      const {
+        ALIGN_CENTER,
+        ALIGN_LEFT,
+        ALIGN_RIGHT,
+        BLOCK_QUOTE,
+        BOLD,
+        CODE,
+        CODE_BLOCK,
+        IMAGE,
+        ITALIC,
+        LINK,
+        ORDERED_LIST,
+        REDO,
+        STRIKETHROUGH,
+        UNDERLINE,
+        UNDO,
+        UNORDERED_LIST,
+      } = tools;
+
       return [
         [UNDO, REDO],
         [BOLD, ITALIC, UNDERLINE, STRIKETHROUGH],
@@ -789,6 +801,9 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
                             color="inherit"
                             size="small"
                             {...{ options }}
+                            PaginatedDropdownOptionListProps={{
+                              paging: false,
+                            }}
                             sx={{
                               minWidth: 'auto',
                               width: SQUARE_TOOL_DIMENSION,
