@@ -34,6 +34,7 @@ export const useAPIService = <T>(
   key?: string,
   loadOnMount = false
 ) => {
+  const baseDefaultValue = defaultValue;
   const isComponentMountedRef = useRef(true);
   const taggedAPIRequestsRef = useRef<TaggedAPIRequest[]>([]);
   const { data, updateData } = useCachedData();
@@ -112,13 +113,13 @@ export const useAPIService = <T>(
     [call, key, updateData]
   );
 
-  const reset = useCallback(() => {
-    setRecord(defaultValue);
+  const resetRef = useRef(() => {
+    setRecord(baseDefaultValue);
     setLoaded(false);
     setLoading(loadOnMount);
     setBusy(false);
     setErrorMessage('');
-  }, [defaultValue, loadOnMount]);
+  });
 
   useEffect(() => {
     isComponentMountedRef.current = true;
@@ -139,7 +140,7 @@ export const useAPIService = <T>(
     busy,
     setBusy,
     taggedAPIRequests: taggedAPIRequestsRef.current,
-    reset,
+    reset: resetRef.current,
   };
 };
 

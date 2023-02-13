@@ -309,7 +309,9 @@ export interface RichTextEditorProps
   value?: string;
   disabled?: boolean;
   readOnly?: boolean;
-  getToolGroups?: (tools: RichTextEditorTools) => Tool[][] | undefined;
+  getToolGroups?: (
+    tools: RichTextEditorTools
+  ) => Tool[][] | undefined | null | void;
 }
 
 export function getRichTextEditorUtilityClass(slot: string): string {
