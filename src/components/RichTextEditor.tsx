@@ -367,7 +367,7 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
     const [addLinkModalOpen, setAddLinkModalOpen] = useState(false);
 
     const [editorState, setEditorState] = useState(() => {
-      if (value) {
+      if (value != null) {
         return EditorState.createWithContent(convertFromHTML(value));
       }
       return EditorState.createEmpty();
@@ -530,7 +530,7 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
     })();
 
     useEffect(() => {
-      if (value) {
+      if (value != null) {
         setEditorState((prevEditorState) => {
           const selectionState = prevEditorState.getSelection();
           const hasFocus = selectionState.getHasFocus();
