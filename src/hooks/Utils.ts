@@ -72,7 +72,7 @@ export const useAPIService = <T>(
         const response = await call(() => (apiFunction as TAPIFunction)())
           .then(async (payload) => {
             const response = await payload;
-            if (response) {
+            if (response != null) {
               if (isComponentMountedRef.current) {
                 setRecord(response);
               }
@@ -333,7 +333,7 @@ export const useRecord = <T>(
     load,
     loading,
     errorMessage,
-    record: record || null,
+    record: record ?? null,
     setRecord: setRecord as Dispatch<SetStateAction<T | null>>,
     busy,
     ...rest,

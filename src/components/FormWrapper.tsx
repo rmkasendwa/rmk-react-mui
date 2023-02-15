@@ -20,6 +20,7 @@ import { Form, Formik, FormikHelpers, FormikProps, FormikValues } from 'formik';
 import { Children, ReactNode, forwardRef } from 'react';
 
 import { useLoadingContext } from '../contexts/LoadingContext';
+import { useMessagingContext } from '../contexts/MessagingContext';
 import ErrorAlert from './ErrorAlert';
 import ErrorFieldHighlighter from './ErrorFieldHighlighter';
 import FixedHeaderContentArea from './FixedHeaderContentArea';
@@ -68,6 +69,8 @@ export interface FormWrapperProps<Values extends FormikValues = FormikValues>
   children?: ((props: FormikProps<Values>) => ReactNode) | ReactNode;
   formTools?: ReactNode | ReactNode[];
   SubmitButtonProps?: Partial<ButtonProps>;
+  errorMessage?: string;
+  successMessage?: string;
 }
 
 export function getFormWrapperUtilityClass(slot: string): string {
@@ -97,6 +100,8 @@ export const FormWrapper = forwardRef<HTMLDivElement, FormWrapperProps>(
       tools,
       formTools,
       SubmitButtonProps = {},
+      errorMessage: errorMessageProp,
+      successMessage,
       ...rest
     } = props;
 
@@ -117,7 +122,15 @@ export const FormWrapper = forwardRef<HTMLDivElement, FormWrapperProps>(
     const { breakpoints } = useTheme();
     const smallScreen = useMediaQuery(breakpoints.down('sm'));
 
-    const { load, loading, errorMessage } = useLoadingContext();
+    const { showSuccessMessage } = useMessagingContext();
+
+    const {
+      load,
+      loading,
+      errorMessage: loadingContextErrorMessage,
+    } = useLoadingContext();
+
+    const errorMessage = errorMessageProp || loadingContextErrorMessage;
 
     return (
       <FixedHeaderContentArea
@@ -135,6 +148,7 @@ export const FormWrapper = forwardRef<HTMLDivElement, FormWrapperProps>(
           {...{ initialValues, validationSchema }}
           onSubmit={async (values, formikHelpers) => {
             onSubmit && (await onSubmit(values, formikHelpers));
+            successMessage && showSuccessMessage(successMessage);
           }}
           enableReinitialize
         >
