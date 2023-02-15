@@ -19,10 +19,12 @@ export const ReactRouterDomSearchParamCache: FC<
   useEffect(() => {
     if (search) {
       routeCacheRef.current[pathname] = pathname + search;
-      updateData({
-        [ROUTE_CACHE_KEY]: routeCacheRef.current,
-      });
+    } else {
+      delete routeCacheRef.current[pathname];
     }
+    updateData({
+      [ROUTE_CACHE_KEY]: routeCacheRef.current,
+    });
   }, [pathname, search, updateData]);
 
   return <Outlet />;
