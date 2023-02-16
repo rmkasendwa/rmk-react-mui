@@ -454,6 +454,11 @@ export const DataDropdownField = forwardRef<
               FieldValueProps={{
                 variant: 'inherit',
                 noWrap: true,
+                ContainerGridProps: {
+                  sx: {
+                    mt: 0,
+                  },
+                },
                 sx: {
                   cursor: 'pointer',
                 },
@@ -466,7 +471,7 @@ export const DataDropdownField = forwardRef<
                   }}
                   direction="row"
                 >
-                  {selectedOptions[0]?.label}
+                  {selectedOptions[0]?.label || rest.placeholder}
                   {endAdornment}
                 </Stack>
               }

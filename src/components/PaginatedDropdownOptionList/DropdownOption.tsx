@@ -17,7 +17,7 @@ import {
 import Box from '@mui/material/Box';
 import MenuItem, { MenuItemProps } from '@mui/material/MenuItem';
 import clsx from 'clsx';
-import { forwardRef } from 'react';
+import { ReactNode, forwardRef } from 'react';
 
 export const DEFAULT_DROPDOWN_OPTION_HEIGHT = 36;
 
@@ -26,6 +26,7 @@ export type DropdownOptionVariant = 'text' | 'checkbox' | 'check';
 export interface DropdownOptionClasses {
   /** Styles applied to the root element. */
   root: string;
+  iconContainer: string;
 }
 
 export type DropdownOptionClassKey = keyof DropdownOptionClasses;
@@ -59,6 +60,7 @@ export interface DropdownOptionProps extends MenuItemProps {
   height?: number;
   selectable?: boolean;
   variant?: DropdownOptionVariant;
+  icon?: ReactNode;
 }
 
 export function getDropdownOptionUtilityClass(slot: string): string {
@@ -66,10 +68,11 @@ export function getDropdownOptionUtilityClass(slot: string): string {
 }
 
 export const dropdownOptionClasses: DropdownOptionClasses =
-  generateUtilityClasses('MuiDropdownOption', ['root']);
+  generateUtilityClasses('MuiDropdownOption', ['root', 'iconContainer']);
 
 const slots = {
   root: ['root'],
+  iconContainer: ['iconContainer'],
 };
 
 export const DropdownOption = forwardRef<HTMLLIElement, DropdownOptionProps>(
@@ -82,6 +85,7 @@ export const DropdownOption = forwardRef<HTMLLIElement, DropdownOptionProps>(
       onClick,
       variant = 'text',
       selected,
+      icon,
       children,
       sx,
       ...rest
@@ -100,6 +104,25 @@ export const DropdownOption = forwardRef<HTMLLIElement, DropdownOptionProps>(
     );
 
     const { palette } = useTheme();
+
+    const label = (() => {
+      if (icon) {
+        return (
+          <Grid container sx={{ alignItems: 'center', gap: 1 }}>
+            <Grid
+              className={clsx(classes.iconContainer)}
+              item
+              sx={{ width: 24, display: 'flex' }}
+            >
+              {icon}
+            </Grid>
+            <Grid item>{children}</Grid>
+          </Grid>
+        );
+      }
+      return children;
+    })();
+
     return (
       <MenuItem
         ref={ref}
@@ -180,7 +203,7 @@ export const DropdownOption = forwardRef<HTMLLIElement, DropdownOptionProps>(
                       })()}
                     </Grid>
                     <Grid item xs sx={{ minWidth: 0 }}>
-                      {children}
+                      {label}
                     </Grid>
                   </Grid>
                 );
@@ -204,12 +227,12 @@ export const DropdownOption = forwardRef<HTMLLIElement, DropdownOptionProps>(
                       })()}
                     </Grid>
                     <Grid item xs sx={{ minWidth: 0 }}>
-                      {children}
+                      {label}
                     </Grid>
                   </Grid>
                 );
               case 'text':
-                return children;
+                return label;
             }
           })()}
         </Box>

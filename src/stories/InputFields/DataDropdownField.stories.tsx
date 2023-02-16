@@ -1,3 +1,4 @@
+import AppleIcon from '@mui/icons-material/Apple';
 import { Typography } from '@mui/material';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { LoremIpsum } from 'lorem-ipsum';
@@ -156,5 +157,24 @@ WithAsyncOptions.args = {
         );
       }, 5000);
     });
+  },
+} as DataDropdownFieldProps;
+
+export const WithOptionIcons = Template.bind({});
+WithOptionIcons.args = {
+  label: 'Option Icons',
+  required: true,
+  options: Array.from({ length: 10 }).map((_, index) => {
+    const label = `${index + 1}. ${lorem.generateWords(4)}`;
+    return {
+      icon: <AppleIcon />,
+      label: <Typography variant="body2">{label}</Typography>,
+      searchableLabel: label,
+      value: index,
+    };
+  }),
+  displayRawOptionLabelInField: true,
+  SelectProps: {
+    multiple: true,
   },
 } as DataDropdownFieldProps;
