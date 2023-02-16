@@ -419,21 +419,9 @@ export const PaginatedDropdownOptionList = forwardRef<
                     tabIndex={isFocused ? 0 : -1}
                     height={optionHeight}
                     variant={optionVariant}
-                    {...{ selectable, component, sx }}
+                    {...{ selectable, component, icon, sx }}
                   >
-                    {(() => {
-                      if (icon) {
-                        return (
-                          <Grid container sx={{ alignItems: 'center', gap: 1 }}>
-                            <Grid item sx={{ width: 24, display: 'flex' }}>
-                              {icon}
-                            </Grid>
-                            <Grid item>{label}</Grid>
-                          </Grid>
-                        );
-                      }
-                      return label;
-                    })()}
+                    {label}
                   </DropdownOption>
                 );
                 if (description) {
