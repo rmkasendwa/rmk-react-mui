@@ -11,12 +11,16 @@ import {
 import Grid from '@mui/material/Grid';
 import { Children, FC, ReactNode, useEffect, useRef, useState } from 'react';
 
-import TextField, { TextFieldProps } from './InputFields/TextField';
 import ReloadIconButton, { ReloadIconButtonProps } from './ReloadIconButton';
+import SearchField, { SearchFieldProps } from './SearchField';
 
 export interface SearchSyncToolbarProps
   extends Omit<BoxProps, 'title'>,
-    Partial<Pick<ReloadIconButtonProps, 'load' | 'loading' | 'errorMessage'>> {
+    Partial<Pick<ReloadIconButtonProps, 'load' | 'loading' | 'errorMessage'>>,
+    Pick<
+      SearchFieldProps,
+      'searchTerm' | 'onChangeSearchTerm' | 'onSearch' | 'searchVelocity'
+    > {
   title?: ReactNode;
   /**
    * Determines whether the component should be rendered with a search tool.
@@ -24,10 +28,7 @@ export interface SearchSyncToolbarProps
    * @default true
    */
   hasSearchTool?: boolean;
-  searchTerm?: string;
   searchFieldPlaceholder?: string;
-  onChangeSearchTerm?: (searchTerm: string) => void;
-  onSearch?: (searchTerm: string) => void;
   /**
    * Determines whether the component should be rendered with a synchronize tool.
    * Note: The synchronize tool will not be rendered if the load function is not supplied regardless of whether this value is set to true.
@@ -49,8 +50,7 @@ export interface SearchSyncToolbarProps
   children?: ReactNode;
   TitleProps?: Partial<Omit<TypographyProps, 'ref'>>;
   searchFieldOpen?: boolean;
-  SearchFieldProps?: Partial<TextFieldProps>;
-  searchVelocity?: 'slow' | 'fast';
+  SearchFieldProps?: Partial<SearchFieldProps>;
 }
 
 export const SearchSyncToolbar: FC<SearchSyncToolbarProps> = ({
@@ -156,42 +156,24 @@ export const SearchSyncToolbar: FC<SearchSyncToolbarProps> = ({
                 {searchFieldOpen || searchFieldOpenProp ? (
                   (() => {
                     const textField = (
-                      <TextField
+                      <SearchField
                         placeholder={searchFieldPlaceholder}
                         variant="outlined"
                         fullWidth
                         {...SearchFieldPropsRest}
                         InputProps={{
-                          startAdornment: (
-                            <SearchIcon
-                              color="inherit"
-                              sx={{
-                                mr: 0.5,
-                              }}
-                            />
-                          ),
                           autoFocus:
                             searchTermProp.length <= 0 && searchFieldOpen,
-                          sx: { fontSize: 'default' },
                         }}
-                        value={searchTerm}
+                        {...{
+                          searchTerm,
+                          onSearch,
+                          onChangeSearchTerm,
+                          searchVelocity,
+                        }}
                         onChange={(event) => {
                           setSearchTerm(event.target.value);
-                          onChangeSearchTerm &&
-                            onChangeSearchTerm(event.target.value);
-                          if (onSearch && searchVelocity === 'fast') {
-                            onSearch(event.target.value);
-                          }
                         }}
-                        onKeyUp={(event) => {
-                          if (event.key === 'Enter' && onSearch) {
-                            onSearch(searchTerm);
-                          }
-                        }}
-                        onBlur={() => {
-                          onSearch && onSearch(searchTerm);
-                        }}
-                        enableLoadingState={false}
                       />
                     );
                     return (
@@ -224,40 +206,18 @@ export const SearchSyncToolbar: FC<SearchSyncToolbarProps> = ({
           </>
         ) : hasSearchTool ? (
           <Grid item xs sx={{ minWidth: 0 }}>
-            <TextField
+            <SearchField
               placeholder={searchFieldPlaceholder}
               variant="standard"
               fullWidth
               {...SearchFieldPropsRest}
+              {...{ searchTerm, onSearch, onChangeSearchTerm, searchVelocity }}
               InputProps={{
-                startAdornment: (
-                  <SearchIcon
-                    color="inherit"
-                    sx={{
-                      mr: 0.5,
-                    }}
-                  />
-                ),
                 disableUnderline: true,
-                sx: { fontSize: 'default' },
               }}
-              value={searchTerm}
               onChange={(event) => {
                 setSearchTerm(event.target.value);
-                onChangeSearchTerm && onChangeSearchTerm(event.target.value);
-                if (onSearch && searchVelocity === 'fast') {
-                  onSearch(event.target.value);
-                }
               }}
-              onKeyUp={(event) => {
-                if (event.key === 'Enter' && onSearch) {
-                  onSearch(searchTerm);
-                }
-              }}
-              onBlur={() => {
-                onSearch && onSearch(searchTerm);
-              }}
-              enableLoadingState={false}
             />
           </Grid>
         ) : null}
