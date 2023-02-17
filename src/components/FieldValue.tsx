@@ -32,6 +32,7 @@ import {
 } from 'react';
 import * as Yup from 'yup';
 
+import { useLoadingContext } from '../contexts/LoadingContext';
 import { useUpdate } from '../hooks/Utils';
 import { ExoticDataType } from '../interfaces/Utils';
 import FormikCurrencyInputField from './FormikInputFields/FormikCurrencyInputField';
@@ -144,6 +145,7 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
         }
       })()
     );
+    const { loading, errorMessage } = useLoadingContext();
 
     const { sx: IconContainerPropsSx, ...IconContainerPropsRest } =
       IconContainerProps;
@@ -171,9 +173,12 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
 
     const { palette, components } = useTheme();
     const [editMode, setEditMode] = useState(editModeProp ?? false);
-    const { update, updating, updated, setUpdated } = useUpdate(
-      fieldValueEditor!
-    );
+    const {
+      update,
+      updating,
+      updated,
+      reset: resetUpdateState,
+    } = useUpdate(fieldValueEditor!);
 
     useEffect(() => {
       onChangeEditModeRef.current && onChangeEditModeRef.current(editMode);
@@ -187,10 +192,25 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
 
     useEffect(() => {
       if (updated && isComponentMountedRef.current) {
-        setEditMode(false);
-        setUpdated(false);
+        (async () => {
+          onFieldValueUpdatedRef.current &&
+            (await onFieldValueUpdatedRef.current());
+          setEditMode(false);
+          resetUpdateState();
+        })();
       }
-    }, [setUpdated, updated]);
+    }, [resetUpdateState, updated]);
+
+    useEffect(() => {
+      isComponentMountedRef.current = true;
+      return () => {
+        isComponentMountedRef.current = false;
+      };
+    }, []);
+
+    if (loading || errorMessage) {
+      return <LoadingTypography>{valueProp}</LoadingTypography>;
+    }
 
     const value = (() => {
       if (editable) {
@@ -205,10 +225,7 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
               }}
               onSubmit={async ({ value }) => {
                 if (fieldValueEditor) {
-                  await update(value);
-                  onFieldValueUpdatedRef.current &&
-                    (await onFieldValueUpdatedRef.current());
-                  setEditMode(false);
+                  update(value);
                 }
               }}
             >
@@ -313,7 +330,7 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
                                   )}
                                 </Grid>
                                 <Grid item>
-                                  {updating ? (
+                                  {updating || updated ? (
                                     <IconButton
                                       disabled
                                       sx={{
@@ -382,13 +399,6 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
       }
       return valueProp;
     })();
-
-    useEffect(() => {
-      isComponentMountedRef.current = true;
-      return () => {
-        isComponentMountedRef.current = false;
-      };
-    }, []);
 
     return (
       <Grid
