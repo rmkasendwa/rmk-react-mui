@@ -483,7 +483,7 @@ export const DataDropdownField = forwardRef<
         }
         return (
           <TextField
-            ref={mergeRefs([ref, anchorRef])}
+            ref={ref}
             onFocus={(event) => {
               setOpen(true);
               setFocused(true);
@@ -520,6 +520,7 @@ export const DataDropdownField = forwardRef<
                 }
                 return props;
               })(),
+              ref: anchorRef,
               readOnly: !searchable,
               // inputComponent: forwardRef<HTMLInputElement, any>(
               //   function ParentInput(inputProps, ref) {
@@ -670,7 +671,7 @@ export const DataDropdownField = forwardRef<
       >
         {({ TransitionProps }) => {
           return (
-            <Grow {...TransitionProps}>
+            <Grow {...TransitionProps} style={{ transformOrigin: '0 0 0' }}>
               <Box tabIndex={-1}>
                 <ClickAwayListener
                   onClickAway={(event) => {
