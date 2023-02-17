@@ -383,6 +383,7 @@ export const usePaginatedRecords = <T>(
   const {
     load: loadFromAPIService,
     record: responseData,
+    reset: baseReset,
     ...rest
   } = useAPIService<PaginatedResponseData<T> | null>(
     null,
@@ -437,6 +438,13 @@ export const usePaginatedRecords = <T>(
     ]
   );
 
+  const resetRef = useRef(() => {
+    baseReset();
+    setCurrentPageRecords([]);
+    setAllPageRecords([]);
+    setRecordsTotalCount(0);
+  });
+
   useEffect(() => {
     if (responseData) {
       const pageKey = `${loadingPaginationParams.offset},${loadingPaginationParams.limit}`;
@@ -468,6 +476,7 @@ export const usePaginatedRecords = <T>(
     loadedPages,
     load,
     responseData,
+    reset: resetRef.current,
     ...rest,
   };
 };
