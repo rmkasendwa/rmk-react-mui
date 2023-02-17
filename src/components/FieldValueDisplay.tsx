@@ -9,7 +9,6 @@ import {
   useThemeProps,
 } from '@mui/material';
 import Box, { BoxProps } from '@mui/material/Box';
-import Skeleton from '@mui/material/Skeleton';
 import clsx from 'clsx';
 import {
   ReactElement,
@@ -21,8 +20,6 @@ import {
   useState,
 } from 'react';
 
-import { useLoadingContext } from '../contexts/LoadingContext';
-import ErrorSkeleton from './ErrorSkeleton';
 import FieldLabel, { FieldLabelProps } from './FieldLabel';
 import FieldValue, { FieldValueProps } from './FieldValue';
 
@@ -177,55 +174,12 @@ export const BaseFieldValueDisplay = <FieldValue extends ReactNode>(
   }, [onChangeEditMode]);
 
   const { components } = useTheme();
-  const { loading, errorMessage } = useLoadingContext();
 
   const [editMode, setEditMode] = useState(editModeProp || false);
-  const labelSkeletonWidth = String(label).length * 7;
-  const valueSkeletonWidth = `${20 + Math.round(Math.random() * 60)}%`;
 
   useEffect(() => {
     onChangeEditModeRef.current && onChangeEditModeRef.current(editMode);
   }, [editMode]);
-
-  if (errorMessage) {
-    return (
-      <Box
-        className={clsx(classes.root)}
-        {...rest}
-        sx={{
-          ...(components?.MuiFieldValueDisplay?.styleOverrides?.root as any),
-          ...sx,
-        }}
-      >
-        <ErrorSkeleton
-          sx={{
-            width: labelSkeletonWidth,
-          }}
-        />
-        <ErrorSkeleton
-          sx={{
-            width: valueSkeletonWidth,
-          }}
-        />
-      </Box>
-    );
-  }
-
-  if (loading) {
-    return (
-      <Box
-        className={clsx(classes.root)}
-        {...rest}
-        sx={{
-          ...(components?.MuiFieldValueDisplay?.styleOverrides?.root as any),
-          ...sx,
-        }}
-      >
-        <Skeleton sx={{ width: labelSkeletonWidth }} />
-        <Skeleton sx={{ width: valueSkeletonWidth }} />
-      </Box>
-    );
-  }
 
   const displayLabel = (() => {
     if (editable && editMode) {
@@ -285,7 +239,9 @@ export const BaseFieldValueDisplay = <FieldValue extends ReactNode>(
           fieldValueEditor,
           onFieldValueUpdated,
         }}
-        onChangeEditMode={(editMode) => setEditMode(editMode)}
+        onChangeEditMode={(editMode) => {
+          setEditMode(editMode);
+        }}
         ContainerGridProps={{
           ...FieldValuePropsContainerGripPropsRest,
           sx: {
