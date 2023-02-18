@@ -577,6 +577,7 @@ export const DataDropdownField = forwardRef<
                   }}
                 >
                   <PaginatedDropdownOptionList
+                    {...PaginatedDropdownOptionListPropsRest}
                     {...{
                       optionVariant,
                       multiple,
@@ -590,7 +591,9 @@ export const DataDropdownField = forwardRef<
                       callGetDropdownOptions,
                       externallyPaginated,
                     }}
-                    {...PaginatedDropdownOptionListPropsRest}
+                    onLoadOptions={(options) => {
+                      setOptions(options);
+                    }}
                     minWidth={
                       anchorRef.current
                         ? anchorRef.current.offsetWidth
