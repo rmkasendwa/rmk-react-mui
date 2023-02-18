@@ -96,6 +96,7 @@ export const PaginatedDropdownOptionList = forwardRef<
     searchable = false,
     searchTerm: searchTermProp = '',
     SearchFieldProps = {},
+    externallyPaginated,
     dataKey,
   },
   ref
@@ -139,11 +140,13 @@ export const PaginatedDropdownOptionList = forwardRef<
     useState(false);
 
   const {
-    load: loadOptions,
+    load: loadAsyncOptions,
     loading,
     allPageRecords: asyncOptions,
     loaded: isAsyncOptionsLoaded,
+    loadNextPage: loadNextAsyncOptions,
     errorMessage,
+    reset: resetAsyncOptionState,
   } = usePaginatedRecords(
     async ({ limit, offset, searchTerm: baseSearchTerm }) => {
       if (getDropdownOptions) {
@@ -176,15 +179,28 @@ export const PaginatedDropdownOptionList = forwardRef<
       !isAsyncOptionsLoaded &&
       (!optionsRef.current || optionsRef.current.length <= 0)
     ) {
-      loadOptions();
+      loadAsyncOptions({ searchTerm });
     }
-  }, [getDropdownOptions, loadOptions, isAsyncOptionsLoaded]);
+  }, [getDropdownOptions, loadAsyncOptions, isAsyncOptionsLoaded, searchTerm]);
 
   useEffect(() => {
     if (!isInitialMount.current && onLoadOptionsRef.current) {
       onLoadOptionsRef.current(asyncOptions);
     }
   }, [asyncOptions]);
+
+  useEffect(() => {
+    if (getDropdownOptions && externallyPaginated) {
+      resetAsyncOptionState();
+      loadAsyncOptions({ searchTerm });
+    }
+  }, [
+    externallyPaginated,
+    getDropdownOptions,
+    loadAsyncOptions,
+    resetAsyncOptionState,
+    searchTerm,
+  ]);
 
   const options = ((): typeof asyncOptions => {
     if (getDropdownOptions && asyncOptions.length > 0) {
@@ -213,16 +229,22 @@ export const PaginatedDropdownOptionList = forwardRef<
   // Filtering options
   useEffect(() => {
     setFilteredOptions(
-      options.filter(({ searchableLabel: baseSearchableLabel, label }) => {
-        const searchableLabel = baseSearchableLabel || String(label);
-        return (
-          !searchTerm ||
-          (searchableLabel &&
-            searchableLabel.toLowerCase().match(searchTerm.toLowerCase()))
-        );
-      })
+      (() => {
+        if (searchTerm && !externallyPaginated) {
+          return options.filter(
+            ({ searchableLabel: baseSearchableLabel, label }) => {
+              const searchableLabel = baseSearchableLabel || String(label);
+              return (
+                searchableLabel &&
+                searchableLabel.toLowerCase().match(searchTerm.toLowerCase())
+              );
+            }
+          );
+        }
+        return options;
+      })()
     );
-  }, [options, searchTerm]);
+  }, [externallyPaginated, options, searchTerm]);
 
   const triggerChangeEvent = useCallback(
     (option: DropdownOption) => {
@@ -348,7 +370,28 @@ export const PaginatedDropdownOptionList = forwardRef<
         scrollableDropdownWrapper.removeEventListener('scroll', scrollCallback);
       };
     }
-  }, [maxHeight, optionHeight, paging, scrollableDropdownWrapper]);
+  }, [optionHeight, paging, scrollableDropdownWrapper]);
+
+  useEffect(() => {
+    if (scrollableDropdownWrapper && externallyPaginated) {
+      const scrollCallback = () => {
+        const { scrollTop, scrollHeight, offsetHeight } =
+          scrollableDropdownWrapper;
+        if (scrollHeight - (scrollTop + offsetHeight) <= optionHeight * 5) {
+          loadNextAsyncOptions();
+        }
+      };
+      scrollableDropdownWrapper.addEventListener('scroll', scrollCallback);
+      return () => {
+        scrollableDropdownWrapper.removeEventListener('scroll', scrollCallback);
+      };
+    }
+  }, [
+    externallyPaginated,
+    loadNextAsyncOptions,
+    optionHeight,
+    scrollableDropdownWrapper,
+  ]);
 
   useEffect(() => {
     setLimit(Math.ceil(maxHeight / optionHeight) + 1);
@@ -600,7 +643,7 @@ export const PaginatedDropdownOptionList = forwardRef<
           <DropdownOption
             onClick={(event) => {
               event.preventDefault();
-              loadOptions();
+              loadAsyncOptions({ searchTerm });
             }}
           >
             <Grid container sx={{ alignItems: 'center', gap: 1 }}>

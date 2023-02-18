@@ -424,11 +424,13 @@ export const DataDropdownField = forwardRef<
               readOnly: !searchable,
             }}
             value={(() => {
-              if (focused && searchable) {
+              if (
+                searchable &&
+                (focused || (open && selectedOptionDisplayString.length <= 0))
+              ) {
                 return searchTerm;
-              } else {
-                return selectedOptionDisplayString;
               }
+              return selectedOptionDisplayString;
             })()}
             className={clsx(classes.root)}
             {...{ variant, label, disabled }}

@@ -1,4 +1,3 @@
-import { pick } from 'lodash';
 import {
   Dispatch,
   SetStateAction,
@@ -384,6 +383,7 @@ export const usePaginatedRecords = <T>(
 
   const {
     load: loadFromAPIService,
+    loading,
     record: responseData,
     reset: baseReset,
     ...rest
@@ -398,7 +398,7 @@ export const usePaginatedRecords = <T>(
   );
 
   const loadedPages = useMemo(() => {
-    return new Map<string, T[]>();
+    return new Map<number, T[]>();
   }, []);
 
   const [currentPageRecords, setCurrentPageRecords] = useState<T[]>([]);
@@ -413,20 +413,23 @@ export const usePaginatedRecords = <T>(
     } as PaginatedRequestParams;
   }, [limitProp, offsetProp, showRecordsProp]);
 
-  const [loadingPaginationParams, setLoadingPaginationParams] = useState(
-    defaultPaginationParams
-  );
-
   const load = useCallback(
-    (params?: PaginatedRequestParams) => {
+    (params: PaginatedRequestParams = {}) => {
       revalidationKey; // Triggering reload whenever extra parameters change
       params = { ...params };
       params.offset || (params.offset = defaultPaginationParams.offset);
       params.limit || (params.limit = defaultPaginationParams.limit);
-      setLoadingPaginationParams(pick(params, 'offset', 'limit'));
       return loadFromAPIService(async () => {
-        const responseData = await recordFinderRef.current({ ...params });
-        const { records, recordsTotalCount } = responseData;
+        const { records, recordsTotalCount } = await recordFinderRef.current({
+          ...params,
+        });
+        loadedPages.set(params.offset!, records);
+        setAllPageRecords(
+          [...loadedPages.keys()]
+            .sort((a, b) => a - b)
+            .map((key) => loadedPages.get(key)!)
+            .flat()
+        );
         setCurrentPageRecords(records);
         setRecordsTotalCount(recordsTotalCount);
         return responseData;
@@ -436,34 +439,36 @@ export const usePaginatedRecords = <T>(
       defaultPaginationParams.limit,
       defaultPaginationParams.offset,
       loadFromAPIService,
+      loadedPages,
+      responseData,
       revalidationKey,
     ]
   );
 
+  const loadNextPage = useCallback(
+    (params?: Omit<PaginatedRequestParams, 'limit' | 'offset'>) => {
+      if (!loading) {
+        const lastPageOffset = [...loadedPages.keys()].sort((a, b) => b - a)[0];
+        const lastPageRecords = loadedPages.get(lastPageOffset);
+        if (lastPageRecords && lastPageOffset != null) {
+          load({
+            ...params,
+            offset: lastPageOffset + lastPageRecords.length,
+            limit: limitProp || lastPageRecords.length,
+          });
+        }
+      }
+    },
+    [limitProp, load, loadedPages, loading]
+  );
+
   const resetRef = useRef(() => {
     baseReset();
+    loadedPages.clear();
     setCurrentPageRecords([]);
     setAllPageRecords([]);
     setRecordsTotalCount(0);
   });
-
-  useEffect(() => {
-    if (responseData) {
-      const pageKey = `${loadingPaginationParams.offset},${loadingPaginationParams.limit}`;
-      loadedPages.set(pageKey, responseData.records);
-      setAllPageRecords(
-        [...loadedPages.keys()]
-          .sort((a, b) => a.localeCompare(b))
-          .map((key) => loadedPages.get(key)!)
-          .flat()
-      );
-    }
-  }, [
-    loadingPaginationParams.limit,
-    loadingPaginationParams.offset,
-    loadedPages,
-    responseData,
-  ]);
 
   useEffect(() => {
     loadOnMount && load();
@@ -477,6 +482,8 @@ export const usePaginatedRecords = <T>(
     recordsTotalCount,
     loadedPages,
     load,
+    loading,
+    loadNextPage,
     responseData,
     reset: resetRef.current,
     ...rest,
