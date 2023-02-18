@@ -369,7 +369,7 @@ export type PaginatedRecordsFinder<T> = (
   options: PaginatedRecordsFinderOptions
 ) => Promise<PaginatedResponseData<T>>;
 
-export interface UsePaginatedRecordsOptions<T>
+export interface UsePaginatedRecordsOptions<T = any>
   extends PaginatedRequestParams,
     UseQueryOptions {
   revalidationKey?: string;
