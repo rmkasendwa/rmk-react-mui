@@ -83,6 +83,7 @@ export interface ModalPopupProps
   showCloseIconButton?: boolean;
   showCloseActionButton?: boolean;
   showActionsToolbar?: boolean;
+  showHeaderToolbar?: boolean;
   enableCloseOnBackdropClick?: boolean;
   modalElement?: ReactElement;
   getModalElement?: (modalElement: ReactElement) => ReactElement;
@@ -117,6 +118,7 @@ export const ModalPopup = forwardRef<HTMLDivElement, ModalPopupProps>(
       CloseActionButtonProps = {},
       sx,
       className,
+      showHeaderToolbar = true,
       showCloseIconButton = true,
       showCloseActionButton = true,
       showActionsToolbar = true,
@@ -187,24 +189,28 @@ export const ModalPopup = forwardRef<HTMLDivElement, ModalPopupProps>(
             ...CardPropsSx,
           }}
         >
-          <SearchSyncToolbar
-            hasSearchTool={false}
-            hasSyncTool={false}
-            {...SearchSyncToolbarPropsRest}
-            {...{ title }}
-            sx={SearchSyncToolbarPropsSx}
-          >
-            {(() => {
-              if (showCloseIconButton && !loading) {
-                return (
-                  <IconButton onClick={onClose}>
-                    <CloseIcon />
-                  </IconButton>
-                );
-              }
-            })()}
-          </SearchSyncToolbar>
-          <Divider />
+          {showHeaderToolbar ? (
+            <>
+              <SearchSyncToolbar
+                hasSearchTool={false}
+                hasSyncTool={false}
+                {...SearchSyncToolbarPropsRest}
+                {...{ title }}
+                sx={SearchSyncToolbarPropsSx}
+              >
+                {(() => {
+                  if (showCloseIconButton && !loading) {
+                    return (
+                      <IconButton onClick={onClose}>
+                        <CloseIcon />
+                      </IconButton>
+                    );
+                  }
+                })()}
+              </SearchSyncToolbar>
+              <Divider />
+            </>
+          ) : null}
           <Box
             {...CardBodyPropsRest}
             sx={{

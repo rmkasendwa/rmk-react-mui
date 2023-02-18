@@ -287,7 +287,7 @@ export const DataDropdownField = forwardRef<
     setSelectedOptions((prevSelectedOptions) => {
       const nextSelectedOptions = fieldValues
         .map((value) => {
-          return options.find(
+          return optionsRef.current.find(
             ({ value: optionValue }) => value === optionValue
           )!;
         })
@@ -300,7 +300,7 @@ export const DataDropdownField = forwardRef<
       }
       return prevSelectedOptions;
     });
-  }, [options, value]);
+  }, [value]);
 
   useEffect(() => {
     if (selectedOption) {
@@ -435,10 +435,11 @@ export const DataDropdownField = forwardRef<
                 return props;
               })(),
               ref: anchorRef,
-              readOnly: !searchable,
+              readOnly: !searchable || isSmallScreenSize,
             }}
             value={(() => {
               if (
+                !isSmallScreenSize &&
                 searchable &&
                 (focused || (open && selectedOptionDisplayString.length <= 0))
               ) {
@@ -572,12 +573,25 @@ export const DataDropdownField = forwardRef<
       {(() => {
         const optionsElement = (
           <PaginatedDropdownOptionList
-            minWidth={
-              anchorRef.current ? anchorRef.current.offsetWidth : undefined
-            }
             paging={optionPaging}
             {...PaginatedDropdownOptionListPropsRest}
             {...{
+              maxHeight: dropdownListMaxHeight,
+              ...(() => {
+                if (isSmallScreenSize) {
+                  return {
+                    optionHeight: 50,
+                    searchable: true,
+                    maxHeight:
+                      dropdownListMaxHeight ?? window.innerHeight - 240,
+                    CardProps: {
+                      sx: {
+                        border: 'none',
+                      },
+                    },
+                  };
+                }
+              })(),
               optionVariant,
               multiple,
               onSelectOption,
@@ -590,21 +604,13 @@ export const DataDropdownField = forwardRef<
               callGetDropdownOptions,
               externallyPaginated,
               limit,
-              maxHeight: dropdownListMaxHeight,
-              ...(() => {
-                if (isSmallScreenSize) {
-                  return {
-                    optionHeight: 50,
-                    maxHeight: window.innerHeight - 180,
-                    CardProps: {
-                      sx: {
-                        border: 'none',
-                      },
-                    },
-                  };
-                }
-              })(),
             }}
+            onChangeSearchTerm={(searchTerm) => {
+              setSearchTerm(searchTerm);
+            }}
+            minWidth={
+              anchorRef.current ? anchorRef.current.offsetWidth : undefined
+            }
             onLoadOptions={(options) => {
               setOptions(options);
             }}
@@ -631,9 +637,9 @@ export const DataDropdownField = forwardRef<
                   p: 0,
                 },
               }}
-              showActionsToolbar={false}
               disableEscapeKeyDown={false}
               disableAutoFocus={false}
+              showHeaderToolbar={false}
               enableCloseOnBackdropClick
             >
               {optionsElement}

@@ -1,11 +1,10 @@
-import SearchIcon from '@mui/icons-material/Search';
 import {
   Divider,
   Grid,
   Tooltip,
   alpha,
   iconButtonClasses,
-  outlinedInputClasses,
+  inputBaseClasses,
 } from '@mui/material';
 import Box from '@mui/material/Box';
 import Card, { CardProps } from '@mui/material/Card';
@@ -59,6 +58,7 @@ export interface PaginatedDropdownOptionListProps {
   optionVariant?: DropdownOptionVariant;
   searchable?: boolean;
   searchTerm?: string;
+  onChangeSearchTerm?: (searchTerm: string) => void;
   SearchFieldProps?: Partial<SearchFieldProps>;
 
   // Async options
@@ -96,6 +96,7 @@ export const PaginatedDropdownOptionList = forwardRef<
     optionVariant,
     searchable = false,
     searchTerm: searchTermProp = '',
+    onChangeSearchTerm,
     SearchFieldProps = {},
     externallyPaginated,
     dataKey,
@@ -112,13 +113,19 @@ export const PaginatedDropdownOptionList = forwardRef<
   const onSelectOptionRef = useRef(onSelectOption);
   const onChangeSelectedOptionRef = useRef(onChangeSelectedOption);
   const onLoadOptionsRef = useRef(onLoadOptions);
+  const onChangeSearchTermRef = useRef(onChangeSearchTerm);
+  const getDropdownOptionsRef = useRef(getDropdownOptions);
   useEffect(() => {
     optionsRef.current = optionsProp;
     onCloseRef.current = onClose;
     onSelectOptionRef.current = onSelectOption;
     onChangeSelectedOptionRef.current = onChangeSelectedOption;
     onLoadOptionsRef.current = onLoadOptions;
+    onChangeSearchTermRef.current = onChangeSearchTerm;
+    getDropdownOptionsRef.current = getDropdownOptions;
   }, [
+    getDropdownOptions,
+    onChangeSearchTerm,
     onChangeSelectedOption,
     onClose,
     onLoadOptions,
@@ -181,36 +188,46 @@ export const PaginatedDropdownOptionList = forwardRef<
   );
 
   useEffect(() => {
+    if (!isInitialMount.current && onChangeSearchTermRef.current) {
+      onChangeSearchTermRef.current(searchTerm);
+    }
+  }, [searchTerm]);
+
+  useEffect(() => {
     if (
-      getDropdownOptions &&
+      isInitialMount.current &&
+      getDropdownOptionsRef.current &&
       !isAsyncOptionsLoaded &&
       (!optionsRef.current || optionsRef.current.length <= 0)
     ) {
       loadAsyncOptions({ searchTerm });
     }
-  }, [getDropdownOptions, loadAsyncOptions, isAsyncOptionsLoaded, searchTerm]);
+  }, [loadAsyncOptions, isAsyncOptionsLoaded, searchTerm]);
 
   useEffect(() => {
-    if (!isInitialMount.current && onLoadOptionsRef.current) {
+    if (
+      !isInitialMount.current &&
+      onLoadOptionsRef.current &&
+      isAsyncOptionsLoaded
+    ) {
       onLoadOptionsRef.current(asyncOptions);
     }
-  }, [asyncOptions]);
+  }, [asyncOptions, isAsyncOptionsLoaded]);
 
   useEffect(() => {
-    if (getDropdownOptions && externallyPaginated) {
+    if (getDropdownOptionsRef.current && externallyPaginated) {
       resetAsyncOptionState();
       loadAsyncOptions({ searchTerm });
     }
   }, [
     externallyPaginated,
-    getDropdownOptions,
     loadAsyncOptions,
     resetAsyncOptionState,
     searchTerm,
   ]);
 
   const options = ((): typeof asyncOptions => {
-    if (getDropdownOptions && asyncOptions.length > 0) {
+    if (getDropdownOptionsRef.current && asyncOptions.length > 0) {
       return asyncOptions;
     }
     if (optionsRef.current && optionsRef.current.length > 0) {
@@ -282,11 +299,6 @@ export const PaginatedDropdownOptionList = forwardRef<
         return [option];
       })();
       setSelectedOptions(nextOptions);
-      onChangeSelectedOptionRef.current &&
-        onChangeSelectedOptionRef.current(nextOptions);
-      if (!multiple && onCloseRef.current) {
-        onCloseRef.current();
-      }
     },
     [multiple, options, selectedOptions]
   );
@@ -301,7 +313,12 @@ export const PaginatedDropdownOptionList = forwardRef<
     if (setSelectedOptionsProp) {
       setSelectedOptionsProp(selectedOptions);
     }
-  }, [setSelectedOptionsProp, selectedOptions]);
+    if (!isInitialMount.current) {
+      onChangeSelectedOptionRef.current &&
+        onChangeSelectedOptionRef.current(selectedOptions);
+      !multiple && onCloseRef.current && onCloseRef.current();
+    }
+  }, [setSelectedOptionsProp, selectedOptions, multiple]);
 
   useEffect(() => {
     const keydownCallback = (event: KeyboardEvent) => {
@@ -455,38 +472,26 @@ export const PaginatedDropdownOptionList = forwardRef<
         if (searchable) {
           return (
             <>
-              <Box
-                sx={{
-                  py: 1,
-                  px: 2,
+              <SearchField
+                variant="standard"
+                {...SearchFieldPropsRest}
+                value={searchTerm}
+                onChange={(event) => {
+                  setSearchTerm(event.target.value);
                 }}
-              >
-                <SearchField
-                  size="small"
-                  placeholder="Search"
-                  {...SearchFieldPropsRest}
-                  InputProps={{
-                    startAdornment: (
-                      <SearchIcon sx={{ pointerEvents: 'none', mr: 1 }} />
-                    ),
-                    ...SearchFieldPropsRest.InputProps,
-                  }}
-                  value={searchTerm}
-                  onChange={(event) => setSearchTerm(event.target.value)}
-                  fullWidth
-                  sx={{
-                    [`.${outlinedInputClasses.root}`]: {
-                      borderRadius: '20px',
-                      bgcolor: alpha(palette.divider, 0.1),
-                      height: 38,
-                    },
-                    [`.${outlinedInputClasses.notchedOutline}`]: {
-                      borderWidth: 0,
-                    },
-                    ...SearchFieldPropsSx,
-                  }}
-                />
-              </Box>
+                InputProps={{
+                  disableUnderline: true,
+                }}
+                fullWidth
+                sx={{
+                  [`.${inputBaseClasses.root}`]: {
+                    px: 2,
+                    bgcolor: alpha(palette.divider, 0.1),
+                    height: optionHeight,
+                  },
+                  ...SearchFieldPropsSx,
+                }}
+              />
               <Divider />
             </>
           );
@@ -640,6 +645,7 @@ export const PaginatedDropdownOptionList = forwardRef<
               onChangeSelectedOption &&
                 onChangeSelectedOption(selectableOptions);
             }}
+            height={optionHeight}
           >
             {hasAllOptionsSelected ? 'Deselect' : 'Select'} All
           </DropdownOption>
@@ -653,6 +659,7 @@ export const PaginatedDropdownOptionList = forwardRef<
               event.preventDefault();
               loadAsyncOptions({ searchTerm });
             }}
+            height={optionHeight}
           >
             <Grid container sx={{ alignItems: 'center', gap: 1 }}>
               <Grid item>
