@@ -306,7 +306,9 @@ export const PhoneNumberInputField = forwardRef<
                           }
                           onClose={handleClosePhoneCountryList}
                           selectedOptions={selectedOptions}
-                          setSelectedOptions={setSelectedOptions}
+                          onChangeSelectedOptions={(options) => {
+                            setSelectedOptions(options);
+                          }}
                           onSelectOption={({ value }) => {
                             const selectedCountry = countries.find(
                               ({ regionalCode }) => regionalCode === value

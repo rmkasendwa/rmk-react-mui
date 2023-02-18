@@ -12,9 +12,7 @@ import MenuItem, { MenuItemProps } from '@mui/material/MenuItem';
 import useTheme from '@mui/material/styles/useTheme';
 import Typography from '@mui/material/Typography';
 import {
-  Dispatch,
   Fragment,
-  SetStateAction,
   forwardRef,
   useCallback,
   useEffect,
@@ -43,7 +41,6 @@ export interface DropdownOption
 export interface PaginatedDropdownOptionListProps {
   options?: DropdownOption[];
   selectedOptions?: DropdownOption[];
-  setSelectedOptions?: Dispatch<SetStateAction<DropdownOption[]>>;
   minWidth?: number;
   maxHeight?: number;
   optionHeight?: number;
@@ -51,9 +48,8 @@ export interface PaginatedDropdownOptionListProps {
   multiple?: boolean;
   loading?: boolean;
   onClose?: () => void;
-  onLoadOptions?: (options: DropdownOption[]) => void;
   onSelectOption?: (selectedOption: DropdownOption) => void;
-  onChangeSelectedOption?: (selectedOptions: DropdownOption[]) => void;
+  onChangeSelectedOptions?: (selectedOptions: DropdownOption[]) => void;
   CardProps?: CardProps;
   optionVariant?: DropdownOptionVariant;
   searchable?: boolean;
@@ -65,6 +61,7 @@ export interface PaginatedDropdownOptionListProps {
   getDropdownOptions?: (
     options: Pick<PaginatedRequestParams, 'limit' | 'offset' | 'searchTerm'>
   ) => Promise<PaginatedResponseData<DropdownOption> | DropdownOption[]>;
+  onLoadOptions?: (options: DropdownOption[]) => void;
   callGetDropdownOptions?: 'always' | 'whenNoOptions';
   externallyPaginated?: boolean;
   dataKey?: string;
@@ -83,7 +80,6 @@ export const PaginatedDropdownOptionList = forwardRef<
 >(function PaginatedDropdownOptionList(
   {
     selectedOptions: selectedOptionsProp,
-    setSelectedOptions: setSelectedOptionsProp,
     minWidth = DEFAULT_DROPDOWN_MENU_MAX_HEIGHT,
     maxHeight = DEFAULT_DROPDOWN_MENU_MAX_HEIGHT,
     optionHeight = DEFAULT_DROPDOWN_OPTION_HEIGHT,
@@ -95,7 +91,7 @@ export const PaginatedDropdownOptionList = forwardRef<
     loading: loadingProp,
     getDropdownOptions,
     onSelectOption,
-    onChangeSelectedOption,
+    onChangeSelectedOptions: onChangeSelectedOptions,
     CardProps,
     optionVariant,
     searchable = false,
@@ -117,7 +113,7 @@ export const PaginatedDropdownOptionList = forwardRef<
   const optionsRef = useRef(optionsProp);
   const onCloseRef = useRef(onClose);
   const onSelectOptionRef = useRef(onSelectOption);
-  const onChangeSelectedOptionRef = useRef(onChangeSelectedOption);
+  const onChangeSelectedOptionRef = useRef(onChangeSelectedOptions);
   const onLoadOptionsRef = useRef(onLoadOptions);
   const onChangeSearchTermRef = useRef(onChangeSearchTerm);
   const getDropdownOptionsRef = useRef(getDropdownOptions);
@@ -126,7 +122,7 @@ export const PaginatedDropdownOptionList = forwardRef<
     optionsRef.current = optionsProp;
     onCloseRef.current = onClose;
     onSelectOptionRef.current = onSelectOption;
-    onChangeSelectedOptionRef.current = onChangeSelectedOption;
+    onChangeSelectedOptionRef.current = onChangeSelectedOptions;
     onLoadOptionsRef.current = onLoadOptions;
     onChangeSearchTermRef.current = onChangeSearchTerm;
     getDropdownOptionsRef.current = getDropdownOptions;
@@ -135,7 +131,7 @@ export const PaginatedDropdownOptionList = forwardRef<
     getDropdownOptions,
     onChangeAsyncOptionPagesMap,
     onChangeSearchTerm,
-    onChangeSelectedOption,
+    onChangeSelectedOptions,
     onClose,
     onLoadOptions,
     onSelectOption,
@@ -223,6 +219,7 @@ export const PaginatedDropdownOptionList = forwardRef<
   useEffect(() => {
     if (
       !isInitialMountRef.current &&
+      getDropdownOptionsRef.current &&
       onLoadOptionsRef.current &&
       isAsyncOptionsLoaded
     ) {
@@ -325,15 +322,12 @@ export const PaginatedDropdownOptionList = forwardRef<
   }, [selectedOptionsProp]);
 
   useEffect(() => {
-    if (setSelectedOptionsProp) {
-      setSelectedOptionsProp(selectedOptions);
-    }
     if (!isInitialMountRef.current) {
       onChangeSelectedOptionRef.current &&
         onChangeSelectedOptionRef.current(selectedOptions);
       !multiple && onCloseRef.current && onCloseRef.current();
     }
-  }, [setSelectedOptionsProp, selectedOptions, multiple]);
+  }, [multiple, selectedOptions]);
 
   useEffect(() => {
     const keydownCallback = (event: KeyboardEvent) => {
@@ -421,6 +415,7 @@ export const PaginatedDropdownOptionList = forwardRef<
         }
       };
       scrollableDropdownWrapper.addEventListener('scroll', scrollCallback);
+      scrollCallback();
       return () => {
         scrollableDropdownWrapper.removeEventListener('scroll', scrollCallback);
       };
@@ -430,7 +425,6 @@ export const PaginatedDropdownOptionList = forwardRef<
     loadNextAsyncOptions,
     optionHeight,
     scrollableDropdownWrapper,
-    searchTerm,
   ]);
 
   useEffect(() => {
@@ -490,9 +484,9 @@ export const PaginatedDropdownOptionList = forwardRef<
               <SearchField
                 variant="standard"
                 {...SearchFieldPropsRest}
-                value={searchTerm}
-                onChange={(event) => {
-                  setSearchTerm(event.target.value);
+                {...{ searchTerm }}
+                onChangeSearchTerm={(searchTerm) => {
+                  setSearchTerm(searchTerm);
                 }}
                 InputProps={{
                   disableUnderline: true,
