@@ -155,7 +155,7 @@ WithAsyncOptions.args = {
             'Ten',
           ].map((value) => ({ label: value, value }))
         );
-      }, 5000);
+      }, 1000);
     });
   },
 } as DataDropdownFieldProps;
