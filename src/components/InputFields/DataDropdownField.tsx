@@ -85,12 +85,12 @@ export interface DataDropdownFieldProps
         | 'callGetDropdownOptions'
         | 'externallyPaginated'
         | 'limit'
+        | 'sortOptions'
       >
     > {
   disableEmptyOption?: boolean;
   options?: DropdownOption[];
   dataKey?: string;
-  sortOptions?: boolean;
   value?: string | string[];
   selectedOption?: DropdownOption;
   dropdownListMaxHeight?: number;
@@ -125,7 +125,7 @@ export const DataDropdownField = forwardRef<
     value,
     dataKey,
     options: optionsProp,
-    sortOptions = false,
+    sortOptions,
     onChange,
     onFocus,
     onBlur,
@@ -195,24 +195,6 @@ export const DataDropdownField = forwardRef<
     optionsRef.current = options;
   }, [onChange, options]);
 
-  const sortOptionsRef = useRef(
-    (
-      { label: aLabel, searchableLabel: aSearchableLabel }: DropdownOption,
-      { label: bLabel, searchableLabel: bSearchableLabel }: DropdownOption
-    ) => {
-      if (typeof aLabel === 'string' && typeof bLabel === 'string') {
-        return aLabel.localeCompare(bLabel);
-      }
-      if (
-        typeof aSearchableLabel === 'string' &&
-        typeof bSearchableLabel === 'string'
-      ) {
-        return aSearchableLabel.localeCompare(bSearchableLabel);
-      }
-      return 0;
-    }
-  );
-
   const [searchTerm, setSearchTerm] = useState('');
 
   const [open, setOpen] = useState(false);
@@ -257,9 +239,7 @@ export const DataDropdownField = forwardRef<
   useEffect(() => {
     if (optionsProp) {
       setOptions((prevOptions) => {
-        const nextOptions = optionsProp.sort(
-          sortOptions ? sortOptionsRef.current : () => 0
-        );
+        const nextOptions = optionsProp;
         if (
           JSON.stringify(
             prevOptions.map(({ value, label, searchableLabel }) => ({
@@ -310,9 +290,7 @@ export const DataDropdownField = forwardRef<
       );
       if (!existingOption) {
         setOptions((prevOptions) => {
-          return [...prevOptions, selectedOption].sort(
-            sortOptions ? sortOptionsRef.current : () => 0
-          );
+          return [...prevOptions, selectedOption];
         });
       }
       setSelectedOptions((prevSelectedOptions) => {
@@ -585,10 +563,8 @@ export const DataDropdownField = forwardRef<
                     searchable: true,
                     maxHeight:
                       dropdownListMaxHeight ?? window.innerHeight - 240,
-                    CardProps: {
-                      sx: {
-                        border: 'none',
-                      },
+                    sx: {
+                      border: 'none',
                     },
                   };
                 }
@@ -604,6 +580,7 @@ export const DataDropdownField = forwardRef<
               callGetDropdownOptions,
               externallyPaginated,
               limit,
+              sortOptions,
             }}
             onChangeSearchTerm={(searchTerm) => {
               setSearchTerm(searchTerm);

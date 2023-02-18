@@ -1,16 +1,25 @@
 import {
+  ComponentsOverrides,
+  ComponentsProps,
+  ComponentsVariants,
   Divider,
   Grid,
   Tooltip,
   alpha,
+  unstable_composeClasses as composeClasses,
+  generateUtilityClass,
+  generateUtilityClasses,
   iconButtonClasses,
   inputBaseClasses,
+  useThemeProps,
 } from '@mui/material';
 import Box from '@mui/material/Box';
 import Card, { CardProps } from '@mui/material/Card';
 import MenuItem, { MenuItemProps } from '@mui/material/MenuItem';
 import useTheme from '@mui/material/styles/useTheme';
 import Typography from '@mui/material/Typography';
+import clsx from 'clsx';
+import { omit } from 'lodash';
 import {
   Fragment,
   forwardRef,
@@ -38,9 +47,46 @@ export interface DropdownOption
   extends Pick<MenuItemProps, 'onClick'>,
     BaseDropdownOption {}
 
-export interface PaginatedDropdownOptionListProps {
+const DEFAULT_DROPDOWN_MENU_MAX_HEIGHT = 200;
+
+export interface PaginatedDropdownOptionListClasses {
+  /** Styles applied to the root element. */
+  root: string;
+}
+
+export type PaginatedDropdownOptionListClassKey =
+  keyof PaginatedDropdownOptionListClasses;
+
+// Adding theme prop types
+declare module '@mui/material/styles/props' {
+  interface ComponentsPropsList {
+    MuiPaginatedDropdownOptionList: PaginatedDropdownOptionListProps;
+  }
+}
+
+// Adding theme override types
+declare module '@mui/material/styles/overrides' {
+  interface ComponentNameToClassKey {
+    MuiPaginatedDropdownOptionList: keyof PaginatedDropdownOptionListClasses;
+  }
+}
+
+// Adding theme component types
+declare module '@mui/material/styles/components' {
+  interface Components<Theme = unknown> {
+    MuiPaginatedDropdownOptionList?: {
+      defaultProps?: ComponentsProps['MuiPaginatedDropdownOptionList'];
+      styleOverrides?: ComponentsOverrides<Theme>['MuiPaginatedDropdownOptionList'];
+      variants?: ComponentsVariants['MuiPaginatedDropdownOptionList'];
+    };
+  }
+}
+
+export interface PaginatedDropdownOptionListProps
+  extends Partial<Pick<CardProps, 'sx' | 'className'>> {
   options?: DropdownOption[];
   selectedOptions?: DropdownOption[];
+  sortOptions?: boolean;
   minWidth?: number;
   maxHeight?: number;
   optionHeight?: number;
@@ -50,7 +96,6 @@ export interface PaginatedDropdownOptionListProps {
   onClose?: () => void;
   onSelectOption?: (selectedOption: DropdownOption) => void;
   onChangeSelectedOptions?: (selectedOptions: DropdownOption[]) => void;
-  CardProps?: CardProps;
   optionVariant?: DropdownOptionVariant;
   searchable?: boolean;
   searchTerm?: string;
@@ -72,13 +117,29 @@ export interface PaginatedDropdownOptionListProps {
   ) => void;
 }
 
-const DEFAULT_DROPDOWN_MENU_MAX_HEIGHT = 200;
+export function getPaginatedDropdownOptionListUtilityClass(
+  slot: string
+): string {
+  return generateUtilityClass('MuiPaginatedDropdownOptionList', slot);
+}
+
+export const paginatedDropdownOptionListClasses: PaginatedDropdownOptionListClasses =
+  generateUtilityClasses('MuiPaginatedDropdownOptionList', ['root']);
+
+const slots = {
+  root: ['root'],
+};
 
 export const PaginatedDropdownOptionList = forwardRef<
   HTMLDivElement,
   PaginatedDropdownOptionListProps
->(function PaginatedDropdownOptionList(
-  {
+>(function PaginatedDropdownOptionList(inProps, ref) {
+  const props = useThemeProps({
+    props: inProps,
+    name: 'MuiPaginatedDropdownOptionList',
+  });
+  const {
+    className,
     selectedOptions: selectedOptionsProp,
     minWidth = DEFAULT_DROPDOWN_MENU_MAX_HEIGHT,
     maxHeight = DEFAULT_DROPDOWN_MENU_MAX_HEIGHT,
@@ -92,7 +153,6 @@ export const PaginatedDropdownOptionList = forwardRef<
     getDropdownOptions,
     onSelectOption,
     onChangeSelectedOptions: onChangeSelectedOptions,
-    CardProps,
     optionVariant,
     searchable = false,
     searchTerm: searchTermProp = '',
@@ -100,12 +160,27 @@ export const PaginatedDropdownOptionList = forwardRef<
     SearchFieldProps = {},
     externallyPaginated,
     dataKey,
-    limit: limitProp = 100,
     asyncOptionPagesMap,
     onChangeAsyncOptionPagesMap,
-  },
-  ref
-) {
+    sortOptions = false,
+    callGetDropdownOptions = 'whenNoOptions',
+    ...rest
+  } = omit(props, 'limit');
+
+  let { limit: limitProp = 100 } = props;
+
+  const classes = composeClasses(
+    slots,
+    getPaginatedDropdownOptionListUtilityClass,
+    (() => {
+      if (className) {
+        return {
+          root: className,
+        };
+      }
+    })()
+  );
+
   const { sx: SearchFieldPropsSx, ...SearchFieldPropsRest } = SearchFieldProps;
 
   // Refs
@@ -127,16 +202,25 @@ export const PaginatedDropdownOptionList = forwardRef<
     onChangeSearchTermRef.current = onChangeSearchTerm;
     getDropdownOptionsRef.current = getDropdownOptions;
     onChangeAsyncOptionPagesMapRef.current = onChangeAsyncOptionPagesMap;
-  }, [
-    getDropdownOptions,
-    onChangeAsyncOptionPagesMap,
-    onChangeSearchTerm,
-    onChangeSelectedOptions,
-    onClose,
-    onLoadOptions,
-    onSelectOption,
-    optionsProp,
-  ]);
+  }, [getDropdownOptions, onChangeAsyncOptionPagesMap, onChangeSearchTerm, onChangeSelectedOptions, onClose, onLoadOptions, onSelectOption, optionsProp]);
+
+  const sortOptionsRef = useRef(
+    (
+      { label: aLabel, searchableLabel: aSearchableLabel }: DropdownOption,
+      { label: bLabel, searchableLabel: bSearchableLabel }: DropdownOption
+    ) => {
+      if (typeof aLabel === 'string' && typeof bLabel === 'string') {
+        return aLabel.localeCompare(bLabel);
+      }
+      if (
+        typeof aSearchableLabel === 'string' &&
+        typeof bSearchableLabel === 'string'
+      ) {
+        return aSearchableLabel.localeCompare(bSearchableLabel);
+      }
+      return 0;
+    }
+  );
 
   const displayLimit = useMemo(() => {
     return Math.ceil(maxHeight / optionHeight) + 1;
@@ -208,13 +292,14 @@ export const PaginatedDropdownOptionList = forwardRef<
   useEffect(() => {
     if (
       isInitialMountRef.current &&
-      getDropdownOptionsRef.current &&
-      !isAsyncOptionsLoaded &&
-      (!optionsRef.current || optionsRef.current.length <= 0)
+      ((getDropdownOptionsRef.current &&
+        !isAsyncOptionsLoaded &&
+        (!optionsRef.current || optionsRef.current.length <= 0)) ||
+        callGetDropdownOptions === 'always')
     ) {
       loadAsyncOptions();
     }
-  }, [loadAsyncOptions, isAsyncOptionsLoaded, searchTerm]);
+  }, [loadAsyncOptions, isAsyncOptionsLoaded, searchTerm, callGetDropdownOptions]);
 
   useEffect(() => {
     if (
@@ -246,7 +331,7 @@ export const PaginatedDropdownOptionList = forwardRef<
       return optionsRef.current;
     }
     return [];
-  })();
+  })().sort(sortOptions ? sortOptionsRef.current : () => 0);
 
   // Options state
   const [filteredOptions, setFilteredOptions] =
@@ -381,16 +466,7 @@ export const PaginatedDropdownOptionList = forwardRef<
     return () => {
       window.removeEventListener('keydown', keydownCallback);
     };
-  }, [
-    filteredOptions,
-    focusedOptionIndex,
-    limit,
-    maxHeight,
-    offset,
-    optionHeight,
-    scrollableDropdownWrapper,
-    triggerChangeEvent,
-  ]);
+  }, [filteredOptions, focusedOptionIndex, limit, maxHeight, offset, optionHeight, scrollableDropdownWrapper, triggerChangeEvent]);
 
   useEffect(() => {
     if (scrollableDropdownWrapper && paging) {
@@ -420,12 +496,7 @@ export const PaginatedDropdownOptionList = forwardRef<
         scrollableDropdownWrapper.removeEventListener('scroll', scrollCallback);
       };
     }
-  }, [
-    externallyPaginated,
-    loadNextAsyncOptions,
-    optionHeight,
-    scrollableDropdownWrapper,
-  ]);
+  }, [externallyPaginated, loadNextAsyncOptions, optionHeight, scrollableDropdownWrapper]);
 
   useEffect(() => {
     setLimit(Math.ceil(maxHeight / optionHeight) + 1);
@@ -451,13 +522,7 @@ export const PaginatedDropdownOptionList = forwardRef<
       }
       setScrolledToSelectedOption(true);
     }
-  }, [
-    optionHeight,
-    filteredOptions,
-    scrollableDropdownWrapper,
-    scrolledToSelectedOption,
-    selectedOptionsProp,
-  ]);
+  }, [optionHeight, filteredOptions, scrollableDropdownWrapper, scrolledToSelectedOption, selectedOptionsProp]);
 
   useEffect(() => {
     isInitialMountRef.current = false;
@@ -476,7 +541,7 @@ export const PaginatedDropdownOptionList = forwardRef<
   });
 
   return (
-    <Card {...CardProps} ref={ref} tabIndex={-1}>
+    <Card {...rest} ref={ref} className={clsx(classes.root)} tabIndex={-1}>
       {(() => {
         if (searchable) {
           return (
