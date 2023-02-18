@@ -190,7 +190,11 @@ export const ProfileAvatar = forwardRef<HTMLDivElement, ProfileAvatarProps>(
         {(() => {
           if (label) {
             return (() => {
-              const labelWords = label.replace(/[^\w\-_\s]/g, '').split(/\s+/g);
+              const labelWords = label
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/[^\w\-_\s]/g, '')
+                .split(/\s+/g);
               if (labelWords.length > 1) {
                 return (
                   labelWords[0].charAt(0) +
