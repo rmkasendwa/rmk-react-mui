@@ -599,7 +599,6 @@ export const DataDropdownField = forwardRef<
               searchTerm,
               options,
               selectedOptions,
-              setSelectedOptions,
               dataKey,
               getDropdownOptions,
               callGetDropdownOptions,
@@ -618,7 +617,10 @@ export const DataDropdownField = forwardRef<
             onClose={() => {
               setOpen(false);
             }}
-            onChangeSelectedOption={triggerChangeEvent}
+            onChangeSelectedOptions={(options) => {
+              setSelectedOptions(options);
+              triggerChangeEvent(options);
+            }}
             asyncOptionPagesMap={asyncOptionPagesMapRef.current}
             onChangeAsyncOptionPagesMap={(asyncOptionPagesMap) => {
               asyncOptionPagesMapRef.current = asyncOptionPagesMap;

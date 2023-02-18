@@ -159,7 +159,7 @@ const BaseTableColumnToggleIconButton = <T extends BaseTableRow>(
         selectedOptions: options.filter(({ value }) => {
           return selectedColumnIds.includes(String(value) as any);
         }),
-        onChangeSelectedOption: (selectedOptions) => {
+        onChangeSelectedOptions: (selectedOptions) => {
           setSelectedColumnIds(
             selectedOptions.map(({ value }) => String(value) as any)
           );
