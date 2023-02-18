@@ -31,19 +31,12 @@ import {
 } from 'react';
 import { mergeRefs } from 'react-merge-refs';
 
-import { LoadingProvider } from '../../contexts/LoadingContext';
-import { usePaginatedRecords } from '../../hooks/Utils';
-import {
-  PaginatedRequestParams,
-  PaginatedResponseData,
-} from '../../interfaces/Utils';
 import { isDescendant } from '../../utils/html';
 import FieldValueDisplay from '../FieldValueDisplay';
 import PaginatedDropdownOptionList, {
   DropdownOption,
   PaginatedDropdownOptionListProps,
 } from '../PaginatedDropdownOptionList';
-import RetryErrorMessage from '../RetryErrorMessage';
 import TextField, { TextFieldProps } from './TextField';
 
 export interface DataDropdownFieldClasses {
@@ -81,7 +74,15 @@ declare module '@mui/material/styles/components' {
 export interface DataDropdownFieldProps
   extends Omit<TextFieldProps, 'value' | 'variant'>,
     Partial<
-      Pick<PaginatedDropdownOptionListProps, 'optionVariant' | 'onSelectOption'>
+      Pick<
+        PaginatedDropdownOptionListProps,
+        | 'optionVariant'
+        | 'onSelectOption'
+        | 'searchable'
+        | 'getDropdownOptions'
+        | 'callGetDropdownOptions'
+        | 'externallyPaginated'
+      >
     > {
   disableEmptyOption?: boolean;
   options?: DropdownOption[];
@@ -93,17 +94,8 @@ export interface DataDropdownFieldProps
   optionPaging?: boolean;
   onChangeSearchTerm?: (searchTerm: string) => void;
   SelectedOptionPillProps?: Partial<BoxProps>;
-  searchable?: boolean;
   PaginatedDropdownOptionListProps?: Partial<PaginatedDropdownOptionListProps>;
-
-  // Async options
-  getDropdownOptions?: (
-    options: Pick<PaginatedRequestParams, 'limit' | 'offset' | 'searchTerm'>
-  ) => Promise<PaginatedResponseData<DropdownOption> | DropdownOption[]>;
-  callGetDropdownOptions?: 'always' | 'whenNoOptions';
-
   variant?: 'standard' | 'filled' | 'outlined' | 'text';
-  externallyPaginated?: boolean;
 }
 
 export function getDataDropdownFieldUtilityClass(slot: string): string {
@@ -148,7 +140,7 @@ export const DataDropdownField = forwardRef<
     showClearButton = true,
     searchable = true,
     getDropdownOptions,
-    callGetDropdownOptions = 'whenNoOptions',
+    callGetDropdownOptions,
     onSelectOption,
     variant: variantProp,
     label,
@@ -189,13 +181,11 @@ export const DataDropdownField = forwardRef<
   // Refs
   const anchorRef = useRef<HTMLInputElement>(null);
   const onChangeRef = useRef(onChange);
-  const getDropdownOptionsRef = useRef(getDropdownOptions);
   const optionsRef = useRef(options);
   useEffect(() => {
     onChangeRef.current = onChange;
-    getDropdownOptionsRef.current = getDropdownOptions;
     optionsRef.current = options;
-  }, [getDropdownOptions, onChange, options]);
+  }, [onChange, options]);
 
   const sortOptionsRef = useRef(
     (
@@ -217,44 +207,10 @@ export const DataDropdownField = forwardRef<
 
   const [searchTerm, setSearchTerm] = useState('');
 
-  const {
-    load: loadOptions,
-    loading,
-    allPageRecords: dropdownRecords,
-    errorMessage,
-  } = usePaginatedRecords(
-    async ({ limit, offset, searchTerm: baseSearchTerm }) => {
-      if (getDropdownOptions) {
-        const optionsResponse = await getDropdownOptions({
-          searchTerm: baseSearchTerm ?? searchTerm,
-          limit,
-          offset,
-        });
-        if (Array.isArray(optionsResponse)) {
-          return {
-            records: optionsResponse,
-            recordsTotalCount: optionsResponse.length,
-          };
-        }
-        return optionsResponse;
-      }
-      return { records: options, recordsTotalCount: options.length };
-    },
-    {
-      loadOnMount: false,
-      autoSync: false,
-      key: dataKey,
-      revalidationKey: searchTerm,
-    }
-  );
-
   const [open, setOpen] = useState(false);
   const [focused, setFocused] = useState(false);
 
   const [selectedOptions, setSelectedOptions] = useState<DropdownOption[]>([]);
-  const [missingOptionValues, setMissingOptionValues] = useState<
-    (string | number)[]
-  >([]);
 
   const selectedOptionValue = useMemo(() => {
     if (multiple) {
@@ -291,39 +247,6 @@ export const DataDropdownField = forwardRef<
   }, [selectedOptions]);
 
   useEffect(() => {
-    const shouldLoadOptions = (() => {
-      switch (callGetDropdownOptions) {
-        case 'whenNoOptions':
-          return options.length <= 0;
-        case 'always':
-        default:
-          return true;
-      }
-    })();
-    if (open && shouldLoadOptions) {
-      loadOptions();
-    }
-  }, [callGetDropdownOptions, loadOptions, open, options.length]);
-
-  useEffect(() => {
-    if (value) {
-      const fieldValues = Array.isArray(value) ? value : [value];
-      const optionValues = options.map(({ value }) => value);
-      setMissingOptionValues(
-        fieldValues.filter((value) => {
-          return !optionValues.includes(value);
-        })
-      );
-    }
-  }, [errorMessage, options, value]);
-
-  useEffect(() => {
-    if (missingOptionValues.length > 0 && !errorMessage) {
-      loadOptions();
-    }
-  }, [errorMessage, loadOptions, missingOptionValues.length]);
-
-  useEffect(() => {
     if (optionsProp) {
       setOptions((prevOptions) => {
         const nextOptions = optionsProp.sort(
@@ -349,12 +272,8 @@ export const DataDropdownField = forwardRef<
         }
         return prevOptions;
       });
-    } else {
-      setOptions(
-        dropdownRecords.sort(sortOptions ? sortOptionsRef.current : () => 0)
-      );
     }
-  }, [dropdownRecords, optionsProp, sortOptions]);
+  }, [optionsProp, sortOptions]);
 
   useEffect(() => {
     const fieldValues = Array.isArray(value) ? value : [value];
@@ -400,25 +319,6 @@ export const DataDropdownField = forwardRef<
       });
     }
   }, [selectedOption, sortOptions]);
-
-  if (value && loading && missingOptionValues.length > 0) {
-    if (isTextVariant) {
-      return <FieldValueDisplay {...{ label, value }} />;
-    }
-    return (
-      <LoadingProvider value={{ loading, errorMessage }}>
-        <TextField {...rest} {...{ label, variant }} />
-      </LoadingProvider>
-    );
-  }
-
-  const errorProps: Pick<TextFieldProps, 'error' | 'helperText'> = {};
-  if (errorMessage) {
-    errorProps.error = true;
-    errorProps.helperText = (
-      <RetryErrorMessage message={errorMessage} retry={loadOptions} />
-    );
-  }
 
   const endAdornment = (
     <>
@@ -507,9 +407,6 @@ export const DataDropdownField = forwardRef<
             onChange={(event) => {
               if (searchable) {
                 setSearchTerm(event.target.value);
-                if (externallyPaginated) {
-                  loadOptions({ searchTerm: event.target.value });
-                }
                 onChangeSearchTerm && onChangeSearchTerm(event.target.value);
               }
             }}
@@ -536,7 +433,6 @@ export const DataDropdownField = forwardRef<
             className={clsx(classes.root)}
             {...{ variant, label, disabled }}
             {...rest}
-            {...errorProps}
             endChildren={(() => {
               if (searchable && !focused && selectedOptions.length > 0) {
                 return (
@@ -687,6 +583,12 @@ export const DataDropdownField = forwardRef<
                       onSelectOption,
                       searchTerm,
                       options,
+                      selectedOptions,
+                      setSelectedOptions,
+                      dataKey,
+                      getDropdownOptions,
+                      callGetDropdownOptions,
+                      externallyPaginated,
                     }}
                     {...PaginatedDropdownOptionListPropsRest}
                     minWidth={
@@ -699,15 +601,7 @@ export const DataDropdownField = forwardRef<
                     onClose={() => {
                       setOpen(false);
                     }}
-                    loadOptions={
-                      getDropdownOptions ? () => loadOptions() : undefined
-                    }
                     onChangeSelectedOption={triggerChangeEvent}
-                    {...{
-                      selectedOptions,
-                      setSelectedOptions,
-                      loading,
-                    }}
                   />
                 </ClickAwayListener>
               </Box>
