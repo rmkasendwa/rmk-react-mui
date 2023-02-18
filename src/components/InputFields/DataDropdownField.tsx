@@ -391,8 +391,15 @@ export const DataDropdownField = forwardRef<
         return (
           <TextField
             ref={ref}
-            onFocus={(event) => {
+            onClick={(event) => {
+              event.preventDefault();
               setOpen(true);
+            }}
+            onFocus={(event) => {
+              event.preventDefault();
+              if (!isSmallScreenSize) {
+                setOpen(true);
+              }
               setFocused(true);
               onFocus && onFocus(event);
             }}
@@ -565,6 +572,10 @@ export const DataDropdownField = forwardRef<
       {(() => {
         const optionsElement = (
           <PaginatedDropdownOptionList
+            minWidth={
+              anchorRef.current ? anchorRef.current.offsetWidth : undefined
+            }
+            paging={optionPaging}
             {...PaginatedDropdownOptionListPropsRest}
             {...{
               optionVariant,
@@ -579,9 +590,12 @@ export const DataDropdownField = forwardRef<
               callGetDropdownOptions,
               externallyPaginated,
               limit,
+              maxHeight: dropdownListMaxHeight,
               ...(() => {
                 if (isSmallScreenSize) {
                   return {
+                    optionHeight: 50,
+                    maxHeight: window.innerHeight - 180,
                     CardProps: {
                       sx: {
                         border: 'none',
@@ -594,11 +608,6 @@ export const DataDropdownField = forwardRef<
             onLoadOptions={(options) => {
               setOptions(options);
             }}
-            minWidth={
-              anchorRef.current ? anchorRef.current.offsetWidth : undefined
-            }
-            maxHeight={dropdownListMaxHeight}
-            paging={optionPaging}
             onClose={() => {
               setOpen(false);
             }}
@@ -611,6 +620,11 @@ export const DataDropdownField = forwardRef<
               {...{ open }}
               onClose={() => {
                 setOpen(false);
+              }}
+              CardProps={{
+                sx: {
+                  maxHeight: 'none',
+                },
               }}
               CardBodyProps={{
                 sx: {
