@@ -357,10 +357,11 @@ export const useRecords = <T>(
   };
 };
 
-export interface UsePaginatedRecordsOptions
+export interface UsePaginatedRecordsOptions<T>
   extends PaginatedRequestParams,
     UseQueryOptions {
   revalidationKey?: string;
+  loadedPagesMap?: Map<number, T[]>;
 }
 
 export const usePaginatedRecords = <T>(
@@ -373,15 +374,18 @@ export const usePaginatedRecords = <T>(
     limit: limitProp = 100,
     offset: offsetProp = 0,
     showRecords: showRecordsProp = true,
+    loadedPagesMap,
     revalidationKey,
-  }: UsePaginatedRecordsOptions = {}
+  }: UsePaginatedRecordsOptions<T> = {}
 ) => {
   // Refs
   const isInitialMountRef = useRef(true);
   const recordFinderRef = useRef(recordFinder);
+  const loadedPagesMapRef = useRef(loadedPagesMap);
   useEffect(() => {
     recordFinderRef.current = recordFinder;
-  }, [recordFinder]);
+    loadedPagesMapRef.current = loadedPagesMap;
+  }, [loadedPagesMap, recordFinder]);
 
   const {
     load: loadFromAPIService,
@@ -400,7 +404,7 @@ export const usePaginatedRecords = <T>(
   );
 
   const loadedPages = useMemo(() => {
-    return new Map<number, T[]>();
+    return loadedPagesMapRef.current || new Map<number, T[]>();
   }, []);
 
   const [currentPageRecords, setCurrentPageRecords] = useState<T[]>([]);

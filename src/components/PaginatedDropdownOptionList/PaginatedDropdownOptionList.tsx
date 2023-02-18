@@ -69,6 +69,10 @@ export interface PaginatedDropdownOptionListProps {
   externallyPaginated?: boolean;
   dataKey?: string;
   limit?: number;
+  asyncOptionPagesMap?: Map<number, DropdownOption[]>;
+  onChangeAsyncOptionPagesMap?: (
+    asyncOptionPagesMap: Map<number, DropdownOption[]>
+  ) => void;
 }
 
 const DEFAULT_DROPDOWN_MENU_MAX_HEIGHT = 200;
@@ -101,6 +105,8 @@ export const PaginatedDropdownOptionList = forwardRef<
     externallyPaginated,
     dataKey,
     limit: limitProp = 100,
+    asyncOptionPagesMap,
+    onChangeAsyncOptionPagesMap,
   },
   ref
 ) {
@@ -115,6 +121,7 @@ export const PaginatedDropdownOptionList = forwardRef<
   const onLoadOptionsRef = useRef(onLoadOptions);
   const onChangeSearchTermRef = useRef(onChangeSearchTerm);
   const getDropdownOptionsRef = useRef(getDropdownOptions);
+  const onChangeAsyncOptionPagesMapRef = useRef(onChangeAsyncOptionPagesMap);
   useEffect(() => {
     optionsRef.current = optionsProp;
     onCloseRef.current = onClose;
@@ -123,8 +130,10 @@ export const PaginatedDropdownOptionList = forwardRef<
     onLoadOptionsRef.current = onLoadOptions;
     onChangeSearchTermRef.current = onChangeSearchTerm;
     getDropdownOptionsRef.current = getDropdownOptions;
+    onChangeAsyncOptionPagesMapRef.current = onChangeAsyncOptionPagesMap;
   }, [
     getDropdownOptions,
+    onChangeAsyncOptionPagesMap,
     onChangeSearchTerm,
     onChangeSelectedOption,
     onClose,
@@ -160,6 +169,7 @@ export const PaginatedDropdownOptionList = forwardRef<
     loadNextPage: loadNextAsyncOptions,
     errorMessage,
     reset: resetAsyncOptionState,
+    loadedPages,
   } = usePaginatedRecords(
     async ({ limit, offset }) => {
       if (getDropdownOptions) {
@@ -184,8 +194,14 @@ export const PaginatedDropdownOptionList = forwardRef<
       key: dataKey,
       revalidationKey: searchTerm,
       limit: limitProp,
+      loadedPagesMap: asyncOptionPagesMap,
     }
   );
+
+  useEffect(() => {
+    onChangeAsyncOptionPagesMapRef.current &&
+      onChangeAsyncOptionPagesMapRef.current(loadedPages);
+  }, [loadedPages]);
 
   useEffect(() => {
     if (!isInitialMountRef.current && onChangeSearchTermRef.current) {

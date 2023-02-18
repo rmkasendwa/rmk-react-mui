@@ -59,11 +59,12 @@ export interface ExternallyPaginatedTableCardProps<
   RecordRow extends BaseTableRow = any
 > extends Omit<TableProps<RecordRow>, 'rows'>,
     NonNullable<Pick<CardProps, 'title'>>,
-    Pick<UsePaginatedRecordsOptions, 'revalidationKey'> {
+    Pick<UsePaginatedRecordsOptions<RecordRow>, 'revalidationKey'> {
   recordsFinder: (
-    options: Pick<UsePaginatedRecordsOptions, 'limit' | 'offset'> & {
-      searchTerm: string;
-    }
+    options: Pick<
+      UsePaginatedRecordsOptions<RecordRow>,
+      'limit' | 'offset' | 'searchTerm'
+    >
   ) => Promise<PaginatedResponseData<RecordRow>>;
   recordKey?: string;
   limit?: number;
