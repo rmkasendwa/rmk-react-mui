@@ -32,11 +32,11 @@ import {
 import { mergeRefs } from 'react-merge-refs';
 
 import { LoadingProvider } from '../../contexts/LoadingContext';
+import { usePaginatedRecords } from '../../hooks/Utils';
 import {
-  UsePaginatedRecordsOptions,
-  usePaginatedRecords,
-} from '../../hooks/Utils';
-import { PaginatedResponseData } from '../../interfaces/Utils';
+  PaginatedRequestParams,
+  PaginatedResponseData,
+} from '../../interfaces/Utils';
 import { isDescendant } from '../../utils/html';
 import FieldValueDisplay from '../FieldValueDisplay';
 import PaginatedDropdownOptionList, {
@@ -98,9 +98,7 @@ export interface DataDropdownFieldProps
 
   // Async options
   getDropdownOptions?: (
-    options: Pick<UsePaginatedRecordsOptions, 'limit' | 'offset'> & {
-      searchTerm: string;
-    }
+    options: Pick<PaginatedRequestParams, 'limit' | 'offset' | 'searchTerm'>
   ) => Promise<PaginatedResponseData<DropdownOption> | DropdownOption[]>;
   callGetDropdownOptions?: 'always' | 'whenNoOptions';
 
@@ -403,30 +401,6 @@ export const DataDropdownField = forwardRef<
     }
   }, [selectedOption, sortOptions]);
 
-  const filteredOptions = useMemo(() => {
-    if (
-      !externallyPaginated &&
-      searchTerm &&
-      searchTerm !== selectedOptionDisplayString
-    ) {
-      const searchFilterTerms = searchTerm
-        .split(',')
-        .map((string) => string.trim().toLowerCase());
-      return options.filter(({ label, searchableLabel }) => {
-        if (typeof label !== 'string' && searchableLabel) {
-          label = searchableLabel;
-        }
-        return (
-          typeof label === 'string' &&
-          searchFilterTerms.some((searchFilterTerm) => {
-            return String(label).toLowerCase().match(searchFilterTerm);
-          })
-        );
-      });
-    }
-    return options;
-  }, [externallyPaginated, options, searchTerm, selectedOptionDisplayString]);
-
   if (value && loading && missingOptionValues.length > 0) {
     if (isTextVariant) {
       return <FieldValueDisplay {...{ label, value }} />;
@@ -711,9 +685,10 @@ export const DataDropdownField = forwardRef<
                       optionVariant,
                       multiple,
                       onSelectOption,
+                      searchTerm,
+                      options,
                     }}
                     {...PaginatedDropdownOptionListPropsRest}
-                    options={filteredOptions}
                     minWidth={
                       anchorRef.current
                         ? anchorRef.current.offsetWidth

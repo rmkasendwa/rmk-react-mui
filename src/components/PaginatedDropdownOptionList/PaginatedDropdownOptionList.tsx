@@ -25,8 +25,8 @@ import {
 } from 'react';
 
 import { DropdownOption as BaseDropdownOption } from '../../interfaces/Utils';
-import TextField, { TextFieldProps } from '../InputFields/TextField';
 import ReloadIconButton from '../ReloadIconButton';
+import SearchField, { SearchFieldProps } from '../SearchField';
 import DropdownOption, {
   DEFAULT_DROPDOWN_OPTION_HEIGHT,
   DropdownOptionVariant,
@@ -53,7 +53,8 @@ export interface PaginatedDropdownOptionListProps {
   CardProps?: CardProps;
   optionVariant?: DropdownOptionVariant;
   searchable?: boolean;
-  SearchFieldProps?: Partial<TextFieldProps>;
+  searchTerm?: string;
+  SearchFieldProps?: Partial<SearchFieldProps>;
 }
 
 const DEFAULT_DROPDOWN_MENU_MAX_HEIGHT = 200;
@@ -79,6 +80,7 @@ export const PaginatedDropdownOptionList = forwardRef<
     CardProps,
     optionVariant,
     searchable = false,
+    searchTerm: searchTermProp = '',
     SearchFieldProps = {},
   },
   ref
@@ -120,9 +122,13 @@ export const PaginatedDropdownOptionList = forwardRef<
     null
   );
 
-  const [searchTerm, setSearchTerm] = useState(''); // Search state
+  const [searchTerm, setSearchTerm] = useState(searchTermProp); // Search state
   const [scrolledToSelectedOption, setScrolledToSelectedOption] =
     useState(false);
+
+  useEffect(() => {
+    setSearchTerm(searchTermProp);
+  }, [searchTermProp]);
 
   // Filtering options
   useEffect(() => {
@@ -324,7 +330,7 @@ export const PaginatedDropdownOptionList = forwardRef<
                   px: 2,
                 }}
               >
-                <TextField
+                <SearchField
                   size="small"
                   placeholder="Search"
                   {...SearchFieldPropsRest}
