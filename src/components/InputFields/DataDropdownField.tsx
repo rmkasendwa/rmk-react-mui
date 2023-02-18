@@ -32,8 +32,11 @@ import {
 import { mergeRefs } from 'react-merge-refs';
 
 import { LoadingProvider } from '../../contexts/LoadingContext';
-import { useRecords } from '../../hooks/Utils';
-import { TAPIFunction } from '../../interfaces/Utils';
+import {
+  UsePaginatedRecordsOptions,
+  usePaginatedRecords,
+} from '../../hooks/Utils';
+import { PaginatedResponseData } from '../../interfaces/Utils';
 import { isDescendant } from '../../utils/html';
 import FieldValueDisplay from '../FieldValueDisplay';
 import PaginatedDropdownOptionList, {
@@ -94,10 +97,15 @@ export interface DataDropdownFieldProps
   PaginatedDropdownOptionListProps?: Partial<PaginatedDropdownOptionListProps>;
 
   // Async options
-  getDropdownOptions?: TAPIFunction<DropdownOption[]>;
+  getDropdownOptions?: (
+    options: Pick<UsePaginatedRecordsOptions, 'limit' | 'offset'> & {
+      searchTerm: string;
+    }
+  ) => Promise<PaginatedResponseData<DropdownOption> | DropdownOption[]>;
   callGetDropdownOptions?: 'always' | 'whenNoOptions';
 
   variant?: 'standard' | 'filled' | 'outlined' | 'text';
+  externallyPaginated?: boolean;
 }
 
 export function getDataDropdownFieldUtilityClass(slot: string): string {
@@ -146,6 +154,7 @@ export const DataDropdownField = forwardRef<
     onSelectOption,
     variant: variantProp,
     label,
+    externallyPaginated,
     ...rest
   } = props;
 
@@ -208,35 +217,39 @@ export const DataDropdownField = forwardRef<
     }
   );
 
+  const [searchTerm, setSearchTerm] = useState('');
+
   const {
     load: loadOptions,
     loading,
-    records: dropdownRecords,
+    allPageRecords: dropdownRecords,
     errorMessage,
-  } = useRecords(
-    async () => {
-      const shouldGetOptions = (() => {
-        switch (callGetDropdownOptions) {
-          case 'whenNoOptions':
-            return options.length <= 0;
-          case 'always':
-          default:
-            return true;
+  } = usePaginatedRecords(
+    async ({ limit, offset, searchTerm: baseSearchTerm }) => {
+      if (getDropdownOptions) {
+        const optionsResponse = await getDropdownOptions({
+          searchTerm: baseSearchTerm ?? searchTerm,
+          limit,
+          offset,
+        });
+        if (Array.isArray(optionsResponse)) {
+          return {
+            records: optionsResponse,
+            recordsTotalCount: optionsResponse.length,
+          };
         }
-      })();
-      if (getDropdownOptions && shouldGetOptions) {
-        return await getDropdownOptions();
+        return optionsResponse;
       }
-      return options;
+      return { records: options, recordsTotalCount: options.length };
     },
     {
       loadOnMount: false,
       autoSync: false,
       key: dataKey,
+      revalidationKey: searchTerm,
     }
   );
 
-  const [searchTerm, setSearchTerm] = useState('');
   const [open, setOpen] = useState(false);
   const [focused, setFocused] = useState(false);
 
@@ -280,10 +293,19 @@ export const DataDropdownField = forwardRef<
   }, [selectedOptions]);
 
   useEffect(() => {
-    if (open) {
+    const shouldLoadOptions = (() => {
+      switch (callGetDropdownOptions) {
+        case 'whenNoOptions':
+          return options.length <= 0;
+        case 'always':
+        default:
+          return true;
+      }
+    })();
+    if (open && shouldLoadOptions) {
       loadOptions();
     }
-  }, [loadOptions, open]);
+  }, [callGetDropdownOptions, loadOptions, open, options.length]);
 
   useEffect(() => {
     if (value) {
@@ -295,7 +317,7 @@ export const DataDropdownField = forwardRef<
         })
       );
     }
-  }, [errorMessage, loadOptions, options, value]);
+  }, [errorMessage, options, value]);
 
   useEffect(() => {
     if (missingOptionValues.length > 0 && !errorMessage) {
@@ -382,7 +404,11 @@ export const DataDropdownField = forwardRef<
   }, [selectedOption, sortOptions]);
 
   const filteredOptions = useMemo(() => {
-    if (searchTerm && searchTerm !== selectedOptionDisplayString) {
+    if (
+      !externallyPaginated &&
+      searchTerm &&
+      searchTerm !== selectedOptionDisplayString
+    ) {
       const searchFilterTerms = searchTerm
         .split(',')
         .map((string) => string.trim().toLowerCase());
@@ -399,7 +425,7 @@ export const DataDropdownField = forwardRef<
       });
     }
     return options;
-  }, [options, searchTerm, selectedOptionDisplayString]);
+  }, [externallyPaginated, options, searchTerm, selectedOptionDisplayString]);
 
   if (value && loading && missingOptionValues.length > 0) {
     if (isTextVariant) {
@@ -507,6 +533,9 @@ export const DataDropdownField = forwardRef<
             onChange={(event) => {
               if (searchable) {
                 setSearchTerm(event.target.value);
+                if (externallyPaginated) {
+                  loadOptions({ searchTerm: event.target.value });
+                }
                 onChangeSearchTerm && onChangeSearchTerm(event.target.value);
               }
             }}
@@ -522,11 +551,6 @@ export const DataDropdownField = forwardRef<
               })(),
               ref: anchorRef,
               readOnly: !searchable,
-              // inputComponent: forwardRef<HTMLInputElement, any>(
-              //   function ParentInput(inputProps, ref) {
-              //     return <input {...inputProps} ref={ref} />;
-              //   }
-              // ),
             }}
             value={(() => {
               if (focused && searchable) {
@@ -701,7 +725,7 @@ export const DataDropdownField = forwardRef<
                       setOpen(false);
                     }}
                     loadOptions={
-                      getDropdownOptions ? () => loadOptions(true) : undefined
+                      getDropdownOptions ? () => loadOptions() : undefined
                     }
                     onChangeSelectedOption={triggerChangeEvent}
                     {...{

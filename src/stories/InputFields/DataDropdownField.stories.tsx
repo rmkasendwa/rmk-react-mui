@@ -160,6 +160,38 @@ WithAsyncOptions.args = {
   },
 } as DataDropdownFieldProps;
 
+const externallyPaginatedDataset = Array.from({ length: 1000 }).map(
+  (_, index) => {
+    const value = `${index + 1}. ${lorem.generateWords(4)}`;
+    return {
+      label: value,
+      value,
+    };
+  }
+);
+export const ExternallyPaginated = Template.bind({});
+ExternallyPaginated.args = {
+  label: 'Dropdown With Async Options',
+  required: true,
+  getDropdownOptions: async ({ limit = 10, offset = 0, searchTerm }) => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(
+          externallyPaginatedDataset
+            .slice(offset, limit)
+            .filter(({ label }) => {
+              return (
+                !searchTerm ||
+                String(label).toLowerCase().match(searchTerm.toLowerCase())
+              );
+            })
+        );
+      }, 500);
+    });
+  },
+  externallyPaginated: true,
+} as DataDropdownFieldProps;
+
 export const WithOptionIcons = Template.bind({});
 WithOptionIcons.args = {
   label: 'Option Icons',
