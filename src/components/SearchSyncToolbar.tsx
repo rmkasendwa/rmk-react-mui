@@ -220,7 +220,9 @@ export const SearchSyncToolbar: FC<SearchSyncToolbarProps> = ({
               }}
             />
           </Grid>
-        ) : null}
+        ) : (
+          <Grid item xs />
+        )}
         {(() => {
           if (tools) {
             return Children.toArray(tools).map((tool, index) => {

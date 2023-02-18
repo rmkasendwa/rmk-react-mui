@@ -13,6 +13,7 @@ import {
   generateUtilityClass,
   generateUtilityClasses,
   inputBaseClasses,
+  useMediaQuery,
   useTheme,
   useThemeProps,
 } from '@mui/material';
@@ -33,6 +34,7 @@ import { mergeRefs } from 'react-merge-refs';
 
 import { isDescendant } from '../../utils/html';
 import FieldValueDisplay from '../FieldValueDisplay';
+import ModalPopup from '../ModalPopup';
 import PaginatedDropdownOptionList, {
   DropdownOption,
   PaginatedDropdownOptionListProps,
@@ -176,7 +178,10 @@ export const DataDropdownField = forwardRef<
   const { sx: WrapperPropsSx, ...WrapperPropsRest } = WrapperProps;
 
   const multiple = SelectProps?.multiple;
-  const { palette } = useTheme();
+
+  const { palette, breakpoints } = useTheme();
+
+  const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
 
   const [options, setOptions] = useState<DropdownOption[]>(optionsProp || []);
 
@@ -557,66 +562,103 @@ export const DataDropdownField = forwardRef<
           />
         );
       })()}
-      <Popper
-        open={open}
-        anchorEl={anchorRef.current}
-        transition
-        placement="bottom-start"
-        tabIndex={-1}
-        sx={{
-          zIndex: 1400,
-        }}
-      >
-        {({ TransitionProps }) => {
+      {(() => {
+        const optionsElement = (
+          <PaginatedDropdownOptionList
+            {...PaginatedDropdownOptionListPropsRest}
+            {...{
+              optionVariant,
+              multiple,
+              onSelectOption,
+              searchTerm,
+              options,
+              selectedOptions,
+              setSelectedOptions,
+              dataKey,
+              getDropdownOptions,
+              callGetDropdownOptions,
+              externallyPaginated,
+              limit,
+              ...(() => {
+                if (isSmallScreenSize) {
+                  return {
+                    CardProps: {
+                      sx: {
+                        border: 'none',
+                      },
+                    },
+                  };
+                }
+              })(),
+            }}
+            onLoadOptions={(options) => {
+              setOptions(options);
+            }}
+            minWidth={
+              anchorRef.current ? anchorRef.current.offsetWidth : undefined
+            }
+            maxHeight={dropdownListMaxHeight}
+            paging={optionPaging}
+            onClose={() => {
+              setOpen(false);
+            }}
+            onChangeSelectedOption={triggerChangeEvent}
+          />
+        );
+        if (isSmallScreenSize) {
           return (
-            <Grow {...TransitionProps} style={{ transformOrigin: '0 0 0' }}>
-              <Box tabIndex={-1}>
-                <ClickAwayListener
-                  onClickAway={(event) => {
-                    if (anchorRef.current) {
-                      setOpen(
-                        isDescendant(anchorRef.current, event.target as any)
-                      );
-                    }
-                  }}
-                >
-                  <PaginatedDropdownOptionList
-                    {...PaginatedDropdownOptionListPropsRest}
-                    {...{
-                      optionVariant,
-                      multiple,
-                      onSelectOption,
-                      searchTerm,
-                      options,
-                      selectedOptions,
-                      setSelectedOptions,
-                      dataKey,
-                      getDropdownOptions,
-                      callGetDropdownOptions,
-                      externallyPaginated,
-                      limit,
-                    }}
-                    onLoadOptions={(options) => {
-                      setOptions(options);
-                    }}
-                    minWidth={
-                      anchorRef.current
-                        ? anchorRef.current.offsetWidth
-                        : undefined
-                    }
-                    maxHeight={dropdownListMaxHeight}
-                    paging={optionPaging}
-                    onClose={() => {
-                      setOpen(false);
-                    }}
-                    onChangeSelectedOption={triggerChangeEvent}
-                  />
-                </ClickAwayListener>
-              </Box>
-            </Grow>
+            <ModalPopup
+              {...{ open }}
+              onClose={() => {
+                setOpen(false);
+              }}
+              CardBodyProps={{
+                sx: {
+                  p: 0,
+                },
+              }}
+              showActionsToolbar={false}
+              disableEscapeKeyDown={false}
+              disableAutoFocus={false}
+              enableCloseOnBackdropClick
+            >
+              {optionsElement}
+            </ModalPopup>
           );
-        }}
-      </Popper>
+        }
+        return (
+          <Popper
+            {...{ open }}
+            anchorEl={anchorRef.current}
+            transition
+            placement="bottom-start"
+            tabIndex={-1}
+            sx={{
+              zIndex: 1400,
+            }}
+          >
+            {({ TransitionProps }) => {
+              return (
+                <Grow {...TransitionProps} style={{ transformOrigin: '0 0 0' }}>
+                  <Box tabIndex={-1}>
+                    <ClickAwayListener
+                      onClickAway={(event) => {
+                        if (anchorRef.current) {
+                          setOpen(
+                            isDescendant(anchorRef.current, event.target as any)
+                          );
+                        }
+                      }}
+                    >
+                      {optionsElement}
+                    </ClickAwayListener>
+                  </Box>
+                </Grow>
+              );
+            }}
+          </Popper>
+        );
+      })()}
     </>
   );
 });
