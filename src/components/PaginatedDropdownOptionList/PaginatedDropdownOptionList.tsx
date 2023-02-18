@@ -52,6 +52,7 @@ export interface PaginatedDropdownOptionListProps {
   multiple?: boolean;
   loading?: boolean;
   onClose?: () => void;
+  onLoadOptions?: (options: DropdownOption[]) => void;
   onSelectOption?: (selectedOption: DropdownOption) => void;
   onChangeSelectedOption?: (selectedOptions: DropdownOption[]) => void;
   CardProps?: CardProps;
@@ -83,6 +84,7 @@ export const PaginatedDropdownOptionList = forwardRef<
     optionHeight = DEFAULT_DROPDOWN_OPTION_HEIGHT,
     paging = true,
     options: optionsProp,
+    onLoadOptions,
     multiple,
     onClose,
     loading: loadingProp,
@@ -101,16 +103,25 @@ export const PaginatedDropdownOptionList = forwardRef<
   const { sx: SearchFieldPropsSx, ...SearchFieldPropsRest } = SearchFieldProps;
 
   // Refs
+  const isInitialMount = useRef(true);
   const optionsRef = useRef(optionsProp);
   const onCloseRef = useRef(onClose);
   const onSelectOptionRef = useRef(onSelectOption);
   const onChangeSelectedOptionRef = useRef(onChangeSelectedOption);
+  const onLoadOptionsRef = useRef(onLoadOptions);
   useEffect(() => {
     optionsRef.current = optionsProp;
     onCloseRef.current = onClose;
     onSelectOptionRef.current = onSelectOption;
     onChangeSelectedOptionRef.current = onChangeSelectedOption;
-  }, [onChangeSelectedOption, onClose, onSelectOption, optionsProp]);
+    onLoadOptionsRef.current = onLoadOptions;
+  }, [
+    onChangeSelectedOption,
+    onClose,
+    onLoadOptions,
+    onSelectOption,
+    optionsProp,
+  ]);
 
   const defaultLimit = useMemo(() => {
     return Math.ceil(maxHeight / optionHeight) + 1;
@@ -130,8 +141,8 @@ export const PaginatedDropdownOptionList = forwardRef<
   const {
     load: loadOptions,
     loading,
-    allPageRecords: loadedOptions,
-    loaded: optionsLoaded,
+    allPageRecords: asyncOptions,
+    loaded: isAsyncOptionsLoaded,
     errorMessage,
   } = usePaginatedRecords(
     async ({ limit, offset, searchTerm: baseSearchTerm }) => {
@@ -160,16 +171,26 @@ export const PaginatedDropdownOptionList = forwardRef<
   );
 
   useEffect(() => {
-    if (getDropdownOptions) {
+    if (
+      getDropdownOptions &&
+      !isAsyncOptionsLoaded &&
+      (!optionsRef.current || optionsRef.current.length <= 0)
+    ) {
       loadOptions();
     }
-  }, [getDropdownOptions, loadOptions]);
+  }, [getDropdownOptions, loadOptions, isAsyncOptionsLoaded]);
 
-  const options = ((): typeof loadedOptions => {
-    if (getDropdownOptions) {
-      return loadedOptions;
+  useEffect(() => {
+    if (!isInitialMount.current && onLoadOptionsRef.current) {
+      onLoadOptionsRef.current(asyncOptions);
     }
-    if (optionsRef.current) {
+  }, [asyncOptions]);
+
+  const options = ((): typeof asyncOptions => {
+    if (getDropdownOptions && asyncOptions.length > 0) {
+      return asyncOptions;
+    }
+    if (optionsRef.current && optionsRef.current.length > 0) {
       return optionsRef.current;
     }
     return [];
@@ -361,6 +382,13 @@ export const PaginatedDropdownOptionList = forwardRef<
     selectedOptionsProp,
   ]);
 
+  useEffect(() => {
+    isInitialMount.current = false;
+    return () => {
+      isInitialMount.current = true;
+    };
+  }, []);
+
   const displayOptions = paging
     ? filteredOptions.slice(offset, offset + limit)
     : filteredOptions;
@@ -506,7 +534,7 @@ export const PaginatedDropdownOptionList = forwardRef<
             if (
               !loading &&
               !loadingProp &&
-              (!getDropdownOptions || optionsLoaded)
+              (!getDropdownOptions || isAsyncOptionsLoaded)
             ) {
               return (
                 <MenuItem disabled>
@@ -523,7 +551,8 @@ export const PaginatedDropdownOptionList = forwardRef<
         <>
           <Divider />
           <DropdownOption
-            onClick={() => {
+            onClick={(event) => {
+              event.preventDefault();
               const selectableOptions = (() => {
                 const selectedLockedOptions = selectedOptions
                   .map(({ value: selectedOptionValue }) => {
@@ -569,7 +598,8 @@ export const PaginatedDropdownOptionList = forwardRef<
         <>
           {displayOptions.length > 0 ? <Divider /> : null}
           <DropdownOption
-            onClick={() => {
+            onClick={(event) => {
+              event.preventDefault();
               loadOptions();
             }}
           >
