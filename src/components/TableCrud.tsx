@@ -107,7 +107,10 @@ export interface TableCrudProps<
       Pick<ModalFormProps<InitialValues>, 'validationSchema' | 'editableFields'>
     >,
     Pick<PageTitleProps, 'tools'>,
-    Pick<UsePaginatedRecordsOptions, 'revalidationKey' | 'autoSync'> {
+    Pick<
+      UsePaginatedRecordsOptions<RecordRow>,
+      'revalidationKey' | 'autoSync'
+    > {
   title?: ReactNode;
   children?:
     | ModalFormFunctionChildren<
@@ -121,9 +124,10 @@ export interface TableCrudProps<
     | ReactNode;
   description?: ReactNode;
   recordsFinder: (
-    options: Pick<UsePaginatedRecordsOptions, 'limit' | 'offset'> & {
-      searchTerm: string;
-    }
+    options: Pick<
+      UsePaginatedRecordsOptions<RecordRow>,
+      'limit' | 'offset' | 'searchTerm'
+    >
   ) => Promise<PaginatedResponseData<RecordRow>>;
   recordDetailsFinder?: (selectedRecordId: string) => Promise<RecordRow>;
   getEditableRecordInitialValues?: (record: RecordRow) => any;

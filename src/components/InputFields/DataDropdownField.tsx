@@ -189,6 +189,7 @@ export const DataDropdownField = forwardRef<
   const anchorRef = useRef<HTMLInputElement>(null);
   const onChangeRef = useRef(onChange);
   const optionsRef = useRef(options);
+  const asyncOptionPagesMapRef = useRef<Map<number, DropdownOption[]>>();
   useEffect(() => {
     onChangeRef.current = onChange;
     optionsRef.current = options;
@@ -618,6 +619,10 @@ export const DataDropdownField = forwardRef<
               setOpen(false);
             }}
             onChangeSelectedOption={triggerChangeEvent}
+            asyncOptionPagesMap={asyncOptionPagesMapRef.current}
+            onChangeAsyncOptionPagesMap={(asyncOptionPagesMap) => {
+              asyncOptionPagesMapRef.current = asyncOptionPagesMap;
+            }}
           />
         );
         if (isSmallScreenSize) {
