@@ -125,7 +125,7 @@ export const DataDropdownField = forwardRef<
     value,
     dataKey,
     options: optionsProp,
-    sortOptions = false,
+    sortOptions,
     onChange,
     onFocus,
     onBlur,
@@ -563,10 +563,8 @@ export const DataDropdownField = forwardRef<
                     searchable: true,
                     maxHeight:
                       dropdownListMaxHeight ?? window.innerHeight - 240,
-                    CardProps: {
-                      sx: {
-                        border: 'none',
-                      },
+                    sx: {
+                      border: 'none',
                     },
                   };
                 }

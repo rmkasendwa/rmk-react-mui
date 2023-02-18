@@ -162,7 +162,8 @@ export const PaginatedDropdownOptionList = forwardRef<
     dataKey,
     asyncOptionPagesMap,
     onChangeAsyncOptionPagesMap,
-    sortOptions,
+    sortOptions = false,
+    callGetDropdownOptions = 'whenNoOptions',
     ...rest
   } = omit(props, 'limit');
 
@@ -291,13 +292,14 @@ export const PaginatedDropdownOptionList = forwardRef<
   useEffect(() => {
     if (
       isInitialMountRef.current &&
-      getDropdownOptionsRef.current &&
-      !isAsyncOptionsLoaded &&
-      (!optionsRef.current || optionsRef.current.length <= 0)
+      ((getDropdownOptionsRef.current &&
+        !isAsyncOptionsLoaded &&
+        (!optionsRef.current || optionsRef.current.length <= 0)) ||
+        callGetDropdownOptions === 'always')
     ) {
       loadAsyncOptions();
     }
-  }, [loadAsyncOptions, isAsyncOptionsLoaded, searchTerm]);
+  }, [loadAsyncOptions, isAsyncOptionsLoaded, searchTerm, callGetDropdownOptions]);
 
   useEffect(() => {
     if (
