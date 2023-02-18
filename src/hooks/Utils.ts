@@ -365,7 +365,9 @@ export interface UsePaginatedRecordsOptions
 }
 
 export const usePaginatedRecords = <T>(
-  recordFinder: TAPIFunction<PaginatedResponseData<T>>,
+  recordFinder: (
+    options: PaginatedRequestParams
+  ) => Promise<PaginatedResponseData<T>>,
   {
     key,
     loadOnMount = true,
@@ -423,7 +425,7 @@ export const usePaginatedRecords = <T>(
       params.limit || (params.limit = defaultPaginationParams.limit);
       setLoadingPaginationParams(pick(params, 'offset', 'limit'));
       return loadFromAPIService(async () => {
-        const responseData = await recordFinderRef.current();
+        const responseData = await recordFinderRef.current({ ...params });
         const { records, recordsTotalCount } = responseData;
         setCurrentPageRecords(records);
         setRecordsTotalCount(recordsTotalCount);

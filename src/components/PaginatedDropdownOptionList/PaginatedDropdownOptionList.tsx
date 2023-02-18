@@ -500,7 +500,11 @@ export const PaginatedDropdownOptionList = forwardRef<
       {loadOptions && (
         <>
           {displayOptions.length > 0 ? <Divider /> : null}
-          <DropdownOption onClick={() => loadOptions()}>
+          <DropdownOption
+            onClick={() => {
+              loadOptions();
+            }}
+          >
             <Grid container sx={{ alignItems: 'center', gap: 1 }}>
               <Grid item>
                 <ReloadIconButton
