@@ -107,7 +107,7 @@ export const PaginatedDropdownOptionList = forwardRef<
   const { sx: SearchFieldPropsSx, ...SearchFieldPropsRest } = SearchFieldProps;
 
   // Refs
-  const isInitialMount = useRef(true);
+  const isInitialMountRef = useRef(true);
   const optionsRef = useRef(optionsProp);
   const onCloseRef = useRef(onClose);
   const onSelectOptionRef = useRef(onSelectOption);
@@ -161,7 +161,7 @@ export const PaginatedDropdownOptionList = forwardRef<
     errorMessage,
     reset: resetAsyncOptionState,
   } = usePaginatedRecords(
-    async ({ limit, offset, searchTerm }) => {
+    async ({ limit, offset }) => {
       if (getDropdownOptions) {
         const optionsResponse = await getDropdownOptions({
           searchTerm,
@@ -188,25 +188,25 @@ export const PaginatedDropdownOptionList = forwardRef<
   );
 
   useEffect(() => {
-    if (!isInitialMount.current && onChangeSearchTermRef.current) {
+    if (!isInitialMountRef.current && onChangeSearchTermRef.current) {
       onChangeSearchTermRef.current(searchTerm);
     }
   }, [searchTerm]);
 
   useEffect(() => {
     if (
-      isInitialMount.current &&
+      isInitialMountRef.current &&
       getDropdownOptionsRef.current &&
       !isAsyncOptionsLoaded &&
       (!optionsRef.current || optionsRef.current.length <= 0)
     ) {
-      loadAsyncOptions({ searchTerm });
+      loadAsyncOptions();
     }
   }, [loadAsyncOptions, isAsyncOptionsLoaded, searchTerm]);
 
   useEffect(() => {
     if (
-      !isInitialMount.current &&
+      !isInitialMountRef.current &&
       onLoadOptionsRef.current &&
       isAsyncOptionsLoaded
     ) {
@@ -215,16 +215,15 @@ export const PaginatedDropdownOptionList = forwardRef<
   }, [asyncOptions, isAsyncOptionsLoaded]);
 
   useEffect(() => {
-    if (getDropdownOptionsRef.current && externallyPaginated) {
+    if (
+      !isInitialMountRef.current &&
+      getDropdownOptionsRef.current &&
+      externallyPaginated &&
+      searchTerm != null
+    ) {
       resetAsyncOptionState();
-      loadAsyncOptions({ searchTerm });
     }
-  }, [
-    externallyPaginated,
-    loadAsyncOptions,
-    resetAsyncOptionState,
-    searchTerm,
-  ]);
+  }, [externallyPaginated, resetAsyncOptionState, searchTerm]);
 
   const options = ((): typeof asyncOptions => {
     if (getDropdownOptionsRef.current && asyncOptions.length > 0) {
@@ -313,7 +312,7 @@ export const PaginatedDropdownOptionList = forwardRef<
     if (setSelectedOptionsProp) {
       setSelectedOptionsProp(selectedOptions);
     }
-    if (!isInitialMount.current) {
+    if (!isInitialMountRef.current) {
       onChangeSelectedOptionRef.current &&
         onChangeSelectedOptionRef.current(selectedOptions);
       !multiple && onCloseRef.current && onCloseRef.current();
@@ -451,9 +450,9 @@ export const PaginatedDropdownOptionList = forwardRef<
   ]);
 
   useEffect(() => {
-    isInitialMount.current = false;
+    isInitialMountRef.current = false;
     return () => {
-      isInitialMount.current = true;
+      isInitialMountRef.current = true;
     };
   }, []);
 
@@ -642,8 +641,6 @@ export const PaginatedDropdownOptionList = forwardRef<
                 });
               })();
               setSelectedOptions(selectableOptions);
-              onChangeSelectedOption &&
-                onChangeSelectedOption(selectableOptions);
             }}
             height={optionHeight}
           >
@@ -657,7 +654,7 @@ export const PaginatedDropdownOptionList = forwardRef<
           <DropdownOption
             onClick={(event) => {
               event.preventDefault();
-              loadAsyncOptions({ searchTerm });
+              loadAsyncOptions();
             }}
             height={optionHeight}
           >

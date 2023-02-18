@@ -376,6 +376,8 @@ export const usePaginatedRecords = <T>(
     revalidationKey,
   }: UsePaginatedRecordsOptions = {}
 ) => {
+  // Refs
+  const isInitialMountRef = useRef(true);
   const recordFinderRef = useRef(recordFinder);
   useEffect(() => {
     recordFinderRef.current = recordFinder;
@@ -472,8 +474,17 @@ export const usePaginatedRecords = <T>(
   });
 
   useEffect(() => {
-    loadOnMount && load();
+    if (loadOnMount || !isInitialMountRef.current) {
+      load();
+    }
   }, [load, loadOnMount]);
+
+  useEffect(() => {
+    isInitialMountRef.current = false;
+    return () => {
+      isInitialMountRef.current = true;
+    };
+  }, []);
 
   return {
     currentPageRecords,
