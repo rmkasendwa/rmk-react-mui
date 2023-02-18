@@ -357,6 +357,18 @@ export const useRecords = <T>(
   };
 };
 
+export interface RecordFinderRequestController {
+  cancelRequest: () => void;
+}
+
+export type PaginatedRecordsFinderOptions = PaginatedRequestParams & {
+  getRequestController?: (controller: RecordFinderRequestController) => void;
+};
+
+export type PaginatedRecordsFinder<T> = (
+  options: PaginatedRecordsFinderOptions
+) => Promise<PaginatedResponseData<T>>;
+
 export interface UsePaginatedRecordsOptions<T>
   extends PaginatedRequestParams,
     UseQueryOptions {
@@ -365,9 +377,7 @@ export interface UsePaginatedRecordsOptions<T>
 }
 
 export const usePaginatedRecords = <T>(
-  recordFinder: (
-    options: PaginatedRequestParams
-  ) => Promise<PaginatedResponseData<T>>,
+  recordFinder: PaginatedRecordsFinder<T>,
   {
     key,
     loadOnMount = true,
@@ -382,6 +392,9 @@ export const usePaginatedRecords = <T>(
   const isInitialMountRef = useRef(true);
   const recordFinderRef = useRef(recordFinder);
   const loadedPagesMapRef = useRef(loadedPagesMap);
+  const pendingRecordRequestControllers = useRef<
+    RecordFinderRequestController[]
+  >([]);
   useEffect(() => {
     recordFinderRef.current = recordFinder;
     loadedPagesMapRef.current = loadedPagesMap;
@@ -427,9 +440,32 @@ export const usePaginatedRecords = <T>(
       params.offset || (params.offset = defaultPaginationParams.offset);
       params.limit || (params.limit = defaultPaginationParams.limit);
       return loadFromAPIService(async () => {
-        const { records, recordsTotalCount } = await recordFinderRef.current({
-          ...params,
-        });
+        let pendingRecordRequestController: RecordFinderRequestController;
+        const { records, recordsTotalCount } = await recordFinderRef
+          .current({
+            ...params,
+            getRequestController: (requestController) => {
+              pendingRecordRequestController = requestController;
+              pendingRecordRequestControllers.current.push(
+                pendingRecordRequestController
+              );
+            },
+          })
+          .finally(() => {
+            if (
+              pendingRecordRequestController &&
+              pendingRecordRequestControllers.current.includes(
+                pendingRecordRequestController
+              )
+            ) {
+              pendingRecordRequestControllers.current.splice(
+                pendingRecordRequestControllers.current.indexOf(
+                  pendingRecordRequestController
+                ),
+                1
+              );
+            }
+          });
         loadedPages.set(params.offset!, records);
         const allPageRecords = [...loadedPages.keys()]
           .sort((a, b) => a - b)
@@ -475,6 +511,12 @@ export const usePaginatedRecords = <T>(
     setCurrentPageRecords([]);
     setAllPageRecords([]);
     setRecordsTotalCount(0);
+    pendingRecordRequestControllers.current.forEach(
+      (pendingRecordRequestController) => {
+        pendingRecordRequestController.cancelRequest();
+      }
+    );
+    pendingRecordRequestControllers.current.splice(0);
   });
 
   useEffect(() => {

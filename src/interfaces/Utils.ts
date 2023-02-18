@@ -1,5 +1,4 @@
 import { MenuItemProps } from '@mui/material/MenuItem';
-import { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { ElementType, ReactNode } from 'react';
 
 export interface PaginatedRequestParams {
@@ -23,16 +22,6 @@ export interface ReduxAction {
 
 export interface RequestController {
   cancelRequest: () => void;
-}
-
-export type ResponseProcessor = <T = any>(
-  response: AxiosResponse<T>
-) => AxiosResponse<any>;
-
-export interface RequestOptions extends AxiosRequestConfig {
-  getRequestController?: (controller: RequestController) => void;
-  label?: string;
-  processResponse?: ResponseProcessor;
 }
 
 export interface LoadingProps {

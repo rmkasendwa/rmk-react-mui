@@ -30,10 +30,12 @@ import {
   useState,
 } from 'react';
 
-import { usePaginatedRecords } from '../../hooks/Utils';
+import {
+  PaginatedRecordsFinderOptions,
+  usePaginatedRecords,
+} from '../../hooks/Utils';
 import {
   DropdownOption as BaseDropdownOption,
-  PaginatedRequestParams,
   PaginatedResponseData,
 } from '../../interfaces/Utils';
 import ReloadIconButton from '../ReloadIconButton';
@@ -104,7 +106,7 @@ export interface PaginatedDropdownOptionListProps
 
   // Async options
   getDropdownOptions?: (
-    options: Pick<PaginatedRequestParams, 'limit' | 'offset' | 'searchTerm'>
+    options: PaginatedRecordsFinderOptions
   ) => Promise<PaginatedResponseData<DropdownOption> | DropdownOption[]>;
   onLoadOptions?: (options: DropdownOption[]) => void;
   callGetDropdownOptions?: 'always' | 'whenNoOptions';
@@ -251,12 +253,13 @@ export const PaginatedDropdownOptionList = forwardRef<
     reset: resetAsyncOptionState,
     loadedPages,
   } = usePaginatedRecords(
-    async ({ limit, offset }) => {
+    async ({ limit, offset, getRequestController }) => {
       if (getDropdownOptions) {
         const optionsResponse = await getDropdownOptions({
           searchTerm,
           limit,
           offset,
+          getRequestController,
         });
         if (Array.isArray(optionsResponse)) {
           return {
