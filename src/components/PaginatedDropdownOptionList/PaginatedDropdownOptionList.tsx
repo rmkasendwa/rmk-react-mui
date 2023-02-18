@@ -24,7 +24,12 @@ import {
   useState,
 } from 'react';
 
-import { DropdownOption as BaseDropdownOption } from '../../interfaces/Utils';
+import { usePaginatedRecords } from '../../hooks/Utils';
+import {
+  DropdownOption as BaseDropdownOption,
+  PaginatedRequestParams,
+  PaginatedResponseData,
+} from '../../interfaces/Utils';
 import ReloadIconButton from '../ReloadIconButton';
 import SearchField, { SearchFieldProps } from '../SearchField';
 import DropdownOption, {
@@ -37,7 +42,7 @@ export interface DropdownOption
     BaseDropdownOption {}
 
 export interface PaginatedDropdownOptionListProps {
-  options: DropdownOption[];
+  options?: DropdownOption[];
   selectedOptions?: DropdownOption[];
   setSelectedOptions?: Dispatch<SetStateAction<DropdownOption[]>>;
   minWidth?: number;
@@ -47,7 +52,6 @@ export interface PaginatedDropdownOptionListProps {
   multiple?: boolean;
   loading?: boolean;
   onClose?: () => void;
-  loadOptions?: () => void;
   onSelectOption?: (selectedOption: DropdownOption) => void;
   onChangeSelectedOption?: (selectedOptions: DropdownOption[]) => void;
   CardProps?: CardProps;
@@ -55,6 +59,14 @@ export interface PaginatedDropdownOptionListProps {
   searchable?: boolean;
   searchTerm?: string;
   SearchFieldProps?: Partial<SearchFieldProps>;
+
+  // Async options
+  getDropdownOptions?: (
+    options: Pick<PaginatedRequestParams, 'limit' | 'offset' | 'searchTerm'>
+  ) => Promise<PaginatedResponseData<DropdownOption> | DropdownOption[]>;
+  callGetDropdownOptions?: 'always' | 'whenNoOptions';
+  externallyPaginated?: boolean;
+  dataKey?: string;
 }
 
 const DEFAULT_DROPDOWN_MENU_MAX_HEIGHT = 200;
@@ -70,11 +82,11 @@ export const PaginatedDropdownOptionList = forwardRef<
     maxHeight = DEFAULT_DROPDOWN_MENU_MAX_HEIGHT,
     optionHeight = DEFAULT_DROPDOWN_OPTION_HEIGHT,
     paging = true,
-    options,
+    options: optionsProp,
     multiple,
     onClose,
-    loading,
-    loadOptions,
+    loading: loadingProp,
+    getDropdownOptions,
     onSelectOption,
     onChangeSelectedOption,
     CardProps,
@@ -82,24 +94,23 @@ export const PaginatedDropdownOptionList = forwardRef<
     searchable = false,
     searchTerm: searchTermProp = '',
     SearchFieldProps = {},
+    dataKey,
   },
   ref
 ) {
   const { sx: SearchFieldPropsSx, ...SearchFieldPropsRest } = SearchFieldProps;
 
   // Refs
-  const optionsRef = useRef(options);
+  const optionsRef = useRef(optionsProp);
   const onCloseRef = useRef(onClose);
-  const loadOptionsRef = useRef(loadOptions);
   const onSelectOptionRef = useRef(onSelectOption);
   const onChangeSelectedOptionRef = useRef(onChangeSelectedOption);
   useEffect(() => {
-    optionsRef.current = options;
+    optionsRef.current = optionsProp;
     onCloseRef.current = onClose;
-    loadOptionsRef.current = loadOptions;
     onSelectOptionRef.current = onSelectOption;
     onChangeSelectedOptionRef.current = onChangeSelectedOption;
-  }, [loadOptions, onChangeSelectedOption, onClose, onSelectOption, options]);
+  }, [onChangeSelectedOption, onClose, onSelectOption, optionsProp]);
 
   const defaultLimit = useMemo(() => {
     return Math.ceil(maxHeight / optionHeight) + 1;
@@ -112,6 +123,58 @@ export const PaginatedDropdownOptionList = forwardRef<
   const [limit, setLimit] = useState(defaultLimit);
   const [offset, setOffset] = useState(0);
 
+  const [searchTerm, setSearchTerm] = useState(searchTermProp);
+  const [scrolledToSelectedOption, setScrolledToSelectedOption] =
+    useState(false);
+
+  const {
+    load: loadOptions,
+    loading,
+    allPageRecords: loadedOptions,
+    loaded: optionsLoaded,
+    errorMessage,
+  } = usePaginatedRecords(
+    async ({ limit, offset, searchTerm: baseSearchTerm }) => {
+      if (getDropdownOptions) {
+        const optionsResponse = await getDropdownOptions({
+          searchTerm: baseSearchTerm ?? searchTerm,
+          limit,
+          offset,
+        });
+        if (Array.isArray(optionsResponse)) {
+          return {
+            records: optionsResponse,
+            recordsTotalCount: optionsResponse.length,
+          };
+        }
+        return optionsResponse;
+      }
+      return { records: [], recordsTotalCount: 0 };
+    },
+    {
+      loadOnMount: false,
+      autoSync: false,
+      key: dataKey,
+      revalidationKey: searchTerm,
+    }
+  );
+
+  useEffect(() => {
+    if (getDropdownOptions) {
+      loadOptions();
+    }
+  }, [getDropdownOptions, loadOptions]);
+
+  const options = ((): typeof loadedOptions => {
+    if (getDropdownOptions) {
+      return loadedOptions;
+    }
+    if (optionsRef.current) {
+      return optionsRef.current;
+    }
+    return [];
+  })();
+
   // Options state
   const [filteredOptions, setFilteredOptions] =
     useState<DropdownOption[]>(options); // Filtered options state
@@ -121,10 +184,6 @@ export const PaginatedDropdownOptionList = forwardRef<
   const [focusedOptionIndex, setFocusedOptionIndex] = useState<number | null>(
     null
   );
-
-  const [searchTerm, setSearchTerm] = useState(searchTermProp); // Search state
-  const [scrolledToSelectedOption, setScrolledToSelectedOption] =
-    useState(false);
 
   useEffect(() => {
     setSearchTerm(searchTermProp);
@@ -149,30 +208,23 @@ export const PaginatedDropdownOptionList = forwardRef<
       const { value } = option;
       const nextOptions = (() => {
         if (multiple) {
-          const options = [...selectedOptions];
-          const selectedOption = options.find(
+          const localOptions = [...selectedOptions];
+          const selectedOption = localOptions.find(
             ({ value: selectedOptionValue }) => {
               return selectedOptionValue === value;
             }
           );
           if (selectedOption) {
-            options.splice(options.indexOf(selectedOption), 1);
+            localOptions.splice(localOptions.indexOf(selectedOption), 1);
           } else {
-            options.push(option);
+            localOptions.push(option);
           }
-          return options.sort((a, b) => {
-            const aOption = optionsRef.current.find(
-              ({ value }) => value === a.value
-            );
-            const bOption = optionsRef.current.find(
-              ({ value }) => value === b.value
-            );
+          return localOptions.sort((a, b) => {
+            const aOption = options.find(({ value }) => value === a.value);
+            const bOption = options.find(({ value }) => value === b.value);
 
             if (aOption && bOption) {
-              return (
-                optionsRef.current.indexOf(aOption) -
-                optionsRef.current.indexOf(bOption)
-              );
+              return options.indexOf(aOption) - options.indexOf(bOption);
             }
             return 0;
           });
@@ -186,7 +238,7 @@ export const PaginatedDropdownOptionList = forwardRef<
         onCloseRef.current();
       }
     },
-    [multiple, selectedOptions]
+    [multiple, options, selectedOptions]
   );
 
   useEffect(() => {
@@ -385,76 +437,86 @@ export const PaginatedDropdownOptionList = forwardRef<
           tabIndex={-1}
         >
           <Box sx={{ height: offset * optionHeight }} />
-          {displayOptions.length > 0 ? (
-            displayOptions.map((option) => {
-              const {
-                value,
-                label,
-                icon,
-                description,
-                selectable,
-                isDropdownOption = true,
-                isDropdownOptionWrapped = true,
-                onClick,
-                component,
-                sx,
-              } = option;
-              if (isDropdownOption && isDropdownOptionWrapped) {
-                const classNames = [];
-                const isFocused =
-                  filteredOptions.indexOf(option) === focusedOptionIndex;
-                if (isFocused) {
-                  classNames.push('Mui-focusVisible');
-                }
-                const dropdownOptionElement = (
-                  <DropdownOption
-                    className={classNames.join(' ')}
-                    value={value}
-                    key={value}
-                    onClick={(event) => {
-                      triggerChangeEvent(option);
-                      onClick && onClick(event);
-                      onSelectOption && onSelectOption(option);
-                    }}
-                    selected={(() => {
-                      const selectedOptionValues = selectedOptions.map(
-                        ({ value }) => value
-                      );
-                      return selectedOptionValues.includes(value);
-                    })()}
-                    tabIndex={isFocused ? 0 : -1}
-                    height={optionHeight}
-                    variant={optionVariant}
-                    {...{ selectable, component, icon, sx }}
-                  >
-                    {label}
-                  </DropdownOption>
-                );
-                if (description) {
-                  return (
-                    <Tooltip
-                      title={description}
+          {(() => {
+            if (displayOptions.length > 0) {
+              return displayOptions.map((option) => {
+                const {
+                  value,
+                  label,
+                  icon,
+                  description,
+                  selectable,
+                  isDropdownOption = true,
+                  isDropdownOptionWrapped = true,
+                  onClick,
+                  component,
+                  sx,
+                } = option;
+                if (isDropdownOption && isDropdownOptionWrapped) {
+                  const classNames = [];
+                  const isFocused =
+                    filteredOptions.indexOf(option) === focusedOptionIndex;
+                  if (isFocused) {
+                    classNames.push('Mui-focusVisible');
+                  }
+                  const dropdownOptionElement = (
+                    <DropdownOption
+                      className={classNames.join(' ')}
+                      value={value}
                       key={value}
-                      placement="left"
-                      sx={{
-                        pointerEvents: 'none',
+                      onClick={(event) => {
+                        triggerChangeEvent(option);
+                        onClick && onClick(event);
+                        onSelectOption && onSelectOption(option);
                       }}
+                      selected={(() => {
+                        const selectedOptionValues = selectedOptions.map(
+                          ({ value }) => value
+                        );
+                        return selectedOptionValues.includes(value);
+                      })()}
+                      tabIndex={isFocused ? 0 : -1}
+                      height={optionHeight}
+                      variant={optionVariant}
+                      {...{ selectable, component, icon, sx }}
                     >
-                      {dropdownOptionElement}
-                    </Tooltip>
+                      {label}
+                    </DropdownOption>
                   );
+                  if (description) {
+                    return (
+                      <Tooltip
+                        title={description}
+                        key={value}
+                        placement="left"
+                        sx={{
+                          pointerEvents: 'none',
+                        }}
+                      >
+                        {dropdownOptionElement}
+                      </Tooltip>
+                    );
+                  }
+                  return dropdownOptionElement;
                 }
-                return dropdownOptionElement;
-              }
-              return <Fragment key={value}>{label}</Fragment>;
-            })
-          ) : !loadOptionsRef.current || !loading ? (
-            <MenuItem disabled>
-              <Typography variant="body2" color={palette.error.main}>
-                No options found
-              </Typography>
-            </MenuItem>
-          ) : null}
+                return <Fragment key={value}>{label}</Fragment>;
+              });
+            }
+
+            if (
+              !loading &&
+              !loadingProp &&
+              (!getDropdownOptions || optionsLoaded)
+            ) {
+              return (
+                <MenuItem disabled>
+                  <Typography variant="body2" color={palette.error.main}>
+                    No options found
+                  </Typography>
+                </MenuItem>
+              );
+            }
+          })()}
         </Box>
       </Box>
       {multiple && filteredOptions.length > 1 ? (
@@ -503,7 +565,7 @@ export const PaginatedDropdownOptionList = forwardRef<
           </DropdownOption>
         </>
       ) : null}
-      {loadOptions && (
+      {getDropdownOptions && (
         <>
           {displayOptions.length > 0 ? <Divider /> : null}
           <DropdownOption
@@ -514,7 +576,7 @@ export const PaginatedDropdownOptionList = forwardRef<
             <Grid container sx={{ alignItems: 'center', gap: 1 }}>
               <Grid item>
                 <ReloadIconButton
-                  {...{ loading }}
+                  {...{ loading: loading || loadingProp, errorMessage }}
                   sx={{
                     pointerEvents: 'none',
                     [`& .${iconButtonClasses.root}`]: {
@@ -523,7 +585,7 @@ export const PaginatedDropdownOptionList = forwardRef<
                   }}
                 />
               </Grid>
-              {!loading ? (
+              {!loadingProp ? (
                 <Grid item xs sx={{ minWidth: 0 }}>
                   Refresh
                 </Grid>
