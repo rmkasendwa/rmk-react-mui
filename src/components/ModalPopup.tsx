@@ -20,6 +20,7 @@ import {
   useTheme,
   useThemeProps,
 } from '@mui/material';
+import { BoxProps } from '@mui/material/Box';
 import clsx from 'clsx';
 import { omit } from 'lodash';
 import {
@@ -68,7 +69,7 @@ declare module '@mui/material/styles/components' {
 
 export interface ModalPopupProps
   extends Partial<Omit<ModalProps, 'children' | 'title'>> {
-  title: ReactNode;
+  title?: ReactNode;
   children?: ReactNode;
   loading?: boolean;
   errorMessage?: string;
@@ -77,9 +78,12 @@ export interface ModalPopupProps
   onClose?: () => void;
   SearchSyncToolbarProps?: Partial<SearchSyncToolbarProps>;
   CardProps?: Partial<CardProps>;
+  CardBodyProps?: Partial<BoxProps>;
   CloseActionButtonProps?: Partial<ButtonProps>;
   showCloseIconButton?: boolean;
   showCloseActionButton?: boolean;
+  showActionsToolbar?: boolean;
+  enableCloseOnBackdropClick?: boolean;
   modalElement?: ReactElement;
   getModalElement?: (modalElement: ReactElement) => ReactElement;
 }
@@ -108,12 +112,15 @@ export const ModalPopup = forwardRef<HTMLDivElement, ModalPopupProps>(
       actionButtons,
       SearchSyncToolbarProps = {},
       CardProps = {},
+      CardBodyProps = {},
       loading = false,
       CloseActionButtonProps = {},
       sx,
       className,
       showCloseIconButton = true,
       showCloseActionButton = true,
+      showActionsToolbar = true,
+      enableCloseOnBackdropClick = false,
       getModalElement,
       ...rest
     } = props;
@@ -142,6 +149,7 @@ export const ModalPopup = forwardRef<HTMLDivElement, ModalPopupProps>(
       sx: closeActionButtonPropsSx,
       ...closeActionButtonPropsRest
     } = CloseActionButtonProps;
+    const { sx: CardBodyPropsSx, ...CardBodyPropsRest } = CardBodyProps;
 
     // Refs
     const onCloseRef = useRef(onClose);
@@ -183,7 +191,7 @@ export const ModalPopup = forwardRef<HTMLDivElement, ModalPopupProps>(
             hasSearchTool={false}
             hasSyncTool={false}
             {...SearchSyncToolbarPropsRest}
-            title={title}
+            {...{ title }}
             sx={SearchSyncToolbarPropsSx}
           >
             {(() => {
@@ -197,58 +205,70 @@ export const ModalPopup = forwardRef<HTMLDivElement, ModalPopupProps>(
             })()}
           </SearchSyncToolbar>
           <Divider />
-          <Box sx={{ py: 0, px: 3, overflowY: 'auto', flex: 1 }}>
+          <Box
+            {...CardBodyPropsRest}
+            sx={{
+              py: 2,
+              px: 3,
+              overflowY: 'auto',
+              flex: 1,
+              ...CardBodyPropsSx,
+            }}
+          >
             {children ? (
               <Box
                 ref={(detailsContainerElement: HTMLDivElement | null) => {
                   setDetailsContainerElement(detailsContainerElement);
-                }}
-                sx={{
-                  py: 2,
                 }}
               >
                 {children}
               </Box>
             ) : null}
           </Box>
-          <Divider />
-          <Grid
-            container
-            spacing={2}
-            sx={{ py: 2, px: 3, flexDirection: 'row-reverse' }}
-          >
-            {(() => {
-              if (actionButtons) {
-                return Children.toArray(actionButtons).map((tool, index) => {
-                  return (
-                    <Grid item key={index} sx={{ minWidth: 0 }}>
-                      {tool}
-                    </Grid>
-                  );
-                });
-              }
-            })()}
-            {(() => {
-              if (showCloseActionButton) {
-                return (
-                  <Grid item>
-                    <Button
-                      variant="outlined"
-                      color="inherit"
-                      {...closeActionButtonPropsRest}
-                      onClick={onClose}
-                      sx={{
-                        color: alpha(palette.text.primary, 0.5),
-                        ...closeActionButtonPropsSx,
-                      }}
-                    >
-                      {closeActionButtonPropsChildren ?? 'Close'}
-                    </Button>
-                  </Grid>
-                );
-              }
-            })()}
-          </Grid>
+          {showActionsToolbar ? (
+            <>
+              <Divider />
+              <Grid
+                container
+                spacing={2}
+                sx={{ py: 2, px: 3, flexDirection: 'row-reverse' }}
+              >
+                {(() => {
+                  if (actionButtons) {
+                    return Children.toArray(actionButtons).map(
+                      (tool, index) => {
+                        return (
+                          <Grid item key={index} sx={{ minWidth: 0 }}>
+                            {tool}
+                          </Grid>
+                        );
+                      }
+                    );
+                  }
+                })()}
+                {(() => {
+                  if (showCloseActionButton) {
+                    return (
+                      <Grid item>
+                        <Button
+                          variant="outlined"
+                          color="inherit"
+                          {...closeActionButtonPropsRest}
+                          onClick={onClose}
+                          sx={{
+                            color: alpha(palette.text.primary, 0.5),
+                            ...closeActionButtonPropsSx,
+                          }}
+                        >
+                          {closeActionButtonPropsChildren ?? 'Close'}
+                        </Button>
+                      </Grid>
+                    );
+                  }
+                })()}
+              </Grid>
+            </>
+          ) : null}
         </Card>
       ));
 
@@ -261,7 +281,10 @@ export const ModalPopup = forwardRef<HTMLDivElement, ModalPopupProps>(
         className={clsx(classes.root)}
         open={open}
         onClose={(_, reason) => {
-          if (reason !== 'backdropClick' && onClose) {
+          if (
+            onClose &&
+            (enableCloseOnBackdropClick || reason !== 'backdropClick')
+          ) {
             onClose();
           }
         }}

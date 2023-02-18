@@ -404,6 +404,7 @@ export const usePaginatedRecords = <T>(
   const [currentPageRecords, setCurrentPageRecords] = useState<T[]>([]);
   const [allPageRecords, setAllPageRecords] = useState<T[]>([]);
   const [recordsTotalCount, setRecordsTotalCount] = useState(0);
+  const [hasNextPage, setHasNextPage] = useState(false);
 
   const defaultPaginationParams = useMemo(() => {
     return {
@@ -424,12 +425,12 @@ export const usePaginatedRecords = <T>(
           ...params,
         });
         loadedPages.set(params.offset!, records);
-        setAllPageRecords(
-          [...loadedPages.keys()]
-            .sort((a, b) => a - b)
-            .map((key) => loadedPages.get(key)!)
-            .flat()
-        );
+        const allPageRecords = [...loadedPages.keys()]
+          .sort((a, b) => a - b)
+          .map((key) => loadedPages.get(key)!)
+          .flat();
+        setAllPageRecords(allPageRecords);
+        setHasNextPage(allPageRecords.length < recordsTotalCount);
         setCurrentPageRecords(records);
         setRecordsTotalCount(recordsTotalCount);
         return responseData;
@@ -447,7 +448,7 @@ export const usePaginatedRecords = <T>(
 
   const loadNextPage = useCallback(
     (params?: Omit<PaginatedRequestParams, 'limit' | 'offset'>) => {
-      if (!loading) {
+      if (!loading && hasNextPage) {
         const lastPageOffset = [...loadedPages.keys()].sort((a, b) => b - a)[0];
         const lastPageRecords = loadedPages.get(lastPageOffset);
         if (lastPageRecords && lastPageOffset != null) {
@@ -459,7 +460,7 @@ export const usePaginatedRecords = <T>(
         }
       }
     },
-    [limitProp, load, loadedPages, loading]
+    [hasNextPage, limitProp, load, loadedPages, loading]
   );
 
   const resetRef = useRef(() => {

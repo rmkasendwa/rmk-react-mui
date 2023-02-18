@@ -68,6 +68,7 @@ export interface PaginatedDropdownOptionListProps {
   callGetDropdownOptions?: 'always' | 'whenNoOptions';
   externallyPaginated?: boolean;
   dataKey?: string;
+  limit?: number;
 }
 
 const DEFAULT_DROPDOWN_MENU_MAX_HEIGHT = 200;
@@ -98,6 +99,7 @@ export const PaginatedDropdownOptionList = forwardRef<
     SearchFieldProps = {},
     externallyPaginated,
     dataKey,
+    limit: limitProp = 100,
   },
   ref
 ) {
@@ -124,15 +126,19 @@ export const PaginatedDropdownOptionList = forwardRef<
     optionsProp,
   ]);
 
-  const defaultLimit = useMemo(() => {
+  const displayLimit = useMemo(() => {
     return Math.ceil(maxHeight / optionHeight) + 1;
   }, [maxHeight, optionHeight]);
+
+  if (limitProp < displayLimit) {
+    limitProp = displayLimit;
+  }
 
   const { palette } = useTheme();
   const [scrollableDropdownWrapper, setScrollableDropdownWrapper] =
     useState<HTMLDivElement | null>(null);
 
-  const [limit, setLimit] = useState(defaultLimit);
+  const [limit, setLimit] = useState(displayLimit);
   const [offset, setOffset] = useState(0);
 
   const [searchTerm, setSearchTerm] = useState(searchTermProp);
@@ -148,10 +154,10 @@ export const PaginatedDropdownOptionList = forwardRef<
     errorMessage,
     reset: resetAsyncOptionState,
   } = usePaginatedRecords(
-    async ({ limit, offset, searchTerm: baseSearchTerm }) => {
+    async ({ limit, offset, searchTerm }) => {
       if (getDropdownOptions) {
         const optionsResponse = await getDropdownOptions({
-          searchTerm: baseSearchTerm ?? searchTerm,
+          searchTerm,
           limit,
           offset,
         });
@@ -170,6 +176,7 @@ export const PaginatedDropdownOptionList = forwardRef<
       autoSync: false,
       key: dataKey,
       revalidationKey: searchTerm,
+      limit: limitProp,
     }
   );
 
@@ -378,7 +385,7 @@ export const PaginatedDropdownOptionList = forwardRef<
         const { scrollTop, scrollHeight, offsetHeight } =
           scrollableDropdownWrapper;
         if (scrollHeight - (scrollTop + offsetHeight) <= optionHeight * 5) {
-          loadNextAsyncOptions();
+          loadNextAsyncOptions({ searchTerm });
         }
       };
       scrollableDropdownWrapper.addEventListener('scroll', scrollCallback);
@@ -391,6 +398,7 @@ export const PaginatedDropdownOptionList = forwardRef<
     loadNextAsyncOptions,
     optionHeight,
     scrollableDropdownWrapper,
+    searchTerm,
   ]);
 
   useEffect(() => {
