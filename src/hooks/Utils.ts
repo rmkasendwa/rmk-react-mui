@@ -410,7 +410,7 @@ export const usePaginatedRecords = <T>(
   const [currentPageRecords, setCurrentPageRecords] = useState<T[]>([]);
   const [allPageRecords, setAllPageRecords] = useState<T[]>([]);
   const [recordsTotalCount, setRecordsTotalCount] = useState(0);
-  const [hasNextPage, setHasNextPage] = useState(false);
+  const [hasNextPage, setHasNextPage] = useState(true);
 
   const defaultPaginationParams = useMemo(() => {
     return {
