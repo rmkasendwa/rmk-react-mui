@@ -417,7 +417,7 @@ export const PaginatedDropdownOptionList = forwardRef<
         const { scrollTop, scrollHeight, offsetHeight } =
           scrollableDropdownWrapper;
         if (scrollHeight - (scrollTop + offsetHeight) <= optionHeight * 5) {
-          loadNextAsyncOptions({ searchTerm });
+          loadNextAsyncOptions();
         }
       };
       scrollableDropdownWrapper.addEventListener('scroll', scrollCallback);
