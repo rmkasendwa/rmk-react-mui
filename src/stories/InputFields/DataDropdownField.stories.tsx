@@ -176,16 +176,17 @@ ExternallyPaginated.args = {
   getDropdownOptions: async ({ limit = 10, offset = 0, searchTerm }) => {
     return new Promise((resolve) => {
       setTimeout(() => {
+        const filteredOptions = externallyPaginatedDataset.filter(
+          ({ label }) => {
+            return (
+              !searchTerm ||
+              String(label).toLowerCase().match(searchTerm.toLowerCase())
+            );
+          }
+        );
         resolve({
-          records: externallyPaginatedDataset
-            .slice(offset, offset + limit)
-            .filter(({ label }) => {
-              return (
-                !searchTerm ||
-                String(label).toLowerCase().match(searchTerm.toLowerCase())
-              );
-            }),
-          recordsTotalCount: externallyPaginatedDataset.length,
+          records: filteredOptions.slice(offset, offset + limit),
+          recordsTotalCount: filteredOptions.length,
         });
       }, 500);
     });

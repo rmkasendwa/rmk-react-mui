@@ -82,6 +82,7 @@ export interface DataDropdownFieldProps
         | 'getDropdownOptions'
         | 'callGetDropdownOptions'
         | 'externallyPaginated'
+        | 'limit'
       >
     > {
   disableEmptyOption?: boolean;
@@ -144,6 +145,7 @@ export const DataDropdownField = forwardRef<
     onSelectOption,
     variant: variantProp,
     label,
+    limit,
     externallyPaginated,
     ...rest
   } = props;
@@ -592,6 +594,7 @@ export const DataDropdownField = forwardRef<
                       getDropdownOptions,
                       callGetDropdownOptions,
                       externallyPaginated,
+                      limit,
                     }}
                     onLoadOptions={(options) => {
                       setOptions(options);
