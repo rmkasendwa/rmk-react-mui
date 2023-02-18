@@ -41,6 +41,7 @@ export interface DropdownOption
 export interface PaginatedDropdownOptionListProps {
   options?: DropdownOption[];
   selectedOptions?: DropdownOption[];
+  sortOptions?: boolean;
   minWidth?: number;
   maxHeight?: number;
   optionHeight?: number;
@@ -103,6 +104,7 @@ export const PaginatedDropdownOptionList = forwardRef<
     limit: limitProp = 100,
     asyncOptionPagesMap,
     onChangeAsyncOptionPagesMap,
+    sortOptions,
   },
   ref
 ) {
@@ -137,6 +139,24 @@ export const PaginatedDropdownOptionList = forwardRef<
     onSelectOption,
     optionsProp,
   ]);
+
+  const sortOptionsRef = useRef(
+    (
+      { label: aLabel, searchableLabel: aSearchableLabel }: DropdownOption,
+      { label: bLabel, searchableLabel: bSearchableLabel }: DropdownOption
+    ) => {
+      if (typeof aLabel === 'string' && typeof bLabel === 'string') {
+        return aLabel.localeCompare(bLabel);
+      }
+      if (
+        typeof aSearchableLabel === 'string' &&
+        typeof bSearchableLabel === 'string'
+      ) {
+        return aSearchableLabel.localeCompare(bSearchableLabel);
+      }
+      return 0;
+    }
+  );
 
   const displayLimit = useMemo(() => {
     return Math.ceil(maxHeight / optionHeight) + 1;
@@ -246,7 +266,7 @@ export const PaginatedDropdownOptionList = forwardRef<
       return optionsRef.current;
     }
     return [];
-  })();
+  })().sort(sortOptions ? sortOptionsRef.current : () => 0);
 
   // Options state
   const [filteredOptions, setFilteredOptions] =
