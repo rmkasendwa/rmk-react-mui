@@ -189,11 +189,13 @@ export const DataDropdownField = forwardRef<
   const anchorRef = useRef<HTMLInputElement>(null);
   const onChangeRef = useRef(onChange);
   const optionsRef = useRef(options);
+  const selectedOptionRef = useRef(selectedOption);
   const asyncOptionPagesMapRef = useRef<Map<number, DropdownOption[]>>();
   useEffect(() => {
     onChangeRef.current = onChange;
     optionsRef.current = options;
-  }, [onChange, options]);
+    selectedOptionRef.current = selectedOption;
+  }, [onChange, options, selectedOption]);
 
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -284,27 +286,19 @@ export const DataDropdownField = forwardRef<
   }, [value]);
 
   useEffect(() => {
-    if (selectedOption) {
-      const existingOption = optionsRef.current.find(
-        ({ value }) => value === selectedOption.value
-      );
-      if (!existingOption) {
-        setOptions((prevOptions) => {
-          return [...prevOptions, selectedOption];
-        });
-      }
-      setSelectedOptions((prevSelectedOptions) => {
-        const nextSelectedOptions = [selectedOption];
+    setSelectedOptions((prevSelectedOptions) => {
+      if (selectedOption?.value && selectedOptionRef.current) {
+        const nextSelectedOptions = [selectedOptionRef.current];
         if (
           nextSelectedOptions.map(({ value }) => value).join(';') !==
           prevSelectedOptions.map(({ value }) => value).join(';')
         ) {
           return nextSelectedOptions;
         }
-        return prevSelectedOptions;
-      });
-    }
-  }, [selectedOption, sortOptions]);
+      }
+      return prevSelectedOptions;
+    });
+  }, [selectedOption?.value]);
 
   const endAdornment = (
     <>
@@ -367,6 +361,7 @@ export const DataDropdownField = forwardRef<
               onClick={() => {
                 setOpen(true);
               }}
+              enableLoadingState={rest.enableLoadingState}
             />
           );
         }

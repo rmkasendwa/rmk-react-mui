@@ -82,6 +82,7 @@ export interface FieldValueDisplayProps<
   LabelProps?: Partial<FieldLabelProps>;
   DescriptionProps?: Partial<FieldLabelProps>;
   FieldValueProps?: Partial<FieldValueProps>;
+  enableLoadingState?: boolean;
 }
 
 export function getFieldValueDisplayUtilityClass(slot: string): string {
@@ -127,6 +128,7 @@ export const BaseFieldValueDisplay = <FieldValue extends ReactNode>(
     fieldValueEditor,
     onFieldValueUpdated,
     className,
+    enableLoadingState = true,
     sx,
     ...rest
   } = props;
@@ -201,7 +203,7 @@ export const BaseFieldValueDisplay = <FieldValue extends ReactNode>(
       {displayLabel && (
         <FieldLabel
           className={clsx(classes.label, LabelPropsClassName)}
-          {...{ required }}
+          {...{ enableLoadingState, required }}
           {...LabelPropsRest}
           sx={{
             ...(components?.MuiFieldValueDisplay?.styleOverrides?.label as any),
@@ -214,6 +216,7 @@ export const BaseFieldValueDisplay = <FieldValue extends ReactNode>(
       {description && (
         <FieldLabel
           className={clsx(classes.description, DescriptionPropsClassName)}
+          {...{ enableLoadingState }}
           {...DescriptionPropsRest}
           sx={{
             ...(components?.MuiFieldValueDisplay?.styleOverrides
@@ -226,7 +229,7 @@ export const BaseFieldValueDisplay = <FieldValue extends ReactNode>(
       )}
       <FieldValue
         className={clsx(classes.value, ValuePropsClassName)}
-        {...({} as any)}
+        {...({ enableLoadingState } as any)}
         {...FieldValuePropsRest}
         {...{
           editable,

@@ -93,6 +93,7 @@ export interface FieldValueProps<T extends ReactNode = ReactNode>
   editField?: ReactNode;
   editMode?: boolean;
   children?: T;
+  enableLoadingState?: boolean;
 }
 
 export function getFieldValueUtilityClass(slot: string): string {
@@ -128,6 +129,7 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
       editField,
       editMode: editModeProp,
       onChangeEditMode,
+      enableLoadingState = true,
       sx,
       ...rest
     } = props;
@@ -208,7 +210,7 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
       };
     }, []);
 
-    if (loading || errorMessage) {
+    if (enableLoadingState && (loading || errorMessage)) {
       return <LoadingTypography>{valueProp}</LoadingTypography>;
     }
 
