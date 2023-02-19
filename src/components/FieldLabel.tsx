@@ -2,6 +2,7 @@ import {
   ComponentsOverrides,
   ComponentsProps,
   ComponentsVariants,
+  Typography,
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
   generateUtilityClasses,
@@ -47,6 +48,7 @@ declare module '@mui/material/styles/components' {
 
 export interface FieldLabelProps extends LoadingTypographyProps {
   required?: boolean;
+  enableLoadingState?: boolean;
 }
 
 export function getFieldLabelUtilityClass(slot: string): string {
@@ -65,7 +67,14 @@ const slots = {
 export const FieldLabel = forwardRef<HTMLElement, FieldLabelProps>(
   function FieldLabel(inProps, ref) {
     const props = useThemeProps({ props: inProps, name: 'MuiFieldLabel' });
-    const { required, children, className, sx, ...rest } = props;
+    const {
+      required,
+      children,
+      className,
+      enableLoadingState = true,
+      sx,
+      ...rest
+    } = props;
 
     const classes = composeClasses(
       slots,
@@ -81,8 +90,10 @@ export const FieldLabel = forwardRef<HTMLElement, FieldLabelProps>(
 
     const { palette, components } = useTheme();
 
+    const LabelComponent = enableLoadingState ? LoadingTypography : Typography;
+
     return (
-      <LoadingTypography
+      <LabelComponent
         ref={ref as any}
         className={clsx(classes.root, className)}
         {...{ component: 'div' }}
@@ -107,7 +118,7 @@ export const FieldLabel = forwardRef<HTMLElement, FieldLabelProps>(
         }}
       >
         {children}
-      </LoadingTypography>
+      </LabelComponent>
     );
   }
 );
