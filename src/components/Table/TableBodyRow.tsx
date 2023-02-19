@@ -91,6 +91,7 @@ export const TableBodyRow = <T extends BaseTableRow>(
     defaultDateFormat,
     defaultDateTimeFormat,
     defaultCountryCode: rowDefaultCountryCode,
+    noWrap: rowNoWrap,
     ...rest
   } = props;
 
@@ -168,6 +169,7 @@ export const TableBodyRow = <T extends BaseTableRow>(
           dateFormat = defaultDateFormat,
           dateTimeFormat = defaultDateTimeFormat,
           defaultCountryCode = rowDefaultCountryCode,
+          noWrap = rowNoWrap,
         } = column;
         return (
           <TableBodyColumn
@@ -184,6 +186,7 @@ export const TableBodyRow = <T extends BaseTableRow>(
               dateFormat,
               dateTimeFormat,
               defaultCountryCode,
+              noWrap,
             }}
             {...column}
             onClick={() => {

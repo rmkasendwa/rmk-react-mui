@@ -24,14 +24,14 @@ export type TableColumnType =
   | 'currencyInput'
   | 'dateInput'
   | 'dropdownInput'
+  | 'ellipsisMenuTool'
   | 'id'
   | 'input'
   | 'numberInput'
   | 'percentageInput'
   | 'phonenumberInput'
   | 'rowAdder'
-  | 'tool'
-  | 'ellipsisMenuTool';
+  | 'tool';
 
 export type GetColumnValue<
   RowObject extends Record<string, any> = any,
@@ -79,10 +79,11 @@ export interface TableColumn<
     Partial<
       Pick<
         FieldValueProps,
-        | 'onFieldValueUpdated'
         | 'editField'
         | 'editMode'
         | 'editable'
+        | 'noWrap'
+        | 'onFieldValueUpdated'
         | 'validationRules'
       >
     > {
@@ -134,13 +135,14 @@ export interface BaseTableRow {
 export interface TableRowProps<RowObject extends Record<string, any> = any>
   extends Pick<
     TableColumn<RowObject>,
-    | 'decimalPlaces'
     | 'columnTypographyProps'
-    | 'editable'
-    | 'opaque'
-    | 'textTransform'
+    | 'decimalPlaces'
     | 'defaultColumnValue'
     | 'defaultCountryCode'
+    | 'editable'
+    | 'noWrap'
+    | 'opaque'
+    | 'textTransform'
   > {
   columns: Array<TableColumn<RowObject>>;
   row: RowObject;
