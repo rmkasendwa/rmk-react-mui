@@ -18,6 +18,7 @@ import { forwardRef } from 'react';
 
 import { GRAVATAR_URL } from '../constants';
 import { useLoadingContext } from '../contexts/LoadingContext';
+import { parseNameAndEmailAddressCombination } from '../utils';
 import ProfileAvatar, { ProfileAvatarProps } from './ProfileAvatar';
 
 export interface ProfileGravatarClasses {
@@ -70,7 +71,15 @@ const slots = {
 export const ProfileGravatar = forwardRef<HTMLDivElement, ProfileGravatarProps>(
   function ProfileGravatar(inProps, ref) {
     const props = useThemeProps({ props: inProps, name: 'MuiProfileGravatar' });
-    const { className, email, size, defaultAvatar, sx, ...rest } = props;
+    const {
+      className,
+      label,
+      email: emailProp,
+      size,
+      defaultAvatar,
+      sx,
+      ...rest
+    } = props;
 
     const classes = composeClasses(
       slots,
@@ -86,6 +95,16 @@ export const ProfileGravatar = forwardRef<HTMLDivElement, ProfileGravatarProps>(
 
     const { loading, errorMessage } = useLoadingContext();
 
+    const email = (() => {
+      if (label) {
+        const { email } = parseNameAndEmailAddressCombination(label);
+        if (email) {
+          return email;
+        }
+      }
+      return emailProp;
+    })();
+
     return (
       <Box
         ref={ref}
@@ -94,7 +113,11 @@ export const ProfileGravatar = forwardRef<HTMLDivElement, ProfileGravatarProps>(
           display: 'inline-flex',
         }}
       >
-        <ProfileAvatar {...{ size, defaultAvatar }} {...rest} sx={{ ...sx }} />
+        <ProfileAvatar
+          {...{ size, defaultAvatar, label }}
+          {...rest}
+          sx={{ ...sx }}
+        />
         {email && !loading && !errorMessage ? (
           <ProfileAvatar
             {...{ size }}
