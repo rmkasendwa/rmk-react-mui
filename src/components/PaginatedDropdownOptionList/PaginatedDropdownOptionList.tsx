@@ -38,6 +38,7 @@ import {
   DropdownOption as BaseDropdownOption,
   PaginatedResponseData,
 } from '../../interfaces/Utils';
+import InfiniteScrollBox from '../InfiniteScrollBox';
 import ReloadIconButton from '../ReloadIconButton';
 import SearchField, { SearchFieldProps } from '../SearchField';
 import DropdownOption, {
@@ -473,22 +474,6 @@ export const PaginatedDropdownOptionList = forwardRef<
   }, [optionHeight, paging, scrollableDropdownWrapper]);
 
   useEffect(() => {
-    if (scrollableDropdownWrapper && externallyPaginated) {
-      const scrollCallback = () => {
-        const { scrollTop, scrollHeight, offsetHeight } =
-          scrollableDropdownWrapper;
-        if (scrollHeight - (scrollTop + offsetHeight) <= optionHeight * 5) {
-          loadNextAsyncOptions();
-        }
-      };
-      scrollableDropdownWrapper.addEventListener('scroll', scrollCallback);
-      return () => {
-        scrollableDropdownWrapper.removeEventListener('scroll', scrollCallback);
-      };
-    }
-  }, [externallyPaginated, loadNextAsyncOptions, optionHeight, scrollableDropdownWrapper]);
-
-  useEffect(() => {
     setLimit(Math.ceil(maxHeight / optionHeight) + 1);
   }, [maxHeight, optionHeight]);
 
@@ -561,9 +546,12 @@ export const PaginatedDropdownOptionList = forwardRef<
           );
         }
       })()}
-      <Box
+      <InfiniteScrollBox
         ref={(scrollableDropdownWrapper: HTMLDivElement) => {
           setScrollableDropdownWrapper(scrollableDropdownWrapper);
+        }}
+        load={() => {
+          loadNextAsyncOptions();
         }}
         sx={{
           minWidth,
@@ -572,6 +560,7 @@ export const PaginatedDropdownOptionList = forwardRef<
           overflowY: 'auto',
         }}
         tabIndex={-1}
+        bottomThreshold={optionHeight * 5}
       >
         <Box
           component="ul"
@@ -666,7 +655,7 @@ export const PaginatedDropdownOptionList = forwardRef<
             }
           })()}
         </Box>
-      </Box>
+      </InfiniteScrollBox>
       {multiple && filteredOptions.length > 1 ? (
         <>
           <Divider />
