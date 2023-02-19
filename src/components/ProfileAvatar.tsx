@@ -14,6 +14,7 @@ import clsx from 'clsx';
 import { forwardRef, useMemo } from 'react';
 
 import { useLoadingContext } from '../contexts/LoadingContext';
+import { parseNameAndEmailAddressCombination } from '../utils';
 import ErrorSkeleton from './ErrorSkeleton';
 
 export interface ProfileAvatarClasses {
@@ -57,6 +58,7 @@ export interface ProfileAvatarProps extends AvatarProps {
   label?: string;
   defaultAvatar?: DefaultAvatar;
   size?: number;
+  enableLoadingState?: boolean;
 }
 
 export function getProfileAvatarUtilityClass(slot: string): string {
@@ -74,12 +76,13 @@ export const ProfileAvatar = forwardRef<HTMLDivElement, ProfileAvatarProps>(
   function ProfileAvatar(inProps, ref) {
     const props = useThemeProps({ props: inProps, name: 'MuiProfileAvatar' });
     const {
-      label,
+      label: label,
       sx,
       size = 32,
       defaultAvatar = 'standard',
       children,
       className,
+      enableLoadingState = true,
       ...rest
     } = props;
 
@@ -143,31 +146,32 @@ export const ProfileAvatar = forwardRef<HTMLDivElement, ProfileAvatarProps>(
     }, [defaultAvatar, label]);
 
     const { loading, errorMessage } = useLoadingContext();
+    if (enableLoadingState) {
+      if (loading) {
+        return (
+          <Skeleton
+            variant="circular"
+            sx={{
+              width: size,
+              height: size,
+              ...sx,
+            }}
+          />
+        );
+      }
 
-    if (loading) {
-      return (
-        <Skeleton
-          variant="circular"
-          sx={{
-            width: size,
-            height: size,
-            ...sx,
-          }}
-        />
-      );
-    }
-
-    if (errorMessage) {
-      return (
-        <ErrorSkeleton
-          variant="circular"
-          sx={{
-            width: size,
-            height: size,
-            ...sx,
-          }}
-        />
-      );
+      if (errorMessage) {
+        return (
+          <ErrorSkeleton
+            variant="circular"
+            sx={{
+              width: size,
+              height: size,
+              ...sx,
+            }}
+          />
+        );
+      }
     }
 
     return (
@@ -190,7 +194,8 @@ export const ProfileAvatar = forwardRef<HTMLDivElement, ProfileAvatarProps>(
         {(() => {
           if (label) {
             return (() => {
-              const labelWords = label
+              const { name } = parseNameAndEmailAddressCombination(label);
+              const labelWords = name
                 .normalize('NFD')
                 .replace(/[\u0300-\u036f]/g, '')
                 .replace(/[^\w\-_\s]/g, '')

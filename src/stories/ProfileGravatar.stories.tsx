@@ -22,3 +22,8 @@ Default.args = {
   label: 'Ronald Kasendwa',
   email: 'kasendwaronald@gmail.com',
 } as ProfileGravatarProps;
+
+export const WithEmailPartOfLabel = Template.bind({});
+WithEmailPartOfLabel.args = {
+  label: 'Ronald Kasendwa <kasendwaronald@gmail.com>',
+} as ProfileGravatarProps;
