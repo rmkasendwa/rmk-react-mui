@@ -471,6 +471,25 @@ export const BaseTable = <T extends BaseTableRow>(
         nextColumn.opaque ? OPAQUE_BG_CLASS_NAME : null
       );
 
+      // Nowrap state
+      switch (nextColumn.type) {
+        case 'boolean':
+        case 'checkbox':
+        case 'currency':
+        case 'date':
+        case 'dateTime':
+        case 'email':
+        case 'enum':
+        case 'id':
+        case 'number':
+        case 'percentage':
+        case 'string':
+        case 'time':
+        case 'timestamp':
+          nextColumn.noWrap ?? (nextColumn.noWrap = true);
+          break;
+      }
+
       return nextColumn;
     });
   }, [columnsProp, currencyCode, enableColumnDisplayToggle]);
