@@ -250,7 +250,6 @@ export const PaginatedDropdownOptionList = forwardRef<
     loaded: isAsyncOptionsLoaded,
     loadNextPage: loadNextAsyncOptions,
     errorMessage,
-    reset: resetAsyncOptionState,
     loadedPages,
   } = usePaginatedRecords(
     async ({ limit, offset, getRequestController }) => {
@@ -275,9 +274,9 @@ export const PaginatedDropdownOptionList = forwardRef<
       loadOnMount: false,
       autoSync: false,
       key: dataKey,
-      revalidationKey: searchTerm,
       limit: limitProp,
       loadedPagesMap: asyncOptionPagesMap,
+      searchTerm,
     }
   );
 
@@ -314,17 +313,6 @@ export const PaginatedDropdownOptionList = forwardRef<
       onLoadOptionsRef.current(asyncOptions);
     }
   }, [asyncOptions, isAsyncOptionsLoaded]);
-
-  useEffect(() => {
-    if (
-      !isInitialMountRef.current &&
-      getDropdownOptionsRef.current &&
-      externallyPaginated &&
-      searchTerm != null
-    ) {
-      resetAsyncOptionState();
-    }
-  }, [externallyPaginated, resetAsyncOptionState, searchTerm]);
 
   const options = ((): typeof asyncOptions => {
     if (getDropdownOptionsRef.current && asyncOptions.length > 0) {
@@ -494,7 +482,6 @@ export const PaginatedDropdownOptionList = forwardRef<
         }
       };
       scrollableDropdownWrapper.addEventListener('scroll', scrollCallback);
-      scrollCallback();
       return () => {
         scrollableDropdownWrapper.removeEventListener('scroll', scrollCallback);
       };
@@ -728,7 +715,9 @@ export const PaginatedDropdownOptionList = forwardRef<
       ) : null}
       {getDropdownOptions && (
         <>
-          {displayOptions.length > 0 ? <Divider /> : null}
+          {displayOptions.length > 0 || isAsyncOptionsLoaded ? (
+            <Divider />
+          ) : null}
           <DropdownOption
             onClick={(event) => {
               event.preventDefault();
@@ -748,7 +737,7 @@ export const PaginatedDropdownOptionList = forwardRef<
                   }}
                 />
               </Grid>
-              {!loadingProp ? (
+              {!loading && !loadingProp ? (
                 <Grid item xs sx={{ minWidth: 0 }}>
                   Refresh
                 </Grid>
