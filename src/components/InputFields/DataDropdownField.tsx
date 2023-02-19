@@ -553,6 +553,13 @@ export const DataDropdownField = forwardRef<
           <PaginatedDropdownOptionList
             paging={optionPaging}
             {...PaginatedDropdownOptionListPropsRest}
+            {...(() => {
+              if (isTextVariant) {
+                return {
+                  searchable: true,
+                };
+              }
+            })()}
             {...{
               maxHeight: dropdownListMaxHeight,
               ...(() => {
