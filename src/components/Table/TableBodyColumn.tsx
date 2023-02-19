@@ -128,6 +128,7 @@ export const TableBodyColumn = forwardRef<
     dateFormat,
     dateTimeFormat,
     defaultCountryCode,
+    noWrap,
   } = props;
 
   const classes = composeClasses(
@@ -357,14 +358,15 @@ export const TableBodyColumn = forwardRef<
         }}
       >
         <FieldValue
-          {...columnTypographyPropsRest}
           {...{
             editable,
             editMode,
             onFieldValueUpdated,
             editField,
             validationRules,
+            noWrap,
           }}
+          {...columnTypographyPropsRest}
           editField={(() => {
             if (getEditField) {
               return getEditField(row, column);

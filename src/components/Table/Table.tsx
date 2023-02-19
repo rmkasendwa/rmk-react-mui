@@ -118,18 +118,19 @@ export interface TableProps<RowObject extends Record<string, any> = any>
   extends Partial<Pick<MuiBaseTableProps, 'onClick' | 'sx' | 'className'>>,
     Pick<
       TableRowProps<RowObject>,
-      | 'columns'
-      | 'generateRowData'
-      | 'decimalPlaces'
-      | 'textTransform'
-      | 'onClickRow'
-      | 'defaultColumnValue'
       | 'columnTypographyProps'
-      | 'minColumnWidth'
-      | 'editable'
+      | 'columns'
+      | 'decimalPlaces'
+      | 'defaultColumnValue'
+      | 'defaultCountryCode'
       | 'defaultDateFormat'
       | 'defaultDateTimeFormat'
-      | 'defaultCountryCode'
+      | 'editable'
+      | 'generateRowData'
+      | 'minColumnWidth'
+      | 'noWrap'
+      | 'onClickRow'
+      | 'textTransform'
     >,
     Pick<
       TableColumnToggleIconButtonProps<RowObject>,
@@ -257,6 +258,7 @@ export const BaseTable = <T extends BaseTableRow>(
     defaultDateTimeFormat = 'MMM dd, yyyy hh:mm aa',
     defaultCountryCode,
     currencyCode,
+    noWrap,
     sx,
     ...rest
   } = props;
@@ -996,18 +998,19 @@ export const BaseTable = <T extends BaseTableRow>(
                   >
                     <TableBodyRow
                       {...{
-                        row,
-                        decimalPlaces,
-                        textTransform,
-                        onClickRow,
-                        generateRowData,
-                        defaultColumnValue,
                         columnTypographyProps,
-                        minColumnWidth,
-                        editable,
+                        decimalPlaces,
+                        defaultColumnValue,
+                        defaultCountryCode,
                         defaultDateFormat,
                         defaultDateTimeFormat,
-                        defaultCountryCode,
+                        editable,
+                        generateRowData,
+                        minColumnWidth,
+                        noWrap,
+                        onClickRow,
+                        row,
+                        textTransform,
                       }}
                       columns={displayingColumns}
                       getRowProps={forEachRowProps}
@@ -1120,10 +1123,10 @@ export const BaseTable = <T extends BaseTableRow>(
           if (filteredCount >= 0) {
             const paginationProps: Pick<
               TablePaginationProps,
-              | 'page'
-              | 'rowsPerPageOptions'
-              | 'rowsPerPage'
               | 'onRowsPerPageChange'
+              | 'page'
+              | 'rowsPerPage'
+              | 'rowsPerPageOptions'
             > = {
               page: pageIndex,
               rowsPerPageOptions: [
