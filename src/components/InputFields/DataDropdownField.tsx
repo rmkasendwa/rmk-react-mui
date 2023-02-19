@@ -308,7 +308,10 @@ export const DataDropdownField = forwardRef<
 
   const endAdornment = (
     <>
-      {showClearButton && selectedOptions.length > 0 && !disabled ? (
+      {showClearButton &&
+      selectedOptions.length > 0 &&
+      !disabled &&
+      !focused ? (
         <Tooltip title="Clear">
           <IconButton
             className="data-dropdown-input-clear-button"
@@ -537,6 +540,7 @@ export const DataDropdownField = forwardRef<
                 })(),
               },
             }}
+            showClearButton={!focused}
             sx={{
               '& .data-dropdown-input-clear-button': {
                 visibility: 'hidden',
