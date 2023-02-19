@@ -1,3 +1,15 @@
+/**
+ * Parses the input string to find a name and email address. The input string is returned trimed as a name if no email address is found.
+ *
+ * @param inputName The label that includes a name and email address.
+ * @returns The parsed result.
+ *
+ * @example
+ * parseNameAndEmailAddressCombination("John Doe <john@example.com>"); -> { name: "John Doe", email: "john@example.com" }
+ *
+ * @example
+ * parseNameAndEmailAddressCombination("John Doe"); -> { name: "John Doe" }
+ */
 export const parseNameAndEmailAddressCombination = (
   inputName: string
 ): {
