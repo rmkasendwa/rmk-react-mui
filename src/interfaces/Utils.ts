@@ -96,11 +96,11 @@ export type ExoticDataType =
   | 'checkbox'
   | 'currency'
   | 'dateTime'
-  | 'timestamp'
+  | 'email'
   | 'percentage'
   | 'phoneNumber'
   | 'time'
-  | 'email';
+  | 'timestamp';
 
 export type DropdownOptionValue = string | number;
 
