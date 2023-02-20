@@ -62,7 +62,7 @@ import ModalForm, {
   ModalFormProps,
 } from './ModalForm';
 import { PageTitleProps } from './PageTitle';
-import SearchSyncToolbar from './SearchSyncToolbar';
+import SearchSyncToolbar, { SearchSyncToolbarProps } from './SearchSyncToolbar';
 import Table from './Table';
 import { TableProps } from './Table/Table';
 
@@ -161,6 +161,8 @@ export interface TableCrudProps<
 
   getExtraRowTools?: (record: RecordRow) => ReactNode;
   extraActionsColumnWidth?: number;
+
+  SearchSyncToolbarProps?: Partial<SearchSyncToolbarProps>;
 }
 
 export function getTableCrudUtilityClass(slot: string): string {
@@ -225,6 +227,7 @@ const BaseTableCrud = <
     autoSync = true,
     getExtraRowTools,
     extraActionsColumnWidth,
+    SearchSyncToolbarProps = {},
     ...rest
   } = omit(props, 'labelPlural', 'labelSingular');
 
@@ -255,6 +258,9 @@ const BaseTableCrud = <
     sx: PaginatedTableWrapperPropsSx,
     ...PaginatedTableWrapperPropsRest
   } = PaginatedTableWrapperProps;
+
+  const { sx: SearchSyncToolbarPropsSx, ...SearchSyncToolbarPropsRest } =
+    SearchSyncToolbarProps;
 
   // Refs
   const getEditableRecordInitialValuesRef = useRef(
@@ -494,6 +500,7 @@ const BaseTableCrud = <
 
   const toolbarElement = (
     <SearchSyncToolbar
+      {...SearchSyncToolbarPropsRest}
       {...{ load, loading, errorMessage, searchTerm }}
       title={(() => {
         if (title) {
@@ -538,6 +545,7 @@ const BaseTableCrud = <
         [`.${outlinedInputClasses.root}`]: {
           bgcolor: palette.background.paper,
         },
+        ...SearchSyncToolbarPropsSx,
       }}
     />
   );
