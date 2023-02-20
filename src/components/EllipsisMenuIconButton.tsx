@@ -143,7 +143,7 @@ export const EllipsisMenuIconButton = forwardRef<
         anchorEl={anchorRef.current}
         transition
         placement="bottom-end"
-        sx={{ zIndex: 999 }}
+        sx={{ zIndex: 9999 }}
       >
         {({ TransitionProps }) => {
           return (

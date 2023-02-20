@@ -514,12 +514,26 @@ export const usePaginatedRecords = <T>(
     loadedPages.clear();
     recordsTotalCountRef.current = 0;
     hasNextPageRef.current = true;
-    pendingRecordRequestControllers.current.forEach(
-      (pendingRecordRequestController) => {
-        pendingRecordRequestController.cancelRequest();
+    const requestControllersToClear = [
+      ...pendingRecordRequestControllers.current,
+    ];
+    requestControllersToClear.forEach((pendingRecordRequestController) => {
+      pendingRecordRequestController.cancelRequest();
+    });
+    requestControllersToClear.forEach((pendingRecordRequestController) => {
+      if (
+        pendingRecordRequestControllers.current.includes(
+          pendingRecordRequestController
+        )
+      ) {
+        pendingRecordRequestControllers.current.splice(
+          pendingRecordRequestControllers.current.indexOf(
+            pendingRecordRequestController
+          ),
+          1
+        );
       }
-    );
-    pendingRecordRequestControllers.current.splice(0);
+    });
     baseReset; // Run to reset completely
   });
 
