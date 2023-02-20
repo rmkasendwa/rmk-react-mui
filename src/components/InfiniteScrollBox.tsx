@@ -10,7 +10,7 @@ import {
 } from '@mui/material';
 import Box from '@mui/material/Box';
 import clsx from 'clsx';
-import { ReactNode, forwardRef, useRef, useState } from 'react';
+import { ReactNode, forwardRef, useEffect, useRef, useState } from 'react';
 import { mergeRefs } from 'react-merge-refs';
 
 import {
@@ -57,6 +57,10 @@ export interface InfiniteScrollBoxProps
   paging?: boolean;
   dataElements?: ReactNode[];
   dataElementLength?: number;
+  focusedElementIndex?: number;
+  onChangeFocusedDataElement?: (dataElementIndex: number) => void;
+  onSelectDataElement?: (dataElementIndex: number) => void;
+  onClose?: () => void;
 }
 
 export function getInfiniteScrollBoxUtilityClass(slot: string): string {
@@ -86,6 +90,10 @@ export const InfiniteScrollBox = forwardRef<
     children,
     paging = false,
     dataElements,
+    onSelectDataElement,
+    onClose,
+    focusedElementIndex: focusedElementIndexProp,
+    onChangeFocusedDataElement,
     ...rest
   } = props;
 
@@ -101,7 +109,18 @@ export const InfiniteScrollBox = forwardRef<
     })()
   );
 
+  const isInitialMountRef = useRef(true);
   const elementRef = useRef<HTMLDivElement>();
+  const loadRef = useRef(load);
+  const onChangeFocusedDataElementRef = useRef(onChangeFocusedDataElement);
+  const onSelectDataElementRef = useRef(onSelectDataElement);
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    loadRef.current = load;
+    onChangeFocusedDataElementRef.current = onChangeFocusedDataElement;
+    onSelectDataElementRef.current = onSelectDataElement;
+    onCloseRef.current = onClose;
+  }, [load, onChangeFocusedDataElement, onClose, onSelectDataElement]);
 
   const limit = (() => {
     return (
@@ -123,13 +142,83 @@ export const InfiniteScrollBox = forwardRef<
     invertScrollDirection,
     onChangeScrollLength: (scrollLength) => {
       const { scrollTop } = scrollLength;
-      if (dataElementLength && dataElementLength > 0) {
+      if (dataElementLength) {
         setOffset(Math.floor(scrollTop / dataElementLength));
       }
       onChangeScrollLength && onChangeScrollLength(scrollLength);
     },
     element: elementRef.current,
   });
+
+  const [focusedElementIndex, setFocusedElementIndex] = useState(0);
+
+  useEffect(() => {
+    if (focusedElementIndexProp != null) {
+      setFocusedElementIndex(focusedElementIndexProp);
+    }
+  }, [focusedElementIndexProp]);
+
+  useEffect(() => {
+    if (!isInitialMountRef.current) {
+      onChangeFocusedDataElementRef.current &&
+        onChangeFocusedDataElementRef.current(focusedElementIndex);
+    }
+  }, [focusedElementIndex]);
+
+  useEffect(() => {
+    if (dataElements && dataElementLength) {
+      const keydownCallback = (event: KeyboardEvent) => {
+        event.preventDefault();
+        const nextFocusedOptionIndex = (() => {
+          switch (event.key) {
+            case 'ArrowUp':
+              if (!loadRef.current || focusedElementIndex > 0) {
+                return (
+                  (!!focusedElementIndex
+                    ? focusedElementIndex
+                    : dataElements.length) - 1
+                );
+              }
+              return 0;
+            case 'ArrowDown':
+              return (focusedElementIndex + 1) % dataElements.length;
+            case 'Enter':
+              if (focusedElementIndex != null) {
+                onSelectDataElementRef.current &&
+                  onSelectDataElementRef.current(focusedElementIndex);
+              }
+              break;
+            case 'Escape':
+              onCloseRef.current && onCloseRef.current();
+              break;
+          }
+        })();
+        if (
+          nextFocusedOptionIndex != null &&
+          elementRef.current?.offsetHeight
+        ) {
+          setFocusedElementIndex(nextFocusedOptionIndex);
+          if (elementRef.current) {
+            // TODO: Scroll to element if not visible
+            if (nextFocusedOptionIndex > offset + limit - 1) {
+            } else {
+            }
+          }
+        }
+      };
+      window.addEventListener('keydown', keydownCallback);
+      return () => {
+        window.removeEventListener('keydown', keydownCallback);
+      };
+    }
+  }, [dataElementLength, dataElements, focusedElementIndex, limit, offset]);
+
+  useEffect(() => {
+    isInitialMountRef.current = false;
+    return () => {
+      isInitialMountRef.current = true;
+    };
+  }, []);
 
   return (
     <Box
