@@ -225,19 +225,18 @@ export const PaginatedDropdownOptionList = forwardRef<
     }
   );
 
-  const displayLimit = useMemo(() => {
+  const limit = useMemo(() => {
     return Math.ceil(maxHeight / optionHeight) + 1;
   }, [maxHeight, optionHeight]);
 
-  if (limitProp < displayLimit) {
-    limitProp = displayLimit;
+  if (limitProp < limit) {
+    limitProp = limit;
   }
 
   const { palette } = useTheme();
   const [scrollableDropdownWrapper, setScrollableDropdownWrapper] =
     useState<HTMLDivElement | null>(null);
 
-  const [limit, setLimit] = useState(displayLimit);
   const [offset, setOffset] = useState(0);
 
   const [searchTerm, setSearchTerm] = useState(searchTermProp);
@@ -472,10 +471,6 @@ export const PaginatedDropdownOptionList = forwardRef<
       };
     }
   }, [optionHeight, paging, scrollableDropdownWrapper]);
-
-  useEffect(() => {
-    setLimit(Math.ceil(maxHeight / optionHeight) + 1);
-  }, [maxHeight, optionHeight]);
 
   useEffect(() => {
     if (
