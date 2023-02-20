@@ -243,14 +243,17 @@ export interface UseRecordOptions<T> extends UseQueryOptions {
   defaultValue?: T;
 }
 
-export const useRecord = <T>(
-  recordFinder: TAPIFunction<T>,
+export const useRecord = <
+  LoadableRecord = any,
+  LoadFunction extends TAPIFunction<LoadableRecord> = TAPIFunction<LoadableRecord>
+>(
+  recordFinder?: LoadFunction,
   {
     defaultValue,
     key,
     loadOnMount = true,
     autoSync = true,
-  }: UseRecordOptions<T> = {}
+  }: UseRecordOptions<LoadableRecord> = {}
 ) => {
   // Refs
   const nextSyncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -260,7 +263,7 @@ export const useRecord = <T>(
   }, [recordFinder]);
 
   const {
-    load: apiServiceLoad,
+    load: baseLoad,
     loading,
     errorMessage,
     busy,
@@ -270,11 +273,20 @@ export const useRecord = <T>(
   } = useAPIService(defaultValue!, key, loadOnMount);
 
   const load = useCallback(
-    (polling = false) => {
-      return apiServiceLoad(recordFinderRef.current, undefined, polling);
+    (...args: any) => {
+      return baseLoad(() => {
+        if (recordFinderRef.current) {
+          return recordFinderRef.current(...args);
+        }
+        return Promise.resolve();
+      });
     },
-    [apiServiceLoad]
-  );
+    [baseLoad]
+  ) as LoadFunction;
+
+  const poll = useCallback(() => {
+    return baseLoad(recordFinderRef.current, undefined, true);
+  }, [baseLoad]);
 
   useEffect(() => {
     loadOnMount && load();
@@ -288,7 +300,7 @@ export const useRecord = <T>(
           clearTimeout(nextSyncTimeoutRef.current);
         }
         nextSyncTimeoutRef.current = setTimeout(() => {
-          load(true);
+          poll();
         }, DEFAULT_SYNC_TIMEOUT);
       };
       const visiblityChangeEventCallback = (event?: Event) => {
@@ -306,7 +318,7 @@ export const useRecord = <T>(
             blurTime != null &&
             Date.now() - blurTime >= WINDOW_BLUR_THRESHOLD
           ) {
-            load(true);
+            poll();
           }
         }
       };
@@ -326,33 +338,39 @@ export const useRecord = <T>(
         }
       };
     }
-  }, [autoSync, busy, errorMessage, load, loading]);
+  }, [autoSync, busy, errorMessage, loading, poll]);
 
   return {
     load,
     loading,
     errorMessage,
     record: record ?? null,
-    setRecord: setRecord as Dispatch<SetStateAction<T | null>>,
+    setRecord: setRecord as Dispatch<SetStateAction<LoadableRecord | null>>,
     busy,
     ...rest,
   };
 };
 
-export const useRecords = <T>(
-  recordFinder: TAPIFunction<T[]>,
-  { loadOnMount = true, autoSync = true, ...inputRest }: UseQueryOptions
+export const useRecords = <
+  LoadableRecord,
+  LoadFunction extends TAPIFunction<LoadableRecord[]> = TAPIFunction<
+    LoadableRecord[]
+  >
+>(
+  recordFinder?: LoadFunction,
+  { ...inputRest }: UseQueryOptions = {}
 ) => {
-  const { record, setRecord, ...rest } = useRecord(recordFinder, {
-    defaultValue: [],
-    loadOnMount,
-    autoSync,
-    ...inputRest,
-  });
+  const { record, setRecord, ...rest } = useRecord<LoadableRecord[]>(
+    recordFinder,
+    {
+      defaultValue: [],
+      ...inputRest,
+    }
+  );
 
   return {
     records: record!,
-    setRecords: setRecord as Dispatch<SetStateAction<T[]>>,
+    setRecords: setRecord as Dispatch<SetStateAction<LoadableRecord[]>>,
     ...rest,
   };
 };

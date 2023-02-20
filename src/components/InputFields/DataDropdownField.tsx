@@ -32,6 +32,7 @@ import {
 } from 'react';
 import { mergeRefs } from 'react-merge-refs';
 
+import { useRecord } from '../../hooks/Utils';
 import { isDescendant } from '../../utils/html';
 import FieldValueDisplay from '../FieldValueDisplay';
 import ModalPopup from '../ModalPopup';
@@ -93,6 +94,9 @@ export interface DataDropdownFieldProps
   dataKey?: string;
   value?: string | string[];
   selectedOption?: DropdownOption;
+  getSelectedOptions?: (
+    selectedValue: string | string[]
+  ) => Promise<DropdownOption[]>;
   dropdownListMaxHeight?: number;
   optionPaging?: boolean;
   onChangeSearchTerm?: (searchTerm: string) => void;
@@ -149,6 +153,7 @@ export const DataDropdownField = forwardRef<
     label,
     limit,
     externallyPaginated,
+    getSelectedOptions,
     ...rest
   } = props;
 
@@ -191,11 +196,13 @@ export const DataDropdownField = forwardRef<
   const optionsRef = useRef(options);
   const selectedOptionRef = useRef(selectedOption);
   const asyncOptionPagesMapRef = useRef<Map<number, DropdownOption[]>>();
+  const getSelectedOptionsRef = useRef(getSelectedOptions);
   useEffect(() => {
     onChangeRef.current = onChange;
     optionsRef.current = options;
     selectedOptionRef.current = selectedOption;
-  }, [onChange, options, selectedOption]);
+    getSelectedOptionsRef.current = getSelectedOptions;
+  }, [getSelectedOptions, onChange, options, selectedOption]);
 
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -210,6 +217,12 @@ export const DataDropdownField = forwardRef<
     }
     return selectedOptions[0]?.value;
   }, [multiple, selectedOptions]);
+
+  const { load: loadAsyncSelectedOptions, record: asyncSelectedOptions } =
+    useRecord<DropdownOption[]>(getSelectedOptions, {
+      autoSync: false,
+      loadOnMount: false,
+    });
 
   const triggerChangeEvent = useCallback(
     (selectedOptions: DropdownOption[]) => {
@@ -299,6 +312,37 @@ export const DataDropdownField = forwardRef<
       return prevSelectedOptions;
     });
   }, [selectedOption?.value]);
+
+  useEffect(() => {
+    if (asyncSelectedOptions && asyncSelectedOptions.length > 0) {
+      setSelectedOptions((prevSelectedOptions) => {
+        if (
+          asyncSelectedOptions.map(({ value }) => value).join(';') !==
+          prevSelectedOptions.map(({ value }) => value).join(';')
+        ) {
+          return asyncSelectedOptions;
+        }
+        return prevSelectedOptions;
+      });
+    }
+  }, [asyncSelectedOptions]);
+
+  useEffect(() => {
+    if (value) {
+      setSelectedOptions((prevSelectedOptions) => {
+        const selectedValue = [...(Array.isArray(value) ? value : [value])];
+        if (
+          getSelectedOptionsRef.current &&
+          (prevSelectedOptions.length <= 0 ||
+            selectedValue.join(';') !==
+              prevSelectedOptions.map(({ value }) => value).join(';'))
+        ) {
+          loadAsyncSelectedOptions(value);
+        }
+        return prevSelectedOptions;
+      });
+    }
+  }, [loadAsyncSelectedOptions, value]);
 
   const endAdornment = (
     <>
