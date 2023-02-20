@@ -551,6 +551,7 @@ export const PaginatedDropdownOptionList = forwardRef<
         paging={paging && filteredOptions.length > 0}
         bottomThreshold={optionHeight * 5}
         enableKeyboardNavigationWrapping={!externallyPaginated}
+        {...{ onClose }}
         tabIndex={-1}
         sx={{
           minWidth,
