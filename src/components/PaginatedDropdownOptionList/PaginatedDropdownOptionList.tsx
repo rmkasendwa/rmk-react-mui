@@ -548,10 +548,9 @@ export const PaginatedDropdownOptionList = forwardRef<
             onSelectOptionRef.current(filteredOptions[focusedOptionIndex]);
           triggerChangeEvent(filteredOptions[focusedOptionIndex]);
         }}
-        paging={paging && filteredOptions.length > 0}
         bottomThreshold={optionHeight * 5}
         enableKeyboardNavigationWrapping={!externallyPaginated}
-        {...{ onClose }}
+        {...{ onClose, paging }}
         tabIndex={-1}
         sx={{
           minWidth,
