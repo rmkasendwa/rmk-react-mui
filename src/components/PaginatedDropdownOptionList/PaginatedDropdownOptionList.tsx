@@ -13,7 +13,6 @@ import {
   inputBaseClasses,
   useThemeProps,
 } from '@mui/material';
-import Box from '@mui/material/Box';
 import Card, { CardProps } from '@mui/material/Card';
 import MenuItem, { MenuItemProps } from '@mui/material/MenuItem';
 import useTheme from '@mui/material/styles/useTheme';
@@ -237,8 +236,6 @@ export const PaginatedDropdownOptionList = forwardRef<
   const [scrollableDropdownWrapper, setScrollableDropdownWrapper] =
     useState<HTMLDivElement | null>(null);
 
-  const [offset, setOffset] = useState(0);
-
   const [searchTerm, setSearchTerm] = useState(searchTermProp);
   const [scrolledToSelectedOption, setScrolledToSelectedOption] =
     useState(false);
@@ -322,7 +319,9 @@ export const PaginatedDropdownOptionList = forwardRef<
       return optionsRef.current;
     }
     return [];
-  })().sort(sortOptions ? sortOptionsRef.current : () => 0);
+  })().sort(
+    sortOptions && !externallyPaginated ? sortOptionsRef.current : () => 0
+  );
 
   // Options state
   const [filteredOptions, setFilteredOptions] =
@@ -406,73 +405,6 @@ export const PaginatedDropdownOptionList = forwardRef<
   }, [multiple, selectedOptions]);
 
   useEffect(() => {
-    const keydownCallback = (event: KeyboardEvent) => {
-      const nextFocusedOptionIndex = (() => {
-        switch (event.key) {
-          case 'ArrowUp':
-            if (focusedOptionIndex != null) {
-              return (
-                (!!focusedOptionIndex
-                  ? focusedOptionIndex
-                  : filteredOptions.length) - 1
-              );
-            }
-            return filteredOptions.length - 1;
-          case 'ArrowDown':
-            if (focusedOptionIndex != null) {
-              return (focusedOptionIndex + 1) % filteredOptions.length;
-            }
-            return 0;
-          case 'Enter':
-            if (focusedOptionIndex != null) {
-              onSelectOptionRef.current &&
-                onSelectOptionRef.current(filteredOptions[focusedOptionIndex]);
-              triggerChangeEvent(filteredOptions[focusedOptionIndex]);
-            }
-            break;
-          case 'Escape':
-            onCloseRef.current && onCloseRef.current();
-            break;
-        }
-      })();
-      if (nextFocusedOptionIndex != null) {
-        setFocusedOptionIndex(nextFocusedOptionIndex);
-        if (scrollableDropdownWrapper) {
-          if (nextFocusedOptionIndex > offset + limit - 1) {
-            scrollableDropdownWrapper.scrollTop =
-              (nextFocusedOptionIndex + 1) * optionHeight - maxHeight;
-          } else {
-            const { scrollTop } = scrollableDropdownWrapper;
-            const nextFocusedOptionScrollTop =
-              (nextFocusedOptionIndex + 1) * optionHeight;
-            if (nextFocusedOptionScrollTop <= scrollTop) {
-              scrollableDropdownWrapper.scrollTop =
-                nextFocusedOptionScrollTop - optionHeight;
-            }
-          }
-        }
-      }
-    };
-    window.addEventListener('keydown', keydownCallback);
-    return () => {
-      window.removeEventListener('keydown', keydownCallback);
-    };
-  }, [filteredOptions, focusedOptionIndex, limit, maxHeight, offset, optionHeight, scrollableDropdownWrapper, triggerChangeEvent]);
-
-  useEffect(() => {
-    if (scrollableDropdownWrapper && paging) {
-      const scrollCallback = () => {
-        const { scrollTop } = scrollableDropdownWrapper;
-        setOffset(Math.floor(scrollTop / optionHeight));
-      };
-      scrollableDropdownWrapper.addEventListener('scroll', scrollCallback);
-      return () => {
-        scrollableDropdownWrapper.removeEventListener('scroll', scrollCallback);
-      };
-    }
-  }, [optionHeight, paging, scrollableDropdownWrapper]);
-
-  useEffect(() => {
     if (
       scrollableDropdownWrapper &&
       selectedOptionsProp &&
@@ -501,9 +433,6 @@ export const PaginatedDropdownOptionList = forwardRef<
     };
   }, []);
 
-  const displayOptions = paging
-    ? filteredOptions.slice(offset, offset + limit)
-    : filteredOptions;
   const hasAllOptionsSelected = filteredOptions.every(({ value }) => {
     return selectedOptions.find(
       ({ value: selectedOptionValue }) => value === selectedOptionValue
@@ -548,108 +477,103 @@ export const PaginatedDropdownOptionList = forwardRef<
         load={() => {
           loadNextAsyncOptions();
         }}
+        dataElements={filteredOptions.map((option) => {
+          const {
+            value,
+            label,
+            icon,
+            description,
+            selectable,
+            isDropdownOption = true,
+            isDropdownOptionWrapped = true,
+            onClick,
+            component,
+            sx,
+          } = option;
+          if (isDropdownOption && isDropdownOptionWrapped) {
+            const classNames = [];
+            const isFocused =
+              filteredOptions.indexOf(option) === focusedOptionIndex;
+            if (isFocused) {
+              classNames.push('Mui-focusVisible');
+            }
+            const dropdownOptionElement = (
+              <DropdownOption
+                className={classNames.join(' ')}
+                value={value}
+                key={value}
+                onClick={(event) => {
+                  triggerChangeEvent(option);
+                  onClick && onClick(event);
+                  onSelectOption && onSelectOption(option);
+                }}
+                selected={(() => {
+                  const selectedOptionValues = selectedOptions.map(
+                    ({ value }) => value
+                  );
+                  return selectedOptionValues.includes(value);
+                })()}
+                tabIndex={isFocused ? 0 : -1}
+                height={optionHeight}
+                variant={optionVariant}
+                {...{ selectable, component, icon, sx }}
+              >
+                {label}
+              </DropdownOption>
+            );
+            if (description) {
+              return (
+                <Tooltip
+                  title={description}
+                  key={value}
+                  placement="left"
+                  sx={{
+                    pointerEvents: 'none',
+                  }}
+                >
+                  {dropdownOptionElement}
+                </Tooltip>
+              );
+            }
+            return dropdownOptionElement;
+          }
+          return <Fragment key={value}>{label}</Fragment>;
+        })}
+        dataElementLength={optionHeight}
+        onChangeFocusedDataElement={(index) => {
+          setFocusedOptionIndex(index);
+        }}
+        onSelectDataElement={(focusedOptionIndex) => {
+          onSelectOptionRef.current &&
+            onSelectOptionRef.current(filteredOptions[focusedOptionIndex]);
+          triggerChangeEvent(filteredOptions[focusedOptionIndex]);
+        }}
+        paging={paging && filteredOptions.length > 0}
+        bottomThreshold={optionHeight * 5}
+        enableKeyboardNavigationWrapping={!externallyPaginated}
+        tabIndex={-1}
         sx={{
           minWidth,
           maxHeight,
           boxSizing: 'border-box',
           overflowY: 'auto',
         }}
-        tabIndex={-1}
-        bottomThreshold={optionHeight * 5}
       >
-        <Box
-          component="ul"
-          sx={{
-            m: 0,
-            p: 0,
-            minHeight: paging
-              ? filteredOptions.length * optionHeight
-              : undefined,
-          }}
-          tabIndex={-1}
-        >
-          <Box sx={{ height: offset * optionHeight }} />
-          {(() => {
-            if (displayOptions.length > 0) {
-              return displayOptions.map((option) => {
-                const {
-                  value,
-                  label,
-                  icon,
-                  description,
-                  selectable,
-                  isDropdownOption = true,
-                  isDropdownOptionWrapped = true,
-                  onClick,
-                  component,
-                  sx,
-                } = option;
-                if (isDropdownOption && isDropdownOptionWrapped) {
-                  const classNames = [];
-                  const isFocused =
-                    filteredOptions.indexOf(option) === focusedOptionIndex;
-                  if (isFocused) {
-                    classNames.push('Mui-focusVisible');
-                  }
-                  const dropdownOptionElement = (
-                    <DropdownOption
-                      className={classNames.join(' ')}
-                      value={value}
-                      key={value}
-                      onClick={(event) => {
-                        triggerChangeEvent(option);
-                        onClick && onClick(event);
-                        onSelectOption && onSelectOption(option);
-                      }}
-                      selected={(() => {
-                        const selectedOptionValues = selectedOptions.map(
-                          ({ value }) => value
-                        );
-                        return selectedOptionValues.includes(value);
-                      })()}
-                      tabIndex={isFocused ? 0 : -1}
-                      height={optionHeight}
-                      variant={optionVariant}
-                      {...{ selectable, component, icon, sx }}
-                    >
-                      {label}
-                    </DropdownOption>
-                  );
-                  if (description) {
-                    return (
-                      <Tooltip
-                        title={description}
-                        key={value}
-                        placement="left"
-                        sx={{
-                          pointerEvents: 'none',
-                        }}
-                      >
-                        {dropdownOptionElement}
-                      </Tooltip>
-                    );
-                  }
-                  return dropdownOptionElement;
-                }
-                return <Fragment key={value}>{label}</Fragment>;
-              });
-            }
-
-            if (
-              !loading &&
-              !loadingProp &&
-              (!getDropdownOptions || isAsyncOptionsLoaded)
-            ) {
-              return (
-                <MenuItem disabled>
-                  <Typography variant="body2" color={palette.error.main}>
-                    No options found
-                  </Typography>
-                </MenuItem>
-              );
-            }
-          })()}
-        </Box>
+        {(() => {
+          if (
+            !loading &&
+            !loadingProp &&
+            (!getDropdownOptions || isAsyncOptionsLoaded)
+          ) {
+            return (
+              <MenuItem disabled>
+                <Typography variant="body2" color={palette.error.main}>
+                  No options found
+                </Typography>
+              </MenuItem>
+            );
+          }
+        })()}
       </InfiniteScrollBox>
       {multiple && filteredOptions.length > 1 ? (
         <>
@@ -699,7 +623,7 @@ export const PaginatedDropdownOptionList = forwardRef<
       ) : null}
       {getDropdownOptions && (
         <>
-          {displayOptions.length > 0 || isAsyncOptionsLoaded ? (
+          {filteredOptions.length > 0 || isAsyncOptionsLoaded ? (
             <Divider />
           ) : null}
           <DropdownOption
