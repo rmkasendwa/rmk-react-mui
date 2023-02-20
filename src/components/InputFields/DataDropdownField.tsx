@@ -32,6 +32,7 @@ import {
 } from 'react';
 import { mergeRefs } from 'react-merge-refs';
 
+import { LoadingProvider } from '../../contexts/LoadingContext';
 import { useRecord } from '../../hooks/Utils';
 import { isDescendant } from '../../utils/html';
 import FieldValueDisplay from '../FieldValueDisplay';
@@ -40,6 +41,7 @@ import PaginatedDropdownOptionList, {
   DropdownOption,
   PaginatedDropdownOptionListProps,
 } from '../PaginatedDropdownOptionList';
+import RetryErrorMessage from '../RetryErrorMessage';
 import TextField, { TextFieldProps } from './TextField';
 
 export interface DataDropdownFieldClasses {
@@ -218,11 +220,15 @@ export const DataDropdownField = forwardRef<
     return selectedOptions[0]?.value;
   }, [multiple, selectedOptions]);
 
-  const { load: loadAsyncSelectedOptions, record: asyncSelectedOptions } =
-    useRecord<DropdownOption[]>(getSelectedOptions, {
-      autoSync: false,
-      loadOnMount: false,
-    });
+  const {
+    load: loadAsyncSelectedOptions,
+    record: asyncSelectedOptions,
+    loading: loadingAsyncSelectedOptions,
+    errorMessage: asyncSelectedOptionsErrorMessage,
+  } = useRecord(getSelectedOptions, {
+    autoSync: false,
+    loadOnMount: false,
+  });
 
   const triggerChangeEvent = useCallback(
     (selectedOptions: DropdownOption[]) => {
@@ -343,6 +349,37 @@ export const DataDropdownField = forwardRef<
       });
     }
   }, [loadAsyncSelectedOptions, value]);
+
+  if (value && loadingAsyncSelectedOptions) {
+    return (
+      <LoadingProvider
+        value={{
+          loading: loadingAsyncSelectedOptions,
+          errorMessage: asyncSelectedOptionsErrorMessage,
+        }}
+      >
+        {(() => {
+          if (isTextVariant) {
+            return <FieldValueDisplay {...{ label }} />;
+          }
+          return <TextField {...rest} {...{ label, variant }} />;
+        })()}
+      </LoadingProvider>
+    );
+  }
+
+  const errorProps: Pick<TextFieldProps, 'error' | 'helperText'> = {};
+  if (asyncSelectedOptionsErrorMessage) {
+    errorProps.error = true;
+    errorProps.helperText = (
+      <RetryErrorMessage
+        message={asyncSelectedOptionsErrorMessage}
+        retry={() => {
+          loadAsyncSelectedOptions(value);
+        }}
+      />
+    );
+  }
 
   const endAdornment = (
     <>
