@@ -61,6 +61,7 @@ export interface InfiniteScrollBoxProps
   onChangeFocusedDataElement?: (dataElementIndex: number) => void;
   onSelectDataElement?: (dataElementIndex: number) => void;
   onClose?: () => void;
+  enableKeyboardNavigationWrapping?: boolean;
 }
 
 export function getInfiniteScrollBoxUtilityClass(slot: string): string {
@@ -94,6 +95,7 @@ export const InfiniteScrollBox = forwardRef<
     onClose,
     focusedElementIndex: focusedElementIndexProp,
     onChangeFocusedDataElement,
+    enableKeyboardNavigationWrapping = false,
     ...rest
   } = props;
 
@@ -173,7 +175,11 @@ export const InfiniteScrollBox = forwardRef<
           const nextFocusedOptionIndex = (() => {
             switch (event.key) {
               case 'ArrowUp':
-                if (!loadRef.current || prevFocusedElementIndex > 0) {
+                if (
+                  enableKeyboardNavigationWrapping ||
+                  !loadRef.current ||
+                  prevFocusedElementIndex > 0
+                ) {
                   return (
                     (!!prevFocusedElementIndex
                       ? prevFocusedElementIndex
@@ -229,7 +235,7 @@ export const InfiniteScrollBox = forwardRef<
         window.removeEventListener('keydown', keydownCallback);
       };
     }
-  }, [dataElementLength, dataElements, limit, offset]);
+  }, [dataElementLength, dataElements, enableKeyboardNavigationWrapping, limit, offset]);
 
   useEffect(() => {
     isInitialMountRef.current = false;
