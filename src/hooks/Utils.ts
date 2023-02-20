@@ -239,15 +239,12 @@ export const useDelete = <DeleteFunction extends TAPIFunction>(
   };
 };
 
-export interface UseRecordOptions<T> extends UseQueryOptions {
-  defaultValue?: T;
+export interface UseRecordOptions<LoadableRecord> extends UseQueryOptions {
+  defaultValue?: LoadableRecord;
 }
 
-export const useRecord = <
-  LoadableRecord = any,
-  LoadFunction extends TAPIFunction<LoadableRecord> = TAPIFunction<LoadableRecord>
->(
-  recordFinder?: LoadFunction,
+export const useRecord = <LoadableRecord>(
+  recordFinder?: TAPIFunction<LoadableRecord>,
   {
     defaultValue,
     key,
@@ -256,6 +253,7 @@ export const useRecord = <
   }: UseRecordOptions<LoadableRecord> = {}
 ) => {
   // Refs
+  const isInitialMountRef = useRef(true);
   const nextSyncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const recordFinderRef = useRef(recordFinder);
   useEffect(() => {
@@ -282,14 +280,16 @@ export const useRecord = <
       });
     },
     [baseLoad]
-  ) as LoadFunction;
+  ) as NonNullable<typeof recordFinder>;
 
   const poll = useCallback(() => {
     return baseLoad(recordFinderRef.current, undefined, true);
   }, [baseLoad]);
 
   useEffect(() => {
-    loadOnMount && load();
+    if (loadOnMount && isInitialMountRef.current) {
+      load();
+    }
   }, [load, loadOnMount]);
 
   useEffect(() => {
@@ -340,6 +340,13 @@ export const useRecord = <
     }
   }, [autoSync, busy, errorMessage, loading, poll]);
 
+  useEffect(() => {
+    isInitialMountRef.current = false;
+    return () => {
+      isInitialMountRef.current = true;
+    };
+  }, []);
+
   return {
     load,
     loading,
@@ -351,22 +358,14 @@ export const useRecord = <
   };
 };
 
-export const useRecords = <
-  LoadableRecord,
-  LoadFunction extends TAPIFunction<LoadableRecord[]> = TAPIFunction<
-    LoadableRecord[]
-  >
->(
-  recordFinder?: LoadFunction,
+export const useRecords = <LoadableRecord>(
+  recordFinder?: TAPIFunction<LoadableRecord[]>,
   { ...inputRest }: UseQueryOptions = {}
 ) => {
-  const { record, setRecord, ...rest } = useRecord<LoadableRecord[]>(
-    recordFinder,
-    {
-      defaultValue: [],
-      ...inputRest,
-    }
-  );
+  const { record, setRecord, ...rest } = useRecord(recordFinder, {
+    defaultValue: [],
+    ...inputRest,
+  });
 
   return {
     records: record!,
