@@ -169,49 +169,67 @@ export const InfiniteScrollBox = forwardRef<
     if (dataElements && dataElementLength) {
       const keydownCallback = (event: KeyboardEvent) => {
         event.preventDefault();
-        const nextFocusedOptionIndex = (() => {
-          switch (event.key) {
-            case 'ArrowUp':
-              if (!loadRef.current || focusedElementIndex > 0) {
-                return (
-                  (!!focusedElementIndex
-                    ? focusedElementIndex
-                    : dataElements.length) - 1
-                );
+        setFocusedElementIndex((prevFocusedElementIndex) => {
+          const nextFocusedOptionIndex = (() => {
+            switch (event.key) {
+              case 'ArrowUp':
+                if (!loadRef.current || prevFocusedElementIndex > 0) {
+                  return (
+                    (!!prevFocusedElementIndex
+                      ? prevFocusedElementIndex
+                      : dataElements.length) - 1
+                  );
+                }
+                return 0;
+              case 'ArrowDown':
+                return (prevFocusedElementIndex + 1) % dataElements.length;
+              case 'Enter':
+                if (prevFocusedElementIndex != null) {
+                  onSelectDataElementRef.current &&
+                    onSelectDataElementRef.current(prevFocusedElementIndex);
+                }
+                break;
+              case 'Escape':
+                onCloseRef.current && onCloseRef.current();
+                break;
+            }
+          })();
+          if (
+            nextFocusedOptionIndex != null &&
+            elementRef.current?.offsetHeight
+          ) {
+            if (elementRef.current) {
+              const nextFocusedOptionScrollTop =
+                nextFocusedOptionIndex * dataElementLength;
+              const { scrollTop: scrollUpperBound } = elementRef.current;
+              const scrollLowerBound =
+                scrollUpperBound + elementRef.current.offsetHeight;
+
+              if (
+                nextFocusedOptionScrollTop + dataElementLength >
+                scrollLowerBound
+              ) {
+                elementRef.current.scrollTop =
+                  scrollUpperBound +
+                  nextFocusedOptionScrollTop +
+                  dataElementLength -
+                  scrollLowerBound;
               }
-              return 0;
-            case 'ArrowDown':
-              return (focusedElementIndex + 1) % dataElements.length;
-            case 'Enter':
-              if (focusedElementIndex != null) {
-                onSelectDataElementRef.current &&
-                  onSelectDataElementRef.current(focusedElementIndex);
+              if (nextFocusedOptionScrollTop < scrollUpperBound) {
+                elementRef.current.scrollTop = nextFocusedOptionScrollTop;
               }
-              break;
-            case 'Escape':
-              onCloseRef.current && onCloseRef.current();
-              break;
-          }
-        })();
-        if (
-          nextFocusedOptionIndex != null &&
-          elementRef.current?.offsetHeight
-        ) {
-          setFocusedElementIndex(nextFocusedOptionIndex);
-          if (elementRef.current) {
-            // TODO: Scroll to element if not visible
-            if (nextFocusedOptionIndex > offset + limit - 1) {
-            } else {
+              return nextFocusedOptionIndex;
             }
           }
-        }
+          return prevFocusedElementIndex;
+        });
       };
       window.addEventListener('keydown', keydownCallback);
       return () => {
         window.removeEventListener('keydown', keydownCallback);
       };
     }
-  }, [dataElementLength, dataElements, focusedElementIndex, limit, offset]);
+  }, [dataElementLength, dataElements, limit, offset]);
 
   useEffect(() => {
     isInitialMountRef.current = false;
