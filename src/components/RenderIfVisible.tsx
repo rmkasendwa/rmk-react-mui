@@ -3,7 +3,7 @@ import { FC, ReactNode, useEffect, useRef } from 'react';
 import { IntersectionOptions, useInView } from 'react-intersection-observer';
 
 export interface DefaultPlaceholderDimensions {
-  height: number;
+  height?: number;
   width?: number;
 }
 

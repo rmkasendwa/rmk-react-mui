@@ -6,6 +6,10 @@ export interface UseLoadOnScrollToBottomOptions {
   element?: HTMLElement;
   bottomThreshold?: number;
   load: () => void;
+  onChangeScrollLength?: (scrollLength: {
+    scrollTop: number;
+    scrollLeft: number;
+  }) => void;
   shouldLoadOnScroll?: boolean;
   invertScrollDirection?: boolean;
 }
@@ -17,18 +21,23 @@ export const useLoadOnScrollToBottom = ({
   element,
   bottomThreshold = LOAD_NEXT_BOUNDARY_THRESHOLD,
   load,
+  onChangeScrollLength,
   shouldLoadOnScroll = true,
   invertScrollDirection = false,
 }: UseLoadOnScrollToBottomOptions) => {
+  // Refs
   const loadRef = useRef(load);
+  const onChangeScrollLengthRef = useRef(onChangeScrollLength);
   useEffect(() => {
     loadRef.current = load;
-  }, [load]);
+    onChangeScrollLengthRef.current = onChangeScrollLength;
+  }, [load, onChangeScrollLength]);
 
   useEffect(() => {
     if (element && shouldLoadOnScroll) {
       const scrollEventCallback = () => {
         const scrollTop = Math.abs(element.scrollTop);
+        const scrollLeft = Math.abs(element.scrollLeft);
         const hasScrolledToBottom = (() => {
           if (invertScrollDirection) {
             return scrollTop < bottomThreshold;
@@ -44,6 +53,11 @@ export const useLoadOnScrollToBottom = ({
         ) {
           loadRef.current();
         }
+        onChangeScrollLengthRef.current &&
+          onChangeScrollLengthRef.current({
+            scrollTop,
+            scrollLeft,
+          });
       };
       element.addEventListener('scroll', scrollEventCallback);
       scrollEventCallback();
