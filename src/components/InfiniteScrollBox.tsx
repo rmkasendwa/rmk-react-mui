@@ -62,6 +62,7 @@ export interface InfiniteScrollBoxProps
   onSelectDataElement?: (dataElementIndex: number) => void;
   onClose?: () => void;
   enableKeyboardNavigationWrapping?: boolean;
+  PagingContainer?: Partial<BoxProps>;
 }
 
 export function getInfiniteScrollBoxUtilityClass(slot: string): string {
@@ -96,6 +97,7 @@ export const InfiniteScrollBox = forwardRef<
     focusedElementIndex: focusedElementIndexProp,
     onChangeFocusedDataElement,
     enableKeyboardNavigationWrapping = false,
+    PagingContainer = {},
     ...rest
   } = props;
 
@@ -111,6 +113,9 @@ export const InfiniteScrollBox = forwardRef<
     })()
   );
 
+  const { sx: PagingContainerSx, ...PagingContainerRest } = PagingContainer;
+
+  // Refs
   const isInitialMountRef = useRef(true);
   const elementRef = useRef<HTMLDivElement>();
   const loadRef = useRef(load);
@@ -251,15 +256,15 @@ export const InfiniteScrollBox = forwardRef<
       className={clsx(classes.root)}
     >
       {(() => {
-        if (dataElements) {
+        if (dataElements && dataElements.length > 0) {
           const displayableDataSet = paging
             ? dataElements.slice(offset, offset + limit)
             : dataElements;
           return (
             <Box
+              {...PagingContainerRest}
               sx={{
-                m: 0,
-                p: 0,
+                ...PagingContainerSx,
                 minHeight:
                   paging && dataElementLength
                     ? dataElements.length * dataElementLength
