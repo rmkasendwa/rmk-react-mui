@@ -220,15 +220,37 @@ export const DataDropdownField = forwardRef<
     return selectedOptions[0]?.value;
   }, [multiple, selectedOptions]);
 
+  const canLoadAsyncSelectedOptions = Boolean(
+    getSelectedOptions || getDropdownOptions
+  );
+
   const {
     load: loadAsyncSelectedOptions,
     record: asyncSelectedOptions,
     loading: loadingAsyncSelectedOptions,
     errorMessage: asyncSelectedOptionsErrorMessage,
-  } = useRecord(getSelectedOptions, {
-    autoSync: false,
-    loadOnMount: false,
-  });
+  } = useRecord(
+    (async (value) => {
+      if (getSelectedOptions) {
+        return getSelectedOptions(value);
+      }
+      if (getDropdownOptions) {
+        const dropdownOptionsResponse = await getDropdownOptions({});
+        const options = Array.isArray(dropdownOptionsResponse)
+          ? dropdownOptionsResponse
+          : dropdownOptionsResponse.records;
+        const selectedValue = Array.isArray(value) ? value : [value];
+        return options.filter(({ value }) => {
+          return selectedValue.includes(String(value));
+        });
+      }
+      return [];
+    }) as NonNullable<typeof getSelectedOptions>,
+    {
+      autoSync: false,
+      loadOnMount: false,
+    }
+  );
 
   const triggerChangeEvent = useCallback(
     (selectedOptions: DropdownOption[]) => {
@@ -338,7 +360,7 @@ export const DataDropdownField = forwardRef<
       setSelectedOptions((prevSelectedOptions) => {
         const selectedValue = [...(Array.isArray(value) ? value : [value])];
         if (
-          getSelectedOptionsRef.current &&
+          canLoadAsyncSelectedOptions &&
           (prevSelectedOptions.length <= 0 ||
             selectedValue.join(';') !==
               prevSelectedOptions.map(({ value }) => value).join(';'))
@@ -348,7 +370,7 @@ export const DataDropdownField = forwardRef<
         return prevSelectedOptions;
       });
     }
-  }, [loadAsyncSelectedOptions, value]);
+  }, [canLoadAsyncSelectedOptions, loadAsyncSelectedOptions, value]);
 
   if (value && loadingAsyncSelectedOptions) {
     return (
