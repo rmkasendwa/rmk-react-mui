@@ -156,6 +156,7 @@ export const EllipsisMenuIconButton = forwardRef<
                         close();
                       }
                     }}
+                    keyboardFocusElement={anchorRef.current}
                     {...{ options }}
                     {...PaginatedDropdownOptionListProps}
                   />

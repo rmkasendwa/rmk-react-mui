@@ -37,7 +37,9 @@ import {
   DropdownOption as BaseDropdownOption,
   PaginatedResponseData,
 } from '../../interfaces/Utils';
-import InfiniteScrollBox from '../InfiniteScrollBox';
+import InfiniteScrollBox, {
+  InfiniteScrollBoxProps,
+} from '../InfiniteScrollBox';
 import ReloadIconButton from '../ReloadIconButton';
 import SearchField, { SearchFieldProps } from '../SearchField';
 import DropdownOption, {
@@ -85,7 +87,8 @@ declare module '@mui/material/styles/components' {
 }
 
 export interface PaginatedDropdownOptionListProps
-  extends Partial<Pick<CardProps, 'sx' | 'className'>> {
+  extends Partial<Pick<CardProps, 'sx' | 'className'>>,
+    Pick<InfiniteScrollBoxProps, 'keyboardFocusElement'> {
   options?: DropdownOption[];
   selectedOptions?: DropdownOption[];
   sortOptions?: boolean;
@@ -166,6 +169,7 @@ export const PaginatedDropdownOptionList = forwardRef<
     onChangeAsyncOptionPagesMap,
     sortOptions = false,
     callGetDropdownOptions = 'whenNoOptions',
+    keyboardFocusElement,
     ...rest
   } = omit(props, 'limit');
 
@@ -550,7 +554,7 @@ export const PaginatedDropdownOptionList = forwardRef<
         }}
         bottomThreshold={optionHeight * 5}
         enableKeyboardNavigationWrapping={!externallyPaginated}
-        {...{ onClose, paging }}
+        {...{ onClose, paging, keyboardFocusElement }}
         sx={{
           minWidth,
           maxHeight,
