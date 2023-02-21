@@ -440,7 +440,7 @@ export const PaginatedDropdownOptionList = forwardRef<
   });
 
   return (
-    <Card {...rest} ref={ref} className={clsx(classes.root)} tabIndex={-1}>
+    <Card {...rest} ref={ref} className={clsx(classes.root)}>
       {(() => {
         if (searchable) {
           return (
@@ -551,7 +551,6 @@ export const PaginatedDropdownOptionList = forwardRef<
         bottomThreshold={optionHeight * 5}
         enableKeyboardNavigationWrapping={!externallyPaginated}
         {...{ onClose, paging }}
-        tabIndex={-1}
         sx={{
           minWidth,
           maxHeight,

@@ -173,13 +173,14 @@ export const InfiniteScrollBox = forwardRef<
   }, [focusedElementIndex]);
 
   useEffect(() => {
-    if (dataElements && dataElementLength) {
+    if (dataElements && dataElementLength && elementRef.current) {
+      const element = elementRef.current;
       const keydownCallback = (event: KeyboardEvent) => {
-        event.preventDefault();
         setFocusedElementIndex((prevFocusedElementIndex) => {
           const nextFocusedOptionIndex = (() => {
             switch (event.key) {
               case 'ArrowUp':
+                event.preventDefault();
                 if (
                   enableKeyboardNavigationWrapping ||
                   !loadRef.current ||
@@ -193,9 +194,11 @@ export const InfiniteScrollBox = forwardRef<
                 }
                 return 0;
               case 'ArrowDown':
+                event.preventDefault();
                 return (prevFocusedElementIndex + 1) % dataElements.length;
               case 'Enter':
                 if (prevFocusedElementIndex != null) {
+                  event.preventDefault();
                   onSelectDataElementRef.current &&
                     onSelectDataElementRef.current(prevFocusedElementIndex);
                 }
@@ -235,9 +238,9 @@ export const InfiniteScrollBox = forwardRef<
           return prevFocusedElementIndex;
         });
       };
-      window.addEventListener('keydown', keydownCallback);
+      element.addEventListener('keydown', keydownCallback);
       return () => {
-        window.removeEventListener('keydown', keydownCallback);
+        element.removeEventListener('keydown', keydownCallback);
       };
     }
   }, [dataElementLength, dataElements, enableKeyboardNavigationWrapping, limit, offset]);
@@ -254,6 +257,7 @@ export const InfiniteScrollBox = forwardRef<
       ref={mergeRefs([elementRef, ref])}
       {...rest}
       className={clsx(classes.root)}
+      tabIndex={0}
     >
       {(() => {
         if (dataElements && dataElements.length > 0) {
