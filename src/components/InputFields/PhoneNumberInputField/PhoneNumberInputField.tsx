@@ -288,12 +288,11 @@ export const PhoneNumberInputField = forwardRef<
                   element.style.zIndex = '1400';
                 }
               }}
-              tabIndex={-1}
             >
               {({ TransitionProps }) => {
                 return (
                   <Grow {...TransitionProps}>
-                    <Box tabIndex={-1}>
+                    <Box>
                       <ClickAwayListener
                         onClickAway={handleClosePhoneCountryList}
                       >

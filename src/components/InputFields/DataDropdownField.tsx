@@ -742,7 +742,6 @@ export const DataDropdownField = forwardRef<
             anchorEl={anchorRef.current}
             transition
             placement="bottom-start"
-            tabIndex={-1}
             sx={{
               zIndex: 1400,
             }}
@@ -750,7 +749,7 @@ export const DataDropdownField = forwardRef<
             {({ TransitionProps }) => {
               return (
                 <Grow {...TransitionProps} style={{ transformOrigin: '0 0 0' }}>
-                  <Box tabIndex={-1}>
+                  <Box>
                     <ClickAwayListener
                       onClickAway={(event) => {
                         if (anchorRef.current) {

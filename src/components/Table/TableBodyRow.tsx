@@ -146,7 +146,6 @@ export const TableBodyRow = <T extends BaseTableRow>(
       {...rowPropsRest}
       {...rest}
       className={clsx(classes.root)}
-      tabIndex={-1}
       hover
       sx={{
         verticalAlign: 'top',
