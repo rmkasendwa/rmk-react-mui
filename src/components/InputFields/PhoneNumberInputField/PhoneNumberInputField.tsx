@@ -303,6 +303,7 @@ export const PhoneNumberInputField = forwardRef<
                               ? anchorRef.current.offsetWidth
                               : undefined
                           }
+                          keyboardFocusElement={anchorRef.current}
                           onClose={handleClosePhoneCountryList}
                           selectedOptions={selectedOptions}
                           onChangeSelectedOptions={(options) => {

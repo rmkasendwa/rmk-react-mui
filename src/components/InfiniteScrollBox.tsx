@@ -58,6 +58,7 @@ export interface InfiniteScrollBoxProps
   dataElements?: ReactNode[];
   dataElementLength?: number;
   focusedElementIndex?: number;
+  keyboardFocusElement?: HTMLElement | HTMLElement[] | null;
   onChangeFocusedDataElement?: (dataElementIndex: number) => void;
   onSelectDataElement?: (dataElementIndex: number) => void;
   onClose?: () => void;
@@ -98,6 +99,7 @@ export const InfiniteScrollBox = forwardRef<
     onChangeFocusedDataElement,
     enableKeyboardNavigationWrapping = false,
     PagingContainer = {},
+    keyboardFocusElement: keyboardFocusElementProp,
     ...rest
   } = props;
 
@@ -157,7 +159,9 @@ export const InfiniteScrollBox = forwardRef<
     element: elementRef.current,
   });
 
-  const [focusedElementIndex, setFocusedElementIndex] = useState(0);
+  const [focusedElementIndex, setFocusedElementIndex] = useState<
+    number | undefined
+  >(undefined);
 
   useEffect(() => {
     if (focusedElementIndexProp != null) {
@@ -166,17 +170,27 @@ export const InfiniteScrollBox = forwardRef<
   }, [focusedElementIndexProp]);
 
   useEffect(() => {
-    if (!isInitialMountRef.current) {
+    if (!isInitialMountRef.current && focusedElementIndex != null) {
       onChangeFocusedDataElementRef.current &&
         onChangeFocusedDataElementRef.current(focusedElementIndex);
     }
   }, [focusedElementIndex]);
 
   useEffect(() => {
-    if (dataElements && dataElementLength && elementRef.current) {
-      const element = elementRef.current;
+    const keyboardFocusElements: HTMLElement[] = [];
+    if (keyboardFocusElementProp) {
+      if (Array.isArray(keyboardFocusElementProp)) {
+        keyboardFocusElements.push(...keyboardFocusElementProp);
+      } else {
+        keyboardFocusElements.push(keyboardFocusElementProp);
+      }
+    }
+    if (elementRef.current) {
+      keyboardFocusElements.push(elementRef.current);
+    }
+    if (dataElements && dataElementLength && keyboardFocusElements.length > 0) {
       const keydownCallback = (event: KeyboardEvent) => {
-        setFocusedElementIndex((prevFocusedElementIndex) => {
+        setFocusedElementIndex((prevFocusedElementIndex = -1) => {
           const nextFocusedOptionIndex = (() => {
             switch (event.key) {
               case 'ArrowUp':
@@ -235,15 +249,19 @@ export const InfiniteScrollBox = forwardRef<
               return nextFocusedOptionIndex;
             }
           }
-          return prevFocusedElementIndex;
+          return prevFocusedElementIndex >= 0 ? prevFocusedElementIndex : 0;
         });
       };
-      element.addEventListener('keydown', keydownCallback);
+      keyboardFocusElements.forEach((element) => {
+        element.addEventListener('keydown', keydownCallback);
+      });
       return () => {
-        element.removeEventListener('keydown', keydownCallback);
+        keyboardFocusElements.forEach((element) => {
+          element.removeEventListener('keydown', keydownCallback);
+        });
       };
     }
-  }, [dataElementLength, dataElements, enableKeyboardNavigationWrapping, limit, offset]);
+  }, [dataElementLength, dataElements, enableKeyboardNavigationWrapping, keyboardFocusElementProp]);
 
   useEffect(() => {
     isInitialMountRef.current = false;

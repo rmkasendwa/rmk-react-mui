@@ -194,6 +194,7 @@ export const DataDropdownField = forwardRef<
 
   // Refs
   const anchorRef = useRef<HTMLInputElement>(null);
+  const searchFieldRef = useRef<HTMLInputElement>(null);
   const onChangeRef = useRef(onChange);
   const optionsRef = useRef(options);
   const selectedOptionRef = useRef(selectedOption);
@@ -511,8 +512,11 @@ export const DataDropdownField = forwardRef<
                 }
                 return props;
               })(),
-              ref: anchorRef,
               readOnly: !searchable || isSmallScreenSize,
+              ref: anchorRef,
+            }}
+            inputProps={{
+              ref: searchFieldRef,
             }}
             value={(() => {
               if (
@@ -688,6 +692,7 @@ export const DataDropdownField = forwardRef<
               limit,
               sortOptions,
             }}
+            keyboardFocusElement={searchFieldRef.current}
             onChangeSearchTerm={(searchTerm) => {
               setSearchTerm(searchTerm);
             }}
@@ -703,6 +708,7 @@ export const DataDropdownField = forwardRef<
             onChangeSelectedOptions={(options) => {
               setSelectedOptions(options);
               triggerChangeEvent(options);
+              searchFieldRef.current?.blur();
             }}
             asyncOptionPagesMap={asyncOptionPagesMapRef.current}
             onChangeAsyncOptionPagesMap={(asyncOptionPagesMap) => {
