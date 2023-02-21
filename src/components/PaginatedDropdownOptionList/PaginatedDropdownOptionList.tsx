@@ -333,9 +333,11 @@ export const PaginatedDropdownOptionList = forwardRef<
   const [selectedOptions, setSelectedOptions] = useState<DropdownOption[]>(
     selectedOptionsProp || []
   ); // Selected options state
-  const [focusedOptionIndex, setFocusedOptionIndex] = useState<number | null>(
-    null
-  );
+  const [focusedOptionIndex, setFocusedOptionIndex] = useState(() => {
+    if (selectedOptions.length > 0) {
+      return filteredOptions.indexOf(selectedOptions[0]);
+    }
+  });
 
   useEffect(() => {
     setSearchTerm(searchTermProp);
@@ -544,6 +546,7 @@ export const PaginatedDropdownOptionList = forwardRef<
           return <Fragment key={value}>{label}</Fragment>;
         })}
         dataElementLength={optionHeight}
+        focusedElementIndex={focusedOptionIndex}
         onChangeFocusedDataElement={(index) => {
           setFocusedOptionIndex(index);
         }}
