@@ -65,6 +65,7 @@ export interface TextFieldProps
   labelWrappedPlaceholderFallback?: boolean;
   FieldValueDisplayProps?: Partial<FieldValueDisplayProps>;
   value?: string;
+  startAdornment?: ReactNode;
   endAdornment?: ReactNode;
   endChildren?: ReactNode;
   WrapperProps?: Partial<BoxProps>;
@@ -108,6 +109,7 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
       value,
       required,
       labelWrapped = false,
+      startAdornment,
       endAdornment: endAdornmentProp,
       enableLoadingState = true,
       endChildren,
@@ -269,6 +271,7 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
               triggerChangeEvent(event.target.value);
             }}
             InputProps={{
+              startAdornment,
               endAdornment:
                 endAdornment ??
                 (() => {

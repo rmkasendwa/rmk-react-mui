@@ -1,5 +1,5 @@
 import AppleIcon from '@mui/icons-material/Apple';
-import { Typography } from '@mui/material';
+import { Stack, Typography } from '@mui/material';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { LoremIpsum } from 'lorem-ipsum';
 import React from 'react';
@@ -249,4 +249,23 @@ WithAsyncSelectedOptions.args = {
   SelectProps: {
     multiple: true,
   },
+} as DataDropdownFieldProps;
+
+export const WithEndAdornment = Template.bind({});
+WithEndAdornment.args = {
+  label: 'Dropdown With Options',
+  required: true,
+  options: ['One', 'Two', 'Three'].map((value) => ({ label: value, value })),
+  startAdornment: <Typography variant="body2">To</Typography>,
+  endAdornment: (
+    <Stack
+      direction="row"
+      sx={{
+        gap: 0.5,
+      }}
+    >
+      <Typography variant="body2">Cc</Typography>
+      <Typography variant="body2">Bcc</Typography>
+    </Stack>
+  ),
 } as DataDropdownFieldProps;
