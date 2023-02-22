@@ -69,6 +69,8 @@ export interface FormWrapperProps<Values extends FormikValues = FormikValues>
   children?: ((props: FormikProps<Values>) => ReactNode) | ReactNode;
   formTools?: ReactNode | ReactNode[];
   SubmitButtonProps?: Partial<ButtonProps>;
+  CancelButtonProps?: Partial<ButtonProps>;
+  cancelButtonAction?: 'navigate-to-previous-page' | 'none';
   errorMessage?: string;
   successMessage?: string;
 }
@@ -100,6 +102,8 @@ export const FormWrapper = forwardRef<HTMLDivElement, FormWrapperProps>(
       tools,
       formTools,
       SubmitButtonProps = {},
+      CancelButtonProps = {},
+      cancelButtonAction = 'navigate-to-previous-page',
       errorMessage: errorMessageProp,
       successMessage,
       ...rest
@@ -118,6 +122,7 @@ export const FormWrapper = forwardRef<HTMLDivElement, FormWrapperProps>(
     );
 
     const { ...SubmitButtonPropsRest } = SubmitButtonProps;
+    const { ...CancelButtonPropsRest } = CancelButtonProps;
 
     const { breakpoints } = useTheme();
     const smallScreen = useMediaQuery(breakpoints.down('sm'));
@@ -167,8 +172,13 @@ export const FormWrapper = forwardRef<HTMLDivElement, FormWrapperProps>(
                         color="inherit"
                         variant="contained"
                         onClick={() => {
-                          window.history.back();
+                          if (
+                            cancelButtonAction === 'navigate-to-previous-page'
+                          ) {
+                            window.history.back();
+                          }
                         }}
+                        {...CancelButtonPropsRest}
                       >
                         Cancel
                       </Button>
