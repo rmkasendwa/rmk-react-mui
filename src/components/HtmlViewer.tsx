@@ -127,6 +127,7 @@ export const HtmlViewer = forwardRef<HTMLDivElement, HtmlViewerProps>(
         }}
         sx={{
           whiteSpace: 'pre-wrap',
+          wordBreak: 'break-all',
           a: {
             color: palette.text.primary,
             textDecoration: 'none',
