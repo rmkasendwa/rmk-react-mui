@@ -319,17 +319,30 @@ export const PaginatedDropdownOptionList = forwardRef<
     if (getDropdownOptionsRef.current && asyncOptions.length > 0) {
       return asyncOptions;
     }
-    if (optionsRef.current && optionsRef.current.length > 0) {
-      return optionsRef.current;
+    if (optionsProp && optionsProp.length > 0) {
+      return optionsProp;
     }
     return [];
   })().sort(
     sortOptions && !externallyPaginated ? sortOptionsRef.current : () => 0
   );
 
+  const filteredOptions = (() => {
+    if (searchTerm && !externallyPaginated) {
+      return options.filter(
+        ({ searchableLabel: baseSearchableLabel, label }) => {
+          const searchableLabel = baseSearchableLabel || String(label);
+          return (
+            searchableLabel &&
+            searchableLabel.toLowerCase().match(searchTerm.toLowerCase())
+          );
+        }
+      );
+    }
+    return options;
+  })();
+
   // Options state
-  const [filteredOptions, setFilteredOptions] =
-    useState<DropdownOption[]>(options); // Filtered options state
   const [selectedOptions, setSelectedOptions] = useState<DropdownOption[]>(
     selectedOptionsProp || []
   ); // Selected options state
@@ -342,26 +355,6 @@ export const PaginatedDropdownOptionList = forwardRef<
   useEffect(() => {
     setSearchTerm(searchTermProp);
   }, [searchTermProp]);
-
-  // Filtering options
-  useEffect(() => {
-    setFilteredOptions(
-      (() => {
-        if (searchTerm && !externallyPaginated) {
-          return options.filter(
-            ({ searchableLabel: baseSearchableLabel, label }) => {
-              const searchableLabel = baseSearchableLabel || String(label);
-              return (
-                searchableLabel &&
-                searchableLabel.toLowerCase().match(searchTerm.toLowerCase())
-              );
-            }
-          );
-        }
-        return options;
-      })()
-    );
-  }, [externallyPaginated, options, searchTerm]);
 
   const triggerChangeEvent = useCallback(
     (option: DropdownOption) => {
