@@ -14,6 +14,7 @@ import { useAPIService } from '../hooks/Utils';
 import { PermissionCode } from '../interfaces/Users';
 import { TAPIFunction } from '../interfaces/Utils';
 import { useAPIContext } from './APIContext';
+import { useCachedData } from './DataStoreContext';
 
 export interface LoggedInUser {
   id: string;
@@ -43,6 +44,7 @@ export const AuthProvider: FC<{
   const [loggedInUser, setLoggedInUser] = useState<LoggedInUser | null>(null);
   const [loadingCurrentSession, setLoadingCurrentSession] = useState(true);
   const { setSessionExpired } = useAPIContext();
+  const { reset: resetCachedData } = useCachedData();
   const {
     record: user,
     load,
@@ -80,9 +82,8 @@ export const AuthProvider: FC<{
   const logoutRef = useRef(async (logout?: () => void) => {
     clearLoggedInUserSession();
     logout && (await logout());
-    StorageManager.clear();
+    await resetCachedData();
     setLoggedInUser(null);
-    window.location.reload();
   });
 
   const updateLoggedInUser = useCallback(

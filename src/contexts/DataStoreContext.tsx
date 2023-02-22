@@ -12,17 +12,9 @@ import {
 const CACHED_DATA_PREFIX = 'cached-data';
 const MAX_DATA_MEMORY_SIZE = 15 * 1024; // 15KB
 const MAX_DATA_KEY_COUNT = 35;
-const allDataKeys: string[] =
+const dataKeys: string[] =
   StorageManager.get(`${CACHED_DATA_PREFIX}-keys`) || [];
-const dataKeys = allDataKeys.splice(-MAX_DATA_KEY_COUNT);
 const baseData: Record<string, any> = StorageManager.get('data') || {};
-
-if (allDataKeys.length > 0) {
-  allDataKeys.forEach((key) => {
-    StorageManager.remove(`${CACHED_DATA_PREFIX}-${key}`);
-  });
-  StorageManager.add(`${CACHED_DATA_PREFIX}-keys`, dataKeys);
-}
 
 dataKeys.forEach((key) => {
   const keyData = StorageManager.get(`${CACHED_DATA_PREFIX}-${key}`);

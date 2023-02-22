@@ -12,19 +12,22 @@ export const ReactRouterDomSearchParamCache: FC<
 > = () => {
   const { pathname, search } = useLocation();
   const { data, updateData } = useCachedData();
-  const routeCacheRef = useRef(
-    (data[ROUTE_CACHE_KEY] || {}) as Record<string, string>
-  );
+
+  const dataRef = useRef(data);
+  useEffect(() => {
+    dataRef.current = data;
+  }, [data]);
 
   useEffect(() => {
+    const routeCache = dataRef.current[ROUTE_CACHE_KEY] || {};
     if (search) {
-      routeCacheRef.current[pathname] = pathname + search;
+      routeCache[pathname] = pathname + search;
+      updateData({
+        [ROUTE_CACHE_KEY]: routeCache,
+      });
     } else {
-      delete routeCacheRef.current[pathname];
+      delete routeCache[pathname];
     }
-    updateData({
-      [ROUTE_CACHE_KEY]: routeCacheRef.current,
-    });
   }, [pathname, search, updateData]);
 
   return <Outlet />;
