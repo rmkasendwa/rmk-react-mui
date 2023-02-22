@@ -156,6 +156,8 @@ export const DataDropdownField = forwardRef<
     limit,
     externallyPaginated,
     getSelectedOptions,
+    startAdornment,
+    endAdornment: endAdornmentProp,
     ...rest
   } = props;
 
@@ -402,7 +404,7 @@ export const DataDropdownField = forwardRef<
   }
 
   const endAdornment = (
-    <>
+    <Stack direction="row" sx={{ alignItems: 'center' }}>
       {showClearButton &&
       selectedOptions.length > 0 &&
       !disabled &&
@@ -424,7 +426,8 @@ export const DataDropdownField = forwardRef<
         </Tooltip>
       ) : null}
       <ExpandMoreIcon />
-    </>
+      {endAdornmentProp}
+    </Stack>
   );
 
   return (
@@ -455,6 +458,7 @@ export const DataDropdownField = forwardRef<
                   }}
                   direction="row"
                 >
+                  {startAdornment}
                   {selectedOptions[0]?.label || rest.placeholder}
                   {endAdornment}
                 </Stack>
@@ -529,7 +533,7 @@ export const DataDropdownField = forwardRef<
               return selectedOptionDisplayString;
             })()}
             className={clsx(classes.root)}
-            {...{ variant, label, disabled }}
+            {...{ variant, label, disabled, startAdornment }}
             {...rest}
             endChildren={(() => {
               if (searchable && !focused && selectedOptions.length > 0) {
