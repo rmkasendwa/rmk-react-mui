@@ -453,29 +453,33 @@ export const usePaginatedRecords = <T>(
       params.limit || (params.limit = limit);
       params.searchTerm || (params.searchTerm = searchTerm);
       return loadFromAPIService(async () => {
-        let pendingRecordRequestController: RecordFinderRequestController;
+        const localPendingRecordRequestControllers: RecordFinderRequestController[] =
+          [];
         const responseData = await recordFinderRef
           .current({
             ...params,
             getRequestController: (requestController) => {
-              pendingRecordRequestController = requestController;
-              pendingRecordRequestControllers.current.push(
-                pendingRecordRequestController
-              );
+              localPendingRecordRequestControllers.push(requestController);
+              pendingRecordRequestControllers.current.push(requestController);
             },
           })
           .finally(() => {
-            if (
-              pendingRecordRequestController &&
-              pendingRecordRequestControllers.current.includes(
-                pendingRecordRequestController
-              )
-            ) {
-              pendingRecordRequestControllers.current.splice(
-                pendingRecordRequestControllers.current.indexOf(
-                  pendingRecordRequestController
-                ),
-                1
+            if (localPendingRecordRequestControllers.length > 0) {
+              localPendingRecordRequestControllers.forEach(
+                (requestController) => {
+                  if (
+                    pendingRecordRequestControllers.current.indexOf(
+                      requestController
+                    )
+                  ) {
+                    pendingRecordRequestControllers.current.splice(
+                      pendingRecordRequestControllers.current.indexOf(
+                        requestController
+                      ),
+                      1
+                    );
+                  }
+                }
               );
             }
           });
