@@ -123,24 +123,7 @@ export const EmailAddressSelector = forwardRef<
     })()
   );
 
-  // Refs
-  const isInitialMountRef = useRef(true);
-  const anchorRef = useRef<HTMLDivElement | null>();
-  const searchFieldRef = useRef<HTMLInputElement | null>();
-  const onChangeSelectedEmailAddressesRef = useRef(
-    onChangeSelectedEmailAddresses
-  );
-  useEffect(() => {
-    onChangeSelectedEmailAddressesRef.current = onChangeSelectedEmailAddresses;
-  }, [onChangeSelectedEmailAddresses]);
-
-  const [selectedEmailAddressHolders, setSelectedEmailAddressHolders] =
-    useState<(string | EmailAddressHolder)[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedEmailAddress, setSelectedEmailAddress] = useState<
-    string | undefined
-  >(undefined);
-  const [isFocused, setIsFocused] = useState(false);
 
   const {
     load: loadEmailAddressHolders,
@@ -170,10 +153,30 @@ export const EmailAddressSelector = forwardRef<
     }
   );
 
+  // Refs
+  const isInitialMountRef = useRef(true);
+  const anchorRef = useRef<HTMLDivElement | null>();
+  const searchFieldRef = useRef<HTMLInputElement | null>();
+  const onChangeSelectedEmailAddressesRef = useRef(
+    onChangeSelectedEmailAddresses
+  );
+  const emailAddressHoldersRef = useRef(emailAddressHolders);
+  useEffect(() => {
+    onChangeSelectedEmailAddressesRef.current = onChangeSelectedEmailAddresses;
+    emailAddressHoldersRef.current = emailAddressHolders;
+  }, [emailAddressHolders, onChangeSelectedEmailAddresses]);
+
+  const [selectedEmailAddressHolders, setSelectedEmailAddressHolders] =
+    useState<(string | EmailAddressHolder)[]>([]);
+  const [selectedEmailAddress, setSelectedEmailAddress] = useState<
+    string | undefined
+  >(undefined);
+  const [isFocused, setIsFocused] = useState(false);
+
   useEffect(() => {
     if (selectedEmailAddress) {
       setSelectedEmailAddressHolders((prevEmailAddresses) => {
-        const selectedEmailAddressHolder = emailAddressHolders.find(
+        const selectedEmailAddressHolder = emailAddressHoldersRef.current.find(
           ({ email }) => {
             return email === selectedEmailAddress;
           }
@@ -186,7 +189,7 @@ export const EmailAddressSelector = forwardRef<
       resetEmailAddressHoldersState();
       setSelectedEmailAddress(undefined);
     }
-  }, [emailAddressHolders, resetEmailAddressHoldersState, selectedEmailAddress]);
+  }, [resetEmailAddressHoldersState, selectedEmailAddress]);
 
   useEffect(() => {
     if (!isInitialMountRef.current && emailAddressesProp) {
