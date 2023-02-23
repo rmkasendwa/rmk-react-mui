@@ -12,6 +12,7 @@ import {
   generateUtilityClasses,
   useThemeProps,
 } from '@mui/material';
+import { BoxProps } from '@mui/material/Box';
 import clsx from 'clsx';
 import { MD5 } from 'crypto-js';
 import { forwardRef } from 'react';
@@ -53,7 +54,14 @@ declare module '@mui/material/styles/components' {
   }
 }
 
-export interface ProfileGravatarProps extends ProfileAvatarProps {
+export interface ProfileGravatarProps
+  extends BoxProps,
+    Partial<
+      Pick<
+        ProfileAvatarProps,
+        'label' | 'size' | 'defaultAvatar' | 'enableLoadingState' | 'src'
+      >
+    > {
   email?: string;
 }
 
@@ -77,6 +85,8 @@ export const ProfileGravatar = forwardRef<HTMLDivElement, ProfileGravatarProps>(
       email: emailProp,
       size,
       defaultAvatar,
+      enableLoadingState,
+      src,
       sx,
       ...rest
     } = props;
@@ -108,21 +118,20 @@ export const ProfileGravatar = forwardRef<HTMLDivElement, ProfileGravatarProps>(
     return (
       <Box
         ref={ref}
+        {...rest}
+        className={clsx(classes.root)}
         sx={{
           position: 'relative',
           display: 'inline-flex',
+          ...sx,
         }}
       >
         <ProfileAvatar
-          {...{ size, defaultAvatar, label }}
-          {...rest}
-          sx={{ ...sx }}
+          {...{ size, defaultAvatar, label, enableLoadingState, src }}
         />
         {email && !loading && !errorMessage ? (
           <ProfileAvatar
             {...{ size }}
-            {...rest}
-            className={clsx(classes.root)}
             src={addSearchParams(
               getInterpolatedPath(GRAVATAR_URL, {
                 md5EmailHash: MD5(email).toString(),
@@ -132,7 +141,7 @@ export const ProfileGravatar = forwardRef<HTMLDivElement, ProfileGravatarProps>(
                 size,
               }
             )}
-            sx={{ ...sx, position: 'absolute', top: 0, left: 0 }}
+            sx={{ position: 'absolute', top: 0, left: 0 }}
           />
         ) : null}
       </Box>

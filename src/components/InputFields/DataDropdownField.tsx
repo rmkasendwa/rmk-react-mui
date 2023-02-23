@@ -105,6 +105,7 @@ export interface DataDropdownFieldProps
   SelectedOptionPillProps?: Partial<BoxProps>;
   PaginatedDropdownOptionListProps?: Partial<PaginatedDropdownOptionListProps>;
   variant?: 'standard' | 'filled' | 'outlined' | 'text';
+  showDropdownIcon?: boolean;
 }
 
 export function getDataDropdownFieldUtilityClass(slot: string): string {
@@ -158,6 +159,7 @@ export const DataDropdownField = forwardRef<
     getSelectedOptions,
     startAdornment,
     endAdornment: endAdornmentProp,
+    showDropdownIcon = true,
     ...rest
   } = props;
 
@@ -425,7 +427,7 @@ export const DataDropdownField = forwardRef<
           </IconButton>
         </Tooltip>
       ) : null}
-      <ExpandMoreIcon />
+      {showDropdownIcon ? <ExpandMoreIcon /> : null}
       {endAdornmentProp}
     </Stack>
   );
