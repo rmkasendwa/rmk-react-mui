@@ -1,6 +1,7 @@
 import {
   Box,
   BoxProps,
+  Card,
   Chip,
   ClickAwayListener,
   ComponentsOverrides,
@@ -10,6 +11,7 @@ import {
   Grid,
   Grow,
   Popper,
+  Tooltip,
   Typography,
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
@@ -408,13 +410,79 @@ export const EmailAddressSelector = forwardRef<
                 <Chip
                   key={index}
                   avatar={
-                    <ProfileGravatar
-                      {...ProfileGravatarPropsRest}
-                      email={email}
-                      label={name}
-                      src={profilePictureUrl}
-                      size={24}
-                    />
+                    <Tooltip
+                      title={
+                        <Card
+                          sx={{
+                            p: 2,
+                            width: 360,
+                          }}
+                        >
+                          <Grid
+                            container
+                            spacing={2}
+                            sx={{
+                              alignItems: 'center',
+                            }}
+                          >
+                            <Grid item>
+                              <ProfileGravatar
+                                {...ProfileGravatarPropsRest}
+                                size={64}
+                                email={email}
+                                label={name}
+                                src={profilePictureUrl}
+                              />
+                            </Grid>
+                            <Grid
+                              item
+                              xs
+                              sx={{
+                                minWidth: 0,
+                              }}
+                            >
+                              <Typography
+                                variant="body2"
+                                noWrap
+                                sx={{
+                                  fontWeight: 600,
+                                  fontSize: 20,
+                                }}
+                              >
+                                {name || email}
+                              </Typography>
+                              <Typography
+                                variant="body2"
+                                noWrap
+                                sx={{
+                                  fontSize: 18,
+                                }}
+                              >
+                                {email}
+                              </Typography>
+                            </Grid>
+                          </Grid>
+                        </Card>
+                      }
+                      enterDelay={1000}
+                      enterNextDelay={500}
+                      componentsProps={{
+                        tooltip: {
+                          sx: {
+                            p: 0,
+                            maxWidth: 'none',
+                          },
+                        },
+                      }}
+                    >
+                      <ProfileGravatar
+                        {...ProfileGravatarPropsRest}
+                        email={email}
+                        label={name}
+                        src={profilePictureUrl}
+                        size={24}
+                      />
+                    </Tooltip>
                   }
                   label={name || email}
                   onDelete={() => {
