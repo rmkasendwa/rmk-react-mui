@@ -134,54 +134,86 @@ export const EmailAddressSelector = forwardRef<
     onChangeSelectedEmailAddressesRef.current = onChangeSelectedEmailAddresses;
   }, [onChangeSelectedEmailAddresses]);
 
-  const [emailAddresses, setEmailAddresses] = useState<string[]>([]);
+  const [selectedEmailAddressHolders, setSelectedEmailAddressHolders] =
+    useState<(string | EmailAddressHolder)[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedEmailAddress, setSelectedEmailAddress] = useState<
     string | undefined
   >(undefined);
   const [isFocused, setIsFocused] = useState(false);
 
-  const { load: loadEmailAddressHolders, allPageRecords: emailAddressHolders } =
-    usePaginatedRecords(
-      async ({ limit, offset, getRequestController }) => {
-        if (getEmailAddressHolders) {
-          const optionsResponse = await getEmailAddressHolders({
-            searchTerm,
-            limit,
-            offset,
-            getRequestController,
-          });
-          return {
-            records: optionsResponse,
-            recordsTotalCount: optionsResponse.length,
-          };
-        }
-        return { records: [], recordsTotalCount: 0 };
-      },
-      {
-        loadOnMount: false,
-        autoSync: false,
-        limit: 5,
-        searchTerm,
+  const {
+    load: loadEmailAddressHolders,
+    allPageRecords: emailAddressHolders,
+    reset: resetEmailAddressHoldersState,
+  } = usePaginatedRecords(
+    async ({ limit, offset, getRequestController }) => {
+      if (getEmailAddressHolders) {
+        const optionsResponse = await getEmailAddressHolders({
+          searchTerm,
+          limit,
+          offset,
+          getRequestController,
+        });
+        return {
+          records: optionsResponse,
+          recordsTotalCount: optionsResponse.length,
+        };
       }
-    );
+      return { records: [], recordsTotalCount: 0 };
+    },
+    {
+      loadOnMount: false,
+      autoSync: false,
+      limit: 5,
+      searchTerm,
+    }
+  );
 
   useEffect(() => {
     if (selectedEmailAddress) {
-      setEmailAddresses((prevPeople) => {
-        return [...prevPeople, selectedEmailAddress];
+      setSelectedEmailAddressHolders((prevEmailAddresses) => {
+        const selectedEmailAddressHolder = emailAddressHolders.find(
+          ({ email }) => {
+            return email === selectedEmailAddress;
+          }
+        );
+        return [
+          ...prevEmailAddresses,
+          selectedEmailAddressHolder || selectedEmailAddress,
+        ];
       });
+      resetEmailAddressHoldersState();
       setSelectedEmailAddress(undefined);
     }
-  }, [selectedEmailAddress]);
+  }, [emailAddressHolders, resetEmailAddressHoldersState, selectedEmailAddress]);
 
   useEffect(() => {
     if (!isInitialMountRef.current && emailAddressesProp) {
-      setEmailAddresses((prevEmailAddresses) => {
-        if (emailAddressesProp.join(';') !== prevEmailAddresses.join(';')) {
-          return emailAddressesProp;
+      setSelectedEmailAddressHolders((prevEmailAddressHolders) => {
+        const emailAddresses = prevEmailAddressHolders.map((emailAddress) => {
+          if (typeof emailAddress === 'string') {
+            return emailAddress;
+          }
+          return emailAddress.email;
+        });
+        if (emailAddressesProp.join(';') !== emailAddresses.join(';')) {
+          return emailAddressesProp.map((emailAddress) => {
+            const existingEmailAddressHolder = prevEmailAddressHolders.find(
+              (emailAddressHolder) => {
+                return (
+                  typeof emailAddressHolder !== 'string' &&
+                  emailAddressHolder.email === emailAddress
+                );
+              }
+            );
+            if (existingEmailAddressHolder) {
+              return existingEmailAddressHolder;
+            }
+            return emailAddress;
+          });
         }
-        return prevEmailAddresses;
+        return prevEmailAddressHolders;
       });
     }
   }, [emailAddressesProp]);
@@ -195,9 +227,16 @@ export const EmailAddressSelector = forwardRef<
   useEffect(() => {
     if (!isInitialMountRef.current) {
       onChangeSelectedEmailAddressesRef.current &&
-        onChangeSelectedEmailAddressesRef.current(emailAddresses);
+        onChangeSelectedEmailAddressesRef.current(
+          selectedEmailAddressHolders.map((emailAddress) => {
+            if (typeof emailAddress === 'string') {
+              return emailAddress;
+            }
+            return emailAddress.email;
+          })
+        );
     }
-  }, [emailAddresses]);
+  }, [selectedEmailAddressHolders]);
 
   useEffect(() => {
     isInitialMountRef.current = false;
@@ -235,6 +274,16 @@ export const EmailAddressSelector = forwardRef<
       }
       return validEmailAddress;
     })();
+
+    const selectedEmailAddresses = selectedEmailAddressHolders.map(
+      (emailAddress) => {
+        if (typeof emailAddress === 'string') {
+          return emailAddress;
+        }
+        return emailAddress.email;
+      }
+    );
+
     return {
       label: (
         <Grid
@@ -281,7 +330,7 @@ export const EmailAddressSelector = forwardRef<
         </Grid>
       ),
       value: email,
-      selectable: !emailAddresses.includes(email),
+      selectable: !selectedEmailAddresses.includes(email),
     } as DropdownOption;
   });
 
@@ -327,14 +376,33 @@ export const EmailAddressSelector = forwardRef<
               gap: 1,
             }}
           >
-            {emailAddresses.map((emailAddress, index) => {
+            {selectedEmailAddressHolders.map((emailAddress, index) => {
+              const { email, name, profilePictureUrl } = ((): {
+                email: string;
+                name?: string;
+                profilePictureUrl?: string;
+              } => {
+                if (typeof emailAddress === 'string') {
+                  return {
+                    email: emailAddress,
+                  };
+                }
+                return emailAddress;
+              })();
               return (
                 <Chip
                   key={index}
-                  avatar={<ProfileGravatar email={emailAddress} size={24} />}
-                  label={emailAddress}
+                  avatar={
+                    <ProfileGravatar
+                      email={email}
+                      label={name}
+                      src={profilePictureUrl}
+                      size={24}
+                    />
+                  }
+                  label={name || email}
                   onDelete={() => {
-                    setEmailAddresses((prevPeople) => {
+                    setSelectedEmailAddressHolders((prevPeople) => {
                       const nextPeople = [...prevPeople];
                       if (nextPeople.includes(emailAddress)) {
                         nextPeople.splice(nextPeople.indexOf(emailAddress), 1);
