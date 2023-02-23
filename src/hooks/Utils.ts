@@ -404,6 +404,7 @@ export const usePaginatedRecords = <T>(
     showRecords = true,
     loadedPagesMap,
     revalidationKey,
+    autoSync = true,
   }: UsePaginatedRecordsOptions<T> = {}
 ) => {
   // Refs
@@ -538,11 +539,11 @@ export const usePaginatedRecords = <T>(
   });
 
   useEffect(() => {
-    if (loadOnMount || !isInitialMountRef.current) {
+    if (autoSync && (loadOnMount || !isInitialMountRef.current)) {
       resetRef.current();
       load();
     }
-  }, [load, loadOnMount]);
+  }, [autoSync, load, loadOnMount]);
 
   useEffect(() => {
     isInitialMountRef.current = false;

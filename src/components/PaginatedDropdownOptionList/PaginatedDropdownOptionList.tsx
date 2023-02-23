@@ -106,6 +106,7 @@ export interface PaginatedDropdownOptionListProps
   searchTerm?: string;
   onChangeSearchTerm?: (searchTerm: string) => void;
   SearchFieldProps?: Partial<SearchFieldProps>;
+  showNoOptionsFoundMessage?: boolean;
 
   // Async options
   getDropdownOptions?: (
@@ -170,6 +171,7 @@ export const PaginatedDropdownOptionList = forwardRef<
     sortOptions = false,
     callGetDropdownOptions = 'whenNoOptions',
     keyboardFocusElement,
+    showNoOptionsFoundMessage = true,
     ...rest
   } = omit(props, 'limit');
 
@@ -564,6 +566,7 @@ export const PaginatedDropdownOptionList = forwardRef<
       >
         {(() => {
           if (
+            showNoOptionsFoundMessage &&
             !loading &&
             !loadingProp &&
             (!getDropdownOptions || isAsyncOptionsLoaded)

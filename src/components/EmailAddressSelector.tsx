@@ -186,10 +186,9 @@ export const EmailAddressSelector = forwardRef<
           selectedEmailAddressHolder || selectedEmailAddress,
         ];
       });
-      resetEmailAddressHoldersState();
       setSelectedEmailAddress(undefined);
     }
-  }, [resetEmailAddressHoldersState, selectedEmailAddress]);
+  }, [selectedEmailAddress]);
 
   useEffect(() => {
     if (!isInitialMountRef.current && emailAddressesProp) {
@@ -224,8 +223,10 @@ export const EmailAddressSelector = forwardRef<
   useEffect(() => {
     if (isFocused && searchTerm.length > 0) {
       loadEmailAddressHolders();
+    } else {
+      resetEmailAddressHoldersState();
     }
-  }, [isFocused, loadEmailAddressHolders, searchTerm.length]);
+  }, [isFocused, loadEmailAddressHolders, resetEmailAddressHoldersState, searchTerm.length]);
 
   useEffect(() => {
     if (!isInitialMountRef.current) {
@@ -248,13 +249,12 @@ export const EmailAddressSelector = forwardRef<
     };
   }, []);
 
-  const validEmailAddress = Yup.string().email().isValidSync(searchTerm)
+  const validEmailAddress = Yup.string()
+    .email()
+    .required()
+    .isValidSync(searchTerm)
     ? searchTerm
     : undefined;
-
-  const isOpen = Boolean(
-    (validEmailAddress || emailAddressHolders.length > 0) && isFocused
-  );
 
   const options = [
     ...emailAddressHolders,
@@ -336,6 +336,13 @@ export const EmailAddressSelector = forwardRef<
       selectable: !selectedEmailAddresses.includes(email),
     } as DropdownOption;
   });
+
+  const isOpen = Boolean(
+    (validEmailAddress || emailAddressHolders.length > 0) &&
+      isFocused &&
+      options.length > 0 &&
+      searchTerm.length > 0
+  );
 
   return (
     <Box ref={ref} {...rest} className={clsx(classes.root)}>
@@ -492,6 +499,7 @@ export const EmailAddressSelector = forwardRef<
                                 : undefined
                             }
                             optionHeight={OPTION_HEIGHT}
+                            showNoOptionsFoundMessage={false}
                           />
                         </ClickAwayListener>
                       </Box>
