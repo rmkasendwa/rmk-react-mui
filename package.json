@@ -142,6 +142,7 @@
     "prettier": "^2.7.1",
     "prettier-plugin-import-sort": "0.0.7",
     "prettier-plugin-sort-json": "0.0.3",
+    "random-email": "^1.0.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-fast-compare": "^3.2.0",
