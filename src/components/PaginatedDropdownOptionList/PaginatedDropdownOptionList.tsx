@@ -352,6 +352,7 @@ export const PaginatedDropdownOptionList = forwardRef<
     if (selectedOptions.length > 0) {
       return filteredOptions.indexOf(selectedOptions[0]);
     }
+    return 0;
   });
 
   useEffect(() => {

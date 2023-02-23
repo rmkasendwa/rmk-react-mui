@@ -159,9 +159,9 @@ export const InfiniteScrollBox = forwardRef<
     element: elementRef.current,
   });
 
-  const [focusedElementIndex, setFocusedElementIndex] = useState<
-    number | undefined
-  >(undefined);
+  const [focusedElementIndex, setFocusedElementIndex] = useState(
+    focusedElementIndexProp ?? 0
+  );
 
   useEffect(() => {
     if (focusedElementIndexProp != null) {
