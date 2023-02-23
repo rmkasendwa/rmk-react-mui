@@ -211,14 +211,20 @@ export const InfiniteScrollBox = forwardRef<
                 event.preventDefault();
                 return (prevFocusedElementIndex + 1) % dataElements.length;
               case 'Enter':
-                if (prevFocusedElementIndex != null) {
+              case 'Tab':
+                if (
+                  prevFocusedElementIndex != null &&
+                  onSelectDataElementRef.current
+                ) {
                   event.preventDefault();
-                  onSelectDataElementRef.current &&
-                    onSelectDataElementRef.current(prevFocusedElementIndex);
+                  onSelectDataElementRef.current(prevFocusedElementIndex);
                 }
                 break;
               case 'Escape':
-                onCloseRef.current && onCloseRef.current();
+                if (onCloseRef.current) {
+                  event.preventDefault();
+                  onCloseRef.current();
+                }
                 break;
             }
           })();
