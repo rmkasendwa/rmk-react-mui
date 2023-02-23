@@ -59,7 +59,12 @@ export interface ProfileGravatarProps
     Partial<
       Pick<
         ProfileAvatarProps,
-        'label' | 'size' | 'defaultAvatar' | 'enableLoadingState' | 'src'
+        | 'label'
+        | 'size'
+        | 'defaultAvatar'
+        | 'enableLoadingState'
+        | 'src'
+        | 'children'
       >
     > {
   email?: string;
@@ -88,6 +93,7 @@ export const ProfileGravatar = forwardRef<HTMLDivElement, ProfileGravatarProps>(
       enableLoadingState,
       src,
       sx,
+      children,
       ...rest
     } = props;
 
@@ -123,11 +129,11 @@ export const ProfileGravatar = forwardRef<HTMLDivElement, ProfileGravatarProps>(
         sx={{
           position: 'relative',
           display: 'inline-flex',
-          ...sx,
         }}
       >
         <ProfileAvatar
-          {...{ size, defaultAvatar, label, enableLoadingState, src }}
+          {...{ size, defaultAvatar, label, enableLoadingState, src, children }}
+          sx={sx}
         />
         {email && !loading && !errorMessage ? (
           <ProfileAvatar
@@ -141,7 +147,7 @@ export const ProfileGravatar = forwardRef<HTMLDivElement, ProfileGravatarProps>(
                 size,
               }
             )}
-            sx={{ position: 'absolute', top: 0, left: 0 }}
+            sx={{ ...sx, position: 'absolute', top: 0, left: 0 }}
           />
         ) : null}
       </Box>
