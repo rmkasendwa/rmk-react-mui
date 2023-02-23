@@ -117,11 +117,23 @@ export const EmailAddressSelector = forwardRef<
 
   const [emailAddresses, setEmailAddresses] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedEmailAddress, setSelectedEmailAddress] = useState<
+    string | undefined
+  >(undefined);
   const [focused, setFocused] = useState(false);
 
   const validEmailAddress = Yup.string().email().isValidSync(searchTerm)
     ? searchTerm
     : undefined;
+
+  useEffect(() => {
+    if (selectedEmailAddress) {
+      setEmailAddresses((prevPeople) => {
+        return [...prevPeople, selectedEmailAddress];
+      });
+      setSelectedEmailAddress(undefined);
+    }
+  }, [selectedEmailAddress]);
 
   useEffect(() => {
     if (!isInitialMountRef.current && emailAddressesProp) {
@@ -321,15 +333,10 @@ export const EmailAddressSelector = forwardRef<
                               };
                             })}
                             onSelectOption={({ value }) => {
+                              setSelectedEmailAddress(String(value));
                               setSearchTerm('');
-                              setEmailAddresses((prevPeople) => {
-                                return [...prevPeople, String(value)];
-                              });
                             }}
                             keyboardFocusElement={searchFieldRef.current}
-                            onChangeSearchTerm={(searchTerm) => {
-                              setSearchTerm(searchTerm);
-                            }}
                             minWidth={
                               anchorRef.current
                                 ? anchorRef.current.offsetWidth
