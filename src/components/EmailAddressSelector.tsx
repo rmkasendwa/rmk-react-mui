@@ -229,10 +229,9 @@ export const EmailAddressSelector = forwardRef<
   }, [emailAddressesProp]);
 
   useEffect(() => {
+    resetEmailAddressHoldersState();
     if (isFocused && searchTerm.length > 0) {
       loadEmailAddressHolders();
-    } else {
-      resetEmailAddressHoldersState();
     }
   }, [isFocused, loadEmailAddressHolders, resetEmailAddressHoldersState, searchTerm.length]);
 
