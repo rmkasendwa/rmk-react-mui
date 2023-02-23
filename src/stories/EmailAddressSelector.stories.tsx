@@ -40,7 +40,15 @@ const emailAddressHolders = Array.from({ length: 50 }).map(() => {
 export const WithEmailAddressSearchPool = Template.bind({});
 WithEmailAddressSearchPool.args = {
   startAdornment: 'To',
-  getEmailAddressHolders: async () => {
-    return emailAddressHolders;
+  getEmailAddressHolders: async ({ searchTerm, offset = 0, limit = 10 }) => {
+    return emailAddressHolders
+      .filter(({ email, name }) => {
+        return [email, name].some((label) => {
+          return String(label)
+            .toLowerCase()
+            .match(String(searchTerm).toLowerCase());
+        });
+      })
+      .slice(offset, offset + limit);
   },
 } as EmailAddressSelectorProps;
