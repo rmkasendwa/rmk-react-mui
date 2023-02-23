@@ -148,7 +148,7 @@ export const EmailAddressSelector = forwardRef<
     {
       loadOnMount: false,
       autoSync: false,
-      limit: 5,
+      limit: 11,
       searchTerm,
     }
   );
