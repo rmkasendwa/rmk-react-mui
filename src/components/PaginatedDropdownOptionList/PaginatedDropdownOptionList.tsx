@@ -544,9 +544,12 @@ export const PaginatedDropdownOptionList = forwardRef<
           setFocusedOptionIndex(index);
         }}
         onSelectDataElement={(focusedOptionIndex) => {
-          onSelectOptionRef.current &&
-            onSelectOptionRef.current(filteredOptions[focusedOptionIndex]);
-          triggerChangeEvent(filteredOptions[focusedOptionIndex]);
+          const selectedOption = filteredOptions[focusedOptionIndex];
+          if (selectedOption?.selectable) {
+            onSelectOptionRef.current &&
+              onSelectOptionRef.current(selectedOption);
+            triggerChangeEvent(selectedOption);
+          }
         }}
         bottomThreshold={optionHeight * 5}
         enableKeyboardNavigationWrapping={!externallyPaginated}
