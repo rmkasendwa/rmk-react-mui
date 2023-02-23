@@ -72,14 +72,16 @@ export interface EmailAddressHolder {
   profilePictureUrl?: string;
 }
 
+export type EmailAddressHolderResolverFunction = (
+  options: PaginatedRecordsFinderOptions
+) => Promise<EmailAddressHolder[]>;
+
 export interface EmailAddressSelectorProps extends Partial<BoxProps> {
   startAdornment?: ReactNode;
   endAdornment?: ReactNode;
   emailAddresses?: string[];
   onChangeSelectedEmailAddresses?: (emailAddresses: string[]) => void;
-  getEmailAddressHolders?: (
-    options: PaginatedRecordsFinderOptions
-  ) => Promise<EmailAddressHolder[]>;
+  getEmailAddressHolders?: EmailAddressHolderResolverFunction;
   ProfileGravatarProps?: ProfileGravatarProps;
 }
 
