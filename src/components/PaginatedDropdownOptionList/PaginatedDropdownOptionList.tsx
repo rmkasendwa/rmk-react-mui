@@ -482,7 +482,7 @@ export const PaginatedDropdownOptionList = forwardRef<
             label,
             icon,
             description,
-            selectable,
+            selectable = true,
             isDropdownOption = true,
             isDropdownOptionWrapped = true,
             onClick,
@@ -490,21 +490,22 @@ export const PaginatedDropdownOptionList = forwardRef<
             sx,
           } = option;
           if (isDropdownOption && isDropdownOptionWrapped) {
-            const classNames = [];
             const isFocused =
               filteredOptions.indexOf(option) === focusedOptionIndex;
-            if (isFocused) {
-              classNames.push('Mui-focusVisible');
-            }
             const dropdownOptionElement = (
               <DropdownOption
-                className={classNames.join(' ')}
+                className={clsx({
+                  ['Mui-focusVisible']: isFocused && selectable,
+                })}
                 value={value}
                 key={value}
                 onClick={(event) => {
-                  triggerChangeEvent(option);
-                  onClick && onClick(event);
-                  onSelectOption && onSelectOption(option);
+                  if (selectable) {
+                    event.preventDefault();
+                    triggerChangeEvent(option);
+                    onClick && onClick(event);
+                    onSelectOption && onSelectOption(option);
+                  }
                 }}
                 selected={(() => {
                   const selectedOptionValues = selectedOptions.map(

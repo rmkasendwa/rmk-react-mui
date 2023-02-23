@@ -173,6 +173,7 @@ export const DropdownOption = forwardRef<HTMLLIElement, DropdownOptionProps>(
           ...sx,
         }}
         disableRipple={!selectable}
+        disabled={!selectable}
       >
         <Box
           sx={{
