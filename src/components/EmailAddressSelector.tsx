@@ -30,7 +30,7 @@ import TextField from './InputFields/TextField';
 import PaginatedDropdownOptionList, {
   DropdownOption,
 } from './PaginatedDropdownOptionList';
-import ProfileGravatar from './ProfileGravatar';
+import ProfileGravatar, { ProfileGravatarProps } from './ProfileGravatar';
 
 export interface EmailAddressSelectorClasses {
   /** Styles applied to the root element. */
@@ -78,6 +78,7 @@ export interface EmailAddressSelectorProps extends Partial<BoxProps> {
   getEmailAddressHolders?: (
     options: PaginatedRecordsFinderOptions
   ) => Promise<EmailAddressHolder[]>;
+  ProfileGravatarProps?: ProfileGravatarProps;
 }
 
 export function getEmailAddressSelectorUtilityClass(slot: string): string {
@@ -108,6 +109,7 @@ export const EmailAddressSelector = forwardRef<
     onChangeSelectedEmailAddresses,
     emailAddresses: emailAddressesProp,
     getEmailAddressHolders,
+    ProfileGravatarProps = {},
     ...rest
   } = props;
 
@@ -122,6 +124,8 @@ export const EmailAddressSelector = forwardRef<
       }
     })()
   );
+
+  const { ...ProfileGravatarPropsRest } = ProfileGravatarProps;
 
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -298,6 +302,7 @@ export const EmailAddressSelector = forwardRef<
         >
           <Grid item>
             <ProfileGravatar
+              {...ProfileGravatarPropsRest}
               size={32}
               email={email}
               label={name}
@@ -404,6 +409,7 @@ export const EmailAddressSelector = forwardRef<
                   key={index}
                   avatar={
                     <ProfileGravatar
+                      {...ProfileGravatarPropsRest}
                       email={email}
                       label={name}
                       src={profilePictureUrl}

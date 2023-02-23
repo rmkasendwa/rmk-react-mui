@@ -55,7 +55,7 @@ declare module '@mui/material/styles/components' {
 }
 
 export interface ProfileGravatarProps
-  extends BoxProps,
+  extends Omit<BoxProps, 'ref'>,
     Partial<
       Pick<
         ProfileAvatarProps,
@@ -65,6 +65,7 @@ export interface ProfileGravatarProps
         | 'enableLoadingState'
         | 'src'
         | 'children'
+        | 'variant'
       >
     > {
   email?: string;
@@ -91,6 +92,7 @@ export const ProfileGravatar = forwardRef<HTMLDivElement, ProfileGravatarProps>(
       size,
       defaultAvatar,
       enableLoadingState,
+      variant,
       src,
       sx,
       children,
@@ -132,12 +134,20 @@ export const ProfileGravatar = forwardRef<HTMLDivElement, ProfileGravatarProps>(
         }}
       >
         <ProfileAvatar
-          {...{ size, defaultAvatar, label, enableLoadingState, src, children }}
+          {...{
+            size,
+            defaultAvatar,
+            label,
+            enableLoadingState,
+            src,
+            children,
+            variant,
+          }}
           sx={sx}
         />
         {email && !loading && !errorMessage ? (
           <ProfileAvatar
-            {...{ size }}
+            {...{ size, variant }}
             src={addSearchParams(
               getInterpolatedPath(GRAVATAR_URL, {
                 md5EmailHash: MD5(email).toString(),
