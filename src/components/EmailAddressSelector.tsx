@@ -21,9 +21,15 @@ import clsx from 'clsx';
 import { ReactNode, forwardRef, useEffect, useRef, useState } from 'react';
 import * as Yup from 'yup';
 
+import {
+  PaginatedRecordsFinderOptions,
+  usePaginatedRecords,
+} from '../hooks/Utils';
 import { isDescendant } from '../utils/html';
 import TextField from './InputFields/TextField';
-import PaginatedDropdownOptionList from './PaginatedDropdownOptionList';
+import PaginatedDropdownOptionList, {
+  DropdownOption,
+} from './PaginatedDropdownOptionList';
 import ProfileGravatar from './ProfileGravatar';
 
 export interface EmailAddressSelectorClasses {
@@ -58,11 +64,20 @@ declare module '@mui/material/styles/components' {
   }
 }
 
+export interface EmailAddressHolder {
+  name: string;
+  email: string;
+  profilePictureUrl?: string;
+}
+
 export interface EmailAddressSelectorProps extends Partial<BoxProps> {
   startAdornment?: ReactNode;
   endAdornment?: ReactNode;
   emailAddresses?: string[];
   onChangeSelectedEmailAddresses?: (emailAddresses: string[]) => void;
+  getEmailAddressHolders?: (
+    options: PaginatedRecordsFinderOptions
+  ) => Promise<EmailAddressHolder[]>;
 }
 
 export function getEmailAddressSelectorUtilityClass(slot: string): string {
@@ -75,6 +90,8 @@ export const emailAddressSelectorClasses: EmailAddressSelectorClasses =
 const slots = {
   root: ['root'],
 };
+
+const OPTION_HEIGHT = 50;
 
 export const EmailAddressSelector = forwardRef<
   HTMLDivElement,
@@ -90,6 +107,7 @@ export const EmailAddressSelector = forwardRef<
     endAdornment,
     onChangeSelectedEmailAddresses,
     emailAddresses: emailAddressesProp,
+    getEmailAddressHolders,
     ...rest
   } = props;
 
@@ -105,6 +123,7 @@ export const EmailAddressSelector = forwardRef<
     })()
   );
 
+  // Refs
   const isInitialMountRef = useRef(true);
   const anchorRef = useRef<HTMLDivElement | null>();
   const searchFieldRef = useRef<HTMLInputElement | null>();
@@ -117,11 +136,44 @@ export const EmailAddressSelector = forwardRef<
 
   const [emailAddresses, setEmailAddresses] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [focused, setFocused] = useState(false);
+  const [selectedEmailAddress, setSelectedEmailAddress] = useState<
+    string | undefined
+  >(undefined);
+  const [isFocused, setIsFocused] = useState(false);
 
-  const validEmailAddress = Yup.string().email().isValidSync(searchTerm)
-    ? searchTerm
-    : undefined;
+  const { load: loadEmailAddressHolders, allPageRecords: emailAddressHolders } =
+    usePaginatedRecords(
+      async ({ limit, offset, getRequestController }) => {
+        if (getEmailAddressHolders) {
+          const optionsResponse = await getEmailAddressHolders({
+            searchTerm,
+            limit,
+            offset,
+            getRequestController,
+          });
+          return {
+            records: optionsResponse,
+            recordsTotalCount: optionsResponse.length,
+          };
+        }
+        return { records: [], recordsTotalCount: 0 };
+      },
+      {
+        loadOnMount: false,
+        autoSync: false,
+        limit: 5,
+        searchTerm,
+      }
+    );
+
+  useEffect(() => {
+    if (selectedEmailAddress) {
+      setEmailAddresses((prevPeople) => {
+        return [...prevPeople, selectedEmailAddress];
+      });
+      setSelectedEmailAddress(undefined);
+    }
+  }, [selectedEmailAddress]);
 
   useEffect(() => {
     if (!isInitialMountRef.current && emailAddressesProp) {
@@ -133,6 +185,12 @@ export const EmailAddressSelector = forwardRef<
       });
     }
   }, [emailAddressesProp]);
+
+  useEffect(() => {
+    if (isFocused && searchTerm.length > 0) {
+      loadEmailAddressHolders();
+    }
+  }, [isFocused, loadEmailAddressHolders, searchTerm.length]);
 
   useEffect(() => {
     if (!isInitialMountRef.current) {
@@ -147,6 +205,85 @@ export const EmailAddressSelector = forwardRef<
       isInitialMountRef.current = true;
     };
   }, []);
+
+  const validEmailAddress = Yup.string().email().isValidSync(searchTerm)
+    ? searchTerm
+    : undefined;
+
+  const isOpen = Boolean(
+    (validEmailAddress || emailAddressHolders.length > 0) && isFocused
+  );
+
+  const options = [
+    ...emailAddressHolders,
+    ...(() => {
+      if (validEmailAddress) {
+        return [validEmailAddress];
+      }
+      return [];
+    })(),
+  ].map((validEmailAddress) => {
+    const { email, name, profilePictureUrl } = ((): {
+      email: string;
+      name?: string;
+      profilePictureUrl?: string;
+    } => {
+      if (typeof validEmailAddress === 'string') {
+        return {
+          email: validEmailAddress,
+        };
+      }
+      return validEmailAddress;
+    })();
+    return {
+      label: (
+        <Grid
+          container
+          spacing={1}
+          sx={{
+            height: OPTION_HEIGHT,
+          }}
+        >
+          <Grid item>
+            <ProfileGravatar
+              size={32}
+              email={email}
+              label={name}
+              src={profilePictureUrl}
+            />
+          </Grid>
+          <Grid
+            item
+            xs
+            sx={{
+              minWidth: 0,
+            }}
+          >
+            <Typography
+              variant="body2"
+              noWrap
+              sx={{
+                fontWeight: 600,
+              }}
+            >
+              {name || email}
+            </Typography>
+            <Typography
+              variant="body2"
+              noWrap
+              sx={{
+                fontSize: 12,
+              }}
+            >
+              {email}
+            </Typography>
+          </Grid>
+        </Grid>
+      ),
+      value: email,
+      selectable: !emailAddresses.includes(email),
+    } as DropdownOption;
+  });
 
   return (
     <Box ref={ref} {...rest} className={clsx(classes.root)}>
@@ -227,10 +364,10 @@ export const EmailAddressSelector = forwardRef<
                 inputProps={{
                   ref: searchFieldRef,
                   onFocus: () => {
-                    setFocused(true);
+                    setIsFocused(true);
                   },
                   onBlur: () => {
-                    setFocused(false);
+                    setIsFocused(false);
                   },
                   sx: {
                     minWidth: 80,
@@ -244,7 +381,7 @@ export const EmailAddressSelector = forwardRef<
                 showClearButton={false}
               />
               <Popper
-                open={Boolean(validEmailAddress && focused)}
+                open={isOpen}
                 anchorEl={anchorRef.current}
                 transition
                 placement="bottom-start"
@@ -262,7 +399,7 @@ export const EmailAddressSelector = forwardRef<
                         <ClickAwayListener
                           onClickAway={(event) => {
                             if (anchorRef.current) {
-                              setFocused(
+                              setIsFocused(
                                 isDescendant(
                                   anchorRef.current,
                                   event.target as any
@@ -272,69 +409,18 @@ export const EmailAddressSelector = forwardRef<
                           }}
                         >
                           <PaginatedDropdownOptionList
-                            options={(() => {
-                              if (validEmailAddress) {
-                                return [validEmailAddress];
-                              }
-                              return [];
-                            })().map((validEmailAddress) => {
-                              return {
-                                label: (
-                                  <Grid container spacing={1}>
-                                    <Grid item>
-                                      <ProfileGravatar
-                                        size={32}
-                                        email={validEmailAddress}
-                                      />
-                                    </Grid>
-                                    <Grid
-                                      item
-                                      xs
-                                      sx={{
-                                        minWidth: 0,
-                                      }}
-                                    >
-                                      <Typography
-                                        variant="body2"
-                                        noWrap
-                                        sx={{
-                                          fontWeight: 600,
-                                        }}
-                                      >
-                                        {validEmailAddress}
-                                      </Typography>
-                                      <Typography
-                                        variant="body2"
-                                        noWrap
-                                        sx={{
-                                          fontSize: 12,
-                                        }}
-                                      >
-                                        {validEmailAddress}
-                                      </Typography>
-                                    </Grid>
-                                  </Grid>
-                                ),
-                                value: validEmailAddress,
-                                selectable:
-                                  !emailAddresses.includes(validEmailAddress),
-                              };
-                            })}
+                            options={options}
                             onSelectOption={({ value }) => {
+                              setSelectedEmailAddress(String(value));
                               setSearchTerm('');
-                              setEmailAddresses((prevPeople) => {
-                                return [...prevPeople, String(value)];
-                              });
                             }}
                             keyboardFocusElement={searchFieldRef.current}
-                            onChangeSearchTerm={(searchTerm) => {
-                              setSearchTerm(searchTerm);
-                            }}
                             minWidth={
                               anchorRef.current
                                 ? anchorRef.current.offsetWidth
                                 : undefined
                             }
+                            optionHeight={OPTION_HEIGHT}
                           />
                         </ClickAwayListener>
                       </Box>
