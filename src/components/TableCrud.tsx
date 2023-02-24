@@ -794,106 +794,111 @@ const BaseTableCrud = <
         }
       })()}
       {(() => {
-        if (validationSchema && initialValues && children) {
-          const modalFormProps: Partial<ModalFormProps<typeof initialValues>> =
-            {
-              FormikProps: {
-                enableReinitialize: true,
-              },
-              CardProps: {
-                sx: {
-                  maxWidth: 600,
-                  borderRadius: 0,
-                  height: '100%',
-                  maxHeight: 'auto',
-                },
-              },
-              SearchSyncToolbarProps: {
-                TitleProps: {
-                  sx: {
-                    fontSize: 24,
-                    fontWeight: 500,
-                  },
-                },
-              },
-              showCloseIconButton: false,
+        if (
+          (viewableRecordId || (validationSchema && initialValues)) &&
+          children
+        ) {
+          const hasFormProps = Boolean(validationSchema && initialValues);
+          const modalFormProps: Partial<ModalFormProps> = {
+            FormikProps: {
+              enableReinitialize: true,
+            },
+            CardProps: {
               sx: {
-                alignItems: 'start',
-                justifyContent: 'end',
-                p: 0,
+                maxWidth: 600,
+                borderRadius: 0,
+                height: '100%',
+                maxHeight: 'auto',
               },
-            };
+            },
+            SearchSyncToolbarProps: {
+              TitleProps: {
+                sx: {
+                  fontSize: 24,
+                  fontWeight: 500,
+                },
+              },
+            },
+            showCloseIconButton: false,
+            sx: {
+              alignItems: 'start',
+              justifyContent: 'end',
+              p: 0,
+            },
+          };
           return (
             <>
               {/* Create Form */}
-              <ModalForm
-                {...{
-                  validationSchema,
-                  initialValues,
-                }}
-                open={createNewRecord}
-                errorMessage={createErrorMessage}
-                title={
-                  <Grid
-                    container
-                    sx={{
-                      alignItems: 'center',
-                      gap: 1,
-                    }}
-                  >
-                    <Grid item>Create New {labelSingular}</Grid>
-                    {descriptionElement}
-                  </Grid>
-                }
-                submitButtonText="Create"
-                loading={creating}
-                onSubmit={async (values) => {
-                  if (recordCreator) {
-                    await create(values);
-                  }
-                }}
-                onClose={() => {
-                  resetCreation();
-                  if (created) {
-                    autoSync && load();
-                  }
-                  if (defaultPath) {
-                    navigate(defaultPath);
-                  } else {
-                    setSearchParams({
-                      [createRecordSearchParamKey]: null,
-                    });
-                  }
-                }}
-                getModalElement={(modalElement) => {
-                  return (
-                    <Slide
-                      direction="left"
-                      in={createNewRecord}
-                      mountOnEnter
-                      unmountOnExit
+              {hasFormProps ? (
+                <ModalForm
+                  {...{
+                    validationSchema,
+                    initialValues,
+                  }}
+                  open={createNewRecord}
+                  errorMessage={createErrorMessage}
+                  title={
+                    <Grid
+                      container
+                      sx={{
+                        alignItems: 'center',
+                        gap: 1,
+                      }}
                     >
-                      {modalElement}
-                    </Slide>
-                  );
-                }}
-                submitted={created}
-                lockSubmitIfNoChange={false}
-                {...modalFormProps}
-              >
-                {({ ...rest }) => {
-                  if (typeof children === 'function') {
-                    return children({
-                      mode: 'create',
-                      loadingState: {
-                        loading: false,
-                      },
-                      ...rest,
-                    });
+                      <Grid item>Create New {labelSingular}</Grid>
+                      {descriptionElement}
+                    </Grid>
                   }
-                  return children;
-                }}
-              </ModalForm>
+                  submitButtonText="Create"
+                  loading={creating}
+                  onSubmit={async (values) => {
+                    if (recordCreator) {
+                      await create(values);
+                    }
+                  }}
+                  onClose={() => {
+                    resetCreation();
+                    if (created) {
+                      autoSync && load();
+                    }
+                    if (defaultPath) {
+                      navigate(defaultPath);
+                    } else {
+                      setSearchParams({
+                        [createRecordSearchParamKey]: null,
+                      });
+                    }
+                  }}
+                  getModalElement={(modalElement) => {
+                    return (
+                      <Slide
+                        direction="left"
+                        in={createNewRecord}
+                        mountOnEnter
+                        unmountOnExit
+                      >
+                        {modalElement}
+                      </Slide>
+                    );
+                  }}
+                  submitted={created}
+                  lockSubmitIfNoChange={false}
+                  {...modalFormProps}
+                >
+                  {({ ...rest }) => {
+                    if (typeof children === 'function') {
+                      return children({
+                        mode: 'create',
+                        loadingState: {
+                          loading: false,
+                        },
+                        ...rest,
+                      });
+                    }
+                    return children;
+                  }}
+                </ModalForm>
+              ) : null}
 
               {/* Edit Form */}
               {(() => {
@@ -912,7 +917,7 @@ const BaseTableCrud = <
                       validationSchema={
                         editValidationSchema || validationSchema
                       }
-                      initialValues={editInitialValues}
+                      initialValues={editInitialValues || {}}
                       open={Boolean(viewableRecordId)}
                       errorMessage={updateErrorMessage}
                       title={
