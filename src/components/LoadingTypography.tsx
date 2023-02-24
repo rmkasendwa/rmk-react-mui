@@ -47,7 +47,7 @@ declare module '@mui/material/styles/components' {
   }
 }
 
-export interface LoadingTypographyProps extends TypographyProps {}
+export interface LoadingTypographyProps extends Omit<TypographyProps, 'ref'> {}
 
 export function getLoadingTypographyUtilityClass(slot: string): string {
   return generateUtilityClass('MuiLoadingTypography', slot);
@@ -61,7 +61,7 @@ const slots = {
 };
 
 export const LoadingTypography = forwardRef<
-  HTMLDivElement,
+  HTMLElement,
   LoadingTypographyProps
 >(function LoadingTypography(inProps, ref) {
   const props = useThemeProps({ props: inProps, name: 'MuiLoadingTypography' });
