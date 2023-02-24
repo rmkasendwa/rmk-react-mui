@@ -104,7 +104,10 @@ export interface TableCrudProps<
 > extends Pick<TableProps<RecordRow>, 'columns'>,
     Partial<Omit<TableProps<RecordRow>, 'columns'>>,
     Partial<
-      Pick<ModalFormProps<InitialValues>, 'validationSchema' | 'editableFields'>
+      Pick<
+        ModalFormProps<InitialValues>,
+        'validationSchema' | 'editableFields' | 'placement'
+      >
     >,
     Pick<PageTitleProps, 'tools'>,
     Pick<
@@ -164,6 +167,8 @@ export interface TableCrudProps<
   extraActionsColumnWidth?: number;
 
   SearchSyncToolbarProps?: Partial<SearchSyncToolbarProps>;
+
+  ModalFormProps?: Partial<ModalFormProps>;
 }
 
 export function getTableCrudUtilityClass(slot: string): string {
@@ -230,6 +235,8 @@ const BaseTableCrud = <
     extraActionsColumnWidth,
     SearchSyncToolbarProps = {},
     getViewTitle,
+    placement = 'right',
+    ModalFormProps = {},
     ...rest
   } = omit(props, 'labelPlural', 'labelSingular');
 
@@ -263,6 +270,8 @@ const BaseTableCrud = <
 
   const { sx: SearchSyncToolbarPropsSx, ...SearchSyncToolbarPropsRest } =
     SearchSyncToolbarProps;
+
+  const { ...ModalFormPropsRest } = ModalFormProps;
 
   // Refs
   const getEditableRecordInitialValuesRef = useRef(
@@ -802,16 +811,11 @@ const BaseTableCrud = <
         ) {
           const hasFormProps = Boolean(validationSchema && initialValues);
           const modalFormProps: Partial<ModalFormProps> = {
+            placement,
+            showCloseIconButton: false,
+            ...ModalFormPropsRest,
             FormikProps: {
               enableReinitialize: true,
-            },
-            CardProps: {
-              sx: {
-                maxWidth: 600,
-                borderRadius: 0,
-                height: '100%',
-                maxHeight: 'auto',
-              },
             },
             SearchSyncToolbarProps: {
               TitleProps: {
@@ -821,18 +825,14 @@ const BaseTableCrud = <
                 },
               },
             },
-            showCloseIconButton: false,
-            sx: {
-              alignItems: 'start',
-              justifyContent: 'end',
-              p: 0,
-            },
           };
           return (
             <>
               {/* Create Form */}
               {hasFormProps ? (
                 <ModalForm
+                  lockSubmitIfNoChange={false}
+                  {...modalFormProps}
                   {...{
                     validationSchema,
                     initialValues,
@@ -884,8 +884,6 @@ const BaseTableCrud = <
                     );
                   }}
                   submitted={created}
-                  lockSubmitIfNoChange={false}
-                  {...modalFormProps}
                 >
                   {({ ...rest }) => {
                     if (typeof children === 'function') {
@@ -913,6 +911,8 @@ const BaseTableCrud = <
                 return (
                   <LoadingProvider value={loadingState}>
                     <ModalForm
+                      showEditButton={Boolean(recordEditor)}
+                      {...modalFormProps}
                       {...{
                         editableFields,
                       }}
@@ -980,7 +980,6 @@ const BaseTableCrud = <
                       }}
                       submitted={updated}
                       editMode={editRecord}
-                      {...modalFormProps}
                       SearchSyncToolbarProps={{
                         ...modalFormProps.SearchSyncToolbarProps,
                         load: loadRecordDetails,
@@ -1002,10 +1001,6 @@ const BaseTableCrud = <
                           });
                         })();
                         navigate(pathToEditRecord);
-                      }}
-                      showEditButton={Boolean(recordEditor)}
-                      FormikProps={{
-                        enableReinitialize: true,
                       }}
                     >
                       {({ ...rest }) => {

@@ -87,6 +87,7 @@ export interface ModalPopupProps
   enableCloseOnBackdropClick?: boolean;
   modalElement?: ReactElement;
   getModalElement?: (modalElement: ReactElement) => ReactElement;
+  placement?: 'top' | 'right' | 'bottom' | 'left' | 'center';
 }
 
 export function getModalPopupUtilityClass(slot: string): string {
@@ -124,6 +125,7 @@ export const ModalPopup = forwardRef<HTMLDivElement, ModalPopupProps>(
       showActionsToolbar = true,
       enableCloseOnBackdropClick = false,
       getModalElement,
+      placement = 'center',
       ...rest
     } = props;
 
@@ -153,6 +155,43 @@ export const ModalPopup = forwardRef<HTMLDivElement, ModalPopupProps>(
     } = CloseActionButtonProps;
     const { sx: CardBodyPropsSx, ...CardBodyPropsRest } = CardBodyProps;
 
+    const { CardProps: placementCardProps = {}, sx: placementSx } = (() => {
+      const props: Partial<ModalPopupProps> = {};
+      switch (placement) {
+        case 'right':
+        case 'left':
+          props.CardProps = {
+            sx: {
+              maxWidth: 600,
+              borderRadius: 0,
+              height: '100%',
+              maxHeight: 'auto',
+            },
+          };
+          props.sx = {
+            alignItems: 'start',
+            ...(() => {
+              switch (placement) {
+                case 'left':
+                  return {
+                    justifyContent: 'start',
+                  };
+                case 'right':
+                  return {
+                    justifyContent: 'end',
+                  };
+              }
+            })(),
+            p: 0,
+          };
+          break;
+      }
+      return props;
+    })();
+
+    const { sx: placementCardPropsSx, ...placementCardPropsRest } =
+      placementCardProps;
+
     // Refs
     const onCloseRef = useRef(onClose);
     useEffect(() => {
@@ -179,6 +218,7 @@ export const ModalPopup = forwardRef<HTMLDivElement, ModalPopupProps>(
     modalElement ||
       (modalElement = (
         <Card
+          {...(placementCardPropsRest as any)}
           {...CardPropsRest}
           sx={{
             maxWidth: 640,
@@ -186,6 +226,7 @@ export const ModalPopup = forwardRef<HTMLDivElement, ModalPopupProps>(
             maxHeight: `80%`,
             display: 'flex',
             flexDirection: 'column',
+            ...placementCardPropsSx,
             ...CardPropsSx,
           }}
         >
@@ -300,6 +341,7 @@ export const ModalPopup = forwardRef<HTMLDivElement, ModalPopupProps>(
           justifyContent: 'center',
           alignItems: 'center',
           ...(components?.MuiModalPopup?.styleOverrides?.root as any),
+          ...placementSx,
           ...sx,
         }}
       >

@@ -5,8 +5,6 @@ import {
   ComponentsProps,
   ComponentsVariants,
   Tooltip,
-  Typography,
-  TypographyProps,
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
   generateUtilityClasses,
@@ -18,6 +16,8 @@ import formatDate from 'date-fns/format';
 import formatDistance from 'date-fns/formatDistance';
 import formatRelative from 'date-fns/formatRelative';
 import { forwardRef, useEffect, useState } from 'react';
+
+import LoadingTypography, { LoadingTypographyProps } from './LoadingTypography';
 
 export interface TimeStampDisplayClasses {
   /** Styles applied to the root element. */
@@ -51,7 +51,7 @@ declare module '@mui/material/styles/components' {
   }
 }
 
-export interface TimeStampDisplayProps extends TypographyProps {
+export interface TimeStampDisplayProps extends LoadingTypographyProps {
   timestamp: number | string;
   showTooltip?: boolean;
   sentenceCase?: boolean;
@@ -69,95 +69,101 @@ const slots = {
   root: ['root'],
 };
 
-export const TimeStampDisplay = forwardRef<
-  HTMLDivElement,
-  TimeStampDisplayProps
->(function TimeStampDisplay(inProps, ref) {
-  const props = useThemeProps({ props: inProps, name: 'MuiTimeStampDisplay' });
-  const {
-    timestamp,
-    showTooltip = true,
-    sentenceCase = false,
-    sx,
-    className,
-    refreshTimeout = 30000,
-    ...rest
-  } = props;
+export const TimeStampDisplay = forwardRef<HTMLElement, TimeStampDisplayProps>(
+  function TimeStampDisplay(inProps, ref) {
+    const props = useThemeProps({
+      props: inProps,
+      name: 'MuiTimeStampDisplay',
+    });
+    const {
+      timestamp,
+      showTooltip = true,
+      sentenceCase = false,
+      sx,
+      className,
+      refreshTimeout = 30000,
+      ...rest
+    } = props;
 
-  const classes = composeClasses(
-    slots,
-    getTimeStampDisplayUtilityClass,
-    (() => {
-      if (className) {
-        return {
-          root: className,
+    const classes = composeClasses(
+      slots,
+      getTimeStampDisplayUtilityClass,
+      (() => {
+        if (className) {
+          return {
+            root: className,
+          };
+        }
+      })()
+    );
+
+    const [date, setDate] = useState(new Date(timestamp));
+
+    useEffect(() => {
+      setDate(new Date(timestamp));
+    }, [timestamp]);
+
+    useEffect(() => {
+      if (
+        refreshTimeout > 0 &&
+        Math.abs(differenceInHours(new Date(), new Date(timestamp))) <= 30
+      ) {
+        const interval = setInterval(() => {
+          setDate(new Date(timestamp));
+          if (
+            Math.abs(differenceInHours(new Date(), new Date(timestamp))) > 30
+          ) {
+            clearInterval(interval);
+          }
+        }, refreshTimeout);
+        return () => {
+          clearInterval(interval);
         };
       }
-    })()
-  );
+    }, [refreshTimeout, timestamp]);
 
-  const [date, setDate] = useState(new Date(timestamp));
+    const formattedTimestamp = (() => {
+      const today = new Date();
+      if (Math.abs(differenceInHours(today, date)) <= 6) {
+        return formatDistance(date, today, { addSuffix: true });
+      }
+      if (Math.abs(differenceInHours(today, date)) <= 30) {
+        return formatRelative(date, today);
+      }
+      if (date.getFullYear() !== today.getFullYear()) {
+        return formatDate(date, "MMM dd, yyyy 'at' hh:mm aa");
+      }
+      return formatDate(date, "MMM dd 'at' hh:mm aa");
+    })();
 
-  useEffect(() => {
-    setDate(new Date(timestamp));
-  }, [timestamp]);
-
-  useEffect(() => {
-    if (
-      refreshTimeout > 0 &&
-      Math.abs(differenceInHours(new Date(), new Date(timestamp))) <= 30
-    ) {
-      const interval = setInterval(() => {
-        setDate(new Date(timestamp));
-        if (Math.abs(differenceInHours(new Date(), new Date(timestamp))) > 30) {
-          clearInterval(interval);
-        }
-      }, refreshTimeout);
-      return () => {
-        clearInterval(interval);
-      };
-    }
-  }, [refreshTimeout, timestamp]);
-
-  const formattedTimestamp = (() => {
-    const today = new Date();
-    if (Math.abs(differenceInHours(today, date)) <= 6) {
-      return formatDistance(date, today, { addSuffix: true });
-    }
-    if (Math.abs(differenceInHours(today, date)) <= 30) {
-      return formatRelative(date, today);
-    }
-    if (date.getFullYear() !== today.getFullYear()) {
-      return formatDate(date, "MMM dd, yyyy 'at' hh:mm aa");
-    }
-    return formatDate(date, "MMM dd 'at' hh:mm aa");
-  })();
-
-  const displayElement = (
-    <Typography
-      ref={ref}
-      className={clsx(classes.root)}
-      component="span"
-      variant="inherit"
-      {...rest}
-      sx={{
-        cursor: 'default',
-        ...sx,
-      }}
-    >
-      {sentenceCase ? formattedTimestamp.toSentenceCase() : formattedTimestamp}
-    </Typography>
-  );
-
-  if (showTooltip) {
-    return (
-      <Tooltip title={formatDate(date, "EEEE MMM dd, yyyy 'at' hh:mm:ss aa")}>
-        {displayElement}
-      </Tooltip>
+    const displayElement = (
+      <LoadingTypography
+        ref={ref}
+        className={clsx(classes.root)}
+        {...{ component: 'span' as any }}
+        variant="inherit"
+        {...rest}
+        sx={{
+          cursor: 'default',
+          ...sx,
+        }}
+      >
+        {sentenceCase
+          ? formattedTimestamp.toSentenceCase()
+          : formattedTimestamp}
+      </LoadingTypography>
     );
-  }
 
-  return displayElement;
-});
+    if (showTooltip) {
+      return (
+        <Tooltip title={formatDate(date, "EEEE MMM dd, yyyy 'at' hh:mm:ss aa")}>
+          {displayElement}
+        </Tooltip>
+      );
+    }
+
+    return displayElement;
+  }
+);
 
 export default TimeStampDisplay;

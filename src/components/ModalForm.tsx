@@ -150,6 +150,7 @@ export const BaseModalForm = <Values extends FormikValues>(
     lockSubmitIfNoChange = true,
     lockSubmitIfFormInvalid = false,
     CardProps = {},
+    CardBodyProps = {},
     SubmitButtonProps = {},
     ActionButtonProps = {},
     ActionButtonAreaProps = {},
@@ -160,6 +161,7 @@ export const BaseModalForm = <Values extends FormikValues>(
     actionButtons,
     CloseActionButtonProps = {},
     editableFields,
+    placement = 'center',
     ...rest
   } = props;
 
@@ -191,10 +193,32 @@ export const BaseModalForm = <Values extends FormikValues>(
     sx: CloseActionButtonPropsSx,
     ...CloseActionButtonPropsRest
   } = CloseActionButtonProps;
+  const { sx: CardBodyPropsSx, ...CardBodyPropsRest } = CardBodyProps;
 
+  const { CardProps: placementCardProps = {} } = (() => {
+    const props: Partial<ModalPopupProps> = {};
+    switch (placement) {
+      case 'right':
+      case 'left':
+        props.CardProps = {
+          sx: {
+            maxWidth: 600,
+            borderRadius: 0,
+            height: '100%',
+            maxHeight: 'auto',
+          },
+        };
+        break;
+    }
+    return props;
+  })();
+
+  const { sx: placementCardPropsSx, ...placementCardPropsRest } =
+    placementCardProps;
+
+  // Refs
   const onSubmitSuccessRef = useRef(onSubmitSuccess);
   const onCloseRef = useRef(onClose);
-
   useEffect(() => {
     onSubmitSuccessRef.current = onSubmitSuccess;
     onCloseRef.current = onClose;
@@ -209,6 +233,7 @@ export const BaseModalForm = <Values extends FormikValues>(
 
   const modalElement = (
     <Card
+      {...(placementCardPropsRest as any)}
       {...CardPropsRest}
       sx={{
         display: 'flex',
@@ -216,13 +241,14 @@ export const BaseModalForm = <Values extends FormikValues>(
         width: '100%',
         maxWidth: 640,
         maxHeight: '80%',
+        ...placementCardPropsSx,
+        ...CardPropsSx,
         form: {
           display: 'flex',
           flexDirection: 'column',
           height: '100%',
           minHeight: 0,
         },
-        ...CardPropsSx,
       }}
     >
       <Formik
@@ -290,12 +316,14 @@ export const BaseModalForm = <Values extends FormikValues>(
                 if (showForm) {
                   return (
                     <Box
+                      {...CardBodyPropsRest}
                       sx={{
                         overflowY: 'auto',
                         py: 2,
                         px: 3,
                         flex: 1,
                         position: 'relative',
+                        ...CardBodyPropsSx,
                       }}
                     >
                       {(() => {
@@ -522,7 +550,7 @@ export const BaseModalForm = <Values extends FormikValues>(
   return (
     <ModalPopup
       {...rest}
-      {...{ modalElement, title }}
+      {...{ modalElement, title, placement }}
       ref={ref}
       className={clsx(classes.root)}
     />
