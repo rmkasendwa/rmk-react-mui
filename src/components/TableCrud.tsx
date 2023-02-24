@@ -151,6 +151,7 @@ export interface TableCrudProps<
   pathToView?: string;
   getPathToView?: (record: RecordRow) => string;
   viewableRecordIdPathParamKey?: string;
+  getViewTitle?: (record: RecordRow) => ReactNode;
 
   // Edit Path
   templatePathToEdit?: string;
@@ -228,6 +229,7 @@ const BaseTableCrud = <
     getExtraRowTools,
     extraActionsColumnWidth,
     SearchSyncToolbarProps = {},
+    getViewTitle,
     ...rest
   } = omit(props, 'labelPlural', 'labelSingular');
 
@@ -933,6 +935,9 @@ const BaseTableCrud = <
                               if (editRecord) {
                                 return `Edit ${labelSingular}`;
                               }
+                              if (getViewTitle && selectedRecord) {
+                                return getViewTitle(selectedRecord);
+                              }
                               return labelSingular;
                             })()}
                           </Grid>
@@ -998,6 +1003,7 @@ const BaseTableCrud = <
                         })();
                         navigate(pathToEditRecord);
                       }}
+                      showEditButton={Boolean(recordEditor)}
                       FormikProps={{
                         enableReinitialize: true,
                       }}
