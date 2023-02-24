@@ -743,6 +743,10 @@ export const DataDropdownField = forwardRef<
               disableAutoFocus={false}
               showHeaderToolbar={false}
               enableCloseOnBackdropClick
+              sx={{
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
             >
               {optionsElement}
             </ModalPopup>
