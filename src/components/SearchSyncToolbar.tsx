@@ -5,12 +5,11 @@ import {
   ClickAwayListener,
   IconButton,
   Tooltip,
-  Typography,
-  TypographyProps,
 } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import { Children, FC, ReactNode, useEffect, useRef, useState } from 'react';
 
+import LoadingTypography, { LoadingTypographyProps } from './LoadingTypography';
 import ReloadIconButton, { ReloadIconButtonProps } from './ReloadIconButton';
 import SearchField, { SearchFieldProps } from './SearchField';
 
@@ -48,7 +47,7 @@ export interface SearchSyncToolbarProps
    *
    */
   children?: ReactNode;
-  TitleProps?: Partial<Omit<TypographyProps, 'ref'>>;
+  TitleProps?: Partial<Omit<LoadingTypographyProps, 'ref'>>;
   searchFieldOpen?: boolean;
   SearchFieldProps?: Partial<SearchFieldProps>;
 }
@@ -131,8 +130,8 @@ export const SearchSyncToolbar: FC<SearchSyncToolbarProps> = ({
         {title ? (
           <>
             <Grid item xs sx={{ minWidth: 0 }}>
-              <Typography
-                component="div"
+              <LoadingTypography
+                {...({ component: 'div' } as any)}
                 {...titlePropsRest}
                 noWrap
                 sx={{
@@ -141,7 +140,7 @@ export const SearchSyncToolbar: FC<SearchSyncToolbarProps> = ({
                 }}
               >
                 {title}
-              </Typography>
+              </LoadingTypography>
             </Grid>
             {hasSearchTool ? (
               <Grid
