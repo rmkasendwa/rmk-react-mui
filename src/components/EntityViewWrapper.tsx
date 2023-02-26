@@ -1,6 +1,6 @@
 import EditIcon from '@mui/icons-material/Edit';
 import Button from '@mui/material/Button';
-import { FC, ReactNode } from 'react';
+import { FC } from 'react';
 import { Link } from 'react-router-dom';
 
 import FixedHeaderContentArea, {
@@ -9,32 +9,39 @@ import FixedHeaderContentArea, {
 
 export interface EntityViewWrapperProps extends FixedHeaderContentAreaProps {
   pathToEdit?: string;
-  tools?: ReactNode;
 }
 
 export const EntityViewWrapper: FC<EntityViewWrapperProps> = ({
   children,
   pathToEdit,
-  tools,
+  tools = [],
   ...rest
 }) => {
-  const toolsList: ReactNode[] = [];
-  pathToEdit &&
-    toolsList.push(
-      <Button
-        color="primary"
-        variant="contained"
-        size="small"
-        startIcon={<EditIcon />}
-        component={Link}
-        to={pathToEdit}
-      >
-        Edit
-      </Button>
-    );
-  tools && toolsList.push(tools);
   return (
-    <FixedHeaderContentArea {...rest} tools={toolsList}>
+    <FixedHeaderContentArea
+      {...rest}
+      tools={[
+        ...(() => {
+          if (pathToEdit) {
+            return [
+              <Button
+                key="editButton"
+                color="primary"
+                variant="contained"
+                size="small"
+                startIcon={<EditIcon />}
+                component={Link}
+                to={pathToEdit}
+              >
+                Edit
+              </Button>,
+            ];
+          }
+          return [];
+        })(),
+        ...tools,
+      ]}
+    >
       {children}
     </FixedHeaderContentArea>
   );

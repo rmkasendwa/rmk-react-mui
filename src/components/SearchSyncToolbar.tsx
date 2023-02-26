@@ -2,16 +2,61 @@ import SearchIcon from '@mui/icons-material/Search';
 import {
   Box,
   BoxProps,
+  Button,
+  ButtonProps,
   ClickAwayListener,
   IconButton,
   Tooltip,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
 import Grid from '@mui/material/Grid';
-import { Children, FC, ReactNode, useEffect, useRef, useState } from 'react';
+import { FC, ReactNode, useEffect, useRef, useState } from 'react';
 
+import EllipsisMenuIconButton from './EllipsisMenuIconButton';
 import LoadingTypography, { LoadingTypographyProps } from './LoadingTypography';
 import ReloadIconButton, { ReloadIconButtonProps } from './ReloadIconButton';
 import SearchField, { SearchFieldProps } from './SearchField';
+
+export interface Tool
+  extends Pick<
+    ButtonProps,
+    'sx' | 'onMouseDown' | 'onClick' | 'className' | 'color' | 'variant'
+  > {
+  label: ReactNode;
+  type: 'button' | 'icon-button';
+  icon?: ReactNode;
+}
+
+export const getToolNodes = (tools: (ReactNode | Tool)[]) => {
+  return tools.map((tool) => {
+    if (tool && typeof tool === 'object' && 'type' in tool) {
+      const { label, type, icon, sx, ...rest } = tool as Tool;
+      switch (type) {
+        case 'icon-button':
+          return (
+            <Tooltip
+              title={label}
+              PopperProps={{
+                sx: {
+                  pointerEvents: 'none',
+                },
+              }}
+            >
+              <IconButton {...{ sx }}>{icon}</IconButton>
+            </Tooltip>
+          );
+        case 'button':
+          return (
+            <Button startIcon={icon} {...rest} {...{ sx }}>
+              {label}
+            </Button>
+          );
+      }
+    }
+    return tool;
+  });
+};
 
 export interface SearchSyncToolbarProps
   extends Omit<BoxProps, 'title'>,
@@ -39,8 +84,8 @@ export interface SearchSyncToolbarProps
    * Extra tools to be added to the toolbar.
    *
    */
-  tools?: ReactNode | ReactNode[];
-  preTitleTools?: ReactNode | ReactNode[];
+  tools?: (ReactNode | Tool)[];
+  preTitleTools?: (ReactNode | Tool)[];
   /**
    * Extra tools to be added to the toolbar.
    * Note: Tools will always over-write children.
@@ -63,8 +108,8 @@ export const SearchSyncToolbar: FC<SearchSyncToolbarProps> = ({
   errorMessage,
   onChangeSearchTerm,
   onSearch,
-  tools,
-  preTitleTools,
+  tools = [],
+  preTitleTools = [],
   children,
   TitleProps = {},
   searchFieldOpen: searchFieldOpenProp,
@@ -73,7 +118,7 @@ export const SearchSyncToolbar: FC<SearchSyncToolbarProps> = ({
   sx,
   ...rest
 }) => {
-  tools || (tools = children);
+  tools || (tools = [children]);
   const { ...SearchFieldPropsRest } = SearchFieldProps;
 
   // Refs
@@ -84,6 +129,10 @@ export const SearchSyncToolbar: FC<SearchSyncToolbarProps> = ({
   }, [onSearch]);
 
   const { sx: titlePropsSx, ...titlePropsRest } = TitleProps;
+
+  const { breakpoints } = useTheme();
+  const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
+
   const [searchTerm, setSearchTerm] = useState('');
   const [searchFieldOpen, setSearchFieldOpen] = useState(
     searchTermProp.length > 0
@@ -112,13 +161,16 @@ export const SearchSyncToolbar: FC<SearchSyncToolbarProps> = ({
       sx={{
         pl: 3,
         pr: 2,
+        [breakpoints.down('sm')]: {
+          pl: 2,
+        },
         ...sx,
       }}
     >
       <Grid container sx={{ alignItems: 'center', columnGap: 1 }}>
         {(() => {
-          if (preTitleTools) {
-            return Children.toArray(preTitleTools).map((tool, index) => {
+          if (preTitleTools && !isSmallScreenSize) {
+            return getToolNodes(preTitleTools).map((tool, index) => {
               return (
                 <Grid item key={index} sx={{ minWidth: 0 }}>
                   {tool}
@@ -147,12 +199,17 @@ export const SearchSyncToolbar: FC<SearchSyncToolbarProps> = ({
                 item
                 sx={{
                   display: 'flex',
-                  flex: searchFieldOpen || searchFieldOpenProp ? 1 : 'none',
+                  flex:
+                    searchFieldOpen ||
+                    (searchFieldOpenProp && !isSmallScreenSize)
+                      ? 1
+                      : 'none',
                   maxWidth: 300,
                   minWidth: 0,
                 }}
               >
-                {searchFieldOpen || searchFieldOpenProp ? (
+                {searchFieldOpen ||
+                (searchFieldOpenProp && !isSmallScreenSize) ? (
                   (() => {
                     const textField = (
                       <SearchField
@@ -210,7 +267,12 @@ export const SearchSyncToolbar: FC<SearchSyncToolbarProps> = ({
               variant="standard"
               fullWidth
               {...SearchFieldPropsRest}
-              {...{ searchTerm, onSearch, onChangeSearchTerm, searchVelocity }}
+              {...{
+                searchTerm,
+                onSearch,
+                onChangeSearchTerm,
+                searchVelocity,
+              }}
               InputProps={{
                 disableUnderline: true,
               }}
@@ -223,8 +285,8 @@ export const SearchSyncToolbar: FC<SearchSyncToolbarProps> = ({
           <Grid item xs />
         )}
         {(() => {
-          if (tools) {
-            return Children.toArray(tools).map((tool, index) => {
+          if (tools && !isSmallScreenSize) {
+            return getToolNodes(tools).map((tool, index) => {
               return (
                 <Grid item key={index} sx={{ minWidth: 0 }}>
                   {tool}
@@ -238,6 +300,30 @@ export const SearchSyncToolbar: FC<SearchSyncToolbarProps> = ({
             <ReloadIconButton {...{ load, loading, errorMessage }} />
           </Grid>
         ) : null}
+        {(() => {
+          if (isSmallScreenSize) {
+            const smallScreenTools = [...preTitleTools, ...tools]
+              .filter((tool) => {
+                return tool && typeof tool === 'object' && 'label' in tool;
+              })
+              .map((tool) => {
+                return tool as Tool;
+              });
+            if (smallScreenTools.length > 0) {
+              return (
+                <EllipsisMenuIconButton
+                  options={smallScreenTools.map(({ label, icon }, index) => {
+                    return {
+                      label,
+                      icon,
+                      value: index,
+                    };
+                  })}
+                />
+              );
+            }
+          }
+        })()}
       </Grid>
     </Box>
   );
