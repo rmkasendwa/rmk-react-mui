@@ -161,13 +161,22 @@ export const SearchSyncToolbar: FC<SearchSyncToolbarProps> = ({
       sx={{
         pl: 3,
         pr: 2,
-        [breakpoints.down('sm')]: {
-          pl: 2,
-        },
         ...sx,
       }}
     >
-      <Grid container sx={{ alignItems: 'center', columnGap: 1 }}>
+      <Grid
+        container
+        sx={{
+          alignItems: 'center',
+          ...(() => {
+            if (!isSmallScreenSize) {
+              return {
+                columnGap: 1,
+              };
+            }
+          })(),
+        }}
+      >
         {(() => {
           if (preTitleTools && !isSmallScreenSize) {
             return getToolNodes(preTitleTools).map((tool, index) => {
