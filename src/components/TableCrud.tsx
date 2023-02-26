@@ -27,7 +27,6 @@ import clsx from 'clsx';
 import { FormikValues } from 'formik';
 import { omit } from 'lodash';
 import {
-  Children,
   ReactElement,
   ReactNode,
   Ref,
@@ -208,7 +207,7 @@ const BaseTableCrud = <
     validationSchema,
     editableFields,
     revalidationKey = '',
-    tools,
+    tools = [],
     children,
     PaginatedTableWrapperProps = {},
     pathToAddNew,
@@ -534,7 +533,7 @@ const BaseTableCrud = <
       onSearch={(searchTerm) => setSearchTerm(searchTerm)}
       searchFieldPlaceholder={`Search ${labelPlural}`}
       tools={[
-        ...Children.toArray(tools),
+        ...tools,
         ...(() => {
           if (pathToAddNewRecord) {
             return [

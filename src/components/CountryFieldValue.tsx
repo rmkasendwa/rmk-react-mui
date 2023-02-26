@@ -101,6 +101,11 @@ export const CountryFieldValue = forwardRef<
     <FieldValue
       ref={ref}
       {...rest}
+      IconContainerProps={{
+        sx: {
+          alignItems: 'center',
+        },
+      }}
       className={clsx(classes.root)}
       icon={
         <Box
@@ -120,6 +125,7 @@ export const CountryFieldValue = forwardRef<
               if (!countryCode) {
                 return {
                   bgcolor: palette.divider,
+                  height: '0.8em',
                 };
               }
             })(),
