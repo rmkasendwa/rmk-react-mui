@@ -167,6 +167,7 @@ export const SearchSyncToolbar: FC<SearchSyncToolbarProps> = ({
       <Grid
         container
         sx={{
+          height: 50,
           alignItems: 'center',
           ...(() => {
             if (!isSmallScreenSize) {
@@ -188,89 +189,8 @@ export const SearchSyncToolbar: FC<SearchSyncToolbarProps> = ({
             });
           }
         })()}
-        {title ? (
-          <>
-            <Grid item xs sx={{ minWidth: 0 }}>
-              <LoadingTypography
-                {...({ component: 'div' } as any)}
-                {...titlePropsRest}
-                noWrap
-                sx={{
-                  lineHeight: '48px',
-                  ...titlePropsSx,
-                }}
-              >
-                {title}
-              </LoadingTypography>
-            </Grid>
-            {hasSearchTool ? (
-              <Grid
-                item
-                sx={{
-                  display: 'flex',
-                  flex:
-                    searchFieldOpen ||
-                    (searchFieldOpenProp && !isSmallScreenSize)
-                      ? 1
-                      : 'none',
-                  maxWidth: 300,
-                  minWidth: 0,
-                }}
-              >
-                {searchFieldOpen ||
-                (searchFieldOpenProp && !isSmallScreenSize) ? (
-                  (() => {
-                    const textField = (
-                      <SearchField
-                        placeholder={searchFieldPlaceholder}
-                        variant="outlined"
-                        fullWidth
-                        {...SearchFieldPropsRest}
-                        InputProps={{
-                          autoFocus:
-                            searchTermProp.length <= 0 && searchFieldOpen,
-                        }}
-                        {...{
-                          searchTerm,
-                          onSearch,
-                          onChangeSearchTerm,
-                          searchVelocity,
-                        }}
-                        onChange={(event) => {
-                          setSearchTerm(event.target.value);
-                        }}
-                      />
-                    );
-                    return (
-                      <ClickAwayListener
-                        onClickAway={() => {
-                          if (searchTerm.length <= 0) {
-                            setSearchFieldOpen(false);
-                          }
-                        }}
-                      >
-                        {searchFieldPlaceholder ? (
-                          <Tooltip title={searchFieldPlaceholder}>
-                            {textField}
-                          </Tooltip>
-                        ) : (
-                          textField
-                        )}
-                      </ClickAwayListener>
-                    );
-                  })()
-                ) : (
-                  <Tooltip title="Search">
-                    <IconButton onClick={() => setSearchFieldOpen(true)}>
-                      <SearchIcon color="inherit" />
-                    </IconButton>
-                  </Tooltip>
-                )}
-              </Grid>
-            ) : null}
-          </>
-        ) : hasSearchTool ? (
-          <Grid item xs sx={{ minWidth: 0 }}>
+        {(() => {
+          const standardSearchFieldElement = (
             <SearchField
               placeholder={searchFieldPlaceholder}
               variant="standard"
@@ -289,10 +209,118 @@ export const SearchSyncToolbar: FC<SearchSyncToolbarProps> = ({
                 setSearchTerm(event.target.value);
               }}
             />
-          </Grid>
-        ) : (
-          <Grid item xs />
-        )}
+          );
+
+          if (isSmallScreenSize && hasSearchTool && searchFieldOpen) {
+            return (
+              <Grid item xs sx={{ minWidth: 0 }}>
+                <ClickAwayListener
+                  onClickAway={() => {
+                    if (searchTerm.length <= 0) {
+                      setSearchFieldOpen(false);
+                    }
+                  }}
+                >
+                  {standardSearchFieldElement}
+                </ClickAwayListener>
+              </Grid>
+            );
+          }
+
+          if (title) {
+            return (
+              <>
+                <Grid item xs sx={{ minWidth: 0 }}>
+                  <LoadingTypography
+                    {...({ component: 'div' } as any)}
+                    {...titlePropsRest}
+                    noWrap
+                    sx={{
+                      lineHeight: '48px',
+                      ...titlePropsSx,
+                    }}
+                  >
+                    {title}
+                  </LoadingTypography>
+                </Grid>
+                {hasSearchTool ? (
+                  <Grid
+                    item
+                    sx={{
+                      display: 'flex',
+                      flex:
+                        searchFieldOpen ||
+                        (searchFieldOpenProp && !isSmallScreenSize)
+                          ? 1
+                          : 'none',
+                      maxWidth: 300,
+                      minWidth: 0,
+                    }}
+                  >
+                    {searchFieldOpen ||
+                    (searchFieldOpenProp && !isSmallScreenSize) ? (
+                      (() => {
+                        const textField = (
+                          <SearchField
+                            placeholder={searchFieldPlaceholder}
+                            variant="outlined"
+                            fullWidth
+                            {...SearchFieldPropsRest}
+                            InputProps={{
+                              autoFocus:
+                                searchTermProp.length <= 0 && searchFieldOpen,
+                            }}
+                            {...{
+                              searchTerm,
+                              onSearch,
+                              onChangeSearchTerm,
+                              searchVelocity,
+                            }}
+                            onChange={(event) => {
+                              setSearchTerm(event.target.value);
+                            }}
+                          />
+                        );
+                        return (
+                          <ClickAwayListener
+                            onClickAway={() => {
+                              if (searchTerm.length <= 0) {
+                                setSearchFieldOpen(false);
+                              }
+                            }}
+                          >
+                            {searchFieldPlaceholder ? (
+                              <Tooltip title={searchFieldPlaceholder}>
+                                {textField}
+                              </Tooltip>
+                            ) : (
+                              textField
+                            )}
+                          </ClickAwayListener>
+                        );
+                      })()
+                    ) : (
+                      <Tooltip title="Search">
+                        <IconButton onClick={() => setSearchFieldOpen(true)}>
+                          <SearchIcon color="inherit" />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                  </Grid>
+                ) : null}
+              </>
+            );
+          }
+
+          if (hasSearchTool) {
+            return (
+              <Grid item xs sx={{ minWidth: 0 }}>
+                {standardSearchFieldElement}
+              </Grid>
+            );
+          }
+          return <Grid item xs />;
+        })()}
         {(() => {
           if (tools && !isSmallScreenSize) {
             return getToolNodes(tools).map((tool, index) => {
