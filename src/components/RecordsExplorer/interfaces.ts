@@ -89,21 +89,41 @@ export type DataFilterField<RecordRow extends BaseDataRow> =
   | NumberFilterField<RecordRow>
   | TextFilterField<RecordRow>;
 
-export type TextFilterOperator = 'contains' | 'does not contain';
+export const textFilterOperators = ['contains', 'does not contain'] as const;
+export type TextFilterOperator = typeof textFilterOperators[number];
 
-export type EnumFilterOperator = 'is' | 'is not' | 'is any of' | 'is none of';
+export const enumFilterOperators = [
+  'is',
+  'is not',
+  'is any of',
+  'is none of',
+] as const;
+export type EnumFilterOperator = typeof enumFilterOperators[number];
 
-export type NumericFilterOperator = '=' | '≠' | '<' | '>' | '≤' | '≥';
+export const numericFilterOperators = ['=', '≠', '<', '>', '≤', '≥'] as const;
+export type NumericFilterOperator = typeof numericFilterOperators[number];
 
-export type ContentExistenceFilterOperator = 'is empty' | 'is not empty';
+export const contentExistenceFilterOperator = [
+  'is empty',
+  'is not empty',
+] as const;
+export type ContentExistenceFilterOperator =
+  typeof contentExistenceFilterOperator[number];
 
+export const filterOperators = [
+  ...textFilterOperators,
+  ...enumFilterOperators,
+  ...numericFilterOperators,
+] as const;
 export type FilterOperator =
   | EnumFilterOperator
   | TextFilterOperator
   | NumericFilterOperator
   | ContentExistenceFilterOperator;
 
-export type Conjunction = 'and' | 'or';
+export const filterConjunctions = ['and', 'or'];
+
+export type Conjunction = typeof filterConjunctions[number];
 
 export interface Condition<RecordRow extends BaseDataRow> {
   fieldId: keyof RecordRow | string;
