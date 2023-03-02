@@ -239,7 +239,6 @@ export interface RecordsExplorerProps<RecordRow extends BaseDataRow = any>
    */
   hideAddNewButtonOnNoFilteredData?: boolean;
   id?: string;
-  searchTerm?: string;
   /**
    * Function to be called when user searches.
    */
@@ -384,7 +383,6 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
 
   // URL Search params
   const {
-    SEARCH_TERM_SEARCH_PARAM_KEY,
     SEARCH_PARAM_FILTER_BY_ID,
     SEARCH_PARAM_SELECTED_COLUMNS_ID,
     SEARCH_PARAM_EXPANDED_GROUPS_ID,
@@ -396,7 +394,6 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
       return '';
     })();
     return {
-      SEARCH_TERM_SEARCH_PARAM_KEY: `search${urlSearchParamsSuffix}`,
       SEARCH_PARAM_FILTER_BY_ID: `${searchParamFilterById}${urlSearchParamsSuffix}`,
       SEARCH_PARAM_SELECTED_COLUMNS_ID: `${searchParamSelectedColumnsId}${urlSearchParamsSuffix}`,
       SEARCH_PARAM_EXPANDED_GROUPS_ID: 'expandedGroups',
@@ -593,6 +590,7 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
       view: searchParamView,
       groupBy: searchParamGroupBy = [],
       sortBy: searchParamSortBy = [],
+      search: searchTerm,
     },
     setSearchParams: setJSONSearchParams,
   } = useReactRouterDOMSearchParams({
@@ -615,6 +613,7 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
             .oneOf([...sortDirections]),
         })
       ),
+      search: Yup.string(),
     }),
   });
 
@@ -659,14 +658,9 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
       });
   })();
 
-  const searchParamSearchTerm = searchParams.get(
-    SEARCH_TERM_SEARCH_PARAM_KEY
-  ) as string | null;
   const searchParamExpandedGroups = searchParams.get(
     SEARCH_PARAM_EXPANDED_GROUPS_ID
   ) as string | null;
-
-  const [searchTerm, setSearchTerm] = useState(searchParamSearchTerm ?? '');
 
   const searchParamFilterBy = searchParams.get(SEARCH_PARAM_FILTER_BY_ID) as
     | string
@@ -988,10 +982,6 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
   }, [searchParamExpandedGroups]);
 
   useEffect(() => {
-    setSearchTerm(searchParamSearchTerm ?? '');
-  }, [searchParamSearchTerm]);
-
-  useEffect(() => {
     setProcessingDisplayData(false);
     if (onChangeFilteredDataRef.current) {
       onChangeFilteredDataRef.current(filteredData);
@@ -1008,8 +998,8 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
         view: null,
         sortBy: null,
         groupBy: null,
+        search: null,
         [SEARCH_PARAM_FILTER_BY_ID]: null,
-        [SEARCH_TERM_SEARCH_PARAM_KEY]: null,
         [SEARCH_PARAM_SELECTED_COLUMNS_ID]: null,
       },
       {
@@ -1605,7 +1595,7 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
                 searchParamSortBy ||
                 searchParamFilterBy ||
                 searchParamSelectedColumns ||
-                searchParamSearchTerm
+                searchTerm
               ) {
                 tools.push(
                   <Tooltip title="Reset to default view">
@@ -1624,9 +1614,9 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
             })(),
           ]}
           onChangeSearchTerm={(searchTerm: string) => {
-            setSearchParams(
+            setJSONSearchParams(
               {
-                [SEARCH_TERM_SEARCH_PARAM_KEY]: (() => {
+                search: (() => {
                   if (searchTerm) {
                     return searchTerm;
                   } else {
