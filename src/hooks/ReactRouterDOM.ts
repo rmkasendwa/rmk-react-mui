@@ -7,8 +7,8 @@ import { AnyObject } from 'yup/lib/types';
 
 export type RouterMode = 'string' | 'json';
 
-export type SetSearchParams = (
-  searchParams: Record<string, any | null>,
+export type SetSearchParams<SearchParams = Record<string, string | null>> = (
+  searchParams: SearchParams,
   navigateOptions?: {
     replace?: boolean | undefined;
     state?: any;
@@ -23,7 +23,7 @@ export function useReactRouterDOMSearchParams<TShape extends ObjectShape>({
   validator: OptionalObjectSchema<TShape, AnyObject, TypeOfShape<TShape>>;
 }): {
   searchParams: Partial<InferType<typeof validator>>;
-  setSearchParams: SetSearchParams;
+  setSearchParams: SetSearchParams<Partial<InferType<typeof validator>>>;
 };
 
 export function useReactRouterDOMSearchParams(options: { mode?: 'string' }): {
