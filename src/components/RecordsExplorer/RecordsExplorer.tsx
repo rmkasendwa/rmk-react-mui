@@ -270,12 +270,6 @@ export interface RecordsExplorerProps<RecordRow extends BaseDataRow = any>
    */
   searchParamFilterById?: string;
   /**
-   * Property to use when tracking sort parameters in the url.
-   *
-   * @default "sortBy"
-   */
-  searchParamSortById?: string;
-  /**
    * Property to use when tracking grouping parameters in the url.
    *
    * @default "groupBy"
@@ -336,7 +330,6 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
     searchableFields: searchableFieldsProp,
     getGroupableData,
     searchParamFilterById = 'filterBy',
-    searchParamSortById = 'sortBy',
     searchParamGroupById = 'groupBy',
     searchParamSelectedColumnsId = 'selectedColumns',
     ...rest
@@ -404,7 +397,6 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
   const {
     SEARCH_TERM_SEARCH_PARAM_KEY,
     SEARCH_PARAM_FILTER_BY_ID,
-    SEARCH_PARAM_SORT_BY_ID,
     SEARCH_PARAM_GROUP_BY_ID,
     SEARCH_PARAM_SELECTED_COLUMNS_ID,
     SEARCH_PARAM_EXPANDED_GROUPS_ID,
@@ -418,7 +410,6 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
     return {
       SEARCH_TERM_SEARCH_PARAM_KEY: `search${urlSearchParamsSuffix}`,
       SEARCH_PARAM_FILTER_BY_ID: `${searchParamFilterById}${urlSearchParamsSuffix}`,
-      SEARCH_PARAM_SORT_BY_ID: `${searchParamSortById}${urlSearchParamsSuffix}`,
       SEARCH_PARAM_GROUP_BY_ID: `${searchParamGroupById}${urlSearchParamsSuffix}`,
       SEARCH_PARAM_SELECTED_COLUMNS_ID: `${searchParamSelectedColumnsId}${urlSearchParamsSuffix}`,
       SEARCH_PARAM_EXPANDED_GROUPS_ID: 'expandedGroups',
@@ -428,7 +419,6 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
     searchParamFilterById,
     searchParamGroupById,
     searchParamSelectedColumnsId,
-    searchParamSortById,
   ]);
 
   const { palette, spacing } = useTheme();
@@ -619,7 +609,7 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
   }, []);
 
   const {
-    searchParams: { sortBy: selectedSortBy = [] },
+    searchParams: { sortBy: searchParamSortBy = [] },
     setSearchParams: setJSONSearchParams,
   } = useReactRouterDOMSearchParams({
     mode: 'json',
@@ -636,10 +626,13 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
   });
 
   const activeSortParams = (() => {
-    const sortByParams = selectedSortBy.reduce((accumulator, sortByParam) => {
-      accumulator[sortByParam.id] = sortByParam;
-      return accumulator;
-    }, {} as Record<keyof RecordRow, typeof selectedSortBy[number]>);
+    const sortByParams = searchParamSortBy.reduce(
+      (accumulator, sortByParam) => {
+        accumulator[sortByParam.id] = sortByParam;
+        return accumulator;
+      },
+      {} as Record<keyof RecordRow, typeof searchParamSortBy[number]>
+    );
 
     return sortableFields
       .filter(({ id }) => {
@@ -667,8 +660,6 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
   const searchParamFilterBy = searchParams.get(SEARCH_PARAM_FILTER_BY_ID) as
     | string
     | null;
-  const searchParamSortBy =
-    (searchParams.get(SEARCH_PARAM_SORT_BY_ID) as string) || null;
   const searchParamGroupBy =
     (searchParams.get(SEARCH_PARAM_GROUP_BY_ID) as string) || null;
   const searchParamSelectedColumns =
@@ -1115,7 +1106,7 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
       {
         [SEARCH_PARAM_FILTER_BY_ID]: null,
         [SEARCH_PARAM_GROUP_BY_ID]: null,
-        [SEARCH_PARAM_SORT_BY_ID]: null,
+        sortBy: null,
         [SEARCH_TERM_SEARCH_PARAM_KEY]: null,
         [SEARCH_PARAM_SELECTED_COLUMNS_ID]: null,
       },
