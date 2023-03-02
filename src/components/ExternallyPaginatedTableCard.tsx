@@ -16,7 +16,7 @@ import {
   UsePaginatedRecordsOptions,
   usePaginatedRecords,
 } from '../hooks/Utils';
-import { BaseTableRow } from '../interfaces/Table';
+import { BaseDataRow } from '../interfaces/Table';
 import { PaginatedResponseData } from '../interfaces/Utils';
 import Card, { CardProps } from './Card';
 import IconLoadingScreen from './IconLoadingScreen';
@@ -56,7 +56,7 @@ declare module '@mui/material/styles/components' {
 }
 
 export interface ExternallyPaginatedTableCardProps<
-  RecordRow extends BaseTableRow = any
+  RecordRow extends BaseDataRow = any
 > extends Omit<TableProps<RecordRow>, 'rows'>,
     NonNullable<Pick<CardProps, 'title'>>,
     Pick<UsePaginatedRecordsOptions<RecordRow>, 'revalidationKey'> {

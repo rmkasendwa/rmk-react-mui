@@ -19,7 +19,7 @@ import {
   useState,
 } from 'react';
 
-import { BaseTableRow, TableColumn } from '../../interfaces/Table';
+import { BaseDataRow, TableColumn } from '../../interfaces/Table';
 import { DropdownOption } from '../../interfaces/Utils';
 import EllipsisMenuIconButton, {
   EllipsisMenuIconButtonProps,
@@ -58,7 +58,7 @@ declare module '@mui/material/styles/components' {
   }
 }
 
-export interface TableColumnToggleIconButtonProps<T = BaseTableRow>
+export interface TableColumnToggleIconButtonProps<T = BaseDataRow>
   extends Partial<Omit<EllipsisMenuIconButtonProps, 'options'>> {
   columns: TableColumn[];
   selectedColumnIds?: (keyof T)[];
@@ -78,7 +78,7 @@ const slots = {
   root: ['root'],
 };
 
-const BaseTableColumnToggleIconButton = <T extends BaseTableRow>(
+const BaseTableColumnToggleIconButton = <T extends BaseDataRow>(
   inProps: TableColumnToggleIconButtonProps<T>,
   ref: Ref<HTMLButtonElement>
 ) => {

@@ -53,7 +53,7 @@ import {
   useRecord,
   useUpdate,
 } from '../hooks/Utils';
-import { BaseTableRow } from '../interfaces/Table';
+import { BaseDataRow } from '../interfaces/Table';
 import { CrudMode, PaginatedResponseData } from '../interfaces/Utils';
 import IconLoadingScreen from './IconLoadingScreen';
 import ModalForm, {
@@ -98,7 +98,7 @@ declare module '@mui/material/styles/components' {
 }
 
 export interface TableCrudProps<
-  RecordRow extends BaseTableRow = BaseTableRow,
+  RecordRow extends BaseDataRow = BaseDataRow,
   InitialValues extends FormikValues = FormikValues
 > extends Pick<TableProps<RecordRow>, 'columns'>,
     Partial<Omit<TableProps<RecordRow>, 'columns'>>,
@@ -184,7 +184,7 @@ const slots = {
 };
 
 const BaseTableCrud = <
-  RecordRow extends BaseTableRow,
+  RecordRow extends BaseDataRow,
   InitialValues extends FormikValues
 >(
   inProps: TableCrudProps<RecordRow, InitialValues>,
@@ -1115,7 +1115,7 @@ const BaseTableCrud = <
 };
 
 export const TableCrud = forwardRef(BaseTableCrud) as <
-  RecordRow extends BaseTableRow,
+  RecordRow extends BaseDataRow,
   InitialValues extends FormikValues
 >(
   p: TableCrudProps<RecordRow, InitialValues> & { ref?: Ref<HTMLDivElement> }
