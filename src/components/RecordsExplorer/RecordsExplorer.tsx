@@ -264,12 +264,6 @@ export interface RecordsExplorerProps<RecordRow extends BaseDataRow = any>
    * @default "filterBy"
    */
   searchParamFilterById?: string;
-  /**
-   * Property to use when tracking table selected columns in the url.
-   *
-   * @default "selectedColumns"
-   */
-  searchParamSelectedColumnsId?: string;
 }
 
 export function getRecordsExplorerUtilityClass(slot: string): string {
@@ -319,7 +313,6 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
     searchableFields: searchableFieldsProp,
     getGroupableData,
     searchParamFilterById = 'filterBy',
-    searchParamSelectedColumnsId = 'selectedColumns',
     ...rest
   } = omit(props, 'recordLabelSingular');
 
@@ -382,23 +375,19 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
   ]);
 
   // URL Search params
-  const {
-    SEARCH_PARAM_FILTER_BY_ID,
-    SEARCH_PARAM_SELECTED_COLUMNS_ID,
-    SEARCH_PARAM_EXPANDED_GROUPS_ID,
-  } = useMemo(() => {
-    const urlSearchParamsSuffix = (() => {
-      if (id) {
-        return `:${id}`;
-      }
-      return '';
-    })();
-    return {
-      SEARCH_PARAM_FILTER_BY_ID: `${searchParamFilterById}${urlSearchParamsSuffix}`,
-      SEARCH_PARAM_SELECTED_COLUMNS_ID: `${searchParamSelectedColumnsId}${urlSearchParamsSuffix}`,
-      SEARCH_PARAM_EXPANDED_GROUPS_ID: 'expandedGroups',
-    };
-  }, [id, searchParamFilterById, searchParamSelectedColumnsId]);
+  const { SEARCH_PARAM_FILTER_BY_ID, SEARCH_PARAM_EXPANDED_GROUPS_ID } =
+    useMemo(() => {
+      const urlSearchParamsSuffix = (() => {
+        if (id) {
+          return `:${id}`;
+        }
+        return '';
+      })();
+      return {
+        SEARCH_PARAM_FILTER_BY_ID: `${searchParamFilterById}${urlSearchParamsSuffix}`,
+        SEARCH_PARAM_EXPANDED_GROUPS_ID: 'expandedGroups',
+      };
+    }, [id, searchParamFilterById]);
 
   const { palette, spacing } = useTheme();
 
@@ -585,12 +574,27 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
     };
   }, []);
 
+  const baseSelectedColumnIds = useMemo(() => {
+    if (viewsRef.current) {
+      const listView = viewsRef.current.find(
+        ({ type }) => type === 'List'
+      ) as ListView<RecordRow> | null;
+      if (listView) {
+        if (listView.selectedColumnIds) {
+          return listView.selectedColumnIds;
+        }
+        return listView.columns.map(({ id }) => String(id) as any);
+      }
+    }
+  }, []);
+
   const {
     searchParams: {
       view: searchParamView,
       groupBy: searchParamGroupBy = [],
       sortBy: searchParamSortBy = [],
       search: searchTerm,
+      selectedColumns: searchParamSelectedColumns,
     },
     setSearchParams: setJSONSearchParams,
   } = useReactRouterDOMSearchParams({
@@ -614,6 +618,7 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
         })
       ),
       search: Yup.string(),
+      selectedColumns: Yup.array().of(Yup.string().required()),
     }),
   });
 
@@ -658,6 +663,9 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
       });
   })();
 
+  const selectedColumnIds =
+    searchParamSelectedColumns || baseSelectedColumnIds || [];
+
   const searchParamExpandedGroups = searchParams.get(
     SEARCH_PARAM_EXPANDED_GROUPS_ID
   ) as string | null;
@@ -665,8 +673,6 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
   const searchParamFilterBy = searchParams.get(SEARCH_PARAM_FILTER_BY_ID) as
     | string
     | null;
-  const searchParamSelectedColumns =
-    (searchParams.get(SEARCH_PARAM_SELECTED_COLUMNS_ID) as string) || null;
 
   const { loggedInUserHasPermission } = useAuth();
 
@@ -682,45 +688,6 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
     useState(baseConditionGroup);
   const [activeConditionGroup, setActiveConditionGroup] =
     useState(baseConditionGroup);
-
-  const baseSelectedColumnIds = useMemo(() => {
-    if (viewsRef.current) {
-      const listView = viewsRef.current.find(
-        ({ type }) => type === 'List'
-      ) as ListView<RecordRow> | null;
-      if (listView) {
-        if (listView.selectedColumnIds) {
-          return listView.selectedColumnIds;
-        }
-        return listView.columns.map(({ id }) => String(id) as any);
-      }
-    }
-  }, []);
-
-  const [selectedColumnIds, setSelectedColumnIds] = useState<
-    (keyof RecordRow)[]
-  >(baseSelectedColumnIds || []);
-
-  // Setting selected columns from search params
-  useEffect(() => {
-    if (searchParamSelectedColumns) {
-      setSelectedColumnIds((prevSelectedColumnIds) => {
-        const nextSelectedColumnIds = searchParamSelectedColumns
-          .split(',')
-          .map((selectedColumnId) => decodeURIComponent(selectedColumnId));
-        if (nextSelectedColumnIds.join() !== prevSelectedColumnIds.join()) {
-          return nextSelectedColumnIds as typeof prevSelectedColumnIds;
-        }
-        return prevSelectedColumnIds;
-      });
-    } else if (baseSelectedColumnIds) {
-      setSelectedColumnIds(baseSelectedColumnIds);
-    }
-  }, [
-    SEARCH_PARAM_SELECTED_COLUMNS_ID,
-    baseSelectedColumnIds,
-    searchParamSelectedColumns,
-  ]);
 
   const setDefaultFilterByRef = useRef(() => {
     if (filterBy) {
@@ -999,8 +966,8 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
         sortBy: null,
         groupBy: null,
         search: null,
+        selectedColumns: null,
         [SEARCH_PARAM_FILTER_BY_ID]: null,
-        [SEARCH_PARAM_SELECTED_COLUMNS_ID]: null,
       },
       {
         replace: true,
@@ -1109,14 +1076,13 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
                     },
                     onChangeSelectedColumnIds: (localSelectedColumnIds) => {
                       if (selectedColumnIds !== localSelectedColumnIds) {
-                        setSearchParams(
+                        setJSONSearchParams(
                           {
-                            [SEARCH_PARAM_SELECTED_COLUMNS_ID]:
-                              localSelectedColumnIds
-                                .map((selectedColumnId) =>
-                                  encodeURIComponent(String(selectedColumnId))
-                                )
-                                .join(','),
+                            selectedColumns: localSelectedColumnIds.map(
+                              (selectedColumnId) => {
+                                return String(selectedColumnId);
+                              }
+                            ),
                           },
                           {
                             replace: true,
