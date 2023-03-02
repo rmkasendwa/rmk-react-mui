@@ -1,4 +1,5 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react';
+import randomEmail from 'random-email';
 import createMobilePhoneNumber from 'random-mobile-numbers';
 import React from 'react';
 import { starWars, uniqueNamesGenerator } from 'unique-names-generator';
@@ -21,6 +22,7 @@ type Contact = {
   name: string;
   phoneNumber: string;
   status: 'Active' | 'Pending';
+  email: string;
 };
 
 const dataSet = Array.from({ length: 500 }).map((_, index) => {
@@ -31,6 +33,7 @@ const dataSet = Array.from({ length: 500 }).map((_, index) => {
     }),
     phoneNumber: createMobilePhoneNumber('UK'),
     status: ['Active', 'Pending'][Math.floor(Math.random() * 2)],
+    email: randomEmail(),
   } as Contact;
 });
 
@@ -42,8 +45,9 @@ Default.args = {
       type: 'List',
       columns: [
         { id: 'name', label: 'Name' },
+        { id: 'status', label: 'Status', type: 'enum', width: 100 },
         { id: 'phoneNumber', label: 'Phone Number', type: 'phoneNumber' },
-        { id: 'status', label: 'Status' },
+        { id: 'email', label: 'Email', type: 'email' },
       ],
     },
   ],
