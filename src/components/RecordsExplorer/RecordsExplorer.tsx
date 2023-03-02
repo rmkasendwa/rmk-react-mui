@@ -209,10 +209,6 @@ export interface RecordsExplorerProps<RecordRow extends BaseDataRow = any>
    */
   BodyProps?: Partial<BoxProps>;
   /**
-   * Function to be called whenever the input data is filtered.
-   */
-  onChangeFilteredData?: (filteredData: RecordRow[]) => void;
-  /**
    * List of predefined data views to render input data.
    */
   views?: DataView<RecordRow>[];
@@ -296,7 +292,6 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
     IconLoadingScreenProps = {},
     data,
     ViewOptionsButtonProps,
-    onChangeFilteredData,
     filterFields: filterFieldsProp,
     filterBy,
     sortableFields: sortableFieldsProp,
@@ -350,7 +345,6 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
   const sortableFieldsRef = useRef(sortableFieldsProp);
   const groupableFieldsRef = useRef(groupableFieldsProp);
   const getGroupableDataRef = useRef(getGroupableData);
-  const onChangeFilteredDataRef = useRef(onChangeFilteredData);
   const viewsRef = useRef(views);
   useEffect(() => {
     filterBySearchTermRef.current = filterBySearchTerm;
@@ -360,14 +354,12 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
     sortableFieldsRef.current = sortableFieldsProp;
     filterFieldsRef.current = filterFieldsProp;
     getGroupableDataRef.current = getGroupableData;
-    onChangeFilteredDataRef.current = onChangeFilteredData;
     viewsRef.current = views;
   }, [
     filterBySearchTerm,
     filterFieldsProp,
     getGroupableData,
     groupableFieldsProp,
-    onChangeFilteredData,
     searchableFieldsProp,
     setSearchParams,
     sortableFieldsProp,
@@ -388,8 +380,6 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
   }, [id, searchParamFilterById]);
 
   const { palette, spacing } = useTheme();
-
-  const [processingDisplayData, setProcessingDisplayData] = useState(false);
 
   // Resolving data operation fields
   const {
@@ -921,17 +911,6 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
       isInitialMountRef.current = true;
     };
   }, []);
-
-  useEffect(() => {
-    setProcessingDisplayData(false);
-    if (onChangeFilteredDataRef.current) {
-      onChangeFilteredDataRef.current(filteredData);
-    }
-  }, [filteredData]);
-
-  useEffect(() => {
-    setProcessingDisplayData(true);
-  }, [data]);
 
   const resetToDefaultView = () => {
     setJSONSearchParams(
@@ -1616,10 +1595,10 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
                   pathToAddNew,
                   errorMessage,
                   load,
+                  loading,
                 }}
                 {...IconLoadingScreenProps}
                 recordsCount={filteredData.length}
-                loading={loading || processingDisplayData}
               />
             );
           }
