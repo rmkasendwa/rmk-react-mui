@@ -87,6 +87,7 @@ import SortButton from './SortButton';
 import ViewOptionsButton, {
   ViewOptionType,
   ViewOptionsButtonProps,
+  viewOptionTypes,
 } from './ViewOptionsButton';
 
 export interface RecordsExplorerClasses {
@@ -404,8 +405,6 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
 
   const { palette, spacing } = useTheme();
 
-  const [viewType, setViewType] = useState<ViewOptionType>('List');
-
   const [processingDisplayData, setProcessingDisplayData] = useState(false);
 
   const [expandedGroups, setExpandedGroups] = useState<string[]>([]);
@@ -591,14 +590,16 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
 
   const {
     searchParams: {
-      sortBy: searchParamSortBy = [],
+      view,
       groupBy: searchParamGroupBy = [],
+      sortBy: searchParamSortBy = [],
     },
     setSearchParams: setJSONSearchParams,
   } = useReactRouterDOMSearchParams({
     mode: 'json',
     validator: Yup.object({
-      sortBy: Yup.array().of(
+      view: Yup.mixed<ViewOptionType>().oneOf([...viewOptionTypes]),
+      groupBy: Yup.array().of(
         Yup.object({
           id: Yup.mixed<keyof RecordRow>().required(),
           sortDirection: Yup.mixed<SortDirection>()
@@ -606,7 +607,7 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
             .oneOf([...sortDirections]),
         })
       ),
-      groupBy: Yup.array().of(
+      sortBy: Yup.array().of(
         Yup.object({
           id: Yup.mixed<keyof RecordRow>().required(),
           sortDirection: Yup.mixed<SortDirection>()
@@ -616,6 +617,8 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
       ),
     }),
   });
+
+  const viewType = view || 'List';
 
   const activeSortParams = (() => {
     const sortByParams = sortableFields.reduce((accumulator, sortByParam) => {
@@ -1515,9 +1518,16 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
                       }
                     })()}
                     {...ViewOptionsButtonProps}
-                    {...{ id }}
-                    onChangeViewType={(viewType) => {
-                      setViewType(viewType);
+                    {...{ viewType }}
+                    onChangeViewType={(view) => {
+                      setJSONSearchParams(
+                        {
+                          view,
+                        },
+                        {
+                          replace: true,
+                        }
+                      );
                     }}
                   />
                 );
