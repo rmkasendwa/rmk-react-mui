@@ -44,13 +44,16 @@ import {
   useState,
 } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
+import * as Yup from 'yup';
 
 import { useAuth } from '../../contexts/AuthContext';
 import { useReactRouterDOMSearchParams } from '../../hooks/ReactRouterDOM';
 import {
   SelectedSortOption,
   SortBy,
+  SortDirection,
   SortableFields,
+  sortDirections,
 } from '../../interfaces/Sort';
 import { BaseDataRow, TableColumnType } from '../../interfaces/Table';
 import { PermissionCode } from '../../interfaces/Users';
@@ -438,178 +441,219 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
   const [allGroupsExpanded, setAllGroupsExpanded] = useState(false);
 
   // Resolving data operation fields
-  const { filterFields, sortableFields, groupableFields, searchableFields } =
-    useMemo(() => {
-      // Resolving groupable fields
-      const groupableFields = (() => {
-        const groupableFields: typeof groupableFieldsRef.current = [];
-        if (groupableFieldsRef.current) {
-          groupableFields.push(...groupableFieldsRef.current);
-        }
-        if (viewsRef.current) {
-          const listView = viewsRef.current.find(
-            ({ type }) => type === 'List'
-          ) as ListView<RecordRow> | null;
-          if (listView) {
-            groupableFields.push(
-              ...listView.columns
-                .filter(({ id, label, type = 'string' }) => {
-                  return (
-                    typeof label === 'string' &&
-                    !groupableFields.find(
-                      ({ id: groupableFieldId }) => groupableFieldId === id
-                    ) &&
-                    ENUM_TABLE_COLUMN_TYPES.includes(type)
-                  );
-                })
-                .map(({ id, label, type = 'enum' }) => {
-                  return {
-                    id,
-                    label: String(label),
-                    type: type as PrimitiveDataType,
-                  };
-                })
-            );
-            groupableFields.forEach((groupableField) => {
-              const { id: groupableFieldId } = groupableField;
-              if (!groupableField.getGroupLabel) {
-                const column = listView.columns.find(
-                  ({ id }) => id === groupableFieldId
+  const {
+    filterFields,
+    sortableFields = [],
+    groupableFields,
+    searchableFields,
+  } = useMemo(() => {
+    // Resolving groupable fields
+    const groupableFields = (() => {
+      const groupableFields: typeof groupableFieldsRef.current = [];
+      if (groupableFieldsRef.current) {
+        groupableFields.push(...groupableFieldsRef.current);
+      }
+      if (viewsRef.current) {
+        const listView = viewsRef.current.find(
+          ({ type }) => type === 'List'
+        ) as ListView<RecordRow> | null;
+        if (listView) {
+          groupableFields.push(
+            ...listView.columns
+              .filter(({ id, label, type = 'string' }) => {
+                return (
+                  typeof label === 'string' &&
+                  !groupableFields.find(
+                    ({ id: groupableFieldId }) => groupableFieldId === id
+                  ) &&
+                  ENUM_TABLE_COLUMN_TYPES.includes(type)
                 );
-                if (column && column.getColumnValue) {
-                  groupableField.getGroupLabel = column.getColumnValue as any;
-                }
+              })
+              .map(({ id, label, type = 'enum' }) => {
+                return {
+                  id,
+                  label: String(label),
+                  type: type as PrimitiveDataType,
+                };
+              })
+          );
+          groupableFields.forEach((groupableField) => {
+            const { id: groupableFieldId } = groupableField;
+            if (!groupableField.getGroupLabel) {
+              const column = listView.columns.find(
+                ({ id }) => id === groupableFieldId
+              );
+              if (column && column.getColumnValue) {
+                groupableField.getGroupLabel = column.getColumnValue as any;
               }
-            });
-          }
+            }
+          });
         }
-        if (groupableFields.length > 0) {
-          return groupableFields;
-        }
-      })();
+      }
+      if (groupableFields.length > 0) {
+        return groupableFields;
+      }
+    })();
 
-      // Resolving sortable fields
-      const sortableFields = (() => {
-        const sortableFields: typeof sortableFieldsRef.current = [];
-        if (sortableFieldsRef.current) {
-          sortableFields.push(...sortableFieldsRef.current);
+    // Resolving sortable fields
+    const sortableFields = (() => {
+      const sortableFields: typeof sortableFieldsRef.current = [];
+      if (sortableFieldsRef.current) {
+        sortableFields.push(...sortableFieldsRef.current);
+      }
+      if (viewsRef.current) {
+        const listView = viewsRef.current.find(
+          ({ type }) => type === 'List'
+        ) as ListView<RecordRow> | null;
+        if (listView) {
+          sortableFields.push(
+            ...listView.columns
+              .filter(({ id, label, type = 'string' }) => {
+                return (
+                  typeof label === 'string' &&
+                  !sortableFields.find(
+                    ({ id: sortableFieldId }) => sortableFieldId === id
+                  ) &&
+                  PRIMITIVE_DATA_TYPES.includes(type as PrimitiveDataType)
+                );
+              })
+              .map(({ id, label, type = 'string' }) => {
+                return {
+                  id,
+                  label: String(label),
+                  type: type as PrimitiveDataType,
+                };
+              })
+          );
         }
-        if (viewsRef.current) {
-          const listView = viewsRef.current.find(
-            ({ type }) => type === 'List'
-          ) as ListView<RecordRow> | null;
-          if (listView) {
-            sortableFields.push(
-              ...listView.columns
-                .filter(({ id, label, type = 'string' }) => {
-                  return (
-                    typeof label === 'string' &&
-                    !sortableFields.find(
-                      ({ id: sortableFieldId }) => sortableFieldId === id
-                    ) &&
-                    PRIMITIVE_DATA_TYPES.includes(type as PrimitiveDataType)
-                  );
-                })
-                .map(({ id, label, type = 'string' }) => {
-                  return {
-                    id,
-                    label: String(label),
-                    type: type as PrimitiveDataType,
-                  };
-                })
-            );
-          }
-        }
-        if (sortableFields.length > 0) {
-          return sortableFields;
-        }
-      })();
+      }
+      if (sortableFields.length > 0) {
+        return sortableFields;
+      }
+    })();
 
-      // Resolving filter fields
-      const filterFields = (() => {
-        const filterFields: typeof filterFieldsRef.current = [];
-        if (filterFieldsRef.current) {
-          filterFields.push(...filterFieldsRef.current);
+    // Resolving filter fields
+    const filterFields = (() => {
+      const filterFields: typeof filterFieldsRef.current = [];
+      if (filterFieldsRef.current) {
+        filterFields.push(...filterFieldsRef.current);
+      }
+      if (viewsRef.current) {
+        const listView = viewsRef.current.find(
+          ({ type }) => type === 'List'
+        ) as ListView<RecordRow> | null;
+        if (listView) {
+          filterFields.push(
+            ...listView.columns
+              .filter(({ id, label, type = 'string' }) => {
+                return (
+                  typeof label === 'string' &&
+                  !filterFields.find(
+                    ({ id: filterFieldId }) => filterFieldId === id
+                  ) &&
+                  PRIMITIVE_DATA_TYPES.includes(type as PrimitiveDataType)
+                );
+              })
+              .map(({ id, label, type = 'string', getColumnValue }) => {
+                return {
+                  id,
+                  label: String(label),
+                  type: type as any,
+                  getFieldOptionLabel:
+                    ENUM_TABLE_COLUMN_TYPES.includes(type) && getColumnValue
+                      ? getColumnValue
+                      : undefined,
+                  getFilterValue: getColumnValue as any,
+                };
+              })
+          );
         }
-        if (viewsRef.current) {
-          const listView = viewsRef.current.find(
-            ({ type }) => type === 'List'
-          ) as ListView<RecordRow> | null;
-          if (listView) {
-            filterFields.push(
-              ...listView.columns
-                .filter(({ id, label, type = 'string' }) => {
-                  return (
-                    typeof label === 'string' &&
-                    !filterFields.find(
-                      ({ id: filterFieldId }) => filterFieldId === id
-                    ) &&
-                    PRIMITIVE_DATA_TYPES.includes(type as PrimitiveDataType)
-                  );
-                })
-                .map(({ id, label, type = 'string', getColumnValue }) => {
-                  return {
-                    id,
-                    label: String(label),
-                    type: type as any,
-                    getFieldOptionLabel:
-                      ENUM_TABLE_COLUMN_TYPES.includes(type) && getColumnValue
-                        ? getColumnValue
-                        : undefined,
-                    getFilterValue: getColumnValue as any,
-                  };
-                })
-            );
-          }
-        }
-        if (filterFields.length > 0) {
-          return filterFields;
-        }
-      })();
+      }
+      if (filterFields.length > 0) {
+        return filterFields;
+      }
+    })();
 
-      // Resolving filter fields
-      const searchableFields = (() => {
-        const searchableFields: typeof searchableFieldsRef.current = [];
-        if (searchableFieldsRef.current) {
-          searchableFields.push(...searchableFieldsRef.current);
+    // Resolving filter fields
+    const searchableFields = (() => {
+      const searchableFields: typeof searchableFieldsRef.current = [];
+      if (searchableFieldsRef.current) {
+        searchableFields.push(...searchableFieldsRef.current);
+      }
+      if (viewsRef.current) {
+        const listView = viewsRef.current.find(
+          ({ type }) => type === 'List'
+        ) as ListView<RecordRow> | null;
+        if (listView) {
+          searchableFields.push(
+            ...listView.columns
+              .filter(({ id, label, type = 'string' }) => {
+                return (
+                  typeof label === 'string' &&
+                  !searchableFields.find(
+                    ({ id: filterFieldId }) => filterFieldId === id
+                  ) &&
+                  PRIMITIVE_DATA_TYPES.includes(type as PrimitiveDataType)
+                );
+              })
+              .map(({ id, label }) => {
+                return {
+                  id,
+                  label: String(label),
+                };
+              })
+          );
         }
-        if (viewsRef.current) {
-          const listView = viewsRef.current.find(
-            ({ type }) => type === 'List'
-          ) as ListView<RecordRow> | null;
-          if (listView) {
-            searchableFields.push(
-              ...listView.columns
-                .filter(({ id, label, type = 'string' }) => {
-                  return (
-                    typeof label === 'string' &&
-                    !searchableFields.find(
-                      ({ id: filterFieldId }) => filterFieldId === id
-                    ) &&
-                    PRIMITIVE_DATA_TYPES.includes(type as PrimitiveDataType)
-                  );
-                })
-                .map(({ id, label }) => {
-                  return {
-                    id,
-                    label: String(label),
-                  };
-                })
-            );
-          }
-        }
-        if (searchableFields.length > 0) {
-          return searchableFields;
-        }
-      })();
+      }
+      if (searchableFields.length > 0) {
+        return searchableFields;
+      }
+    })();
 
-      return {
-        filterFields,
-        sortableFields,
-        groupableFields,
-        searchableFields,
-      };
-    }, []);
+    return {
+      filterFields,
+      sortableFields,
+      groupableFields,
+      searchableFields,
+    };
+  }, []);
+
+  const {
+    searchParams: { sortBy: selectedSortBy = [] },
+    setSearchParams: setJSONSearchParams,
+  } = useReactRouterDOMSearchParams({
+    mode: 'json',
+    validator: Yup.object({
+      sortBy: Yup.array().of(
+        Yup.object({
+          id: Yup.mixed<keyof RecordRow>().required(),
+          sortDirection: Yup.mixed<SortDirection>()
+            .required()
+            .oneOf([...sortDirections]),
+        })
+      ),
+    }),
+  });
+
+  const activeSortParams = (() => {
+    const sortByParams = selectedSortBy.reduce((accumulator, sortByParam) => {
+      accumulator[sortByParam.id] = sortByParam;
+      return accumulator;
+    }, {} as Record<keyof RecordRow, typeof selectedSortBy[number]>);
+
+    return sortableFields
+      .filter(({ id }) => {
+        return sortByParams[id];
+      })
+      .map((sortByParam) => {
+        return {
+          ...sortByParam,
+          ...sortByParams[sortByParam.id],
+        };
+      });
+  })();
+
+  console.log({ activeSortParams });
 
   const searchParamSearchTerm = searchParams.get(
     SEARCH_TERM_SEARCH_PARAM_KEY
@@ -737,91 +781,6 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
       }
     }
   }, [SEARCH_PARAM_FILTER_BY_ID, selectedConditionGroup]);
-
-  /****************************************
-   * Sort params
-   ****************************************/
-  const [activeSortParams, setActiveSortParams] = useState<
-    SelectedSortOption<RecordRow>[]
-  >([]);
-  const [selectedSortParams, setSelectedSortParams] = useState<
-    SelectedSortOption<RecordRow>[]
-  >([]);
-
-  // Setting default sort params
-  useEffect(() => {
-    if (
-      isInitialMountRef.current &&
-      sortableFields &&
-      !searchParamSortBy &&
-      sortBy
-    ) {
-      setActiveSortParams((prevSelectedSortParams) => {
-        if (
-          sortBy
-            .map(({ id, sortDirection }) => String(id) + sortDirection)
-            .join(',') !==
-          prevSelectedSortParams
-            .map(({ id, sortDirection }) => String(id) + sortDirection)
-            .join(',')
-        ) {
-          return sortBy
-            .map((sortBy) => {
-              const { id } = sortBy;
-              return [
-                sortableFields.find(({ id: currentId }) => currentId === id)!,
-                sortBy,
-              ];
-            })
-            .filter(([selectedSortParam]) => selectedSortParam != null)
-            .map(([selectedSortParam, { sortDirection }]) => {
-              return {
-                ...selectedSortParam,
-                sortDirection: sortDirection || 'ASC',
-              } as SelectedSortOption<RecordRow>;
-            });
-        }
-        return prevSelectedSortParams;
-      });
-    }
-  }, [searchParamSortBy, sortBy, sortableFields]);
-
-  useEffect(() => {
-    if (searchParamSortBy && sortableFields) {
-      setActiveSortParams(
-        getSortParamsFromEncodedString<RecordRow>(
-          searchParamSortBy,
-          sortableFields
-        )
-      );
-    }
-  }, [searchParamSortBy, sortableFields]);
-
-  useEffect(() => {
-    if (!isInitialMountRef.current) {
-      if (selectedSortParams.length > 0) {
-        setSearchParamsRef.current(
-          {
-            [SEARCH_PARAM_SORT_BY_ID]: selectedSortParams
-              .map(({ id, sortDirection }) => {
-                return encodeURIComponent(
-                  `${String(id)}|${sortDirection || 'ASC'}`
-                );
-              })
-              .join(','),
-          },
-          {
-            replace: true,
-          }
-        );
-      } else {
-        setSearchParamsRef.current(
-          { [SEARCH_PARAM_SORT_BY_ID]: null },
-          { replace: true }
-        );
-      }
-    }
-  }, [SEARCH_PARAM_SORT_BY_ID, selectedSortParams]);
 
   /****************************************
    * Group params
@@ -1222,23 +1181,23 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
                     handleSortOperations: false,
                     sortBy: activeSortParams,
                     onChangeSortBy: (sortOptions) => {
-                      if (sortableFields) {
-                        setSelectedSortParams((prevSelectedSortParams) => {
-                          if (
-                            sortOptions
-                              .map(
-                                ({ id, sortDirection }) =>
-                                  String(id) + sortDirection
-                              )
-                              .join(',') !==
-                            prevSelectedSortParams
-                              .map(
-                                ({ id, sortDirection }) =>
-                                  String(id) + sortDirection
-                              )
-                              .join(',')
-                          ) {
-                            return sortOptions
+                      if (
+                        sortOptions
+                          .map(
+                            ({ id, sortDirection }) =>
+                              String(id) + sortDirection
+                          )
+                          .join(',') !==
+                        activeSortParams
+                          .map(
+                            ({ id, sortDirection }) =>
+                              String(id) + sortDirection
+                          )
+                          .join(',')
+                      ) {
+                        setJSONSearchParams(
+                          {
+                            sortBy: sortOptions
                               .map((sortBy) => {
                                 const { id } = sortBy;
                                 return [
@@ -1257,10 +1216,12 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
                                   ...selectedSortParam,
                                   sortDirection: sortDirection || 'ASC',
                                 } as SelectedSortOption<RecordRow>;
-                              });
+                              }),
+                          },
+                          {
+                            replace: true,
                           }
-                          return prevSelectedSortParams;
-                        });
+                        );
                       }
                     },
                     onChangeSelectedColumnIds: (localSelectedColumnIds) => {
@@ -1696,7 +1657,19 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
                     {...{ sortableFields, sortBy, id }}
                     selectedSortParams={activeSortParams}
                     onChangeSelectedSortParams={(sortParams) => {
-                      setSelectedSortParams(sortParams);
+                      setJSONSearchParams(
+                        {
+                          sortBy: sortParams.map(({ id, sortDirection }) => {
+                            return {
+                              id,
+                              sortDirection,
+                            };
+                          }),
+                        },
+                        {
+                          replace: true,
+                        }
+                      );
                     }}
                   />
                 );
