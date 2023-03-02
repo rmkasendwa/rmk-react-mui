@@ -2,7 +2,9 @@ import { ReactNode } from 'react';
 
 import { PrimitiveDataType } from './Utils';
 
-export type SortDirection = 'ASC' | 'DESC';
+export const sortDirections = ['ASC', 'DESC'] as const;
+
+export type SortDirection = typeof sortDirections[number];
 
 export interface SortOption<T = any> {
   id: keyof T;
