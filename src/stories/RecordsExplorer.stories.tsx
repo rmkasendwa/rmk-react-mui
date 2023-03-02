@@ -30,7 +30,7 @@ const dataSet = Array.from({ length: 500 }).map((_, index) => {
       dictionaries: [starWars],
     }),
     phoneNumber: createMobilePhoneNumber('UK'),
-    status: ['Active', 'Pending'][Math.floor(Math.random() * 1)],
+    status: ['Active', 'Pending'][Math.floor(Math.random() * 2)],
   } as Contact;
 });
 
