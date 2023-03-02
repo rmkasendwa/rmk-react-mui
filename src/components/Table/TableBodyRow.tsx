@@ -14,7 +14,7 @@ import TableRow, {
 import clsx from 'clsx';
 import { useEffect, useMemo, useRef } from 'react';
 
-import { BaseTableRow, TableRowProps } from '../../interfaces/Table';
+import { BaseDataRow, TableRowProps } from '../../interfaces/Table';
 import {
   getColumnPaddingStyles,
   getColumnWidthStyles,
@@ -70,7 +70,7 @@ const slots = {
   root: ['root'],
 };
 
-export const TableBodyRow = <T extends BaseTableRow>(
+export const TableBodyRow = <T extends BaseDataRow>(
   inProps: TableBodyRowProps<T>
 ) => {
   const props = useThemeProps({ props: inProps, name: 'MuiTableBodyRow' });

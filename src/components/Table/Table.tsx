@@ -48,7 +48,7 @@ import {
 
 import { SortBy, SortDirection, SortOptions } from '../../interfaces/Sort';
 import {
-  BaseTableRow,
+  BaseDataRow,
   GetRowProps,
   TableColumn,
   TableRowProps,
@@ -202,7 +202,7 @@ const slots = {
   columnDisplayToggle: ['columnDisplayToggle'],
 };
 
-export const BaseTable = <T extends BaseTableRow>(
+export const BaseTable = <T extends BaseDataRow>(
   inProps: TableProps<T>,
   ref: Ref<HTMLTableElement>
 ) => {

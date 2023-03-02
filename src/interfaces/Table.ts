@@ -128,8 +128,8 @@ export type GetRowProps<T = any> = (
   currentEntity: T
 ) => Partial<MuiTableRowProps> | undefined;
 
-export interface BaseTableRow {
-  id: string | number;
+export interface BaseDataRow {
+  id: string;
 }
 
 export interface TableRowProps<RowObject extends Record<string, any> = any>
