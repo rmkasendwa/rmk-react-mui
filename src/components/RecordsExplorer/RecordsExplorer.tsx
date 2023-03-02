@@ -30,6 +30,12 @@ import { IconLoadingScreenProps } from '../IconLoadingScreen';
 import SearchSyncToolbar from '../SearchSyncToolbar';
 import { TableProps } from '../Table';
 import { TimelineChartProps } from '../TimelineChart';
+import {
+  ConditionGroup,
+  DataFilterField,
+  FilterBySearchTerm,
+  SearchableProperty,
+} from './interfaces';
 import { ViewOptionType, ViewOptionsButtonProps } from './ViewOptionsButton';
 
 export interface RecordsExplorerClasses {
@@ -93,9 +99,9 @@ export interface TimelineView<RecordRow extends BaseDataRow>
   type: 'Timeline';
 }
 
-export type DataView<T extends BaseDataRow> = ListView<T> | TimelineView<T>;
-
-export type FilterBySearchTerm<T> = (searchTerm: string, row: T) => boolean;
+export type DataView<RecordRow extends BaseDataRow> =
+  | ListView<RecordRow>
+  | TimelineView<RecordRow>;
 
 export interface RecordsExplorerChildrenOptions<RecordRow extends BaseDataRow> {
   viewType: ViewOptionType;
@@ -266,7 +272,7 @@ const slots = {
 
 export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
   inProps: RecordsExplorerProps<RecordRow>,
-  ref: Ref<HTMLTableElement>
+  ref: Ref<HTMLDivElement>
 ) => {
   const props = useThemeProps({ props: inProps, name: 'MuiRecordsExplorer' });
   const { className, title, sx, fillContentArea = true, ...rest } = props;
