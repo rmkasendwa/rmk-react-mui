@@ -1981,6 +1981,9 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
           flexDirection: 'column',
         },
       }}
+      sx={{
+        px: 0,
+      }}
     >
       {explorerElement}
     </FixedHeaderContentArea>

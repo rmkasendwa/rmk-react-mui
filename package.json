@@ -143,6 +143,7 @@
     "prettier-plugin-import-sort": "0.0.7",
     "prettier-plugin-sort-json": "0.0.3",
     "random-email": "^1.0.3",
+    "random-mobile-numbers": "^1.0.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-fast-compare": "^3.2.0",
@@ -155,6 +156,7 @@
     "style-loader": "^3.3.1",
     "typescript": "^4.8.4",
     "uniqid": "^5.4.0",
+    "unique-names-generator": "^4.7.1",
     "webpack": "^5.74.0",
     "yup": "^0.32.11"
   },
