@@ -41,7 +41,6 @@ import {
   useEffect,
   useMemo,
   useRef,
-  useState,
 } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import * as Yup from 'yup';
@@ -76,12 +75,15 @@ import FilterButton from './FilterButton';
 import GroupButton from './GroupButton';
 import {
   ConditionGroup,
+  Conjunction,
   DataFilterField,
   DataGroup,
   FilterBySearchTerm,
   FilterOperator,
   GroupableField,
   SearchableProperty,
+  filterConjunctions,
+  filterOperators,
 } from './interfaces';
 import SortButton from './SortButton';
 import ViewOptionsButton, {
@@ -254,12 +256,6 @@ export interface RecordsExplorerProps<RecordRow extends BaseDataRow = any>
     data: RecordRow[],
     grouping: GroupableField<RecordRow>
   ) => RecordRow[];
-  /**
-   * Property to use when tracking filter parameters in the url.
-   *
-   * @default "filterBy"
-   */
-  searchParamFilterById?: string;
 }
 
 export function getRecordsExplorerUtilityClass(slot: string): string {
@@ -293,7 +289,6 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
     data,
     ViewOptionsButtonProps,
     filterFields: filterFieldsProp,
-    filterBy,
     sortableFields: sortableFieldsProp,
     sortBy,
     groupableFields: groupableFieldsProp,
@@ -307,7 +302,6 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
     filterBySearchTerm,
     searchableFields: searchableFieldsProp,
     getGroupableData,
-    searchParamFilterById = 'filterBy',
     ...rest
   } = omit(props, 'recordLabelSingular');
 
@@ -333,12 +327,9 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
   const { sx: headerPropsSx, ...headerPropsRest } = HeaderProps;
   const { sx: bodyPropsSx, ...bodyPropsRest } = BodyProps;
 
-  const { searchParams, setSearchParams } = useReactRouterDOMSearchParams();
-
   // Refs
   const isInitialMountRef = useRef(true);
   const headerElementRef = useRef<HTMLDivElement | null>(null);
-  const setSearchParamsRef = useRef(setSearchParams);
   const filterBySearchTermRef = useRef(filterBySearchTerm);
   const searchableFieldsRef = useRef(searchableFieldsProp);
   const filterFieldsRef = useRef(filterFieldsProp);
@@ -348,7 +339,6 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
   const viewsRef = useRef(views);
   useEffect(() => {
     filterBySearchTermRef.current = filterBySearchTerm;
-    setSearchParamsRef.current = setSearchParams;
     searchableFieldsRef.current = searchableFieldsProp;
     groupableFieldsRef.current = groupableFieldsProp;
     sortableFieldsRef.current = sortableFieldsProp;
@@ -361,23 +351,9 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
     getGroupableData,
     groupableFieldsProp,
     searchableFieldsProp,
-    setSearchParams,
     sortableFieldsProp,
     views,
   ]);
-
-  // URL Search params
-  const { SEARCH_PARAM_FILTER_BY_ID } = useMemo(() => {
-    const urlSearchParamsSuffix = (() => {
-      if (id) {
-        return `:${id}`;
-      }
-      return '';
-    })();
-    return {
-      SEARCH_PARAM_FILTER_BY_ID: `${searchParamFilterById}${urlSearchParamsSuffix}`,
-    };
-  }, [id, searchParamFilterById]);
 
   const { palette, spacing } = useTheme();
 
@@ -559,6 +535,14 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
     };
   }, []);
 
+  // Filter fields state
+  const baseConditionGroup = useMemo(() => {
+    return {
+      conjunction: 'and',
+      conditions: [],
+    } as ConditionGroup<RecordRow>;
+  }, []);
+
   const baseSelectedColumnIds = useMemo(() => {
     if (viewsRef.current) {
       const listView = viewsRef.current.find(
@@ -579,6 +563,7 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
       groupBy: searchParamGroupBy = [],
       sortBy: searchParamSortBy = [],
       search: searchTerm,
+      filterBy: searchParamFilterBy,
       selectedColumns: searchParamSelectedColumns,
       expandedGroups: searchParamExpandedGroups,
     },
@@ -595,6 +580,7 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
             .oneOf([...sortDirections]),
         })
       ),
+      expandedGroups: Yup.mixed<'All' | 'None' | string[]>(),
       sortBy: Yup.array().of(
         Yup.object({
           id: Yup.mixed<keyof RecordRow>().required(),
@@ -603,9 +589,22 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
             .oneOf([...sortDirections]),
         })
       ),
+      filterBy: Yup.object({
+        conjunction: Yup.mixed<Conjunction>().oneOf([...filterConjunctions]),
+        conditions: Yup.array()
+          .of(
+            Yup.object({
+              fieldId: Yup.mixed<keyof RecordRow>().required(),
+              operator: Yup.mixed<FilterOperator>()
+                .oneOf([...filterOperators])
+                .required(),
+              value: Yup.mixed<string | number | (string | number)[]>(),
+            })
+          )
+          .required(),
+      }),
       search: Yup.string(),
       selectedColumns: Yup.array().of(Yup.string().required()),
-      expandedGroups: Yup.mixed<'All' | 'None' | string[]>(),
     }),
   });
 
@@ -650,77 +649,20 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
       });
   })();
 
+  const activeConditionGroup = (() => {
+    if (searchParamFilterBy) {
+      return {
+        ...searchParamFilterBy,
+        conjunction: searchParamFilterBy.conjunction || 'and',
+      };
+    }
+    return baseConditionGroup;
+  })();
+
   const selectedColumnIds =
     searchParamSelectedColumns || baseSelectedColumnIds || [];
 
-  const searchParamFilterBy = searchParams.get(SEARCH_PARAM_FILTER_BY_ID) as
-    | string
-    | null;
-
   const { loggedInUserHasPermission } = useAuth();
-
-  // Filter fields state
-  const baseConditionGroup = useMemo(() => {
-    return {
-      conjunction: 'and',
-      conditions: [],
-    } as ConditionGroup<RecordRow>;
-  }, []);
-
-  const [selectedConditionGroup, setSelectedConditionGroup] =
-    useState(baseConditionGroup);
-  const [activeConditionGroup, setActiveConditionGroup] =
-    useState(baseConditionGroup);
-
-  const setDefaultFilterByRef = useRef(() => {
-    if (filterBy) {
-      setActiveConditionGroup({
-        ...filterBy,
-        conjunction: filterBy.conjunction || 'and',
-      });
-    } else {
-      setActiveConditionGroup(baseConditionGroup);
-    }
-  });
-
-  // Setting default field filter
-  useEffect(() => {
-    if (isInitialMountRef.current && !searchParamFilterBy) {
-      setDefaultFilterByRef.current();
-    }
-  }, [searchParamFilterBy, filterBy]);
-
-  useEffect(() => {
-    if (searchParamFilterBy && JSON.isValid(searchParamFilterBy)) {
-      setActiveConditionGroup((prevConditionGroup) => {
-        if (JSON.stringify(prevConditionGroup) !== searchParamFilterBy) {
-          return JSON.parse(searchParamFilterBy) as ConditionGroup<RecordRow>;
-        }
-        return prevConditionGroup;
-      });
-    }
-  }, [baseConditionGroup, searchParamFilterBy]);
-
-  useEffect(() => {
-    if (!isInitialMountRef.current) {
-      if (selectedConditionGroup.conditions.length > 0) {
-        setSearchParamsRef.current(
-          {
-            [SEARCH_PARAM_FILTER_BY_ID]: JSON.stringify(selectedConditionGroup),
-          },
-          { replace: true }
-        );
-      } else {
-        setActiveConditionGroup(selectedConditionGroup);
-        setSearchParamsRef.current(
-          {
-            [SEARCH_PARAM_FILTER_BY_ID]: null,
-          },
-          { replace: true }
-        );
-      }
-    }
-  }, [SEARCH_PARAM_FILTER_BY_ID, selectedConditionGroup]);
 
   // Processing data
   const filteredData = (() => {
@@ -921,13 +863,12 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
         search: null,
         selectedColumns: null,
         expandedGroups: null,
-        [SEARCH_PARAM_FILTER_BY_ID]: null,
+        filterBy: null,
       },
       {
         replace: true,
       }
     );
-    setDefaultFilterByRef.current();
   };
 
   const allGroupsExpanded = Boolean(
@@ -1509,7 +1450,12 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
                     {...{ data, filterFields, id }}
                     selectedConditionGroup={activeConditionGroup}
                     onChangeSelectedConditionGroup={(conditionGroup) => {
-                      setSelectedConditionGroup(conditionGroup);
+                      setJSONSearchParams(
+                        {
+                          filterBy: conditionGroup as any,
+                        },
+                        { replace: true }
+                      );
                     }}
                   />
                 );
