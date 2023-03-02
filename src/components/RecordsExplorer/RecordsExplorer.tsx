@@ -265,12 +265,6 @@ export interface RecordsExplorerProps<RecordRow extends BaseDataRow = any>
    */
   searchParamFilterById?: string;
   /**
-   * Property to use when tracking grouping parameters in the url.
-   *
-   * @default "groupBy"
-   */
-  searchParamGroupById?: string;
-  /**
    * Property to use when tracking table selected columns in the url.
    *
    * @default "selectedColumns"
@@ -325,7 +319,6 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
     searchableFields: searchableFieldsProp,
     getGroupableData,
     searchParamFilterById = 'filterBy',
-    searchParamGroupById = 'groupBy',
     searchParamSelectedColumnsId = 'selectedColumns',
     ...rest
   } = omit(props, 'recordLabelSingular');
@@ -392,7 +385,6 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
   const {
     SEARCH_TERM_SEARCH_PARAM_KEY,
     SEARCH_PARAM_FILTER_BY_ID,
-    SEARCH_PARAM_GROUP_BY_ID,
     SEARCH_PARAM_SELECTED_COLUMNS_ID,
     SEARCH_PARAM_EXPANDED_GROUPS_ID,
   } = useMemo(() => {
@@ -405,16 +397,10 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
     return {
       SEARCH_TERM_SEARCH_PARAM_KEY: `search${urlSearchParamsSuffix}`,
       SEARCH_PARAM_FILTER_BY_ID: `${searchParamFilterById}${urlSearchParamsSuffix}`,
-      SEARCH_PARAM_GROUP_BY_ID: `${searchParamGroupById}${urlSearchParamsSuffix}`,
       SEARCH_PARAM_SELECTED_COLUMNS_ID: `${searchParamSelectedColumnsId}${urlSearchParamsSuffix}`,
       SEARCH_PARAM_EXPANDED_GROUPS_ID: 'expandedGroups',
     };
-  }, [
-    id,
-    searchParamFilterById,
-    searchParamGroupById,
-    searchParamSelectedColumnsId,
-  ]);
+  }, [id, searchParamFilterById, searchParamSelectedColumnsId]);
 
   const { palette, spacing } = useTheme();
 
@@ -606,7 +592,7 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
   const {
     searchParams: {
       sortBy: searchParamSortBy = [],
-      groupBy: selectedGroupParams = [],
+      groupBy: searchParamGroupBy = [],
     },
     setSearchParams: setJSONSearchParams,
   } = useReactRouterDOMSearchParams({
@@ -658,7 +644,7 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
       {} as Record<keyof RecordRow, typeof groupableFields[number]>
     );
 
-    return selectedGroupParams
+    return searchParamGroupBy
       .filter(({ id }) => {
         return groupByParams[id];
       })
@@ -682,8 +668,6 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
   const searchParamFilterBy = searchParams.get(SEARCH_PARAM_FILTER_BY_ID) as
     | string
     | null;
-  const searchParamGroupBy =
-    (searchParams.get(SEARCH_PARAM_GROUP_BY_ID) as string) || null;
   const searchParamSelectedColumns =
     (searchParams.get(SEARCH_PARAM_SELECTED_COLUMNS_ID) as string) || null;
 
@@ -934,43 +918,41 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
 
   // Grouping data
   const groupedData = (() => {
-    if (searchParamGroupBy && groupableFields) {
-      if (activeGroupParams.length > 0) {
-        const groupParams = [...activeGroupParams];
-        const currentGroupParams = groupParams.shift()!;
-        const { id, getGroupLabel } = currentGroupParams;
-        const groupableData = getGroupableDataRef.current
-          ? getGroupableDataRef.current(filteredData, currentGroupParams)
-          : filteredData;
-        return groupableData
-          .reduce((accumulator, row: any) => {
-            let existingGroup = accumulator.find(({ groupName }) => {
-              return (
-                (row[id] == null && groupName === '') ||
-                (row[id] != null && groupName === String(row[id]))
-              );
-            })!;
-            if (!existingGroup) {
-              existingGroup = {
-                ...row,
-                groupName: row[id] != null ? String(row[id]) : '',
-              };
-              accumulator.push(existingGroup);
-            }
-            existingGroup.children ?? (existingGroup.children = []);
-            existingGroup.children.push(row);
-            return accumulator;
-          }, [] as DataGroup<RecordRow>[])
-          .map((group) => {
-            return {
-              ...group,
-              label: getGroupLabel ? getGroupLabel(group) : group.groupName,
+    if (activeGroupParams.length > 0) {
+      const groupParams = [...activeGroupParams];
+      const currentGroupParams = groupParams.shift()!;
+      const { id, getGroupLabel } = currentGroupParams;
+      const groupableData = getGroupableDataRef.current
+        ? getGroupableDataRef.current(filteredData, currentGroupParams)
+        : filteredData;
+      return groupableData
+        .reduce((accumulator, row: any) => {
+          let existingGroup = accumulator.find(({ groupName }) => {
+            return (
+              (row[id] == null && groupName === '') ||
+              (row[id] != null && groupName === String(row[id]))
+            );
+          })!;
+          if (!existingGroup) {
+            existingGroup = {
+              ...row,
+              groupName: row[id] != null ? String(row[id]) : '',
             };
-          })
-          .sort((a, b) => {
-            return sort(a, b, [currentGroupParams as any]);
-          });
-      }
+            accumulator.push(existingGroup);
+          }
+          existingGroup.children ?? (existingGroup.children = []);
+          existingGroup.children.push(row);
+          return accumulator;
+        }, [] as DataGroup<RecordRow>[])
+        .map((group) => {
+          return {
+            ...group,
+            label: getGroupLabel ? getGroupLabel(group) : group.groupName,
+          };
+        })
+        .sort((a, b) => {
+          return sort(a, b, [currentGroupParams as any]);
+        });
     }
     return null;
   })();
@@ -1021,8 +1003,8 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
     setSearchParams(
       {
         [SEARCH_PARAM_FILTER_BY_ID]: null,
-        [SEARCH_PARAM_GROUP_BY_ID]: null,
         sortBy: null,
+        groupBy: null,
         [SEARCH_TERM_SEARCH_PARAM_KEY]: null,
         [SEARCH_PARAM_SELECTED_COLUMNS_ID]: null,
       },
