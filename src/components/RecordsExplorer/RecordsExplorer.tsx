@@ -46,7 +46,6 @@ import {
 import { Link as RouterLink } from 'react-router-dom';
 
 import { useAuth } from '../../contexts/AuthContext';
-import { useLoadOnScrollToBottom } from '../../hooks/InfiniteScroller';
 import { useReactRouterDOMSearchParams } from '../../hooks/ReactRouterDOM';
 import {
   SelectedSortOption,
@@ -213,14 +212,6 @@ export interface RecordsExplorerProps<RecordRow extends BaseDataRow = any>
    */
   noLimit?: boolean;
   /**
-   * Determines if the limit should be extended when the user scrolls to the bottom.
-   */
-  loadMoreOnScrollToBottom?: boolean;
-  /**
-   * The scrollable body element to track to determine if user scrolled to the bottom.
-   */
-  bodyElement?: HTMLDivElement | null;
-  /**
    * Extra props to be assigned to the Header component.
    */
   HeaderProps?: Partial<PaperProps>;
@@ -341,8 +332,6 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
     ViewOptionsButtonProps,
     limit: limitProp = 10,
     noLimit = false,
-    loadMoreOnScrollToBottom = false,
-    bodyElement,
     onChangeFilteredData,
     filterFields: filterFieldsProp,
     filterBy,
@@ -461,7 +450,6 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
 
   const [viewType, setViewType] = useState<ViewOptionType>('List');
 
-  const [displayingData, setDisplayingData] = useState<RecordRow[]>([]);
   const [processingDisplayData, setProcessingDisplayData] = useState(false);
 
   const [limit, setLimit] = useState(limitProp);
@@ -1226,26 +1214,8 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
   }, [filteredData]);
 
   useEffect(() => {
-    setDisplayingData(noLimit ? filteredData : filteredData.slice(0, limit));
-  }, [filteredData, limit, noLimit]);
-
-  useEffect(() => {
     setProcessingDisplayData(true);
   }, [data]);
-
-  /**
-   * Loads more records based on the specified limit.
-   */
-  const loadMoreRows = () => {
-    setSearchParamsRef.current(
-      {
-        [LIMIT_SEARCH_PARAM_KEY]: String(limit + limitProp),
-      },
-      {
-        replace: true,
-      }
-    );
-  };
 
   const resetToDefaultView = () => {
     setSearchParams(
@@ -1262,15 +1232,6 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
     );
     setDefaultFilterByRef.current();
   };
-
-  const hiddenResourcesCount = filteredData.length - displayingData.length;
-
-  useLoadOnScrollToBottom({
-    element: bodyElement || undefined,
-    shouldLoadOnScroll: loadMoreOnScrollToBottom && hiddenResourcesCount > 0,
-    load: () => loadMoreRows(),
-    bottomThreshold: 200,
-  });
 
   const viewElement = (() => {
     if (views) {
@@ -1652,7 +1613,7 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
                       {...baseTableProps}
                       {...tableControlProps}
                       columns={baseTableColumns}
-                      rows={displayingData}
+                      rows={filteredData}
                       stickyHeader
                       sx={{
                         minWidth,
@@ -1682,7 +1643,7 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
               selectedView,
               'type'
             ) as TimelineView<RecordRow>;
-            return <TimelineChart rows={displayingData} {...viewProps} />;
+            return <TimelineChart rows={filteredData} {...viewProps} />;
           }
         }
       }
@@ -1889,7 +1850,7 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
         }}
       >
         {(() => {
-          if (displayingData.length <= 0) {
+          if (filteredData.length <= 0) {
             return (
               <IconLoadingScreen
                 {...{
@@ -1900,7 +1861,7 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
                   load,
                 }}
                 {...IconLoadingScreenProps}
-                recordsCount={displayingData.length}
+                recordsCount={filteredData.length}
                 loading={loading || processingDisplayData}
               />
             );
@@ -1911,47 +1872,13 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
           if (typeof children === 'function') {
             return children({
               viewType,
-              data: displayingData,
+              data: filteredData,
               headerHeight: headerElementRef.current?.offsetHeight,
             });
           }
           return children;
         })()}
       </Box>
-      {!noLimit && hiddenResourcesCount > 0 && !loadMoreOnScrollToBottom ? (
-        <Box
-          className="show-more-button-container"
-          sx={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: 40,
-            pointerEvents: 'none',
-            opacity: 0,
-          }}
-        >
-          <Button
-            variant="contained"
-            color="inherit"
-            onClick={loadMoreRows}
-            sx={{
-              pointerEvents: 'auto',
-              fontSize: 12,
-              fontWeight: 'normal',
-              height: 24,
-            }}
-          >
-            Show more {hiddenResourcesCount}{' '}
-            {hiddenResourcesCount === 1
-              ? lowercaseRecordLabelSingular
-              : lowercaseRecordLabelPlural}
-          </Button>
-        </Box>
-      ) : null}
       {filteredData.length > 0 ? (
         <Paper
           elevation={0}
