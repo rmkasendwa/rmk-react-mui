@@ -37,8 +37,7 @@ const dataSet = Array.from({ length: 500 }).map((_, index) => {
   } as Contact;
 });
 
-export const Default = Template.bind({});
-Default.args = {
+const baseArgs = {
   data: dataSet,
   views: [
     {
@@ -55,4 +54,15 @@ Default.args = {
     },
   ],
   recordLabelPlural: 'Contacts',
+} as RecordsExplorerProps;
+
+export const Default = Template.bind({});
+Default.args = {
+  ...baseArgs,
+} as RecordsExplorerProps;
+
+export const Timeline = Template.bind({});
+Timeline.args = {
+  ...baseArgs,
+  view: 'Timeline',
 } as RecordsExplorerProps;

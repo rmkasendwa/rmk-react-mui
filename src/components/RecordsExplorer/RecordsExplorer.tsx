@@ -175,8 +175,10 @@ export interface RecordsExplorerFunctionChildren<State> {
   (state: State): ReactNode;
 }
 
-export interface RecordsExplorerProps<RecordRow extends BaseDataRow = any>
-  extends Partial<Omit<PaperProps, 'title' | 'children'>>,
+export interface RecordsExplorerProps<
+  RecordRow extends BaseDataRow = any,
+  View extends ViewOptionType = ViewOptionType
+> extends Partial<Omit<PaperProps, 'title' | 'children'>>,
     Partial<Pick<FixedHeaderContentAreaProps, 'title'>> {
   rows?: RecordRow[];
   title?: ReactNode;
@@ -224,6 +226,7 @@ export interface RecordsExplorerProps<RecordRow extends BaseDataRow = any>
    * List of predefined data views to render input data.
    */
   views?: DataView<RecordRow>[];
+  view?: View;
   /**
    * Page path to create a new data record.
    */
@@ -279,8 +282,11 @@ const slots = {
   root: ['root'],
 };
 
-export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
-  inProps: RecordsExplorerProps<RecordRow>,
+export const BaseRecordsExplorer = <
+  RecordRow extends BaseDataRow,
+  View extends ViewOptionType = ViewOptionType
+>(
+  inProps: RecordsExplorerProps<RecordRow, View>,
   ref: Ref<HTMLDivElement>
 ) => {
   const props = useThemeProps({ props: inProps, name: 'MuiRecordsExplorer' });
@@ -304,6 +310,7 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
     groupableFields: groupableFieldsProp,
     groupBy,
     views,
+    view: viewProp,
     pathToAddNew,
     permissionToAddNew,
     hideAddNewButtonOnNoFilteredData = false,
@@ -624,7 +631,15 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
     }),
   });
 
-  const viewType = searchParamView || 'List';
+  const viewType = (() => {
+    if (searchParamView) {
+      return searchParamView as View;
+    }
+    if (viewProp && !modifiedStateKeys.includes('view')) {
+      return viewProp;
+    }
+    return 'List' as View;
+  })();
 
   const activeSortParams = (() => {
     const sortByParams = sortableFields.reduce((accumulator, sortByParam) => {
@@ -1630,9 +1645,10 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
 };
 
 export const RecordsExplorer = forwardRef(BaseRecordsExplorer) as <
-  RecordRow extends BaseDataRow
+  RecordRow extends BaseDataRow,
+  View extends ViewOptionType = ViewOptionType
 >(
-  p: RecordsExplorerProps<RecordRow> & { ref?: Ref<HTMLDivElement> }
+  p: RecordsExplorerProps<RecordRow, View> & { ref?: Ref<HTMLDivElement> }
 ) => ReactElement;
 
 export default RecordsExplorer;
