@@ -275,7 +275,6 @@ export const PaginatedDropdownOptionList = forwardRef<
     },
     {
       loadOnMount: false,
-      autoSync: false,
       key: dataKey,
       limit: limitProp,
       loadedPagesMap: asyncOptionPagesMap,

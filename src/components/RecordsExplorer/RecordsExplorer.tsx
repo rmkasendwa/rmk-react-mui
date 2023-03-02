@@ -1,5 +1,7 @@
 import '@infinite-debugger/rmk-js-extensions/JSON';
 
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import LockResetIcon from '@mui/icons-material/LockReset';
 import {
   Badge,
@@ -61,12 +63,15 @@ import DataTablePagination from '../DataTablePagination';
 import FixedHeaderContentArea, {
   FixedHeaderContentAreaProps,
 } from '../FixedHeaderContentArea';
-import { IconLoadingScreenProps } from '../IconLoadingScreen';
+import IconLoadingScreen, {
+  IconLoadingScreenProps,
+} from '../IconLoadingScreen';
 import RenderIfVisible from '../RenderIfVisible';
 import SearchSyncToolbar from '../SearchSyncToolbar';
 import Table, { TableProps, tableClasses } from '../Table';
 import TimelineChart, { TimelineChartProps } from '../TimelineChart';
 import FilterButton from './FilterButton';
+import GroupButton from './GroupButton';
 import {
   ConditionGroup,
   DataFilterField,
@@ -76,8 +81,12 @@ import {
   GroupableField,
   SearchableProperty,
 } from './interfaces';
+import SortButton from './SortButton';
 import { getSortParamsFromEncodedString } from './utils';
-import { ViewOptionType, ViewOptionsButtonProps } from './ViewOptionsButton';
+import ViewOptionsButton, {
+  ViewOptionType,
+  ViewOptionsButtonProps,
+} from './ViewOptionsButton';
 
 export interface RecordsExplorerClasses {
   /** Styles applied to the root element. */
@@ -321,7 +330,13 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
     title,
     sx,
     fillContentArea = true,
+    load,
+    loading,
+    errorMessage,
     recordLabelPlural = 'Records',
+    HeaderProps = {},
+    BodyProps = {},
+    IconLoadingScreenProps = {},
     data,
     ViewOptionsButtonProps,
     limit: limitProp = 10,
@@ -370,10 +385,14 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
   const lowercaseRecordLabelPlural = recordLabelPlural.toLowerCase();
   const lowercaseRecordLabelSingular = recordLabelSingular.toLowerCase();
 
+  const { sx: headerPropsSx, ...headerPropsRest } = HeaderProps;
+  const { sx: bodyPropsSx, ...bodyPropsRest } = BodyProps;
+
   const { searchParams, setSearchParams } = useReactRouterDOMSearchParams();
 
   // Refs
   const isInitialMountRef = useRef(true);
+  const headerElementRef = useRef<HTMLDivElement | null>(null);
   const setSearchParamsRef = useRef(setSearchParams);
   const filterBySearchTermRef = useRef(filterBySearchTerm);
   const searchableFieldsRef = useRef(searchableFieldsProp);
@@ -1768,16 +1787,36 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
                       getGroupableData,
                       id,
                     }}
+                    selectedGroupParams={activeGroupParams}
+                    onChangeSelectedGroupParams={(groupParams) => {
+                      setSelectedGroupParams(groupParams);
+                    }}
                   />
                 );
               }
 
               if (sortableFields) {
-                tools.push(<SortButton {...{ sortableFields, sortBy, id }} />);
+                tools.push(
+                  <SortButton
+                    {...{ sortableFields, sortBy, id }}
+                    selectedSortParams={activeSortParams}
+                    onChangeSelectedSortParams={(sortParams) => {
+                      setSelectedSortParams(sortParams);
+                    }}
+                  />
+                );
               }
 
               if (filterFields) {
-                tools.push(<FilterButton {...{ data, filterFields, id }} />);
+                tools.push(
+                  <FilterButton
+                    {...{ data, filterFields, id }}
+                    selectedConditionGroup={activeConditionGroup}
+                    onChangeSelectedConditionGroup={(conditionGroup) => {
+                      setSelectedConditionGroup(conditionGroup);
+                    }}
+                  />
+                );
               }
 
               if (
@@ -1802,7 +1841,6 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
 
               return tools;
             })(),
-            ...Children.toArray(tools),
           ]}
           onChangeSearchTerm={(searchTerm: string) => {
             setSearchParams(
