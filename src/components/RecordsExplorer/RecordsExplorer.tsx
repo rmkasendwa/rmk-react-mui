@@ -119,8 +119,6 @@ declare module '@mui/material/styles/components' {
   }
 }
 
-const LIST_VIEW_TYPES: ViewOptionType[] = ['List', 'Timeline'];
-
 const PRIMITIVE_DATA_TYPES: PrimitiveDataType[] = [
   'boolean',
   'date',
@@ -199,18 +197,6 @@ export interface RecordsExplorerProps<RecordRow extends BaseDataRow = any>
    * Extra props to be assigned to the ViewOptionsButton component.
    */
   ViewOptionsButtonProps?: Partial<ViewOptionsButtonProps>;
-  /**
-   * The limit to be used to trancate the displayed data.
-   *
-   * @default 10
-   */
-  limit?: number;
-  /**
-   * Determines if the limit property is active or not. If true, all records will be rendered.
-   *
-   * @default false
-   */
-  noLimit?: boolean;
   /**
    * Extra props to be assigned to the Header component.
    */
@@ -330,8 +316,6 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
     IconLoadingScreenProps = {},
     data,
     ViewOptionsButtonProps,
-    limit: limitProp = 10,
-    noLimit = false,
     onChangeFilteredData,
     filterFields: filterFieldsProp,
     filterBy,
@@ -416,7 +400,6 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
   // URL Search params
   const {
     SEARCH_TERM_SEARCH_PARAM_KEY,
-    LIMIT_SEARCH_PARAM_KEY,
     SEARCH_PARAM_FILTER_BY_ID,
     SEARCH_PARAM_SORT_BY_ID,
     SEARCH_PARAM_GROUP_BY_ID,
@@ -431,7 +414,6 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
     })();
     return {
       SEARCH_TERM_SEARCH_PARAM_KEY: `search${urlSearchParamsSuffix}`,
-      LIMIT_SEARCH_PARAM_KEY: `limit${urlSearchParamsSuffix}`,
       SEARCH_PARAM_FILTER_BY_ID: `${searchParamFilterById}${urlSearchParamsSuffix}`,
       SEARCH_PARAM_SORT_BY_ID: `${searchParamSortById}${urlSearchParamsSuffix}`,
       SEARCH_PARAM_GROUP_BY_ID: `${searchParamGroupById}${urlSearchParamsSuffix}`,
@@ -452,7 +434,6 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
 
   const [processingDisplayData, setProcessingDisplayData] = useState(false);
 
-  const [limit, setLimit] = useState(limitProp);
   const [expandedGroups, setExpandedGroups] = useState<string[]>([]);
   const [allGroupsExpanded, setAllGroupsExpanded] = useState(false);
 
@@ -633,9 +614,6 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
   const searchParamSearchTerm = searchParams.get(
     SEARCH_TERM_SEARCH_PARAM_KEY
   ) as string | null;
-  const searchParamLimit = searchParams.get(LIMIT_SEARCH_PARAM_KEY) as
-    | string
-    | null;
   const searchParamExpandedGroups = searchParams.get(
     SEARCH_PARAM_EXPANDED_GROUPS_ID
   ) as string | null;
@@ -651,8 +629,6 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
     (searchParams.get(SEARCH_PARAM_GROUP_BY_ID) as string) || null;
   const searchParamSelectedColumns =
     (searchParams.get(SEARCH_PARAM_SELECTED_COLUMNS_ID) as string) || null;
-
-  const isListViewType = LIST_VIEW_TYPES.includes(viewType);
 
   const { loggedInUserHasPermission } = useAuth();
 
@@ -1140,37 +1116,6 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
       isInitialMountRef.current = true;
     };
   }, []);
-
-  // Search param `limit` transfer.
-  useEffect(() => {
-    if (noLimit) {
-      setSearchParamsRef.current(
-        {
-          [LIMIT_SEARCH_PARAM_KEY]: null,
-        },
-        {
-          replace: true,
-        }
-      );
-    } else {
-      if (
-        searchParamLimit &&
-        searchParamLimit.match(/^\d+$/g) &&
-        parseInt(searchParamLimit) >= limitProp
-      ) {
-        setLimit(parseInt(searchParamLimit));
-      } else {
-        setSearchParamsRef.current(
-          {
-            [LIMIT_SEARCH_PARAM_KEY]: String(limitProp),
-          },
-          {
-            replace: true,
-          }
-        );
-      }
-    }
-  }, [LIMIT_SEARCH_PARAM_KEY, limitProp, noLimit, searchParamLimit]);
 
   // Search param `expandedGroups` transfer.
   useEffect(() => {
@@ -1876,7 +1821,6 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
         >
           <Divider />
           <DataTablePagination
-            rowsPerPage={!noLimit && isListViewType ? limit : undefined}
             labelPlural={lowercaseRecordLabelPlural}
             lowercaseLabelPlural={lowercaseRecordLabelPlural}
             labelSingular={lowercaseRecordLabelSingular}
