@@ -23,7 +23,13 @@ export function useReactRouterDOMSearchParams<TShape extends ObjectShape>({
   validator: OptionalObjectSchema<TShape, AnyObject, TypeOfShape<TShape>>;
 }): {
   searchParams: Partial<InferType<typeof validator>>;
-  setSearchParams: SetSearchParams<Partial<InferType<typeof validator>>>;
+  setSearchParams: SetSearchParams<
+    Partial<{
+      [K in keyof InferType<typeof validator>]:
+        | InferType<typeof validator>[K]
+        | null;
+    }>
+  >;
 };
 
 export function useReactRouterDOMSearchParams(options: { mode?: 'string' }): {
