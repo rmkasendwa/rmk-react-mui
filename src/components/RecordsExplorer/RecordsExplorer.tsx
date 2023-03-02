@@ -84,7 +84,6 @@ import {
   SearchableProperty,
 } from './interfaces';
 import SortButton from './SortButton';
-import { getSortParamsFromEncodedString } from './utils';
 import ViewOptionsButton, {
   ViewOptionType,
   ViewOptionsButtonProps,
@@ -212,10 +211,6 @@ export interface RecordsExplorerProps<RecordRow extends BaseDataRow = any>
    * Function to be called whenever the input data is filtered.
    */
   onChangeFilteredData?: (filteredData: RecordRow[]) => void;
-  /**
-   * Function to be called whenever filters are cleared.
-   */
-  onClearFilters?: () => void;
   /**
    * List of predefined data views to render input data.
    */
@@ -434,7 +429,7 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
   const {
     filterFields,
     sortableFields = [],
-    groupableFields,
+    groupableFields = [],
     searchableFields,
   } = useMemo(() => {
     // Resolving groupable fields
@@ -609,7 +604,10 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
   }, []);
 
   const {
-    searchParams: { sortBy: searchParamSortBy = [] },
+    searchParams: {
+      sortBy: searchParamSortBy = [],
+      groupBy: selectedGroupParams = [],
+    },
     setSearchParams: setJSONSearchParams,
   } = useReactRouterDOMSearchParams({
     mode: 'json',
@@ -622,19 +620,24 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
             .oneOf([...sortDirections]),
         })
       ),
+      groupBy: Yup.array().of(
+        Yup.object({
+          id: Yup.mixed<keyof RecordRow>().required(),
+          sortDirection: Yup.mixed<SortDirection>()
+            .required()
+            .oneOf([...sortDirections]),
+        })
+      ),
     }),
   });
 
   const activeSortParams = (() => {
-    const sortByParams = searchParamSortBy.reduce(
-      (accumulator, sortByParam) => {
-        accumulator[sortByParam.id] = sortByParam;
-        return accumulator;
-      },
-      {} as Record<keyof RecordRow, typeof searchParamSortBy[number]>
-    );
+    const sortByParams = sortableFields.reduce((accumulator, sortByParam) => {
+      accumulator[sortByParam.id] = sortByParam;
+      return accumulator;
+    }, {} as Record<keyof RecordRow, typeof sortableFields[number]>);
 
-    return sortableFields
+    return searchParamSortBy
       .filter(({ id }) => {
         return sortByParams[id];
       })
@@ -646,7 +649,26 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
       });
   })();
 
-  console.log({ activeSortParams });
+  const activeGroupParams = (() => {
+    const groupByParams = groupableFields.reduce(
+      (accumulator, groupByParam) => {
+        accumulator[groupByParam.id] = groupByParam;
+        return accumulator;
+      },
+      {} as Record<keyof RecordRow, typeof groupableFields[number]>
+    );
+
+    return selectedGroupParams
+      .filter(({ id }) => {
+        return groupByParams[id];
+      })
+      .map((groupByParam) => {
+        return {
+          ...groupByParam,
+          ...groupByParams[groupByParam.id],
+        };
+      });
+  })();
 
   const searchParamSearchTerm = searchParams.get(
     SEARCH_TERM_SEARCH_PARAM_KEY
@@ -666,10 +688,6 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
     (searchParams.get(SEARCH_PARAM_SELECTED_COLUMNS_ID) as string) || null;
 
   const { loggedInUserHasPermission } = useAuth();
-
-  const [groupedData, setGroupedData] = useState<DataGroup<RecordRow>[] | null>(
-    null
-  );
 
   // Filter fields state
   const baseConditionGroup = useMemo(() => {
@@ -772,96 +790,6 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
       }
     }
   }, [SEARCH_PARAM_FILTER_BY_ID, selectedConditionGroup]);
-
-  /****************************************
-   * Group params
-   ****************************************/
-  const [activeGroupParams, setActiveGroupParams] = useState<
-    SelectedSortOption<RecordRow>[]
-  >([]);
-  const [selectedGroupParams, setSelectedGroupParams] = useState<
-    SelectedSortOption<RecordRow>[]
-  >([]);
-
-  // Setting default group params
-  useEffect(() => {
-    if (
-      isInitialMountRef.current &&
-      !searchParamGroupBy &&
-      groupableFields &&
-      groupBy
-    ) {
-      setActiveGroupParams((prevSelectedGroupParams) => {
-        if (
-          groupBy.map(({ id }) => id).join(',') !==
-          prevSelectedGroupParams.map(({ id }) => id).join(',')
-        ) {
-          return groupBy
-            .map((groupBy) => {
-              const { id } = groupBy;
-              return [
-                groupableFields.find(({ id: currentId }) => currentId === id)!,
-                groupBy,
-              ];
-            })
-            .filter(([selectedGroupParam]) => selectedGroupParam != null)
-            .map(([selectedGroupParam, { sortDirection }]) => {
-              return {
-                ...selectedGroupParam,
-                sortDirection: sortDirection || 'ASC',
-              } as SelectedSortOption<RecordRow>;
-            });
-        }
-        return prevSelectedGroupParams;
-      });
-    }
-  }, [searchParamGroupBy, groupBy, groupableFields]);
-
-  useEffect(() => {
-    if (searchParamGroupBy && groupableFields) {
-      setActiveGroupParams(
-        getSortParamsFromEncodedString<RecordRow>(
-          searchParamGroupBy,
-          groupableFields
-        )
-      );
-    } else if (!isInitialMountRef.current) {
-      setActiveGroupParams([]);
-    }
-  }, [searchParamGroupBy, groupableFields]);
-
-  useEffect(() => {
-    if (!isInitialMountRef.current) {
-      if (selectedGroupParams.length > 0) {
-        setSearchParamsRef.current(
-          {
-            [SEARCH_PARAM_GROUP_BY_ID]: selectedGroupParams
-              .map(({ id, sortDirection }) => {
-                return encodeURIComponent(
-                  `${String(id)}|${sortDirection || 'ASC'}`
-                );
-              })
-              .join(','),
-          },
-          {
-            replace: true,
-          }
-        );
-      } else {
-        setSearchParamsRef.current(
-          {
-            [SEARCH_PARAM_GROUP_BY_ID]: null,
-            [SEARCH_PARAM_EXPANDED_GROUPS_ID]: null,
-          },
-          { replace: true }
-        );
-      }
-    }
-  }, [
-    SEARCH_PARAM_EXPANDED_GROUPS_ID,
-    SEARCH_PARAM_GROUP_BY_ID,
-    selectedGroupParams,
-  ]);
 
   // Processing data
   const filteredData = (() => {
@@ -1005,59 +933,47 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
   })();
 
   // Grouping data
-  useEffect(() => {
-    const groupedData = (() => {
-      if (searchParamGroupBy && groupableFields) {
-        const activeGroupParams = getSortParamsFromEncodedString(
-          searchParamGroupBy,
-          groupableFields
-        );
-        if (activeGroupParams.length > 0) {
-          const groupParams = activeGroupParams.map((groupParam) => {
-            return {
-              ...groupableFields!.find(({ id }) => id == groupParam.id)!,
-              ...groupParam,
-            };
-          });
-          const currentGroupParams = groupParams.shift()!;
-          const { id, getGroupLabel } = currentGroupParams;
-          const groupableData = getGroupableDataRef.current
-            ? getGroupableDataRef.current(filteredData, currentGroupParams)
-            : filteredData;
-          return groupableData
-            .reduce((accumulator, row: any) => {
-              let existingGroup = accumulator.find(({ groupName }) => {
-                return (
-                  (row[id] == null && groupName === '') ||
-                  (row[id] != null && groupName === String(row[id]))
-                );
-              })!;
-              if (!existingGroup) {
-                existingGroup = {
-                  ...row,
-                  groupName: row[id] != null ? String(row[id]) : '',
-                };
-                accumulator.push(existingGroup);
-              }
-              existingGroup.children ?? (existingGroup.children = []);
-              existingGroup.children.push(row);
-              return accumulator;
-            }, [] as DataGroup<RecordRow>[])
-            .map((group) => {
-              return {
-                ...group,
-                label: getGroupLabel ? getGroupLabel(group) : group.groupName,
+  const groupedData = (() => {
+    if (searchParamGroupBy && groupableFields) {
+      if (activeGroupParams.length > 0) {
+        const groupParams = [...activeGroupParams];
+        const currentGroupParams = groupParams.shift()!;
+        const { id, getGroupLabel } = currentGroupParams;
+        const groupableData = getGroupableDataRef.current
+          ? getGroupableDataRef.current(filteredData, currentGroupParams)
+          : filteredData;
+        return groupableData
+          .reduce((accumulator, row: any) => {
+            let existingGroup = accumulator.find(({ groupName }) => {
+              return (
+                (row[id] == null && groupName === '') ||
+                (row[id] != null && groupName === String(row[id]))
+              );
+            })!;
+            if (!existingGroup) {
+              existingGroup = {
+                ...row,
+                groupName: row[id] != null ? String(row[id]) : '',
               };
-            })
-            .sort((a, b) => {
-              return sort(a, b, [currentGroupParams as any]);
-            });
-        }
+              accumulator.push(existingGroup);
+            }
+            existingGroup.children ?? (existingGroup.children = []);
+            existingGroup.children.push(row);
+            return accumulator;
+          }, [] as DataGroup<RecordRow>[])
+          .map((group) => {
+            return {
+              ...group,
+              label: getGroupLabel ? getGroupLabel(group) : group.groupName,
+            };
+          })
+          .sort((a, b) => {
+            return sort(a, b, [currentGroupParams as any]);
+          });
       }
-      return null;
-    })();
-    setGroupedData(groupedData);
-  }, [filteredData, groupableFields, searchParamGroupBy]);
+    }
+    return null;
+  })();
 
   // Initial mount ref
   useEffect(() => {
@@ -1636,7 +1552,19 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
                     }}
                     selectedGroupParams={activeGroupParams}
                     onChangeSelectedGroupParams={(groupParams) => {
-                      setSelectedGroupParams(groupParams);
+                      setJSONSearchParams(
+                        {
+                          groupBy: groupParams.map(({ id, sortDirection }) => {
+                            return {
+                              id,
+                              sortDirection,
+                            };
+                          }),
+                        },
+                        {
+                          replace: true,
+                        }
+                      );
                     }}
                   />
                 );
