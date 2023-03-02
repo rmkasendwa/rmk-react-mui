@@ -50,6 +50,9 @@ Default.args = {
         { id: 'email', label: 'Email', type: 'email' },
       ],
     },
+    {
+      type: 'Timeline',
+    },
   ],
   recordLabelPlural: 'Contacts',
 } as RecordsExplorerProps;

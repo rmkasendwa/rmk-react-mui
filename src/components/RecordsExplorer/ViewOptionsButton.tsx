@@ -24,17 +24,9 @@ import {
 } from '@mui/material';
 import { ButtonProps } from '@mui/material/Button';
 import clsx from 'clsx';
-import {
-  ReactNode,
-  forwardRef,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { ReactNode, forwardRef, useMemo, useRef, useState } from 'react';
 import { mergeRefs } from 'react-merge-refs';
 
-import { useReactRouterDOMSearchParams } from '../../hooks/ReactRouterDOM';
 import PaginatedDropdownOptionList, {
   DropdownOption,
 } from '../PaginatedDropdownOptionList';
@@ -71,7 +63,9 @@ declare module '@mui/material/styles/components' {
   }
 }
 
-export type ViewOptionType = 'Timeline' | 'Grid' | 'List';
+export const viewOptionTypes = ['Timeline', 'Grid', 'List'] as const;
+
+export type ViewOptionType = typeof viewOptionTypes[number];
 
 export interface ViewOption {
   label: ViewOptionType;
@@ -88,10 +82,9 @@ const DEFAULT_VIEW_OPTIONS_TYPES = viewOptions.map(({ label }) => label);
 
 export interface ViewOptionsButtonProps extends ButtonProps {
   onChangeViewType?: (viewType: ViewOptionType) => void;
-  defaultViewType?: ViewOptionType;
+  viewType?: ViewOptionType;
   viewOptionTypes?: ViewOptionType[];
   expandedIfHasLessOptions?: boolean;
-  id?: string;
 }
 
 export function getViewOptionsButtonUtilityClass(slot: string): string {
@@ -113,10 +106,9 @@ export const ViewOptionsButton = forwardRef<
   const {
     className,
     onChangeViewType,
-    defaultViewType = 'List',
+    viewType = 'List',
     viewOptionTypes = DEFAULT_VIEW_OPTIONS_TYPES,
     expandedIfHasLessOptions = false,
-    id,
     ...rest
   } = props;
 
@@ -132,28 +124,9 @@ export const ViewOptionsButton = forwardRef<
     })()
   );
 
-  // URL Search params
-  const { VIEW_SEARCH_PARAM_KEY } = useMemo(() => {
-    const urlSearchParamsSuffix = (() => {
-      if (id) {
-        return `:${id}`;
-      }
-      return '';
-    })();
-    return {
-      VIEW_SEARCH_PARAM_KEY: `view${urlSearchParamsSuffix}`,
-    };
-  }, [id]);
-
   const { palette } = useTheme();
   const anchorRef = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
-  const [viewType, setViewType] = useState<ViewOptionType>(defaultViewType);
-
-  const { searchParams, setSearchParams } = useReactRouterDOMSearchParams();
-  const searchParamView = searchParams.get(
-    VIEW_SEARCH_PARAM_KEY
-  ) as ViewOptionType | null;
 
   const options = useMemo(() => {
     return viewOptionTypes
@@ -193,20 +166,6 @@ export const ViewOptionsButton = forwardRef<
 
   const handleClose = () => setOpen(false);
 
-  useEffect(() => {
-    if (searchParamView) {
-      setViewType(searchParamView);
-    } else {
-      setViewType(defaultViewType);
-    }
-  }, [VIEW_SEARCH_PARAM_KEY, defaultViewType, searchParamView, setSearchParams]);
-
-  useEffect(() => {
-    if (onChangeViewType) {
-      onChangeViewType(viewType);
-    }
-  }, [onChangeViewType, viewType]);
-
   if (options.length <= 1) {
     return null;
   }
@@ -222,14 +181,7 @@ export const ViewOptionsButton = forwardRef<
                 color="inherit"
                 variant="contained"
                 onClick={() => {
-                  setSearchParams(
-                    {
-                      [VIEW_SEARCH_PARAM_KEY]: viewTypeDisplay,
-                    },
-                    {
-                      replace: true,
-                    }
-                  );
+                  onChangeViewType && onChangeViewType(value as any);
                 }}
                 sx={{
                   '&,&:hover': {
@@ -259,7 +211,14 @@ export const ViewOptionsButton = forwardRef<
 
   return (
     <>
-      <Tooltip title={`Layout and view options`} placement="top">
+      <Tooltip
+        title="Layout and view options"
+        PopperProps={{
+          sx: {
+            pointerEvents: 'none',
+          },
+        }}
+      >
         <Button
           ref={mergeRefs([anchorRef, ref])}
           {...rest}
@@ -270,7 +229,7 @@ export const ViewOptionsButton = forwardRef<
           onClick={() => setOpen(true)}
           sx={{ lineHeight: 1 }}
         >
-          View
+          {viewType}
         </Button>
       </Tooltip>
       <Popper
@@ -299,17 +258,8 @@ export const ViewOptionsButton = forwardRef<
                     }
                     onClose={handleClose}
                     selectedOptions={selectedOptions}
-                    onChangeSelectedOptions={(selectedOptions) => {
-                      setSearchParams(
-                        {
-                          [VIEW_SEARCH_PARAM_KEY]: String(
-                            selectedOptions[0].value
-                          ),
-                        },
-                        {
-                          replace: true,
-                        }
-                      );
+                    onSelectOption={({ value }) => {
+                      onChangeViewType && onChangeViewType(value as any);
                     }}
                   />
                 </ClickAwayListener>
