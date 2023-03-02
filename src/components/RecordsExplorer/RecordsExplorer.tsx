@@ -656,7 +656,6 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
 
   const { loggedInUserHasPermission } = useAuth();
 
-  const [filteredData, setFilteredData] = useState<RecordRow[]>([]);
   const [groupedData, setGroupedData] = useState<DataGroup<RecordRow>[] | null>(
     null
   );
@@ -939,7 +938,7 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
   ]);
 
   // Processing data
-  useEffect(() => {
+  const filteredData = (() => {
     // Filtering data
     const dataFilteredByFilterFields = (() => {
       if (filterFields) {
@@ -1076,18 +1075,8 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
       return filteredData;
     })();
 
-    setFilteredData(sortedData);
-  }, [
-    activeConditionGroup.conditions,
-    activeConditionGroup.conjunction,
-    activeSortParams,
-    data,
-    filterFields,
-    searchParamSortBy,
-    searchTerm,
-    searchableFields,
-    sortableFields,
-  ]);
+    return sortedData;
+  })();
 
   // Grouping data
   useEffect(() => {
