@@ -375,26 +375,21 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
   ]);
 
   // URL Search params
-  const { SEARCH_PARAM_FILTER_BY_ID, SEARCH_PARAM_EXPANDED_GROUPS_ID } =
-    useMemo(() => {
-      const urlSearchParamsSuffix = (() => {
-        if (id) {
-          return `:${id}`;
-        }
-        return '';
-      })();
-      return {
-        SEARCH_PARAM_FILTER_BY_ID: `${searchParamFilterById}${urlSearchParamsSuffix}`,
-        SEARCH_PARAM_EXPANDED_GROUPS_ID: 'expandedGroups',
-      };
-    }, [id, searchParamFilterById]);
+  const { SEARCH_PARAM_FILTER_BY_ID } = useMemo(() => {
+    const urlSearchParamsSuffix = (() => {
+      if (id) {
+        return `:${id}`;
+      }
+      return '';
+    })();
+    return {
+      SEARCH_PARAM_FILTER_BY_ID: `${searchParamFilterById}${urlSearchParamsSuffix}`,
+    };
+  }, [id, searchParamFilterById]);
 
   const { palette, spacing } = useTheme();
 
   const [processingDisplayData, setProcessingDisplayData] = useState(false);
-
-  const [expandedGroups, setExpandedGroups] = useState<string[]>([]);
-  const [allGroupsExpanded, setAllGroupsExpanded] = useState(false);
 
   // Resolving data operation fields
   const {
@@ -595,6 +590,7 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
       sortBy: searchParamSortBy = [],
       search: searchTerm,
       selectedColumns: searchParamSelectedColumns,
+      expandedGroups: searchParamExpandedGroups,
     },
     setSearchParams: setJSONSearchParams,
   } = useReactRouterDOMSearchParams({
@@ -619,6 +615,7 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
       ),
       search: Yup.string(),
       selectedColumns: Yup.array().of(Yup.string().required()),
+      expandedGroups: Yup.mixed<'All' | 'None' | string[]>(),
     }),
   });
 
@@ -665,10 +662,6 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
 
   const selectedColumnIds =
     searchParamSelectedColumns || baseSelectedColumnIds || [];
-
-  const searchParamExpandedGroups = searchParams.get(
-    SEARCH_PARAM_EXPANDED_GROUPS_ID
-  ) as string | null;
 
   const searchParamFilterBy = searchParams.get(SEARCH_PARAM_FILTER_BY_ID) as
     | string
@@ -929,25 +922,6 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
     };
   }, []);
 
-  // Search param `expandedGroups` transfer.
-  useEffect(() => {
-    if (!searchParamExpandedGroups || searchParamExpandedGroups === 'All') {
-      setExpandedGroups([]);
-      setAllGroupsExpanded(true);
-    } else {
-      setAllGroupsExpanded(false);
-      setExpandedGroups((prevGroups) => {
-        const nextGroups = searchParamExpandedGroups
-          .split(',')
-          .map((group) => decodeURIComponent(group));
-        if (nextGroups.join(',') !== prevGroups.join(',')) {
-          return nextGroups;
-        }
-        return prevGroups;
-      });
-    }
-  }, [searchParamExpandedGroups]);
-
   useEffect(() => {
     setProcessingDisplayData(false);
     if (onChangeFilteredDataRef.current) {
@@ -967,6 +941,7 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
         groupBy: null,
         search: null,
         selectedColumns: null,
+        expandedGroups: null,
         [SEARCH_PARAM_FILTER_BY_ID]: null,
       },
       {
@@ -975,6 +950,16 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
     );
     setDefaultFilterByRef.current();
   };
+
+  const allGroupsExpanded = Boolean(
+    !searchParamExpandedGroups || searchParamExpandedGroups === 'All'
+  );
+  const expandedGroups = (() => {
+    if (Array.isArray(searchParamExpandedGroups)) {
+      return searchParamExpandedGroups;
+    }
+    return [];
+  })();
 
   const viewElement = (() => {
     if (views) {
@@ -1153,10 +1138,11 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
                         >
                           <Box
                             onClick={() => {
-                              setSearchParams(
+                              setJSONSearchParams(
                                 {
-                                  [SEARCH_PARAM_EXPANDED_GROUPS_ID]:
-                                    allGroupsExpanded ? 'None' : 'All',
+                                  expandedGroups: allGroupsExpanded
+                                    ? 'None'
+                                    : 'All',
                                 },
                                 {
                                   replace: true,
@@ -1300,31 +1286,26 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
                                       } else {
                                         groups.includes(id) || groups.push(id);
                                       }
-                                      setSearchParams(
+                                      setJSONSearchParams(
                                         {
-                                          [SEARCH_PARAM_EXPANDED_GROUPS_ID]:
-                                            (() => {
-                                              if (groups.length > 0) {
-                                                if (
-                                                  groupedData.length ===
-                                                  groups.length
-                                                ) {
-                                                  return 'All';
-                                                }
-                                                groups.includes('None') &&
-                                                  groups.splice(
-                                                    groups.indexOf('None'),
-                                                    1
-                                                  );
-                                                return groups
-                                                  .map((group) =>
-                                                    encodeURIComponent(group)
-                                                  )
-                                                  .join(',');
-                                              } else {
-                                                return 'None';
+                                          expandedGroups: (() => {
+                                            if (groups.length > 0) {
+                                              if (
+                                                groupedData.length ===
+                                                groups.length
+                                              ) {
+                                                return 'All';
                                               }
-                                            })(),
+                                              groups.includes('None') &&
+                                                groups.splice(
+                                                  groups.indexOf('None'),
+                                                  1
+                                                );
+                                              return groups;
+                                            } else {
+                                              return 'None';
+                                            }
+                                          })(),
                                         },
                                         {
                                           replace: true,

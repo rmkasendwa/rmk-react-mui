@@ -5,6 +5,10 @@ import { BaseDataRow } from '../../interfaces/Table';
 import { GroupableField } from './interfaces';
 import SortOperationFieldSelector from './SortOperationFieldSelector';
 
+export const expandedGroupsOptions = ['All', 'None'] as const;
+
+export type ExpandedGroupsOption = typeof expandedGroupsOptions[number];
+
 export interface GroupButtonProps<RecordRow extends BaseDataRow = any> {
   groupableFields: GroupableField<RecordRow>[];
   getGroupableData?: (
