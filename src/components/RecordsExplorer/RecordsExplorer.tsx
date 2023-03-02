@@ -590,7 +590,7 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
 
   const {
     searchParams: {
-      view,
+      view: searchParamView,
       groupBy: searchParamGroupBy = [],
       sortBy: searchParamSortBy = [],
     },
@@ -618,7 +618,7 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
     }),
   });
 
-  const viewType = view || 'List';
+  const viewType = searchParamView || 'List';
 
   const activeSortParams = (() => {
     const sortByParams = sortableFields.reduce((accumulator, sortByParam) => {
@@ -1003,11 +1003,12 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
   }, [data]);
 
   const resetToDefaultView = () => {
-    setSearchParams(
+    setJSONSearchParams(
       {
-        [SEARCH_PARAM_FILTER_BY_ID]: null,
+        view: null,
         sortBy: null,
         groupBy: null,
+        [SEARCH_PARAM_FILTER_BY_ID]: null,
         [SEARCH_TERM_SEARCH_PARAM_KEY]: null,
         [SEARCH_PARAM_SELECTED_COLUMNS_ID]: null,
       },
@@ -1599,9 +1600,10 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
               }
 
               if (
-                searchParamFilterBy ||
+                searchParamView ||
                 searchParamGroupBy ||
                 searchParamSortBy ||
+                searchParamFilterBy ||
                 searchParamSelectedColumns ||
                 searchParamSearchTerm
               ) {
