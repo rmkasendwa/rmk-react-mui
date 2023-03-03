@@ -15,6 +15,7 @@ import Grid from '@mui/material/Grid';
 import { omit } from 'lodash';
 import {
   FC,
+  Fragment,
   MutableRefObject,
   ReactNode,
   isValidElement,
@@ -470,8 +471,8 @@ export const SearchSyncToolbar: FC<SearchSyncToolbarProps> = ({
                       }
                     )}
                   />
-                  {smallScreenTools.map(({ popupElement }) => {
-                    return popupElement;
+                  {smallScreenTools.map(({ popupElement }, index) => {
+                    return <Fragment key={index}>{popupElement}</Fragment>;
                   })}
                 </>
               );
