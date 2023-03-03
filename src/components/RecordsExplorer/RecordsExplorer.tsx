@@ -12,17 +12,14 @@ import {
   ComponentsVariants,
   Divider,
   Grid,
-  IconButton,
   Paper,
   PaperProps,
   Stack,
-  Tooltip,
   Typography,
   unstable_composeClasses as composeClasses,
   darken,
   generateUtilityClass,
   generateUtilityClasses,
-  gridClasses,
   lighten,
   tableCellClasses,
   tableContainerClasses,
@@ -376,7 +373,7 @@ export const BaseRecordsExplorer = <
     views,
   ]);
 
-  const { palette, spacing } = useTheme();
+  const { palette } = useTheme();
 
   // Resolving data operation fields
   const {
@@ -1543,30 +1540,28 @@ export const BaseRecordsExplorer = <
                 tools.push(viewOptionsTool);
               }
 
-              if (groupableFields) {
+              if (groupableFields.length > 0) {
                 tools.push(groupTool);
               }
 
-              if (sortableFields) {
+              if (sortableFields.length > 0) {
                 tools.push(sortTool);
               }
 
-              if (filterFields) {
+              if (filterFields.length > 0) {
                 tools.push(filterTool);
               }
 
               if (modifiedStateKeys.length > 0) {
-                tools.push(
-                  <Tooltip title="Reset to default view">
-                    <IconButton
-                      onClick={() => {
-                        resetToDefaultView();
-                      }}
-                    >
-                      <LockResetIcon />
-                    </IconButton>
-                  </Tooltip>
-                );
+                tools.push({
+                  label: 'Reset to default view',
+                  icon: <LockResetIcon />,
+                  onClick: () => {
+                    resetToDefaultView();
+                  },
+                  type: 'icon-button',
+                  alwaysShowOn: 'All Screens',
+                });
               }
 
               return tools;
@@ -1590,12 +1585,6 @@ export const BaseRecordsExplorer = <
           }}
           hasSearchTool={Boolean(searchableFields)}
           searchFieldOpen
-          sx={{
-            pr: `${spacing(1.75)} !important`,
-            [`&>.${gridClasses.container}`]: {
-              columnGap: 1,
-            },
-          }}
         />
         <Divider />
       </Paper>

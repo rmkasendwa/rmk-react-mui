@@ -5,19 +5,28 @@ import {
   Button,
   ButtonProps,
   ClickAwayListener,
+  ComponentsOverrides,
+  ComponentsProps,
+  ComponentsVariants,
   IconButton,
   IconButtonProps,
   Tooltip,
+  unstable_composeClasses as composeClasses,
+  generateUtilityClass,
+  generateUtilityClasses,
   useMediaQuery,
   useTheme,
+  useThemeProps,
 } from '@mui/material';
 import Grid from '@mui/material/Grid';
+import clsx from 'clsx';
 import { omit } from 'lodash';
 import {
-  FC,
+  Children,
   Fragment,
   MutableRefObject,
   ReactNode,
+  forwardRef,
   isValidElement,
   useEffect,
   useRef,
@@ -29,18 +38,55 @@ import LoadingTypography, { LoadingTypographyProps } from './LoadingTypography';
 import ReloadIconButton, { ReloadIconButtonProps } from './ReloadIconButton';
 import SearchField, { SearchFieldProps } from './SearchField';
 
+export interface SearchSyncToolbarClasses {
+  /** Styles applied to the root element. */
+  root: string;
+}
+
+export type SearchSyncToolbarClassKey = keyof SearchSyncToolbarClasses;
+
+// Adding theme prop types
+declare module '@mui/material/styles/props' {
+  interface ComponentsPropsList {
+    MuiSearchSyncToolbar: SearchSyncToolbarProps;
+  }
+}
+
+// Adding theme override types
+declare module '@mui/material/styles/overrides' {
+  interface ComponentNameToClassKey {
+    MuiSearchSyncToolbar: keyof SearchSyncToolbarClasses;
+  }
+}
+
+// Adding theme component types
+declare module '@mui/material/styles/components' {
+  interface Components<Theme = unknown> {
+    MuiSearchSyncToolbar?: {
+      defaultProps?: ComponentsProps['MuiSearchSyncToolbar'];
+      styleOverrides?: ComponentsOverrides<Theme>['MuiSearchSyncToolbar'];
+      variants?: ComponentsVariants['MuiSearchSyncToolbar'];
+    };
+  }
+}
+
+export interface BaseToolOptions {
+  alwaysShowOn?: 'Large Screen' | 'Small Screen' | 'All Screens';
+}
+
 export interface ButtonTool
   extends Pick<
-    ButtonProps,
-    | 'sx'
-    | 'onMouseDown'
-    | 'onClick'
-    | 'className'
-    | 'color'
-    | 'variant'
-    | 'endIcon'
-  > {
-  label?: ReactNode;
+      ButtonProps,
+      | 'sx'
+      | 'onMouseDown'
+      | 'onClick'
+      | 'className'
+      | 'color'
+      | 'variant'
+      | 'endIcon'
+    >,
+    BaseToolOptions {
+  label: ReactNode;
   title?: ReactNode;
   type: 'button';
   icon?: ReactNode;
@@ -50,10 +96,11 @@ export interface ButtonTool
 
 export interface IconButtonTool
   extends Pick<
-    IconButtonProps,
-    'sx' | 'onMouseDown' | 'onClick' | 'className' | 'color'
-  > {
-  label?: ReactNode;
+      IconButtonProps,
+      'sx' | 'onMouseDown' | 'onClick' | 'className' | 'color'
+    >,
+    BaseToolOptions {
+  label: ReactNode;
   title?: ReactNode;
   type: 'icon-button';
   icon?: ReactNode;
@@ -61,7 +108,7 @@ export interface IconButtonTool
   popupElement?: ReactNode;
 }
 
-export interface ElementTool {
+export interface ElementTool extends BaseToolOptions {
   element?: ReactNode;
 }
 
@@ -77,7 +124,7 @@ export const getToolNodes = (
       if (isValidElement(baseTool)) {
         return baseTool;
       } else {
-        const tool = baseTool as Tool;
+        const tool = omit(baseTool as Tool, 'alwaysShowOn') as Tool;
         if ('element' in tool) {
           return tool.element;
         }
@@ -198,290 +245,365 @@ export interface SearchSyncToolbarProps
   SearchFieldProps?: Partial<SearchFieldProps>;
 }
 
-export const SearchSyncToolbar: FC<SearchSyncToolbarProps> = ({
-  title,
-  hasSearchTool = true,
-  searchTerm: searchTermProp = '',
-  searchFieldPlaceholder,
-  hasSyncTool = true,
-  load,
-  loading,
-  errorMessage,
-  onChangeSearchTerm,
-  onSearch,
-  tools = [],
-  preTitleTools = [],
-  children,
-  TitleProps = {},
-  searchFieldOpen: searchFieldOpenProp,
-  SearchFieldProps = {},
-  searchVelocity = 'slow',
-  sx,
-  ...rest
-}) => {
-  tools || (tools = [children]);
-  const { ...SearchFieldPropsRest } = SearchFieldProps;
+export function getSearchSyncToolbarUtilityClass(slot: string): string {
+  return generateUtilityClass('MuiSearchSyncToolbar', slot);
+}
 
-  // Refs
-  const onSearchRef = useRef(onSearch);
-  const isInitialMountRef = useRef(true);
-  useEffect(() => {
-    onSearchRef.current = onSearch;
-  }, [onSearch]);
+export const searchSyncToolbarClasses: SearchSyncToolbarClasses =
+  generateUtilityClasses('MuiSearchSyncToolbar', ['root']);
 
-  const { sx: titlePropsSx, ...titlePropsRest } = TitleProps;
+const slots = {
+  root: ['root'],
+};
 
-  const { breakpoints } = useTheme();
-  const isLargeScreenSize = useMediaQuery(breakpoints.up(1200));
-  const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
+export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
+  function SearchSyncToolbar(inProps, ref) {
+    const props = useThemeProps({
+      props: inProps,
+      name: 'MuiSearchSyncToolbar',
+    });
+    const {
+      className,
+      title,
+      hasSearchTool = true,
+      searchTerm: searchTermProp = '',
+      searchFieldPlaceholder,
+      hasSyncTool = true,
+      load,
+      loading,
+      errorMessage,
+      onChangeSearchTerm,
+      onSearch,
+      preTitleTools = [],
+      children,
+      TitleProps = {},
+      searchFieldOpen: searchFieldOpenProp,
+      SearchFieldProps = {},
+      searchVelocity = 'slow',
+      sx,
+      ...rest
+    } = omit(props, 'tools');
 
-  const [searchTerm, setSearchTerm] = useState('');
-  const [searchFieldOpen, setSearchFieldOpen] = useState(
-    searchTermProp.length > 0
-  );
+    let { tools } = props;
 
-  useEffect(() => {
-    if (searchTerm.length <= 0 && !isInitialMountRef.current) {
-      onSearchRef.current && onSearchRef.current(searchTerm);
-    }
-  }, [searchTerm]);
+    const classes = composeClasses(
+      slots,
+      getSearchSyncToolbarUtilityClass,
+      (() => {
+        if (className) {
+          return {
+            root: className,
+          };
+        }
+      })()
+    );
 
-  useEffect(() => {
-    setSearchTerm(searchTermProp);
-  }, [searchTermProp]);
+    tools || (tools = [...Children.toArray(children)]);
+    const { ...SearchFieldPropsRest } = SearchFieldProps;
 
-  useEffect(() => {
-    isInitialMountRef.current = false;
-    return () => {
-      isInitialMountRef.current = true;
-    };
-  }, []);
+    // Refs
+    const onSearchRef = useRef(onSearch);
+    const isInitialMountRef = useRef(true);
+    useEffect(() => {
+      onSearchRef.current = onSearch;
+    }, [onSearch]);
 
-  return (
-    <Box
-      {...rest}
-      sx={{
-        pl: 3,
-        pr: 2,
-        ...sx,
-      }}
-    >
-      <Grid
-        container
+    const { sx: titlePropsSx, ...titlePropsRest } = TitleProps;
+
+    const { breakpoints } = useTheme();
+    const isLargeScreenSize = useMediaQuery(breakpoints.up(1200));
+    const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
+
+    const [searchTerm, setSearchTerm] = useState('');
+    const [searchFieldOpen, setSearchFieldOpen] = useState(
+      searchTermProp.length > 0
+    );
+
+    useEffect(() => {
+      if (searchTerm.length <= 0 && !isInitialMountRef.current) {
+        onSearchRef.current && onSearchRef.current(searchTerm);
+      }
+    }, [searchTerm]);
+
+    useEffect(() => {
+      setSearchTerm(searchTermProp);
+    }, [searchTermProp]);
+
+    useEffect(() => {
+      isInitialMountRef.current = false;
+      return () => {
+        isInitialMountRef.current = true;
+      };
+    }, []);
+
+    return (
+      <Box
+        ref={ref}
+        {...rest}
+        className={clsx(classes.root)}
         sx={{
-          height: 50,
-          alignItems: 'center',
-          ...(() => {
-            if (!isSmallScreenSize) {
-              return {
-                columnGap: 1,
-              };
-            }
-          })(),
+          pl: 3,
+          pr: 2,
+          ...sx,
         }}
       >
-        {(() => {
-          if (preTitleTools && !isSmallScreenSize) {
-            return getToolNodes(preTitleTools, isLargeScreenSize).map(
-              (tool, index) => {
-                return (
-                  <Grid item key={index} sx={{ minWidth: 0 }}>
-                    {tool}
-                  </Grid>
-                );
+        <Grid
+          container
+          sx={{
+            height: 50,
+            alignItems: 'center',
+            ...(() => {
+              if (!isSmallScreenSize) {
+                return {
+                  columnGap: 1,
+                };
               }
+            })(),
+          }}
+        >
+          {(() => {
+            if (preTitleTools && !isSmallScreenSize) {
+              return getToolNodes(preTitleTools, isLargeScreenSize).map(
+                (tool, index) => {
+                  return (
+                    <Grid item key={index} sx={{ minWidth: 0 }}>
+                      {tool}
+                    </Grid>
+                  );
+                }
+              );
+            }
+          })()}
+          {(() => {
+            const standardSearchFieldElement = (
+              <SearchField
+                placeholder={searchFieldPlaceholder}
+                variant="standard"
+                fullWidth
+                {...SearchFieldPropsRest}
+                {...{
+                  searchTerm,
+                  onSearch,
+                  onChangeSearchTerm,
+                  searchVelocity,
+                }}
+                InputProps={{
+                  disableUnderline: true,
+                }}
+                onChange={(event) => {
+                  setSearchTerm(event.target.value);
+                }}
+              />
             );
-          }
-        })()}
-        {(() => {
-          const standardSearchFieldElement = (
-            <SearchField
-              placeholder={searchFieldPlaceholder}
-              variant="standard"
-              fullWidth
-              {...SearchFieldPropsRest}
-              {...{
-                searchTerm,
-                onSearch,
-                onChangeSearchTerm,
-                searchVelocity,
-              }}
-              InputProps={{
-                disableUnderline: true,
-              }}
-              onChange={(event) => {
-                setSearchTerm(event.target.value);
-              }}
-            />
-          );
 
-          if (isSmallScreenSize && hasSearchTool && searchFieldOpen) {
-            return (
-              <Grid item xs sx={{ minWidth: 0 }}>
-                <ClickAwayListener
-                  onClickAway={() => {
-                    if (searchTerm.length <= 0) {
-                      setSearchFieldOpen(false);
-                    }
-                  }}
-                >
-                  {standardSearchFieldElement}
-                </ClickAwayListener>
-              </Grid>
-            );
-          }
-
-          if (title) {
-            return (
-              <>
-                <Grid item xs sx={{ minWidth: 0 }}>
-                  <LoadingTypography
-                    {...({ component: 'div' } as any)}
-                    {...titlePropsRest}
-                    noWrap
-                    sx={{
-                      lineHeight: '48px',
-                      ...titlePropsSx,
-                    }}
-                  >
-                    {title}
-                  </LoadingTypography>
-                </Grid>
-                {hasSearchTool ? (
-                  <Grid
-                    item
-                    sx={{
-                      display: 'flex',
-                      flex:
-                        searchFieldOpen ||
-                        (searchFieldOpenProp && !isSmallScreenSize)
-                          ? 1
-                          : 'none',
-                      maxWidth: 300,
-                      minWidth: 0,
-                    }}
-                  >
-                    {searchFieldOpen ||
-                    (searchFieldOpenProp && !isSmallScreenSize) ? (
-                      (() => {
-                        const textField = (
-                          <SearchField
-                            placeholder={searchFieldPlaceholder}
-                            variant="outlined"
-                            fullWidth
-                            {...SearchFieldPropsRest}
-                            InputProps={{
-                              autoFocus:
-                                searchTermProp.length <= 0 && searchFieldOpen,
-                            }}
-                            {...{
-                              searchTerm,
-                              onSearch,
-                              onChangeSearchTerm,
-                              searchVelocity,
-                            }}
-                            onChange={(event) => {
-                              setSearchTerm(event.target.value);
-                            }}
-                          />
-                        );
-                        return (
-                          <ClickAwayListener
-                            onClickAway={() => {
-                              if (searchTerm.length <= 0) {
-                                setSearchFieldOpen(false);
-                              }
-                            }}
-                          >
-                            {searchFieldPlaceholder ? (
-                              <Tooltip title={searchFieldPlaceholder}>
-                                {textField}
-                              </Tooltip>
-                            ) : (
-                              textField
-                            )}
-                          </ClickAwayListener>
-                        );
-                      })()
-                    ) : (
-                      <Tooltip title="Search">
-                        <IconButton onClick={() => setSearchFieldOpen(true)}>
-                          <SearchIcon color="inherit" />
-                        </IconButton>
-                      </Tooltip>
-                    )}
-                  </Grid>
-                ) : null}
-              </>
-            );
-          }
-
-          if (hasSearchTool) {
-            return (
-              <Grid item xs sx={{ minWidth: 0 }}>
-                {standardSearchFieldElement}
-              </Grid>
-            );
-          }
-          return <Grid item xs />;
-        })()}
-        {(() => {
-          if (tools && !isSmallScreenSize) {
-            return getToolNodes(tools, isLargeScreenSize).map((tool, index) => {
+            if (isSmallScreenSize && hasSearchTool && searchFieldOpen) {
               return (
-                <Grid item key={index} sx={{ minWidth: 0 }}>
-                  {tool}
+                <Grid item xs sx={{ minWidth: 0 }}>
+                  <ClickAwayListener
+                    onClickAway={() => {
+                      if (searchTerm.length <= 0) {
+                        setSearchFieldOpen(false);
+                      }
+                    }}
+                  >
+                    {standardSearchFieldElement}
+                  </ClickAwayListener>
                 </Grid>
               );
-            });
-          }
-        })()}
-        {hasSyncTool && load ? (
-          <Grid item>
-            <ReloadIconButton {...{ load, loading, errorMessage }} />
-          </Grid>
-        ) : null}
-        {(() => {
-          if (isSmallScreenSize) {
-            const smallScreenTools = [...preTitleTools, ...tools]
-              .filter((tool) => {
-                return (
-                  tool &&
-                  !isValidElement(tool) &&
-                  typeof tool === 'object' &&
-                  !('element' in tool)
-                );
-              })
-              .map((tool) => {
-                return tool as ButtonTool | IconButtonTool;
-              });
-            if (smallScreenTools.length > 0) {
+            }
+
+            if (title) {
               return (
                 <>
-                  <EllipsisMenuIconButton
-                    options={smallScreenTools.map(
-                      ({ label, icon, ref, onClick }, index) => {
-                        return {
-                          ref: ref as any,
-                          label,
-                          icon,
-                          value: index,
-                          onClick: onClick as any,
-                        };
-                      }
-                    )}
-                  />
-                  {smallScreenTools.map(({ popupElement }, index) => {
-                    return <Fragment key={index}>{popupElement}</Fragment>;
-                  })}
+                  <Grid item xs sx={{ minWidth: 0 }}>
+                    <LoadingTypography
+                      {...({ component: 'div' } as any)}
+                      {...titlePropsRest}
+                      noWrap
+                      sx={{
+                        lineHeight: '48px',
+                        ...titlePropsSx,
+                      }}
+                    >
+                      {title}
+                    </LoadingTypography>
+                  </Grid>
+                  {hasSearchTool ? (
+                    <Grid
+                      item
+                      sx={{
+                        display: 'flex',
+                        flex:
+                          searchFieldOpen ||
+                          (searchFieldOpenProp && !isSmallScreenSize)
+                            ? 1
+                            : 'none',
+                        maxWidth: 300,
+                        minWidth: 0,
+                      }}
+                    >
+                      {searchFieldOpen ||
+                      (searchFieldOpenProp && !isSmallScreenSize) ? (
+                        (() => {
+                          const textField = (
+                            <SearchField
+                              placeholder={searchFieldPlaceholder}
+                              variant="outlined"
+                              fullWidth
+                              {...SearchFieldPropsRest}
+                              InputProps={{
+                                autoFocus:
+                                  searchTermProp.length <= 0 && searchFieldOpen,
+                              }}
+                              {...{
+                                searchTerm,
+                                onSearch,
+                                onChangeSearchTerm,
+                                searchVelocity,
+                              }}
+                              onChange={(event) => {
+                                setSearchTerm(event.target.value);
+                              }}
+                            />
+                          );
+                          return (
+                            <ClickAwayListener
+                              onClickAway={() => {
+                                if (searchTerm.length <= 0) {
+                                  setSearchFieldOpen(false);
+                                }
+                              }}
+                            >
+                              {searchFieldPlaceholder ? (
+                                <Tooltip title={searchFieldPlaceholder}>
+                                  {textField}
+                                </Tooltip>
+                              ) : (
+                                textField
+                              )}
+                            </ClickAwayListener>
+                          );
+                        })()
+                      ) : (
+                        <Tooltip title="Search">
+                          <IconButton onClick={() => setSearchFieldOpen(true)}>
+                            <SearchIcon color="inherit" />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                    </Grid>
+                  ) : null}
                 </>
               );
             }
-          }
-        })()}
-      </Grid>
-    </Box>
-  );
-};
+
+            if (hasSearchTool) {
+              return (
+                <Grid item xs sx={{ minWidth: 0 }}>
+                  {standardSearchFieldElement}
+                </Grid>
+              );
+            }
+            return <Grid item xs />;
+          })()}
+          {(() => {
+            if (!isSmallScreenSize) {
+              return getToolNodes(tools, isLargeScreenSize).map(
+                (tool, index) => {
+                  return (
+                    <Grid item key={index} sx={{ minWidth: 0 }}>
+                      {tool}
+                    </Grid>
+                  );
+                }
+              );
+            }
+          })()}
+          {hasSyncTool && load ? (
+            <Grid item>
+              <ReloadIconButton {...{ load, loading, errorMessage }} />
+            </Grid>
+          ) : null}
+          {(() => {
+            if (isSmallScreenSize) {
+              const smallScreenDisplayableTools = [...preTitleTools, ...tools]
+                .filter((tool) => {
+                  return (
+                    tool &&
+                    !isValidElement(tool) &&
+                    typeof tool === 'object' &&
+                    !('element' in tool)
+                  );
+                })
+                .map((tool) => {
+                  return tool as ButtonTool | IconButtonTool;
+                });
+              const [smallScreenTools, ellipsisTools] =
+                smallScreenDisplayableTools.reduce(
+                  (accumulator, tool) => {
+                    const [smallScreenTools, ellipsisTools] = accumulator;
+                    if (
+                      tool.alwaysShowOn &&
+                      (
+                        [
+                          'All Screens',
+                          'Small Screen',
+                        ] as typeof tool.alwaysShowOn[]
+                      ).includes(tool.alwaysShowOn) &&
+                      tool.type === 'icon-button'
+                    ) {
+                      smallScreenTools.push(tool);
+                    } else {
+                      ellipsisTools.push(tool);
+                    }
+                    return accumulator;
+                  },
+                  [[], []] as [
+                    typeof smallScreenDisplayableTools,
+                    typeof smallScreenDisplayableTools
+                  ]
+                );
+              return (
+                <>
+                  {smallScreenTools.length > 0
+                    ? getToolNodes(smallScreenTools, isLargeScreenSize).map(
+                        (tool, index) => {
+                          return (
+                            <Grid item key={index} sx={{ minWidth: 0 }}>
+                              {tool}
+                            </Grid>
+                          );
+                        }
+                      )
+                    : null}
+                  {ellipsisTools.length > 0 ? (
+                    <Grid item>
+                      <EllipsisMenuIconButton
+                        options={ellipsisTools.map(
+                          ({ label, icon, ref, onClick }, index) => {
+                            return {
+                              ref: ref as any,
+                              label,
+                              icon,
+                              value: index,
+                              onClick: onClick as any,
+                            };
+                          }
+                        )}
+                      />
+                      {ellipsisTools.map(({ popupElement }, index) => {
+                        return <Fragment key={index}>{popupElement}</Fragment>;
+                      })}
+                    </Grid>
+                  ) : null}
+                </>
+              );
+            }
+          })()}
+        </Grid>
+      </Box>
+    );
+  }
+);
 
 export default SearchSyncToolbar;
