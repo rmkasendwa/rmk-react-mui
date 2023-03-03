@@ -9,6 +9,7 @@ import {
   uniqueNamesGenerator,
 } from 'unique-names-generator';
 
+import EnumValueChip from '../components/EnumValueChip';
 import RecordsExplorer, {
   RecordsExplorerProps,
 } from '../components/RecordsExplorer';
@@ -22,11 +23,13 @@ const Template: ComponentStory<typeof RecordsExplorer> = (props) => (
   <RecordsExplorer {...props} />
 );
 
+type ContactStatus = 'Active' | 'Pending';
+
 type Contact = {
   id: string;
   name: string;
   phoneNumber: string;
-  status: 'Active' | 'Pending';
+  status: ContactStatus;
   email: string;
   accountBalance: number;
 };
@@ -51,7 +54,23 @@ const baseArgs = {
       type: 'List',
       columns: [
         { id: 'name', label: 'Name' },
-        { id: 'status', label: 'Status', type: 'enum', width: 100 },
+        {
+          id: 'status',
+          label: 'Status',
+          type: 'enum',
+          width: 100,
+          getColumnValue: ({ status }) => {
+            return (
+              <EnumValueChip
+                value={status}
+                colors={{
+                  Active: '#3fb950',
+                  Pending: '#ffa657',
+                }}
+              />
+            );
+          },
+        },
         { id: 'phoneNumber', label: 'Phone Number', type: 'phoneNumber' },
         { id: 'email', label: 'Email', type: 'email' },
         {
@@ -67,7 +86,7 @@ const baseArgs = {
     },
   ],
   recordLabelPlural: 'Contacts',
-} as RecordsExplorerProps;
+} as RecordsExplorerProps<typeof dataSet[number]>;
 
 export const Default = Template.bind({});
 Default.args = {
