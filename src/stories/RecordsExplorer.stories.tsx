@@ -84,3 +84,14 @@ WithDefaultMultipleSortFields.args = {
   ...baseArgs,
   sortBy: [{ id: 'name' }, { id: 'status', sortDirection: 'DESC' }],
 } as RecordsExplorerProps;
+
+export const WithDefaultFilterFormula = Template.bind({});
+WithDefaultFilterFormula.args = {
+  ...baseArgs,
+  filterBy: {
+    conditions: [
+      { fieldId: 'name', operator: 'contains', value: 'ad' },
+      { fieldId: 'status', operator: '=', value: 'Pending' },
+    ],
+  },
+} as RecordsExplorerProps;
