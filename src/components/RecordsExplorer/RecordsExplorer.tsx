@@ -76,7 +76,12 @@ import Table, { TableProps, tableClasses } from '../Table';
 import TimelineChart, { TimelineChartProps } from '../TimelineChart';
 import GroupButton from './GroupButton';
 import { useFilterTool } from './hooks/FilterTool';
-import { useViewOptionsTool } from './hooks/ViewOptionsTool';
+import {
+  ViewOptionType,
+  ViewOptionsToolOptions,
+  useViewOptionsTool,
+  viewOptionTypes,
+} from './hooks/ViewOptionsTool';
 import {
   ConditionGroup,
   Conjunction,
@@ -90,11 +95,6 @@ import {
   filterOperators,
 } from './models';
 import SortButton from './SortButton';
-import {
-  ViewOptionType,
-  ViewOptionsButtonProps,
-  viewOptionTypes,
-} from './ViewOptionsButton';
 
 export interface RecordsExplorerClasses {
   /** Styles applied to the root element. */
@@ -217,7 +217,7 @@ export interface RecordsExplorerProps<
   /**
    * Extra props to be assigned to the ViewOptionsButton component.
    */
-  ViewOptionsButtonProps?: Partial<ViewOptionsButtonProps>;
+  ViewOptionsButtonProps?: Partial<ViewOptionsToolOptions>;
   /**
    * Extra props to be assigned to the Header component.
    */
