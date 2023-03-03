@@ -1,12 +1,12 @@
 import '@infinite-debugger/rmk-js-extensions/JSON';
 
+import AddIcon from '@mui/icons-material/Add';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import LockResetIcon from '@mui/icons-material/LockReset';
 import {
   Badge,
   Box,
-  Button,
   ComponentsOverrides,
   ComponentsProps,
   ComponentsVariants,
@@ -69,7 +69,7 @@ import IconLoadingScreen, {
   IconLoadingScreenProps,
 } from '../IconLoadingScreen';
 import RenderIfVisible from '../RenderIfVisible';
-import SearchSyncToolbar, { Tool } from '../SearchSyncToolbar';
+import SearchSyncToolbar, { IconButtonTool, Tool } from '../SearchSyncToolbar';
 import Table, { TableProps, tableClasses } from '../Table';
 import TimelineChart, { TimelineChartProps } from '../TimelineChart';
 import { useFilterTool } from './hooks/FilterTool';
@@ -1530,16 +1530,35 @@ export const BaseRecordsExplorer = <
                 (!permissionToAddNew ||
                   loggedInUserHasPermission(permissionToAddNew))
               ) {
-                tools.push(
-                  <Button
-                    variant="contained"
-                    component={RouterLink}
-                    to={pathToAddNew}
-                    size="small"
-                  >
-                    Add New {recordLabelSingular}
-                  </Button>
-                );
+                const iconButtonTool: IconButtonTool = {
+                  icon: <AddIcon />,
+                  type: 'icon-button',
+                  label: `Add New ${recordLabelSingular}`,
+                  alwaysShowOn: 'All Screens',
+                  ...(() => {
+                    return {
+                      component: RouterLink,
+                      to: pathToAddNew,
+                    };
+                  })(),
+                };
+                if (isSmallScreenSize) {
+                  tools.push(iconButtonTool);
+                } else {
+                  tools.push({
+                    icon: <AddIcon />,
+                    type: 'button',
+                    label: `Add New ${recordLabelSingular}`,
+                    size: 'small',
+                    variant: 'contained',
+                    ...(() => {
+                      return {
+                        component: RouterLink,
+                        to: pathToAddNew,
+                      };
+                    })(),
+                  });
+                }
               }
               if (ViewOptionsButtonProps || views) {
                 tools.push(viewOptionsTool);

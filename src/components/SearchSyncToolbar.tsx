@@ -75,35 +75,23 @@ export interface BaseToolOptions {
 }
 
 export interface ButtonTool
-  extends Pick<
-      ButtonProps,
-      | 'sx'
-      | 'onMouseDown'
-      | 'onClick'
-      | 'className'
-      | 'color'
-      | 'variant'
-      | 'endIcon'
-    >,
+  extends Partial<Omit<ButtonProps, 'title' | 'type'>>,
     BaseToolOptions {
   label: ReactNode;
-  title?: ReactNode;
   type: 'button';
+  title?: ReactNode;
   icon?: ReactNode;
   ref?: MutableRefObject<HTMLButtonElement | null>;
   popupElement?: ReactNode;
 }
 
 export interface IconButtonTool
-  extends Pick<
-      IconButtonProps,
-      'sx' | 'onMouseDown' | 'onClick' | 'className' | 'color'
-    >,
+  extends Partial<Omit<IconButtonProps, 'title' | 'type'>>,
     BaseToolOptions {
   label: ReactNode;
-  title?: ReactNode;
+  icon: ReactNode;
   type: 'icon-button';
-  icon?: ReactNode;
+  title?: ReactNode;
   ref?: MutableRefObject<HTMLButtonElement | null>;
   popupElement?: ReactNode;
 }
