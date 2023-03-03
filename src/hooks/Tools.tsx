@@ -15,7 +15,7 @@ import { ReactNode, useRef, useState } from 'react';
 
 import { Tool } from '../components/SearchSyncToolbar';
 
-export interface ButtonPopupToolOptions {
+export interface PopupToolOptions extends Partial<Tool> {
   popupCardTitle: ReactNode;
   bodyContent: ReactNode;
   label: ReactNode;
@@ -24,14 +24,15 @@ export interface ButtonPopupToolOptions {
   icon?: ReactNode;
 }
 
-export const useButtonPopupTool = ({
+export const usePopupTool = ({
   label,
   popupCardTitle,
   icon,
   bodyContent,
   BodyContentProps = {},
   footerContent,
-}: ButtonPopupToolOptions) => {
+  ...rest
+}: PopupToolOptions) => {
   const { sx: BodyContentPropsSx, ...BodyContentPropsRest } = BodyContentProps;
   const anchorRef = useRef<HTMLButtonElement | null>(null);
 
@@ -39,6 +40,8 @@ export const useButtonPopupTool = ({
   const [open, setOpen] = useState(false);
 
   const tool: Tool = {
+    color: 'inherit',
+    ...rest,
     ref: anchorRef,
     label: (
       <>

@@ -71,11 +71,11 @@ import IconLoadingScreen, {
   IconLoadingScreenProps,
 } from '../IconLoadingScreen';
 import RenderIfVisible from '../RenderIfVisible';
-import SearchSyncToolbar from '../SearchSyncToolbar';
+import SearchSyncToolbar, { Tool } from '../SearchSyncToolbar';
 import Table, { TableProps, tableClasses } from '../Table';
 import TimelineChart, { TimelineChartProps } from '../TimelineChart';
-import FilterButton from './FilterButton';
 import GroupButton from './GroupButton';
+import { useFilterTool } from './hooks';
 import {
   ConditionGroup,
   Conjunction,
@@ -319,7 +319,6 @@ export const BaseRecordsExplorer = <
     permissionToAddNew,
     hideAddNewButtonOnNoFilteredData = false,
     children,
-    id,
     filterBySearchTerm,
     searchableFields: searchableFieldsProp,
     getGroupableData,
@@ -380,7 +379,7 @@ export const BaseRecordsExplorer = <
 
   // Resolving data operation fields
   const {
-    filterFields,
+    filterFields = [],
     sortableFields = [],
     groupableFields = [],
     searchableFields,
@@ -921,6 +920,23 @@ export const BaseRecordsExplorer = <
     return null;
   })();
 
+  const filterTool = useFilterTool({
+    data,
+    filterFields,
+    selectedConditionGroup: activeConditionGroup,
+    onChangeSelectedConditionGroup: (conditionGroup) => {
+      setSearchParams(
+        {
+          filterBy: conditionGroup as any,
+          modifiedKeys: [
+            ...new Set([...modifiedStateKeys, 'filterBy']),
+          ] as typeof modifiedStateKeys,
+        },
+        { replace: true }
+      );
+    },
+  });
+
   // Initial mount ref
   useEffect(() => {
     isInitialMountRef.current = false;
@@ -1433,7 +1449,7 @@ export const BaseRecordsExplorer = <
           searchFieldPlaceholder={`Filter ${lowercaseRecordLabelPlural}`}
           tools={[
             ...(() => {
-              const tools: ReactNode[] = [];
+              const tools: (ReactNode | Tool)[] = [];
               if (
                 pathToAddNew &&
                 (!hideAddNewButtonOnNoFilteredData ||
@@ -1537,23 +1553,7 @@ export const BaseRecordsExplorer = <
               }
 
               if (filterFields) {
-                tools.push(
-                  <FilterButton
-                    {...{ data, filterFields, id }}
-                    selectedConditionGroup={activeConditionGroup}
-                    onChangeSelectedConditionGroup={(conditionGroup) => {
-                      setSearchParams(
-                        {
-                          filterBy: conditionGroup as any,
-                          modifiedKeys: [
-                            ...new Set([...modifiedStateKeys, 'filterBy']),
-                          ] as typeof modifiedStateKeys,
-                        },
-                        { replace: true }
-                      );
-                    }}
-                  />
-                );
+                tools.push(filterTool);
               }
 
               if (modifiedStateKeys.length > 0) {
