@@ -13,10 +13,12 @@ import {
   Tooltip,
   Typography,
   alpha,
+  useMediaQuery,
   useTheme,
 } from '@mui/material';
 import { ReactNode, useMemo, useRef, useState } from 'react';
 
+import ModalPopup from '../../ModalPopup';
 import PaginatedDropdownOptionList, {
   DropdownOption,
 } from '../../PaginatedDropdownOptionList';
@@ -55,7 +57,9 @@ export const useViewOptionsTool = ({
   expandedIfHasLessOptions = false,
   ...rest
 }: ViewOptionsToolOptions) => {
-  const { palette } = useTheme();
+  const { palette, breakpoints } = useTheme();
+  const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
+
   const anchorRef = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
 
@@ -149,54 +153,101 @@ export const useViewOptionsTool = ({
           ),
         };
       }
+      const optionsElement = (
+        <PaginatedDropdownOptionList
+          options={options}
+          minWidth={
+            anchorRef.current ? anchorRef.current.offsetWidth : undefined
+          }
+          onClose={handleClose}
+          selectedOptions={selectedOptions}
+          onSelectOption={({ value }) => {
+            onChangeViewType && onChangeViewType(value as any);
+          }}
+          searchable={options.length > 5}
+          {...{
+            ...(() => {
+              if (isSmallScreenSize) {
+                return {
+                  optionHeight: 50,
+                  maxHeight: window.innerHeight - 240,
+                  sx: {
+                    border: 'none',
+                  },
+                };
+              }
+            })(),
+          }}
+        />
+      );
       return {
         color: 'inherit',
         ref: anchorRef,
-        label: viewType,
+        label: isSmallScreenSize ? 'View' : viewType,
         icon,
         endIcon: <ExpandMoreIcon />,
         type: 'button',
         onClick: () => {
           setOpen(true);
         },
-        popupElement: (
-          <Popper
-            open={open}
-            anchorEl={anchorRef.current}
-            transition
-            placement="bottom-start"
-            ref={(element) => {
-              if (element) {
-                element.style.zIndex = '1400';
-              }
-            }}
-            tabIndex={-1}
-          >
-            {({ TransitionProps }) => {
-              return (
-                <Grow {...TransitionProps}>
-                  <Box tabIndex={-1}>
-                    <ClickAwayListener onClickAway={handleClose}>
-                      <PaginatedDropdownOptionList
-                        options={options}
-                        minWidth={
-                          anchorRef.current
-                            ? anchorRef.current.offsetWidth
-                            : undefined
-                        }
-                        onClose={handleClose}
-                        selectedOptions={selectedOptions}
-                        onSelectOption={({ value }) => {
-                          onChangeViewType && onChangeViewType(value as any);
-                        }}
-                      />
-                    </ClickAwayListener>
-                  </Box>
-                </Grow>
-              );
-            }}
-          </Popper>
-        ),
+        popupElement: (() => {
+          if (isSmallScreenSize) {
+            return (
+              <ModalPopup
+                {...{ open }}
+                onClose={() => {
+                  setOpen(false);
+                }}
+                CardProps={{
+                  sx: {
+                    maxHeight: 'none',
+                  },
+                }}
+                CardBodyProps={{
+                  sx: {
+                    p: 0,
+                  },
+                }}
+                disableEscapeKeyDown={false}
+                disableAutoFocus={false}
+                showHeaderToolbar={false}
+                enableCloseOnBackdropClick
+                sx={{
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                {optionsElement}
+              </ModalPopup>
+            );
+          }
+          return (
+            <Popper
+              open={open}
+              anchorEl={anchorRef.current}
+              transition
+              placement="bottom-start"
+              ref={(element) => {
+                if (element) {
+                  element.style.zIndex = '1400';
+                }
+              }}
+              tabIndex={-1}
+            >
+              {({ TransitionProps }) => {
+                return (
+                  <Grow {...TransitionProps}>
+                    <Box tabIndex={-1}>
+                      <ClickAwayListener onClickAway={handleClose}>
+                        {optionsElement}
+                      </ClickAwayListener>
+                    </Box>
+                  </Grow>
+                );
+              }}
+            </Popper>
+          );
+        })(),
       };
     })(),
   };
