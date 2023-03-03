@@ -26,9 +26,7 @@ export interface PopupToolOptions extends Partial<ButtonTool> {
 }
 
 export const usePopupTool = ({
-  label,
   popupCardTitle,
-  icon,
   bodyContent,
   BodyContentProps = {},
   footerContent,
@@ -93,37 +91,33 @@ export const usePopupTool = ({
     color: 'inherit',
     ...rest,
     ref: anchorRef,
-    label: (
-      <>
-        {label}
-        <Popper
-          open={open}
-          anchorEl={anchorRef.current}
-          transition
-          placement="bottom-start"
-          sx={{
-            zIndex: 10,
-          }}
-        >
-          {({ TransitionProps }) => {
-            return (
-              <Grow {...TransitionProps}>
-                <Box>
-                  <ClickAwayListener onClickAway={() => setOpen(false)}>
-                    <Box>{bodyContentElement}</Box>
-                  </ClickAwayListener>
-                </Box>
-              </Grow>
-            );
-          }}
-        </Popper>
-      </>
-    ),
-    icon,
     type: 'button',
     onClick: () => {
       setOpen(true);
     },
+    popupElement: (
+      <Popper
+        open={open}
+        anchorEl={anchorRef.current}
+        transition
+        placement="bottom-start"
+        sx={{
+          zIndex: 10,
+        }}
+      >
+        {({ TransitionProps }) => {
+          return (
+            <Grow {...TransitionProps}>
+              <Box>
+                <ClickAwayListener onClickAway={() => setOpen(false)}>
+                  <Box>{bodyContentElement}</Box>
+                </ClickAwayListener>
+              </Box>
+            </Grow>
+          );
+        }}
+      </Popper>
+    ),
   };
   return tool;
 };
