@@ -9,10 +9,12 @@ import {
   Grow,
   Popper,
   alpha,
+  useMediaQuery,
   useTheme,
 } from '@mui/material';
 import { ReactNode, useRef, useState } from 'react';
 
+import ModalPopup from '../components/ModalPopup';
 import { ButtonTool } from '../components/SearchSyncToolbar';
 
 export interface PopupToolOptions extends Partial<ButtonTool> {
@@ -36,13 +38,25 @@ export const usePopupTool = ({
   const { sx: BodyContentPropsSx, ...BodyContentPropsRest } = BodyContentProps;
   const anchorRef = useRef<HTMLButtonElement | null>(null);
 
-  const { palette } = useTheme();
+  const { palette, breakpoints } = useTheme();
+  const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
+
   const [open, setOpen] = useState(false);
 
   const bodyContentElement = (() => {
     if (wrapBodyContentInCard) {
       return (
-        <Card>
+        <Card
+          sx={{
+            ...(() => {
+              if (isSmallScreenSize) {
+                return {
+                  border: 'none',
+                };
+              }
+            })(),
+          }}
+        >
           {(() => {
             if (popupCardTitle) {
               return (
@@ -95,29 +109,61 @@ export const usePopupTool = ({
     onClick: () => {
       setOpen(true);
     },
-    popupElement: (
-      <Popper
-        open={open}
-        anchorEl={anchorRef.current}
-        transition
-        placement="bottom-start"
-        sx={{
-          zIndex: 10,
-        }}
-      >
-        {({ TransitionProps }) => {
-          return (
-            <Grow {...TransitionProps}>
-              <Box>
-                <ClickAwayListener onClickAway={() => setOpen(false)}>
-                  <Box>{bodyContentElement}</Box>
-                </ClickAwayListener>
-              </Box>
-            </Grow>
-          );
-        }}
-      </Popper>
-    ),
+    popupElement: (() => {
+      if (isSmallScreenSize) {
+        return (
+          <ModalPopup
+            {...{ open }}
+            onClose={() => {
+              setOpen(false);
+            }}
+            CardProps={{
+              sx: {
+                maxHeight: 'none',
+              },
+            }}
+            CardBodyProps={{
+              sx: {
+                p: 0,
+              },
+            }}
+            disableEscapeKeyDown={false}
+            disableAutoFocus={false}
+            showHeaderToolbar={false}
+            enableCloseOnBackdropClick
+            sx={{
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            {bodyContentElement}
+          </ModalPopup>
+        );
+      }
+      return (
+        <Popper
+          open={open}
+          anchorEl={anchorRef.current}
+          transition
+          placement="bottom-start"
+          sx={{
+            zIndex: 10,
+          }}
+        >
+          {({ TransitionProps }) => {
+            return (
+              <Grow {...TransitionProps}>
+                <Box>
+                  <ClickAwayListener onClickAway={() => setOpen(false)}>
+                    <Box>{bodyContentElement}</Box>
+                  </ClickAwayListener>
+                </Box>
+              </Grow>
+            );
+          }}
+        </Popper>
+      );
+    })(),
   };
   return tool;
 };

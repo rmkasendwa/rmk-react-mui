@@ -112,27 +112,39 @@ export const getToolNodes = (
                 if (!isLargeScreenSize) {
                   return (
                     <>
-                      <Button
-                        {...rest}
-                        sx={{
-                          ...sx,
-                          minWidth: 'auto',
-                          px: 0.5,
-                          '&>svg': {
-                            fontSize: 16,
+                      <Tooltip
+                        title={title || label}
+                        PopperProps={{
+                          sx: {
+                            pointerEvents: 'none',
                           },
                         }}
                       >
-                        {icon}
-                      </Button>
+                        <Button
+                          {...rest}
+                          sx={{
+                            ...sx,
+                            minWidth: 'auto',
+                            px: 0.5,
+                            '&>svg': {
+                              fontSize: 16,
+                            },
+                          }}
+                        >
+                          {icon}
+                        </Button>
+                      </Tooltip>
                       {popupElement}
                     </>
                   );
                 }
                 return (
-                  <Button startIcon={icon} {...rest} {...{ sx }}>
-                    {label}
-                  </Button>
+                  <>
+                    <Button startIcon={icon} {...rest} {...{ sx }}>
+                      {label}
+                    </Button>
+                    {popupElement}
+                  </>
                 );
               })();
               if (title) {
@@ -444,13 +456,24 @@ export const SearchSyncToolbar: FC<SearchSyncToolbarProps> = ({
               });
             if (smallScreenTools.length > 0) {
               return (
-                <EllipsisMenuIconButton
-                  options={smallScreenTools.map(
-                    ({ label, icon, ref }, index) => {
-                      return { ref, label, icon, value: index };
-                    }
-                  )}
-                />
+                <>
+                  <EllipsisMenuIconButton
+                    options={smallScreenTools.map(
+                      ({ label, icon, ref, onClick }, index) => {
+                        return {
+                          ref: ref as any,
+                          label,
+                          icon,
+                          value: index,
+                          onClick: onClick as any,
+                        };
+                      }
+                    )}
+                  />
+                  {smallScreenTools.map(({ popupElement }) => {
+                    return popupElement;
+                  })}
+                </>
               );
             }
           }
