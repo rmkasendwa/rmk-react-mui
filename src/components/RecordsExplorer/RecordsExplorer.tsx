@@ -306,7 +306,7 @@ export const BaseRecordsExplorer = <
     ViewOptionsButtonProps,
     filterFields: filterFieldsProp,
     sortableFields: sortableFieldsProp,
-    sortBy,
+    sortBy: sortByProp,
     groupableFields: groupableFieldsProp,
     groupBy: groupByProp,
     views,
@@ -641,24 +641,6 @@ export const BaseRecordsExplorer = <
     return 'List' as View;
   })();
 
-  const activeSortParams = (() => {
-    const sortByParams = sortableFields.reduce((accumulator, sortByParam) => {
-      accumulator[sortByParam.id] = sortByParam;
-      return accumulator;
-    }, {} as Record<keyof RecordRow, typeof sortableFields[number]>);
-
-    return searchParamSortBy
-      .filter(({ id }) => {
-        return sortByParams[id];
-      })
-      .map((sortByParam) => {
-        return {
-          ...sortByParam,
-          ...sortByParams[sortByParam.id],
-        };
-      });
-  })();
-
   const activeGroupParams = (() => {
     const groupByParams = groupableFields.reduce(
       (accumulator, groupByParam) => {
@@ -688,6 +670,36 @@ export const BaseRecordsExplorer = <
         return {
           ...groupByParam,
           sortDirection: groupByParam.sortDirection || 'ASC',
+        };
+      });
+  })();
+
+  const activeSortParams = (() => {
+    const sortByParams = sortableFields.reduce((accumulator, sortByParam) => {
+      accumulator[sortByParam.id] = sortByParam;
+      return accumulator;
+    }, {} as Record<keyof RecordRow, typeof sortableFields[number]>);
+
+    return (
+      sortByProp &&
+      !modifiedStateKeys.includes('sortBy') &&
+      searchParamSortBy.length <= 0
+        ? sortByProp
+        : searchParamSortBy
+    )
+      .filter(({ id }) => {
+        return sortByParams[id];
+      })
+      .map((sortByParam) => {
+        return {
+          ...sortByParam,
+          ...sortByParams[sortByParam.id],
+        };
+      })
+      .map((sortByParams) => {
+        return {
+          ...sortByParams,
+          sortDirection: sortByParams.sortDirection || 'ASC',
         };
       });
   })();
@@ -1453,7 +1465,6 @@ export const BaseRecordsExplorer = <
                     {...{
                       groupableFields,
                       getGroupableData,
-                      id,
                     }}
                     selectedGroupParams={activeGroupParams}
                     onChangeSelectedGroupParams={(groupParams) => {
@@ -1481,7 +1492,7 @@ export const BaseRecordsExplorer = <
               if (sortableFields) {
                 tools.push(
                   <SortButton
-                    {...{ sortableFields, sortBy, id }}
+                    {...{ sortableFields }}
                     selectedSortParams={activeSortParams}
                     onChangeSelectedSortParams={(sortParams) => {
                       setSearchParams(

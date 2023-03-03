@@ -72,3 +72,15 @@ WithDefaultGroupByOption.args = {
   ...baseArgs,
   groupBy: [{ id: 'status' }],
 } as RecordsExplorerProps;
+
+export const WithDefaultSortByOption = Template.bind({});
+WithDefaultSortByOption.args = {
+  ...baseArgs,
+  sortBy: [{ id: 'name' }],
+} as RecordsExplorerProps;
+
+export const WithDefaultMultipleSortFields = Template.bind({});
+WithDefaultMultipleSortFields.args = {
+  ...baseArgs,
+  sortBy: [{ id: 'name' }, { id: 'status', sortDirection: 'DESC' }],
+} as RecordsExplorerProps;
