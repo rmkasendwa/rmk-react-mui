@@ -1,7 +1,7 @@
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
 import FilterAltOutlinedIcon from '@mui/icons-material/FilterAltOutlined';
-import { Button, Grid, IconButton, Typography } from '@mui/material';
+import { Button, Grid, IconButton, Tooltip, Typography } from '@mui/material';
 import { omit } from 'lodash';
 import { useEffect, useMemo, useRef } from 'react';
 
@@ -260,8 +260,10 @@ export const useFilterTool = <RecordRow extends BaseDataRow>({
                     {/* Filter field */}
                     <Grid
                       item
+                      xs
                       sx={{
-                        width: 140,
+                        minWidth: 0,
+                        maxWidth: 140,
                       }}
                     >
                       <DataDropdownField
@@ -295,8 +297,10 @@ export const useFilterTool = <RecordRow extends BaseDataRow>({
                     {/* Filter operator */}
                     <Grid
                       item
+                      xs
                       sx={{
-                        width: 140,
+                        minWidth: 0,
+                        maxWidth: 140,
                       }}
                     >
                       <DataDropdownField
@@ -330,8 +334,10 @@ export const useFilterTool = <RecordRow extends BaseDataRow>({
                     {/* Filter Value */}
                     <Grid
                       item
+                      xs
                       sx={{
-                        width: 140,
+                        minWidth: 0,
+                        maxWidth: 140,
                       }}
                     >
                       {(() => {
@@ -434,25 +440,34 @@ export const useFilterTool = <RecordRow extends BaseDataRow>({
 
                     {/* Clear Filter Condition */}
                     <Grid item>
-                      <IconButton
-                        onClick={() => {
-                          const selectedFilterParamIndex =
-                            nextSelectedConditionGroup.conditions.findIndex(
-                              ({ fieldId }) => fieldId === id
-                            );
-                          if (selectedFilterParamIndex !== -1) {
-                            nextSelectedConditionGroup.conditions.splice(
-                              selectedFilterParamIndex,
-                              1
-                            );
-                            onChangeSelectedConditionGroup(
-                              nextSelectedConditionGroup
-                            );
-                          }
+                      <Tooltip
+                        title="Remove condition"
+                        PopperProps={{
+                          sx: {
+                            pointerEvents: 'none',
+                          },
                         }}
                       >
-                        <CloseIcon />
-                      </IconButton>
+                        <IconButton
+                          onClick={() => {
+                            const selectedFilterParamIndex =
+                              nextSelectedConditionGroup.conditions.findIndex(
+                                ({ fieldId }) => fieldId === id
+                              );
+                            if (selectedFilterParamIndex !== -1) {
+                              nextSelectedConditionGroup.conditions.splice(
+                                selectedFilterParamIndex,
+                                1
+                              );
+                              onChangeSelectedConditionGroup(
+                                nextSelectedConditionGroup
+                              );
+                            }
+                          }}
+                        >
+                          <CloseIcon />
+                        </IconButton>
+                      </Tooltip>
                     </Grid>
                   </Grid>
                 );
