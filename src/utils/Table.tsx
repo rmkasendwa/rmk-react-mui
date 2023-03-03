@@ -100,10 +100,10 @@ export const mapTableColumnTypeToPrimitiveDataType = (
     case 'timestamp':
       return 'date';
     case 'boolean':
-      return 'boolean';
-    default:
-      return 'string';
+    case 'enum':
+      return columnType;
   }
+  return 'string';
 };
 
 /**
