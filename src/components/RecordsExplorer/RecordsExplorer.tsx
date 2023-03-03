@@ -76,6 +76,7 @@ import Table, { TableProps, tableClasses } from '../Table';
 import TimelineChart, { TimelineChartProps } from '../TimelineChart';
 import { useFilterTool } from './hooks/FilterTool';
 import { useGroupTool } from './hooks/GroupTool';
+import { useSortTool } from './hooks/SortTool';
 import {
   ViewOptionType,
   ViewOptionsToolOptions,
@@ -94,7 +95,6 @@ import {
   filterConjunctions,
   filterOperators,
 } from './models';
-import SortButton from './SortButton';
 
 export interface RecordsExplorerClasses {
   /** Styles applied to the root element. */
@@ -643,7 +643,7 @@ export const BaseRecordsExplorer = <
     return 'List' as View;
   })();
 
-  const activeGroupParams = (() => {
+  const selectedGroupParams = (() => {
     const groupByParams = groupableFields.reduce(
       (accumulator, groupByParam) => {
         accumulator[groupByParam.id] = groupByParam;
@@ -676,7 +676,7 @@ export const BaseRecordsExplorer = <
       });
   })();
 
-  const activeSortParams = (() => {
+  const selectedSortParams = (() => {
     const sortByParams = sortableFields.reduce((accumulator, sortByParam) => {
       accumulator[sortByParam.id] = sortByParam;
       return accumulator;
@@ -706,7 +706,7 @@ export const BaseRecordsExplorer = <
       });
   })();
 
-  const activeConditionGroup = (() => {
+  const selectedConditionGroup = (() => {
     if (searchParamFilterBy) {
       return {
         ...searchParamFilterBy,
@@ -732,20 +732,20 @@ export const BaseRecordsExplorer = <
     // Filtering data
     const dataFilteredByFilterFields = (() => {
       if (filterFields) {
-        if (activeConditionGroup.conditions.length > 0) {
+        if (selectedConditionGroup.conditions.length > 0) {
           const emptyfilterOperators: FilterOperator[] = [
             'is empty',
             'is not empty',
           ];
           return data.filter((row) => {
-            return activeConditionGroup.conditions
+            return selectedConditionGroup.conditions
               .filter(({ operator, value }) => {
                 return (
                   emptyfilterOperators.includes(operator) ||
                   (value != null && String(value).length > 0)
                 );
               })
-              [activeConditionGroup.conjunction === 'and' ? 'every' : 'some'](
+              [selectedConditionGroup.conjunction === 'and' ? 'every' : 'some'](
                 ({ operator, value, fieldId }) => {
                   const { rawFieldValue, formattedFieldValue }: any = (() => {
                     const rawFieldValue = (row as any)[fieldId];
@@ -869,9 +869,9 @@ export const BaseRecordsExplorer = <
 
     // Sorting data
     const sortedData = (() => {
-      if (activeSortParams && activeSortParams.length > 0) {
+      if (selectedSortParams && selectedSortParams.length > 0) {
         return [...filteredData].sort((a, b) => {
-          return sort(a, b, activeSortParams);
+          return sort(a, b, selectedSortParams);
         });
       }
       return filteredData;
@@ -882,8 +882,8 @@ export const BaseRecordsExplorer = <
 
   // Grouping data
   const groupedData = (() => {
-    if (activeGroupParams.length > 0) {
-      const groupParams = [...activeGroupParams];
+    if (selectedGroupParams.length > 0) {
+      const groupParams = [...selectedGroupParams];
       const currentGroupParams = groupParams.shift()!;
       const { id, getGroupLabel } = currentGroupParams;
       const groupableData = getGroupableDataRef.current
@@ -947,7 +947,7 @@ export const BaseRecordsExplorer = <
   const groupTool = useGroupTool({
     groupableFields,
     getGroupableData,
-    selectedGroupParams: activeGroupParams,
+    selectedGroupParams,
     onChangeSelectedGroupParams: (groupParams) => {
       setSearchParams(
         {
@@ -968,10 +968,33 @@ export const BaseRecordsExplorer = <
     },
   });
 
+  const sortTool = useSortTool({
+    sortableFields,
+    selectedSortParams,
+    onChangeSelectedSortParams: (sortParams) => {
+      setSearchParams(
+        {
+          sortBy: sortParams.map(({ id, sortDirection }) => {
+            return {
+              id,
+              sortDirection,
+            };
+          }),
+          modifiedKeys: [
+            ...new Set([...modifiedStateKeys, 'sortBy']),
+          ] as typeof modifiedStateKeys,
+        },
+        {
+          replace: true,
+        }
+      );
+    },
+  });
+
   const filterTool = useFilterTool({
     data,
     filterFields,
-    selectedConditionGroup: activeConditionGroup,
+    selectedConditionGroup,
     onChangeSelectedConditionGroup: (conditionGroup) => {
       setSearchParams(
         {
@@ -1074,7 +1097,7 @@ export const BaseRecordsExplorer = <
                   const tableControlProps: Partial<typeof viewProps> = {
                     sortable: true,
                     handleSortOperations: false,
-                    sortBy: activeSortParams,
+                    sortBy: selectedSortParams,
                     onChangeSortBy: (sortOptions) => {
                       if (
                         sortOptions
@@ -1083,7 +1106,7 @@ export const BaseRecordsExplorer = <
                               String(id) + sortDirection
                           )
                           .join(',') !==
-                        activeSortParams
+                        selectedSortParams
                           .map(
                             ({ id, sortDirection }) =>
                               String(id) + sortDirection
@@ -1525,30 +1548,7 @@ export const BaseRecordsExplorer = <
               }
 
               if (sortableFields) {
-                tools.push(
-                  <SortButton
-                    {...{ sortableFields }}
-                    selectedSortParams={activeSortParams}
-                    onChangeSelectedSortParams={(sortParams) => {
-                      setSearchParams(
-                        {
-                          sortBy: sortParams.map(({ id, sortDirection }) => {
-                            return {
-                              id,
-                              sortDirection,
-                            };
-                          }),
-                          modifiedKeys: [
-                            ...new Set([...modifiedStateKeys, 'sortBy']),
-                          ] as typeof modifiedStateKeys,
-                        },
-                        {
-                          replace: true,
-                        }
-                      );
-                    }}
-                  />
-                );
+                tools.push(sortTool);
               }
 
               if (filterFields) {
