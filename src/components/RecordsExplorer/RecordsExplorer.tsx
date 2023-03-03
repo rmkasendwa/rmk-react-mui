@@ -75,7 +75,8 @@ import SearchSyncToolbar, { Tool } from '../SearchSyncToolbar';
 import Table, { TableProps, tableClasses } from '../Table';
 import TimelineChart, { TimelineChartProps } from '../TimelineChart';
 import GroupButton from './GroupButton';
-import { useFilterTool } from './hooks';
+import { useFilterTool } from './hooks/FilterTool';
+import { useViewOptionsTool } from './hooks/ViewOptionsTool';
 import {
   ConditionGroup,
   Conjunction,
@@ -89,7 +90,7 @@ import {
   filterOperators,
 } from './models';
 import SortButton from './SortButton';
-import ViewOptionsButton, {
+import {
   ViewOptionType,
   ViewOptionsButtonProps,
   viewOptionTypes,
@@ -920,6 +921,29 @@ export const BaseRecordsExplorer = <
     return null;
   })();
 
+  const viewOptionsTool = useViewOptionsTool({
+    viewOptionTypes: (() => {
+      if (views) {
+        return views.map(({ type }) => type);
+      }
+    })(),
+    ...ViewOptionsButtonProps,
+    viewType,
+    onChangeViewType: (view) => {
+      setSearchParams(
+        {
+          view,
+          modifiedKeys: [
+            ...new Set([...modifiedStateKeys, 'view']),
+          ] as typeof modifiedStateKeys,
+        },
+        {
+          replace: true,
+        }
+      );
+    },
+  });
+
   const filterTool = useFilterTool({
     data,
     filterFields,
@@ -1469,30 +1493,7 @@ export const BaseRecordsExplorer = <
                 );
               }
               if (ViewOptionsButtonProps || views) {
-                tools.push(
-                  <ViewOptionsButton
-                    viewOptionTypes={(() => {
-                      if (views) {
-                        return views.map(({ type }) => type);
-                      }
-                    })()}
-                    {...ViewOptionsButtonProps}
-                    {...{ viewType }}
-                    onChangeViewType={(view) => {
-                      setSearchParams(
-                        {
-                          view,
-                          modifiedKeys: [
-                            ...new Set([...modifiedStateKeys, 'view']),
-                          ] as typeof modifiedStateKeys,
-                        },
-                        {
-                          replace: true,
-                        }
-                      );
-                    }}
-                  />
-                );
+                tools.push(viewOptionsTool);
               }
 
               if (groupableFields) {
