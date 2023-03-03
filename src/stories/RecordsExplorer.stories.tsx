@@ -133,3 +133,10 @@ WithPathToAddNew.args = {
   ...baseArgs,
   pathToAddNew: '/contacts/new',
 } as RecordsExplorerProps;
+
+export const WithTitle = Template.bind({});
+WithTitle.args = {
+  ...baseArgs,
+  pathToAddNew: '/contacts/new',
+  title: 'Contacts',
+} as RecordsExplorerProps;

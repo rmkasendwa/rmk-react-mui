@@ -69,7 +69,11 @@ import IconLoadingScreen, {
   IconLoadingScreenProps,
 } from '../IconLoadingScreen';
 import RenderIfVisible from '../RenderIfVisible';
-import SearchSyncToolbar, { IconButtonTool, Tool } from '../SearchSyncToolbar';
+import SearchSyncToolbar, {
+  IconButtonTool,
+  SearchSyncToolbarProps,
+  Tool,
+} from '../SearchSyncToolbar';
 import Table, { TableProps, tableClasses } from '../Table';
 import TimelineChart, { TimelineChartProps } from '../TimelineChart';
 import { useFilterTool } from './hooks/FilterTool';
@@ -260,6 +264,7 @@ export interface RecordsExplorerProps<
    * The searchable properties on the input data set records.
    */
   searchableFields?: SearchableProperty<RecordRow>[];
+  SearchSyncToolBarProps?: Partial<SearchSyncToolbarProps>;
   filterFields?: DataFilterField<RecordRow>[];
   filterBy?: Omit<ConditionGroup<RecordRow>, 'conjunction'> &
     Partial<Pick<ConditionGroup<RecordRow>, 'conjunction'>>;
@@ -321,6 +326,7 @@ export const BaseRecordsExplorer = <
     filterBySearchTerm,
     searchableFields: searchableFieldsProp,
     getGroupableData,
+    SearchSyncToolBarProps = {},
     id,
     ...rest
   } = omit(props, 'recordLabelSingular');
@@ -346,6 +352,7 @@ export const BaseRecordsExplorer = <
 
   const { sx: HeaderPropsSx, ...HeaderPropsRest } = HeaderProps;
   const { sx: BodyPropsSx, ...BodyPropsRest } = BodyProps;
+  const { ...SearchSyncToolBarPropsRest } = SearchSyncToolBarProps;
 
   // Refs
   const isInitialMountRef = useRef(true);
@@ -1513,13 +1520,14 @@ export const BaseRecordsExplorer = <
         sx={{ position: 'sticky', top: 0, zIndex: 100, ...HeaderPropsSx }}
       >
         <SearchSyncToolbar
+          searchFieldPlaceholder={`Filter ${lowercaseRecordLabelPlural}`}
+          {...SearchSyncToolBarPropsRest}
           {...{
             title,
             searchTerm,
             load,
             errorMessage,
           }}
-          searchFieldPlaceholder={`Filter ${lowercaseRecordLabelPlural}`}
           tools={[
             ...(() => {
               const tools: (ReactNode | Tool)[] = [];
@@ -1683,7 +1691,6 @@ export const BaseRecordsExplorer = <
   if (fillContentArea) {
     return (
       <FixedHeaderContentArea
-        {...{ title }}
         BodyProps={{
           sx: {
             display: 'flex',

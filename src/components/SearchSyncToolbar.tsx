@@ -290,8 +290,8 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
     const { ...SearchFieldPropsRest } = SearchFieldProps;
 
     // Refs
-    const onSearchRef = useRef(onSearch);
     const isInitialMountRef = useRef(true);
+    const onSearchRef = useRef(onSearch);
     useEffect(() => {
       onSearchRef.current = onSearch;
     }, [onSearch]);
