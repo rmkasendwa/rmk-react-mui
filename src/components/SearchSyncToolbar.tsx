@@ -6,15 +6,18 @@ import {
   ButtonProps,
   ClickAwayListener,
   IconButton,
+  IconButtonProps,
   Tooltip,
   useMediaQuery,
   useTheme,
 } from '@mui/material';
 import Grid from '@mui/material/Grid';
+import { omit } from 'lodash';
 import {
   FC,
   MutableRefObject,
   ReactNode,
+  isValidElement,
   useEffect,
   useRef,
   useState,
@@ -25,66 +28,108 @@ import LoadingTypography, { LoadingTypographyProps } from './LoadingTypography';
 import ReloadIconButton, { ReloadIconButtonProps } from './ReloadIconButton';
 import SearchField, { SearchFieldProps } from './SearchField';
 
-export interface Tool
+export interface ButtonTool
   extends Pick<
     ButtonProps,
-    'sx' | 'onMouseDown' | 'onClick' | 'className' | 'color' | 'variant'
+    | 'sx'
+    | 'onMouseDown'
+    | 'onClick'
+    | 'className'
+    | 'color'
+    | 'variant'
+    | 'endIcon'
   > {
-  label: ReactNode;
-  type: 'button' | 'icon-button';
+  label?: ReactNode;
+  title?: ReactNode;
+  type: 'button';
   icon?: ReactNode;
   ref?: MutableRefObject<HTMLButtonElement | null>;
 }
 
+export interface IconButtonTool
+  extends Pick<
+    IconButtonProps,
+    'sx' | 'onMouseDown' | 'onClick' | 'className' | 'color'
+  > {
+  label?: ReactNode;
+  title?: ReactNode;
+  type: 'icon-button';
+  icon?: ReactNode;
+  ref?: MutableRefObject<HTMLButtonElement | null>;
+}
+
+export interface ElementTool {
+  element?: ReactNode;
+}
+
+export type Tool = ButtonTool | IconButtonTool | ElementTool;
+
 export const getToolNodes = (
   tools: (ReactNode | Tool)[],
   isLargeScreenSize: boolean
-) => {
-  return tools.map((tool) => {
-    if (tool && typeof tool === 'object' && 'type' in tool) {
-      const { label, type, icon, ref, sx, ...rest } = tool as Tool;
-      switch (type) {
-        case 'icon-button':
-          return (
-            <Tooltip
-              title={label}
-              PopperProps={{
-                sx: {
-                  pointerEvents: 'none',
-                },
-              }}
-            >
-              <IconButton {...{ sx, ref }}>{icon}</IconButton>
-            </Tooltip>
-          );
-        case 'button':
-          if (!isLargeScreenSize) {
-            return (
-              <Button
-                {...rest}
-                {...{ ref }}
-                sx={{
-                  ...sx,
-                  minWidth: 'auto',
-                  px: 0.5,
-                  '&>svg': {
-                    fontSize: 16,
-                  },
-                }}
-              >
-                {icon}
-              </Button>
-            );
+): ReactNode[] => {
+  return tools
+    .filter((baseTool) => baseTool)
+    .map((baseTool) => {
+      if (isValidElement(baseTool)) {
+        return baseTool;
+      } else {
+        const tool = baseTool as Tool;
+        if ('element' in tool) {
+          return tool.element;
+        }
+        if ('type' in tool) {
+          switch (tool.type) {
+            case 'icon-button': {
+              const { label, icon, title, ...rest } = omit(tool, 'type');
+              return (
+                <Tooltip
+                  title={title || label}
+                  PopperProps={{
+                    sx: {
+                      pointerEvents: 'none',
+                    },
+                  }}
+                >
+                  <IconButton {...rest}>{icon}</IconButton>
+                </Tooltip>
+              );
+            }
+            case 'button': {
+              const { label, icon, title, sx, ...rest } = omit(tool, 'type');
+              const buttonElement = (() => {
+                if (!isLargeScreenSize) {
+                  return (
+                    <Button
+                      {...rest}
+                      sx={{
+                        ...sx,
+                        minWidth: 'auto',
+                        px: 0.5,
+                        '&>svg': {
+                          fontSize: 16,
+                        },
+                      }}
+                    >
+                      {icon}
+                    </Button>
+                  );
+                }
+                return (
+                  <Button startIcon={icon} {...rest} {...{ sx }}>
+                    {label}
+                  </Button>
+                );
+              })();
+              if (title) {
+                return <Tooltip {...{ title }}>{buttonElement}</Tooltip>;
+              }
+              return buttonElement;
+            }
           }
-          return (
-            <Button startIcon={icon} {...rest} {...{ ref, sx }}>
-              {label}
-            </Button>
-          );
+        }
       }
-    }
-    return tool;
-  });
+    });
 };
 
 export interface SearchSyncToolbarProps
@@ -373,10 +418,15 @@ export const SearchSyncToolbar: FC<SearchSyncToolbarProps> = ({
           if (isSmallScreenSize) {
             const smallScreenTools = [...preTitleTools, ...tools]
               .filter((tool) => {
-                return tool && typeof tool === 'object' && 'label' in tool;
+                return (
+                  tool &&
+                  !isValidElement(tool) &&
+                  typeof tool === 'object' &&
+                  !('element' in tool)
+                );
               })
               .map((tool) => {
-                return tool as Tool;
+                return tool as ButtonTool | IconButtonTool;
               });
             if (smallScreenTools.length > 0) {
               return (

@@ -2,7 +2,12 @@ import { ComponentMeta, ComponentStory } from '@storybook/react';
 import randomEmail from 'random-email';
 import createMobilePhoneNumber from 'random-mobile-numbers';
 import React from 'react';
-import { starWars, uniqueNamesGenerator } from 'unique-names-generator';
+import {
+  animals,
+  colors,
+  starWars,
+  uniqueNamesGenerator,
+} from 'unique-names-generator';
 
 import RecordsExplorer, {
   RecordsExplorerProps,
@@ -26,11 +31,11 @@ type Contact = {
   accountBalance: number;
 };
 
-const dataSet = Array.from({ length: 500 }).map((_, index) => {
+const dataSet = Array.from({ length: 1000 }).map((_, index) => {
   return {
     id: String(index),
     name: uniqueNamesGenerator({
-      dictionaries: [starWars],
+      dictionaries: [starWars, colors, animals],
     }),
     phoneNumber: createMobilePhoneNumber('UK'),
     status: ['Active', 'Pending'][Math.floor(Math.random() * 2)],
