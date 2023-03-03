@@ -1,5 +1,5 @@
 import { MenuItemProps } from '@mui/material/MenuItem';
-import { ElementType, ReactNode } from 'react';
+import { ElementType, MutableRefObject, ReactNode } from 'react';
 
 export interface PaginatedRequestParams {
   limit?: number;
@@ -116,6 +116,7 @@ export interface DropdownOption
   isDropdownOption?: boolean;
   isDropdownOptionWrapped?: boolean;
   component?: ElementType;
+  ref?: MutableRefObject<HTMLElement | null>;
 }
 
 export interface EllipsisMenuToolProps {
