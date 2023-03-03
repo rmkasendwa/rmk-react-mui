@@ -357,13 +357,11 @@ export const SearchSyncToolbar: FC<SearchSyncToolbarProps> = ({
             if (smallScreenTools.length > 0) {
               return (
                 <EllipsisMenuIconButton
-                  options={smallScreenTools.map(({ label, icon }, index) => {
-                    return {
-                      label,
-                      icon,
-                      value: index,
-                    };
-                  })}
+                  options={smallScreenTools.map(
+                    ({ label, icon, ref }, index) => {
+                      return { ref, label, icon, value: index };
+                    }
+                  )}
                 />
               );
             }

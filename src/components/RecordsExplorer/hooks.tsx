@@ -1,5 +1,6 @@
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
+import FilterAltOutlinedIcon from '@mui/icons-material/FilterAltOutlined';
 import { Button, Grid, IconButton, Typography } from '@mui/material';
 import { omit } from 'lodash';
 import { useEffect, useMemo, useRef } from 'react';
@@ -107,6 +108,7 @@ export const useFilterTool = <RecordRow extends BaseDataRow>({
   })();
 
   return usePopupTool({
+    icon: <FilterAltOutlinedIcon />,
     ...rest,
     label: hasSearchFilters
       ? (() => {
