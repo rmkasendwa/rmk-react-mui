@@ -31,17 +31,20 @@ import ButtonPopup, { ButtonPopupProps } from '../ButtonPopup';
 import DataDropdownField, {
   DataDropdownFieldProps,
 } from '../InputFields/DataDropdownField';
+import NumberInputField from '../InputFields/NumberInputField';
 import TextField from '../InputFields/TextField';
 import { DropdownOption } from '../PaginatedDropdownOptionList';
 import {
   ConditionGroup,
   Conjunction,
-  ContentExistenceFilterOperator,
   DataFilterField,
   DataMultiSelectDropdownFilterField,
   EnumFilterOperator,
-  NumericFilterOperator,
-  TextFilterOperator,
+  contentExistenceFilterOperator,
+  enumFilterOperators,
+  filterConjunctions,
+  numericFilterOperators,
+  textFilterOperators,
 } from './interfaces';
 
 export interface FilterButtonClasses {
@@ -79,35 +82,9 @@ declare module '@mui/material/styles/components' {
 export const MULTI_SELECT_DROPDOWN_TYPE = 'enum';
 export const DROPDOWN_FILTER_FIELD_TYPES: PrimitiveDataType[] = ['enum'];
 
-export const TEXT_OPERATORS: TextFilterOperator[] = [
-  'contains',
-  'does not contain',
-];
-
 export const DROPDOWN_OPERATORS: EnumFilterOperator[] = ['is', 'is not'];
 
-export const MULTI_SELECT_DROPDOWN_OPERATORS: EnumFilterOperator[] = [
-  'is',
-  'is not',
-  'is any of',
-  'is none of',
-];
-
-export const NUMERIC_OPERATORS: NumericFilterOperator[] = [
-  '=',
-  '≠',
-  '<',
-  '>',
-  '≤',
-  '≥',
-];
-
-export const CONTENT_EXISTENCE_OPERATORS: ContentExistenceFilterOperator[] = [
-  'is empty',
-  'is not empty',
-];
-
-export const CONJUNCTIONS: Conjunction[] = ['and', 'or'];
+export const MULTI_SELECT_DROPDOWN_OPERATORS = enumFilterOperators;
 
 export interface FilterButtonProps<RecordRow extends BaseDataRow = any>
   extends Partial<ButtonPopupProps> {
@@ -280,9 +257,9 @@ export const BaseFilterButton = <RecordRow extends BaseDataRow>(
                         return MULTI_SELECT_DROPDOWN_OPERATORS;
                       case 'number':
                       case 'date':
-                        return NUMERIC_OPERATORS;
+                        return numericFilterOperators;
                     }
-                    return TEXT_OPERATORS;
+                    return textFilterOperators;
                   })();
                   const { operator: selectedOperator } = condition;
 
@@ -321,7 +298,7 @@ export const BaseFilterButton = <RecordRow extends BaseDataRow>(
                               return (
                                 <DataDropdownField
                                   value={conjunction}
-                                  options={CONJUNCTIONS.map((label) => {
+                                  options={filterConjunctions.map((label) => {
                                     return {
                                       label,
                                       value: label,
@@ -415,7 +392,7 @@ export const BaseFilterButton = <RecordRow extends BaseDataRow>(
                           }}
                           options={[
                             ...operatorOptions,
-                            ...CONTENT_EXISTENCE_OPERATORS,
+                            ...contentExistenceFilterOperator,
                           ].map((label) => {
                             return {
                               label,
@@ -435,10 +412,33 @@ export const BaseFilterButton = <RecordRow extends BaseDataRow>(
                       >
                         {(() => {
                           if (
-                            TEXT_OPERATORS.includes(selectedOperator as any)
+                            textFilterOperators.includes(
+                              selectedOperator as any
+                            )
                           ) {
                             return (
                               <TextField
+                                placeholder="Enter a value"
+                                value={condition.value as any}
+                                onChange={(event) => {
+                                  if (event.target.value) {
+                                    nextSelectedConditionGroup.conditions[
+                                      index
+                                    ].value = event.target.value as any;
+                                    onChangeSelectedConditionGroup(
+                                      nextSelectedConditionGroup
+                                    );
+                                  }
+                                }}
+                              />
+                            );
+                          } else if (
+                            numericFilterOperators.includes(
+                              selectedOperator as any
+                            )
+                          ) {
+                            return (
+                              <NumberInputField
                                 placeholder="Enter a value"
                                 value={condition.value as any}
                                 onChange={(event) => {

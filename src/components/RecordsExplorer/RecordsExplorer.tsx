@@ -819,6 +819,18 @@ export const BaseRecordsExplorer = <
                           return !String(fieldValue)
                             .toLowerCase()
                             .match(String(value).toLowerCase());
+                        case '=':
+                          return fieldValue === value;
+                        case '≠':
+                          return fieldValue !== value;
+                        case '<':
+                          return value && fieldValue < value;
+                        case '>':
+                          return value && fieldValue > value;
+                        case '≤':
+                          return value && fieldValue <= value;
+                        case '≥':
+                          return value && fieldValue >= value;
                         default:
                           return false;
                       }
