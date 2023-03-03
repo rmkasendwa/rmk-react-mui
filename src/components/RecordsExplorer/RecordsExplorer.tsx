@@ -590,7 +590,7 @@ export const BaseRecordsExplorer = <
     setSearchParams,
   } = useReactRouterDOMSearchParams({
     mode: 'json',
-    validator: Yup.object({
+    spec: {
       view: Yup.mixed<ViewOptionType>().oneOf([...viewOptionTypes]),
       groupBy: Yup.array().of(
         Yup.object({
@@ -615,9 +615,7 @@ export const BaseRecordsExplorer = <
           .of(
             Yup.object({
               fieldId: Yup.mixed<keyof RecordRow>().required(),
-              operator: Yup.mixed<FilterOperator>()
-                .oneOf([...filterOperators])
-                .required(),
+              operator: Yup.mixed<FilterOperator>().oneOf([...filterOperators]),
               value: Yup.mixed<string | number | (string | number)[]>(),
             })
           )
@@ -630,7 +628,7 @@ export const BaseRecordsExplorer = <
           .oneOf([...modifiedStateKeyTypes])
           .required()
       ),
-    }),
+    },
     id,
   });
 
@@ -712,7 +710,7 @@ export const BaseRecordsExplorer = <
       return {
         ...searchParamFilterBy,
         conjunction: searchParamFilterBy.conjunction || 'and',
-      };
+      } as typeof baseConditionGroup;
     }
     if (filterByProp && !modifiedStateKeys.includes('filterBy')) {
       return {
@@ -733,7 +731,10 @@ export const BaseRecordsExplorer = <
     // Filtering data
     const dataFilteredByFilterFields = (() => {
       if (filterFields) {
-        if (selectedConditionGroup.conditions.length > 0) {
+        if (
+          selectedConditionGroup &&
+          selectedConditionGroup.conditions.length > 0
+        ) {
           const emptyfilterOperators: FilterOperator[] = [
             'is empty',
             'is not empty',
