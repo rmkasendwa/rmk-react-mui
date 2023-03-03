@@ -2,7 +2,7 @@ import ListAltIcon from '@mui/icons-material/ListAlt';
 
 import { SelectedSortOption } from '../../interfaces/Sort';
 import { BaseDataRow } from '../../interfaces/Table';
-import { GroupableField } from './interfaces';
+import { GroupableField } from './models';
 import SortOperationFieldSelector from './SortOperationFieldSelector';
 
 export const expandedGroupsOptions = ['All', 'None'] as const;

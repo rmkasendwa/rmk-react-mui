@@ -45,7 +45,7 @@ import {
   filterConjunctions,
   numericFilterOperators,
   textFilterOperators,
-} from './interfaces';
+} from './models';
 
 export interface FilterButtonClasses {
   /** Styles applied to the root element. */

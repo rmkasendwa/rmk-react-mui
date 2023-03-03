@@ -87,7 +87,7 @@ import {
   SearchableProperty,
   filterConjunctions,
   filterOperators,
-} from './interfaces';
+} from './models';
 import SortButton from './SortButton';
 import ViewOptionsButton, {
   ViewOptionType,
