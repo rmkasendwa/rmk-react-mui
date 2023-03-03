@@ -152,58 +152,51 @@ export const useViewOptionsTool = ({
       return {
         color: 'inherit',
         ref: anchorRef,
-        label: (() => {
-          if (!expandOptions) {
-            return (
-              <>
-                {viewType}
-                <Popper
-                  open={open}
-                  anchorEl={anchorRef.current}
-                  transition
-                  placement="bottom-start"
-                  ref={(element) => {
-                    if (element) {
-                      element.style.zIndex = '1400';
-                    }
-                  }}
-                  tabIndex={-1}
-                >
-                  {({ TransitionProps }) => {
-                    return (
-                      <Grow {...TransitionProps}>
-                        <Box tabIndex={-1}>
-                          <ClickAwayListener onClickAway={handleClose}>
-                            <PaginatedDropdownOptionList
-                              options={options}
-                              minWidth={
-                                anchorRef.current
-                                  ? anchorRef.current.offsetWidth
-                                  : undefined
-                              }
-                              onClose={handleClose}
-                              selectedOptions={selectedOptions}
-                              onSelectOption={({ value }) => {
-                                onChangeViewType &&
-                                  onChangeViewType(value as any);
-                              }}
-                            />
-                          </ClickAwayListener>
-                        </Box>
-                      </Grow>
-                    );
-                  }}
-                </Popper>
-              </>
-            );
-          }
-        })(),
+        label: viewType,
         icon,
         endIcon: <ExpandMoreIcon />,
         type: 'button',
         onClick: () => {
           setOpen(true);
         },
+        popupElement: (
+          <Popper
+            open={open}
+            anchorEl={anchorRef.current}
+            transition
+            placement="bottom-start"
+            ref={(element) => {
+              if (element) {
+                element.style.zIndex = '1400';
+              }
+            }}
+            tabIndex={-1}
+          >
+            {({ TransitionProps }) => {
+              return (
+                <Grow {...TransitionProps}>
+                  <Box tabIndex={-1}>
+                    <ClickAwayListener onClickAway={handleClose}>
+                      <PaginatedDropdownOptionList
+                        options={options}
+                        minWidth={
+                          anchorRef.current
+                            ? anchorRef.current.offsetWidth
+                            : undefined
+                        }
+                        onClose={handleClose}
+                        selectedOptions={selectedOptions}
+                        onSelectOption={({ value }) => {
+                          onChangeViewType && onChangeViewType(value as any);
+                        }}
+                      />
+                    </ClickAwayListener>
+                  </Box>
+                </Grow>
+              );
+            }}
+          </Popper>
+        ),
       };
     })(),
   };

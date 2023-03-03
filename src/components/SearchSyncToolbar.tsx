@@ -44,6 +44,7 @@ export interface ButtonTool
   type: 'button';
   icon?: ReactNode;
   ref?: MutableRefObject<HTMLButtonElement | null>;
+  popupElement?: ReactNode;
 }
 
 export interface IconButtonTool
@@ -56,6 +57,7 @@ export interface IconButtonTool
   type: 'icon-button';
   icon?: ReactNode;
   ref?: MutableRefObject<HTMLButtonElement | null>;
+  popupElement?: ReactNode;
 }
 
 export interface ElementTool {
@@ -81,38 +83,50 @@ export const getToolNodes = (
         if ('type' in tool) {
           switch (tool.type) {
             case 'icon-button': {
-              const { label, icon, title, ...rest } = omit(tool, 'type');
+              const { label, icon, title, popupElement, ...rest } = omit(
+                tool,
+                'type'
+              );
               return (
-                <Tooltip
-                  title={title || label}
-                  PopperProps={{
-                    sx: {
-                      pointerEvents: 'none',
-                    },
-                  }}
-                >
-                  <IconButton {...rest}>{icon}</IconButton>
-                </Tooltip>
+                <>
+                  <Tooltip
+                    title={title || label}
+                    PopperProps={{
+                      sx: {
+                        pointerEvents: 'none',
+                      },
+                    }}
+                  >
+                    <IconButton {...rest}>{icon}</IconButton>
+                  </Tooltip>
+                  {popupElement}
+                </>
               );
             }
             case 'button': {
-              const { label, icon, title, sx, ...rest } = omit(tool, 'type');
+              const { label, icon, title, sx, popupElement, ...rest } = omit(
+                tool,
+                'type'
+              );
               const buttonElement = (() => {
                 if (!isLargeScreenSize) {
                   return (
-                    <Button
-                      {...rest}
-                      sx={{
-                        ...sx,
-                        minWidth: 'auto',
-                        px: 0.5,
-                        '&>svg': {
-                          fontSize: 16,
-                        },
-                      }}
-                    >
-                      {icon}
-                    </Button>
+                    <>
+                      <Button
+                        {...rest}
+                        sx={{
+                          ...sx,
+                          minWidth: 'auto',
+                          px: 0.5,
+                          '&>svg': {
+                            fontSize: 16,
+                          },
+                        }}
+                      >
+                        {icon}
+                      </Button>
+                      {popupElement}
+                    </>
                   );
                 }
                 return (
