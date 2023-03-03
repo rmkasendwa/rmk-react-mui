@@ -17,19 +17,22 @@ export type SetSearchParams<SearchParams = Record<string, string | null>> = (
   }
 ) => void;
 
-export function useReactRouterDOMSearchParams<TShape extends ObjectShape>({
-  validator,
+export function useReactRouterDOMSearchParams<
+  ValidationSpec extends ObjectShape,
+  SearchParamsObject = Yup.InferType<
+    OptionalObjectSchema<ValidationSpec, AnyObject, TypeOfShape<ValidationSpec>>
+  >
+>({
+  spec,
 }: {
   mode: 'json';
-  validator: OptionalObjectSchema<TShape, AnyObject, TypeOfShape<TShape>>;
+  spec: ValidationSpec;
   id?: string;
 }): {
-  searchParams: Partial<Yup.InferType<typeof validator>>;
+  searchParams: Partial<SearchParamsObject>;
   setSearchParams: SetSearchParams<
     Partial<{
-      [K in keyof Yup.InferType<typeof validator>]:
-        | Yup.InferType<typeof validator>[K]
-        | null;
+      [K in keyof SearchParamsObject]: SearchParamsObject[K] | null;
     }>
   >;
 };
@@ -44,13 +47,18 @@ export function useReactRouterDOMSearchParams(): {
   setSearchParams: SetSearchParams;
 };
 
-export function useReactRouterDOMSearchParams<TShape extends ObjectShape>({
+export function useReactRouterDOMSearchParams<
+  ValidationSpec extends ObjectShape,
+  SearchParamsObject = Yup.InferType<
+    OptionalObjectSchema<ValidationSpec, AnyObject, TypeOfShape<ValidationSpec>>
+  >
+>({
   mode,
-  validator = Yup.object(),
+  spec,
   id,
 }: {
   mode?: 'string' | 'json';
-  validator?: OptionalObjectSchema<TShape, AnyObject, TypeOfShape<TShape>>;
+  spec?: ValidationSpec;
   id?: string;
 } = {}) {
   const [searchParams, baseSetSearchParams] = useSearchParams();
@@ -128,6 +136,7 @@ export function useReactRouterDOMSearchParams<TShape extends ObjectShape>({
     ...(() => {
       switch (mode) {
         case 'json':
+          const validSearchParamKeys = Object.keys(spec!);
           const searchEntries = searchParams.entries();
           const allSearchParams: Record<string, string> = {};
           for (const [key, value] of searchEntries) {
@@ -140,29 +149,41 @@ export function useReactRouterDOMSearchParams<TShape extends ObjectShape>({
           return {
             searchParams: Object.keys(allSearchParams).reduce(
               (accumulator, key) => {
-                try {
-                  const objectKey = (() => {
-                    if (id) {
-                      return key.replace(
-                        new RegExp(`:${RegExp.escape(id)}$`),
-                        ''
+                const objectKey = (() => {
+                  if (id) {
+                    return key.replace(
+                      new RegExp(`:${RegExp.escape(id)}$`),
+                      ''
+                    );
+                  }
+                  return key;
+                })();
+                if (validSearchParamKeys.includes(objectKey)) {
+                  try {
+                    const searchParamsObject = {
+                      [objectKey]: JSON.parse(allSearchParams[key]),
+                    };
+                    Object.assign(
+                      accumulator,
+                      Yup.object({
+                        [objectKey]: spec![objectKey],
+                      }).validateSync(searchParamsObject)
+                    );
+                  } catch (err: any) {
+                    if (err.name === 'ValidationError') {
+                      console.error(
+                        `useReactRouterDOMSearchParams: search param `,
+                        err,
+                        {
+                          err,
+                        }
                       );
                     }
-                    return key;
-                  })();
-                  const searchParamsObject = {
-                    [objectKey]: JSON.parse(allSearchParams[key]),
-                  };
-                  Object.assign(
-                    accumulator,
-                    validator.validateSync(searchParamsObject)
-                  );
-                } catch (err) {
-                  console.error(`useReactRouterDOMSearchParams: Error`, err);
+                  }
                 }
                 return accumulator;
               },
-              {} as Partial<Yup.InferType<typeof validator>>
+              {} as Partial<SearchParamsObject>
             ),
           };
         case 'string':
