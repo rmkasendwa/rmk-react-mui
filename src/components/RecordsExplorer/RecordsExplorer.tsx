@@ -309,6 +309,7 @@ export const BaseRecordsExplorer = <
     sortBy: sortByProp,
     groupableFields: groupableFieldsProp,
     groupBy: groupByProp,
+    filterBy: filterByProp,
     views,
     view: viewProp,
     pathToAddNew,
@@ -341,8 +342,8 @@ export const BaseRecordsExplorer = <
   const lowercaseRecordLabelPlural = recordLabelPlural.toLowerCase();
   const lowercaseRecordLabelSingular = recordLabelSingular.toLowerCase();
 
-  const { sx: headerPropsSx, ...headerPropsRest } = HeaderProps;
-  const { sx: bodyPropsSx, ...bodyPropsRest } = BodyProps;
+  const { sx: HeaderPropsSx, ...HeaderPropsRest } = HeaderProps;
+  const { sx: BodyPropsSx, ...BodyPropsRest } = BodyProps;
 
   // Refs
   const isInitialMountRef = useRef(true);
@@ -709,6 +710,12 @@ export const BaseRecordsExplorer = <
       return {
         ...searchParamFilterBy,
         conjunction: searchParamFilterBy.conjunction || 'and',
+      };
+    }
+    if (filterByProp && !modifiedStateKeys.includes('filterBy')) {
+      return {
+        ...filterByProp,
+        conjunction: filterByProp.conjunction || 'and',
       };
     }
     return baseConditionGroup;
@@ -1398,10 +1405,10 @@ export const BaseRecordsExplorer = <
     >
       <Paper
         elevation={0}
-        {...headerPropsRest}
+        {...HeaderPropsRest}
         ref={headerElementRef}
         component="header"
-        sx={{ position: 'sticky', top: 0, zIndex: 10, ...headerPropsSx }}
+        sx={{ position: 'sticky', top: 0, zIndex: 10, ...HeaderPropsSx }}
       >
         <SearchSyncToolbar
           {...{
@@ -1581,11 +1588,11 @@ export const BaseRecordsExplorer = <
         <Divider />
       </Paper>
       <Box
-        {...bodyPropsRest}
+        {...BodyPropsRest}
         component="section"
         sx={{
           position: 'relative',
-          ...bodyPropsSx,
+          ...BodyPropsSx,
           ...(() => {
             if (fillContentArea) {
               return {
