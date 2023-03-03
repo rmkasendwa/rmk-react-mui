@@ -308,7 +308,7 @@ export const BaseRecordsExplorer = <
     sortableFields: sortableFieldsProp,
     sortBy,
     groupableFields: groupableFieldsProp,
-    groupBy,
+    groupBy: groupByProp,
     views,
     view: viewProp,
     pathToAddNew,
@@ -668,7 +668,13 @@ export const BaseRecordsExplorer = <
       {} as Record<keyof RecordRow, typeof groupableFields[number]>
     );
 
-    return searchParamGroupBy
+    return (
+      groupByProp &&
+      !modifiedStateKeys.includes('groupBy') &&
+      searchParamGroupBy.length <= 0
+        ? groupByProp
+        : searchParamGroupBy
+    )
       .filter(({ id }) => {
         return groupByParams[id];
       })
@@ -676,6 +682,12 @@ export const BaseRecordsExplorer = <
         return {
           ...groupByParam,
           ...groupByParams[groupByParam.id],
+        };
+      })
+      .map((groupByParam) => {
+        return {
+          ...groupByParam,
+          sortDirection: groupByParam.sortDirection || 'ASC',
         };
       });
   })();
@@ -1440,7 +1452,6 @@ export const BaseRecordsExplorer = <
                   <GroupButton
                     {...{
                       groupableFields,
-                      groupBy,
                       getGroupableData,
                       id,
                     }}

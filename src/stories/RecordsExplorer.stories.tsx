@@ -66,3 +66,9 @@ Timeline.args = {
   ...baseArgs,
   view: 'Timeline',
 } as RecordsExplorerProps;
+
+export const WithDefaultGroupByOption = Template.bind({});
+WithDefaultGroupByOption.args = {
+  ...baseArgs,
+  groupBy: [{ id: 'status' }],
+} as RecordsExplorerProps;
