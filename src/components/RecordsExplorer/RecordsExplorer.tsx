@@ -74,8 +74,8 @@ import RenderIfVisible from '../RenderIfVisible';
 import SearchSyncToolbar, { Tool } from '../SearchSyncToolbar';
 import Table, { TableProps, tableClasses } from '../Table';
 import TimelineChart, { TimelineChartProps } from '../TimelineChart';
-import GroupButton from './GroupButton';
 import { useFilterTool } from './hooks/FilterTool';
+import { useGroupTool } from './hooks/GroupTool';
 import {
   ViewOptionType,
   ViewOptionsToolOptions,
@@ -944,6 +944,30 @@ export const BaseRecordsExplorer = <
     },
   });
 
+  const groupTool = useGroupTool({
+    groupableFields,
+    getGroupableData,
+    selectedGroupParams: activeGroupParams,
+    onChangeSelectedGroupParams: (groupParams) => {
+      setSearchParams(
+        {
+          groupBy: groupParams.map(({ id, sortDirection }) => {
+            return {
+              id,
+              sortDirection,
+            };
+          }),
+          modifiedKeys: [
+            ...new Set([...modifiedStateKeys, 'groupBy']),
+          ] as typeof modifiedStateKeys,
+        },
+        {
+          replace: true,
+        }
+      );
+    },
+  });
+
   const filterTool = useFilterTool({
     data,
     filterFields,
@@ -1497,33 +1521,7 @@ export const BaseRecordsExplorer = <
               }
 
               if (groupableFields) {
-                tools.push(
-                  <GroupButton
-                    {...{
-                      groupableFields,
-                      getGroupableData,
-                    }}
-                    selectedGroupParams={activeGroupParams}
-                    onChangeSelectedGroupParams={(groupParams) => {
-                      setSearchParams(
-                        {
-                          groupBy: groupParams.map(({ id, sortDirection }) => {
-                            return {
-                              id,
-                              sortDirection,
-                            };
-                          }),
-                          modifiedKeys: [
-                            ...new Set([...modifiedStateKeys, 'groupBy']),
-                          ] as typeof modifiedStateKeys,
-                        },
-                        {
-                          replace: true,
-                        }
-                      );
-                    }}
-                  />
-                );
+                tools.push(groupTool);
               }
 
               if (sortableFields) {
