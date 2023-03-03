@@ -297,7 +297,7 @@ export const useSortOperationFieldSelectorTool = <
                   transition
                   placement="bottom-start"
                   sx={{
-                    zIndex: 10,
+                    zIndex: 9999,
                   }}
                 >
                   {({ TransitionProps }) => {
