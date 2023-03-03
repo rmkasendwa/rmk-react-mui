@@ -27,7 +27,7 @@ import SortIcon from '../../Icons/SortIcon';
 import DataDropdownField from '../../InputFields/DataDropdownField';
 import PaginatedDropdownOptionList from '../../PaginatedDropdownOptionList';
 
-export interface SortOperationFieldSelectorTool<
+export interface SortOperationFieldSelectorToolOptions<
   RecordRow extends BaseDataRow = any
 > extends Partial<PopupToolOptions> {
   sortableFields: SortableFields<RecordRow>;
@@ -55,7 +55,7 @@ export const useSortOperationFieldSelectorTool = <
   selectedSortParams,
   onChangeSelectedSortParams,
   ...rest
-}: SortOperationFieldSelectorTool<RecordRow>) => {
+}: SortOperationFieldSelectorToolOptions<RecordRow>) => {
   title || (title = `${sortLabel} by`);
 
   const unselectedSortableFieldsAnchorRef = useRef<HTMLButtonElement | null>(
