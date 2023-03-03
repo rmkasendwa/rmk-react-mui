@@ -1510,7 +1510,7 @@ export const BaseRecordsExplorer = <
         {...HeaderPropsRest}
         ref={headerElementRef}
         component="header"
-        sx={{ position: 'sticky', top: 0, zIndex: 10, ...HeaderPropsSx }}
+        sx={{ position: 'sticky', top: 0, zIndex: 100, ...HeaderPropsSx }}
       >
         <SearchSyncToolbar
           {...{
@@ -1661,22 +1661,26 @@ export const BaseRecordsExplorer = <
     </Paper>
   );
 
-  return (
-    <FixedHeaderContentArea
-      {...{ title }}
-      BodyProps={{
-        sx: {
-          display: 'flex',
-          flexDirection: 'column',
-        },
-      }}
-      sx={{
-        px: 0,
-      }}
-    >
-      {explorerElement}
-    </FixedHeaderContentArea>
-  );
+  if (fillContentArea) {
+    return (
+      <FixedHeaderContentArea
+        {...{ title }}
+        BodyProps={{
+          sx: {
+            display: 'flex',
+            flexDirection: 'column',
+          },
+        }}
+        sx={{
+          px: 0,
+        }}
+      >
+        {explorerElement}
+      </FixedHeaderContentArea>
+    );
+  }
+
+  return explorerElement;
 };
 
 export const RecordsExplorer = forwardRef(BaseRecordsExplorer) as <
