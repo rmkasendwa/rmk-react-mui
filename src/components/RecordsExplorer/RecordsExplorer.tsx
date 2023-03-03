@@ -58,7 +58,10 @@ import { BaseDataRow, TableColumnType } from '../../interfaces/Table';
 import { PermissionCode } from '../../interfaces/Users';
 import { PrimitiveDataType } from '../../interfaces/Utils';
 import { sort } from '../../utils/Sort';
-import { getTableMinWidth } from '../../utils/Table';
+import {
+  getTableMinWidth,
+  mapTableColumnTypeToPrimitiveDataType,
+} from '../../utils/Table';
 import CollapsibleSection from '../CollapsibleSection';
 import DataTablePagination from '../DataTablePagination';
 import FixedHeaderContentArea, {
@@ -443,20 +446,19 @@ export const BaseRecordsExplorer = <
         if (listView) {
           sortableFields.push(
             ...listView.columns
-              .filter(({ id, label, type = 'string' }) => {
+              .filter(({ id, label }) => {
                 return (
                   typeof label === 'string' &&
                   !sortableFields.find(
                     ({ id: sortableFieldId }) => sortableFieldId === id
-                  ) &&
-                  PRIMITIVE_DATA_TYPES.includes(type as PrimitiveDataType)
+                  )
                 );
               })
               .map(({ id, label, type = 'string' }) => {
                 return {
                   id,
                   label: String(label),
-                  type: type as PrimitiveDataType,
+                  type: mapTableColumnTypeToPrimitiveDataType(type),
                 };
               })
           );
@@ -480,20 +482,19 @@ export const BaseRecordsExplorer = <
         if (listView) {
           filterFields.push(
             ...listView.columns
-              .filter(({ id, label, type = 'string' }) => {
+              .filter(({ id, label }) => {
                 return (
                   typeof label === 'string' &&
                   !filterFields.find(
                     ({ id: filterFieldId }) => filterFieldId === id
-                  ) &&
-                  PRIMITIVE_DATA_TYPES.includes(type as PrimitiveDataType)
+                  )
                 );
               })
               .map(({ id, label, type = 'string', getColumnValue }) => {
                 return {
                   id,
                   label: String(label),
-                  type: type as any,
+                  type: mapTableColumnTypeToPrimitiveDataType(type) as any,
                   getFieldOptionLabel:
                     ENUM_TABLE_COLUMN_TYPES.includes(type) && getColumnValue
                       ? getColumnValue

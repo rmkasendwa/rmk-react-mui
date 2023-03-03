@@ -398,6 +398,7 @@ export const BaseFilterButton = <RecordRow extends BaseDataRow>(
                         }}
                       >
                         <DataDropdownField
+                          placeholder="Select an operator"
                           value={selectedOperator}
                           onChange={(event) => {
                             if (event.target.value) {
