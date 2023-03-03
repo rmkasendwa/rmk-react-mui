@@ -36,7 +36,10 @@ export interface Tool
   ref?: MutableRefObject<HTMLButtonElement | null>;
 }
 
-export const getToolNodes = (tools: (ReactNode | Tool)[]) => {
+export const getToolNodes = (
+  tools: (ReactNode | Tool)[],
+  isLargeScreenSize: boolean
+) => {
   return tools.map((tool) => {
     if (tool && typeof tool === 'object' && 'type' in tool) {
       const { label, type, icon, ref, sx, ...rest } = tool as Tool;
@@ -55,6 +58,24 @@ export const getToolNodes = (tools: (ReactNode | Tool)[]) => {
             </Tooltip>
           );
         case 'button':
+          if (!isLargeScreenSize) {
+            return (
+              <Button
+                {...rest}
+                {...{ ref }}
+                sx={{
+                  ...sx,
+                  minWidth: 'auto',
+                  px: 0.5,
+                  '&>svg': {
+                    fontSize: 16,
+                  },
+                }}
+              >
+                {icon}
+              </Button>
+            );
+          }
           return (
             <Button startIcon={icon} {...rest} {...{ ref, sx }}>
               {label}
@@ -139,6 +160,7 @@ export const SearchSyncToolbar: FC<SearchSyncToolbarProps> = ({
   const { sx: titlePropsSx, ...titlePropsRest } = TitleProps;
 
   const { breakpoints } = useTheme();
+  const isLargeScreenSize = useMediaQuery(breakpoints.up(1200));
   const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -188,13 +210,15 @@ export const SearchSyncToolbar: FC<SearchSyncToolbarProps> = ({
       >
         {(() => {
           if (preTitleTools && !isSmallScreenSize) {
-            return getToolNodes(preTitleTools).map((tool, index) => {
-              return (
-                <Grid item key={index} sx={{ minWidth: 0 }}>
-                  {tool}
-                </Grid>
-              );
-            });
+            return getToolNodes(preTitleTools, isLargeScreenSize).map(
+              (tool, index) => {
+                return (
+                  <Grid item key={index} sx={{ minWidth: 0 }}>
+                    {tool}
+                  </Grid>
+                );
+              }
+            );
           }
         })()}
         {(() => {
@@ -331,7 +355,7 @@ export const SearchSyncToolbar: FC<SearchSyncToolbarProps> = ({
         })()}
         {(() => {
           if (tools && !isSmallScreenSize) {
-            return getToolNodes(tools).map((tool, index) => {
+            return getToolNodes(tools, isLargeScreenSize).map((tool, index) => {
               return (
                 <Grid item key={index} sx={{ minWidth: 0 }}>
                   {tool}
