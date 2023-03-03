@@ -23,6 +23,7 @@ type Contact = {
   phoneNumber: string;
   status: 'Active' | 'Pending';
   email: string;
+  accountBalance: number;
 };
 
 const dataSet = Array.from({ length: 500 }).map((_, index) => {
@@ -34,6 +35,7 @@ const dataSet = Array.from({ length: 500 }).map((_, index) => {
     phoneNumber: createMobilePhoneNumber('UK'),
     status: ['Active', 'Pending'][Math.floor(Math.random() * 2)],
     email: randomEmail(),
+    accountBalance: Math.round(Math.random() * 1000_000),
   } as Contact;
 });
 
@@ -47,6 +49,12 @@ const baseArgs = {
         { id: 'status', label: 'Status', type: 'enum', width: 100 },
         { id: 'phoneNumber', label: 'Phone Number', type: 'phoneNumber' },
         { id: 'email', label: 'Email', type: 'email' },
+        {
+          id: 'accountBalance',
+          label: 'Account Balance',
+          type: 'currency',
+          width: 200,
+        },
       ],
     },
     {
@@ -91,7 +99,7 @@ WithDefaultFilterFormula.args = {
   filterBy: {
     conditions: [
       { fieldId: 'name', operator: 'contains', value: 'ad' },
-      { fieldId: 'status', operator: '=', value: 'Pending' },
+      { fieldId: 'status', operator: 'is', value: 'Pending' },
     ],
   },
 } as RecordsExplorerProps;
