@@ -127,3 +127,9 @@ WithDefaultFilterFormula.args = {
     ],
   },
 } as RecordsExplorerProps;
+
+export const WithPathToAddNew = Template.bind({});
+WithPathToAddNew.args = {
+  ...baseArgs,
+  pathToAddNew: '/contacts/new',
+} as RecordsExplorerProps;
