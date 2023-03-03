@@ -132,7 +132,17 @@ const PRIMITIVE_DATA_TYPES: PrimitiveDataType[] = [
   'string',
 ];
 
-const ENUM_TABLE_COLUMN_TYPES: TableColumnType[] = ['enum', 'email'];
+const ENUM_TABLE_COLUMN_TYPES: TableColumnType[] = ['enum'];
+
+const modifiedStateKeyTypes = [
+  'view',
+  'groupBy',
+  'sortBy',
+  'filterBy',
+  'selectedColumns',
+] as const;
+
+type ModifiedStatKey = typeof modifiedStateKeyTypes[number];
 
 export interface BaseDataView {
   type: ViewOptionType;
@@ -165,8 +175,10 @@ export interface RecordsExplorerFunctionChildren<State> {
   (state: State): ReactNode;
 }
 
-export interface RecordsExplorerProps<RecordRow extends BaseDataRow = any>
-  extends Partial<Omit<PaperProps, 'title' | 'children'>>,
+export interface RecordsExplorerProps<
+  RecordRow extends BaseDataRow = any,
+  View extends ViewOptionType = ViewOptionType
+> extends Partial<Omit<PaperProps, 'title' | 'children'>>,
     Partial<Pick<FixedHeaderContentAreaProps, 'title'>> {
   rows?: RecordRow[];
   title?: ReactNode;
@@ -214,6 +226,7 @@ export interface RecordsExplorerProps<RecordRow extends BaseDataRow = any>
    * List of predefined data views to render input data.
    */
   views?: DataView<RecordRow>[];
+  view?: View;
   /**
    * Page path to create a new data record.
    */
@@ -269,8 +282,11 @@ const slots = {
   root: ['root'],
 };
 
-export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
-  inProps: RecordsExplorerProps<RecordRow>,
+export const BaseRecordsExplorer = <
+  RecordRow extends BaseDataRow,
+  View extends ViewOptionType = ViewOptionType
+>(
+  inProps: RecordsExplorerProps<RecordRow, View>,
   ref: Ref<HTMLDivElement>
 ) => {
   const props = useThemeProps({ props: inProps, name: 'MuiRecordsExplorer' });
@@ -290,10 +306,11 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
     ViewOptionsButtonProps,
     filterFields: filterFieldsProp,
     sortableFields: sortableFieldsProp,
-    sortBy,
+    sortBy: sortByProp,
     groupableFields: groupableFieldsProp,
-    groupBy,
+    groupBy: groupByProp,
     views,
+    view: viewProp,
     pathToAddNew,
     permissionToAddNew,
     hideAddNewButtonOnNoFilteredData = false,
@@ -566,8 +583,9 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
       filterBy: searchParamFilterBy,
       selectedColumns: searchParamSelectedColumns,
       expandedGroups: searchParamExpandedGroups,
+      modifiedKeys: modifiedStateKeys = [],
     },
-    setSearchParams: setJSONSearchParams,
+    setSearchParams,
   } = useReactRouterDOMSearchParams({
     mode: 'json',
     validator: Yup.object({
@@ -605,27 +623,22 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
       }),
       search: Yup.string(),
       selectedColumns: Yup.array().of(Yup.string().required()),
+      modifiedKeys: Yup.array().of(
+        Yup.mixed<ModifiedStatKey>()
+          .oneOf([...modifiedStateKeyTypes])
+          .required()
+      ),
     }),
   });
 
-  const viewType = searchParamView || 'List';
-
-  const activeSortParams = (() => {
-    const sortByParams = sortableFields.reduce((accumulator, sortByParam) => {
-      accumulator[sortByParam.id] = sortByParam;
-      return accumulator;
-    }, {} as Record<keyof RecordRow, typeof sortableFields[number]>);
-
-    return searchParamSortBy
-      .filter(({ id }) => {
-        return sortByParams[id];
-      })
-      .map((sortByParam) => {
-        return {
-          ...sortByParam,
-          ...sortByParams[sortByParam.id],
-        };
-      });
+  const viewType = (() => {
+    if (searchParamView) {
+      return searchParamView as View;
+    }
+    if (viewProp && !modifiedStateKeys.includes('view')) {
+      return viewProp;
+    }
+    return 'List' as View;
   })();
 
   const activeGroupParams = (() => {
@@ -637,7 +650,13 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
       {} as Record<keyof RecordRow, typeof groupableFields[number]>
     );
 
-    return searchParamGroupBy
+    return (
+      groupByProp &&
+      !modifiedStateKeys.includes('groupBy') &&
+      searchParamGroupBy.length <= 0
+        ? groupByProp
+        : searchParamGroupBy
+    )
       .filter(({ id }) => {
         return groupByParams[id];
       })
@@ -645,6 +664,42 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
         return {
           ...groupByParam,
           ...groupByParams[groupByParam.id],
+        };
+      })
+      .map((groupByParam) => {
+        return {
+          ...groupByParam,
+          sortDirection: groupByParam.sortDirection || 'ASC',
+        };
+      });
+  })();
+
+  const activeSortParams = (() => {
+    const sortByParams = sortableFields.reduce((accumulator, sortByParam) => {
+      accumulator[sortByParam.id] = sortByParam;
+      return accumulator;
+    }, {} as Record<keyof RecordRow, typeof sortableFields[number]>);
+
+    return (
+      sortByProp &&
+      !modifiedStateKeys.includes('sortBy') &&
+      searchParamSortBy.length <= 0
+        ? sortByProp
+        : searchParamSortBy
+    )
+      .filter(({ id }) => {
+        return sortByParams[id];
+      })
+      .map((sortByParam) => {
+        return {
+          ...sortByParam,
+          ...sortByParams[sortByParam.id],
+        };
+      })
+      .map((sortByParams) => {
+        return {
+          ...sortByParams,
+          sortDirection: sortByParams.sortDirection || 'ASC',
         };
       });
   })();
@@ -855,7 +910,7 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
   }, []);
 
   const resetToDefaultView = () => {
-    setJSONSearchParams(
+    setSearchParams(
       {
         view: null,
         sortBy: null,
@@ -864,6 +919,7 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
         selectedColumns: null,
         expandedGroups: null,
         filterBy: null,
+        modifiedKeys: null,
       },
       {
         replace: true,
@@ -950,7 +1006,7 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
                           )
                           .join(',')
                       ) {
-                        setJSONSearchParams(
+                        setSearchParams(
                           {
                             sortBy: sortOptions
                               .map((sortBy) => {
@@ -972,6 +1028,9 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
                                   sortDirection: sortDirection || 'ASC',
                                 } as SelectedSortOption<RecordRow>;
                               }),
+                            modifiedKeys: [
+                              ...new Set([...modifiedStateKeys, 'sortBy']),
+                            ] as typeof modifiedStateKeys,
                           },
                           {
                             replace: true,
@@ -981,13 +1040,19 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
                     },
                     onChangeSelectedColumnIds: (localSelectedColumnIds) => {
                       if (selectedColumnIds !== localSelectedColumnIds) {
-                        setJSONSearchParams(
+                        setSearchParams(
                           {
                             selectedColumns: localSelectedColumnIds.map(
                               (selectedColumnId) => {
                                 return String(selectedColumnId);
                               }
                             ),
+                            modifiedKeys: [
+                              ...new Set([
+                                ...modifiedStateKeys,
+                                'selectedColumns',
+                              ]),
+                            ] as typeof modifiedStateKeys,
                           },
                           {
                             replace: true,
@@ -1058,7 +1123,7 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
                         >
                           <Box
                             onClick={() => {
-                              setJSONSearchParams(
+                              setSearchParams(
                                 {
                                   expandedGroups: allGroupsExpanded
                                     ? 'None'
@@ -1206,7 +1271,7 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
                                       } else {
                                         groups.includes(id) || groups.push(id);
                                       }
-                                      setJSONSearchParams(
+                                      setSearchParams(
                                         {
                                           expandedGroups: (() => {
                                             if (groups.length > 0) {
@@ -1378,9 +1443,12 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
                     {...ViewOptionsButtonProps}
                     {...{ viewType }}
                     onChangeViewType={(view) => {
-                      setJSONSearchParams(
+                      setSearchParams(
                         {
                           view,
+                          modifiedKeys: [
+                            ...new Set([...modifiedStateKeys, 'view']),
+                          ] as typeof modifiedStateKeys,
                         },
                         {
                           replace: true,
@@ -1396,13 +1464,11 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
                   <GroupButton
                     {...{
                       groupableFields,
-                      groupBy,
                       getGroupableData,
-                      id,
                     }}
                     selectedGroupParams={activeGroupParams}
                     onChangeSelectedGroupParams={(groupParams) => {
-                      setJSONSearchParams(
+                      setSearchParams(
                         {
                           groupBy: groupParams.map(({ id, sortDirection }) => {
                             return {
@@ -1410,6 +1476,9 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
                               sortDirection,
                             };
                           }),
+                          modifiedKeys: [
+                            ...new Set([...modifiedStateKeys, 'groupBy']),
+                          ] as typeof modifiedStateKeys,
                         },
                         {
                           replace: true,
@@ -1423,10 +1492,10 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
               if (sortableFields) {
                 tools.push(
                   <SortButton
-                    {...{ sortableFields, sortBy, id }}
+                    {...{ sortableFields }}
                     selectedSortParams={activeSortParams}
                     onChangeSelectedSortParams={(sortParams) => {
-                      setJSONSearchParams(
+                      setSearchParams(
                         {
                           sortBy: sortParams.map(({ id, sortDirection }) => {
                             return {
@@ -1434,6 +1503,9 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
                               sortDirection,
                             };
                           }),
+                          modifiedKeys: [
+                            ...new Set([...modifiedStateKeys, 'sortBy']),
+                          ] as typeof modifiedStateKeys,
                         },
                         {
                           replace: true,
@@ -1450,9 +1522,12 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
                     {...{ data, filterFields, id }}
                     selectedConditionGroup={activeConditionGroup}
                     onChangeSelectedConditionGroup={(conditionGroup) => {
-                      setJSONSearchParams(
+                      setSearchParams(
                         {
                           filterBy: conditionGroup as any,
+                          modifiedKeys: [
+                            ...new Set([...modifiedStateKeys, 'filterBy']),
+                          ] as typeof modifiedStateKeys,
                         },
                         { replace: true }
                       );
@@ -1461,14 +1536,7 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
                 );
               }
 
-              if (
-                searchParamView ||
-                searchParamGroupBy ||
-                searchParamSortBy ||
-                searchParamFilterBy ||
-                searchParamSelectedColumns ||
-                searchTerm
-              ) {
+              if (modifiedStateKeys.length > 0) {
                 tools.push(
                   <Tooltip title="Reset to default view">
                     <IconButton
@@ -1486,7 +1554,7 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
             })(),
           ]}
           onChangeSearchTerm={(searchTerm: string) => {
-            setJSONSearchParams(
+            setSearchParams(
               {
                 search: (() => {
                   if (searchTerm) {
@@ -1599,9 +1667,10 @@ export const BaseRecordsExplorer = <RecordRow extends BaseDataRow>(
 };
 
 export const RecordsExplorer = forwardRef(BaseRecordsExplorer) as <
-  RecordRow extends BaseDataRow
+  RecordRow extends BaseDataRow,
+  View extends ViewOptionType = ViewOptionType
 >(
-  p: RecordsExplorerProps<RecordRow> & { ref?: Ref<HTMLDivElement> }
+  p: RecordsExplorerProps<RecordRow, View> & { ref?: Ref<HTMLDivElement> }
 ) => ReactElement;
 
 export default RecordsExplorer;

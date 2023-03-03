@@ -37,8 +37,7 @@ const dataSet = Array.from({ length: 500 }).map((_, index) => {
   } as Contact;
 });
 
-export const Default = Template.bind({});
-Default.args = {
+const baseArgs = {
   data: dataSet,
   views: [
     {
@@ -55,4 +54,33 @@ Default.args = {
     },
   ],
   recordLabelPlural: 'Contacts',
+} as RecordsExplorerProps;
+
+export const Default = Template.bind({});
+Default.args = {
+  ...baseArgs,
+} as RecordsExplorerProps;
+
+export const Timeline = Template.bind({});
+Timeline.args = {
+  ...baseArgs,
+  view: 'Timeline',
+} as RecordsExplorerProps;
+
+export const WithDefaultGroupByOption = Template.bind({});
+WithDefaultGroupByOption.args = {
+  ...baseArgs,
+  groupBy: [{ id: 'status' }],
+} as RecordsExplorerProps;
+
+export const WithDefaultSortByOption = Template.bind({});
+WithDefaultSortByOption.args = {
+  ...baseArgs,
+  sortBy: [{ id: 'name' }],
+} as RecordsExplorerProps;
+
+export const WithDefaultMultipleSortFields = Template.bind({});
+WithDefaultMultipleSortFields.args = {
+  ...baseArgs,
+  sortBy: [{ id: 'name' }, { id: 'status', sortDirection: 'DESC' }],
 } as RecordsExplorerProps;
