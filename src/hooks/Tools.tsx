@@ -13,15 +13,16 @@ import {
 } from '@mui/material';
 import { ReactNode, useRef, useState } from 'react';
 
-import { Tool } from '../components/SearchSyncToolbar';
+import { ButtonTool } from '../components/SearchSyncToolbar';
 
-export interface PopupToolOptions extends Partial<Tool> {
-  popupCardTitle: ReactNode;
+export interface PopupToolOptions extends Partial<ButtonTool> {
   bodyContent: ReactNode;
   label: ReactNode;
+  popupCardTitle?: ReactNode;
   BodyContentProps?: Partial<CardContentProps>;
   footerContent?: ReactNode;
   icon?: ReactNode;
+  wrapBodyContentInCard?: boolean;
 }
 
 export const usePopupTool = ({
@@ -31,6 +32,7 @@ export const usePopupTool = ({
   bodyContent,
   BodyContentProps = {},
   footerContent,
+  wrapBodyContentInCard = true,
   ...rest
 }: PopupToolOptions) => {
   const { sx: BodyContentPropsSx, ...BodyContentPropsRest } = BodyContentProps;
@@ -39,7 +41,55 @@ export const usePopupTool = ({
   const { palette } = useTheme();
   const [open, setOpen] = useState(false);
 
-  const tool: Tool = {
+  const bodyContentElement = (() => {
+    if (wrapBodyContentInCard) {
+      return (
+        <Card>
+          {(() => {
+            if (popupCardTitle) {
+              return (
+                <>
+                  {popupCardTitle}
+                  <Divider />
+                </>
+              );
+            }
+          })()}
+          <CardContent
+            {...BodyContentPropsRest}
+            sx={{
+              maxHeight: `calc(100vh - 210px)`,
+              minWidth: 400,
+              overflowY: 'auto',
+              bgcolor: alpha(palette.background.paper, 0.7),
+              backdropFilter: `blur(20px)`,
+              '&,&:last-child': {
+                py: 1,
+              },
+              px: 2,
+              ...BodyContentPropsSx,
+            }}
+          >
+            {bodyContent}
+          </CardContent>
+          {footerContent ? (
+            <CardActions
+              sx={{
+                bgcolor: alpha(palette.text.primary, 0.05),
+                px: 3,
+                py: 0.5,
+              }}
+            >
+              {footerContent}
+            </CardActions>
+          ) : null}
+        </Card>
+      );
+    }
+    return bodyContent;
+  })();
+
+  const tool: ButtonTool = {
     color: 'inherit',
     ...rest,
     ref: anchorRef,
@@ -60,40 +110,7 @@ export const usePopupTool = ({
               <Grow {...TransitionProps}>
                 <Box>
                   <ClickAwayListener onClickAway={() => setOpen(false)}>
-                    <Box>
-                      <Card>
-                        {popupCardTitle}
-                        <Divider />
-                        <CardContent
-                          {...BodyContentPropsRest}
-                          sx={{
-                            maxHeight: `calc(100vh - 210px)`,
-                            minWidth: 400,
-                            overflowY: 'auto',
-                            bgcolor: alpha(palette.background.paper, 0.7),
-                            backdropFilter: `blur(20px)`,
-                            '&,&:last-child': {
-                              py: 1,
-                            },
-                            px: 2,
-                            ...BodyContentPropsSx,
-                          }}
-                        >
-                          {bodyContent}
-                        </CardContent>
-                        {footerContent ? (
-                          <CardActions
-                            sx={{
-                              bgcolor: alpha(palette.text.primary, 0.05),
-                              px: 3,
-                              py: 0.5,
-                            }}
-                          >
-                            {footerContent}
-                          </CardActions>
-                        ) : null}
-                      </Card>
-                    </Box>
+                    <Box>{bodyContentElement}</Box>
                   </ClickAwayListener>
                 </Box>
               </Grow>
