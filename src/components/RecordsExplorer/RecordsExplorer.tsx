@@ -24,6 +24,7 @@ import {
   tableCellClasses,
   tableContainerClasses,
   tableHeadClasses,
+  useMediaQuery,
   useTheme,
   useThemeProps,
 } from '@mui/material';
@@ -320,6 +321,7 @@ export const BaseRecordsExplorer = <
     filterBySearchTerm,
     searchableFields: searchableFieldsProp,
     getGroupableData,
+    id,
     ...rest
   } = omit(props, 'recordLabelSingular');
 
@@ -373,7 +375,8 @@ export const BaseRecordsExplorer = <
     views,
   ]);
 
-  const { palette } = useTheme();
+  const { palette, breakpoints } = useTheme();
+  const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
 
   // Resolving data operation fields
   const {
@@ -619,7 +622,7 @@ export const BaseRecordsExplorer = <
             })
           )
           .required(),
-      }),
+      }).default(undefined),
       search: Yup.string(),
       selectedColumns: Yup.array().of(Yup.string().required()),
       modifiedKeys: Yup.array().of(
@@ -628,6 +631,7 @@ export const BaseRecordsExplorer = <
           .required()
       ),
     }),
+    id,
   });
 
   const viewType = (() => {
@@ -1637,7 +1641,7 @@ export const BaseRecordsExplorer = <
           return children;
         })()}
       </Box>
-      {filteredData.length > 0 ? (
+      {!isSmallScreenSize && filteredData.length > 0 ? (
         <Paper
           elevation={0}
           component="footer"

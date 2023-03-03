@@ -1,7 +1,9 @@
+import '@infinite-debugger/rmk-js-extensions/RegExp';
+
 import hash from 'object-hash';
 import { useCallback, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { InferType, object } from 'yup';
+import * as Yup from 'yup';
 import { ObjectShape, OptionalObjectSchema, TypeOfShape } from 'yup/lib/object';
 import { AnyObject } from 'yup/lib/types';
 
@@ -16,17 +18,17 @@ export type SetSearchParams<SearchParams = Record<string, string | null>> = (
 ) => void;
 
 export function useReactRouterDOMSearchParams<TShape extends ObjectShape>({
-  mode,
   validator,
 }: {
   mode: 'json';
   validator: OptionalObjectSchema<TShape, AnyObject, TypeOfShape<TShape>>;
+  id?: string;
 }): {
-  searchParams: Partial<InferType<typeof validator>>;
+  searchParams: Partial<Yup.InferType<typeof validator>>;
   setSearchParams: SetSearchParams<
     Partial<{
-      [K in keyof InferType<typeof validator>]:
-        | InferType<typeof validator>[K]
+      [K in keyof Yup.InferType<typeof validator>]:
+        | Yup.InferType<typeof validator>[K]
         | null;
     }>
   >;
@@ -44,10 +46,12 @@ export function useReactRouterDOMSearchParams(): {
 
 export function useReactRouterDOMSearchParams<TShape extends ObjectShape>({
   mode,
-  validator = object(),
+  validator = Yup.object(),
+  id,
 }: {
   mode?: 'string' | 'json';
   validator?: OptionalObjectSchema<TShape, AnyObject, TypeOfShape<TShape>>;
+  id?: string;
 } = {}) {
   const [searchParams, baseSetSearchParams] = useSearchParams();
   const baseSetSearchParamsRef = useRef(baseSetSearchParams);
@@ -83,10 +87,18 @@ export function useReactRouterDOMSearchParams<TShape extends ObjectShape>({
               }, {} as Record<string, string | null>);
             case 'json':
               return keys.reduce((accumulator, key) => {
+                const searchParamKey = (() => {
+                  if (id) {
+                    return `${key}:${id}`;
+                  }
+                  return key;
+                })();
                 if (searchParams[key] == null) {
-                  accumulator[key] = searchParams[key];
+                  accumulator[searchParamKey] = searchParams[key];
                 } else {
-                  accumulator[key] = JSON.stringify(searchParams[key]);
+                  accumulator[searchParamKey] = JSON.stringify(
+                    searchParams[key]
+                  );
                 }
                 return accumulator;
               }, {} as Record<string, string | null>);
@@ -109,7 +121,7 @@ export function useReactRouterDOMSearchParams<TShape extends ObjectShape>({
         baseSetSearchParamsRef.current(nextSearchParams, navigateOptions);
       }
     },
-    [mode]
+    [id, mode]
   );
 
   return {
@@ -129,11 +141,28 @@ export function useReactRouterDOMSearchParams<TShape extends ObjectShape>({
             searchParams: Object.keys(allSearchParams).reduce(
               (accumulator, key) => {
                 try {
-                  (accumulator as any)[key] = JSON.parse(allSearchParams[key]);
-                } catch (err) {}
+                  const objectKey = (() => {
+                    if (id) {
+                      return key.replace(
+                        new RegExp(`:${RegExp.escape(id)}$`),
+                        ''
+                      );
+                    }
+                    return key;
+                  })();
+                  const searchParamsObject = {
+                    [objectKey]: JSON.parse(allSearchParams[key]),
+                  };
+                  Object.assign(
+                    accumulator,
+                    validator.validateSync(searchParamsObject)
+                  );
+                } catch (err) {
+                  console.error(`useReactRouterDOMSearchParams: Error`, err);
+                }
                 return accumulator;
               },
-              {} as Partial<InferType<typeof validator>>
+              {} as Partial<Yup.InferType<typeof validator>>
             ),
           };
         case 'string':
