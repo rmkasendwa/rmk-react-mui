@@ -1,5 +1,6 @@
 import '@infinite-debugger/rmk-js-extensions/RegExp';
 
+import { pick } from 'lodash';
 import hash from 'object-hash';
 import { useCallback, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
@@ -63,9 +64,11 @@ export function useReactRouterDOMSearchParams<
 } = {}) {
   const [searchParams, baseSetSearchParams] = useSearchParams();
   const baseSetSearchParamsRef = useRef(baseSetSearchParams);
+  const specRef = useRef(spec);
   useEffect(() => {
     baseSetSearchParamsRef.current = baseSetSearchParams;
-  }, [baseSetSearchParams]);
+    specRef.current = spec;
+  }, [baseSetSearchParams, spec]);
 
   const setSearchParams = useCallback<SetSearchParams>(
     (searchParams, navigateOptions) => {
@@ -104,9 +107,27 @@ export function useReactRouterDOMSearchParams<
                 if (searchParams[key] == null) {
                   accumulator[searchParamKey] = searchParams[key];
                 } else {
-                  accumulator[searchParamKey] = JSON.stringify(
-                    searchParams[key]
-                  );
+                  try {
+                    if (
+                      Yup.object({
+                        [key]: specRef.current![key],
+                      }).validateSync(pick(searchParams, key))
+                    ) {
+                      accumulator[searchParamKey] = JSON.stringify(
+                        searchParams[key]
+                      );
+                    }
+                  } catch (err: any) {
+                    if (err.name === 'ValidationError') {
+                      console.error(
+                        `useReactRouterDOMSearchParams: search param getter setter `,
+                        err,
+                        {
+                          err,
+                        }
+                      );
+                    }
+                  }
                 }
                 return accumulator;
               }, {} as Record<string, string | null>);
@@ -172,7 +193,7 @@ export function useReactRouterDOMSearchParams<
                   } catch (err: any) {
                     if (err.name === 'ValidationError') {
                       console.error(
-                        `useReactRouterDOMSearchParams: search param `,
+                        `useReactRouterDOMSearchParams: search param getter `,
                         err,
                         {
                           err,
