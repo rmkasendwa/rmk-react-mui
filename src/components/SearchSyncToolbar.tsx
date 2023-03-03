@@ -11,7 +11,14 @@ import {
   useTheme,
 } from '@mui/material';
 import Grid from '@mui/material/Grid';
-import { FC, ReactNode, useEffect, useRef, useState } from 'react';
+import {
+  FC,
+  MutableRefObject,
+  ReactNode,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
 import EllipsisMenuIconButton from './EllipsisMenuIconButton';
 import LoadingTypography, { LoadingTypographyProps } from './LoadingTypography';
@@ -26,12 +33,13 @@ export interface Tool
   label: ReactNode;
   type: 'button' | 'icon-button';
   icon?: ReactNode;
+  ref?: MutableRefObject<HTMLButtonElement | null>;
 }
 
 export const getToolNodes = (tools: (ReactNode | Tool)[]) => {
   return tools.map((tool) => {
     if (tool && typeof tool === 'object' && 'type' in tool) {
-      const { label, type, icon, sx, ...rest } = tool as Tool;
+      const { label, type, icon, ref, sx, ...rest } = tool as Tool;
       switch (type) {
         case 'icon-button':
           return (
@@ -43,12 +51,12 @@ export const getToolNodes = (tools: (ReactNode | Tool)[]) => {
                 },
               }}
             >
-              <IconButton {...{ sx }}>{icon}</IconButton>
+              <IconButton {...{ sx, ref }}>{icon}</IconButton>
             </Tooltip>
           );
         case 'button':
           return (
-            <Button startIcon={icon} {...rest} {...{ sx }}>
+            <Button startIcon={icon} {...rest} {...{ ref, sx }}>
               {label}
             </Button>
           );
