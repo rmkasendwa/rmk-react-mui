@@ -338,7 +338,7 @@ export const BaseRecordsExplorer = <
     getGroupableData,
     SearchSyncToolBarProps = {},
     showPaginationStats = true,
-    enableSmallScreenOptimization: enableSmallScreenOptimizationProp,
+    enableSmallScreenOptimization: enableSmallScreenOptimizationProp = true,
     enableCheckboxAllRowSelector: enableCheckboxAllRowSelectorProp,
     enableCheckboxRowSelectors: enableCheckboxRowSelectorsProp,
     showRowNumber: showRowNumberProp,
@@ -1141,6 +1141,7 @@ export const BaseRecordsExplorer = <
                     enableColumnDisplayToggle,
                     enableCheckboxAllRowSelector,
                     enableCheckboxRowSelectors,
+                    enableSmallScreenOptimization,
                     showRowNumber,
                     bordersVariant: 'square',
                     selectedColumnIds,
@@ -1343,7 +1344,9 @@ export const BaseRecordsExplorer = <
 
                       return (
                         <>
-                          {nestIndex <= 0 ? (
+                          {nestIndex <= 0 &&
+                          (!enableSmallScreenOptimization ||
+                            !isSmallScreenSize) ? (
                             <Table
                               {...baseTableProps}
                               {...tableControlProps}
