@@ -834,7 +834,6 @@ export const BaseTable = <T extends BaseDataRow>(
                   <RenderIfVisible
                     {...tableBodyRowPlaceholderPropsRest}
                     key={row.id}
-                    component="tr"
                     displayPlaceholder={false}
                     unWrapChildrenIfVisible
                     sx={{
