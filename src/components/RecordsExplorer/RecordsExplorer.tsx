@@ -69,7 +69,6 @@ import FixedHeaderContentArea, {
 import IconLoadingScreen, {
   IconLoadingScreenProps,
 } from '../IconLoadingScreen';
-import RenderIfVisible from '../RenderIfVisible';
 import SearchSyncToolbar, {
   SearchSyncToolbarProps,
   Tool,
@@ -1372,185 +1371,176 @@ export const BaseRecordsExplorer = <
                                 !expandedGroups.includes(id) &&
                                 !allGroupsExpanded;
                               return (
-                                <RenderIfVisible
-                                  key={groupName || index}
-                                  displayPlaceholder={false}
-                                  unWrapChildrenIfVisible
-                                  stayRendered
-                                  sx={{
-                                    height: 70,
-                                  }}
-                                >
-                                  <CollapsibleSection
-                                    title={
-                                      <Typography
-                                        component="div"
-                                        variant="body2"
-                                        sx={{
-                                          ...(() => {
-                                            if (!groupName) {
-                                              return {
-                                                opacity: 0.3,
-                                              };
-                                            }
-                                          })(),
-                                        }}
-                                      >
-                                        <Grid container gap={1}>
-                                          <Grid item>{label || '(Empty)'}</Grid>
-                                          {children ? (
-                                            <Grid item>
-                                              <Badge
-                                                color="default"
-                                                badgeContent={children.length}
-                                                max={999}
-                                                sx={{
-                                                  '&>.MuiBadge-badge': {
-                                                    position: 'relative',
-                                                    transform: 'none',
-                                                    bgcolor: (palette.mode ===
-                                                      'dark'
-                                                      ? lighten
-                                                      : darken)(
-                                                      palette.background.paper,
-                                                      0.1
-                                                    ),
-                                                  },
-                                                }}
-                                              />
-                                            </Grid>
-                                          ) : null}
-                                        </Grid>
-                                      </Typography>
-                                    }
-                                    color="inherit"
-                                    HeaderWrapperProps={{
-                                      ...(() => {
-                                        if (
-                                          !enableSmallScreenOptimization ||
-                                          !isSmallScreenSize
-                                        ) {
-                                          return {
-                                            position: 'sticky',
-                                            top: 48,
-                                          };
-                                        }
-                                      })(),
-                                      bgcolor: palette.background.paper,
-                                      zIndex: 2,
-                                    }}
-                                    HeaderProps={{
-                                      sx: {
-                                        py: 1.5,
+                                <CollapsibleSection
+                                  key={index}
+                                  title={
+                                    <Typography
+                                      component="div"
+                                      variant="body2"
+                                      sx={{
                                         ...(() => {
-                                          if (nestIndex > 0) {
+                                          if (!groupName) {
                                             return {
-                                              pl: `${
-                                                unitExtraWidth * nestIndex
-                                              }px`,
+                                              opacity: 0.3,
                                             };
                                           }
-                                          return {
-                                            pl: 2,
-                                          };
                                         })(),
-                                        pr: 3,
-                                        position: 'sticky',
-                                        left: 0,
-                                        width: 'auto',
-                                        display: 'inline-flex',
-                                      },
-                                    }}
-                                    BodyProps={{
-                                      sx: {
-                                        py: 0,
-                                        '& tr>td:first-of-type': {
-                                          pl: 0,
-                                          '&>div': {
-                                            pl: `${groupingExtraWidth}px`,
-                                          },
-                                        },
-                                      },
-                                    }}
-                                    collapseIndicatorVariant="leading"
-                                    collapsed={collapsed}
-                                    onChangeCollapsed={(collapsed: boolean) => {
-                                      const groups = allGroupsExpanded
-                                        ? groupedData.map(({ groupName }) => {
-                                            return groupName || '(Empty)';
-                                          })
-                                        : [...expandedGroups];
-                                      if (collapsed) {
-                                        groups.includes(id) &&
-                                          groups.splice(groups.indexOf(id), 1);
-                                      } else {
-                                        groups.includes(id) || groups.push(id);
+                                      }}
+                                    >
+                                      <Grid container gap={1}>
+                                        <Grid item>{label || '(Empty)'}</Grid>
+                                        {children ? (
+                                          <Grid item>
+                                            <Badge
+                                              color="default"
+                                              badgeContent={children.length}
+                                              max={999}
+                                              sx={{
+                                                '&>.MuiBadge-badge': {
+                                                  position: 'relative',
+                                                  transform: 'none',
+                                                  bgcolor: (palette.mode ===
+                                                    'dark'
+                                                    ? lighten
+                                                    : darken)(
+                                                    palette.background.paper,
+                                                    0.1
+                                                  ),
+                                                },
+                                              }}
+                                            />
+                                          </Grid>
+                                        ) : null}
+                                      </Grid>
+                                    </Typography>
+                                  }
+                                  color="inherit"
+                                  HeaderWrapperProps={{
+                                    ...(() => {
+                                      if (
+                                        !enableSmallScreenOptimization ||
+                                        !isSmallScreenSize
+                                      ) {
+                                        return {
+                                          position: 'sticky',
+                                          top: 48,
+                                        };
                                       }
-                                      setSearchParams(
-                                        {
-                                          expandedGroups: (() => {
-                                            if (groups.length > 0) {
-                                              if (
-                                                groupedData.length ===
-                                                groups.length
-                                              ) {
-                                                return 'All';
-                                              }
-                                              groups.includes('None') &&
-                                                groups.splice(
-                                                  groups.indexOf('None'),
-                                                  1
-                                                );
-                                              return groups;
-                                            } else {
-                                              return 'None';
-                                            }
-                                          })(),
-                                        },
-                                        {
-                                          replace: true,
-                                        }
-                                      );
-                                    }}
-                                    sx={{
+                                    })(),
+                                    bgcolor: palette.background.paper,
+                                    zIndex: 2,
+                                  }}
+                                  HeaderProps={{
+                                    sx: {
+                                      py: 1.5,
                                       ...(() => {
-                                        if (
-                                          !enableSmallScreenOptimization ||
-                                          !isSmallScreenSize
-                                        ) {
+                                        if (nestIndex > 0) {
                                           return {
-                                            minWidth,
+                                            pl: `${
+                                              unitExtraWidth * nestIndex
+                                            }px`,
                                           };
                                         }
+                                        return {
+                                          pl: 2,
+                                        };
                                       })(),
-                                    }}
-                                  >
-                                    {(() => {
-                                      const {
-                                        children: nestedChildren,
-                                        groupName,
-                                      } =
-                                        (children[0] as NestedDataGroup<RecordRow>) ||
-                                        {};
-                                      if (nestedChildren && groupName) {
-                                        return getDataGroupElement(
-                                          children as NestedDataGroup<RecordRow>[],
-                                          nestIndex + 1
-                                        );
+                                      pr: 3,
+                                      position: 'sticky',
+                                      left: 0,
+                                      width: 'auto',
+                                      display: 'inline-flex',
+                                    },
+                                  }}
+                                  BodyProps={{
+                                    sx: {
+                                      py: 0,
+                                      '& tr>td:first-of-type': {
+                                        pl: 0,
+                                        '&>div': {
+                                          pl: `${groupingExtraWidth}px`,
+                                        },
+                                      },
+                                    },
+                                  }}
+                                  collapseIndicatorVariant="leading"
+                                  collapsed={collapsed}
+                                  onChangeCollapsed={(collapsed: boolean) => {
+                                    const groups = allGroupsExpanded
+                                      ? groupedData.map(({ groupName }) => {
+                                          return groupName || '(Empty)';
+                                        })
+                                      : [...expandedGroups];
+                                    if (collapsed) {
+                                      groups.includes(id) &&
+                                        groups.splice(groups.indexOf(id), 1);
+                                    } else {
+                                      groups.includes(id) || groups.push(id);
+                                    }
+                                    setSearchParams(
+                                      {
+                                        expandedGroups: (() => {
+                                          if (groups.length > 0) {
+                                            if (
+                                              groupedData.length ===
+                                              groups.length
+                                            ) {
+                                              return 'All';
+                                            }
+                                            groups.includes('None') &&
+                                              groups.splice(
+                                                groups.indexOf('None'),
+                                                1
+                                              );
+                                            return groups;
+                                          } else {
+                                            return 'None';
+                                          }
+                                        })(),
+                                      },
+                                      {
+                                        replace: true,
                                       }
-                                      return (
-                                        <Table
-                                          {...baseTableProps}
-                                          {...groupedDataTableProps}
-                                          showHeaderRow={false}
-                                          stickyHeader
-                                          rows={(children as RecordRow[]) || []}
-                                          {...{ sx }}
-                                        />
+                                    );
+                                  }}
+                                  sx={{
+                                    ...(() => {
+                                      if (
+                                        !enableSmallScreenOptimization ||
+                                        !isSmallScreenSize
+                                      ) {
+                                        return {
+                                          minWidth,
+                                        };
+                                      }
+                                    })(),
+                                  }}
+                                >
+                                  {(() => {
+                                    const {
+                                      children: nestedChildren,
+                                      groupName,
+                                    } =
+                                      (children[0] as NestedDataGroup<RecordRow>) ||
+                                      {};
+                                    if (nestedChildren && groupName) {
+                                      return getDataGroupElement(
+                                        children as NestedDataGroup<RecordRow>[],
+                                        nestIndex + 1
                                       );
-                                    })()}
-                                  </CollapsibleSection>
-                                </RenderIfVisible>
+                                    }
+                                    return (
+                                      <Table
+                                        {...baseTableProps}
+                                        {...groupedDataTableProps}
+                                        showHeaderRow={false}
+                                        stickyHeader
+                                        rows={(children as RecordRow[]) || []}
+                                        {...{ sx }}
+                                      />
+                                    );
+                                  })()}
+                                </CollapsibleSection>
                               );
                             }
                           )}
