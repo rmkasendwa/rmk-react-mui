@@ -136,12 +136,22 @@ export interface ConditionGroup<RecordRow extends BaseDataRow> {
   conditions: Condition<RecordRow>[];
 }
 
-export type DataGroup<T = any> = T & {
+export type BaseDataGroup<RecordRow> = {
   groupName?: string;
   label?: ReactNode;
-  children?: DataGroup<T>[];
-};
+} & RecordRow;
 
-export type GroupableField<T> = SortOption<T> & {
-  getGroupLabel?: (row: DataGroup<T>) => ReactNode;
-};
+export type DataGroup<RecordRow extends BaseDataRow = any> =
+  BaseDataGroup<RecordRow> & {
+    children: RecordRow[];
+  };
+
+export type NestedDataGroup<RecordRow extends BaseDataRow = any> =
+  BaseDataGroup<RecordRow> & {
+    children: NestedDataGroup<RecordRow>[] | RecordRow[];
+  };
+
+export type GroupableField<RecordRow extends BaseDataRow> =
+  SortOption<RecordRow> & {
+    getGroupLabel?: (row: DataGroup<RecordRow>) => ReactNode;
+  };
