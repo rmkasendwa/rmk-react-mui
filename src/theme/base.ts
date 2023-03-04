@@ -12,11 +12,6 @@ export const getBaseTheme = (palette: Palette): any => {
   const baseTheme = createTheme({ palette });
   return createTheme({
     ...baseTheme,
-    mixins: {
-      toolbar: {
-        minHeight: 48,
-      },
-    },
     components: {
       MuiButton: {
         styleOverrides: {

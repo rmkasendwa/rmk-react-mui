@@ -185,7 +185,16 @@ export interface RecordsExplorerProps<
   RecordRow extends BaseDataRow = any,
   View extends ViewOptionType = ViewOptionType
 > extends Partial<Omit<PaperProps, 'title' | 'children'>>,
-    Partial<Pick<FixedHeaderContentAreaProps, 'title'>> {
+    Partial<Pick<FixedHeaderContentAreaProps, 'title'>>,
+    Partial<
+      Pick<
+        TableProps<RecordRow>,
+        | 'enableSmallScreenOptimization'
+        | 'enableCheckboxAllRowSelector'
+        | 'enableCheckboxRowSelectors'
+        | 'showRowNumber'
+      >
+    > {
   rows?: RecordRow[];
   title?: ReactNode;
   children?:
@@ -329,6 +338,10 @@ export const BaseRecordsExplorer = <
     getGroupableData,
     SearchSyncToolBarProps = {},
     showPaginationStats = true,
+    enableSmallScreenOptimization: enableSmallScreenOptimizationProp,
+    enableCheckboxAllRowSelector: enableCheckboxAllRowSelectorProp,
+    enableCheckboxRowSelectors: enableCheckboxRowSelectorsProp,
+    showRowNumber: showRowNumberProp,
     id,
     ...rest
   } = omit(props, 'recordLabelSingular');
@@ -1065,7 +1078,10 @@ export const BaseRecordsExplorer = <
             const {
               minColumnWidth = 200,
               enableColumnDisplayToggle = true,
-              enableSmallScreenOptimization = true,
+              enableSmallScreenOptimization = enableSmallScreenOptimizationProp,
+              enableCheckboxAllRowSelector = enableCheckboxAllRowSelectorProp,
+              enableCheckboxRowSelectors = enableCheckboxRowSelectorsProp,
+              showRowNumber = showRowNumberProp,
             } = selectedView;
             const displayingColumns = selectedView.columns.filter(({ id }) => {
               return selectedColumnIds.includes(String(id) as any);
@@ -1104,6 +1120,9 @@ export const BaseRecordsExplorer = <
                     ...viewProps,
                     paging: false,
                     enableColumnDisplayToggle,
+                    enableCheckboxAllRowSelector,
+                    enableCheckboxRowSelectors,
+                    showRowNumber,
                     bordersVariant: 'square',
                     selectedColumnIds,
                   };
@@ -1229,60 +1248,70 @@ export const BaseRecordsExplorer = <
                   };
 
                   if (groupedData) {
-                    const headerColumns = baseTableColumns.map((column) => ({
-                      ...column,
-                    }));
-                    const firstColumnWidth =
-                      (headerColumns[0].width || minColumnWidth) +
-                      selectedGroupParams.length * 30;
-
-                    headerColumns[0] = {
-                      ...headerColumns[0],
-                      label: (
-                        <Stack
-                          direction="row"
-                          sx={{
-                            alignItems: 'center',
-                            gap: 1,
-                          }}
-                        >
-                          <Box
-                            onClick={() => {
-                              setSearchParams(
-                                {
-                                  expandedGroups: allGroupsExpanded
-                                    ? 'None'
-                                    : 'All',
-                                },
-                                {
-                                  replace: true,
-                                }
-                              );
-                            }}
-                            sx={{
-                              display: 'flex',
-                              cursor: 'pointer',
-                            }}
-                          >
-                            {allGroupsExpanded ? (
-                              <KeyboardArrowDownIcon />
-                            ) : (
-                              <KeyboardArrowRightIcon />
-                            )}
-                          </Box>
-                          {headerColumns[0].label}
-                        </Stack>
-                      ),
-                      searchableLabel: String(headerColumns[0].label),
-                      width: firstColumnWidth,
-                    };
-
-                    const bodyColumns = displayingColumns.map((column) => ({
-                      ...column,
-                    }));
-                    bodyColumns[0] = {
-                      ...bodyColumns[0],
-                      width: firstColumnWidth,
+                    const groupingExtraWidth =
+                      selectedGroupParams.length * (24 + 16 + 8);
+                    const groupedDataTableProps: Partial<
+                      typeof baseTableProps
+                    > = {
+                      columns: baseTableColumns,
+                      getDisplayingColumns: (columns) => {
+                        const groupedDataColumns: typeof columns = columns.map(
+                          (column) => ({
+                            ...column,
+                          })
+                        );
+                        const firstColumnWidth =
+                          (groupedDataColumns[0].width || minColumnWidth) +
+                          groupingExtraWidth;
+                        groupedDataColumns[0] = {
+                          ...groupedDataColumns[0],
+                          label: (
+                            <Stack
+                              direction="row"
+                              sx={{
+                                alignItems: 'center',
+                                gap: 1,
+                              }}
+                            >
+                              <Box
+                                onClick={() => {
+                                  setSearchParams(
+                                    {
+                                      expandedGroups: allGroupsExpanded
+                                        ? 'None'
+                                        : 'All',
+                                    },
+                                    {
+                                      replace: true,
+                                    }
+                                  );
+                                }}
+                                sx={{
+                                  display: 'flex',
+                                  cursor: 'pointer',
+                                }}
+                              >
+                                {allGroupsExpanded ? (
+                                  <KeyboardArrowDownIcon />
+                                ) : (
+                                  <KeyboardArrowRightIcon />
+                                )}
+                              </Box>
+                              {groupedDataColumns[0].label}
+                            </Stack>
+                          ),
+                          searchableLabel: String(groupedDataColumns[0].label),
+                          width: firstColumnWidth,
+                          sx: {
+                            ...groupedDataColumns[0]?.sx,
+                            '&>div': {
+                              ...(groupedDataColumns[0] as any)?.sx?.['&>div'],
+                              pl: 2,
+                            },
+                          },
+                        };
+                        return groupedDataColumns;
+                      },
                     };
 
                     return (
@@ -1290,13 +1319,12 @@ export const BaseRecordsExplorer = <
                         <Table
                           {...baseTableProps}
                           {...tableControlProps}
+                          {...groupedDataTableProps}
                           className={clsx(
                             `Mui-group-header-table`,
                             baseTableProps.className
                           )}
-                          columns={headerColumns}
                           showDataRows={false}
-                          showRowNumber={false}
                           stickyHeader
                           sx={{
                             position: 'sticky',
@@ -1397,7 +1425,10 @@ export const BaseRecordsExplorer = <
                                       sx: {
                                         py: 0,
                                         '& tr>td:first-of-type': {
-                                          pl: 6,
+                                          pl: 0,
+                                          '&>div': {
+                                            pl: `${groupingExtraWidth}px`,
+                                          },
                                         },
                                       },
                                     }}
@@ -1456,9 +1487,8 @@ export const BaseRecordsExplorer = <
                                   >
                                     <Table
                                       {...baseTableProps}
-                                      columns={bodyColumns}
+                                      {...groupedDataTableProps}
                                       showHeaderRow={false}
-                                      showRowNumber={false}
                                       stickyHeader
                                       rows={children || []}
                                       {...{ sx }}
