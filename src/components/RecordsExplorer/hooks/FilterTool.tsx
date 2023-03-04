@@ -240,6 +240,7 @@ export const useFilterTool = <RecordRow extends BaseDataRow>({
                                   }
                                 }}
                                 showClearButton={false}
+                                size="small"
                               />
                             );
                           default:
@@ -291,6 +292,7 @@ export const useFilterTool = <RecordRow extends BaseDataRow>({
                           };
                         })}
                         showClearButton={false}
+                        size="small"
                       />
                     </Grid>
 
@@ -328,6 +330,7 @@ export const useFilterTool = <RecordRow extends BaseDataRow>({
                           };
                         })}
                         showClearButton={false}
+                        size="small"
                       />
                     </Grid>
 
@@ -432,6 +435,7 @@ export const useFilterTool = <RecordRow extends BaseDataRow>({
                                   nextSelectedConditionGroup
                                 );
                               }}
+                              size="small"
                             />
                           );
                         }
