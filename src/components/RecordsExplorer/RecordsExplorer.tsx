@@ -93,6 +93,7 @@ import {
   FilterBySearchTerm,
   FilterOperator,
   GroupableField,
+  NestedDataGroup,
   SearchableProperty,
   filterConjunctions,
   filterOperators,
@@ -908,42 +909,63 @@ export const BaseRecordsExplorer = <
   const groupedData = (() => {
     if (selectedGroupParams.length > 0) {
       const groupParams = [...selectedGroupParams];
-      const currentGroupParams = groupParams.shift()!;
-      const { id, getGroupLabel } = currentGroupParams;
-      const groupableData = getGroupableDataRef.current
-        ? getGroupableDataRef.current(filteredData, currentGroupParams)
-        : filteredData;
-      return groupableData
-        .reduce((accumulator, row: any) => {
-          let existingGroup = accumulator.find(({ groupName }) => {
-            return (
-              (row[id] == null && groupName === '') ||
-              (row[id] != null && groupName === String(row[id]))
-            );
-          })!;
-          if (!existingGroup) {
-            existingGroup = {
-              ...row,
-              groupName: row[id] != null ? String(row[id]) : '',
+
+      const groupData = (
+        inputGroupableData: typeof filteredData,
+        currentGroupParams: typeof groupParams[number]
+      ): NestedDataGroup<RecordRow>[] => {
+        const { id, getGroupLabel } = currentGroupParams;
+        const groupableData = getGroupableData
+          ? getGroupableData(inputGroupableData, currentGroupParams)
+          : inputGroupableData;
+
+        const groupedData = groupableData
+          .reduce((accumulator, row: any) => {
+            let existingGroup = accumulator.find(({ groupName }) => {
+              return (
+                (row[id] == null && groupName === '') ||
+                (row[id] != null && groupName === String(row[id]))
+              );
+            })!;
+            if (!existingGroup) {
+              existingGroup = {
+                ...row,
+                groupName: row[id] != null ? String(row[id]) : '',
+              };
+              accumulator.push(existingGroup);
+            }
+            existingGroup.children ?? (existingGroup.children = []);
+            existingGroup.children.push(row);
+            return accumulator;
+          }, [] as DataGroup<RecordRow>[])
+          .map((group) => {
+            return {
+              ...group,
+              label: getGroupLabel ? getGroupLabel(group) : group.groupName,
             };
-            accumulator.push(existingGroup);
-          }
-          existingGroup.children ?? (existingGroup.children = []);
-          existingGroup.children.push(row);
-          return accumulator;
-        }, [] as DataGroup<RecordRow>[])
-        .map((group) => {
-          return {
-            ...group,
-            label: getGroupLabel ? getGroupLabel(group) : group.groupName,
-          };
-        })
-        .sort((a, b) => {
-          return sort(a, b, [currentGroupParams as any]);
-        });
+          })
+          .sort((a, b) => {
+            return sort(a, b, [currentGroupParams as any]);
+          });
+
+        if (groupParams.length > 0) {
+          const currentGroupParams = groupParams.shift()!;
+          return groupedData.map(({ children, ...restDataGroup }) => {
+            return {
+              ...restDataGroup,
+              children: groupData(children, currentGroupParams),
+            } as NestedDataGroup<RecordRow>;
+          });
+        }
+
+        return groupedData;
+      };
+      return groupData(filteredData, groupParams.shift()!);
     }
     return null;
   })();
+
+  console.log({ groupedData });
 
   const viewOptionsTool = useViewOptionsTool({
     viewOptionTypes: (() => {
@@ -1490,7 +1512,7 @@ export const BaseRecordsExplorer = <
                                       {...groupedDataTableProps}
                                       showHeaderRow={false}
                                       stickyHeader
-                                      rows={children || []}
+                                      rows={(children as RecordRow[]) || []}
                                       {...{ sx }}
                                     />
                                   </CollapsibleSection>
