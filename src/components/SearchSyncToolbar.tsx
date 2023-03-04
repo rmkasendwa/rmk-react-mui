@@ -408,10 +408,12 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                 }}
                 InputProps={{
                   disableUnderline: true,
+                  autoFocus: searchTermProp.length <= 0 && searchFieldOpen,
                 }}
                 onChange={(event) => {
                   setSearchTerm(event.target.value);
                 }}
+                size="small"
               />
             );
 
@@ -459,6 +461,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                             : 'none',
                         maxWidth: 300,
                         minWidth: 0,
+                        pr: 1,
                       }}
                     >
                       {searchFieldOpen ||
@@ -483,6 +486,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                               onChange={(event) => {
                                 setSearchTerm(event.target.value);
                               }}
+                              size="small"
                             />
                           );
                           return (

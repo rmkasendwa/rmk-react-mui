@@ -220,7 +220,9 @@ export const TableBodyRow = <T extends BaseDataRow>(
         sx={{
           alignItems: 'center',
           cursor: onClickRow ? 'pointer' : 'inherit',
-          p: 2,
+          py: 2,
+          pl: 3,
+          pr: 2,
         }}
       >
         <Grid
