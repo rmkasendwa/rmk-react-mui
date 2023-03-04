@@ -913,7 +913,7 @@ export const BaseRecordsExplorer = <
       const groupData = (
         inputGroupableData: typeof filteredData,
         currentGroupParams: typeof groupParams[number]
-      ): NestedDataGroup<RecordRow>[] => {
+      ): NestedDataGroup<RecordRow>[] | DataGroup<RecordRow>[] => {
         const { id, getGroupLabel } = currentGroupParams;
         const groupableData = getGroupableData
           ? getGroupableData(inputGroupableData, currentGroupParams)
@@ -964,8 +964,6 @@ export const BaseRecordsExplorer = <
     }
     return null;
   })();
-
-  console.log({ groupedData });
 
   const viewOptionsTool = useViewOptionsTool({
     viewOptionTypes: (() => {
@@ -1270,95 +1268,104 @@ export const BaseRecordsExplorer = <
                   };
 
                   if (groupedData) {
-                    const groupingExtraWidth =
-                      selectedGroupParams.length * (24 + 16 + 8);
-                    const groupedDataTableProps: Partial<
-                      typeof baseTableProps
-                    > = {
-                      columns: baseTableColumns,
-                      getDisplayingColumns: (columns) => {
-                        const groupedDataColumns: typeof columns = columns.map(
-                          (column) => ({
-                            ...column,
-                          })
-                        );
-                        const firstColumnWidth =
-                          (groupedDataColumns[0].width || minColumnWidth) +
-                          groupingExtraWidth;
-                        groupedDataColumns[0] = {
-                          ...groupedDataColumns[0],
-                          label: (
-                            <Stack
-                              direction="row"
-                              sx={{
-                                alignItems: 'center',
-                                gap: 1,
-                              }}
-                            >
-                              <Box
-                                onClick={() => {
-                                  setSearchParams(
-                                    {
-                                      expandedGroups: allGroupsExpanded
-                                        ? 'None'
-                                        : 'All',
-                                    },
-                                    {
-                                      replace: true,
-                                    }
-                                  );
-                                }}
+                    const getDataGroupElement = (
+                      inputGroupedData: typeof groupedData,
+                      nestIndex = 0
+                    ) => {
+                      const unitExtraWidth = 24 + 16 + 8;
+                      const groupingExtraWidth =
+                        (nestIndex + 1) * unitExtraWidth;
+                      const groupedDataTableProps: Partial<
+                        typeof baseTableProps
+                      > = {
+                        columns: baseTableColumns,
+                        getDisplayingColumns: (columns) => {
+                          const groupedDataColumns: typeof columns =
+                            columns.map((column) => ({
+                              ...column,
+                            }));
+                          const firstColumnWidth =
+                            (groupedDataColumns[0].width || minColumnWidth) +
+                            groupingExtraWidth;
+                          groupedDataColumns[0] = {
+                            ...groupedDataColumns[0],
+                            label: (
+                              <Stack
+                                direction="row"
                                 sx={{
-                                  display: 'flex',
-                                  cursor: 'pointer',
+                                  alignItems: 'center',
+                                  gap: 1,
                                 }}
                               >
-                                {allGroupsExpanded ? (
-                                  <KeyboardArrowDownIcon />
-                                ) : (
-                                  <KeyboardArrowRightIcon />
-                                )}
-                              </Box>
-                              {groupedDataColumns[0].label}
-                            </Stack>
-                          ),
-                          searchableLabel: String(groupedDataColumns[0].label),
-                          width: firstColumnWidth,
-                          sx: {
-                            ...groupedDataColumns[0]?.sx,
-                            '&>div': {
-                              ...(groupedDataColumns[0] as any)?.sx?.['&>div'],
-                              pl: 2,
+                                <Box
+                                  onClick={() => {
+                                    setSearchParams(
+                                      {
+                                        expandedGroups: allGroupsExpanded
+                                          ? 'None'
+                                          : 'All',
+                                      },
+                                      {
+                                        replace: true,
+                                      }
+                                    );
+                                  }}
+                                  sx={{
+                                    display: 'flex',
+                                    cursor: 'pointer',
+                                  }}
+                                >
+                                  {allGroupsExpanded ? (
+                                    <KeyboardArrowDownIcon />
+                                  ) : (
+                                    <KeyboardArrowRightIcon />
+                                  )}
+                                </Box>
+                                {groupedDataColumns[0].label}
+                              </Stack>
+                            ),
+                            searchableLabel: String(
+                              groupedDataColumns[0].label
+                            ),
+                            width: firstColumnWidth,
+                            sx: {
+                              ...groupedDataColumns[0]?.sx,
+                              '&>div': {
+                                ...(groupedDataColumns[0] as any)?.sx?.[
+                                  '&>div'
+                                ],
+                                pl: 2,
+                              },
                             },
-                          },
-                        };
-                        return groupedDataColumns;
-                      },
-                    };
+                          };
+                          return groupedDataColumns;
+                        },
+                      };
 
-                    return (
-                      <>
-                        <Table
-                          {...baseTableProps}
-                          {...tableControlProps}
-                          {...groupedDataTableProps}
-                          className={clsx(
-                            `Mui-group-header-table`,
-                            baseTableProps.className
-                          )}
-                          showDataRows={false}
-                          stickyHeader
-                          sx={{
-                            position: 'sticky',
-                            top: 0,
-                            bgcolor: palette.background.paper,
-                            zIndex: 5,
-                            minWidth,
-                            ...sx,
-                          }}
-                        />
-                        {(() => {
-                          return groupedData.map(
+                      return (
+                        <>
+                          {nestIndex <= 0 ? (
+                            <Table
+                              {...baseTableProps}
+                              {...tableControlProps}
+                              {...groupedDataTableProps}
+                              className={clsx(
+                                `Mui-group-header-table`,
+                                baseTableProps.className
+                              )}
+                              showDataRows={false}
+                              stickyHeader
+                              sx={{
+                                position: 'sticky',
+                                top: 0,
+                                bgcolor: palette.background.paper,
+                                zIndex: 5,
+                                minWidth,
+                                ...sx,
+                              }}
+                            />
+                          ) : null}
+                          {inputGroupedData.map(
                             ({ groupName, label, children }, index) => {
                               const id = groupName || '(Empty)';
                               const collapsed =
@@ -1435,7 +1442,18 @@ export const BaseRecordsExplorer = <
                                     HeaderProps={{
                                       sx: {
                                         py: 1.5,
-                                        pl: 2,
+                                        ...(() => {
+                                          if (nestIndex > 0) {
+                                            return {
+                                              pl: `${
+                                                unitExtraWidth * nestIndex
+                                              }px`,
+                                            };
+                                          }
+                                          return {
+                                            pl: 2,
+                                          };
+                                        })(),
                                         pr: 3,
                                         position: 'sticky',
                                         left: 0,
@@ -1507,22 +1525,40 @@ export const BaseRecordsExplorer = <
                                       })(),
                                     }}
                                   >
-                                    <Table
-                                      {...baseTableProps}
-                                      {...groupedDataTableProps}
-                                      showHeaderRow={false}
-                                      stickyHeader
-                                      rows={(children as RecordRow[]) || []}
-                                      {...{ sx }}
-                                    />
+                                    {(() => {
+                                      const {
+                                        children: nestedChildren,
+                                        groupName,
+                                      } =
+                                        (children[0] as NestedDataGroup<RecordRow>) ||
+                                        {};
+                                      if (nestedChildren && groupName) {
+                                        return getDataGroupElement(
+                                          children as NestedDataGroup<RecordRow>[],
+                                          nestIndex + 1
+                                        );
+                                      }
+                                      return (
+                                        <Table
+                                          {...baseTableProps}
+                                          {...groupedDataTableProps}
+                                          showHeaderRow={false}
+                                          stickyHeader
+                                          rows={(children as RecordRow[]) || []}
+                                          {...{ sx }}
+                                        />
+                                      );
+                                    })()}
                                   </CollapsibleSection>
                                 </RenderIfVisible>
                               );
                             }
-                          );
-                        })()}
-                      </>
-                    );
+                          )}
+                        </>
+                      );
+                    };
+
+                    return getDataGroupElement(groupedData);
                   }
                   return (
                     <Table
