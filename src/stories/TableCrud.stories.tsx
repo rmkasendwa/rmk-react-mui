@@ -3,12 +3,7 @@ import { ComponentMeta, ComponentStory } from '@storybook/react';
 import randomEmail from 'random-email';
 import createMobilePhoneNumber from 'random-mobile-numbers';
 import React from 'react';
-import {
-  animals,
-  colors,
-  starWars,
-  uniqueNamesGenerator,
-} from 'unique-names-generator';
+import { colors, starWars, uniqueNamesGenerator } from 'unique-names-generator';
 
 import EnumValueChip from '../components/EnumValueChip';
 import FieldValue from '../components/FieldValue';
@@ -59,7 +54,8 @@ const dataSet = Array.from({ length: 1000 }).map((_, index) => {
   return {
     id: String(index),
     name: uniqueNamesGenerator({
-      dictionaries: [starWars, colors, animals],
+      dictionaries: [starWars, colors],
+      separator: ' ',
     }),
     phoneNumber: createMobilePhoneNumber('UK'),
     status: ['Active', 'Pending'][Math.floor(Math.random() * 2)],
