@@ -117,6 +117,7 @@ export interface TableColumn<
   dateFormat?: string;
   dateTimeFormat?: string;
   defaultCountryCode?: CountryCode;
+  holdsPriorityInformation?: boolean;
 }
 
 export interface ForEachDerivedColumnConfiguration<T> {

@@ -150,7 +150,12 @@ export const TableBodyRow = <T extends BaseDataRow>(
   const { sx: rowPropsSx, ...rowPropsRest } = rowProps;
 
   if (enableSmallScreenOptimization && isSmallScreenSize) {
-    const [column, ...restColumns] = columns;
+    const importantColumns = columns.filter(
+      ({ holdsPriorityInformation = true }) => {
+        return holdsPriorityInformation;
+      }
+    );
+    const [column, ...restColumns] = importantColumns;
     const {
       id,
       sx,
@@ -164,7 +169,7 @@ export const TableBodyRow = <T extends BaseDataRow>(
       defaultCountryCode = rowDefaultCountryCode,
       noWrap = rowNoWrap,
     } = column;
-    const ellipsisMenuToolColumn = restColumns.find(({ type }) => {
+    const ellipsisMenuToolColumn = columns.find(({ type }) => {
       return type === 'ellipsisMenuTool';
     });
     return (

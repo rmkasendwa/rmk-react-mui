@@ -609,27 +609,6 @@ const BaseTableCrud = <
                       className={clsx(classes.root)}
                       {...{ labelPlural, labelSingular }}
                       columns={[
-                        {
-                          id: 'number' as any,
-                          label: 'Number',
-                          width: 60,
-                          getColumnValue: (record) => {
-                            return `${
-                              1 + currentPageRecords.indexOf(record) + offset
-                            }.`;
-                          },
-                          align: 'right',
-                          showHeaderText: false,
-                          opaque: true,
-                          sx: {
-                            position: 'sticky',
-                            left: 0,
-                            zIndex: 1,
-                          },
-                          headerSx: {
-                            zIndex: 5,
-                          },
-                        },
                         ...columns,
                         ...(() => {
                           if (
@@ -789,6 +768,7 @@ const BaseTableCrud = <
                           overflow: 'hidden',
                         },
                       }}
+                      showRowNumber
                       sx={{
                         ...sx,
                         tr: {
