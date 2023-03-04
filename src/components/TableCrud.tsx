@@ -19,6 +19,7 @@ import {
   generateUtilityClass,
   generateUtilityClasses,
   outlinedInputClasses,
+  useMediaQuery,
   useTheme,
   useThemeProps,
 } from '@mui/material';
@@ -295,7 +296,9 @@ const BaseTableCrud = <
     };
   }, [labelSingular]);
 
-  const { palette } = useTheme();
+  const { palette, breakpoints } = useTheme();
+  const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
+
   const { pathname } = useLocation();
   const params = useParams();
   const navigate = useNavigate();
@@ -779,6 +782,26 @@ const BaseTableCrud = <
                   );
                 })()}
               </Box>
+              {pathToAddNewRecord && isSmallScreenSize ? (
+                <Button
+                  component={RouterLink}
+                  to={pathToAddNewRecord}
+                  color="primary"
+                  variant="contained"
+                  sx={{
+                    p: 0,
+                    minWidth: 'auto',
+                    width: 50,
+                    height: 50,
+                    borderRadius: '50%',
+                    position: 'fixed',
+                    bottom: 16,
+                    right: 16,
+                  }}
+                >
+                  <AddIcon />
+                </Button>
+              ) : null}
             </Box>
           );
         }

@@ -461,7 +461,13 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                             : 'none',
                         maxWidth: 300,
                         minWidth: 0,
-                        pr: 1,
+                        ...(() => {
+                          if (!isSmallScreenSize) {
+                            return {
+                              pr: 1,
+                            };
+                          }
+                        })(),
                       }}
                     >
                       {searchFieldOpen ||
