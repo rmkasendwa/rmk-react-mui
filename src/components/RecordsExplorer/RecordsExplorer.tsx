@@ -1273,9 +1273,13 @@ export const BaseRecordsExplorer = <
                       inputGroupedData: typeof groupedData,
                       nestIndex = 0
                     ) => {
-                      const unitExtraWidth = 24 + 16 + 8;
+                      const unitGroupIconWidth = 24 + 8;
+                      const unitExtraWidth = unitGroupIconWidth + 16;
                       const groupingExtraWidth =
-                        selectedGroupParams.length * unitExtraWidth;
+                        unitExtraWidth +
+                        (selectedGroupParams.length - 1) * unitGroupIconWidth;
+                      const groupingContainerExtraWidth =
+                        nestIndex * unitExtraWidth;
                       const groupedDataTableProps: Partial<
                         typeof baseTableProps
                       > = {
@@ -1440,9 +1444,7 @@ export const BaseRecordsExplorer = <
                                       ...(() => {
                                         if (nestIndex > 0) {
                                           return {
-                                            pl: `${
-                                              unitExtraWidth * nestIndex
-                                            }px`,
+                                            pl: `${groupingContainerExtraWidth}px`,
                                           };
                                         }
                                         return {
