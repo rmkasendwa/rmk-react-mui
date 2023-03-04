@@ -1,3 +1,6 @@
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import PhoneIcon from '@mui/icons-material/Phone';
+import ShareIcon from '@mui/icons-material/Share';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import randomEmail from 'random-email';
 import createMobilePhoneNumber from 'random-mobile-numbers';
@@ -90,6 +93,23 @@ const baseArgs = {
           label: 'Account Balance',
           type: 'currency',
           width: 200,
+        },
+        {
+          id: 'actions' as any,
+          type: 'ellipsisMenuTool',
+          getColumnValue: () => {
+            return {
+              options: [
+                { label: 'Call', icon: <PhoneIcon />, value: 'Call' },
+                { label: 'Share', icon: <ShareIcon />, value: 'Share' },
+                {
+                  label: 'Delete',
+                  icon: <DeleteOutlineIcon />,
+                  value: 'Delete',
+                },
+              ],
+            };
+          },
         },
       ],
     },
