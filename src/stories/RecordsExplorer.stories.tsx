@@ -2,22 +2,20 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import PhoneIcon from '@mui/icons-material/Phone';
 import ShareIcon from '@mui/icons-material/Share';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { countries } from 'countries-list';
 import randomEmail from 'random-email';
 import createMobilePhoneNumber from 'random-mobile-numbers';
 import React from 'react';
-import {
-  animals,
-  colors,
-  starWars,
-  uniqueNamesGenerator,
-} from 'unique-names-generator';
+import { colors, starWars, uniqueNamesGenerator } from 'unique-names-generator';
 
+import CountryFieldValue from '../components/CountryFieldValue';
 import EnumValueChip from '../components/EnumValueChip';
 import FieldValue from '../components/FieldValue';
 import ProfileGravatar from '../components/ProfileGravatar';
 import RecordsExplorer, {
   RecordsExplorerProps,
 } from '../components/RecordsExplorer';
+import { CountryCode } from '../interfaces/Countries';
 
 export default {
   title: 'Components/Records Explorer',
@@ -28,8 +26,10 @@ const Template: ComponentStory<typeof RecordsExplorer> = (props) => (
   <RecordsExplorer {...props} />
 );
 
-const contactStatus = ['Active', 'Pending'] as const;
-type ContactStatus = typeof contactStatus[number];
+const countryCodes = Object.keys(countries) as CountryCode[];
+
+const contactStatuses = ['Active', 'Pending'] as const;
+type ContactStatus = typeof contactStatuses[number];
 
 const contactSources = [
   'Refferal',
@@ -47,19 +47,22 @@ type Contact = {
   email: string;
   accountBalance: number;
   source: ContactSource;
+  countryCode: CountryCode;
 };
 
 const dataSet = Array.from({ length: 1000 }).map((_, index) => {
   return {
     id: String(index),
     name: uniqueNamesGenerator({
-      dictionaries: [starWars, colors, animals],
+      dictionaries: [starWars, colors],
+      separator: ' ',
     }),
     phoneNumber: createMobilePhoneNumber('UK'),
-    status: ['Active', 'Pending'][Math.floor(Math.random() * 2)],
+    status: contactStatuses[Math.floor(Math.random() * contactStatuses.length)],
     email: randomEmail(),
     accountBalance: Math.round(Math.random() * 1000_000),
     source: contactSources[Math.floor(Math.random() * contactSources.length)],
+    countryCode: countryCodes[Math.floor(Math.random() * countryCodes.length)],
   } as Contact;
 });
 
@@ -114,6 +117,18 @@ const baseArgs = {
           },
         },
         { id: 'source', label: 'Source', type: 'enum' },
+        {
+          id: 'countryCode',
+          label: 'Country',
+          getColumnValue: ({ countryCode }) => {
+            return (
+              <CountryFieldValue
+                {...{ countryCode }}
+                countryLabel={countries[countryCode].name}
+              />
+            );
+          },
+        },
         { id: 'phoneNumber', label: 'Phone Number', type: 'phoneNumber' },
         { id: 'email', label: 'Email', type: 'email' },
         {

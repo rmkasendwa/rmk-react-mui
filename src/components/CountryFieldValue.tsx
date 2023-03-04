@@ -12,6 +12,8 @@ import {
 } from '@mui/material';
 import Box, { BoxProps } from '@mui/material/Box';
 import clsx from 'clsx';
+import { countries } from 'countries-list';
+import { omit } from 'lodash';
 import { forwardRef } from 'react';
 
 import { CountryCode } from '../interfaces/Countries';
@@ -52,7 +54,7 @@ declare module '@mui/material/styles/components' {
 export interface CountryFieldValueProps
   extends Partial<Omit<FieldValueProps, 'icon' | 'children'>> {
   countryCode?: CountryCode;
-  countryLabel: string;
+  countryLabel?: string;
   FlagIconProps?: Partial<BoxProps>;
 }
 
@@ -75,11 +77,12 @@ export const CountryFieldValue = forwardRef<
   const {
     className,
     countryCode,
-    countryLabel,
     FlagIconProps = {},
     sx,
     ...rest
-  } = props;
+  } = omit(props, 'countryLabel');
+
+  let { countryLabel } = props;
 
   const classes = composeClasses(
     slots,
@@ -93,9 +96,10 @@ export const CountryFieldValue = forwardRef<
     })()
   );
 
-  const { palette } = useTheme();
-
   const { sx: FlagIconPropsSx, ...FlagIconPropsRest } = FlagIconProps;
+  countryLabel || (countryLabel = countries[countryCode!]?.name);
+
+  const { palette } = useTheme();
 
   return (
     <FieldValue

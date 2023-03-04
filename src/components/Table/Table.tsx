@@ -840,7 +840,7 @@ export const BaseTable = <T extends BaseDataRow>(
                     displayPlaceholder={false}
                     unWrapChildrenIfVisible
                     sx={{
-                      height: 41,
+                      height: 89,
                       ...tableBodyRowPlaceholderPropsSx,
                     }}
                   >
