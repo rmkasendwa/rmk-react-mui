@@ -1,10 +1,13 @@
 import {
+  Box,
   ComponentsOverrides,
   ComponentsProps,
   ComponentsVariants,
+  Grid,
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
   generateUtilityClasses,
+  useMediaQuery,
   useTheme,
   useThemeProps,
 } from '@mui/material';
@@ -12,7 +15,7 @@ import TableRow, {
   TableRowProps as MuiTableRowProps,
 } from '@mui/material/TableRow';
 import clsx from 'clsx';
-import { useEffect, useMemo, useRef } from 'react';
+import { Fragment, useEffect, useMemo, useRef } from 'react';
 
 import { BaseDataRow, TableRowProps } from '../../interfaces/Table';
 import {
@@ -55,7 +58,9 @@ declare module '@mui/material/styles/components' {
 
 export interface TableBodyRowProps<T extends Record<string, any> = any>
   extends Partial<Omit<MuiTableRowProps, 'defaultValue'>>,
-    TableRowProps<T> {}
+    TableRowProps<T> {
+  enableSmallScreenOptimization?: boolean;
+}
 
 export function getTableBodyRowUtilityClass(slot: string): string {
   return generateUtilityClass('MuiTableBodyRow', slot);
@@ -92,6 +97,7 @@ export const TableBodyRow = <T extends BaseDataRow>(
     defaultDateTimeFormat,
     defaultCountryCode: rowDefaultCountryCode,
     noWrap: rowNoWrap,
+    enableSmallScreenOptimization = true,
     ...rest
   } = props;
 
@@ -117,7 +123,8 @@ export const TableBodyRow = <T extends BaseDataRow>(
     generateRowDataRef.current = generateRowData;
   }, [columns, generateRowData, getRowProps]);
 
-  const { components } = useTheme();
+  const { components, breakpoints } = useTheme();
+  const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
 
   const { rowProps } = useMemo(() => {
     return {
@@ -141,6 +148,141 @@ export const TableBodyRow = <T extends BaseDataRow>(
   }, [row]);
 
   const { sx: rowPropsSx, ...rowPropsRest } = rowProps;
+
+  if (enableSmallScreenOptimization && isSmallScreenSize) {
+    const [column, ...restColumns] = columns;
+    const {
+      id,
+      sx,
+      propagateClickToParentRowClickEvent = true,
+      decimalPlaces = rowDecimalPlaces,
+      textTransform = rowTextTransform,
+      defaultColumnValue = rowDefaultColumnValue,
+      editable = rowEditable,
+      dateFormat = defaultDateFormat,
+      dateTimeFormat = defaultDateTimeFormat,
+      defaultCountryCode = rowDefaultCountryCode,
+      noWrap = rowNoWrap,
+    } = column;
+    return (
+      <Box
+        {...rest}
+        className={clsx(classes.root)}
+        sx={{
+          cursor: onClickRow ? 'pointer' : 'inherit',
+          p: 2,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 1,
+        }}
+      >
+        <TableBodyColumn
+          key={String(id)}
+          {...({} as any)}
+          {...{
+            column,
+            row,
+            columnTypographyProps,
+            decimalPlaces,
+            textTransform,
+            defaultColumnValue,
+            editable,
+            dateFormat,
+            dateTimeFormat,
+            defaultCountryCode,
+            noWrap,
+            sx,
+            enableSmallScreenOptimization,
+          }}
+          {...column}
+          onClick={() => {
+            propagateClickToParentRowClickEvent &&
+              onClickRow &&
+              onClickRow(row);
+          }}
+          columnTypographyProps={{
+            noWrap,
+            sx: {
+              fontSize: 16,
+            },
+          }}
+        />
+        {(() => {
+          if (restColumns.length > 0) {
+            return (
+              <Grid
+                container
+                sx={{
+                  gap: 1,
+                  alignItems: 'center',
+                  flexWrap: 'nowrap',
+                  overflow: 'hidden',
+                }}
+              >
+                {restColumns.slice(0, 3).map((column, index) => {
+                  const {
+                    id,
+                    sx,
+                    propagateClickToParentRowClickEvent = true,
+                    decimalPlaces = rowDecimalPlaces,
+                    textTransform = rowTextTransform,
+                    defaultColumnValue = rowDefaultColumnValue,
+                    editable = rowEditable,
+                    dateFormat = defaultDateFormat,
+                    dateTimeFormat = defaultDateTimeFormat,
+                    defaultCountryCode = rowDefaultCountryCode,
+                    noWrap = rowNoWrap,
+                  } = column;
+                  return (
+                    <Fragment key={index}>
+                      {index > 0 ? (
+                        <Grid
+                          item
+                          sx={{
+                            flex: 'none',
+                          }}
+                        >
+                          &bull;
+                        </Grid>
+                      ) : null}
+                      <Grid item>
+                        <TableBodyColumn
+                          key={String(id)}
+                          {...({} as any)}
+                          {...{
+                            column,
+                            row,
+                            columnTypographyProps,
+                            decimalPlaces,
+                            textTransform,
+                            defaultColumnValue,
+                            editable,
+                            dateFormat,
+                            dateTimeFormat,
+                            defaultCountryCode,
+                            noWrap,
+                            sx,
+                            enableSmallScreenOptimization,
+                          }}
+                          {...column}
+                          onClick={() => {
+                            propagateClickToParentRowClickEvent &&
+                              onClickRow &&
+                              onClickRow(row);
+                          }}
+                        />
+                      </Grid>
+                    </Fragment>
+                  );
+                })}
+              </Grid>
+            );
+          }
+        })()}
+      </Box>
+    );
+  }
+
   return (
     <TableRow
       {...rowPropsRest}
