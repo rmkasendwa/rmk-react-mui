@@ -745,76 +745,79 @@ export const BaseTable = <T extends BaseDataRow>(
   }
 
   if (enableSmallScreenOptimization && isSmallScreenSize) {
-    return (
-      <Box
-        sx={{
-          [`.${tableBodyRowClasses.root}:hover`]: {
-            bgcolor: alpha(palette.primary.main, 0.1),
-          },
-        }}
-      >
-        {(() => {
-          if (pageRows.length > 0) {
-            return pageRows.map((row, index) => {
-              const classNames = [];
-              const rowNumber = rowStartIndex + 1 + index;
-              if (rowNumber % 2 === 0) {
-                classNames.push('even');
-              } else {
-                classNames.push('odd');
-              }
-              return (
-                <RenderIfVisible
-                  {...tableBodyRowPlaceholderPropsRest}
-                  key={row.id}
-                  component="tr"
-                  displayPlaceholder={false}
-                  unWrapChildrenIfVisible
-                  sx={{
-                    height: 41,
-                    ...tableBodyRowPlaceholderPropsSx,
-                  }}
-                >
-                  {index > 0 ? <Divider /> : null}
-                  <TableBodyRow
-                    {...{
-                      columnTypographyProps,
-                      decimalPlaces,
-                      defaultColumnValue,
-                      defaultCountryCode,
-                      defaultDateFormat,
-                      defaultDateTimeFormat,
-                      editable,
-                      generateRowData,
-                      minColumnWidth,
-                      noWrap,
-                      onClickRow,
-                      row,
-                      textTransform,
-                      enableSmallScreenOptimization,
+    if (showDataRows) {
+      return (
+        <Box
+          sx={{
+            [`.${tableBodyRowClasses.root}:hover`]: {
+              bgcolor: alpha(palette.primary.main, 0.1),
+            },
+          }}
+        >
+          {(() => {
+            if (pageRows.length > 0) {
+              return pageRows.map((row, index) => {
+                const classNames = [];
+                const rowNumber = rowStartIndex + 1 + index;
+                if (rowNumber % 2 === 0) {
+                  classNames.push('even');
+                } else {
+                  classNames.push('odd');
+                }
+                return (
+                  <RenderIfVisible
+                    {...tableBodyRowPlaceholderPropsRest}
+                    key={row.id}
+                    component="tr"
+                    displayPlaceholder={false}
+                    unWrapChildrenIfVisible
+                    sx={{
+                      height: 41,
+                      ...tableBodyRowPlaceholderPropsSx,
                     }}
-                    columns={displayingColumns}
-                    getRowProps={forEachRowProps}
-                    className={classNames.join(' ')}
-                  />
-                </RenderIfVisible>
-              );
-            });
-          }
-          return (
-            <Box
-              sx={{
-                p: 2,
-              }}
-            >
-              <Typography variant="body2" align="center">
-                {emptyRowsLabel}
-              </Typography>
-            </Box>
-          );
-        })()}
-      </Box>
-    );
+                  >
+                    {index > 0 ? <Divider /> : null}
+                    <TableBodyRow
+                      {...{
+                        columnTypographyProps,
+                        decimalPlaces,
+                        defaultColumnValue,
+                        defaultCountryCode,
+                        defaultDateFormat,
+                        defaultDateTimeFormat,
+                        editable,
+                        generateRowData,
+                        minColumnWidth,
+                        noWrap,
+                        onClickRow,
+                        row,
+                        textTransform,
+                        enableSmallScreenOptimization,
+                      }}
+                      columns={displayingColumns}
+                      getRowProps={forEachRowProps}
+                      className={classNames.join(' ')}
+                    />
+                  </RenderIfVisible>
+                );
+              });
+            }
+            return (
+              <Box
+                sx={{
+                  p: 2,
+                }}
+              >
+                <Typography variant="body2" align="center">
+                  {emptyRowsLabel}
+                </Typography>
+              </Box>
+            );
+          })()}
+        </Box>
+      );
+    }
+    return null;
   }
 
   const tableElement = (

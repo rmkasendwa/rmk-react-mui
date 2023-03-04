@@ -1062,8 +1062,11 @@ export const BaseRecordsExplorer = <
         const { type } = selectedView;
         switch (type) {
           case 'List':
-            const { minColumnWidth = 200, enableColumnDisplayToggle = true } =
-              selectedView;
+            const {
+              minColumnWidth = 200,
+              enableColumnDisplayToggle = true,
+              enableSmallScreenOptimization = true,
+            } = selectedView;
             const displayingColumns = selectedView.columns.filter(({ id }) => {
               return selectedColumnIds.includes(String(id) as any);
             });
@@ -1364,8 +1367,17 @@ export const BaseRecordsExplorer = <
                                     }
                                     color="inherit"
                                     HeaderWrapperProps={{
-                                      position: 'sticky',
-                                      top: 48,
+                                      ...(() => {
+                                        if (
+                                          !enableSmallScreenOptimization ||
+                                          !isSmallScreenSize
+                                        ) {
+                                          return {
+                                            position: 'sticky',
+                                            top: 48,
+                                          };
+                                        }
+                                      })(),
                                       bgcolor: palette.background.paper,
                                       zIndex: 2,
                                     }}
@@ -1429,7 +1441,16 @@ export const BaseRecordsExplorer = <
                                       );
                                     }}
                                     sx={{
-                                      minWidth,
+                                      ...(() => {
+                                        if (
+                                          !enableSmallScreenOptimization ||
+                                          !isSmallScreenSize
+                                        ) {
+                                          return {
+                                            minWidth,
+                                          };
+                                        }
+                                      })(),
                                     }}
                                   >
                                     <Table

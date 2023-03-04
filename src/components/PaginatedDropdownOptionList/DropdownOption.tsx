@@ -19,8 +19,6 @@ import MenuItem, { MenuItemProps } from '@mui/material/MenuItem';
 import clsx from 'clsx';
 import { ReactNode, forwardRef } from 'react';
 
-export const DEFAULT_DROPDOWN_OPTION_HEIGHT = 36;
-
 export type DropdownOptionVariant = 'text' | 'checkbox' | 'check';
 
 export interface DropdownOptionClasses {
@@ -80,7 +78,7 @@ export const DropdownOption = forwardRef<HTMLLIElement, DropdownOptionProps>(
     const props = useThemeProps({ props: inProps, name: 'MuiDropdownOption' });
     const {
       className,
-      height = DEFAULT_DROPDOWN_OPTION_HEIGHT,
+      height,
       selectable = true,
       onClick,
       variant = 'text',
