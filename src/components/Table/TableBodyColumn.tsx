@@ -10,6 +10,7 @@ import {
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
   generateUtilityClasses,
+  useMediaQuery,
   useTheme,
   useThemeProps,
 } from '@mui/material';
@@ -82,6 +83,7 @@ export interface TableBodyColumnProps<
     Partial<Pick<TableCellProps, 'onClick'>> {
   column: TableColumn<RowObject>;
   row: RowObject;
+  enableSmallScreenOptimization?: boolean;
 }
 
 export function getTableBodyColumnUtilityClass(slot: string): string {
@@ -129,6 +131,7 @@ export const TableBodyColumn = forwardRef<
     dateTimeFormat,
     defaultCountryCode,
     noWrap,
+    enableSmallScreenOptimization,
   } = props;
 
   const classes = composeClasses(
@@ -153,7 +156,8 @@ export const TableBodyColumn = forwardRef<
   };
 
   const [editMode, setEditMode] = useState(editModeProp ?? false);
-  const { palette } = useTheme();
+  const { palette, breakpoints } = useTheme();
+  const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
 
   useEffect(() => {
     if (editModeProp != null) {
@@ -307,6 +311,69 @@ export const TableBodyColumn = forwardRef<
     return { formattedColumnValue, baseColumnValue: (row as any)[id] };
   })();
 
+  const tableColumnContentElement = (
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        ...(() => {
+          if (!enableSmallScreenOptimization || !isSmallScreenSize) {
+            return {
+              alignItems:
+                ({ left: 'start', right: 'end' } as any)[align] || align,
+            };
+          }
+        })(),
+        minWidth: 0,
+      }}
+    >
+      <FieldValue
+        {...{
+          editable,
+          editMode,
+          onFieldValueUpdated,
+          editField,
+          validationRules,
+          noWrap,
+        }}
+        {...columnTypographyPropsRest}
+        editField={(() => {
+          if (getEditField) {
+            return getEditField(row, column);
+          }
+          return editField;
+        })()}
+        editableValue={(() => {
+          const editableValue = (() => {
+            if (getEditableColumnValue) {
+              return getEditableColumnValue(row, column);
+            }
+            return baseColumnValue;
+          })();
+          return editableValue ?? null;
+        })()}
+        fieldValueEditor={(() => {
+          if (fieldValueEditor) {
+            return (updatedValue) => {
+              return fieldValueEditor(row, updatedValue, column);
+            };
+          }
+        })()}
+        onChangeEditMode={(editMode) => setEditMode(editMode)}
+        type={mapTableColumnTypeToExoticDataType(type)}
+        sx={{
+          ...columnTypographyPropsSx,
+        }}
+      >
+        {formattedColumnValue}
+      </FieldValue>
+    </Box>
+  );
+
+  if (enableSmallScreenOptimization && isSmallScreenSize) {
+    return tableColumnContentElement;
+  }
+
   return (
     <TableCell
       ref={ref}
@@ -349,55 +416,7 @@ export const TableBodyColumn = forwardRef<
         ...(bodySx as any),
       }}
     >
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: ({ left: 'start', right: 'end' } as any)[align] || align,
-          minWidth: 0,
-        }}
-      >
-        <FieldValue
-          {...{
-            editable,
-            editMode,
-            onFieldValueUpdated,
-            editField,
-            validationRules,
-            noWrap,
-          }}
-          {...columnTypographyPropsRest}
-          editField={(() => {
-            if (getEditField) {
-              return getEditField(row, column);
-            }
-            return editField;
-          })()}
-          editableValue={(() => {
-            const editableValue = (() => {
-              if (getEditableColumnValue) {
-                return getEditableColumnValue(row, column);
-              }
-              return baseColumnValue;
-            })();
-            return editableValue ?? null;
-          })()}
-          fieldValueEditor={(() => {
-            if (fieldValueEditor) {
-              return (updatedValue) => {
-                return fieldValueEditor(row, updatedValue, column);
-              };
-            }
-          })()}
-          onChangeEditMode={(editMode) => setEditMode(editMode)}
-          type={mapTableColumnTypeToExoticDataType(type)}
-          sx={{
-            ...columnTypographyPropsSx,
-          }}
-        >
-          {formattedColumnValue}
-        </FieldValue>
-      </Box>
+      {tableColumnContentElement}
     </TableCell>
   );
 });

@@ -11,6 +11,7 @@ import {
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
   generateUtilityClasses,
+  useMediaQuery,
   useThemeProps,
 } from '@mui/material';
 import Box, { BoxProps } from '@mui/material/Box';
@@ -62,7 +63,7 @@ import {
 } from '../../utils/Table';
 import DataTablePagination from '../DataTablePagination';
 import RenderIfVisible, { RenderIfVisibleProps } from '../RenderIfVisible';
-import TableBodyRow from './TableBodyRow';
+import TableBodyRow, { tableBodyRowClasses } from './TableBodyRow';
 import TableColumnToggleIconButton, {
   TableColumnToggleIconButtonProps,
 } from './TableColumnToggleIconButton';
@@ -163,6 +164,7 @@ export interface TableProps<RowObject extends Record<string, any> = any>
   TableBodyRowPlaceholderProps?: Partial<RenderIfVisibleProps>;
   PaginatedTableWrapperProps?: Partial<BoxProps>;
   parentBackgroundColor?: string;
+  enableSmallScreenOptimization?: boolean;
 
   // Sort props
   sortable?: boolean;
@@ -256,6 +258,7 @@ export const BaseTable = <T extends BaseDataRow>(
     rowsPerPageOptions: rowsPerPageOptionsProp = [10, 25, 50, 100],
     defaultDateFormat = 'MMM dd, yyyy',
     defaultDateTimeFormat = 'MMM dd, yyyy hh:mm aa',
+    enableSmallScreenOptimization = true,
     defaultCountryCode,
     currencyCode,
     noWrap,
@@ -300,7 +303,9 @@ export const BaseTable = <T extends BaseDataRow>(
     onChangeCheckedRowIdsRef.current = onChangeCheckedRowIdsProp;
   }, [columnsProp, onChangeCheckedRowIdsProp, onChangeSelectedColumnIds]);
 
-  const { palette } = useTheme();
+  const { palette, breakpoints } = useTheme();
+  const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
+
   const { sx: headerRowPropsSx, ...restHeaderRowProps } = HeaderRowProps;
   const [pageIndex, setPageIndex] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(rowsPerPageProp);
@@ -737,6 +742,78 @@ export const BaseTable = <T extends BaseDataRow>(
         borderBottomWidth: 0,
       },
     });
+  }
+
+  if (enableSmallScreenOptimization && isSmallScreenSize) {
+    return (
+      <Box
+        sx={{
+          [`.${tableBodyRowClasses.root}:hover`]: {
+            bgcolor: alpha(palette.primary.main, 0.1),
+          },
+        }}
+      >
+        {(() => {
+          if (pageRows.length > 0) {
+            return pageRows.map((row, index) => {
+              const classNames = [];
+              const rowNumber = rowStartIndex + 1 + index;
+              if (rowNumber % 2 === 0) {
+                classNames.push('even');
+              } else {
+                classNames.push('odd');
+              }
+              return (
+                <RenderIfVisible
+                  {...tableBodyRowPlaceholderPropsRest}
+                  key={row.id}
+                  component="tr"
+                  displayPlaceholder={false}
+                  unWrapChildrenIfVisible
+                  sx={{
+                    height: 41,
+                    ...tableBodyRowPlaceholderPropsSx,
+                  }}
+                >
+                  <TableBodyRow
+                    {...{
+                      columnTypographyProps,
+                      decimalPlaces,
+                      defaultColumnValue,
+                      defaultCountryCode,
+                      defaultDateFormat,
+                      defaultDateTimeFormat,
+                      editable,
+                      generateRowData,
+                      minColumnWidth,
+                      noWrap,
+                      onClickRow,
+                      row,
+                      textTransform,
+                      enableSmallScreenOptimization,
+                    }}
+                    columns={displayingColumns}
+                    getRowProps={forEachRowProps}
+                    className={classNames.join(' ')}
+                  />
+                </RenderIfVisible>
+              );
+            });
+          }
+          return (
+            <Box
+              sx={{
+                p: 2,
+              }}
+            >
+              <Typography variant="body2" align="center">
+                {emptyRowsLabel}
+              </Typography>
+            </Box>
+          );
+        })()}
+      </Box>
+    );
   }
 
   const tableElement = (
