@@ -74,6 +74,7 @@ import SearchSyncToolbar, {
   Tool,
 } from '../SearchSyncToolbar';
 import Table, { TableProps, tableClasses } from '../Table';
+import { tableBodyRowClasses } from '../Table/TableBodyRow';
 import TimelineChart, { TimelineChartProps } from '../TimelineChart';
 import { useFilterTool } from './hooks/FilterTool';
 import { useGroupTool } from './hooks/GroupTool';
@@ -1463,6 +1464,9 @@ export const BaseRecordsExplorer = <
                                         '&>div': {
                                           pl: `${groupingExtraWidth}px`,
                                         },
+                                      },
+                                      [`.${tableBodyRowClasses.smallScreen}`]: {
+                                        pl: `${groupingExtraWidth}px`,
                                       },
                                     },
                                   }}

@@ -27,6 +27,7 @@ import TableBodyColumn from './TableBodyColumn';
 export interface TableBodyRowClasses {
   /** Styles applied to the root element. */
   root: string;
+  smallScreen: string;
 }
 
 export type TableBodyRowClassKey = keyof TableBodyRowClasses;
@@ -68,11 +69,12 @@ export function getTableBodyRowUtilityClass(slot: string): string {
 
 export const tableBodyRowClasses: TableBodyRowClasses = generateUtilityClasses(
   'MuiTableBodyRow',
-  ['root']
+  ['root', 'smallScreen']
 );
 
 const slots = {
   root: ['root'],
+  smallScreen: ['smallScreen'],
 };
 
 export const TableBodyRow = <T extends BaseDataRow>(
@@ -213,7 +215,7 @@ export const TableBodyRow = <T extends BaseDataRow>(
     return (
       <Grid
         {...rest}
-        className={clsx(classes.root)}
+        className={clsx(classes.root, classes.smallScreen)}
         container
         sx={{
           alignItems: 'center',
@@ -221,7 +223,13 @@ export const TableBodyRow = <T extends BaseDataRow>(
           p: 2,
         }}
       >
-        <Grid item xs>
+        <Grid
+          item
+          xs
+          sx={{
+            minWidth: 0,
+          }}
+        >
           <Stack
             sx={{
               gap: 1,
@@ -259,7 +267,6 @@ export const TableBodyRow = <T extends BaseDataRow>(
                       const {
                         id,
                         sx,
-                        propagateClickToParentRowClickEvent = true,
                         decimalPlaces = rowDecimalPlaces,
                         textTransform = rowTextTransform,
                         defaultColumnValue = rowDefaultColumnValue,
@@ -301,11 +308,6 @@ export const TableBodyRow = <T extends BaseDataRow>(
                                 enableSmallScreenOptimization,
                               }}
                               {...column}
-                              onClick={() => {
-                                propagateClickToParentRowClickEvent &&
-                                  onClickRow &&
-                                  onClickRow(row);
-                              }}
                             />
                           </Grid>
                         </Fragment>
