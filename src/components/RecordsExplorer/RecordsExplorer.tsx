@@ -1529,6 +1529,7 @@ export const BaseRecordsExplorer = <
             title,
             searchTerm,
             load,
+            loading,
             errorMessage,
           }}
           tools={[
