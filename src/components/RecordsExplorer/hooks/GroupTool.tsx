@@ -35,7 +35,7 @@ export const useGroupTool = <RecordRow extends BaseDataRow>({
     selectedSortParams: selectedGroupParams,
     onChangeSelectedSortParams: onChangeSelectedGroupParams,
     icon: <ListAltIcon />,
-    label: 'Group',
+    sortLabel: 'Group',
     addFieldText: 'Add subgroup',
   });
 };

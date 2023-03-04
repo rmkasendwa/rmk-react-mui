@@ -23,7 +23,16 @@ const Template: ComponentStory<typeof RecordsExplorer> = (props) => (
   <RecordsExplorer {...props} />
 );
 
-type ContactStatus = 'Active' | 'Pending';
+const contactStatus = ['Active', 'Pending'] as const;
+type ContactStatus = typeof contactStatus[number];
+
+const contactSources = [
+  'Refferal',
+  'Website',
+  'Google Search',
+  'Trip',
+] as const;
+type ContactSource = typeof contactSources[number];
 
 type Contact = {
   id: string;
@@ -32,6 +41,7 @@ type Contact = {
   status: ContactStatus;
   email: string;
   accountBalance: number;
+  source: ContactSource;
 };
 
 const dataSet = Array.from({ length: 1000 }).map((_, index) => {
@@ -44,6 +54,7 @@ const dataSet = Array.from({ length: 1000 }).map((_, index) => {
     status: ['Active', 'Pending'][Math.floor(Math.random() * 2)],
     email: randomEmail(),
     accountBalance: Math.round(Math.random() * 1000_000),
+    source: contactSources[Math.floor(Math.random() * contactSources.length)],
   } as Contact;
 });
 
@@ -71,6 +82,7 @@ const baseArgs = {
             );
           },
         },
+        { id: 'source', label: 'Source', type: 'enum' },
         { id: 'phoneNumber', label: 'Phone Number', type: 'phoneNumber' },
         { id: 'email', label: 'Email', type: 'email' },
         {

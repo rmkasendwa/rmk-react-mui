@@ -48,7 +48,6 @@ export const useSortOperationFieldSelectorTool = <
   onSelectSortOption,
   addFieldText = 'Add another sort',
   footerContent,
-  label,
   title,
   icon = <SortIcon />,
   sortLabel = 'Sort',
@@ -87,8 +86,8 @@ export const useSortOperationFieldSelectorTool = <
 
   return usePopupTool({
     ...rest,
-    label: label
-      ? label
+    label: sortLabel
+      ? sortLabel
       : hasSortParams
       ? (() => {
           if (selectedSortParams.length === 1) {
@@ -311,6 +310,7 @@ export const useSortOperationFieldSelectorTool = <
                           >
                             <Box>
                               <PaginatedDropdownOptionList
+                                searchable={unselectedSortableFields.length > 5}
                                 options={unselectedSortableFields.map(
                                   ({ id, label }) => {
                                     return {
@@ -353,6 +353,7 @@ export const useSortOperationFieldSelectorTool = <
       }
       return (
         <PaginatedDropdownOptionList
+          searchable={unselectedSortableFields.length > 5}
           options={unselectedSortableFields.map(({ id, label }) => {
             return {
               label,
