@@ -345,6 +345,12 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
       };
     }, []);
 
+    const syncButtonElement = (() => {
+      if (hasSyncTool && load) {
+        return <ReloadIconButton {...{ load, loading, errorMessage }} />;
+      }
+    })();
+
     return (
       <Box
         ref={mergeRefs([anchorElementRef, ref])}
@@ -528,11 +534,6 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
               );
             }
           })()}
-          {hasSyncTool && load ? (
-            <Grid item>
-              <ReloadIconButton {...{ load, loading, errorMessage }} />
-            </Grid>
-          ) : null}
           {(() => {
             if (isSmallScreenSize) {
               const smallScreenDisplayableTools = [...preTitleTools, ...tools]
@@ -585,6 +586,9 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                         }
                       )
                     : null}
+                  {syncButtonElement ? (
+                    <Grid item>{syncButtonElement}</Grid>
+                  ) : null}
                   {ellipsisTools.length > 0 ? (
                     <Grid item>
                       <EllipsisMenuIconButton
@@ -607,6 +611,9 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                   ) : null}
                 </>
               );
+            }
+            if (syncButtonElement) {
+              return <Grid item>{syncButtonElement}</Grid>;
             }
           })()}
         </Grid>
