@@ -1,5 +1,3 @@
-import '../src/scss/style.scss';
-
 import { CssBaseline } from '@mui/material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { withThemes } from '@react-theming/storybook-addon';
