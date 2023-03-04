@@ -140,3 +140,11 @@ WithTitle.args = {
   pathToAddNew: '/contacts/new',
   title: 'Contacts',
 } as RecordsExplorerProps;
+
+export const WithLoadFunction = Template.bind({});
+WithLoadFunction.args = {
+  ...baseArgs,
+  load: () => {
+    console.log('Loading...');
+  },
+} as RecordsExplorerProps;
