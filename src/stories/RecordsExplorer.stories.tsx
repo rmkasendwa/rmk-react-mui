@@ -120,6 +120,7 @@ const baseArgs = {
         {
           id: 'countryCode',
           label: 'Country',
+          type: 'enum',
           getColumnValue: ({ countryCode }) => {
             return (
               <CountryFieldValue
