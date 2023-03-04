@@ -1274,7 +1274,7 @@ export const BaseRecordsExplorer = <
                     ) => {
                       const unitExtraWidth = 24 + 16 + 8;
                       const groupingExtraWidth =
-                        (nestIndex + 1) * unitExtraWidth;
+                        selectedGroupParams.length * unitExtraWidth;
                       const groupedDataTableProps: Partial<
                         typeof baseTableProps
                       > = {
