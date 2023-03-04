@@ -1300,8 +1300,14 @@ export const BaseRecordsExplorer = <
                       const groupingExtraWidth =
                         unitExtraWidth +
                         (selectedGroupParams.length - 1) * unitGroupIconWidth;
-                      const groupingContainerExtraWidth =
-                        nestIndex * unitExtraWidth;
+                      const groupingContainerExtraWidth = (() => {
+                        if (nestIndex > 0) {
+                          return (
+                            unitExtraWidth +
+                            (nestIndex - 1) * unitGroupIconWidth
+                          );
+                        }
+                      })();
                       const groupedDataTableProps: Partial<
                         typeof baseTableProps
                       > = {
@@ -1466,7 +1472,7 @@ export const BaseRecordsExplorer = <
                                     sx: {
                                       py: 1.5,
                                       ...(() => {
-                                        if (nestIndex > 0) {
+                                        if (groupingContainerExtraWidth) {
                                           return {
                                             pl: `${groupingContainerExtraWidth}px`,
                                           };
