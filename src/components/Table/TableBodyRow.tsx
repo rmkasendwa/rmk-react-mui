@@ -97,7 +97,7 @@ export const TableBodyRow = <T extends BaseDataRow>(
     defaultDateTimeFormat,
     defaultCountryCode: rowDefaultCountryCode,
     noWrap: rowNoWrap,
-    enableSmallScreenOptimization = true,
+    enableSmallScreenOptimization = false,
     ...rest
   } = props;
 

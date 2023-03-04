@@ -129,7 +129,7 @@ export const TableBodyColumn = forwardRef<any, TableBodyColumnProps<any>>(
       dateTimeFormat,
       defaultCountryCode,
       noWrap,
-      enableSmallScreenOptimization,
+      enableSmallScreenOptimization = false,
     } = props;
 
     const classes = composeClasses(
