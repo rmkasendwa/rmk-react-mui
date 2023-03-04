@@ -13,6 +13,8 @@ import {
 } from 'unique-names-generator';
 
 import EnumValueChip from '../components/EnumValueChip';
+import FieldValue from '../components/FieldValue';
+import ProfileGravatar from '../components/ProfileGravatar';
 import RecordsExplorer, {
   RecordsExplorerProps,
 } from '../components/RecordsExplorer';
@@ -67,7 +69,33 @@ const baseArgs = {
     {
       type: 'List',
       columns: [
-        { id: 'name', label: 'Name' },
+        {
+          id: 'name',
+          label: 'Contact',
+          getColumnValue: ({ name, email }) => {
+            return (
+              <FieldValue
+                icon={
+                  <ProfileGravatar
+                    size={20}
+                    email={email}
+                    label={name}
+                    defaultAvatar="highContrastHueShiftingIntials"
+                  />
+                }
+                variant="inherit"
+                noWrap
+                ContainerGridProps={{
+                  sx: {
+                    alignItems: 'center',
+                  },
+                }}
+              >
+                {name}
+              </FieldValue>
+            );
+          },
+        },
         {
           id: 'status',
           label: 'Status',
