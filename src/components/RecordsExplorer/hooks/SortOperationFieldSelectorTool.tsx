@@ -178,6 +178,7 @@ export const useSortOperationFieldSelectorTool = <
                           }),
                         ]}
                         showClearButton={false}
+                        size="small"
                       />
                     </Grid>
                     <Grid item>
