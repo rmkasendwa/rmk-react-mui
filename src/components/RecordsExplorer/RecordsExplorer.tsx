@@ -1269,6 +1269,28 @@ export const BaseRecordsExplorer = <
                   };
 
                   if (groupedData) {
+                    const allDataGroups = groupedData.reduce(
+                      (accumulator, dataGroup) => {
+                        const appendNestedDataGroups = (
+                          inputDataGroup = dataGroup
+                        ) => {
+                          accumulator.push(inputDataGroup);
+                          const { groupName, children } =
+                            (inputDataGroup
+                              .children[0] as NestedDataGroup<RecordRow>) || {};
+                          if (groupName && children) {
+                            (
+                              inputDataGroup.children as NestedDataGroup<RecordRow>[]
+                            ).forEach((dataGroup) => {
+                              appendNestedDataGroups(dataGroup);
+                            });
+                          }
+                        };
+                        appendNestedDataGroups();
+                        return accumulator;
+                      },
+                      [] as typeof groupedData
+                    );
                     const getDataGroupElement = (
                       inputGroupedData: typeof groupedData,
                       nestIndex = 0
@@ -1373,10 +1395,12 @@ export const BaseRecordsExplorer = <
                             />
                           ) : null}
                           {inputGroupedData.map(
-                            ({ groupName, label, children }, index) => {
-                              const id = groupName || '(Empty)';
+                            (
+                              { id: groupId, groupName, label, children },
+                              index
+                            ) => {
                               const collapsed =
-                                !expandedGroups.includes(id) &&
+                                !expandedGroups.includes(groupId) &&
                                 !allGroupsExpanded;
                               return (
                                 <CollapsibleSection
@@ -1476,15 +1500,19 @@ export const BaseRecordsExplorer = <
                                   collapsed={collapsed}
                                   onChangeCollapsed={(collapsed: boolean) => {
                                     const groups = allGroupsExpanded
-                                      ? groupedData.map(({ groupName }) => {
-                                          return groupName || '(Empty)';
+                                      ? allDataGroups.map(({ id }) => {
+                                          return id || '(Empty)';
                                         })
                                       : [...expandedGroups];
                                     if (collapsed) {
-                                      groups.includes(id) &&
-                                        groups.splice(groups.indexOf(id), 1);
+                                      groups.includes(groupId) &&
+                                        groups.splice(
+                                          groups.indexOf(groupId),
+                                          1
+                                        );
                                     } else {
-                                      groups.includes(id) || groups.push(id);
+                                      groups.includes(groupId) ||
+                                        groups.push(groupId);
                                     }
                                     setSearchParams(
                                       {
