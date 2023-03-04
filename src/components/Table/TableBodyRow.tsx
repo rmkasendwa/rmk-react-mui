@@ -155,7 +155,7 @@ export const TableBodyRow = <T extends BaseDataRow>(
         return holdsPriorityInformation;
       }
     );
-    const [column, ...restColumns] = importantColumns;
+    const [highestPriorityColumn, ...restColumns] = importantColumns;
     const {
       id,
       sx,
@@ -168,10 +168,48 @@ export const TableBodyRow = <T extends BaseDataRow>(
       dateTimeFormat = defaultDateTimeFormat,
       defaultCountryCode = rowDefaultCountryCode,
       noWrap = rowNoWrap,
-    } = column;
+      getColumnValue,
+    } = highestPriorityColumn;
     const ellipsisMenuToolColumn = columns.find(({ type }) => {
       return type === 'ellipsisMenuTool';
     });
+    const rowNumberColumn = columns.find(({ id }) => {
+      return id === 'rowNumber';
+    });
+    const column: typeof highestPriorityColumn = {
+      ...highestPriorityColumn,
+      columnTypographyProps,
+      decimalPlaces,
+      textTransform,
+      defaultColumnValue,
+      editable,
+      dateFormat,
+      dateTimeFormat,
+      defaultCountryCode,
+      noWrap,
+      sx,
+      getColumnValue: (row) => {
+        return (
+          <>
+            {(() => {
+              if (rowNumberColumn && rowNumberColumn.getColumnValue) {
+                return (
+                  <>
+                    {rowNumberColumn.getColumnValue(row, rowNumberColumn)}&nbsp;
+                  </>
+                );
+              }
+            })()}
+            {(() => {
+              if (getColumnValue) {
+                return getColumnValue(row, highestPriorityColumn);
+              }
+              return row[id];
+            })()}
+          </>
+        );
+      },
+    };
     return (
       <Grid
         {...rest}
@@ -191,22 +229,7 @@ export const TableBodyRow = <T extends BaseDataRow>(
           >
             <TableBodyColumn
               key={String(id)}
-              {...({} as any)}
-              {...{
-                column,
-                row,
-                columnTypographyProps,
-                decimalPlaces,
-                textTransform,
-                defaultColumnValue,
-                editable,
-                dateFormat,
-                dateTimeFormat,
-                defaultCountryCode,
-                noWrap,
-                sx,
-                enableSmallScreenOptimization,
-              }}
+              {...{ column, row, enableSmallScreenOptimization }}
               {...column}
               onClick={() => {
                 propagateClickToParentRowClickEvent &&
