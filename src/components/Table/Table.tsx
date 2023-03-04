@@ -166,6 +166,9 @@ export interface TableProps<RowObject extends Record<string, any> = any>
   parentBackgroundColor?: string;
   enableSmallScreenOptimization?: boolean;
   showRowNumber?: boolean;
+  getDisplayingColumns?: (
+    columns: TableColumn<RowObject>[]
+  ) => TableColumn<RowObject>[];
 
   // Sort props
   sortable?: boolean;
@@ -259,11 +262,12 @@ export const BaseTable = <T extends BaseDataRow>(
     rowsPerPageOptions: rowsPerPageOptionsProp = [10, 25, 50, 100],
     defaultDateFormat = 'MMM dd, yyyy',
     defaultDateTimeFormat = 'MMM dd, yyyy hh:mm aa',
-    enableSmallScreenOptimization = true,
+    enableSmallScreenOptimization = false,
     showRowNumber = false,
     defaultCountryCode,
     currencyCode,
     noWrap,
+    getDisplayingColumns,
     sx,
     ...rest
   } = props;
@@ -321,50 +325,11 @@ export const BaseTable = <T extends BaseDataRow>(
   const [checkedRowIds, setCheckedRowIds] = useState<string[]>(
     checkedRowIdsProp || []
   );
-  const checkboxColumn: TableColumn<T> = {
-    id: 'checkbox' as any,
-    label: enableCheckboxAllRowSelector ? (
-      <Checkbox
-        checked={allRowsChecked}
-        onChange={(event) => {
-          setAllRowsChecked(event.target.checked);
-          setCheckedRowIds([]);
-        }}
-        color="default"
-      />
-    ) : null,
-    getColumnValue: ({ id: baseId }) => {
-      const id = String(baseId);
-      const checked = allRowsChecked || checkedRowIds.includes(id);
-      return (
-        <Checkbox
-          {...{ checked }}
-          color="default"
-          onChange={() => {
-            setCheckedRowIds((prevCheckedRowIds) => {
-              const nextCheckedRowIds = [...prevCheckedRowIds];
-              if (nextCheckedRowIds.includes(id)) {
-                nextCheckedRowIds.splice(nextCheckedRowIds.indexOf(id), 1);
-              } else {
-                nextCheckedRowIds.push(id);
-              }
-              return nextCheckedRowIds;
-            });
-          }}
-        />
-      );
-    },
-    width: 40,
-    sx: {
-      '&,>div': {
-        p: 0,
-      },
-    },
-    holdsPriorityInformation: false,
-  };
+
   useEffect(() => {
     setAllRowsChecked(allRowsCheckedProp);
   }, [allRowsCheckedProp]);
+
   useEffect(() => {
     if (checkedRowIdsProp && !onChangeCheckedRowIdsRef.current) {
       setCheckedRowIds((prevCheckedRowIds) => {
@@ -464,6 +429,7 @@ export const BaseTable = <T extends BaseDataRow>(
           break;
         case 'ellipsisMenuTool':
           nextColumn.opaque = true;
+          nextColumn.width = 42;
           nextColumn.defaultColumnValue ||
             (nextColumn.defaultColumnValue = <>&nbsp;</>);
           nextColumn.propagateClickToParentRowClickEvent = false;
@@ -503,10 +469,72 @@ export const BaseTable = <T extends BaseDataRow>(
     });
   }, [columnsProp, currencyCode, enableColumnDisplayToggle]);
 
-  const displayingColumns = [
+  const baseDisplayingColumns = [
     ...(() => {
       if (enableCheckboxRowSelectors) {
-        return [checkboxColumn];
+        return [
+          {
+            id: 'checkbox' as any,
+            label: enableCheckboxAllRowSelector ? (
+              <Box
+                sx={{
+                  width: 60,
+                  display: 'flex',
+                  justifyContent: 'center',
+                }}
+              >
+                <Checkbox
+                  checked={allRowsChecked}
+                  onChange={(event) => {
+                    setAllRowsChecked(event.target.checked);
+                    setCheckedRowIds([]);
+                  }}
+                  color="default"
+                />
+              </Box>
+            ) : null,
+            getColumnValue: ({ id: baseId }) => {
+              const id = String(baseId);
+              const checked = allRowsChecked || checkedRowIds.includes(id);
+              return (
+                <Box
+                  sx={{
+                    width: 60,
+                    display: 'flex',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Checkbox
+                    {...{ checked }}
+                    color="default"
+                    onChange={() => {
+                      setCheckedRowIds((prevCheckedRowIds) => {
+                        const nextCheckedRowIds = [...prevCheckedRowIds];
+                        if (nextCheckedRowIds.includes(id)) {
+                          nextCheckedRowIds.splice(
+                            nextCheckedRowIds.indexOf(id),
+                            1
+                          );
+                        } else {
+                          nextCheckedRowIds.push(id);
+                        }
+                        return nextCheckedRowIds;
+                      });
+                    }}
+                  />
+                </Box>
+              );
+            },
+            width: 60,
+            sortable: false,
+            sx: {
+              '&,>div': {
+                p: 0,
+              },
+            },
+            holdsPriorityInformation: false,
+          } as TableColumn<T>,
+        ];
       }
       return [];
     })(),
@@ -548,6 +576,13 @@ export const BaseTable = <T extends BaseDataRow>(
       })
       .filter((column) => column != null),
   ];
+
+  const displayingColumns = (() => {
+    if (getDisplayingColumns) {
+      return getDisplayingColumns(baseDisplayingColumns);
+    }
+    return baseDisplayingColumns;
+  })();
 
   const minWidth = getTableMinWidth(
     displayingColumns.map((column) => {
