@@ -10,14 +10,20 @@ import {
 } from '@mui/material';
 import Box from '@mui/material/Box';
 import clsx from 'clsx';
-import { ReactNode, forwardRef, useEffect, useRef, useState } from 'react';
+import {
+  Fragment,
+  ReactNode,
+  forwardRef,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { mergeRefs } from 'react-merge-refs';
 
 import {
   UseLoadOnScrollToBottomOptions,
   useLoadOnScrollToBottom,
 } from '../hooks/InfiniteScroller';
-import RenderIfVisible from './RenderIfVisible';
 
 export interface InfiniteScrollBoxClasses {
   /** Styles applied to the root element. */
@@ -303,18 +309,7 @@ export const InfiniteScrollBox = forwardRef<
                 <Box sx={{ height: offset * dataElementLength }} />
               ) : null}
               {displayableDataSet.map((dataElement, index) => {
-                return (
-                  <RenderIfVisible
-                    key={index}
-                    defaultPlaceholderDimensions={{
-                      height: dataElementLength,
-                    }}
-                    unWrapChildrenIfVisible
-                    initialVisible
-                  >
-                    {dataElement}
-                  </RenderIfVisible>
-                );
+                return <Fragment key={index}>{dataElement}</Fragment>;
               })}
             </Box>
           );

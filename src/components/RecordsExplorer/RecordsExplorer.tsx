@@ -71,7 +71,6 @@ import IconLoadingScreen, {
 } from '../IconLoadingScreen';
 import RenderIfVisible from '../RenderIfVisible';
 import SearchSyncToolbar, {
-  IconButtonTool,
   SearchSyncToolbarProps,
   Tool,
 } from '../SearchSyncToolbar';
@@ -1555,21 +1554,26 @@ export const BaseRecordsExplorer = <
                 (!permissionToAddNew ||
                   loggedInUserHasPermission(permissionToAddNew))
               ) {
-                const iconButtonTool: IconButtonTool = {
-                  icon: <AddIcon />,
-                  type: 'icon-button',
-                  label: `Add New ${recordLabelSingular}`,
-                  alwaysShowOn: 'All Screens',
-                  ...(() => {
-                    return {
-                      component: RouterLink,
-                      to: pathToAddNew,
-                    };
-                  })(),
-                };
                 if (isSmallScreenSize) {
                   if (!fillContentArea) {
-                    tools.push(iconButtonTool);
+                    tools.push({
+                      icon: <AddIcon />,
+                      type: 'icon-button',
+                      label: `Add New ${recordLabelSingular}`,
+                      alwaysShowOn: 'All Screens',
+                      ...(() => {
+                        return {
+                          component: RouterLink,
+                          to: pathToAddNew,
+                        };
+                      })(),
+                      sx: {
+                        '&,&:hover': {
+                          bgcolor: palette.primary.main,
+                          color: palette.getContrastText(palette.primary.main),
+                        },
+                      },
+                    });
                   }
                 } else {
                   tools.push({
@@ -1714,7 +1718,7 @@ export const BaseRecordsExplorer = <
             p: 0,
             minWidth: 'auto',
             width: 50,
-            height: `50px !important`,
+            height: 50,
             borderRadius: '50%',
             position: 'fixed',
             bottom: 16,
