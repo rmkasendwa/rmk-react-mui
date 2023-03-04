@@ -1063,7 +1063,7 @@ export const BaseRecordsExplorer = <
         const { type } = selectedView;
         switch (type) {
           case 'List':
-            const { minColumnWidth, enableColumnDisplayToggle = true } =
+            const { minColumnWidth = 200, enableColumnDisplayToggle = true } =
               selectedView;
             const displayingColumns = selectedView.columns.filter(({ id }) => {
               return selectedColumnIds.includes(String(id) as any);
@@ -1230,6 +1230,10 @@ export const BaseRecordsExplorer = <
                     const headerColumns = baseTableColumns.map((column) => ({
                       ...column,
                     }));
+                    const firstColumnWidth =
+                      (headerColumns[0].width || minColumnWidth) +
+                      selectedGroupParams.length * 30;
+
                     headerColumns[0] = {
                       ...headerColumns[0],
                       label: (
@@ -1268,6 +1272,15 @@ export const BaseRecordsExplorer = <
                         </Stack>
                       ),
                       searchableLabel: String(headerColumns[0].label),
+                      width: firstColumnWidth,
+                    };
+
+                    const bodyColumns = displayingColumns.map((column) => ({
+                      ...column,
+                    }));
+                    bodyColumns[0] = {
+                      ...bodyColumns[0],
+                      width: firstColumnWidth,
                     };
 
                     return (
@@ -1422,7 +1435,7 @@ export const BaseRecordsExplorer = <
                                   >
                                     <Table
                                       {...baseTableProps}
-                                      columns={displayingColumns}
+                                      columns={bodyColumns}
                                       showHeaderRow={false}
                                       stickyHeader
                                       rows={children || []}
