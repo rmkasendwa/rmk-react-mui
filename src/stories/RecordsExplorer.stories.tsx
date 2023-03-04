@@ -6,7 +6,7 @@ import { countries } from 'countries-list';
 import randomEmail from 'random-email';
 import createMobilePhoneNumber from 'random-mobile-numbers';
 import React from 'react';
-import { colors, starWars, uniqueNamesGenerator } from 'unique-names-generator';
+import { names, uniqueNamesGenerator } from 'unique-names-generator';
 
 import CountryFieldValue from '../components/CountryFieldValue';
 import EnumValueChip from '../components/EnumValueChip';
@@ -54,7 +54,7 @@ const dataSet = Array.from({ length: 1000 }).map((_, index) => {
   return {
     id: String(index),
     name: uniqueNamesGenerator({
-      dictionaries: [starWars, colors],
+      dictionaries: [names, names],
       separator: ' ',
     }),
     phoneNumber: createMobilePhoneNumber('UK'),
@@ -74,7 +74,7 @@ const baseArgs = {
       columns: [
         {
           id: 'name',
-          label: 'Contact',
+          label: 'Name',
           getColumnValue: ({ name, email }) => {
             return (
               <FieldValue
