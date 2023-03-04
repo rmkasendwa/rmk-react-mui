@@ -7,6 +7,7 @@ import LockResetIcon from '@mui/icons-material/LockReset';
 import {
   Badge,
   Box,
+  Button,
   ComponentsOverrides,
   ComponentsProps,
   ComponentsVariants,
@@ -276,6 +277,7 @@ export interface RecordsExplorerProps<
     data: RecordRow[],
     grouping: GroupableField<RecordRow>
   ) => RecordRow[];
+  showPaginationStats?: boolean;
 }
 
 export function getRecordsExplorerUtilityClass(slot: string): string {
@@ -327,6 +329,7 @@ export const BaseRecordsExplorer = <
     searchableFields: searchableFieldsProp,
     getGroupableData,
     SearchSyncToolBarProps = {},
+    showPaginationStats = true,
     id,
     ...rest
   } = omit(props, 'recordLabelSingular');
@@ -1551,7 +1554,9 @@ export const BaseRecordsExplorer = <
                   })(),
                 };
                 if (isSmallScreenSize) {
-                  tools.push(iconButtonTool);
+                  if (!fillContentArea) {
+                    tools.push(iconButtonTool);
+                  }
                 } else {
                   tools.push({
                     icon: <AddIcon />,
@@ -1669,7 +1674,7 @@ export const BaseRecordsExplorer = <
           return children;
         })()}
       </Box>
-      {!isSmallScreenSize && filteredData.length > 0 ? (
+      {!isSmallScreenSize && showPaginationStats && filteredData.length > 0 ? (
         <Paper
           elevation={0}
           component="footer"
@@ -1684,6 +1689,26 @@ export const BaseRecordsExplorer = <
             totalCount={data.length}
           />
         </Paper>
+      ) : null}
+      {pathToAddNew && fillContentArea && isSmallScreenSize ? (
+        <Button
+          component={RouterLink}
+          to={pathToAddNew}
+          color="primary"
+          variant="contained"
+          sx={{
+            p: 0,
+            minWidth: 'auto',
+            width: 50,
+            height: `50px !important`,
+            borderRadius: '50%',
+            position: 'fixed',
+            bottom: 16,
+            right: 16,
+          }}
+        >
+          <AddIcon />
+        </Button>
       ) : null}
     </Paper>
   );
