@@ -375,10 +375,121 @@ export const BaseTable = <T extends BaseDataRow>(
   parentBackgroundColor || (parentBackgroundColor = palette.background.paper);
 
   // Setting default column properties
-  const columns = useMemo(() => {
-    return expandTableColumnWidths(columnsProp, {
-      enableColumnDisplayToggle,
-    }).map((column) => {
+  const columns = (() => {
+    return expandTableColumnWidths(
+      [
+        ...(() => {
+          if (enableCheckboxRowSelectors) {
+            return [
+              {
+                id: 'checkbox' as any,
+                label: enableCheckboxAllRowSelector ? (
+                  <Box
+                    sx={{
+                      width: 60,
+                      display: 'flex',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Checkbox
+                      checked={allRowsChecked}
+                      onChange={(event) => {
+                        setAllRowsChecked(event.target.checked);
+                        setCheckedRowIds([]);
+                      }}
+                      color="default"
+                    />
+                  </Box>
+                ) : null,
+                getColumnValue: ({ id: baseId }) => {
+                  const id = String(baseId);
+                  const checked = allRowsChecked || checkedRowIds.includes(id);
+                  return (
+                    <Box
+                      sx={{
+                        width: 60,
+                        display: 'flex',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <Checkbox
+                        {...{ checked }}
+                        color="default"
+                        onChange={() => {
+                          setCheckedRowIds((prevCheckedRowIds) => {
+                            const nextCheckedRowIds = [...prevCheckedRowIds];
+                            if (nextCheckedRowIds.includes(id)) {
+                              nextCheckedRowIds.splice(
+                                nextCheckedRowIds.indexOf(id),
+                                1
+                              );
+                            } else {
+                              nextCheckedRowIds.push(id);
+                            }
+                            return nextCheckedRowIds;
+                          });
+                        }}
+                      />
+                    </Box>
+                  );
+                },
+                width: 60,
+                sortable: false,
+                sx: {
+                  '&,>div': {
+                    p: 0,
+                  },
+                },
+                holdsPriorityInformation: false,
+              } as TableColumn<T>,
+            ];
+          }
+          return [];
+        })(),
+        ...(() => {
+          if (showRowNumber) {
+            return [
+              {
+                id: 'rowNumber' as any,
+                label: 'Number',
+                width: 60,
+                getColumnValue: (record) => {
+                  return `${
+                    1 + rowStartIndex + pageRows.indexOf(record) + pageIndex
+                  }.`;
+                },
+                align: 'right',
+                showHeaderText: false,
+                opaque: true,
+                sx: {
+                  position: 'sticky',
+                  left: 0,
+                  zIndex: 1,
+                },
+                headerSx: {
+                  zIndex: 5,
+                },
+                holdsPriorityInformation: false,
+              } as TableColumn<T>,
+            ];
+          }
+          return [];
+        })(),
+        ...(() => {
+          if (selectedColumnIdsProp && onChangeSelectedColumnIds) {
+            return selectedColumnIdsProp;
+          }
+          return selectedColumnIds;
+        })()
+          .map((selectedColumnId) => {
+            return columnsProp.find(({ id }) => id === selectedColumnId)!;
+          })
+          .filter((column) => column != null),
+      ],
+      {
+        enableColumnDisplayToggle,
+      }
+    ).map((column) => {
       const nextColumn = { ...column } as typeof column;
       nextColumn.type || (nextColumn.type = 'string');
       nextColumn.className = clsx(
@@ -467,121 +578,13 @@ export const BaseTable = <T extends BaseDataRow>(
 
       return nextColumn;
     });
-  }, [columnsProp, currencyCode, enableColumnDisplayToggle]);
-
-  const baseDisplayingColumns = [
-    ...(() => {
-      if (enableCheckboxRowSelectors) {
-        return [
-          {
-            id: 'checkbox' as any,
-            label: enableCheckboxAllRowSelector ? (
-              <Box
-                sx={{
-                  width: 60,
-                  display: 'flex',
-                  justifyContent: 'center',
-                }}
-              >
-                <Checkbox
-                  checked={allRowsChecked}
-                  onChange={(event) => {
-                    setAllRowsChecked(event.target.checked);
-                    setCheckedRowIds([]);
-                  }}
-                  color="default"
-                />
-              </Box>
-            ) : null,
-            getColumnValue: ({ id: baseId }) => {
-              const id = String(baseId);
-              const checked = allRowsChecked || checkedRowIds.includes(id);
-              return (
-                <Box
-                  sx={{
-                    width: 60,
-                    display: 'flex',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <Checkbox
-                    {...{ checked }}
-                    color="default"
-                    onChange={() => {
-                      setCheckedRowIds((prevCheckedRowIds) => {
-                        const nextCheckedRowIds = [...prevCheckedRowIds];
-                        if (nextCheckedRowIds.includes(id)) {
-                          nextCheckedRowIds.splice(
-                            nextCheckedRowIds.indexOf(id),
-                            1
-                          );
-                        } else {
-                          nextCheckedRowIds.push(id);
-                        }
-                        return nextCheckedRowIds;
-                      });
-                    }}
-                  />
-                </Box>
-              );
-            },
-            width: 60,
-            sortable: false,
-            sx: {
-              '&,>div': {
-                p: 0,
-              },
-            },
-            holdsPriorityInformation: false,
-          } as TableColumn<T>,
-        ];
-      }
-      return [];
-    })(),
-    ...(() => {
-      if (showRowNumber) {
-        return [
-          {
-            id: 'rowNumber' as any,
-            label: 'Number',
-            width: 60,
-            getColumnValue: (record) => {
-              return `${1 + pageRows.indexOf(record) + pageIndex}.`;
-            },
-            align: 'right',
-            showHeaderText: false,
-            opaque: true,
-            sx: {
-              position: 'sticky',
-              left: 0,
-              zIndex: 1,
-            },
-            headerSx: {
-              zIndex: 5,
-            },
-            holdsPriorityInformation: false,
-          } as TableColumn<T>,
-        ];
-      }
-      return [];
-    })(),
-    ...(() => {
-      if (selectedColumnIdsProp && onChangeSelectedColumnIds) {
-        return selectedColumnIdsProp;
-      }
-      return selectedColumnIds;
-    })()
-      .map((selectedColumnId) => {
-        return columns.find(({ id }) => id === selectedColumnId)!;
-      })
-      .filter((column) => column != null),
-  ];
+  })();
 
   const displayingColumns = (() => {
     if (getDisplayingColumns) {
-      return getDisplayingColumns(baseDisplayingColumns);
+      return getDisplayingColumns(columns);
     }
-    return baseDisplayingColumns;
+    return columns;
   })();
 
   const minWidth = getTableMinWidth(
