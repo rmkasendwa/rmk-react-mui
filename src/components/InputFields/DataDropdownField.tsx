@@ -675,7 +675,6 @@ export const DataDropdownField = forwardRef<
               ...(() => {
                 if (isSmallScreenSize) {
                   return {
-                    optionHeight: 50,
                     searchable: true,
                     maxHeight:
                       dropdownListMaxHeight ?? window.innerHeight - 240,

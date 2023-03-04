@@ -11,6 +11,7 @@ import {
   generateUtilityClasses,
   iconButtonClasses,
   inputBaseClasses,
+  useMediaQuery,
   useThemeProps,
 } from '@mui/material';
 import Card, { CardProps } from '@mui/material/Card';
@@ -42,10 +43,7 @@ import InfiniteScrollBox, {
 } from '../InfiniteScrollBox';
 import ReloadIconButton from '../ReloadIconButton';
 import SearchField, { SearchFieldProps } from '../SearchField';
-import DropdownOption, {
-  DEFAULT_DROPDOWN_OPTION_HEIGHT,
-  DropdownOptionVariant,
-} from './DropdownOption';
+import DropdownOption, { DropdownOptionVariant } from './DropdownOption';
 
 export interface DropdownOption
   extends Pick<MenuItemProps, 'onClick'>,
@@ -149,7 +147,7 @@ export const PaginatedDropdownOptionList = forwardRef<
     selectedOptions: selectedOptionsProp,
     minWidth = DEFAULT_DROPDOWN_MENU_MAX_HEIGHT,
     maxHeight = DEFAULT_DROPDOWN_MENU_MAX_HEIGHT,
-    optionHeight = DEFAULT_DROPDOWN_OPTION_HEIGHT,
+    optionHeight: optionHeightProp,
     paging = true,
     options: optionsProp,
     onLoadOptions,
@@ -230,6 +228,19 @@ export const PaginatedDropdownOptionList = forwardRef<
     }
   );
 
+  const { palette, breakpoints } = useTheme();
+  const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
+
+  const optionHeight = (() => {
+    if (optionHeightProp) {
+      return optionHeightProp;
+    }
+    if (isSmallScreenSize) {
+      return 50;
+    }
+    return 36;
+  })();
+
   const limit = useMemo(() => {
     return Math.ceil(maxHeight / optionHeight) + 1;
   }, [maxHeight, optionHeight]);
@@ -238,7 +249,6 @@ export const PaginatedDropdownOptionList = forwardRef<
     limitProp = limit;
   }
 
-  const { palette } = useTheme();
   const [scrollableDropdownWrapper, setScrollableDropdownWrapper] =
     useState<HTMLDivElement | null>(null);
 
@@ -351,7 +361,6 @@ export const PaginatedDropdownOptionList = forwardRef<
     if (selectedOptions.length > 0) {
       return filteredOptions.indexOf(selectedOptions[0]);
     }
-    return 0;
   });
 
   useEffect(() => {
