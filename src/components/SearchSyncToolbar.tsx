@@ -18,6 +18,7 @@ import {
   useTheme,
   useThemeProps,
 } from '@mui/material';
+import buttonClasses from '@mui/material/Button/buttonClasses';
 import Grid from '@mui/material/Grid';
 import clsx from 'clsx';
 import { omit } from 'lodash';
@@ -162,9 +163,12 @@ export const getToolNodes = (
                           sx={{
                             ...sx,
                             minWidth: 'auto',
-                            px: 0.5,
+                            px: 1,
                             '&>svg': {
-                              fontSize: 16,
+                              fontSize: 20,
+                            },
+                            [`.${buttonClasses.endIcon}`]: {
+                              m: 0,
                             },
                           }}
                         >
@@ -368,7 +372,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
             height: 50,
             alignItems: 'center',
             ...(() => {
-              if (!isSmallScreenSize) {
+              if (showFullToolWidth) {
                 return {
                   columnGap: 1,
                 };
