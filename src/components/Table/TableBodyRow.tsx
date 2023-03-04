@@ -1,9 +1,9 @@
 import {
-  Box,
   ComponentsOverrides,
   ComponentsProps,
   ComponentsVariants,
   Grid,
+  Stack,
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
   generateUtilityClasses,
@@ -164,122 +164,178 @@ export const TableBodyRow = <T extends BaseDataRow>(
       defaultCountryCode = rowDefaultCountryCode,
       noWrap = rowNoWrap,
     } = column;
+    const ellipsisMenuToolColumn = restColumns.find(({ type }) => {
+      return type === 'ellipsisMenuTool';
+    });
     return (
-      <Box
+      <Grid
         {...rest}
         className={clsx(classes.root)}
+        container
         sx={{
+          alignItems: 'center',
           cursor: onClickRow ? 'pointer' : 'inherit',
           p: 2,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 1,
         }}
       >
-        <TableBodyColumn
-          key={String(id)}
-          {...({} as any)}
-          {...{
-            column,
-            row,
-            columnTypographyProps,
-            decimalPlaces,
-            textTransform,
-            defaultColumnValue,
-            editable,
-            dateFormat,
-            dateTimeFormat,
-            defaultCountryCode,
-            noWrap,
-            sx,
-            enableSmallScreenOptimization,
-          }}
-          {...column}
-          onClick={() => {
-            propagateClickToParentRowClickEvent &&
-              onClickRow &&
-              onClickRow(row);
-          }}
-          columnTypographyProps={{
-            noWrap,
-            sx: {
-              fontSize: 16,
-            },
-          }}
-        />
+        <Grid item xs>
+          <Stack
+            sx={{
+              gap: 1,
+            }}
+          >
+            <TableBodyColumn
+              key={String(id)}
+              {...({} as any)}
+              {...{
+                column,
+                row,
+                columnTypographyProps,
+                decimalPlaces,
+                textTransform,
+                defaultColumnValue,
+                editable,
+                dateFormat,
+                dateTimeFormat,
+                defaultCountryCode,
+                noWrap,
+                sx,
+                enableSmallScreenOptimization,
+              }}
+              {...column}
+              onClick={() => {
+                propagateClickToParentRowClickEvent &&
+                  onClickRow &&
+                  onClickRow(row);
+              }}
+              columnTypographyProps={{
+                noWrap,
+                sx: {
+                  fontSize: 16,
+                },
+              }}
+            />
+            {(() => {
+              if (restColumns.length > 0) {
+                return (
+                  <Grid
+                    container
+                    sx={{
+                      gap: 1,
+                      alignItems: 'center',
+                      flexWrap: 'nowrap',
+                      overflow: 'hidden',
+                    }}
+                  >
+                    {restColumns.slice(0, 3).map((column, index) => {
+                      const {
+                        id,
+                        sx,
+                        propagateClickToParentRowClickEvent = true,
+                        decimalPlaces = rowDecimalPlaces,
+                        textTransform = rowTextTransform,
+                        defaultColumnValue = rowDefaultColumnValue,
+                        editable = rowEditable,
+                        dateFormat = defaultDateFormat,
+                        dateTimeFormat = defaultDateTimeFormat,
+                        defaultCountryCode = rowDefaultCountryCode,
+                        noWrap = rowNoWrap,
+                      } = column;
+                      return (
+                        <Fragment key={index}>
+                          {index > 0 ? (
+                            <Grid
+                              item
+                              sx={{
+                                flex: 'none',
+                              }}
+                            >
+                              &bull;
+                            </Grid>
+                          ) : null}
+                          <Grid item>
+                            <TableBodyColumn
+                              key={String(id)}
+                              {...({} as any)}
+                              {...{
+                                column,
+                                row,
+                                columnTypographyProps,
+                                decimalPlaces,
+                                textTransform,
+                                defaultColumnValue,
+                                editable,
+                                dateFormat,
+                                dateTimeFormat,
+                                defaultCountryCode,
+                                noWrap,
+                                sx,
+                                enableSmallScreenOptimization,
+                              }}
+                              {...column}
+                              onClick={() => {
+                                propagateClickToParentRowClickEvent &&
+                                  onClickRow &&
+                                  onClickRow(row);
+                              }}
+                            />
+                          </Grid>
+                        </Fragment>
+                      );
+                    })}
+                  </Grid>
+                );
+              }
+            })()}
+          </Stack>
+        </Grid>
         {(() => {
-          if (restColumns.length > 0) {
+          if (ellipsisMenuToolColumn) {
+            const {
+              id,
+              sx,
+              propagateClickToParentRowClickEvent = true,
+              decimalPlaces = rowDecimalPlaces,
+              textTransform = rowTextTransform,
+              defaultColumnValue = rowDefaultColumnValue,
+              editable = rowEditable,
+              dateFormat = defaultDateFormat,
+              dateTimeFormat = defaultDateTimeFormat,
+              defaultCountryCode = rowDefaultCountryCode,
+              noWrap = rowNoWrap,
+            } = ellipsisMenuToolColumn;
             return (
-              <Grid
-                container
-                sx={{
-                  gap: 1,
-                  alignItems: 'center',
-                  flexWrap: 'nowrap',
-                  overflow: 'hidden',
-                }}
-              >
-                {restColumns.slice(0, 3).map((column, index) => {
-                  const {
-                    id,
+              <Grid item>
+                <TableBodyColumn
+                  key={String(id)}
+                  {...({} as any)}
+                  {...{
+                    row,
+                    columnTypographyProps,
+                    decimalPlaces,
+                    textTransform,
+                    defaultColumnValue,
+                    editable,
+                    dateFormat,
+                    dateTimeFormat,
+                    defaultCountryCode,
+                    noWrap,
                     sx,
-                    propagateClickToParentRowClickEvent = true,
-                    decimalPlaces = rowDecimalPlaces,
-                    textTransform = rowTextTransform,
-                    defaultColumnValue = rowDefaultColumnValue,
-                    editable = rowEditable,
-                    dateFormat = defaultDateFormat,
-                    dateTimeFormat = defaultDateTimeFormat,
-                    defaultCountryCode = rowDefaultCountryCode,
-                    noWrap = rowNoWrap,
-                  } = column;
-                  return (
-                    <Fragment key={index}>
-                      {index > 0 ? (
-                        <Grid
-                          item
-                          sx={{
-                            flex: 'none',
-                          }}
-                        >
-                          &bull;
-                        </Grid>
-                      ) : null}
-                      <Grid item>
-                        <TableBodyColumn
-                          key={String(id)}
-                          {...({} as any)}
-                          {...{
-                            column,
-                            row,
-                            columnTypographyProps,
-                            decimalPlaces,
-                            textTransform,
-                            defaultColumnValue,
-                            editable,
-                            dateFormat,
-                            dateTimeFormat,
-                            defaultCountryCode,
-                            noWrap,
-                            sx,
-                            enableSmallScreenOptimization,
-                          }}
-                          {...column}
-                          onClick={() => {
-                            propagateClickToParentRowClickEvent &&
-                              onClickRow &&
-                              onClickRow(row);
-                          }}
-                        />
-                      </Grid>
-                    </Fragment>
-                  );
-                })}
+                    enableSmallScreenOptimization,
+                  }}
+                  {...ellipsisMenuToolColumn}
+                  column={ellipsisMenuToolColumn}
+                  onClick={() => {
+                    propagateClickToParentRowClickEvent &&
+                      onClickRow &&
+                      onClickRow(row);
+                  }}
+                />
               </Grid>
             );
           }
         })()}
-      </Box>
+      </Grid>
     );
   }
 

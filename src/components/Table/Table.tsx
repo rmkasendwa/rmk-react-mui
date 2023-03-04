@@ -775,6 +775,7 @@ export const BaseTable = <T extends BaseDataRow>(
                     ...tableBodyRowPlaceholderPropsSx,
                   }}
                 >
+                  {index > 0 ? <Divider /> : null}
                   <TableBodyRow
                     {...{
                       columnTypographyProps,
