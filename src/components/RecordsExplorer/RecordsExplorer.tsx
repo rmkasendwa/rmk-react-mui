@@ -1296,6 +1296,7 @@ export const BaseRecordsExplorer = <
                           )}
                           columns={headerColumns}
                           showDataRows={false}
+                          showRowNumber={false}
                           stickyHeader
                           sx={{
                             position: 'sticky',
@@ -1457,6 +1458,7 @@ export const BaseRecordsExplorer = <
                                       {...baseTableProps}
                                       columns={bodyColumns}
                                       showHeaderRow={false}
+                                      showRowNumber={false}
                                       stickyHeader
                                       rows={children || []}
                                       {...{ sx }}

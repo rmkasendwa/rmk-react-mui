@@ -165,6 +165,7 @@ export interface TableProps<RowObject extends Record<string, any> = any>
   PaginatedTableWrapperProps?: Partial<BoxProps>;
   parentBackgroundColor?: string;
   enableSmallScreenOptimization?: boolean;
+  showRowNumber?: boolean;
 
   // Sort props
   sortable?: boolean;
@@ -259,6 +260,7 @@ export const BaseTable = <T extends BaseDataRow>(
     defaultDateFormat = 'MMM dd, yyyy',
     defaultDateTimeFormat = 'MMM dd, yyyy hh:mm aa',
     enableSmallScreenOptimization = true,
+    showRowNumber = false,
     defaultCountryCode,
     currencyCode,
     noWrap,
@@ -358,6 +360,7 @@ export const BaseTable = <T extends BaseDataRow>(
         p: 0,
       },
     },
+    holdsPriorityInformation: false,
   };
   useEffect(() => {
     setAllRowsChecked(allRowsCheckedProp);
@@ -464,6 +467,7 @@ export const BaseTable = <T extends BaseDataRow>(
           nextColumn.defaultColumnValue ||
             (nextColumn.defaultColumnValue = <>&nbsp;</>);
           nextColumn.propagateClickToParentRowClickEvent = false;
+          nextColumn.holdsPriorityInformation = false;
           nextColumn.sx = {
             position: 'sticky',
             p: 0,
@@ -503,6 +507,33 @@ export const BaseTable = <T extends BaseDataRow>(
     ...(() => {
       if (enableCheckboxRowSelectors) {
         return [checkboxColumn];
+      }
+      return [];
+    })(),
+    ...(() => {
+      if (showRowNumber) {
+        return [
+          {
+            id: 'rowNumber' as any,
+            label: 'Number',
+            width: 60,
+            getColumnValue: (record) => {
+              return `${1 + pageRows.indexOf(record) + pageIndex}.`;
+            },
+            align: 'right',
+            showHeaderText: false,
+            opaque: true,
+            sx: {
+              position: 'sticky',
+              left: 0,
+              zIndex: 1,
+            },
+            headerSx: {
+              zIndex: 5,
+            },
+            holdsPriorityInformation: false,
+          } as TableColumn<T>,
+        ];
       }
       return [];
     })(),
