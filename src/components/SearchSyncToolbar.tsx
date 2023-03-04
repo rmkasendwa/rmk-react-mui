@@ -32,6 +32,7 @@ import {
   useRef,
   useState,
 } from 'react';
+import { mergeRefs } from 'react-merge-refs';
 
 import EllipsisMenuIconButton from './EllipsisMenuIconButton';
 import LoadingTypography, { LoadingTypographyProps } from './LoadingTypography';
@@ -104,7 +105,7 @@ export type Tool = ButtonTool | IconButtonTool | ElementTool;
 
 export const getToolNodes = (
   tools: (ReactNode | Tool)[],
-  isLargeScreenSize: boolean
+  showFullToolWidth: boolean
 ): ReactNode[] => {
   return tools
     .filter((baseTool) => baseTool)
@@ -145,7 +146,7 @@ export const getToolNodes = (
                 'type'
               );
               const buttonElement = (() => {
-                if (!isLargeScreenSize) {
+                if (!showFullToolWidth) {
                   return (
                     <>
                       <Tooltip
@@ -291,6 +292,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
 
     // Refs
     const isInitialMountRef = useRef(true);
+    const anchorElementRef = useRef<HTMLDivElement | null>(null);
     const onSearchRef = useRef(onSearch);
     useEffect(() => {
       onSearchRef.current = onSearch;
@@ -299,9 +301,9 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
     const { sx: titlePropsSx, ...titlePropsRest } = TitleProps;
 
     const { breakpoints } = useTheme();
-    const isLargeScreenSize = useMediaQuery(breakpoints.up(1200));
     const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
 
+    const [showFullToolWidth, setShowFullToolWidth] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [searchFieldOpen, setSearchFieldOpen] = useState(
       searchTermProp.length > 0
@@ -318,6 +320,25 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
     }, [searchTermProp]);
 
     useEffect(() => {
+      if (anchorElementRef.current) {
+        const anchorElement = anchorElementRef.current;
+        const windowResizeEventCallback = () => {
+          setShowFullToolWidth(() => {
+            if (hasSearchTool && title) {
+              return anchorElement.offsetWidth > 960;
+            }
+            return anchorElement.offsetWidth > 800;
+          });
+        };
+        window.addEventListener('resize', windowResizeEventCallback);
+        windowResizeEventCallback();
+        return () => {
+          window.removeEventListener('resize', windowResizeEventCallback);
+        };
+      }
+    }, [hasSearchTool, title]);
+
+    useEffect(() => {
       isInitialMountRef.current = false;
       return () => {
         isInitialMountRef.current = true;
@@ -326,7 +347,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
 
     return (
       <Box
-        ref={ref}
+        ref={mergeRefs([anchorElementRef, ref])}
         {...rest}
         className={clsx(classes.root)}
         sx={{
@@ -351,7 +372,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
         >
           {(() => {
             if (preTitleTools && !isSmallScreenSize) {
-              return getToolNodes(preTitleTools, isLargeScreenSize).map(
+              return getToolNodes(preTitleTools, showFullToolWidth).map(
                 (tool, index) => {
                   return (
                     <Grid item key={index} sx={{ minWidth: 0 }}>
@@ -496,7 +517,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
           })()}
           {(() => {
             if (!isSmallScreenSize) {
-              return getToolNodes(tools, isLargeScreenSize).map(
+              return getToolNodes(tools, showFullToolWidth).map(
                 (tool, index) => {
                   return (
                     <Grid item key={index} sx={{ minWidth: 0 }}>
@@ -554,7 +575,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
               return (
                 <>
                   {smallScreenTools.length > 0
-                    ? getToolNodes(smallScreenTools, isLargeScreenSize).map(
+                    ? getToolNodes(smallScreenTools, showFullToolWidth).map(
                         (tool, index) => {
                           return (
                             <Grid item key={index} sx={{ minWidth: 0 }}>
