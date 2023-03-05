@@ -85,7 +85,9 @@ declare module '@mui/material/styles/components' {
 }
 
 export interface PaginatedDropdownOptionListProps
-  extends Partial<Pick<CardProps, 'sx' | 'className'>>,
+  extends Partial<
+      Pick<CardProps, 'sx' | 'className' | 'variant' | 'elevation'>
+    >,
     Pick<InfiniteScrollBoxProps, 'keyboardFocusElement'> {
   options?: DropdownOption[];
   selectedOptions?: DropdownOption[];
