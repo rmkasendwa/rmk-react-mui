@@ -361,6 +361,7 @@ export const useFilterTool = <RecordRow extends BaseDataRow>({
                                   );
                                 }
                               }}
+                              size="small"
                             />
                           );
                         } else if (
@@ -382,6 +383,7 @@ export const useFilterTool = <RecordRow extends BaseDataRow>({
                                   );
                                 }
                               }}
+                              size="small"
                             />
                           );
                         } else if (
