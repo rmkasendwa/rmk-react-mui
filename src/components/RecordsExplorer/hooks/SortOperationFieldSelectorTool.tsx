@@ -25,7 +25,9 @@ import {
 import { BaseDataRow } from '../../../interfaces/Table';
 import SortIcon from '../../Icons/SortIcon';
 import DataDropdownField from '../../InputFields/DataDropdownField';
-import PaginatedDropdownOptionList from '../../PaginatedDropdownOptionList';
+import PaginatedDropdownOptionList, {
+  PaginatedDropdownOptionListProps,
+} from '../../PaginatedDropdownOptionList';
 
 export interface SortOperationFieldSelectorToolOptions<
   RecordRow extends BaseDataRow = any
@@ -132,6 +134,30 @@ export const useSortOperationFieldSelectorTool = <
       </Grid>
     ),
     bodyContent: (() => {
+      const paginatedDropdownOptionsListProps: PaginatedDropdownOptionListProps =
+        {
+          searchable: unselectedSortableFields.length > 5,
+          options: unselectedSortableFields.map(({ id, label }) => {
+            return {
+              label,
+              value: String(id),
+            };
+          }),
+          onChangeSelectedOptions: (selectedOptions) => {
+            const selectedSortParam = unselectedSortableFields.find(
+              ({ id }) => id === selectedOptions[0].value
+            );
+            if (selectedSortParam) {
+              onChangeSelectedSortParams([
+                ...selectedSortParams,
+                {
+                  ...selectedSortParam,
+                  sortDirection: selectedSortParam.sortDirection || 'ASC',
+                },
+              ]);
+            }
+          },
+        };
       if (selectedSortParams.length > 0) {
         return (
           <>
@@ -311,34 +337,7 @@ export const useSortOperationFieldSelectorTool = <
                           >
                             <Box>
                               <PaginatedDropdownOptionList
-                                searchable={unselectedSortableFields.length > 5}
-                                options={unselectedSortableFields.map(
-                                  ({ id, label }) => {
-                                    return {
-                                      label,
-                                      value: String(id),
-                                    };
-                                  }
-                                )}
-                                onChangeSelectedOptions={(selectedOptions) => {
-                                  const selectedSortParam =
-                                    unselectedSortableFields.find(
-                                      ({ id }) =>
-                                        id === selectedOptions[0].value
-                                    );
-                                  if (selectedSortParam) {
-                                    onChangeSelectedSortParams([
-                                      ...selectedSortParams,
-                                      {
-                                        ...selectedSortParam,
-                                        sortDirection:
-                                          selectedSortParam.sortDirection ||
-                                          'ASC',
-                                      },
-                                    ]);
-                                    setOpenUnselectedSortableFields(false);
-                                  }
-                                }}
+                                {...paginatedDropdownOptionsListProps}
                               />
                             </Box>
                           </ClickAwayListener>
@@ -354,29 +353,11 @@ export const useSortOperationFieldSelectorTool = <
       }
       return (
         <PaginatedDropdownOptionList
-          searchable={unselectedSortableFields.length > 5}
-          options={unselectedSortableFields.map(({ id, label }) => {
-            return {
-              label,
-              value: String(id),
-            };
-          })}
-          onChangeSelectedOptions={(selectedOptions) => {
-            const selectedSortParam = unselectedSortableFields.find(
-              ({ id }) => id === selectedOptions[0].value
-            );
-            if (selectedSortParam) {
-              onChangeSelectedSortParams([
-                ...selectedSortParams,
-                {
-                  ...selectedSortParam,
-                  sortDirection: selectedSortParam.sortDirection || 'ASC',
-                },
-              ]);
-            }
-          }}
+          {...paginatedDropdownOptionsListProps}
           sx={{
             border: 'none',
+            mx: -2,
+            my: -1,
           }}
         />
       );

@@ -47,6 +47,7 @@ export const usePopupTool = ({
     if (wrapBodyContentInCard) {
       return (
         <Card
+          variant="outlined"
           sx={{
             ...(() => {
               if (isSmallScreenSize) {

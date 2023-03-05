@@ -173,9 +173,16 @@ export type DataView<RecordRow extends BaseDataRow> =
   | TimelineView<RecordRow>;
 
 export interface RecordsExplorerChildrenOptions<RecordRow extends BaseDataRow> {
-  viewType: ViewOptionType;
+  selectedView: ViewOptionType;
   data: RecordRow[];
   headerHeight?: number;
+  filterFields?: DataFilterField<RecordRow>[];
+  filterBy?: Omit<ConditionGroup<RecordRow>, 'conjunction'> &
+    Partial<Pick<ConditionGroup<RecordRow>, 'conjunction'>>;
+  sortableFields?: SortableFields<RecordRow>;
+  sortBy?: SortBy<RecordRow>;
+  groupableFields?: GroupableField<RecordRow>[];
+  groupBy?: SortBy<RecordRow>;
 }
 
 export interface RecordsExplorerFunctionChildren<State> {
@@ -244,7 +251,7 @@ export interface RecordsExplorerProps<
    * List of predefined data views to render input data.
    */
   views?: DataView<RecordRow>[];
-  view?: View;
+  selectedView?: View;
   /**
    * Page path to create a new data record.
    */
@@ -319,7 +326,6 @@ export const BaseRecordsExplorer = <
     load,
     loading,
     errorMessage,
-    recordLabelPlural = 'Records',
     HeaderProps = {},
     BodyProps = {},
     IconLoadingScreenProps = {},
@@ -332,7 +338,7 @@ export const BaseRecordsExplorer = <
     groupBy: groupByProp,
     filterBy: filterByProp,
     views,
-    view: viewProp,
+    selectedView: viewProp,
     pathToAddNew,
     permissionToAddNew,
     hideAddNewButtonOnNoFilteredData = false,
@@ -348,9 +354,9 @@ export const BaseRecordsExplorer = <
     showRowNumber: showRowNumberProp,
     id,
     ...rest
-  } = omit(props, 'recordLabelSingular');
+  } = omit(props, 'recordLabelPlural', 'recordLabelSingular');
 
-  let { recordLabelSingular } = props;
+  let { recordLabelPlural, recordLabelSingular } = props;
 
   const classes = composeClasses(
     slots,
@@ -363,6 +369,14 @@ export const BaseRecordsExplorer = <
       }
     })()
   );
+
+  if (!recordLabelPlural) {
+    if (typeof titleProp === 'string') {
+      recordLabelPlural = titleProp;
+    } else {
+      recordLabelPlural = 'Records';
+    }
+  }
 
   recordLabelSingular ||
     (recordLabelSingular = recordLabelPlural.replace(/s$/gi, ''));
@@ -580,14 +594,6 @@ export const BaseRecordsExplorer = <
     };
   }, []);
 
-  // Filter fields state
-  const baseConditionGroup = useMemo(() => {
-    return {
-      conjunction: 'and',
-      conditions: [],
-    } as ConditionGroup<RecordRow>;
-  }, []);
-
   const baseSelectedColumnIds = useMemo(() => {
     if (viewsRef.current) {
       const listView = viewsRef.current.find(
@@ -736,7 +742,7 @@ export const BaseRecordsExplorer = <
       return {
         ...searchParamFilterBy,
         conjunction: searchParamFilterBy.conjunction || 'and',
-      } as typeof baseConditionGroup;
+      } as ConditionGroup<RecordRow>;
     }
     if (filterByProp && !modifiedStateKeys.includes('filterBy')) {
       return {
@@ -744,7 +750,6 @@ export const BaseRecordsExplorer = <
         conjunction: filterByProp.conjunction || 'and',
       };
     }
-    return baseConditionGroup;
   })();
 
   const selectedColumnIds =
@@ -769,8 +774,9 @@ export const BaseRecordsExplorer = <
             return selectedConditionGroup.conditions
               .filter(({ operator, value }) => {
                 return (
-                  emptyfilterOperators.includes(operator) ||
-                  (value != null && String(value).length > 0)
+                  operator &&
+                  (emptyfilterOperators.includes(operator) ||
+                    (value != null && String(value).length > 0))
                 );
               })
               [selectedConditionGroup.conjunction === 'and' ? 'every' : 'some'](
@@ -1639,9 +1645,15 @@ export const BaseRecordsExplorer = <
   })() as ReactNode | undefined;
 
   const state: RecordsExplorerChildrenOptions<RecordRow> = {
-    viewType,
+    selectedView: viewType,
     data: filteredData,
     headerHeight: headerElementRef.current?.offsetHeight,
+    filterFields,
+    filterBy: selectedConditionGroup,
+    sortableFields,
+    sortBy: selectedSortParams,
+    groupableFields,
+    groupBy: selectedGroupParams,
   };
 
   const title = (() => {

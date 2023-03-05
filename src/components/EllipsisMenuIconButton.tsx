@@ -114,6 +114,10 @@ export const EllipsisMenuIconButton = forwardRef<
 
   const close = () => setOpen(false);
 
+  if (options.length <= 0) {
+    return null;
+  }
+
   return (
     <>
       <IconButton
