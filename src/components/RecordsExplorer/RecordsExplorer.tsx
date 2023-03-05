@@ -197,7 +197,9 @@ export interface RecordsExplorerProps<
       >
     > {
   rows?: RecordRow[];
-  title?: ReactNode;
+  getTitle?: RecordsExplorerFunctionChildren<
+    RecordsExplorerChildrenOptions<RecordRow>
+  >;
   children?:
     | RecordsExplorerFunctionChildren<RecordsExplorerChildrenOptions<RecordRow>>
     | ReactNode;
@@ -310,7 +312,8 @@ export const BaseRecordsExplorer = <
   const props = useThemeProps({ props: inProps, name: 'MuiRecordsExplorer' });
   const {
     className,
-    title,
+    title: titleProp,
+    getTitle,
     sx,
     fillContentArea = true,
     load,
@@ -1635,6 +1638,21 @@ export const BaseRecordsExplorer = <
     }
   })() as ReactNode | undefined;
 
+  const state: RecordsExplorerChildrenOptions<RecordRow> = {
+    viewType,
+    data: filteredData,
+    headerHeight: headerElementRef.current?.offsetHeight,
+  };
+
+  const title = (() => {
+    if (titleProp) {
+      return titleProp;
+    }
+    if (getTitle) {
+      return getTitle(state);
+    }
+  })();
+
   const explorerElement = (
     <Paper
       ref={ref}
@@ -1827,11 +1845,7 @@ export const BaseRecordsExplorer = <
             return viewElement;
           }
           if (typeof children === 'function') {
-            return children({
-              viewType,
-              data: filteredData,
-              headerHeight: headerElementRef.current?.offsetHeight,
-            });
+            return children(state);
           }
           return children;
         })()}
