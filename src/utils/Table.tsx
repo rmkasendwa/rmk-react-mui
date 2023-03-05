@@ -158,9 +158,6 @@ export const expandTableColumnWidths = (
       case 'phoneNumber':
         nextColumn.width || (nextColumn.width = 195);
         break;
-      case 'ellipsisMenuTool':
-        nextColumn.width = 40;
-        break;
     }
 
     const { showHeaderText, label } = nextColumn;

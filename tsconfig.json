@@ -22,6 +22,6 @@
     "strictNullChecks": true,
     "target": "es5"
   },
-  "exclude": ["**/*.stories.*", "**/stores/**", "**/node_modules/**"],
+  "exclude": ["**/*.stories.*", "**/stories/**", "**/node_modules/**"],
   "include": ["./src/**/*"]
 }

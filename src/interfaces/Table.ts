@@ -7,7 +7,6 @@ import {
 import { TableCellProps } from '@mui/material/TableCell';
 import { ReactNode } from 'react';
 
-import { EllipsisMenuIconButtonProps } from '../components/EllipsisMenuIconButton';
 import { FieldValueProps } from '../components/FieldValue';
 import { CountryCode } from './Countries';
 import { DropdownOption, ExoticDataType } from './Utils';
@@ -24,7 +23,6 @@ export type TableColumnType =
   | 'currencyInput'
   | 'dateInput'
   | 'dropdownInput'
-  | 'ellipsisMenuTool'
   | 'id'
   | 'input'
   | 'numberInput'
@@ -36,12 +34,7 @@ export type TableColumnType =
 export type GetColumnValue<
   RowObject extends Record<string, any> = any,
   ColumnType extends TableColumnType = TableColumnType
-> = (
-  row: RowObject,
-  column: TableColumn<RowObject, ColumnType>
-) => ColumnType extends 'ellipsisMenuTool'
-  ? EllipsisMenuIconButtonProps
-  : ReactNode;
+> = (row: RowObject, column: TableColumn<RowObject, ColumnType>) => ReactNode;
 
 export type GetEditField<
   RowObject extends Record<string, any> = any,
