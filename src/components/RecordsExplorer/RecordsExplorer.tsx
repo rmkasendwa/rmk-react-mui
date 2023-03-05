@@ -395,22 +395,28 @@ export const BaseRecordsExplorer = <
   const filterFieldsRef = useRef(filterFieldsProp);
   const sortableFieldsRef = useRef(sortableFieldsProp);
   const groupableFieldsRef = useRef(groupableFieldsProp);
+  const sortByPropRef = useRef(sortByProp);
   const getGroupableDataRef = useRef(getGroupableData);
   const viewsRef = useRef(views);
+  const filterByPropRef = useRef(filterByProp);
   useEffect(() => {
     filterBySearchTermRef.current = filterBySearchTerm;
+    filterByPropRef.current = filterByProp;
     searchableFieldsRef.current = searchableFieldsProp;
     groupableFieldsRef.current = groupableFieldsProp;
     sortableFieldsRef.current = sortableFieldsProp;
+    sortByPropRef.current = sortByProp;
     filterFieldsRef.current = filterFieldsProp;
     getGroupableDataRef.current = getGroupableData;
     viewsRef.current = views;
   }, [
+    filterByProp,
     filterBySearchTerm,
     filterFieldsProp,
     getGroupableData,
     groupableFieldsProp,
     searchableFieldsProp,
+    sortByProp,
     sortableFieldsProp,
     views,
   ]);
@@ -611,13 +617,13 @@ export const BaseRecordsExplorer = <
   const {
     searchParams: {
       view: searchParamView,
-      groupBy: searchParamGroupBy = [],
-      sortBy: searchParamSortBy = [],
+      groupBy: searchParamGroupBy,
+      sortBy: searchParamSortBy,
       search: searchTerm,
       filterBy: searchParamFilterBy,
       selectedColumns: searchParamSelectedColumns,
       expandedGroups: searchParamExpandedGroups,
-      modifiedKeys: modifiedStateKeys = [],
+      modifiedKeys: modifiedStateKeys,
     },
     setSearchParams,
   } = useReactRouterDOMSearchParams({
@@ -668,7 +674,7 @@ export const BaseRecordsExplorer = <
     if (searchParamView) {
       return searchParamView as View;
     }
-    if (viewProp && !modifiedStateKeys.includes('view')) {
+    if (viewProp && !modifiedStateKeys?.includes('view')) {
       return viewProp;
     }
     return 'List' as View;
@@ -683,13 +689,16 @@ export const BaseRecordsExplorer = <
       {} as Record<keyof RecordRow, typeof groupableFields[number]>
     );
 
-    return (
-      groupByProp &&
-      !modifiedStateKeys.includes('groupBy') &&
-      searchParamGroupBy.length <= 0
-        ? groupByProp
-        : searchParamGroupBy
-    )
+    return (() => {
+      if (
+        groupByProp &&
+        !modifiedStateKeys?.includes('groupBy') &&
+        (!searchParamGroupBy || searchParamGroupBy.length <= 0)
+      ) {
+        return groupByProp;
+      }
+      return searchParamGroupBy || [];
+    })()
       .filter(({ id }) => {
         return groupByParams[id];
       })
@@ -707,19 +716,22 @@ export const BaseRecordsExplorer = <
       });
   })();
 
-  const selectedSortParams = (() => {
+  const selectedSortParams = useMemo(() => {
     const sortByParams = sortableFields.reduce((accumulator, sortByParam) => {
       accumulator[sortByParam.id] = sortByParam;
       return accumulator;
     }, {} as Record<keyof RecordRow, typeof sortableFields[number]>);
 
-    return (
-      sortByProp &&
-      !modifiedStateKeys.includes('sortBy') &&
-      searchParamSortBy.length <= 0
-        ? sortByProp
-        : searchParamSortBy
-    )
+    return (() => {
+      if (
+        sortByPropRef.current &&
+        !modifiedStateKeys?.includes('sortBy') &&
+        (!searchParamSortBy || searchParamSortBy.length <= 0)
+      ) {
+        return sortByPropRef.current;
+      }
+      return searchParamSortBy || [];
+    })()
       .filter(({ id }) => {
         return sortByParams[id];
       })
@@ -735,22 +747,22 @@ export const BaseRecordsExplorer = <
           sortDirection: sortByParams.sortDirection || 'ASC',
         };
       });
-  })();
+  }, [modifiedStateKeys, searchParamSortBy, sortableFields]);
 
-  const selectedConditionGroup = (() => {
+  const selectedConditionGroup = useMemo(() => {
     if (searchParamFilterBy) {
       return {
         ...searchParamFilterBy,
         conjunction: searchParamFilterBy.conjunction || 'and',
       } as ConditionGroup<RecordRow>;
     }
-    if (filterByProp && !modifiedStateKeys.includes('filterBy')) {
+    if (filterByPropRef.current && !modifiedStateKeys?.includes('filterBy')) {
       return {
-        ...filterByProp,
-        conjunction: filterByProp.conjunction || 'and',
+        ...filterByPropRef.current,
+        conjunction: filterByPropRef.current.conjunction || 'and',
       };
     }
-  })();
+  }, [modifiedStateKeys, searchParamFilterBy]);
 
   const selectedColumnIds =
     searchParamSelectedColumns || baseSelectedColumnIds || [];
@@ -758,7 +770,7 @@ export const BaseRecordsExplorer = <
   const { loggedInUserHasPermission } = useAuth();
 
   // Processing data
-  const filteredData = (() => {
+  const filteredData = useMemo(() => {
     // Filtering data
     const dataFilteredByFilterFields = (() => {
       if (filterFields) {
@@ -912,10 +924,17 @@ export const BaseRecordsExplorer = <
     })();
 
     return sortedData;
-  })();
+  }, [
+    data,
+    filterFields,
+    searchTerm,
+    searchableFields,
+    selectedConditionGroup,
+    selectedSortParams,
+  ]);
 
   // Grouping data
-  const groupedData = (() => {
+  const groupedData = useMemo(() => {
     if (selectedGroupParams.length > 0) {
       const groupParams = [...selectedGroupParams];
 
@@ -924,8 +943,8 @@ export const BaseRecordsExplorer = <
         currentGroupParams: typeof groupParams[number]
       ): NestedDataGroup<RecordRow>[] | DataGroup<RecordRow>[] => {
         const { id, getGroupLabel } = currentGroupParams;
-        const groupableData = getGroupableData
-          ? getGroupableData(inputGroupableData, currentGroupParams)
+        const groupableData = getGroupableDataRef.current
+          ? getGroupableDataRef.current(inputGroupableData, currentGroupParams)
           : inputGroupableData;
 
         const groupedData = groupableData
@@ -972,7 +991,7 @@ export const BaseRecordsExplorer = <
       return groupData(filteredData, groupParams.shift()!);
     }
     return null;
-  })();
+  }, [filteredData, selectedGroupParams]);
 
   const viewOptionsTool = useViewOptionsTool({
     viewOptionTypes: (() => {
@@ -987,7 +1006,7 @@ export const BaseRecordsExplorer = <
         {
           view,
           modifiedKeys: [
-            ...new Set([...modifiedStateKeys, 'view']),
+            ...new Set([...(modifiedStateKeys || []), 'view']),
           ] as typeof modifiedStateKeys,
         },
         {
@@ -1011,7 +1030,7 @@ export const BaseRecordsExplorer = <
             };
           }),
           modifiedKeys: [
-            ...new Set([...modifiedStateKeys, 'groupBy']),
+            ...new Set([...(modifiedStateKeys || []), 'groupBy']),
           ] as typeof modifiedStateKeys,
         },
         {
@@ -1034,7 +1053,7 @@ export const BaseRecordsExplorer = <
             };
           }),
           modifiedKeys: [
-            ...new Set([...modifiedStateKeys, 'sortBy']),
+            ...new Set([...(modifiedStateKeys || []), 'sortBy']),
           ] as typeof modifiedStateKeys,
         },
         {
@@ -1053,7 +1072,7 @@ export const BaseRecordsExplorer = <
         {
           filterBy: conditionGroup as any,
           modifiedKeys: [
-            ...new Set([...modifiedStateKeys, 'filterBy']),
+            ...new Set([...(modifiedStateKeys || []), 'filterBy']),
           ] as typeof modifiedStateKeys,
         },
         { replace: true }
@@ -1199,7 +1218,10 @@ export const BaseRecordsExplorer = <
                                 } as SelectedSortOption<RecordRow>;
                               }),
                             modifiedKeys: [
-                              ...new Set([...modifiedStateKeys, 'sortBy']),
+                              ...new Set([
+                                ...(modifiedStateKeys || []),
+                                'sortBy',
+                              ]),
                             ] as typeof modifiedStateKeys,
                           },
                           {
@@ -1219,7 +1241,7 @@ export const BaseRecordsExplorer = <
                             ),
                             modifiedKeys: [
                               ...new Set([
-                                ...modifiedStateKeys,
+                                ...(modifiedStateKeys || []),
                                 'selectedColumns',
                               ]),
                             ] as typeof modifiedStateKeys,
@@ -1781,7 +1803,7 @@ export const BaseRecordsExplorer = <
                 tools.push(filterTool);
               }
 
-              if (modifiedStateKeys.length > 0) {
+              if (modifiedStateKeys && modifiedStateKeys.length > 0) {
                 tools.push({
                   label: 'Reset to default view',
                   icon: <LockResetIcon />,
