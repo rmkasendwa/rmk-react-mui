@@ -127,7 +127,7 @@ export type Conjunction = typeof filterConjunctions[number];
 
 export interface Condition<RecordRow extends BaseDataRow> {
   fieldId: keyof RecordRow | string;
-  operator: FilterOperator;
+  operator?: FilterOperator;
   value?: string | number | (string | number)[];
 }
 

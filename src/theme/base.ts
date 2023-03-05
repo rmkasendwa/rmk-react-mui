@@ -1,4 +1,4 @@
-import { Palette, createTheme, darken } from '@mui/material';
+import { Palette, alpha, createTheme, darken } from '@mui/material';
 import { grey } from '@mui/material/colors';
 
 // Mood Colors
@@ -29,6 +29,22 @@ export const getBaseTheme = (palette: Palette): any => {
             '&:hover': {
               backgroundColor: darken(palette.background.paper, 0.18),
               boxShadow: 'none',
+            },
+          },
+        },
+      },
+      MuiIconButton: {
+        defaultProps: {
+          color: 'inherit',
+        },
+        styleOverrides: {
+          root: {
+            padding: baseTheme.spacing(1),
+            '&.Mui-disabled': {
+              color: palette.text.disabled,
+            },
+            '&:hover': {
+              backgroundColor: alpha(palette.text.primary, 0.1),
             },
           },
         },

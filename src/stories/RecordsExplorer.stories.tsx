@@ -80,7 +80,22 @@ export const WithTitle = Template.bind({});
 WithTitle.args = {
   ...baseArgs,
   pathToAddNew: '/contacts/new',
-  title: 'Contacts',
+  title: 'All Contacts',
+} as RecordsExplorerProps;
+
+export const WithDynamicTitle = Template.bind({});
+WithDynamicTitle.args = {
+  ...baseArgs,
+  pathToAddNew: '/contacts/new',
+  getTitle: ({ filterBy, selectedView }) => {
+    const titleParts = ['Contacts'];
+    if (filterBy) {
+      titleParts.unshift('Filtered');
+    }
+    titleParts.push(selectedView);
+
+    return titleParts.join(' ');
+  },
 } as RecordsExplorerProps;
 
 export const WithLoadFunction = Template.bind({});

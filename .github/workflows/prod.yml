@@ -16,7 +16,9 @@ jobs:
       # Setup .npmrc file to publish to npm
       - uses: actions/setup-node@v2
         with:
-          node-version: '16.x'
+          node-version: 16.x
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
           registry-url: 'https://registry.npmjs.org'
       - run: npm install --legacy-peer-deps
       - run: npm run build
