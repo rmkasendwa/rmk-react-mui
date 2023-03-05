@@ -1,5 +1,6 @@
 import '@infinite-debugger/rmk-js-extensions/RegExp';
 
+import { diff } from '@infinite-debugger/rmk-utils/data';
 import { pick } from 'lodash';
 import hash from 'object-hash';
 import { useCallback, useEffect, useRef } from 'react';
@@ -63,6 +64,7 @@ export function useReactRouterDOMSearchParams<
   const [searchParams, baseSetSearchParams] = useSearchParams();
   const baseSetSearchParamsRef = useRef(baseSetSearchParams);
   const specRef = useRef(spec);
+  const jsonSearchParamsCacheRef = useRef<any>({});
   useEffect(() => {
     baseSetSearchParamsRef.current = baseSetSearchParams;
     specRef.current = spec;
@@ -166,44 +168,60 @@ export function useReactRouterDOMSearchParams<
             }
           }
           return {
-            searchParams: Object.keys(allSearchParams).reduce(
-              (accumulator, key) => {
-                const objectKey = (() => {
-                  if (id) {
-                    return key.replace(
-                      new RegExp(`:${RegExp.escape(id)}$`),
-                      ''
-                    );
-                  }
-                  return key;
-                })();
-                if (validSearchParamKeys.includes(objectKey)) {
-                  try {
-                    const searchParamsObject = {
-                      [objectKey]: JSON.parse(allSearchParams[key]),
-                    };
-                    Object.assign(
-                      accumulator,
-                      Yup.object({
-                        [objectKey]: spec![objectKey],
-                      }).validateSync(searchParamsObject)
-                    );
-                  } catch (err: any) {
-                    if (err.name === 'ValidationError') {
-                      console.error(
-                        `useReactRouterDOMSearchParams: search param getter `,
-                        err,
-                        {
-                          err,
-                        }
+            searchParams: (() => {
+              const nextSearchParams = Object.keys(allSearchParams).reduce(
+                (accumulator, key) => {
+                  const objectKey = (() => {
+                    if (id) {
+                      return key.replace(
+                        new RegExp(`:${RegExp.escape(id)}$`),
+                        ''
                       );
                     }
+                    return key;
+                  })();
+                  if (validSearchParamKeys.includes(objectKey)) {
+                    try {
+                      const searchParamsObject = {
+                        [objectKey]: JSON.parse(allSearchParams[key]),
+                      };
+                      Object.assign(
+                        accumulator,
+                        Yup.object({
+                          [objectKey]: spec![objectKey],
+                        }).validateSync(searchParamsObject)
+                      );
+                    } catch (err: any) {
+                      if (err.name === 'ValidationError') {
+                        console.error(
+                          `useReactRouterDOMSearchParams: search param getter `,
+                          err,
+                          {
+                            err,
+                          }
+                        );
+                      }
+                    }
                   }
-                }
-                return accumulator;
-              },
-              {} as Partial<SearchParamsObject>
-            ),
+                  return accumulator;
+                },
+                {} as Partial<SearchParamsObject>
+              );
+              const searchParamsDiff = diff(
+                nextSearchParams,
+                jsonSearchParamsCacheRef.current
+              );
+
+              jsonSearchParamsCacheRef.current = Object.assign(
+                pick(
+                  jsonSearchParamsCacheRef.current,
+                  Object.keys(nextSearchParams)
+                ),
+                pick(nextSearchParams, Object.keys(searchParamsDiff))
+              );
+
+              return jsonSearchParamsCacheRef.current;
+            })(),
           };
         case 'string':
         default:

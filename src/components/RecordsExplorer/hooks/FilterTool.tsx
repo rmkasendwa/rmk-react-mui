@@ -8,6 +8,7 @@ import {
   IconButton,
   Stack,
   Table,
+  TableBody,
   TableCell,
   TableRow,
   Tooltip,
@@ -180,350 +181,354 @@ export const useFilterTool = <RecordRow extends BaseDataRow>({
             mx: -2,
           }}
         >
-          {(() => {
-            if (
-              selectedConditionGroup &&
-              selectedConditionGroup.conditions.length > 0
-            ) {
-              const { conjunction } = selectedConditionGroup;
-              return selectedConditionGroup.conditions
-                .map((condition) => {
-                  const { fieldId } = condition;
-                  const baseFilter = filterFieldsWithOptions.find(
-                    ({ id }) => fieldId === id
-                  )!;
-                  return [baseFilter, condition] as [
-                    typeof baseFilter,
-                    typeof condition
-                  ];
-                })
-                .filter(([field]) => field != null)
-                .map(([field, condition], index) => {
-                  const { id, label, type = 'text' } = field;
-                  const operatorOptions = (() => {
-                    switch (type) {
-                      case 'enum':
-                        return MULTI_SELECT_DROPDOWN_OPERATORS;
-                      case 'number':
-                      case 'date':
-                        return numericFilterOperators;
-                    }
-                    return textFilterOperators;
-                  })();
-                  const { operator: selectedOperator } = condition;
+          <TableBody>
+            {(() => {
+              if (
+                selectedConditionGroup &&
+                selectedConditionGroup.conditions.length > 0
+              ) {
+                const { conjunction } = selectedConditionGroup;
+                return selectedConditionGroup.conditions
+                  .map((condition) => {
+                    const { fieldId } = condition;
+                    const baseFilter = filterFieldsWithOptions.find(
+                      ({ id }) => fieldId === id
+                    )!;
+                    return [baseFilter, condition] as [
+                      typeof baseFilter,
+                      typeof condition
+                    ];
+                  })
+                  .filter(([field]) => field != null)
+                  .map(([field, condition], index) => {
+                    const { id, label, type = 'text' } = field;
+                    const operatorOptions = (() => {
+                      switch (type) {
+                        case 'enum':
+                          return MULTI_SELECT_DROPDOWN_OPERATORS;
+                        case 'number':
+                        case 'date':
+                          return numericFilterOperators;
+                      }
+                      return textFilterOperators;
+                    })();
+                    const { operator: selectedOperator } = condition;
 
-                  const nextSelectedConditionGroup = JSON.parse(
-                    JSON.stringify(selectedConditionGroup)
-                  ) as typeof selectedConditionGroup;
+                    const nextSelectedConditionGroup = JSON.parse(
+                      JSON.stringify(selectedConditionGroup)
+                    ) as typeof selectedConditionGroup;
 
-                  return (
-                    <TableRow
-                      key={index}
-                      sx={{
-                        mb: 1,
-                        alignItems: 'center',
-                        [`.${tableCellClasses.root}`]: {
-                          px: 1,
-                          '&:first-of-type': {
-                            pl: 2,
+                    return (
+                      <TableRow
+                        key={index}
+                        sx={{
+                          mb: 1,
+                          alignItems: 'center',
+                          [`.${tableCellClasses.root}`]: {
+                            px: 1,
+                            '&:first-of-type': {
+                              pl: 2,
+                            },
+                            '&:last-of-type': {
+                              pr: 2,
+                            },
                           },
-                          '&:last-of-type': {
-                            pr: 2,
-                          },
-                        },
-                      }}
-                    >
-                      {/* Where Clause */}
-                      <TableCell>
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            justifyContent: 'end',
-                          }}
-                        >
-                          {(() => {
-                            switch (index) {
-                              case 0:
-                                return (
-                                  <Typography
-                                    variant="body2"
-                                    sx={{
-                                      pr: 2,
-                                    }}
-                                  >
-                                    Where
-                                  </Typography>
-                                );
-                              case 1:
-                                return (
-                                  <DataDropdownField
-                                    value={conjunction}
-                                    options={filterConjunctions.map((label) => {
-                                      return {
-                                        label,
-                                        value: label,
-                                      };
-                                    })}
-                                    onChange={(event) => {
-                                      if (event.target.value) {
-                                        onChangeSelectedConditionGroup({
-                                          ...selectedConditionGroup,
-                                          conjunction: event.target
-                                            .value as Conjunction,
-                                        });
-                                      }
-                                    }}
-                                    showClearButton={false}
-                                    size="small"
-                                    variant="text"
-                                  />
-                                );
-                              default:
-                                return (
-                                  <Typography
-                                    variant="body2"
-                                    sx={{
-                                      pl: 2,
-                                    }}
-                                  >
-                                    {conjunction}
-                                  </Typography>
-                                );
-                            }
-                          })()}
-                        </Box>
-                      </TableCell>
-
-                      {/* Filter field */}
-                      <TableCell>
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            justifyContent: 'end',
-                          }}
-                        >
-                          <DataDropdownField
-                            value={String(id)}
-                            onChange={(event) => {
-                              if (event.target.value) {
-                                nextSelectedConditionGroup.conditions[
-                                  index
-                                ].fieldId = event.target.value as any;
-                                delete nextSelectedConditionGroup.conditions[
-                                  index
-                                ].value;
-                                onChangeSelectedConditionGroup(
-                                  nextSelectedConditionGroup
-                                );
+                        }}
+                      >
+                        {/* Where Clause */}
+                        <TableCell>
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              justifyContent: 'end',
+                            }}
+                          >
+                            {(() => {
+                              switch (index) {
+                                case 0:
+                                  return (
+                                    <Typography
+                                      variant="body2"
+                                      sx={{
+                                        pr: 2,
+                                      }}
+                                    >
+                                      Where
+                                    </Typography>
+                                  );
+                                case 1:
+                                  return (
+                                    <DataDropdownField
+                                      value={conjunction}
+                                      options={filterConjunctions.map(
+                                        (label) => {
+                                          return {
+                                            label,
+                                            value: label,
+                                          };
+                                        }
+                                      )}
+                                      onChange={(event) => {
+                                        if (event.target.value) {
+                                          onChangeSelectedConditionGroup({
+                                            ...selectedConditionGroup,
+                                            conjunction: event.target
+                                              .value as Conjunction,
+                                          });
+                                        }
+                                      }}
+                                      showClearButton={false}
+                                      size="small"
+                                      variant="text"
+                                    />
+                                  );
+                                default:
+                                  return (
+                                    <Typography
+                                      variant="body2"
+                                      sx={{
+                                        pl: 2,
+                                      }}
+                                    >
+                                      {conjunction}
+                                    </Typography>
+                                  );
                               }
+                            })()}
+                          </Box>
+                        </TableCell>
+
+                        {/* Filter field */}
+                        <TableCell>
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              justifyContent: 'end',
                             }}
-                            selectedOption={{
-                              label,
-                              value: String(id),
-                            }}
-                            options={filterFields.map(({ id, label }) => {
-                              return {
+                          >
+                            <DataDropdownField
+                              value={String(id)}
+                              onChange={(event) => {
+                                if (event.target.value) {
+                                  nextSelectedConditionGroup.conditions[
+                                    index
+                                  ].fieldId = event.target.value as any;
+                                  delete nextSelectedConditionGroup.conditions[
+                                    index
+                                  ].value;
+                                  onChangeSelectedConditionGroup(
+                                    nextSelectedConditionGroup
+                                  );
+                                }
+                              }}
+                              selectedOption={{
                                 label,
                                 value: String(id),
-                              };
-                            })}
-                            showClearButton={false}
-                            size="small"
-                            variant="text"
-                          />
-                        </Box>
-                      </TableCell>
+                              }}
+                              options={filterFields.map(({ id, label }) => {
+                                return {
+                                  label,
+                                  value: String(id),
+                                };
+                              })}
+                              showClearButton={false}
+                              size="small"
+                              variant="text"
+                            />
+                          </Box>
+                        </TableCell>
 
-                      {/* Filter operator */}
-                      <TableCell>
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            justifyContent: 'end',
-                          }}
-                        >
-                          <DataDropdownField
-                            placeholder="Select an operator"
-                            value={selectedOperator}
-                            onChange={(event) => {
-                              if (event.target.value) {
-                                nextSelectedConditionGroup.conditions[
-                                  index
-                                ].operator = event.target.value as any;
-                                delete nextSelectedConditionGroup.conditions[
-                                  index
-                                ].value;
-                                onChangeSelectedConditionGroup(
-                                  nextSelectedConditionGroup
-                                );
-                              }
-                            }}
-                            options={[
-                              ...operatorOptions,
-                              ...contentExistenceFilterOperator,
-                            ].map((label) => {
-                              return {
-                                label,
-                                value: label,
-                              };
-                            })}
-                            showClearButton={false}
-                            size="small"
-                            variant="text"
-                          />
-                        </Box>
-                      </TableCell>
-
-                      {/* Filter Value */}
-                      {selectedOperator ? (
+                        {/* Filter operator */}
                         <TableCell>
-                          {(() => {
-                            if (
-                              textFilterOperators.includes(
-                                selectedOperator as any
-                              )
-                            ) {
-                              return (
-                                <TextField
-                                  placeholder="Enter a value"
-                                  value={condition.value as any}
-                                  onChange={(event) => {
-                                    if (event.target.value) {
-                                      nextSelectedConditionGroup.conditions[
-                                        index
-                                      ].value = event.target.value as any;
-                                      onChangeSelectedConditionGroup(
-                                        nextSelectedConditionGroup
-                                      );
-                                    }
-                                  }}
-                                  size="small"
-                                  fullWidth
-                                />
-                              );
-                            } else if (
-                              numericFilterOperators.includes(
-                                selectedOperator as any
-                              )
-                            ) {
-                              return (
-                                <NumberInputField
-                                  placeholder="Enter a value"
-                                  value={condition.value as any}
-                                  onChange={(event) => {
-                                    if (event.target.value) {
-                                      nextSelectedConditionGroup.conditions[
-                                        index
-                                      ].value = event.target.value as any;
-                                      onChangeSelectedConditionGroup(
-                                        nextSelectedConditionGroup
-                                      );
-                                    }
-                                  }}
-                                  size="small"
-                                  fullWidth
-                                />
-                              );
-                            } else if (
-                              MULTI_SELECT_DROPDOWN_OPERATORS.includes(
-                                selectedOperator as any
-                              )
-                            ) {
-                              const {
-                                label,
-                                type = MULTI_SELECT_DROPDOWN_TYPE,
-                                ...rest
-                              } = field;
-                              const fieldProps: Partial<DataDropdownFieldProps> =
-                                {};
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              justifyContent: 'end',
+                            }}
+                          >
+                            <DataDropdownField
+                              placeholder="Select an operator"
+                              value={selectedOperator}
+                              onChange={(event) => {
+                                if (event.target.value) {
+                                  nextSelectedConditionGroup.conditions[
+                                    index
+                                  ].operator = event.target.value as any;
+                                  delete nextSelectedConditionGroup.conditions[
+                                    index
+                                  ].value;
+                                  onChangeSelectedConditionGroup(
+                                    nextSelectedConditionGroup
+                                  );
+                                }
+                              }}
+                              options={[
+                                ...operatorOptions,
+                                ...contentExistenceFilterOperator,
+                              ].map((label) => {
+                                return {
+                                  label,
+                                  value: label,
+                                };
+                              })}
+                              showClearButton={false}
+                              size="small"
+                              variant="text"
+                            />
+                          </Box>
+                        </TableCell>
+
+                        {/* Filter Value */}
+                        {selectedOperator ? (
+                          <TableCell>
+                            {(() => {
                               if (
-                                type === MULTI_SELECT_DROPDOWN_TYPE &&
-                                !DROPDOWN_OPERATORS.includes(
+                                textFilterOperators.includes(
                                   selectedOperator as any
                                 )
                               ) {
-                                fieldProps.SelectProps = {
-                                  multiple: true,
-                                };
+                                return (
+                                  <TextField
+                                    placeholder="Enter a value"
+                                    value={condition.value as any}
+                                    onChange={(event) => {
+                                      if (event.target.value) {
+                                        nextSelectedConditionGroup.conditions[
+                                          index
+                                        ].value = event.target.value as any;
+                                        onChangeSelectedConditionGroup(
+                                          nextSelectedConditionGroup
+                                        );
+                                      }
+                                    }}
+                                    size="small"
+                                    fullWidth
+                                  />
+                                );
+                              } else if (
+                                numericFilterOperators.includes(
+                                  selectedOperator as any
+                                )
+                              ) {
+                                return (
+                                  <NumberInputField
+                                    placeholder="Enter a value"
+                                    value={condition.value as any}
+                                    onChange={(event) => {
+                                      if (event.target.value) {
+                                        nextSelectedConditionGroup.conditions[
+                                          index
+                                        ].value = event.target.value as any;
+                                        onChangeSelectedConditionGroup(
+                                          nextSelectedConditionGroup
+                                        );
+                                      }
+                                    }}
+                                    size="small"
+                                    fullWidth
+                                  />
+                                );
+                              } else if (
+                                MULTI_SELECT_DROPDOWN_OPERATORS.includes(
+                                  selectedOperator as any
+                                )
+                              ) {
+                                const {
+                                  label,
+                                  type = MULTI_SELECT_DROPDOWN_TYPE,
+                                  ...rest
+                                } = field;
+                                const fieldProps: Partial<DataDropdownFieldProps> =
+                                  {};
+                                if (
+                                  type === MULTI_SELECT_DROPDOWN_TYPE &&
+                                  !DROPDOWN_OPERATORS.includes(
+                                    selectedOperator as any
+                                  )
+                                ) {
+                                  fieldProps.SelectProps = {
+                                    multiple: true,
+                                  };
+                                }
+                                return (
+                                  <DataDropdownField
+                                    placeholder={label}
+                                    value={condition.value as any}
+                                    optionVariant="check"
+                                    sortOptions
+                                    SelectedOptionPillProps={{
+                                      sx: {
+                                        bgcolor: 'transparent',
+                                        px: 0,
+                                        mr: 1,
+                                      },
+                                    }}
+                                    {...fieldProps}
+                                    {...omit(
+                                      rest,
+                                      'getFilterValue',
+                                      'title',
+                                      'getFieldOptionLabel',
+                                      'id'
+                                    )}
+                                    onChange={(event) => {
+                                      nextSelectedConditionGroup.conditions[
+                                        index
+                                      ].value = event.target.value as any;
+                                      onChangeSelectedConditionGroup(
+                                        nextSelectedConditionGroup
+                                      );
+                                    }}
+                                    size="small"
+                                    fullWidth
+                                  />
+                                );
                               }
-                              return (
-                                <DataDropdownField
-                                  placeholder={label}
-                                  value={condition.value as any}
-                                  optionVariant="check"
-                                  sortOptions
-                                  SelectedOptionPillProps={{
-                                    sx: {
-                                      bgcolor: 'transparent',
-                                      px: 0,
-                                      mr: 1,
-                                    },
-                                  }}
-                                  {...fieldProps}
-                                  {...omit(
-                                    rest,
-                                    'getFilterValue',
-                                    'title',
-                                    'getFieldOptionLabel',
-                                    'id'
-                                  )}
-                                  onChange={(event) => {
-                                    nextSelectedConditionGroup.conditions[
-                                      index
-                                    ].value = event.target.value as any;
-                                    onChangeSelectedConditionGroup(
-                                      nextSelectedConditionGroup
-                                    );
-                                  }}
-                                  size="small"
-                                  fullWidth
-                                />
-                              );
-                            }
-                          })()}
-                        </TableCell>
-                      ) : null}
+                            })()}
+                          </TableCell>
+                        ) : null}
 
-                      {/* Clear Filter Condition */}
-                      <TableCell
-                        sx={{
-                          width: 40,
-                        }}
-                      >
-                        <Tooltip
-                          title="Remove condition"
-                          PopperProps={{
-                            sx: {
-                              pointerEvents: 'none',
-                            },
+                        {/* Clear Filter Condition */}
+                        <TableCell
+                          sx={{
+                            width: 40,
                           }}
                         >
-                          <IconButton
-                            onClick={() => {
-                              const selectedFilterParamIndex =
-                                nextSelectedConditionGroup.conditions.findIndex(
-                                  ({ fieldId }) => fieldId === id
-                                );
-                              if (selectedFilterParamIndex !== -1) {
-                                nextSelectedConditionGroup.conditions.splice(
-                                  selectedFilterParamIndex,
-                                  1
-                                );
-                                onChangeSelectedConditionGroup(
-                                  nextSelectedConditionGroup
-                                );
-                              }
+                          <Tooltip
+                            title="Remove condition"
+                            PopperProps={{
+                              sx: {
+                                pointerEvents: 'none',
+                              },
                             }}
                           >
-                            <CloseIcon />
-                          </IconButton>
-                        </Tooltip>
-                      </TableCell>
-                    </TableRow>
-                  );
-                });
-            }
-          })()}
+                            <IconButton
+                              onClick={() => {
+                                const selectedFilterParamIndex =
+                                  nextSelectedConditionGroup.conditions.findIndex(
+                                    ({ fieldId }) => fieldId === id
+                                  );
+                                if (selectedFilterParamIndex !== -1) {
+                                  nextSelectedConditionGroup.conditions.splice(
+                                    selectedFilterParamIndex,
+                                    1
+                                  );
+                                  onChangeSelectedConditionGroup(
+                                    nextSelectedConditionGroup
+                                  );
+                                }
+                              }}
+                            >
+                              <CloseIcon />
+                            </IconButton>
+                          </Tooltip>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  });
+              }
+            })()}
+          </TableBody>
         </Table>
         <Grid container>
           <Grid item>

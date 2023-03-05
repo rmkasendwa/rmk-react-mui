@@ -63,7 +63,6 @@ export const useSortOperationFieldSelectorTool = <
     null
   );
   const sortableFieldsRef = useRef(sortableFields);
-
   useEffect(() => {
     sortableFieldsRef.current = sortableFields;
   }, [onSelectSortOption, sortableFields]);
