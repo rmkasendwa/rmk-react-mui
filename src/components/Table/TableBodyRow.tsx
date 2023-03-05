@@ -172,8 +172,8 @@ export const TableBodyRow = <T extends BaseDataRow>(
       noWrap = rowNoWrap,
       getColumnValue,
     } = highestPriorityColumn;
-    const ellipsisMenuToolColumn = columns.find(({ type }) => {
-      return type === 'ellipsisMenuTool';
+    const ellipsisMenuToolColumn = columns.find(({ id }) => {
+      return id === 'ellipsisMenuTool';
     });
     const rowNumberColumn = columns.find(({ id }) => {
       return id === 'rowNumber';

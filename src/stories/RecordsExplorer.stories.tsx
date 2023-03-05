@@ -4,7 +4,7 @@ import React from 'react';
 import RecordsExplorer, {
   RecordsExplorerProps,
 } from '../components/RecordsExplorer';
-import { contacts, tableColumns } from './data/contacts';
+import { contactTableProps, contacts, tableColumns } from './data/contacts';
 
 export default {
   title: 'Components/Records Explorer',
@@ -21,6 +21,7 @@ const baseArgs = {
     {
       type: 'List',
       columns: tableColumns,
+      ...contactTableProps,
     },
     {
       type: 'Timeline',

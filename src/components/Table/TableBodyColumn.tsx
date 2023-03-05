@@ -21,9 +21,6 @@ import { forwardRef, useEffect, useState } from 'react';
 import * as yup from 'yup';
 
 import { mapTableColumnTypeToExoticDataType } from '../../utils/Table';
-import EllipsisMenuIconButton, {
-  EllipsisMenuIconButtonProps,
-} from '../EllipsisMenuIconButton';
 import FieldValue from '../FieldValue';
 import PhoneNumberFieldValue from '../PhoneNumberFieldValue';
 import TimeStampDisplay from '../TimeStampDisplay';
@@ -154,7 +151,7 @@ export const TableBodyColumn = forwardRef<any, TableBodyColumnProps<any>>(
     };
 
     const [editMode, setEditMode] = useState(editModeProp ?? false);
-    const { palette, breakpoints } = useTheme();
+    const { breakpoints } = useTheme();
     const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
 
     useEffect(() => {
@@ -166,19 +163,6 @@ export const TableBodyColumn = forwardRef<any, TableBodyColumnProps<any>>(
     const { baseColumnValue, formattedColumnValue } = (() => {
       let formattedColumnValue = (() => {
         if (getColumnValue) {
-          if (type === 'ellipsisMenuTool') {
-            const { options, ...rest } =
-              (getColumnValue(row, column) as EllipsisMenuIconButtonProps) ||
-              {};
-            if (options && options.length > 0) {
-              return (
-                <Box>
-                  <EllipsisMenuIconButton options={options} {...rest} />
-                </Box>
-              );
-            }
-            return defaultColumnValue;
-          }
           return getColumnValue(row, column);
         }
         return result(row, id) as any;
@@ -400,13 +384,6 @@ export const TableBodyColumn = forwardRef<any, TableBodyColumnProps<any>>(
             width: `calc(100% + 1px)`,
             pointerEvents: 'none',
           },
-          ...(() => {
-            if (type === 'ellipsisMenuTool') {
-              return {
-                bgcolor: palette.background.paper,
-              };
-            }
-          })(),
           ...(() => {
             if (editMode) {
               return {

@@ -11,6 +11,7 @@ import CountryFieldValue from '../../components/CountryFieldValue';
 import EnumValueChip from '../../components/EnumValueChip';
 import FieldValue from '../../components/FieldValue';
 import ProfileGravatar from '../../components/ProfileGravatar';
+import { TableProps } from '../../components/Table';
 import { CountryCode } from '../../interfaces/Countries';
 import { TableColumn } from '../../interfaces/Table';
 
@@ -121,21 +122,20 @@ export const tableColumns: TableColumn<Contact>[] = [
     type: 'currency',
     width: 200,
   },
-  {
-    id: 'actions' as any,
-    type: 'ellipsisMenuTool',
-    getColumnValue: () => {
-      return {
-        options: [
-          { label: 'Call', icon: <PhoneIcon />, value: 'Call' },
-          { label: 'Share', icon: <ShareIcon />, value: 'Share' },
-          {
-            label: 'Delete',
-            icon: <DeleteOutlineIcon />,
-            value: 'Delete',
-          },
-        ],
-      };
-    },
-  },
 ];
+
+export const contactTableProps = {
+  getEllipsisMenuToolProps: () => {
+    return {
+      options: [
+        { label: 'Call', icon: <PhoneIcon />, value: 'Call' },
+        { label: 'Share', icon: <ShareIcon />, value: 'Share' },
+        {
+          label: 'Delete',
+          icon: <DeleteOutlineIcon />,
+          value: 'Delete',
+        },
+      ],
+    };
+  },
+} as Partial<TableProps<Contact>>;

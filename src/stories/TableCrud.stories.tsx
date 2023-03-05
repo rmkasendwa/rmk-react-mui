@@ -3,7 +3,7 @@ import { ComponentMeta, ComponentStory } from '@storybook/react';
 import React from 'react';
 
 import TableCrud, { TableCrudProps } from '../components/TableCrud';
-import { contacts, tableColumns } from './data/contacts';
+import { contactTableProps, contacts, tableColumns } from './data/contacts';
 
 export default {
   title: 'Components/Table Crud',
@@ -25,6 +25,7 @@ const Template: ComponentStory<typeof TableCrud> = (props) => {
 };
 
 const baseArgs = {
+  ...contactTableProps,
   columns: tableColumns,
   title: 'Contacts',
   recordsFinder: async ({ limit = 100, offset = 0, searchTerm }) => {

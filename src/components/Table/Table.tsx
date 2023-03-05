@@ -62,6 +62,9 @@ import {
   mapTableColumnTypeToPrimitiveDataType,
 } from '../../utils/Table';
 import DataTablePagination from '../DataTablePagination';
+import EllipsisMenuIconButton, {
+  EllipsisMenuIconButtonProps,
+} from '../EllipsisMenuIconButton';
 import RenderIfVisible, { RenderIfVisibleProps } from '../RenderIfVisible';
 import TableBodyRow, { tableBodyRowClasses } from './TableBodyRow';
 import TableColumnToggleIconButton, {
@@ -169,6 +172,9 @@ export interface TableProps<RowObject extends Record<string, any> = any>
   getDisplayingColumns?: (
     columns: TableColumn<RowObject>[]
   ) => TableColumn<RowObject>[];
+  getEllipsisMenuToolProps?: (
+    row: RowObject
+  ) => EllipsisMenuIconButtonProps | undefined | null;
 
   // Sort props
   sortable?: boolean;
@@ -268,6 +274,7 @@ export const BaseTable = <T extends BaseDataRow>(
     currencyCode,
     noWrap,
     getDisplayingColumns,
+    getEllipsisMenuToolProps,
     sx,
     ...rest
   } = props;
@@ -485,6 +492,36 @@ export const BaseTable = <T extends BaseDataRow>(
             return columnsProp.find(({ id }) => id === selectedColumnId)!;
           })
           .filter((column) => column != null),
+        ...(() => {
+          if (getEllipsisMenuToolProps) {
+            return [
+              {
+                id: 'ellipsisMenuTool' as any,
+                opaque: true,
+                width: 42,
+                defaultColumnValue: <>&nbsp;</>,
+                propagateClickToParentRowClickEvent: false,
+                getColumnValue: (row) => {
+                  const ellipsisMenuToolProps = getEllipsisMenuToolProps(row);
+                  if (ellipsisMenuToolProps) {
+                    return (
+                      <Box>
+                        <EllipsisMenuIconButton {...ellipsisMenuToolProps} />
+                      </Box>
+                    );
+                  }
+                },
+                holdsPriorityInformation: false,
+                sx: {
+                  position: 'sticky',
+                  p: 0,
+                  right: 0,
+                },
+              } as TableColumn<T>,
+            ];
+          }
+          return [];
+        })(),
       ],
       {
         enableColumnDisplayToggle,
@@ -537,20 +574,6 @@ export const BaseTable = <T extends BaseDataRow>(
         case 'checkbox':
           nextColumn.locked = true;
           nextColumn.align = 'center';
-          break;
-        case 'ellipsisMenuTool':
-          nextColumn.opaque = true;
-          nextColumn.width = 42;
-          nextColumn.defaultColumnValue ||
-            (nextColumn.defaultColumnValue = <>&nbsp;</>);
-          nextColumn.propagateClickToParentRowClickEvent = false;
-          nextColumn.holdsPriorityInformation = false;
-          nextColumn.sx = {
-            position: 'sticky',
-            p: 0,
-            right: 0,
-            ...nextColumn.sx,
-          };
           break;
       }
       nextColumn.className = clsx(
