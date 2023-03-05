@@ -940,8 +940,9 @@ export const BaseRecordsExplorer = <
 
       const groupData = (
         inputGroupableData: typeof filteredData,
-        currentGroupParams: typeof groupParams[number]
+        nestIndex = 0
       ): NestedDataGroup<RecordRow>[] | DataGroup<RecordRow>[] => {
+        const currentGroupParams = groupParams[nestIndex];
         const { id, getGroupLabel } = currentGroupParams;
         const groupableData = getGroupableDataRef.current
           ? getGroupableDataRef.current(inputGroupableData, currentGroupParams)
@@ -976,19 +977,18 @@ export const BaseRecordsExplorer = <
             return sort(a, b, [currentGroupParams as any]);
           });
 
-        if (groupParams.length > 0) {
-          const currentGroupParams = groupParams.shift()!;
+        if (nestIndex < groupParams.length - 1) {
           return groupedData.map(({ children, ...restDataGroup }) => {
             return {
               ...restDataGroup,
-              children: groupData(children, currentGroupParams),
+              children: groupData(children, nestIndex + 1),
             } as NestedDataGroup<RecordRow>;
           });
         }
 
         return groupedData;
       };
-      return groupData(filteredData, groupParams.shift()!);
+      return groupData(filteredData);
     }
     return null;
   }, [filteredData, selectedGroupParams]);
