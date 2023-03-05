@@ -354,6 +354,8 @@ export const useSortOperationFieldSelectorTool = <
       return (
         <PaginatedDropdownOptionList
           {...paginatedDropdownOptionsListProps}
+          variant="elevation"
+          elevation={0}
           sx={{
             border: 'none',
             mx: -2,
