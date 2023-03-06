@@ -73,7 +73,11 @@ import SearchSyncToolbar, {
   SearchSyncToolbarProps,
   Tool,
 } from '../SearchSyncToolbar';
-import Table, { TableProps, tableClasses } from '../Table';
+import Table, {
+  TableProps,
+  getComputedTableProps,
+  tableClasses,
+} from '../Table';
 import { tableBodyRowClasses } from '../Table/TableBodyRow';
 import TimelineChart, { TimelineChartProps } from '../TimelineChart';
 import { useFilterTool } from './hooks/FilterTool';
@@ -354,7 +358,12 @@ export const BaseRecordsExplorer = <
     showRowNumber: showRowNumberProp,
     id,
     ...rest
-  } = omit(props, 'recordLabelPlural', 'recordLabelSingular');
+  } = omit(
+    props,
+    'recordLabelPlural',
+    'recordLabelSingular',
+    'permissionToViewDetails'
+  );
 
   let { recordLabelPlural, recordLabelSingular } = props;
 
@@ -1123,6 +1132,11 @@ export const BaseRecordsExplorer = <
         const { type } = selectedView;
         switch (type) {
           case 'List':
+            const { ...viewProps } = omit(
+              selectedView,
+              'type',
+              'minWidth'
+            ) as ListView<RecordRow>;
             const {
               minColumnWidth = 200,
               enableColumnDisplayToggle = true,
@@ -1134,9 +1148,15 @@ export const BaseRecordsExplorer = <
             const displayingColumns = selectedView.columns.filter(({ id }) => {
               return selectedColumnIds.includes(String(id) as any);
             });
+
+            const { columns: allDisplayingColumns } = getComputedTableProps({
+              ...viewProps,
+              columns: displayingColumns,
+            });
+
             const {
               minWidth = getTableMinWidth(
-                displayingColumns.map((column) => {
+                allDisplayingColumns.map((column) => {
                   const { minWidth } = column;
                   return {
                     ...column,
@@ -1158,12 +1178,6 @@ export const BaseRecordsExplorer = <
                 }}
               >
                 {(() => {
-                  const { ...viewProps } = omit(
-                    selectedView,
-                    'type',
-                    'minWidth'
-                  ) as ListView<RecordRow>;
-
                   const baseTableProps: typeof viewProps = {
                     ...viewProps,
                     paging: false,
@@ -1322,15 +1336,45 @@ export const BaseRecordsExplorer = <
                       },
                       [] as typeof groupedData
                     );
+
+                    const unitGroupIconWidth = 24 + 8;
+                    const unitExtraWidth = unitGroupIconWidth + 16;
+                    const groupingExtraWidth =
+                      unitExtraWidth +
+                      (selectedGroupParams.length - 1) * unitGroupIconWidth;
+
+                    const [firstGroupColumn, ...restGroupColumns] =
+                      allDisplayingColumns;
+
+                    const groupTableColumns = [
+                      {
+                        ...firstGroupColumn,
+                        extraWidth: groupingExtraWidth,
+                      },
+                      ...restGroupColumns,
+                    ].map((column) => ({
+                      ...column,
+                    }));
+
+                    const {
+                      minWidth = getTableMinWidth(
+                        groupTableColumns.map((column) => {
+                          const { minWidth } = column;
+                          return {
+                            ...column,
+                            minWidth: minWidth ?? minColumnWidth,
+                          };
+                        }),
+                        {
+                          enableColumnDisplayToggle,
+                        }
+                      ),
+                    } = selectedView;
+
                     const getDataGroupElement = (
                       inputGroupedData: typeof groupedData,
                       nestIndex = 0
                     ) => {
-                      const unitGroupIconWidth = 24 + 8;
-                      const unitExtraWidth = unitGroupIconWidth + 16;
-                      const groupingExtraWidth =
-                        unitExtraWidth +
-                        (selectedGroupParams.length - 1) * unitGroupIconWidth;
                       const groupingContainerExtraWidth = (() => {
                         if (nestIndex > 0) {
                           return (
@@ -1339,10 +1383,11 @@ export const BaseRecordsExplorer = <
                           );
                         }
                       })();
+
                       const groupedDataTableProps: Partial<
                         typeof baseTableProps
                       > = {
-                        columns: baseTableColumns,
+                        columns: groupTableColumns,
                         getDisplayingColumns: (columns) => {
                           const groupedDataColumns: typeof columns =
                             columns.map((column) => ({

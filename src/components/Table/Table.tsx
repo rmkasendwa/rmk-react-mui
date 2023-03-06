@@ -14,23 +14,17 @@ import {
   useMediaQuery,
   useThemeProps,
 } from '@mui/material';
-import Box, { BoxProps } from '@mui/material/Box';
-import { PaginationProps } from '@mui/material/Pagination';
+import Box from '@mui/material/Box';
 import { Theme } from '@mui/material/styles/createTheme';
 import useTheme from '@mui/material/styles/useTheme';
-import MuiBaseTable, {
-  TableProps as MuiBaseTableProps,
-} from '@mui/material/Table';
+import MuiBaseTable from '@mui/material/Table';
 import TableBody, { tableBodyClasses } from '@mui/material/TableBody';
 import TableCell, { tableCellClasses } from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TablePagination, {
   TablePaginationProps,
 } from '@mui/material/TablePagination';
-import TableRow, {
-  TableRowProps as MuiTableRowProps,
-  tableRowClasses,
-} from '@mui/material/TableRow';
+import TableRow, { tableRowClasses } from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 import { alpha, darken, lighten } from '@mui/system/colorManipulator';
 import { SxProps } from '@mui/system/styleFunctionSx';
@@ -38,7 +32,6 @@ import clsx from 'clsx';
 import { omit } from 'lodash';
 import {
   ReactElement,
-  ReactNode,
   Ref,
   forwardRef,
   useEffect,
@@ -47,13 +40,8 @@ import {
   useState,
 } from 'react';
 
-import { SortBy, SortDirection, SortOptions } from '../../interfaces/Sort';
-import {
-  BaseDataRow,
-  GetRowProps,
-  TableColumn,
-  TableRowProps,
-} from '../../interfaces/Table';
+import { SortDirection, SortOptions } from '../../interfaces/Sort';
+import { BaseDataRow } from '../../interfaces/Table';
 import { sort } from '../../utils/Sort';
 import {
   expandTableColumnWidths,
@@ -62,14 +50,12 @@ import {
   mapTableColumnTypeToPrimitiveDataType,
 } from '../../utils/Table';
 import DataTablePagination from '../DataTablePagination';
-import EllipsisMenuIconButton, {
-  EllipsisMenuIconButtonProps,
-} from '../EllipsisMenuIconButton';
-import RenderIfVisible, { RenderIfVisibleProps } from '../RenderIfVisible';
+import EllipsisMenuIconButton from '../EllipsisMenuIconButton';
+import RenderIfVisible from '../RenderIfVisible';
+import { TableProps } from './interfaces';
 import TableBodyRow, { tableBodyRowClasses } from './TableBodyRow';
-import TableColumnToggleIconButton, {
-  TableColumnToggleIconButtonProps,
-} from './TableColumnToggleIconButton';
+import TableColumnToggleIconButton from './TableColumnToggleIconButton';
+import { getComputedTableProps } from './utils';
 
 export type {
   ForEachDerivedColumnConfiguration,
@@ -108,93 +94,6 @@ declare module '@mui/material/styles/components' {
       variants?: ComponentsVariants['MuiTableExtended'];
     };
   }
-}
-
-export type TableVariant =
-  | 'stripped'
-  | 'stripped-rows'
-  | 'stripped-columns'
-  | 'plain';
-
-export type TableBordersVariant = 'square' | 'rows' | 'columns' | 'none';
-
-export interface TableProps<RowObject extends Record<string, any> = any>
-  extends Partial<Pick<MuiBaseTableProps, 'onClick' | 'sx' | 'className'>>,
-    Pick<
-      TableRowProps<RowObject>,
-      | 'columnTypographyProps'
-      | 'columns'
-      | 'decimalPlaces'
-      | 'defaultColumnValue'
-      | 'defaultCountryCode'
-      | 'defaultDateFormat'
-      | 'defaultDateTimeFormat'
-      | 'editable'
-      | 'generateRowData'
-      | 'minColumnWidth'
-      | 'noWrap'
-      | 'onClickRow'
-      | 'textTransform'
-    >,
-    Pick<
-      TableColumnToggleIconButtonProps<RowObject>,
-      'selectedColumnIds' | 'onChangeSelectedColumnIds'
-    >,
-    Partial<Pick<TablePaginationProps, 'rowsPerPageOptions'>> {
-  rows?: RowObject[];
-  rowStartIndex?: number;
-  rowsPerPage?: number;
-  pageIndex?: number;
-  filterdRowCount?: number;
-  totalRowCount?: number;
-  labelPlural?: string;
-  labelSingular?: string;
-  lowercaseLabelPlural?: string;
-  emptyRowsLabel?: ReactNode;
-  variant?: TableVariant;
-  bordersVariant?: TableBordersVariant;
-  onChangePage?: (pageIndex: number) => void;
-  onRowsPerPageChange?: (rowsPerPage: number) => void;
-  forEachRowProps?: GetRowProps<RowObject>;
-  paging?: boolean;
-  showHeaderRow?: boolean;
-  showDataRows?: boolean;
-  HeaderRowProps?: Partial<MuiTableRowProps>;
-  currencyCode?: string;
-  paginationType?: 'default' | 'classic';
-  PaginationProps?: PaginationProps;
-  stickyHeader?: boolean;
-  TableBodyRowPlaceholderProps?: Partial<RenderIfVisibleProps>;
-  PaginatedTableWrapperProps?: Partial<BoxProps>;
-  parentBackgroundColor?: string;
-  enableSmallScreenOptimization?: boolean;
-  showRowNumber?: boolean;
-  getDisplayingColumns?: (
-    columns: TableColumn<RowObject>[]
-  ) => TableColumn<RowObject>[];
-  getEllipsisMenuToolProps?: (
-    row: RowObject
-  ) => EllipsisMenuIconButtonProps | undefined | null;
-
-  // Sort props
-  sortable?: boolean;
-  handleSortOperations?: boolean;
-  sortBy?: SortBy<RowObject>;
-  onChangeSortBy?: (sortOptions: SortOptions<RowObject>) => void;
-
-  // Removable columns
-  enableColumnDisplayToggle?: boolean;
-  ColumnDisplayToggleProps?: Partial<BoxProps>;
-
-  // Checkboxes
-  enableCheckboxRowSelectors?: boolean;
-  enableCheckboxAllRowSelector?: boolean;
-  allRowsChecked?: boolean;
-  checkedRowIds?: string[];
-  onChangeCheckedRowIds?: (
-    checkedRowIds: string[],
-    allRowsChecked: boolean
-  ) => void;
 }
 
 const OPAQUE_BG_CLASS_NAME = `MuiTableCell-opaque`;
@@ -383,150 +282,119 @@ export const BaseTable = <T extends BaseDataRow>(
 
   // Setting default column properties
   const columns = (() => {
-    return expandTableColumnWidths(
-      [
-        ...(() => {
-          if (enableCheckboxRowSelectors) {
-            return [
-              {
-                id: 'checkbox' as any,
-                label: enableCheckboxAllRowSelector ? (
-                  <Box
-                    sx={{
-                      width: 60,
-                      display: 'flex',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <Checkbox
-                      checked={allRowsChecked}
-                      onChange={(event) => {
-                        setAllRowsChecked(event.target.checked);
-                        setCheckedRowIds([]);
-                      }}
-                      color="default"
-                    />
-                  </Box>
-                ) : null,
-                getColumnValue: ({ id: baseId }) => {
-                  const id = String(baseId);
-                  const checked = allRowsChecked || checkedRowIds.includes(id);
-                  return (
-                    <Box
-                      sx={{
-                        width: 60,
-                        display: 'flex',
-                        justifyContent: 'center',
-                      }}
-                    >
-                      <Checkbox
-                        {...{ checked }}
-                        color="default"
-                        onChange={() => {
-                          setCheckedRowIds((prevCheckedRowIds) => {
-                            const nextCheckedRowIds = [...prevCheckedRowIds];
-                            if (nextCheckedRowIds.includes(id)) {
-                              nextCheckedRowIds.splice(
-                                nextCheckedRowIds.indexOf(id),
-                                1
-                              );
-                            } else {
-                              nextCheckedRowIds.push(id);
-                            }
-                            return nextCheckedRowIds;
-                          });
-                        }}
-                      />
-                    </Box>
-                  );
-                },
-                width: 60,
-                sortable: false,
-                sx: {
-                  '&,>div': {
-                    p: 0,
-                  },
-                },
-                holdsPriorityInformation: false,
-              } as TableColumn<T>,
-            ];
-          }
-          return [];
-        })(),
-        ...(() => {
-          if (showRowNumber) {
-            return [
-              {
-                id: 'rowNumber' as any,
-                label: 'Number',
-                width: 60,
-                getColumnValue: (record) => {
-                  return `${
-                    1 + rowStartIndex + pageRows.indexOf(record) + pageIndex
-                  }.`;
-                },
-                align: 'right',
-                showHeaderText: false,
-                opaque: true,
-                sx: {
-                  position: 'sticky',
-                  left: 0,
-                  zIndex: 1,
-                },
-                headerSx: {
-                  zIndex: 5,
-                },
-                holdsPriorityInformation: false,
-              } as TableColumn<T>,
-            ];
-          }
-          return [];
-        })(),
-        ...(() => {
-          if (selectedColumnIdsProp && onChangeSelectedColumnIds) {
-            return selectedColumnIdsProp;
-          }
-          return selectedColumnIds;
-        })()
-          .map((selectedColumnId) => {
-            return columnsProp.find(({ id }) => id === selectedColumnId)!;
-          })
-          .filter((column) => column != null),
-        ...(() => {
-          if (getEllipsisMenuToolProps) {
-            return [
-              {
-                id: 'ellipsisMenuTool' as any,
-                opaque: true,
-                width: 42,
-                defaultColumnValue: <>&nbsp;</>,
-                propagateClickToParentRowClickEvent: false,
-                getColumnValue: (row) => {
-                  const ellipsisMenuToolProps = getEllipsisMenuToolProps(row);
-                  if (ellipsisMenuToolProps) {
-                    return (
-                      <Box>
-                        <EllipsisMenuIconButton {...ellipsisMenuToolProps} />
-                      </Box>
-                    );
-                  }
-                },
-                holdsPriorityInformation: false,
-                sx: {
-                  position: 'sticky',
-                  p: 0,
-                  right: 0,
-                },
-              } as TableColumn<T>,
-            ];
-          }
-          return [];
-        })(),
-      ],
-      {
-        enableColumnDisplayToggle,
+    const computedColumns: typeof columnsProp = [];
+    const selectedColumns = (() => {
+      if (selectedColumnIdsProp && onChangeSelectedColumnIds) {
+        return selectedColumnIdsProp;
       }
-    ).map((column) => {
+      return selectedColumnIds;
+    })()
+      .map((selectedColumnId) => {
+        return columnsProp.find(({ id }) => id === selectedColumnId)!;
+      })
+      .filter((column) => column != null);
+
+    const { columns: allColumns } = getComputedTableProps(props);
+
+    if (enableCheckboxRowSelectors) {
+      const checkboxColumn = allColumns.find(({ id }) => id === 'checkbox');
+      if (checkboxColumn) {
+        computedColumns.push({
+          ...checkboxColumn,
+          label: enableCheckboxAllRowSelector ? (
+            <Box
+              sx={{
+                width: 60,
+                display: 'flex',
+                justifyContent: 'center',
+              }}
+            >
+              <Checkbox
+                checked={allRowsChecked}
+                onChange={(event) => {
+                  setAllRowsChecked(event.target.checked);
+                  setCheckedRowIds([]);
+                }}
+                color="default"
+              />
+            </Box>
+          ) : null,
+          getColumnValue: ({ id: baseId }) => {
+            const id = String(baseId);
+            const checked = allRowsChecked || checkedRowIds.includes(id);
+            return (
+              <Box
+                sx={{
+                  width: 60,
+                  display: 'flex',
+                  justifyContent: 'center',
+                }}
+              >
+                <Checkbox
+                  {...{ checked }}
+                  color="default"
+                  onChange={() => {
+                    setCheckedRowIds((prevCheckedRowIds) => {
+                      const nextCheckedRowIds = [...prevCheckedRowIds];
+                      if (nextCheckedRowIds.includes(id)) {
+                        nextCheckedRowIds.splice(
+                          nextCheckedRowIds.indexOf(id),
+                          1
+                        );
+                      } else {
+                        nextCheckedRowIds.push(id);
+                      }
+                      return nextCheckedRowIds;
+                    });
+                  }}
+                />
+              </Box>
+            );
+          },
+        });
+      }
+    }
+
+    if (showRowNumber) {
+      const numberColumn = allColumns.find(({ id }) => id === 'rowNumber');
+      if (numberColumn) {
+        computedColumns.push({
+          ...numberColumn,
+          getColumnValue: (record) => {
+            return `${
+              1 + rowStartIndex + pageRows.indexOf(record) + pageIndex
+            }.`;
+          },
+        });
+      }
+    }
+
+    computedColumns.push(...selectedColumns);
+
+    if (getEllipsisMenuToolProps) {
+      const ellipsisMenuToolColumn = allColumns.find(
+        ({ id }) => id === 'ellipsisMenuTool'
+      );
+      if (ellipsisMenuToolColumn) {
+        computedColumns.push({
+          ...ellipsisMenuToolColumn,
+          getColumnValue: (row) => {
+            const ellipsisMenuToolProps = getEllipsisMenuToolProps(row);
+            if (ellipsisMenuToolProps) {
+              return (
+                <Box>
+                  <EllipsisMenuIconButton {...ellipsisMenuToolProps} />
+                </Box>
+              );
+            }
+          },
+        });
+      }
+    }
+
+    return expandTableColumnWidths(computedColumns, {
+      enableColumnDisplayToggle,
+    }).map((column) => {
       const nextColumn = { ...column } as typeof column;
       nextColumn.type || (nextColumn.type = 'string');
       nextColumn.className = clsx(
@@ -1399,8 +1267,8 @@ export const BaseTable = <T extends BaseDataRow>(
   return tableElement;
 };
 
-export const Table = forwardRef(BaseTable) as <T extends Record<string, any>>(
-  p: TableProps<T> & { ref?: Ref<HTMLDivElement> }
+export const Table = forwardRef(BaseTable) as <DataRow extends BaseDataRow>(
+  p: TableProps<DataRow> & { ref?: Ref<HTMLDivElement> }
 ) => ReactElement;
 
 export default Table;
