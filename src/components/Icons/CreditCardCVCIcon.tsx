@@ -28,6 +28,7 @@ export const CreditCardCVCIcon = forwardRef<
         width="7"
         height="5"
         rx="2.5"
+        fill="#fff"
         stroke="#D10244"
       ></rect>
     </SvgIcon>

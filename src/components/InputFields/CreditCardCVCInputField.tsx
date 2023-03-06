@@ -1,17 +1,17 @@
 import { forwardRef, useState } from 'react';
 
-import CreditCardIcon from '../Icons/CreditCardIcon';
+import CreditCardCVCIcon from '../Icons/CreditCardCVCIcon';
 import TextField, { TextFieldProps } from './TextField';
 
-export interface CreditCardNumberInputFieldProps
+export interface CreditCardCVCInputFieldProps
   extends Omit<TextFieldProps, 'value'> {
   value?: string;
 }
 
-export const CreditCardNumberInputField = forwardRef<
+export const CreditCardCVCInputField = forwardRef<
   HTMLDivElement,
-  CreditCardNumberInputFieldProps
->(function CreditCardNumberInputField(
+  CreditCardCVCInputFieldProps
+>(function CreditCardCVCInputField(
   { name, id, disabled, endAdornment, ...rest },
   ref
 ) {
@@ -19,19 +19,13 @@ export const CreditCardNumberInputField = forwardRef<
   return (
     <TextField
       ref={ref}
-      placeholder="1234 5678 9012 3456"
+      placeholder="3 digits"
       {...rest}
       {...{ name, id, disabled }}
       onChange={(event) => {
         const numericDigitsMatch = String(event.target.value).match(/\d/g);
         if (numericDigitsMatch) {
-          setInputValue(
-            numericDigitsMatch
-              .join('')
-              .slice(0, 20)
-              .match(/\d{1,4}/g)!
-              .join(' ')
-          );
+          setInputValue(numericDigitsMatch.join('').slice(0, 3));
         } else {
           setInputValue('');
         }
@@ -40,11 +34,11 @@ export const CreditCardNumberInputField = forwardRef<
       endAdornment={
         <>
           {endAdornment}
-          <CreditCardIcon />
+          <CreditCardCVCIcon />
         </>
       }
     />
   );
 });
 
-export default CreditCardNumberInputField;
+export default CreditCardCVCInputField;
