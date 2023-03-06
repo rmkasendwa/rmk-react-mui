@@ -63,8 +63,7 @@ import ModalForm, {
 } from './ModalForm';
 import { PageTitleProps } from './PageTitle';
 import SearchSyncToolbar, { SearchSyncToolbarProps } from './SearchSyncToolbar';
-import Table from './Table';
-import { TableProps } from './Table/Table';
+import Table, { TableProps } from './Table';
 
 export interface TableCrudClasses {
   /** Styles applied to the root element. */

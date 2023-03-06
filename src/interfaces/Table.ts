@@ -85,6 +85,7 @@ export interface TableColumn<
   align?: 'left' | 'center' | 'right';
   width?: number;
   minWidth?: number;
+  extraWidth?: number;
   noHeaderTextSuffix?: boolean;
   headerTextSuffix?: ReactNode;
   enumValues?: TableColumnEnumValue[];

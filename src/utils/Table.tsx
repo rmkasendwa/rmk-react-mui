@@ -160,18 +160,23 @@ export const expandTableColumnWidths = (
         break;
     }
 
-    const { showHeaderText, label } = nextColumn;
-    const extraWidth = (() => {
-      if (
-        isLastColumn &&
-        enableColumnDisplayToggle &&
-        showHeaderText &&
-        label
-      ) {
-        return 44;
-      }
-      return 0;
-    })();
+    const {
+      showHeaderText,
+      label,
+      extraWidth: baseExtraWidth = 0,
+    } = nextColumn;
+    const extraWidth =
+      (() => {
+        if (
+          isLastColumn &&
+          enableColumnDisplayToggle &&
+          showHeaderText &&
+          label
+        ) {
+          return 44;
+        }
+        return 0;
+      })() + baseExtraWidth;
 
     nextColumn.minWidth && (nextColumn.minWidth += extraWidth);
     nextColumn.width && (nextColumn.width += extraWidth);
