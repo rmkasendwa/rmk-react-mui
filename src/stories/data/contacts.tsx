@@ -93,8 +93,8 @@ export const tableColumns: TableColumn<Contact>[] = [
         <EnumValueChip
           value={status}
           colors={{
-            Active: '#3fb950',
-            Pending: '#ffa657',
+            Active: '#1F8D60',
+            Pending: '#C31521',
           }}
         />
       );

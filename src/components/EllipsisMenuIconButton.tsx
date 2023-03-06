@@ -133,7 +133,7 @@ export const EllipsisMenuIconButton = forwardRef<
             if (open) {
               return {
                 '&,&:hover': {
-                  bgcolor: alpha(palette.primary.main, 0.3),
+                  bgcolor: alpha(palette.text.primary, 0.1),
                 },
               };
             }
