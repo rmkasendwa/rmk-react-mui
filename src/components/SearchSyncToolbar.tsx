@@ -361,8 +361,15 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
         {...rest}
         className={clsx(classes.root)}
         sx={{
-          pl: 3,
-          pr: 2,
+          ...(() => {
+            if (isSmallScreenSize) {
+              return {
+                pl: 2,
+                pr: 1,
+              };
+            }
+            return { pl: 3, pr: 2 };
+          })(),
           ...sx,
         }}
       >

@@ -221,8 +221,8 @@ export const TableBodyRow = <T extends BaseDataRow>(
           alignItems: 'center',
           cursor: onClickRow ? 'pointer' : 'inherit',
           py: 2,
-          pl: 3,
-          pr: 2,
+          pl: 2,
+          pr: 1,
         }}
       >
         <Grid
@@ -290,7 +290,12 @@ export const TableBodyRow = <T extends BaseDataRow>(
                               &bull;
                             </Grid>
                           ) : null}
-                          <Grid item>
+                          <Grid
+                            item
+                            sx={{
+                              flex: 'none',
+                            }}
+                          >
                             <TableBodyColumn
                               key={String(id)}
                               {...({} as any)}

@@ -1172,9 +1172,6 @@ export const BaseRecordsExplorer = <
               <Box
                 sx={{
                   position: 'relative',
-                  [`.${tableClasses.columnDisplayToggle}`]: {
-                    minWidth,
-                  },
                 }}
               >
                 {(() => {
@@ -1188,6 +1185,11 @@ export const BaseRecordsExplorer = <
                     showRowNumber,
                     bordersVariant: 'square',
                     selectedColumnIds,
+                    ColumnDisplayToggleProps: {
+                      sx: {
+                        minWidth,
+                      },
+                    },
                   };
 
                   const tableControlProps: Partial<typeof viewProps> = {
@@ -1268,20 +1270,15 @@ export const BaseRecordsExplorer = <
                     },
                   };
 
-                  const { columns, sx } = baseTableProps;
-                  const baseTableColumns = columns.map((column) => ({
-                    ...column,
-                  }));
-
-                  baseTableColumns[0] = {
-                    ...baseTableColumns[0],
+                  allDisplayingColumns[0] = {
+                    ...allDisplayingColumns[0],
                     sx: {
-                      ...baseTableColumns[0].sx,
+                      ...allDisplayingColumns[0].sx,
                       position: 'sticky',
                       left: 0,
                     },
                     headerSx: {
-                      ...baseTableColumns[0].headerSx,
+                      ...allDisplayingColumns[0].headerSx,
                       zIndex: 5,
                       ...(() => {
                         if (groupedData) {
@@ -1294,20 +1291,7 @@ export const BaseRecordsExplorer = <
                       })(),
                     },
                     bodySx: {
-                      ...baseTableColumns[0].bodySx,
-                      zIndex: 1,
-                    },
-                    opaque: true,
-                  };
-                  displayingColumns[0] = {
-                    ...displayingColumns[0],
-                    sx: {
-                      ...displayingColumns[0].sx,
-                      position: 'sticky',
-                      left: 0,
-                    },
-                    bodySx: {
-                      ...displayingColumns[0].bodySx,
+                      ...allDisplayingColumns[0].bodySx,
                       zIndex: 1,
                     },
                     opaque: true,
@@ -1448,6 +1432,11 @@ export const BaseRecordsExplorer = <
                             },
                           };
                           return groupedDataColumns;
+                        },
+                        ColumnDisplayToggleProps: {
+                          sx: {
+                            minWidth,
+                          },
                         },
                       };
 
@@ -1676,7 +1665,7 @@ export const BaseRecordsExplorer = <
                     <Table
                       {...baseTableProps}
                       {...tableControlProps}
-                      columns={baseTableColumns}
+                      columns={allDisplayingColumns}
                       rows={filteredData}
                       stickyHeader
                       sx={{
