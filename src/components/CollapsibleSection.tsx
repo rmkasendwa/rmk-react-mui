@@ -123,7 +123,7 @@ export const CollapsibleSection = forwardRef<
     HeaderWrapperProps;
   const { sx: headerPropsSx, ...headerPropsRest } = HeaderProps;
   const { ...bodyPropsRest } = BodyProps;
-  const [collapsed, setCollapsed] = useState(true);
+  const [collapsed, setCollapsed] = useState(collapsedProp);
 
   useEffect(() => {
     setCollapsed(collapsedProp);

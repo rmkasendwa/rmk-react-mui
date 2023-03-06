@@ -1655,7 +1655,10 @@ export const BaseRecordsExplorer = <
                                         showHeaderRow={false}
                                         stickyHeader
                                         rows={(children as RecordRow[]) || []}
-                                        {...{ sx }}
+                                        sx={{
+                                          minWidth,
+                                          ...sx,
+                                        }}
                                       />
                                     );
                                   })()}
