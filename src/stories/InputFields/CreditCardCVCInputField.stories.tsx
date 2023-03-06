@@ -4,7 +4,8 @@ import React from 'react';
 import { CreditCardCVCInputField } from '../../components/InputFields/CreditCardCVCInputField';
 
 export default {
-  title: 'Components/Input Fields/Credit Card CVC Input Field',
+  title:
+    'Components/Input Fields/Credit Card Input Fields/Credit Card CVC Input Field',
   component: CreditCardCVCInputField,
   parameters: {
     layout: 'centered',
