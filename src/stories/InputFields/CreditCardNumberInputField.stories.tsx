@@ -4,7 +4,8 @@ import React from 'react';
 import { CreditCardNumberInputField } from '../../components/InputFields/CreditCardNumberInputField';
 
 export default {
-  title: 'Components/Input Fields/Credit Card Number Input Field',
+  title:
+    'Components/Input Fields/Credit Card Input Fields/Credit Card Number Input Field',
   component: CreditCardNumberInputField,
   parameters: {
     layout: 'centered',
