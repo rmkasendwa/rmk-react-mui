@@ -1,7 +1,50 @@
+import {
+  ComponentsOverrides,
+  ComponentsProps,
+  ComponentsVariants,
+  unstable_composeClasses as composeClasses,
+  generateUtilityClass,
+  generateUtilityClasses,
+  useThemeProps,
+} from '@mui/material';
+import clsx from 'clsx';
 import { forwardRef, useCallback, useEffect, useRef, useState } from 'react';
 
 import CreditCardCVCIcon from '../Icons/CreditCardCVCIcon';
 import TextField, { TextFieldProps } from './TextField';
+
+export interface CreditCardCVCInputFieldClasses {
+  /** Styles applied to the root element. */
+  root: string;
+}
+
+export type CreditCardCVCInputFieldClassKey =
+  keyof CreditCardCVCInputFieldClasses;
+
+// Adding theme prop types
+declare module '@mui/material/styles/props' {
+  interface ComponentsPropsList {
+    MuiCreditCardCVCInputField: CreditCardCVCInputFieldProps;
+  }
+}
+
+// Adding theme override types
+declare module '@mui/material/styles/overrides' {
+  interface ComponentNameToClassKey {
+    MuiCreditCardCVCInputField: keyof CreditCardCVCInputFieldClasses;
+  }
+}
+
+// Adding theme component types
+declare module '@mui/material/styles/components' {
+  interface Components<Theme = unknown> {
+    MuiCreditCardCVCInputField?: {
+      defaultProps?: ComponentsProps['MuiCreditCardCVCInputField'];
+      styleOverrides?: ComponentsOverrides<Theme>['MuiCreditCardCVCInputField'];
+      variants?: ComponentsVariants['MuiCreditCardCVCInputField'];
+    };
+  }
+}
 
 export const getValidInputValue = (inputValue: string) => {
   const numericDigitsMatch = inputValue.match(/\d/g);
@@ -16,13 +59,39 @@ export interface CreditCardCVCInputFieldProps
   value?: string;
 }
 
+export function getCreditCardCVCInputFieldUtilityClass(slot: string): string {
+  return generateUtilityClass('MuiCreditCardCVCInputField', slot);
+}
+
+export const creditCardCVCInputFieldClasses: CreditCardCVCInputFieldClasses =
+  generateUtilityClasses('MuiCreditCardCVCInputField', ['root']);
+
+const slots = {
+  root: ['root'],
+};
+
 export const CreditCardCVCInputField = forwardRef<
   HTMLDivElement,
   CreditCardCVCInputFieldProps
->(function CreditCardCVCInputField(
-  { name, id, endAdornment, value, onChange, ...rest },
-  ref
-) {
+>(function CreditCardCVCInputField(inProps, ref) {
+  const props = useThemeProps({
+    props: inProps,
+    name: 'MuiCreditCardCVCInputField',
+  });
+  const { className, name, id, endAdornment, value, onChange, ...rest } = props;
+
+  const classes = composeClasses(
+    slots,
+    getCreditCardCVCInputFieldUtilityClass,
+    (() => {
+      if (className) {
+        return {
+          root: className,
+        };
+      }
+    })()
+  );
+
   // Refs
   const onChangeRef = useRef(onChange);
   useEffect(() => {
@@ -57,9 +126,10 @@ export const CreditCardCVCInputField = forwardRef<
 
   return (
     <TextField
-      ref={ref}
       placeholder="3 digits"
+      ref={ref}
       {...rest}
+      className={clsx(classes.root)}
       {...{ name, id }}
       onChange={(event) => {
         const nextInputValue = getValidInputValue(String(event.target.value));

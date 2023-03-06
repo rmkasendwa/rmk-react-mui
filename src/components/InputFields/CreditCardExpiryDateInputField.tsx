@@ -1,6 +1,49 @@
+import {
+  ComponentsOverrides,
+  ComponentsProps,
+  ComponentsVariants,
+  unstable_composeClasses as composeClasses,
+  generateUtilityClass,
+  generateUtilityClasses,
+  useThemeProps,
+} from '@mui/material';
+import clsx from 'clsx';
 import { forwardRef, useCallback, useEffect, useRef, useState } from 'react';
 
 import TextField, { TextFieldProps } from './TextField';
+
+export interface CreditCardExpiryDateInputFieldClasses {
+  /** Styles applied to the root element. */
+  root: string;
+}
+
+export type CreditCardExpiryDateInputFieldClassKey =
+  keyof CreditCardExpiryDateInputFieldClasses;
+
+// Adding theme prop types
+declare module '@mui/material/styles/props' {
+  interface ComponentsPropsList {
+    MuiCreditCardExpiryDateInputField: CreditCardExpiryDateInputFieldProps;
+  }
+}
+
+// Adding theme override types
+declare module '@mui/material/styles/overrides' {
+  interface ComponentNameToClassKey {
+    MuiCreditCardExpiryDateInputField: keyof CreditCardExpiryDateInputFieldClasses;
+  }
+}
+
+// Adding theme component types
+declare module '@mui/material/styles/components' {
+  interface Components<Theme = unknown> {
+    MuiCreditCardExpiryDateInputField?: {
+      defaultProps?: ComponentsProps['MuiCreditCardExpiryDateInputField'];
+      styleOverrides?: ComponentsOverrides<Theme>['MuiCreditCardExpiryDateInputField'];
+      variants?: ComponentsVariants['MuiCreditCardExpiryDateInputField'];
+    };
+  }
+}
 
 export const getValidInputValue = (inputValue: string) => {
   const numericDigitsMatch = inputValue.match(/\d{1,2}\/?\d{0,2}/);
@@ -24,13 +67,41 @@ export interface CreditCardExpiryDateInputFieldProps
   value?: string;
 }
 
+export function getCreditCardExpiryDateInputFieldUtilityClass(
+  slot: string
+): string {
+  return generateUtilityClass('MuiCreditCardExpiryDateInputField', slot);
+}
+
+export const creditCardExpiryDateInputFieldClasses: CreditCardExpiryDateInputFieldClasses =
+  generateUtilityClasses('MuiCreditCardExpiryDateInputField', ['root']);
+
+const slots = {
+  root: ['root'],
+};
+
 export const CreditCardExpiryDateInputField = forwardRef<
   HTMLDivElement,
   CreditCardExpiryDateInputFieldProps
->(function CreditCardExpiryDateInputField(
-  { name, id, value, onChange, ...rest },
-  ref
-) {
+>(function CreditCardExpiryDateInputField(inProps, ref) {
+  const props = useThemeProps({
+    props: inProps,
+    name: 'MuiCreditCardExpiryDateInputField',
+  });
+  const { className, name, id, value, onChange, ...rest } = props;
+
+  const classes = composeClasses(
+    slots,
+    getCreditCardExpiryDateInputFieldUtilityClass,
+    (() => {
+      if (className) {
+        return {
+          root: className,
+        };
+      }
+    })()
+  );
+
   // Refs
   const onChangeRef = useRef(onChange);
   useEffect(() => {
@@ -65,9 +136,10 @@ export const CreditCardExpiryDateInputField = forwardRef<
 
   return (
     <TextField
-      ref={ref}
       placeholder="MM/YY"
+      ref={ref}
       {...rest}
+      className={clsx(classes.root)}
       {...{ name, id }}
       onChange={(event) => {
         const nextInputValue = getValidInputValue(String(event.target.value));
