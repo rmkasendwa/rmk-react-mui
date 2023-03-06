@@ -57,6 +57,7 @@ export interface RadioButtonsFieldProps
   extends Partial<Omit<FormControlProps, 'id' | 'name' | 'onChange' | 'value'>>,
     Partial<Pick<RadioGroupProps, 'id' | 'name' | 'onChange' | 'value'>> {
   label?: ReactNode;
+  RadioGroupProps?: Partial<RadioGroupProps>;
   FieldLabelProps?: Partial<FieldLabelProps>;
   FormControlLabelProps?: Partial<FormControlLabelProps>;
   RadioProps?: Partial<RadioProps>;
@@ -85,6 +86,7 @@ export const RadioButtonsField = forwardRef<
     FieldLabelProps = {},
     RadioProps = {},
     FormControlLabelProps = {},
+    RadioGroupProps = {},
     required,
     id,
     name,
@@ -109,6 +111,7 @@ export const RadioButtonsField = forwardRef<
     })()
   );
 
+  const { ...RadioGroupPropsRest } = RadioGroupProps;
   const { ...FieldLabelPropsRest } = FieldLabelProps;
   const { ...FormControlLabelPropsRest } = FormControlLabelProps;
   const { sx: RadioPropsSx, ...RadioPropsRest } = RadioProps;
@@ -120,7 +123,7 @@ export const RadioButtonsField = forwardRef<
           {label}
         </FieldLabel>
       ) : null}
-      <RadioGroup {...{ id, name, value, onChange }}>
+      <RadioGroup {...RadioGroupPropsRest} {...{ id, name, value, onChange }}>
         {options.map((option) => {
           const { value, label } = ((): DropdownOption => {
             if (typeof option === 'string') {
