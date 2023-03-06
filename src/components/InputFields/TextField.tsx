@@ -146,13 +146,11 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
     const { InputProps = {} } = rest;
     const { endAdornment, ...restInputProps } = InputProps;
 
+    // Refs
     const onChangeRef = useRef(onChange);
     useEffect(() => {
       onChangeRef.current = onChange;
     }, [onChange]);
-
-    const { loading, errorMessage, locked } = useLoadingContext();
-    const [inputValue, setInputValue] = useState('');
 
     const triggerChangeEvent = useCallback(
       (inputValue: string) => {
@@ -171,6 +169,9 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
       },
       [id, name]
     );
+
+    const { loading, errorMessage, locked } = useLoadingContext();
+    const [inputValue, setInputValue] = useState('');
 
     useEffect(() => {
       if (onChangeRef.current && value != null) {
@@ -303,7 +304,7 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
                             <IconButton
                               className="text-input-clear-button"
                               onClick={(event) => {
-                                event.stopPropagation();
+                                event.preventDefault();
                                 if (!onChangeRef.current || value == null) {
                                   setInputValue('');
                                 }
