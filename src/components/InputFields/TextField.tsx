@@ -18,7 +18,14 @@ import MuiTextField, {
 } from '@mui/material/TextField';
 import Tooltip from '@mui/material/Tooltip';
 import clsx from 'clsx';
-import { ReactNode, forwardRef, useCallback, useEffect, useState } from 'react';
+import {
+  ReactNode,
+  forwardRef,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
 import { useLoadingContext } from '../../contexts/LoadingContext';
 import ErrorSkeleton from '../ErrorSkeleton';
@@ -139,27 +146,36 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
     const { InputProps = {} } = rest;
     const { endAdornment, ...restInputProps } = InputProps;
 
+    const onChangeRef = useRef(onChange);
+    useEffect(() => {
+      onChangeRef.current = onChange;
+    }, [onChange]);
+
     const { loading, errorMessage, locked } = useLoadingContext();
     const [inputValue, setInputValue] = useState('');
 
     const triggerChangeEvent = useCallback(
       (inputValue: string) => {
-        const event: any = new Event('change', { bubbles: true });
-        Object.defineProperty(event, 'target', {
-          writable: false,
-          value: {
-            name,
-            id,
-            value: inputValue,
-          },
-        });
-        onChange && onChange(event);
+        if (onChangeRef.current) {
+          const event: any = new Event('change', { bubbles: true });
+          Object.defineProperty(event, 'target', {
+            writable: false,
+            value: {
+              name,
+              id,
+              value: inputValue,
+            },
+          });
+          onChangeRef.current(event);
+        }
       },
-      [id, name, onChange]
+      [id, name]
     );
 
     useEffect(() => {
-      setInputValue(value ?? '');
+      if (onChangeRef.current && value != null) {
+        setInputValue(value ?? '');
+      }
     }, [value]);
 
     if (enableLoadingState && locked) {
@@ -267,7 +283,9 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
             })()}
             value={inputValue}
             onChange={(event) => {
-              setInputValue(event.target.value);
+              if (!onChangeRef.current || value == null) {
+                setInputValue(event.target.value);
+              }
               triggerChangeEvent(event.target.value);
             }}
             InputProps={{
@@ -286,7 +304,9 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
                               className="text-input-clear-button"
                               onClick={(event) => {
                                 event.stopPropagation();
-                                setInputValue('');
+                                if (!onChangeRef.current || value == null) {
+                                  setInputValue('');
+                                }
                                 triggerChangeEvent('');
                               }}
                               sx={{ p: 0.4 }}
