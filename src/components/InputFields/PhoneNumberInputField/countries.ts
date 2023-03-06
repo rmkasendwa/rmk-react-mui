@@ -1,5 +1,7 @@
+import { countries as countriesMap } from 'countries-list';
+
+import { CountryCode } from '../../../interfaces/Countries';
 import PhoneNumberUtil from '../../../utils/PhoneNumberUtil';
-import flags from './flags.json';
 
 export interface Country {
   regionalCode: string;
@@ -7,7 +9,11 @@ export interface Country {
   countryCode: number;
 }
 
-export const countries = Object.keys(flags).map((key) => {
+export const countries = Object.keys(countriesMap).map((key) => {
   const countryCode = PhoneNumberUtil.getCountryCodeForRegion(key);
-  return { regionalCode: key, name: (flags as any)[key], countryCode };
+  return {
+    regionalCode: key,
+    name: countriesMap[key as CountryCode].name,
+    countryCode,
+  };
 });

@@ -260,7 +260,6 @@ export const TableBodyRow = <T extends BaseDataRow>(
                     container
                     sx={{
                       gap: 1,
-                      alignItems: 'center',
                       flexWrap: 'nowrap',
                       overflow: 'hidden',
                     }}
