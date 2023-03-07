@@ -3,10 +3,12 @@ import '@infinite-debugger/rmk-js-extensions/Object';
 import { ExoticDataType, PrimitiveDataType } from '../../interfaces/Utils';
 import {
   BaseDataRow,
+  CHECKBOX_COLUMN_ID,
+  ELLIPSIS_MENU_TOOL_COLUMN_ID,
   TableColumn,
   TableColumnType,
   TableProps,
-} from './interfaces';
+} from './models';
 
 /**
  * Gets the table column element widths.
@@ -207,7 +209,7 @@ export const getComputedTableProps = <DataRow extends BaseDataRow>(
 
   if (enableCheckboxRowSelectors) {
     computedColumns.push({
-      id: 'checkbox' as any,
+      id: CHECKBOX_COLUMN_ID as any,
       width: 60,
       sortable: false,
       sx: {
@@ -243,7 +245,7 @@ export const getComputedTableProps = <DataRow extends BaseDataRow>(
 
   if (getEllipsisMenuToolProps) {
     computedColumns.push({
-      id: 'ellipsisMenuTool' as any,
+      id: ELLIPSIS_MENU_TOOL_COLUMN_ID as any,
       label: 'Actions',
       showHeaderText: false,
       opaque: true,

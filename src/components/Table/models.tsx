@@ -17,6 +17,9 @@ import { FieldValueProps } from '../FieldValue';
 import { RenderIfVisibleProps } from '../RenderIfVisible';
 import { TableColumnToggleIconButtonProps } from './TableColumnToggleIconButton';
 
+export const CHECKBOX_COLUMN_ID = 'checkbox';
+export const ELLIPSIS_MENU_TOOL_COLUMN_ID = 'ellipsisMenuTool';
+
 export type TableColumnEnumValue =
   | {
       id: string;

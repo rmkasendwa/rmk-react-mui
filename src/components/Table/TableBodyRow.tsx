@@ -17,7 +17,11 @@ import TableRow, {
 import clsx from 'clsx';
 import { Fragment, useEffect, useMemo, useRef } from 'react';
 
-import { BaseDataRow, TableRowProps } from './interfaces';
+import {
+  BaseDataRow,
+  ELLIPSIS_MENU_TOOL_COLUMN_ID,
+  TableRowProps,
+} from './models';
 import TableBodyColumn from './TableBodyColumn';
 import { getColumnPaddingStyles, getColumnWidthStyles } from './utils';
 
@@ -170,7 +174,7 @@ export const TableBodyRow = <T extends BaseDataRow>(
       getColumnValue,
     } = highestPriorityColumn;
     const ellipsisMenuToolColumn = columns.find(({ id }) => {
-      return id === 'ellipsisMenuTool';
+      return id === ELLIPSIS_MENU_TOOL_COLUMN_ID;
     });
     const rowNumberColumn = columns.find(({ id }) => {
       return id === 'rowNumber';
