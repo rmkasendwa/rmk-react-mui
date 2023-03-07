@@ -24,7 +24,7 @@ import { mapTableColumnTypeToExoticDataType } from '../../utils/Table';
 import FieldValue from '../FieldValue';
 import PhoneNumberFieldValue from '../PhoneNumberFieldValue';
 import TimeStampDisplay from '../TimeStampDisplay';
-import { TableColumn } from './Table';
+import { TableColumn } from './hooks';
 
 export interface TableBodyColumnClasses {
   /** Styles applied to the root element. */
