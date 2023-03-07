@@ -1490,6 +1490,7 @@ export const BaseRecordsExplorer = <
                               {...baseTableProps}
                               {...tableControlProps}
                               {...groupedDataTableProps}
+                              columns={baseTableColumns}
                               className={clsx(
                                 `Mui-group-header-table`,
                                 baseTableProps.className
