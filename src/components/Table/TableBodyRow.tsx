@@ -54,9 +54,9 @@ declare module '@mui/material/styles/components' {
   }
 }
 
-export interface TableBodyRowProps<T extends Record<string, any> = any>
+export interface TableBodyRowProps<DataRow extends BaseDataRow = any>
   extends Partial<Omit<MuiTableRowProps, 'defaultValue'>>,
-    TableRowProps<T> {
+    TableRowProps<DataRow> {
   enableSmallScreenOptimization?: boolean;
 }
 

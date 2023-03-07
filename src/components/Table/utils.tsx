@@ -244,6 +244,8 @@ export const getComputedTableProps = <DataRow extends BaseDataRow>(
   if (getEllipsisMenuToolProps) {
     computedColumns.push({
       id: 'ellipsisMenuTool' as any,
+      label: 'Actions',
+      showHeaderText: false,
       opaque: true,
       width: 42,
       defaultColumnValue: <>&nbsp;</>,

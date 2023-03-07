@@ -175,7 +175,7 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
 
     useEffect(() => {
       if (onChangeRef.current && value != null) {
-        setInputValue(value ?? '');
+        setInputValue(value);
       }
     }, [value]);
 

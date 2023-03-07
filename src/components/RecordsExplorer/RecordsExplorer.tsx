@@ -1279,6 +1279,38 @@ export const BaseRecordsExplorer = <
                     },
                   };
 
+                  const { columns, sx } = baseTableProps;
+                  const baseTableColumns = columns.map((column) => ({
+                    ...column,
+                  }));
+
+                  baseTableColumns[0] = {
+                    ...baseTableColumns[0],
+                    sx: {
+                      ...baseTableColumns[0].sx,
+                      position: 'sticky',
+                      left: 0,
+                    },
+                    headerSx: {
+                      ...baseTableColumns[0].headerSx,
+                      zIndex: 5,
+                      ...(() => {
+                        if (groupedData) {
+                          return {
+                            '&>div': {
+                              pl: 2,
+                            },
+                          };
+                        }
+                      })(),
+                    },
+                    bodySx: {
+                      ...baseTableColumns[0].bodySx,
+                      zIndex: 1,
+                    },
+                    opaque: true,
+                  };
+
                   allDisplayingColumns[0] = {
                     ...allDisplayingColumns[0],
                     sx: {
@@ -1674,7 +1706,7 @@ export const BaseRecordsExplorer = <
                     <Table
                       {...baseTableProps}
                       {...tableControlProps}
-                      columns={allDisplayingColumns}
+                      columns={baseTableColumns}
                       rows={filteredData}
                       stickyHeader
                       sx={{
