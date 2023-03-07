@@ -445,14 +445,9 @@ export const useTable = <DataRow extends BaseDataRow>(
     });
   })();
 
-  const selectedColumns = (() => {
-    if (selectedColumnIdsProp && onChangeSelectedColumnIds) {
-      return selectedColumnIdsProp;
-    }
-    return selectedColumnIds;
-  })()
+  const selectedColumns = [...selectedColumnIds, 'checkbox', 'ellipsisMenuTool']
     .map((selectedColumnId) => {
-      return columnsProp.find(({ id }) => id === selectedColumnId)!;
+      return allColumns.find(({ id }) => id === selectedColumnId)!;
     })
     .filter((column) => column != null);
 
@@ -1005,7 +1000,7 @@ export const useTable = <DataRow extends BaseDataRow>(
   })();
 
   const columnDisplayToggle = (() => {
-    if (showHeaderRow && enableColumnDisplayToggle) {
+    if (showHeaderRow && enableColumnDisplayToggle && !optimizeForSmallScreen) {
       const selectableColumns = allColumns.filter(({ id }) => {
         return !(['checkbox', 'ellipsisMenuTool'] as typeof id[]).includes(id);
       });

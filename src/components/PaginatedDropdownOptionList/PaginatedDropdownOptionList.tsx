@@ -352,10 +352,9 @@ export const PaginatedDropdownOptionList = forwardRef<
     return options;
   })();
 
-  // Options state
   const [localSelectedOptions, setLocalSelectedOptions] = useState<
     DropdownOption[]
-  >([]); // Selected options state
+  >([]);
 
   const selectedOptions = (() => {
     if (selectedOptionsProp && onChangeSelectedOptions) {
