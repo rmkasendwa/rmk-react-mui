@@ -11,9 +11,8 @@ import CountryFieldValue from '../../components/CountryFieldValue';
 import EnumValueChip from '../../components/EnumValueChip';
 import FieldValue from '../../components/FieldValue';
 import ProfileGravatar from '../../components/ProfileGravatar';
-import { TableProps } from '../../components/Table';
+import { TableColumn, TableProps } from '../../components/Table';
 import { CountryCode } from '../../interfaces/Countries';
-import { TableColumn } from '../../interfaces/Table';
 
 const countryCodes = Object.keys(countries) as CountryCode[];
 
@@ -111,6 +110,9 @@ export const tableColumns: TableColumn<Contact>[] = [
           countryLabel={countries[countryCode].name}
         />
       );
+    },
+    getFilterValue: ({ countryCode }) => {
+      return countries[countryCode].name;
     },
   },
   { id: 'phoneNumber', label: 'Phone Number', type: 'phoneNumber' },

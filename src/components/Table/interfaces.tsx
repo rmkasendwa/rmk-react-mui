@@ -38,40 +38,40 @@ export type TableColumnType =
   | 'tool';
 
 export type GetColumnValue<
-  RowObject extends Record<string, any> = any,
+  DataRow extends Record<string, any> = any,
   ColumnType extends TableColumnType = TableColumnType
-> = (row: RowObject, column: TableColumn<RowObject, ColumnType>) => ReactNode;
+> = (row: DataRow, column: TableColumn<DataRow, ColumnType>) => ReactNode;
 
 export type GetEditField<
-  RowObject extends Record<string, any> = any,
+  DataRow extends Record<string, any> = any,
   ColumnType extends TableColumnType = TableColumnType
-> = (row: RowObject, column: TableColumn<RowObject, ColumnType>) => ReactNode;
+> = (row: DataRow, column: TableColumn<DataRow, ColumnType>) => ReactNode;
 
 export type GetEditableColumnValue<
-  RowObject extends Record<string, any> = any,
+  DataRow extends Record<string, any> = any,
   ColumnType extends TableColumnType = TableColumnType
 > = (
-  row: RowObject,
-  column: TableColumn<RowObject, ColumnType>
+  row: DataRow,
+  column: TableColumn<DataRow, ColumnType>
 ) => string | number | boolean | (string | number | boolean)[] | undefined;
 
 export type FieldValueEditor<
-  RowObject extends Record<string, any> = any,
+  DataRow extends Record<string, any> = any,
   ColumnType extends TableColumnType = TableColumnType,
   UpdatedValue extends ReactNode = ReactNode
 > = (
-  row: RowObject,
+  row: DataRow,
   updatedValue: UpdatedValue,
-  column: TableColumn<RowObject, ColumnType>
+  column: TableColumn<DataRow, ColumnType>
 ) => any;
 
 export type OnClickColumn<
-  RowObject extends Record<string, any> = any,
+  DataRow extends Record<string, any> = any,
   ColumnType extends TableColumnType = TableColumnType
-> = (row: RowObject, column: TableColumn<RowObject, ColumnType>) => void;
+> = (row: DataRow, column: TableColumn<DataRow, ColumnType>) => void;
 
 export interface TableColumn<
-  RowObject extends Record<string, any> = any,
+  DataRow extends Record<string, any> = any,
   ColumnType extends TableColumnType = TableColumnType
 > extends Partial<Omit<TableCellProps, 'defaultValue' | 'id'>>,
     Partial<Pick<DropdownOption, 'label' | 'searchableLabel' | 'description'>>,
@@ -86,7 +86,7 @@ export interface TableColumn<
         | 'validationRules'
       >
     > {
-  id: keyof RowObject;
+  id: keyof DataRow;
   type?: ColumnType;
   align?: 'left' | 'center' | 'right';
   width?: number;
@@ -99,18 +99,19 @@ export interface TableColumn<
   columnClassName?: string;
   locked?: boolean;
   defaultColumnValue?: ReactNode;
-  getColumnValue?: GetColumnValue<RowObject, ColumnType>;
-  getEditableColumnValue?: GetEditableColumnValue<RowObject, ColumnType>;
-  getEditField?: GetEditField<RowObject, ColumnType>;
-  fieldValueEditor?: FieldValueEditor<RowObject, ColumnType>;
-  onClickColumn?: OnClickColumn<RowObject, ColumnType>;
+  getColumnValue?: GetColumnValue<DataRow, ColumnType>;
+  getFilterValue?: (row: DataRow) => string;
+  getEditableColumnValue?: GetEditableColumnValue<DataRow, ColumnType>;
+  getEditField?: GetEditField<DataRow, ColumnType>;
+  fieldValueEditor?: FieldValueEditor<DataRow, ColumnType>;
+  onClickColumn?: OnClickColumn<DataRow, ColumnType>;
   headerSx?: SxProps<Theme>;
   bodySx?: SxProps<Theme>;
   sortable?: boolean;
   opaque?: boolean;
   propagateClickToParentRowClickEvent?: boolean;
   columnTypographyProps?: Partial<TypographyProps>;
-  getColumnTypographyProps?: (row: RowObject) => Partial<TypographyProps>;
+  getColumnTypographyProps?: (row: DataRow) => Partial<TypographyProps>;
   decimalPlaces?: number;
   textTransform?: boolean;
   showHeaderText?: boolean;
@@ -133,9 +134,9 @@ export interface BaseDataRow {
   id: string;
 }
 
-export interface TableRowProps<RowObject extends Record<string, any> = any>
+export interface TableRowProps<DataRow extends Record<string, any> = any>
   extends Pick<
-    TableColumn<RowObject>,
+    TableColumn<DataRow>,
     | 'columnTypographyProps'
     | 'decimalPlaces'
     | 'defaultColumnValue'
@@ -145,11 +146,11 @@ export interface TableRowProps<RowObject extends Record<string, any> = any>
     | 'opaque'
     | 'textTransform'
   > {
-  columns: Array<TableColumn<RowObject>>;
-  row: RowObject;
-  generateRowData?: (currentEntity: RowObject) => any;
+  columns: Array<TableColumn<DataRow>>;
+  row: DataRow;
+  generateRowData?: (currentEntity: DataRow) => any;
   getRowProps?: GetRowProps;
-  onClickRow?: (currentEntity: RowObject) => void;
+  onClickRow?: (currentEntity: DataRow) => void;
   minColumnWidth?: number;
   defaultDateFormat?: string;
   defaultDateTimeFormat?: string;

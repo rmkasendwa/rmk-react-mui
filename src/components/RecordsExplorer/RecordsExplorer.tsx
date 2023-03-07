@@ -536,18 +536,26 @@ export const BaseRecordsExplorer = <
                   )
                 );
               })
-              .map(({ id, label, type = 'string', getColumnValue }) => {
-                return {
+              .map(
+                ({
                   id,
-                  label: String(label),
-                  type: mapTableColumnTypeToPrimitiveDataType(type) as any,
-                  getFieldOptionLabel:
-                    ENUM_TABLE_COLUMN_TYPES.includes(type) && getColumnValue
-                      ? getColumnValue
-                      : undefined,
-                  getFilterValue: getColumnValue as any,
-                };
-              })
+                  label,
+                  type = 'string',
+                  getFilterValue,
+                  getColumnValue,
+                }) => {
+                  return {
+                    id,
+                    label: String(label),
+                    type: mapTableColumnTypeToPrimitiveDataType(type) as any,
+                    getFieldOptionLabel:
+                      ENUM_TABLE_COLUMN_TYPES.includes(type) && getColumnValue
+                        ? getColumnValue
+                        : undefined,
+                    getFilterValue: getFilterValue || (getColumnValue as any),
+                  };
+                }
+              )
           );
         }
       }
@@ -577,10 +585,11 @@ export const BaseRecordsExplorer = <
                   )
                 );
               })
-              .map(({ id, label }) => {
+              .map(({ id, label, getFilterValue, getColumnValue }) => {
                 return {
                   id,
                   label: label as string,
+                  getFilterValue: getFilterValue || (getColumnValue as any),
                 };
               })
           );
@@ -896,15 +905,25 @@ export const BaseRecordsExplorer = <
           );
         }
         if (searchableFields) {
-          const searchableFieldIds = searchableFields.map(({ id }) => id);
           const lowercaseSearchTerm = searchTerm.toLowerCase();
           return dataFilteredByFilterFields.filter((row) => {
-            return searchableFieldIds.some((id) => {
-              const value = row[id];
-              if (typeof value === 'string') {
-                return value.toLowerCase().match(lowercaseSearchTerm);
+            return searchableFields.some(({ id, getFilterValue }) => {
+              const searchValues: string[] = [];
+              if (typeof row[id] === 'string') {
+                searchValues.push(row[id] as any);
               }
-              return false;
+              if (getFilterValue) {
+                const filterValue = getFilterValue(row);
+                if (typeof filterValue === 'string') {
+                  searchValues.push(filterValue);
+                }
+              }
+              return (
+                searchValues.length > 0 &&
+                searchValues.some((value) => {
+                  return value.toLowerCase().match(lowercaseSearchTerm);
+                })
+              );
             });
           });
         }
