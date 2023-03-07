@@ -1,6 +1,6 @@
 import { ReactElement, ReactNode } from 'react';
 
-import { BaseDataRow } from '../../interfaces/Table';
+import { BaseDataRow } from '../Table';
 
 export interface BaseTimelineChartProps<T extends BaseDataRow> {
   onSelectTimeline?: (id: string) => void;

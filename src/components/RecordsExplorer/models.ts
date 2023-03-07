@@ -2,11 +2,11 @@ import { TextFieldProps } from '@mui/material';
 import { ReactNode } from 'react';
 
 import { SortOption } from '../../interfaces/Sort';
-import { BaseDataRow } from '../../interfaces/Table';
 import { PrimitiveDataType } from '../../interfaces/Utils';
 import { DataDropdownFieldProps } from '../InputFields/DataDropdownField';
 import { DateInputFieldProps } from '../InputFields/DateInputField';
 import { NumberInputFieldProps } from '../InputFields/NumberInputField';
+import { BaseDataRow } from '../Table';
 
 // Search term filter types
 export type FilterBySearchTerm<RecordRow extends BaseDataRow> = (

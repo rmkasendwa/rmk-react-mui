@@ -19,11 +19,11 @@ import {
   useState,
 } from 'react';
 
-import { BaseDataRow, TableColumn } from '../../interfaces/Table';
 import { DropdownOption } from '../../interfaces/Utils';
 import EllipsisMenuIconButton, {
   EllipsisMenuIconButtonProps,
 } from '../EllipsisMenuIconButton';
+import { BaseDataRow, TableColumn } from './interfaces';
 
 export interface TableColumnToggleIconButtonClasses {
   /** Styles applied to the root element. */

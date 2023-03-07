@@ -25,7 +25,7 @@ import {
   useRef,
 } from 'react';
 
-import { BaseDataRow } from '../../interfaces/Table';
+import { BaseDataRow } from '../Table';
 import { MONTHS, alignmentSyles } from './data';
 import { BaseTimelineChartProps, Timeline } from './interfaces';
 

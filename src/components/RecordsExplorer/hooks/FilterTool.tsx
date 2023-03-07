@@ -19,7 +19,6 @@ import { omit } from 'lodash';
 import { useEffect, useMemo, useRef } from 'react';
 
 import { PopupToolOptions, usePopupTool } from '../../../hooks/Tools';
-import { BaseDataRow } from '../../../interfaces/Table';
 import { PrimitiveDataType } from '../../../interfaces/Utils';
 import DataDropdownField, {
   DataDropdownFieldProps,
@@ -27,6 +26,7 @@ import DataDropdownField, {
 import NumberInputField from '../../InputFields/NumberInputField';
 import TextField from '../../InputFields/TextField';
 import { DropdownOption } from '../../PaginatedDropdownOptionList';
+import { BaseDataRow } from '../../Table';
 import {
   ConditionGroup,
   Conjunction,

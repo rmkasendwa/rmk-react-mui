@@ -17,12 +17,9 @@ import TableRow, {
 import clsx from 'clsx';
 import { Fragment, useEffect, useMemo, useRef } from 'react';
 
-import { BaseDataRow, TableRowProps } from '../../interfaces/Table';
-import {
-  getColumnPaddingStyles,
-  getColumnWidthStyles,
-} from '../../utils/Table';
+import { BaseDataRow, TableRowProps } from './interfaces';
 import TableBodyColumn from './TableBodyColumn';
+import { getColumnPaddingStyles, getColumnWidthStyles } from './utils';
 
 export interface TableBodyRowClasses {
   /** Styles applied to the root element. */

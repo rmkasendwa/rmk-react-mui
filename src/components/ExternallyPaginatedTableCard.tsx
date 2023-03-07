@@ -16,11 +16,10 @@ import {
   UsePaginatedRecordsOptions,
   usePaginatedRecords,
 } from '../hooks/Utils';
-import { BaseDataRow } from '../interfaces/Table';
 import { PaginatedResponseData } from '../interfaces/Utils';
 import Card, { CardProps } from './Card';
 import IconLoadingScreen from './IconLoadingScreen';
-import Table, { TableProps } from './Table';
+import Table, { BaseDataRow, TableProps } from './Table';
 
 export interface ExternallyPaginatedTableCardClasses {
   /** Styles applied to the root element. */

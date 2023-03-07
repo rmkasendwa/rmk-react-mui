@@ -33,27 +33,20 @@ import { omit } from 'lodash';
 import { ReactNode, Ref, useEffect, useMemo, useRef, useState } from 'react';
 
 import { SortDirection, SortOptions } from '../../interfaces/Sort';
-import { BaseDataRow } from '../../interfaces/Table';
 import { sort } from '../../utils/Sort';
-import {
-  expandTableColumnWidths,
-  getColumnWidthStyles,
-  getTableMinWidth,
-  mapTableColumnTypeToPrimitiveDataType,
-} from '../../utils/Table';
 import DataTablePagination from '../DataTablePagination';
 import EllipsisMenuIconButton from '../EllipsisMenuIconButton';
 import RenderIfVisible from '../RenderIfVisible';
-import { TableProps } from './interfaces';
+import { BaseDataRow, TableProps } from './interfaces';
 import TableBodyRow, { tableBodyRowClasses } from './TableBodyRow';
 import TableColumnToggleIconButton from './TableColumnToggleIconButton';
-import { getComputedTableProps } from './utils';
-
-export type {
-  ForEachDerivedColumnConfiguration,
-  TableColumn,
-  TableColumnEnumValue,
-} from '../../interfaces/Table';
+import {
+  expandTableColumnWidths,
+  getColumnWidthStyles,
+  getComputedTableProps,
+  getTableMinWidth,
+  mapTableColumnTypeToPrimitiveDataType,
+} from './utils';
 
 export interface TableClasses {
   /** Styles applied to the root element. */

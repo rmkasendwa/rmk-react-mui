@@ -20,11 +20,11 @@ import { result } from 'lodash';
 import { forwardRef, useEffect, useState } from 'react';
 import * as yup from 'yup';
 
-import { mapTableColumnTypeToExoticDataType } from '../../utils/Table';
 import FieldValue from '../FieldValue';
 import PhoneNumberFieldValue from '../PhoneNumberFieldValue';
 import TimeStampDisplay from '../TimeStampDisplay';
-import { TableColumn } from './hooks';
+import { TableColumn } from './interfaces';
+import { mapTableColumnTypeToExoticDataType } from './utils';
 
 export interface TableBodyColumnClasses {
   /** Styles applied to the root element. */

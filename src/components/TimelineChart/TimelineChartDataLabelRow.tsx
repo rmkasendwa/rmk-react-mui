@@ -1,7 +1,7 @@
 import { Box, Typography, alpha, useTheme } from '@mui/material';
 import { ReactNode, useEffect, useMemo, useRef } from 'react';
 
-import { BaseDataRow } from '../../interfaces/Table';
+import { BaseDataRow } from '../Table';
 import { alignmentSyles } from './data';
 import { BaseTimelineChartProps } from './interfaces';
 
