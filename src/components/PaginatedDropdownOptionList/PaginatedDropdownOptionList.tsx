@@ -23,7 +23,6 @@ import { omit } from 'lodash';
 import {
   Fragment,
   forwardRef,
-  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -196,7 +195,6 @@ export const PaginatedDropdownOptionList = forwardRef<
   const optionsRef = useRef(optionsProp);
   const onCloseRef = useRef(onClose);
   const onSelectOptionRef = useRef(onSelectOption);
-  const onChangeSelectedOptionRef = useRef(onChangeSelectedOptions);
   const onLoadOptionsRef = useRef(onLoadOptions);
   const onChangeSearchTermRef = useRef(onChangeSearchTerm);
   const getDropdownOptionsRef = useRef(getDropdownOptions);
@@ -205,7 +203,6 @@ export const PaginatedDropdownOptionList = forwardRef<
     optionsRef.current = optionsProp;
     onCloseRef.current = onClose;
     onSelectOptionRef.current = onSelectOption;
-    onChangeSelectedOptionRef.current = onChangeSelectedOptions;
     onLoadOptionsRef.current = onLoadOptions;
     onChangeSearchTermRef.current = onChangeSearchTerm;
     getDropdownOptionsRef.current = getDropdownOptions;
@@ -356,9 +353,17 @@ export const PaginatedDropdownOptionList = forwardRef<
   })();
 
   // Options state
-  const [selectedOptions, setSelectedOptions] = useState<DropdownOption[]>(
-    selectedOptionsProp || []
-  ); // Selected options state
+  const [localSelectedOptions, setLocalSelectedOptions] = useState<
+    DropdownOption[]
+  >([]); // Selected options state
+
+  const selectedOptions = (() => {
+    if (selectedOptionsProp && onChangeSelectedOptions) {
+      return selectedOptionsProp;
+    }
+    return localSelectedOptions;
+  })();
+
   const [focusedOptionIndex, setFocusedOptionIndex] = useState(() => {
     if (selectedOptions.length > 0) {
       return filteredOptions.indexOf(selectedOptions[0]);
@@ -369,52 +374,38 @@ export const PaginatedDropdownOptionList = forwardRef<
     setSearchTerm(searchTermProp);
   }, [searchTermProp]);
 
-  const triggerChangeEvent = useCallback(
-    (option: DropdownOption) => {
-      const { value } = option;
-      const nextOptions = (() => {
-        if (multiple) {
-          const localOptions = [...selectedOptions];
-          const selectedOption = localOptions.find(
-            ({ value: selectedOptionValue }) => {
-              return selectedOptionValue === value;
-            }
-          );
-          if (selectedOption) {
-            localOptions.splice(localOptions.indexOf(selectedOption), 1);
-          } else {
-            localOptions.push(option);
+  const triggerChangeEvent = (option: DropdownOption) => {
+    const { value } = option;
+    const nextOptions = (() => {
+      if (multiple) {
+        const localOptions = [...selectedOptions];
+        const selectedOption = localOptions.find(
+          ({ value: selectedOptionValue }) => {
+            return selectedOptionValue === value;
           }
-          return localOptions.sort((a, b) => {
-            const aOption = options.find(({ value }) => value === a.value);
-            const bOption = options.find(({ value }) => value === b.value);
-
-            if (aOption && bOption) {
-              return options.indexOf(aOption) - options.indexOf(bOption);
-            }
-            return 0;
-          });
+        );
+        if (selectedOption) {
+          localOptions.splice(localOptions.indexOf(selectedOption), 1);
+        } else {
+          localOptions.push(option);
         }
-        return [option];
-      })();
-      setSelectedOptions(nextOptions);
-    },
-    [multiple, options, selectedOptions]
-  );
+        return localOptions.sort((a, b) => {
+          const aOption = options.find(({ value }) => value === a.value);
+          const bOption = options.find(({ value }) => value === b.value);
 
-  useEffect(() => {
-    if (selectedOptionsProp) {
-      setSelectedOptions(selectedOptionsProp);
+          if (aOption && bOption) {
+            return options.indexOf(aOption) - options.indexOf(bOption);
+          }
+          return 0;
+        });
+      }
+      return [option];
+    })();
+    if (!onChangeSelectedOptions || !selectedOptionsProp) {
+      setLocalSelectedOptions(nextOptions);
     }
-  }, [selectedOptionsProp]);
-
-  useEffect(() => {
-    if (!isInitialMountRef.current) {
-      onChangeSelectedOptionRef.current &&
-        onChangeSelectedOptionRef.current(selectedOptions);
-      !multiple && onCloseRef.current && onCloseRef.current();
-    }
-  }, [multiple, selectedOptions]);
+    onChangeSelectedOptions && onChangeSelectedOptions(nextOptions);
+  };
 
   useEffect(() => {
     if (
@@ -632,7 +623,11 @@ export const PaginatedDropdownOptionList = forwardRef<
                   return selectable || selectedLockedOptions.includes(option);
                 });
               })();
-              setSelectedOptions(selectableOptions);
+              if (!onChangeSelectedOptions || !selectedOptionsProp) {
+                setLocalSelectedOptions(selectableOptions);
+              }
+              onChangeSelectedOptions &&
+                onChangeSelectedOptions(selectableOptions);
             }}
             height={optionHeight}
           >
