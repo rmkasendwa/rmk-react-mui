@@ -3,7 +3,7 @@ import '@infinite-debugger/rmk-js-extensions/Object';
 import { ReactElement, Ref, forwardRef } from 'react';
 
 import { useTable } from './hooks';
-import { BaseDataRow, TableProps } from './interfaces';
+import { BaseDataRow, TableProps } from './models';
 
 export const BaseTable = <T extends BaseDataRow>(
   inProps: TableProps<T>,

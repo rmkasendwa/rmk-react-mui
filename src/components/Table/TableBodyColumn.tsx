@@ -23,7 +23,7 @@ import * as yup from 'yup';
 import FieldValue from '../FieldValue';
 import PhoneNumberFieldValue from '../PhoneNumberFieldValue';
 import TimeStampDisplay from '../TimeStampDisplay';
-import { BaseDataRow, TableColumn } from './interfaces';
+import { BaseDataRow, TableColumn } from './models';
 import { mapTableColumnTypeToExoticDataType } from './utils';
 
 export interface TableBodyColumnClasses {

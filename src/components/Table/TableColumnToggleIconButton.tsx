@@ -15,7 +15,7 @@ import { DropdownOption } from '../../interfaces/Utils';
 import EllipsisMenuIconButton, {
   EllipsisMenuIconButtonProps,
 } from '../EllipsisMenuIconButton';
-import { BaseDataRow, TableColumn } from './interfaces';
+import { BaseDataRow, TableColumn } from './models';
 
 export interface TableColumnToggleIconButtonClasses {
   /** Styles applied to the root element. */

@@ -37,7 +37,12 @@ import { sort } from '../../utils/Sort';
 import DataTablePagination from '../DataTablePagination';
 import EllipsisMenuIconButton from '../EllipsisMenuIconButton';
 import RenderIfVisible from '../RenderIfVisible';
-import { BaseDataRow, TableProps } from './interfaces';
+import {
+  BaseDataRow,
+  CHECKBOX_COLUMN_ID,
+  ELLIPSIS_MENU_TOOL_COLUMN_ID,
+  TableProps,
+} from './models';
 import TableBodyRow, { tableBodyRowClasses } from './TableBodyRow';
 import TableColumnToggleIconButton from './TableColumnToggleIconButton';
 import {
@@ -271,7 +276,9 @@ export const useTable = <DataRow extends BaseDataRow>(
     const { columns: allColumns } = getComputedTableProps(props);
 
     if (enableCheckboxRowSelectors) {
-      const checkboxColumn = allColumns.find(({ id }) => id === 'checkbox');
+      const checkboxColumn = allColumns.find(
+        ({ id }) => id === CHECKBOX_COLUMN_ID
+      );
       if (checkboxColumn) {
         computedColumns.push({
           ...checkboxColumn,
@@ -347,7 +354,7 @@ export const useTable = <DataRow extends BaseDataRow>(
 
     if (getEllipsisMenuToolProps) {
       const ellipsisMenuToolColumn = allColumns.find(
-        ({ id }) => id === 'ellipsisMenuTool'
+        ({ id }) => id === ELLIPSIS_MENU_TOOL_COLUMN_ID
       );
       if (ellipsisMenuToolColumn) {
         computedColumns.push({
@@ -445,7 +452,11 @@ export const useTable = <DataRow extends BaseDataRow>(
     });
   })();
 
-  const selectedColumns = [...selectedColumnIds, 'checkbox', 'ellipsisMenuTool']
+  const selectedColumns = [
+    ...selectedColumnIds,
+    'checkbox',
+    ELLIPSIS_MENU_TOOL_COLUMN_ID,
+  ]
     .map((selectedColumnId) => {
       return allColumns.find(({ id }) => id === selectedColumnId)!;
     })
@@ -1002,7 +1013,9 @@ export const useTable = <DataRow extends BaseDataRow>(
   const columnDisplayToggle = (() => {
     if (showHeaderRow && enableColumnDisplayToggle && !optimizeForSmallScreen) {
       const selectableColumns = allColumns.filter(({ id }) => {
-        return !(['checkbox', 'ellipsisMenuTool'] as typeof id[]).includes(id);
+        return !(
+          ['checkbox', ELLIPSIS_MENU_TOOL_COLUMN_ID] as typeof id[]
+        ).includes(id);
       });
       return (
         <Box
