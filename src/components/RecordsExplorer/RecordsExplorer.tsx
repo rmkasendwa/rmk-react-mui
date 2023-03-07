@@ -135,14 +135,6 @@ declare module '@mui/material/styles/components' {
   }
 }
 
-const PRIMITIVE_DATA_TYPES: PrimitiveDataType[] = [
-  'boolean',
-  'date',
-  'enum',
-  'number',
-  'string',
-];
-
 const ENUM_TABLE_COLUMN_TYPES: TableColumnType[] = ['enum'];
 
 const modifiedStateKeyTypes = [
@@ -578,19 +570,18 @@ export const BaseRecordsExplorer = <
         if (listView) {
           searchableFields.push(
             ...listView.columns
-              .filter(({ id, label, type = 'string' }) => {
+              .filter(({ id, label }) => {
                 return (
                   typeof label === 'string' &&
                   !searchableFields.find(
                     ({ id: filterFieldId }) => filterFieldId === id
-                  ) &&
-                  PRIMITIVE_DATA_TYPES.includes(type as PrimitiveDataType)
+                  )
                 );
               })
               .map(({ id, label }) => {
                 return {
                   id,
-                  label: String(label),
+                  label: label as string,
                 };
               })
           );
