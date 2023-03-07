@@ -17,6 +17,7 @@ export type FilterBySearchTerm<RecordRow extends BaseDataRow> = (
 export interface SearchableProperty<RecordRow extends BaseDataRow> {
   label: string;
   id: keyof RecordRow;
+  getFilterValue?: (row: RecordRow) => any;
 }
 
 export interface BaseDataFilterField<RecordRow extends BaseDataRow> {
