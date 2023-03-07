@@ -22,12 +22,12 @@ import {
   SortDirection,
   SortableFields,
 } from '../../../interfaces/Sort';
-import { BaseDataRow } from '../../../interfaces/Table';
 import SortIcon from '../../Icons/SortIcon';
 import DataDropdownField from '../../InputFields/DataDropdownField';
 import PaginatedDropdownOptionList, {
   PaginatedDropdownOptionListProps,
 } from '../../PaginatedDropdownOptionList';
+import { BaseDataRow } from '../../Table';
 
 export interface SortOperationFieldSelectorToolOptions<
   RecordRow extends BaseDataRow = any

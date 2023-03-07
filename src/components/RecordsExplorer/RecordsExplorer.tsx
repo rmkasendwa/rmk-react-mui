@@ -53,14 +53,9 @@ import {
   SortableFields,
   sortDirections,
 } from '../../interfaces/Sort';
-import { BaseDataRow, TableColumnType } from '../../interfaces/Table';
 import { PermissionCode } from '../../interfaces/Users';
 import { PrimitiveDataType } from '../../interfaces/Utils';
 import { sort } from '../../utils/Sort';
-import {
-  getTableMinWidth,
-  mapTableColumnTypeToPrimitiveDataType,
-} from '../../utils/Table';
 import CollapsibleSection from '../CollapsibleSection';
 import DataTablePagination from '../DataTablePagination';
 import FixedHeaderContentArea, {
@@ -74,8 +69,12 @@ import SearchSyncToolbar, {
   Tool,
 } from '../SearchSyncToolbar';
 import Table, {
+  BaseDataRow,
+  TableColumnType,
   TableProps,
   getComputedTableProps,
+  getTableMinWidth,
+  mapTableColumnTypeToPrimitiveDataType,
   tableClasses,
 } from '../Table';
 import { tableBodyRowClasses } from '../Table/TableBodyRow';

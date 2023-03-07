@@ -54,7 +54,6 @@ import {
   useRecord,
   useUpdate,
 } from '../hooks/Utils';
-import { BaseDataRow } from '../interfaces/Table';
 import { CrudMode, PaginatedResponseData } from '../interfaces/Utils';
 import IconLoadingScreen from './IconLoadingScreen';
 import ModalForm, {
@@ -63,7 +62,7 @@ import ModalForm, {
 } from './ModalForm';
 import { PageTitleProps } from './PageTitle';
 import SearchSyncToolbar, { SearchSyncToolbarProps } from './SearchSyncToolbar';
-import Table, { TableProps } from './Table';
+import Table, { BaseDataRow, TableProps } from './Table';
 
 export interface TableCrudClasses {
   /** Styles applied to the root element. */

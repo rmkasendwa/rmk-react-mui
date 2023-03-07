@@ -29,8 +29,8 @@ import {
 import { mergeRefs } from 'react-merge-refs';
 
 import { useReactRouterDOMSearchParams } from '../../hooks/ReactRouterDOM';
-import { BaseDataRow } from '../../interfaces/Table';
 import RenderIfVisible from '../RenderIfVisible';
+import { BaseDataRow } from '../Table';
 import { BaseTimelineChartProps } from './interfaces';
 import TimelineChartBodyDataRow from './TimelineChartBodyDataRow';
 import TimelineChartDataLabelRow, {
