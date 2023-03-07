@@ -38,17 +38,17 @@ export type TableColumnType =
   | 'tool';
 
 export type GetColumnValue<
-  DataRow extends Record<string, any> = any,
+  DataRow extends BaseDataRow = any,
   ColumnType extends TableColumnType = TableColumnType
 > = (row: DataRow, column: TableColumn<DataRow, ColumnType>) => ReactNode;
 
 export type GetEditField<
-  DataRow extends Record<string, any> = any,
+  DataRow extends BaseDataRow = any,
   ColumnType extends TableColumnType = TableColumnType
 > = (row: DataRow, column: TableColumn<DataRow, ColumnType>) => ReactNode;
 
 export type GetEditableColumnValue<
-  DataRow extends Record<string, any> = any,
+  DataRow extends BaseDataRow = any,
   ColumnType extends TableColumnType = TableColumnType
 > = (
   row: DataRow,
@@ -56,7 +56,7 @@ export type GetEditableColumnValue<
 ) => string | number | boolean | (string | number | boolean)[] | undefined;
 
 export type FieldValueEditor<
-  DataRow extends Record<string, any> = any,
+  DataRow extends BaseDataRow = any,
   ColumnType extends TableColumnType = TableColumnType,
   UpdatedValue extends ReactNode = ReactNode
 > = (
@@ -66,12 +66,12 @@ export type FieldValueEditor<
 ) => any;
 
 export type OnClickColumn<
-  DataRow extends Record<string, any> = any,
+  DataRow extends BaseDataRow = any,
   ColumnType extends TableColumnType = TableColumnType
 > = (row: DataRow, column: TableColumn<DataRow, ColumnType>) => void;
 
 export interface TableColumn<
-  DataRow extends Record<string, any> = any,
+  DataRow extends BaseDataRow = any,
   ColumnType extends TableColumnType = TableColumnType
 > extends Partial<Omit<TableCellProps, 'defaultValue' | 'id'>>,
     Partial<Pick<DropdownOption, 'label' | 'searchableLabel' | 'description'>>,
@@ -130,11 +130,11 @@ export type GetRowProps<T = any> = (
   currentEntity: T
 ) => Partial<MuiTableRowProps> | undefined;
 
-export interface BaseDataRow {
+export type BaseDataRow = Record<string, any> & {
   id: string;
-}
+};
 
-export interface TableRowProps<DataRow extends Record<string, any> = any>
+export interface TableRowProps<DataRow extends BaseDataRow = any>
   extends Pick<
     TableColumn<DataRow>,
     | 'columnTypographyProps'

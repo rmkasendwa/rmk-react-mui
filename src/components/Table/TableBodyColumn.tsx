@@ -23,7 +23,7 @@ import * as yup from 'yup';
 import FieldValue from '../FieldValue';
 import PhoneNumberFieldValue from '../PhoneNumberFieldValue';
 import TimeStampDisplay from '../TimeStampDisplay';
-import { TableColumn } from './interfaces';
+import { BaseDataRow, TableColumn } from './interfaces';
 import { mapTableColumnTypeToExoticDataType } from './utils';
 
 export interface TableBodyColumnClasses {
@@ -74,12 +74,11 @@ const toolTypes = [
   'checkbox',
 ];
 
-export interface TableBodyColumnProps<
-  RowObject extends Record<string, any> = any
-> extends TableColumn,
+export interface TableBodyColumnProps<DataRow extends BaseDataRow = any>
+  extends TableColumn,
     Partial<Pick<TableCellProps, 'onClick'>> {
-  column: TableColumn<RowObject>;
-  row: RowObject;
+  column: TableColumn<DataRow>;
+  row: DataRow;
   enableSmallScreenOptimization?: boolean;
 }
 

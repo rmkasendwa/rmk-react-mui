@@ -213,9 +213,9 @@ export const useTable = <DataRow extends BaseDataRow>(
    * *****************
    */
   const [allRowsChecked, setAllRowsChecked] = useState(allRowsCheckedProp);
-  const [checkedRowIds, setCheckedRowIds] = useState<string[]>(
-    checkedRowIdsProp || []
-  );
+  const [checkedRowIds, setCheckedRowIds] = useState<string[]>(() => {
+    return checkedRowIdsProp || [];
+  });
 
   useEffect(() => {
     setAllRowsChecked(allRowsCheckedProp);
@@ -231,6 +231,7 @@ export const useTable = <DataRow extends BaseDataRow>(
       });
     }
   }, [checkedRowIdsProp]);
+
   useEffect(() => {
     onChangeCheckedRowIdsRef.current &&
       onChangeCheckedRowIdsRef.current(checkedRowIds, allRowsChecked);
@@ -245,19 +246,18 @@ export const useTable = <DataRow extends BaseDataRow>(
     }
     return columnsProp.map(({ id }) => String(id) as any);
   }, [columnsProp, selectedColumnIdsProp]);
-  const [selectedColumnIds, setSelectedColumnIds] = useState<
+
+  const [localSelectedColumnIds, setLocalSelectedColumnIds] = useState<
     NonNullable<typeof selectedColumnIdsProp>
   >(baseSelectedColumnIds);
-  useEffect(() => {
-    if (selectedColumnIdsProp && !onChangeSelectedColumnIdsRef.current) {
-      setSelectedColumnIds((prevSelectedColumnIds) => {
-        if (prevSelectedColumnIds.join('') !== selectedColumnIdsProp.join('')) {
-          return selectedColumnIdsProp;
-        }
-        return prevSelectedColumnIds;
-      });
+
+  const selectedColumnIds = (() => {
+    if (onChangeSelectedColumnIdsRef.current && selectedColumnIdsProp) {
+      return selectedColumnIdsProp;
     }
-  }, [selectedColumnIdsProp]);
+    return localSelectedColumnIds;
+  })();
+
   useEffect(() => {
     onChangeSelectedColumnIdsRef.current &&
       onChangeSelectedColumnIdsRef.current(selectedColumnIds);
@@ -266,19 +266,8 @@ export const useTable = <DataRow extends BaseDataRow>(
   parentBackgroundColor || (parentBackgroundColor = palette.background.paper);
 
   // Setting default column properties
-  const columns = (() => {
+  const allColumns = (() => {
     const computedColumns: typeof columnsProp = [];
-    const selectedColumns = (() => {
-      if (selectedColumnIdsProp && onChangeSelectedColumnIds) {
-        return selectedColumnIdsProp;
-      }
-      return selectedColumnIds;
-    })()
-      .map((selectedColumnId) => {
-        return columnsProp.find(({ id }) => id === selectedColumnId)!;
-      })
-      .filter((column) => column != null);
-
     const { columns: allColumns } = getComputedTableProps(props);
 
     if (enableCheckboxRowSelectors) {
@@ -354,7 +343,7 @@ export const useTable = <DataRow extends BaseDataRow>(
       }
     }
 
-    computedColumns.push(...selectedColumns);
+    computedColumns.push(...columnsProp);
 
     if (getEllipsisMenuToolProps) {
       const ellipsisMenuToolColumn = allColumns.find(
@@ -456,11 +445,22 @@ export const useTable = <DataRow extends BaseDataRow>(
     });
   })();
 
+  const selectedColumns = (() => {
+    if (selectedColumnIdsProp && onChangeSelectedColumnIds) {
+      return selectedColumnIdsProp;
+    }
+    return selectedColumnIds;
+  })()
+    .map((selectedColumnId) => {
+      return columnsProp.find(({ id }) => id === selectedColumnId)!;
+    })
+    .filter((column) => column != null);
+
   const displayingColumns = (() => {
     if (getDisplayingColumns) {
-      return getDisplayingColumns(columns);
+      return getDisplayingColumns(selectedColumns);
     }
-    return columns;
+    return selectedColumns;
   })();
 
   const minWidth = getTableMinWidth(
@@ -689,8 +689,11 @@ export const useTable = <DataRow extends BaseDataRow>(
     });
   }
 
+  const optimizeForSmallScreen =
+    enableSmallScreenOptimization && isSmallScreenSize;
+
   const tableHeaderRow = (() => {
-    if (showHeaderRow) {
+    if (showHeaderRow && !optimizeForSmallScreen) {
       return (
         <TableRow {...restHeaderRowProps} sx={{ ...headerRowPropsSx }}>
           {displayingColumns.map((column, index) => {
@@ -919,7 +922,7 @@ export const useTable = <DataRow extends BaseDataRow>(
 
   const tableBodyRows = (() => {
     if (showDataRows) {
-      if (enableSmallScreenOptimization && isSmallScreenSize) {
+      if (optimizeForSmallScreen) {
         return pageRows.reduce((accumulator, row, index) => {
           const rowNumber = rowStartIndex + 1 + index;
           accumulator[row.id] = (
@@ -1003,6 +1006,9 @@ export const useTable = <DataRow extends BaseDataRow>(
 
   const columnDisplayToggle = (() => {
     if (showHeaderRow && enableColumnDisplayToggle) {
+      const selectableColumns = allColumns.filter(({ id }) => {
+        return !(['checkbox', 'ellipsisMenuTool'] as typeof id[]).includes(id);
+      });
       return (
         <Box
           {...ColumnDisplayTogglePropsRest}
@@ -1044,13 +1050,17 @@ export const useTable = <DataRow extends BaseDataRow>(
               }}
             >
               <TableColumnToggleIconButton
-                {...{ columns, selectedColumnIds }}
+                {...{ selectedColumnIds }}
+                columns={selectableColumns}
                 onChangeSelectedColumnIds={(selectedColumnIds) => {
-                  if (selectedColumnIdsProp && onChangeSelectedColumnIds) {
-                    onChangeSelectedColumnIds(selectedColumnIds);
-                  } else {
-                    setSelectedColumnIds(selectedColumnIds);
+                  if (
+                    !onChangeSelectedColumnIds ||
+                    selectedColumnIdsProp == null
+                  ) {
+                    setLocalSelectedColumnIds(selectedColumnIds);
                   }
+                  onChangeSelectedColumnIds &&
+                    onChangeSelectedColumnIds(selectedColumnIds);
                 }}
                 sx={{
                   borderTopRightRadius: 0,
@@ -1138,98 +1148,103 @@ export const useTable = <DataRow extends BaseDataRow>(
     }
   })();
 
-  const baseTableElement = (
-    <MuiBaseTable
-      {...omit(
-        rest,
-        'lowercaseLabelPlural',
-        'parentBackgroundColor',
-        'currencyCode',
-        'emptyRowsLabel'
-      )}
-      ref={ref}
-      {...{ stickyHeader }}
-      className={clsx(classes.root, `Mui-table-${variant}`)}
-      sx={{
-        tableLayout: 'fixed',
-        minWidth,
-        ...variantStyles,
-        ...borderVariantStyles,
-        ...sx,
-        [`.${OPAQUE_BG_CLASS_NAME}`]: {
-          bgcolor: parentBackgroundColor,
-        },
-      }}
-    >
-      {tableHeaderRow ? (
-        <TableHead
+  const baseTableElement = (() => {
+    if (optimizeForSmallScreen) {
+      if (!tableBodyRows) {
+        return null;
+      }
+      return (
+        <Box
           sx={{
-            bgcolor: alpha(palette.text.primary, TABLE_HEAD_ALPHA),
+            [`.${tableBodyRowClasses.root}:hover`]: {
+              bgcolor: alpha(palette.primary.main, 0.1),
+            },
           }}
         >
-          {tableHeaderRow}
-        </TableHead>
-      ) : null}
-      {tableBodyRows
-        ? (() => {
-            if (enableSmallScreenOptimization && isSmallScreenSize) {
+          {(() => {
+            const pageRowElements = Object.values(tableBodyRows);
+            if (pageRowElements.length > 0) {
+              return pageRowElements;
+            }
+            return (
+              <Box
+                sx={{
+                  p: 2,
+                }}
+              >
+                <Typography variant="body2" align="center">
+                  {emptyRowsLabel}
+                </Typography>
+              </Box>
+            );
+          })()}
+        </Box>
+      );
+    }
+    return (
+      <MuiBaseTable
+        {...omit(
+          rest,
+          'lowercaseLabelPlural',
+          'parentBackgroundColor',
+          'currencyCode',
+          'emptyRowsLabel'
+        )}
+        ref={ref}
+        {...{ stickyHeader }}
+        className={clsx(classes.root, `Mui-table-${variant}`)}
+        sx={{
+          tableLayout: 'fixed',
+          minWidth,
+          ...variantStyles,
+          ...borderVariantStyles,
+          ...sx,
+          [`.${OPAQUE_BG_CLASS_NAME}`]: {
+            bgcolor: parentBackgroundColor,
+          },
+        }}
+      >
+        {tableHeaderRow ? (
+          <TableHead
+            sx={{
+              bgcolor: alpha(palette.text.primary, TABLE_HEAD_ALPHA),
+            }}
+          >
+            {tableHeaderRow}
+          </TableHead>
+        ) : null}
+        {tableBodyRows
+          ? (() => {
               return (
-                <Box
-                  sx={{
-                    [`.${tableBodyRowClasses.root}:hover`]: {
-                      bgcolor: alpha(palette.primary.main, 0.1),
-                    },
-                  }}
-                >
+                <TableBody>
                   {(() => {
                     const pageRowElements = Object.values(tableBodyRows);
                     if (pageRowElements.length > 0) {
                       return pageRowElements;
                     }
                     return (
-                      <Box
-                        sx={{
-                          p: 2,
-                        }}
-                      >
-                        <Typography variant="body2" align="center">
-                          {emptyRowsLabel}
-                        </Typography>
-                      </Box>
+                      <TableRow>
+                        <TableCell
+                          colSpan={displayingColumns.length}
+                          align="center"
+                        >
+                          <Typography variant="body2">
+                            {emptyRowsLabel}
+                          </Typography>
+                        </TableCell>
+                      </TableRow>
                     );
                   })()}
-                </Box>
+                </TableBody>
               );
-            }
-            return (
-              <TableBody>
-                {(() => {
-                  const pageRowElements = Object.values(tableBodyRows);
-                  if (pageRowElements.length > 0) {
-                    return pageRowElements;
-                  }
-                  return (
-                    <TableRow>
-                      <TableCell
-                        colSpan={displayingColumns.length}
-                        align="center"
-                      >
-                        <Typography variant="body2">
-                          {emptyRowsLabel}
-                        </Typography>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })()}
-              </TableBody>
-            );
-          })()
-        : null}
-    </MuiBaseTable>
-  );
+            })()
+          : null}
+      </MuiBaseTable>
+    );
+  })();
 
   const tableElement = (() => {
-    if (paging) {
+    if (paging && !optimizeForSmallScreen) {
       return (
         <Box
           {...PaginatedTableWrapperPropsRest}

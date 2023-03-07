@@ -9,15 +9,7 @@ import {
   useThemeProps,
 } from '@mui/material';
 import clsx from 'clsx';
-import {
-  ReactElement,
-  Ref,
-  forwardRef,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { ReactElement, Ref, forwardRef } from 'react';
 
 import { DropdownOption } from '../../interfaces/Utils';
 import EllipsisMenuIconButton, {
@@ -58,11 +50,11 @@ declare module '@mui/material/styles/components' {
   }
 }
 
-export interface TableColumnToggleIconButtonProps<T = BaseDataRow>
+export interface TableColumnToggleIconButtonProps<DataRow = BaseDataRow>
   extends Partial<Omit<EllipsisMenuIconButtonProps, 'options'>> {
   columns: TableColumn[];
-  selectedColumnIds?: (keyof T)[];
-  onChangeSelectedColumnIds?: (selectedColumnIds: (keyof T)[]) => void;
+  selectedColumnIds: (keyof DataRow)[];
+  onChangeSelectedColumnIds?: (selectedColumnIds: (keyof DataRow)[]) => void;
 }
 
 export function getTableColumnToggleIconButtonUtilityClass(
@@ -78,8 +70,8 @@ const slots = {
   root: ['root'],
 };
 
-const BaseTableColumnToggleIconButton = <T extends BaseDataRow>(
-  inProps: TableColumnToggleIconButtonProps<T>,
+const BaseTableColumnToggleIconButton = <DataRow extends BaseDataRow>(
+  inProps: TableColumnToggleIconButtonProps<DataRow>,
   ref: Ref<HTMLButtonElement>
 ) => {
   const props = useThemeProps({
@@ -89,7 +81,7 @@ const BaseTableColumnToggleIconButton = <T extends BaseDataRow>(
   const {
     className,
     columns,
-    selectedColumnIds: selectedColumnIdsProp,
+    selectedColumnIds,
     onChangeSelectedColumnIds,
     PaginatedDropdownOptionListProps,
     ...rest
@@ -107,17 +99,7 @@ const BaseTableColumnToggleIconButton = <T extends BaseDataRow>(
     })()
   );
 
-  // Refs
-  const onChangeSelectedColumnIdsRef = useRef(onChangeSelectedColumnIds);
-  useEffect(() => {
-    onChangeSelectedColumnIdsRef.current = onChangeSelectedColumnIds;
-  }, [onChangeSelectedColumnIds]);
-
-  const [selectedColumnIds, setSelectedColumnIds] = useState<
-    NonNullable<typeof selectedColumnIdsProp>
-  >(selectedColumnIdsProp || []);
-
-  const options = useMemo(() => {
+  const options = (() => {
     return columns.map(({ id, label, searchableLabel, locked }) => {
       const isColumnSelected = selectedColumnIds.includes(id as any);
       return {
@@ -128,23 +110,7 @@ const BaseTableColumnToggleIconButton = <T extends BaseDataRow>(
           !locked && (!isColumnSelected || selectedColumnIds.length > 2),
       } as DropdownOption;
     });
-  }, [columns, selectedColumnIds]);
-
-  useEffect(() => {
-    if (selectedColumnIdsProp) {
-      setSelectedColumnIds((prevSelectedColumnIds) => {
-        if (prevSelectedColumnIds.join('') !== selectedColumnIdsProp.join('')) {
-          return selectedColumnIdsProp;
-        }
-        return prevSelectedColumnIds;
-      });
-    }
-  }, [selectedColumnIdsProp]);
-
-  useEffect(() => {
-    onChangeSelectedColumnIdsRef.current &&
-      onChangeSelectedColumnIdsRef.current(selectedColumnIds);
-  }, [selectedColumnIds]);
+  })();
 
   return (
     <EllipsisMenuIconButton
@@ -160,9 +126,10 @@ const BaseTableColumnToggleIconButton = <T extends BaseDataRow>(
           return selectedColumnIds.includes(String(value) as any);
         }),
         onChangeSelectedOptions: (selectedOptions) => {
-          setSelectedColumnIds(
-            selectedOptions.map(({ value }) => String(value) as any)
-          );
+          onChangeSelectedColumnIds &&
+            onChangeSelectedColumnIds(
+              selectedOptions.map(({ value }) => String(value) as any)
+            );
         },
         multiple: true,
       }}
@@ -175,8 +142,10 @@ const BaseTableColumnToggleIconButton = <T extends BaseDataRow>(
 
 export const TableColumnToggleIconButton = forwardRef(
   BaseTableColumnToggleIconButton
-) as <T>(
-  p: TableColumnToggleIconButtonProps<T> & { ref?: Ref<HTMLButtonElement> }
+) as <DataRow extends BaseDataRow>(
+  p: TableColumnToggleIconButtonProps<DataRow> & {
+    ref?: Ref<HTMLButtonElement>;
+  }
 ) => ReactElement;
 
 export default TableColumnToggleIconButton;
