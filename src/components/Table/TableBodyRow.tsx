@@ -1,5 +1,3 @@
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import {
   Box,
   ComponentsOverrides,
@@ -26,6 +24,7 @@ import {
   TableRowProps,
 } from './models';
 import TableBodyColumn from './TableBodyColumn';
+import TableGroupCollapseTool from './TableGroupCollapseTool';
 import { getColumnPaddingStyles, getColumnWidthStyles } from './utils';
 
 export interface TableBodyRowClasses {
@@ -163,9 +162,6 @@ export const TableBodyRow = <T extends BaseDataRow>(
           onChangeGroupCollapsed,
         } = row.GroupingProps;
         const [firstColumn, ...restColumns] = inputColumns;
-        const changeCollapsedState = () => {
-          onChangeGroupCollapsed && onChangeGroupCollapsed(!groupCollapsed);
-        };
 
         return [
           {
@@ -176,6 +172,7 @@ export const TableBodyRow = <T extends BaseDataRow>(
                   direction="row"
                   sx={{
                     alignItems: 'center',
+                    flexWrap: 'nowrap',
                   }}
                 >
                   {(() => {
@@ -184,26 +181,15 @@ export const TableBodyRow = <T extends BaseDataRow>(
                         <Box
                           sx={{
                             width: indentLevel * 24,
+                            flex: 'none',
                           }}
                         />
                       );
                     }
                   })()}
-                  {groupCollapsed ? (
-                    <KeyboardArrowRightIcon
-                      onClick={changeCollapsedState}
-                      sx={{
-                        cursor: 'pointer',
-                      }}
-                    />
-                  ) : (
-                    <KeyboardArrowDownIcon
-                      onClick={changeCollapsedState}
-                      sx={{
-                        cursor: 'pointer',
-                      }}
-                    />
-                  )}
+                  <TableGroupCollapseTool
+                    {...{ groupCollapsed, onChangeGroupCollapsed }}
+                  />
                   {groupLabel}
                 </Stack>
               );
@@ -229,11 +215,13 @@ export const TableBodyRow = <T extends BaseDataRow>(
                   direction="row"
                   sx={{
                     alignItems: 'center',
+                    flexWrap: 'nowrap',
                   }}
                 >
                   <Box
                     sx={{
                       width: (parentGroupIndentLevel + 1) * 24,
+                      flex: 'none',
                     }}
                   />
                   {(() => {
