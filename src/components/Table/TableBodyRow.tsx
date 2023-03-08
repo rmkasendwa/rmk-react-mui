@@ -1,4 +1,7 @@
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import {
+  Box,
   ComponentsOverrides,
   ComponentsProps,
   ComponentsVariants,
@@ -151,21 +154,92 @@ export const TableBodyRow = <T extends BaseDataRow>(
   const { sx: rowPropsSx, ...rowPropsRest } = rowProps;
 
   const columns = (() => {
-    if (row.GroupingProps && 'isGroupHeader' in row.GroupingProps) {
-      const { groupLabel } = row.GroupingProps;
-      const [firstColumn, ...restColumns] = inputColumns;
-      return [
-        {
-          ...firstColumn,
-          getColumnValue: () => groupLabel,
-        } as typeof firstColumn,
-        ...restColumns.map((column) => {
-          return {
-            ...column,
-            showBodyContent: false,
-          };
-        }),
-      ];
+    if (row.GroupingProps) {
+      if ('isGroupHeader' in row.GroupingProps) {
+        const { groupLabel, indentLevel, groupCollapsed } = row.GroupingProps;
+        const [firstColumn, ...restColumns] = inputColumns;
+        return [
+          {
+            ...firstColumn,
+            getColumnValue: () => {
+              return (
+                <Stack
+                  direction="row"
+                  sx={{
+                    alignItems: 'center',
+                  }}
+                >
+                  {(() => {
+                    if (indentLevel > 0) {
+                      return (
+                        <Box
+                          sx={{
+                            width: indentLevel * 24,
+                          }}
+                        />
+                      );
+                    }
+                  })()}
+                  {groupCollapsed ? (
+                    <KeyboardArrowRightIcon
+                      sx={{
+                        ml: -1,
+                        cursor: 'pointer',
+                      }}
+                    />
+                  ) : (
+                    <KeyboardArrowDownIcon
+                      sx={{
+                        ml: -1,
+                        cursor: 'pointer',
+                      }}
+                    />
+                  )}
+                  {groupLabel}
+                </Stack>
+              );
+            },
+          } as typeof firstColumn,
+          ...restColumns.map((column) => {
+            return {
+              ...column,
+              showBodyContent: false,
+            };
+          }),
+        ];
+      } else {
+        const { parentGroupIndentLevel } = row.GroupingProps;
+        const [firstColumn, ...restColumns] = inputColumns;
+        const { getColumnValue, id } = firstColumn;
+        return [
+          {
+            ...firstColumn,
+            getColumnValue: (localRow, column) => {
+              return (
+                <Stack
+                  direction="row"
+                  sx={{
+                    alignItems: 'center',
+                  }}
+                >
+                  <Box
+                    sx={{
+                      width: (parentGroupIndentLevel + 1) * 24,
+                    }}
+                  />
+                  {(() => {
+                    if (getColumnValue) {
+                      return getColumnValue(localRow, column);
+                    }
+                    return row[id];
+                  })()}
+                </Stack>
+              );
+            },
+          } as typeof firstColumn,
+          ...restColumns,
+        ];
+      }
     }
     return inputColumns;
   })();
