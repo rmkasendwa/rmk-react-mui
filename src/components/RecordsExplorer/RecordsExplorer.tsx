@@ -1,27 +1,19 @@
 import '@infinite-debugger/rmk-js-extensions/JSON';
 
 import AddIcon from '@mui/icons-material/Add';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import LockResetIcon from '@mui/icons-material/LockReset';
 import {
-  Badge,
   Box,
   Button,
   ComponentsOverrides,
   ComponentsProps,
   ComponentsVariants,
   Divider,
-  Grid,
   Paper,
   PaperProps,
-  Stack,
-  Typography,
   unstable_composeClasses as composeClasses,
-  darken,
   generateUtilityClass,
   generateUtilityClasses,
-  lighten,
   tableCellClasses,
   tableContainerClasses,
   tableHeadClasses,
@@ -56,7 +48,6 @@ import {
 import { PermissionCode } from '../../interfaces/Users';
 import { PrimitiveDataType } from '../../interfaces/Utils';
 import { sort } from '../../utils/Sort';
-import CollapsibleSection from '../CollapsibleSection';
 import DataTablePagination from '../DataTablePagination';
 import FixedHeaderContentArea, {
   FixedHeaderContentAreaProps,
@@ -77,7 +68,6 @@ import Table, {
   mapTableColumnTypeToPrimitiveDataType,
   tableClasses,
 } from '../Table';
-import { tableBodyRowClasses } from '../Table/TableBodyRow';
 import TimelineChart, { TimelineChartProps } from '../TimelineChart';
 import { useFilterTool } from './hooks/FilterTool';
 import { useGroupTool } from './hooks/GroupTool';
@@ -1338,377 +1328,65 @@ export const BaseRecordsExplorer = <
                     opaque: true,
                   };
 
-                  if (groupedData) {
-                    const allDataGroups = groupedData.reduce(
-                      (accumulator, dataGroup) => {
-                        const appendNestedDataGroups = (
-                          inputDataGroup = dataGroup
-                        ) => {
-                          accumulator.push(inputDataGroup);
-                          const { groupName, children } =
-                            (inputDataGroup
-                              .children[0] as NestedDataGroup<RecordRow>) || {};
-                          if (groupName && children) {
-                            (
-                              inputDataGroup.children as NestedDataGroup<RecordRow>[]
-                            ).forEach((dataGroup) => {
-                              appendNestedDataGroups(dataGroup);
-                            });
-                          }
-                        };
-                        appendNestedDataGroups();
-                        return accumulator;
-                      },
-                      [] as typeof groupedData
-                    );
-
-                    const unitGroupIconWidth = 24 + 8;
-                    const unitExtraWidth = unitGroupIconWidth + 16;
-                    const groupingExtraWidth =
-                      unitExtraWidth +
-                      (selectedGroupParams.length - 1) * unitGroupIconWidth;
-
-                    const [firstGroupColumn, ...restGroupColumns] =
-                      allDisplayingColumns;
-
-                    const groupTableColumns = [
-                      {
-                        ...firstGroupColumn,
-                        extraWidth: groupingExtraWidth,
-                      },
-                      ...restGroupColumns,
-                    ].map((column) => ({
-                      ...column,
-                    }));
-
-                    const {
-                      minWidth = getTableMinWidth(
-                        groupTableColumns.map((column) => {
-                          const { minWidth } = column;
-                          return {
-                            ...column,
-                            minWidth: minWidth ?? minColumnWidth,
-                          };
-                        }),
-                        {
-                          enableColumnDisplayToggle,
-                        }
-                      ),
-                    } = selectedView;
-
-                    const getDataGroupElement = (
-                      inputGroupedData: typeof groupedData,
-                      nestIndex = 0
-                    ) => {
-                      const groupingContainerExtraWidth = (() => {
-                        if (nestIndex > 0) {
-                          return (
-                            unitExtraWidth +
-                            (nestIndex - 1) * unitGroupIconWidth
-                          );
-                        }
-                      })();
-
-                      const groupedDataTableProps: Partial<
-                        typeof baseTableProps
-                      > = {
-                        columns: groupTableColumns,
-                        getDisplayingColumns: (columns) => {
-                          const groupedDataColumns: typeof columns =
-                            columns.map((column) => ({
-                              ...column,
-                            }));
-                          const firstColumnWidth =
-                            (groupedDataColumns[0].width || minColumnWidth) +
-                            groupingExtraWidth;
-                          groupedDataColumns[0] = {
-                            ...groupedDataColumns[0],
-                            label: (
-                              <Stack
-                                direction="row"
-                                sx={{
-                                  alignItems: 'center',
-                                  gap: 1,
-                                }}
-                              >
-                                <Box
-                                  onClick={() => {
-                                    setSearchParams(
-                                      {
-                                        expandedGroups: allGroupsExpanded
-                                          ? 'None'
-                                          : 'All',
-                                      },
-                                      {
-                                        replace: true,
-                                      }
-                                    );
-                                  }}
-                                  sx={{
-                                    display: 'flex',
-                                    cursor: 'pointer',
-                                  }}
-                                >
-                                  {allGroupsExpanded ? (
-                                    <KeyboardArrowDownIcon />
-                                  ) : (
-                                    <KeyboardArrowRightIcon />
-                                  )}
-                                </Box>
-                                {groupedDataColumns[0].label}
-                              </Stack>
-                            ),
-                            searchableLabel: String(
-                              groupedDataColumns[0].label
-                            ),
-                            width: firstColumnWidth,
-                            sx: {
-                              ...groupedDataColumns[0]?.sx,
-                              '&>div': {
-                                ...(groupedDataColumns[0] as any)?.sx?.[
-                                  '&>div'
-                                ],
-                                pl: 2,
+                  const tableData = (() => {
+                    if (groupedData) {
+                      const groupRows: RecordRow[] = [];
+                      const flattenGroupHierachy = (
+                        inputGroupedData: typeof groupedData,
+                        nestIndex = 0,
+                        parentId?: string
+                      ) => {
+                        inputGroupedData.forEach(
+                          ({ id: groupId, label, children, ...rest }) => {
+                            groupRows.push({
+                              id: groupId,
+                              ...rest,
+                              GroupingProps: {
+                                isGroupHeader: true,
+                                groupId: groupId,
+                                groupLabel: label,
+                                groupCollapsed:
+                                  !expandedGroups.includes(groupId) &&
+                                  !allGroupsExpanded,
+                                indentLevel: nestIndex,
+                                parentGroupId: parentId,
                               },
-                            },
-                          };
-                          return groupedDataColumns;
-                        },
-                        ColumnDisplayToggleProps: {
-                          sx: {
-                            minWidth,
-                          },
-                        },
-                      };
+                            } as RecordRow);
 
-                      return (
-                        <>
-                          {nestIndex <= 0 &&
-                          (!enableSmallScreenOptimization ||
-                            !isSmallScreenSize) ? (
-                            <Table
-                              {...baseTableProps}
-                              {...tableControlProps}
-                              {...groupedDataTableProps}
-                              columns={baseTableColumns}
-                              className={clsx(
-                                `Mui-group-header-table`,
-                                baseTableProps.className
-                              )}
-                              showDataRows={false}
-                              stickyHeader
-                              sx={{
-                                position: 'sticky',
-                                top: 0,
-                                bgcolor: palette.background.paper,
-                                zIndex: 5,
-                                minWidth,
-                                ...sx,
-                              }}
-                            />
-                          ) : null}
-                          {inputGroupedData.map(
-                            (
-                              { id: groupId, groupName, label, children },
-                              index
-                            ) => {
-                              const collapsed =
-                                !expandedGroups.includes(groupId) &&
-                                !allGroupsExpanded;
-                              return (
-                                <CollapsibleSection
-                                  key={index}
-                                  title={
-                                    <Typography
-                                      component="div"
-                                      variant="body2"
-                                      sx={{
-                                        ...(() => {
-                                          if (!groupName) {
-                                            return {
-                                              opacity: 0.3,
-                                            };
-                                          }
-                                        })(),
-                                      }}
-                                    >
-                                      <Grid container gap={1}>
-                                        <Grid item>{label || '(Empty)'}</Grid>
-                                        {children ? (
-                                          <Grid item>
-                                            <Badge
-                                              color="default"
-                                              badgeContent={children.length}
-                                              max={999}
-                                              sx={{
-                                                '&>.MuiBadge-badge': {
-                                                  position: 'relative',
-                                                  transform: 'none',
-                                                  bgcolor: (palette.mode ===
-                                                    'dark'
-                                                    ? lighten
-                                                    : darken)(
-                                                    palette.background.paper,
-                                                    0.1
-                                                  ),
-                                                },
-                                              }}
-                                            />
-                                          </Grid>
-                                        ) : null}
-                                      </Grid>
-                                    </Typography>
-                                  }
-                                  color="inherit"
-                                  HeaderWrapperProps={{
-                                    ...(() => {
-                                      if (
-                                        !enableSmallScreenOptimization ||
-                                        !isSmallScreenSize
-                                      ) {
-                                        return {
-                                          position: 'sticky',
-                                          top: 48,
-                                        };
-                                      }
-                                    })(),
-                                    bgcolor: palette.background.paper,
-                                    zIndex: 2,
-                                  }}
-                                  HeaderProps={{
-                                    sx: {
-                                      py: 1.5,
-                                      ...(() => {
-                                        if (groupingContainerExtraWidth) {
-                                          return {
-                                            pl: `${groupingContainerExtraWidth}px`,
-                                          };
-                                        }
-                                        return {
-                                          pl: 2,
-                                        };
-                                      })(),
-                                      pr: 3,
-                                      position: 'sticky',
-                                      left: 0,
-                                      width: 'auto',
-                                      display: 'inline-flex',
+                            const { children: nestedChildren, groupName } =
+                              (children[0] as NestedDataGroup<RecordRow>) || {};
+                            if (nestedChildren && groupName) {
+                              return flattenGroupHierachy(
+                                children as NestedDataGroup<RecordRow>[],
+                                nestIndex + 1,
+                                groupId
+                              );
+                            } else {
+                              (children as RecordRow[]).forEach(
+                                ({ ...rest }) => {
+                                  groupRows.push({
+                                    ...rest,
+                                    GroupingProps: {
+                                      parentGroupId: groupId,
                                     },
-                                  }}
-                                  BodyProps={{
-                                    sx: {
-                                      py: 0,
-                                      '& tr>td:first-of-type': {
-                                        pl: 0,
-                                        '&>div': {
-                                          pl: `${groupingExtraWidth}px`,
-                                        },
-                                      },
-                                      [`.${tableBodyRowClasses.smallScreen}`]: {
-                                        pl: `${groupingExtraWidth}px`,
-                                      },
-                                    },
-                                  }}
-                                  collapseIndicatorVariant="leading"
-                                  collapsed={collapsed}
-                                  onChangeCollapsed={(collapsed: boolean) => {
-                                    const groups = allGroupsExpanded
-                                      ? allDataGroups.map(({ id }) => {
-                                          return id || '(Empty)';
-                                        })
-                                      : [...expandedGroups];
-                                    if (collapsed) {
-                                      groups.includes(groupId) &&
-                                        groups.splice(
-                                          groups.indexOf(groupId),
-                                          1
-                                        );
-                                    } else {
-                                      groups.includes(groupId) ||
-                                        groups.push(groupId);
-                                    }
-                                    setSearchParams(
-                                      {
-                                        expandedGroups: (() => {
-                                          if (groups.length > 0) {
-                                            if (
-                                              groupedData.length ===
-                                              groups.length
-                                            ) {
-                                              return 'All';
-                                            }
-                                            groups.includes('None') &&
-                                              groups.splice(
-                                                groups.indexOf('None'),
-                                                1
-                                              );
-                                            return groups;
-                                          } else {
-                                            return 'None';
-                                          }
-                                        })(),
-                                      },
-                                      {
-                                        replace: true,
-                                      }
-                                    );
-                                  }}
-                                  sx={{
-                                    ...(() => {
-                                      if (
-                                        !enableSmallScreenOptimization ||
-                                        !isSmallScreenSize
-                                      ) {
-                                        return {
-                                          minWidth,
-                                        };
-                                      }
-                                    })(),
-                                  }}
-                                >
-                                  {(() => {
-                                    const {
-                                      children: nestedChildren,
-                                      groupName,
-                                    } =
-                                      (children[0] as NestedDataGroup<RecordRow>) ||
-                                      {};
-                                    if (nestedChildren && groupName) {
-                                      return getDataGroupElement(
-                                        children as NestedDataGroup<RecordRow>[],
-                                        nestIndex + 1
-                                      );
-                                    }
-                                    return (
-                                      <Table
-                                        {...baseTableProps}
-                                        {...groupedDataTableProps}
-                                        showHeaderRow={false}
-                                        stickyHeader
-                                        rows={(children as RecordRow[]) || []}
-                                        sx={{
-                                          minWidth,
-                                          ...sx,
-                                        }}
-                                      />
-                                    );
-                                  })()}
-                                </CollapsibleSection>
+                                  } as RecordRow);
+                                }
                               );
                             }
-                          )}
-                        </>
-                      );
-                    };
-
-                    return getDataGroupElement(groupedData);
-                  }
+                          }
+                        );
+                      };
+                      flattenGroupHierachy(groupedData);
+                      return groupRows;
+                    }
+                    return filteredData;
+                  })();
                   return (
                     <Table
                       {...baseTableProps}
                       {...tableControlProps}
                       columns={baseTableColumns}
-                      rows={filteredData}
+                      rows={tableData}
                       stickyHeader
                       sx={{
                         minWidth,
