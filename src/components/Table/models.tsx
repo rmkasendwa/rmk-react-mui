@@ -20,6 +20,28 @@ import { TableColumnToggleIconButtonProps } from './TableColumnToggleIconButton'
 export const CHECKBOX_COLUMN_ID = 'checkbox';
 export const ELLIPSIS_MENU_TOOL_COLUMN_ID = 'ellipsisMenuTool';
 
+export type RecordsGroupHeaderProps = {
+  isGroupHeader: true;
+  groupId: string;
+  groupLabel?: ReactNode;
+  indentLevel: number;
+  groupCollapsed: boolean;
+  parentGroupId?: string;
+};
+
+export type RecordsGroupMemberProps = {
+  parentGroupId: string;
+};
+
+export type RecordsGroupProps =
+  | RecordsGroupHeaderProps
+  | RecordsGroupMemberProps;
+
+export type BaseDataRow = Record<string, any> & {
+  id: string;
+  GroupingProps?: RecordsGroupProps;
+};
+
 export type TableColumnEnumValue =
   | {
       id: string;
@@ -118,6 +140,7 @@ export interface TableColumn<
   decimalPlaces?: number;
   textTransform?: boolean;
   showHeaderText?: boolean;
+  showBodyContent?: boolean;
   dateFormat?: string;
   dateTimeFormat?: string;
   defaultCountryCode?: CountryCode;
@@ -132,10 +155,6 @@ export interface ForEachDerivedColumnConfiguration<T> {
 export type GetRowProps<T = any> = (
   currentEntity: T
 ) => Partial<MuiTableRowProps> | undefined;
-
-export type BaseDataRow = Record<string, any> & {
-  id: string;
-};
 
 export interface TableRowProps<DataRow extends BaseDataRow = any>
   extends Pick<

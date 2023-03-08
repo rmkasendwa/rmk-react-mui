@@ -931,18 +931,79 @@ export const useTable = <DataRow extends BaseDataRow>(
       if (optimizeForSmallScreen) {
         return pageRows.reduce((accumulator, row, index) => {
           const rowNumber = rowStartIndex + 1 + index;
-          accumulator[row.id] = (
+          const { GroupingProps } = row;
+          const compositeId = (() => {
+            if (GroupingProps) {
+              const { parentGroupId } = GroupingProps;
+              return parentGroupId + row.id;
+            }
+            return row.id;
+          })();
+          accumulator.push({
+            id: compositeId,
+            element: (
+              <RenderIfVisible
+                {...tableBodyRowPlaceholderPropsRest}
+                key={compositeId}
+                displayPlaceholder={false}
+                unWrapChildrenIfVisible
+                sx={{
+                  height: 89,
+                  ...tableBodyRowPlaceholderPropsSx,
+                }}
+              >
+                {index > 0 ? <Divider /> : null}
+                <TableBodyRow
+                  {...{
+                    columnTypographyProps,
+                    decimalPlaces,
+                    defaultColumnValue,
+                    defaultCountryCode,
+                    defaultDateFormat,
+                    defaultDateTimeFormat,
+                    editable,
+                    generateRowData,
+                    minColumnWidth,
+                    noWrap,
+                    onClickRow,
+                    row,
+                    textTransform,
+                    enableSmallScreenOptimization,
+                  }}
+                  columns={displayingColumns}
+                  getRowProps={forEachRowProps}
+                  className={clsx(rowNumber % 2 === 0 ? 'even' : 'odd')}
+                />
+              </RenderIfVisible>
+            ),
+          });
+          return accumulator;
+        }, [] as { id: string; element: ReactNode }[]);
+      }
+      return pageRows.reduce((accumulator, row, index) => {
+        const rowNumber = rowStartIndex + 1 + index;
+        const { GroupingProps } = row;
+        const compositeId = (() => {
+          if (GroupingProps) {
+            const { parentGroupId } = GroupingProps;
+            return parentGroupId + row.id;
+          }
+          return row.id;
+        })();
+        accumulator.push({
+          id: compositeId,
+          element: (
             <RenderIfVisible
               {...tableBodyRowPlaceholderPropsRest}
-              key={row.id}
+              key={compositeId}
+              component="tr"
               displayPlaceholder={false}
               unWrapChildrenIfVisible
               sx={{
-                height: 89,
+                height: 41,
                 ...tableBodyRowPlaceholderPropsSx,
               }}
             >
-              {index > 0 ? <Divider /> : null}
               <TableBodyRow
                 {...{
                   columnTypographyProps,
@@ -958,55 +1019,16 @@ export const useTable = <DataRow extends BaseDataRow>(
                   onClickRow,
                   row,
                   textTransform,
-                  enableSmallScreenOptimization,
                 }}
                 columns={displayingColumns}
                 getRowProps={forEachRowProps}
                 className={clsx(rowNumber % 2 === 0 ? 'even' : 'odd')}
               />
             </RenderIfVisible>
-          );
-          return accumulator;
-        }, {} as Record<string, ReactNode>);
-      }
-      return pageRows.reduce((accumulator, row, index) => {
-        const rowNumber = rowStartIndex + 1 + index;
-        accumulator[row.id] = (
-          <RenderIfVisible
-            {...tableBodyRowPlaceholderPropsRest}
-            key={row.id}
-            component="tr"
-            displayPlaceholder={false}
-            unWrapChildrenIfVisible
-            sx={{
-              height: 41,
-              ...tableBodyRowPlaceholderPropsSx,
-            }}
-          >
-            <TableBodyRow
-              {...{
-                columnTypographyProps,
-                decimalPlaces,
-                defaultColumnValue,
-                defaultCountryCode,
-                defaultDateFormat,
-                defaultDateTimeFormat,
-                editable,
-                generateRowData,
-                minColumnWidth,
-                noWrap,
-                onClickRow,
-                row,
-                textTransform,
-              }}
-              columns={displayingColumns}
-              getRowProps={forEachRowProps}
-              className={clsx(rowNumber % 2 === 0 ? 'even' : 'odd')}
-            />
-          </RenderIfVisible>
-        );
+          ),
+        });
         return accumulator;
-      }, {} as Record<string, ReactNode>);
+      }, [] as { id: string; element: ReactNode }[]);
     }
   })();
 
@@ -1170,7 +1192,7 @@ export const useTable = <DataRow extends BaseDataRow>(
           }}
         >
           {(() => {
-            const pageRowElements = Object.values(tableBodyRows);
+            const pageRowElements = tableBodyRows.map(({ element }) => element);
             if (pageRowElements.length > 0) {
               return pageRowElements;
             }
@@ -1226,7 +1248,9 @@ export const useTable = <DataRow extends BaseDataRow>(
               return (
                 <TableBody>
                   {(() => {
-                    const pageRowElements = Object.values(tableBodyRows);
+                    const pageRowElements = tableBodyRows.map(
+                      ({ element }) => element
+                    );
                     if (pageRowElements.length > 0) {
                       return pageRowElements;
                     }

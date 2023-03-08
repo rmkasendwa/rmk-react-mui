@@ -83,7 +83,7 @@ export const TableBodyRow = <T extends BaseDataRow>(
 ) => {
   const props = useThemeProps({ props: inProps, name: 'MuiTableBodyRow' });
   const {
-    columns,
+    columns: inputColumns,
     row,
     getRowProps,
     generateRowData,
@@ -117,14 +117,12 @@ export const TableBodyRow = <T extends BaseDataRow>(
   );
 
   // Refs
-  const columnsRef = useRef(columns);
   const getRowPropsRef = useRef(getRowProps);
   const generateRowDataRef = useRef(generateRowData);
   useEffect(() => {
-    columnsRef.current = columns;
     getRowPropsRef.current = getRowProps;
     generateRowDataRef.current = generateRowData;
-  }, [columns, generateRowData, getRowProps]);
+  }, [generateRowData, getRowProps]);
 
   const { components, breakpoints } = useTheme();
   const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
@@ -151,6 +149,26 @@ export const TableBodyRow = <T extends BaseDataRow>(
   }, [row]);
 
   const { sx: rowPropsSx, ...rowPropsRest } = rowProps;
+
+  const columns = (() => {
+    if (row.GroupingProps && 'isGroupHeader' in row.GroupingProps) {
+      const { groupLabel } = row.GroupingProps;
+      const [firstColumn, ...restColumns] = inputColumns;
+      return [
+        {
+          ...firstColumn,
+          getColumnValue: () => groupLabel,
+        } as typeof firstColumn,
+        ...restColumns.map((column) => {
+          return {
+            ...column,
+            showBodyContent: false,
+          };
+        }),
+      ];
+    }
+    return inputColumns;
+  })();
 
   if (enableSmallScreenOptimization && isSmallScreenSize) {
     const importantColumns = columns.filter(

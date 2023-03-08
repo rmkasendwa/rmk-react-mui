@@ -94,6 +94,7 @@ export interface FieldValueProps<T extends ReactNode = ReactNode>
   editMode?: boolean;
   children?: T;
   enableLoadingState?: boolean;
+  showDefaultValue?: boolean;
 }
 
 export function getFieldValueUtilityClass(slot: string): string {
@@ -130,6 +131,7 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
       editMode: editModeProp,
       onChangeEditMode,
       enableLoadingState = true,
+      showDefaultValue = true,
       sx,
       ...rest
     } = props;
@@ -148,6 +150,12 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
       })()
     );
     const { loading, errorMessage } = useLoadingContext();
+
+    const defaultValue = (() => {
+      if (showDefaultValue) {
+        return '-';
+      }
+    })();
 
     const { sx: IconContainerPropsSx, ...IconContainerPropsRest } =
       IconContainerProps;
@@ -462,7 +470,7 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
               ...sx,
             }}
           >
-            {value ?? '-'}
+            {value ?? defaultValue}
           </LoadingTypography>
         </Grid>
         {!editMode && endIcon ? (
