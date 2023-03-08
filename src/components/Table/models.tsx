@@ -214,9 +214,11 @@ export interface TableProps<DataRow extends BaseDataRow = any>
       | 'onClickRow'
       | 'textTransform'
     >,
-    Pick<
-      TableColumnToggleIconButtonProps<DataRow>,
-      'selectedColumnIds' | 'onChangeSelectedColumnIds'
+    Partial<
+      Pick<
+        TableColumnToggleIconButtonProps<DataRow>,
+        'selectedColumnIds' | 'onChangeSelectedColumnIds'
+      >
     >,
     Partial<Pick<TablePaginationProps, 'rowsPerPageOptions'>> {
   rows?: DataRow[];
