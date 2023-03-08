@@ -20,7 +20,6 @@ import TableRow, {
   TableRowProps as MuiTableRowProps,
 } from '@mui/material/TableRow';
 import clsx from 'clsx';
-import { omit } from 'lodash';
 import { Fragment, useEffect, useMemo, useRef } from 'react';
 
 import {
@@ -162,6 +161,7 @@ export const TableBodyRow = <T extends BaseDataRow>(
 
   const isGroupHeader =
     row.GroupingProps && 'isGroupHeader' in row.GroupingProps;
+  const isClickable = Boolean(onClickRow && !isGroupHeader);
 
   if (enableSmallScreenOptimization && isSmallScreenSize) {
     const columns = (() => {
@@ -177,7 +177,7 @@ export const TableBodyRow = <T extends BaseDataRow>(
 
           return [
             {
-              ...omit(firstColumn, 'onClickRow'),
+              ...firstColumn,
               getColumnValue: () => {
                 return (
                   <Stack
@@ -309,7 +309,7 @@ export const TableBodyRow = <T extends BaseDataRow>(
         container
         sx={{
           alignItems: 'center',
-          cursor: onClickRow ? 'pointer' : 'inherit',
+          cursor: isClickable ? 'pointer' : 'inherit',
           py: 2,
           pl: `calc(${spacing(2)} + ${indentLevel * 24}px)`,
           pr: 1,
@@ -332,9 +332,13 @@ export const TableBodyRow = <T extends BaseDataRow>(
               {...{ column, row, enableSmallScreenOptimization }}
               {...column}
               onClick={() => {
-                propagateClickToParentRowClickEvent &&
+                if (
                   onClickRow &&
+                  propagateClickToParentRowClickEvent &&
+                  !isClickable
+                ) {
                   onClickRow(row);
+                }
               }}
               columnTypographyProps={{
                 noWrap,
@@ -452,9 +456,13 @@ export const TableBodyRow = <T extends BaseDataRow>(
                   {...ellipsisMenuToolColumn}
                   column={ellipsisMenuToolColumn}
                   onClick={() => {
-                    propagateClickToParentRowClickEvent &&
+                    if (
                       onClickRow &&
+                      propagateClickToParentRowClickEvent &&
+                      !isClickable
+                    ) {
                       onClickRow(row);
+                    }
                   }}
                 />
               </Grid>
@@ -479,7 +487,7 @@ export const TableBodyRow = <T extends BaseDataRow>(
 
         return [
           {
-            ...omit(firstColumn, 'onClickRow'),
+            ...firstColumn,
             getColumnValue: () => {
               return (
                 <Stack
@@ -590,7 +598,7 @@ export const TableBodyRow = <T extends BaseDataRow>(
       hover
       sx={{
         verticalAlign: 'top',
-        cursor: onClickRow ? 'pointer' : 'inherit',
+        cursor: isClickable ? 'pointer' : 'inherit',
         ...(() => {
           if (row.GroupingProps && 'isGroupHeader' in row.GroupingProps) {
             return {
@@ -640,9 +648,13 @@ export const TableBodyRow = <T extends BaseDataRow>(
             }}
             {...column}
             onClick={() => {
-              propagateClickToParentRowClickEvent &&
+              if (
                 onClickRow &&
+                propagateClickToParentRowClickEvent &&
+                !isClickable
+              ) {
                 onClickRow(row);
+              }
             }}
             sx={{
               ...getColumnPaddingStyles({
