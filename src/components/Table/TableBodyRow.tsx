@@ -126,7 +126,7 @@ export const TableBodyRow = <T extends BaseDataRow>(
     generateRowDataRef.current = generateRowData;
   }, [generateRowData, getRowProps]);
 
-  const { components, breakpoints, palette } = useTheme();
+  const { components, breakpoints, palette, spacing } = useTheme();
   const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
 
   const { rowProps } = useMemo(() => {
@@ -152,97 +152,54 @@ export const TableBodyRow = <T extends BaseDataRow>(
 
   const { sx: rowPropsSx, ...rowPropsRest } = rowProps;
 
-  const columns = (() => {
-    if (row.GroupingProps) {
-      if ('isGroupHeader' in row.GroupingProps) {
-        const {
-          groupLabel,
-          indentLevel,
-          groupCollapsed,
-          onChangeGroupCollapsed,
-        } = row.GroupingProps;
-        const [firstColumn, secondColumn, ...restColumns] = inputColumns;
-
-        return [
-          {
-            ...firstColumn,
-            getColumnValue: () => {
-              return (
-                <Stack
-                  direction="row"
-                  sx={{
-                    alignItems: 'center',
-                    flexWrap: 'nowrap',
-                  }}
-                >
-                  {(() => {
-                    if (indentLevel > 0) {
-                      return (
-                        <Box
-                          sx={{
-                            width: indentLevel * 24,
-                            flex: 'none',
-                          }}
-                        />
-                      );
-                    }
-                  })()}
-                  <TableGroupCollapseTool
-                    {...{ groupCollapsed, onChangeGroupCollapsed }}
-                  />
-                  {groupLabel}
-                </Stack>
-              );
-            },
-            isGroupHeaderColumn: true,
-          },
-          {
-            ...secondColumn,
-            showBodyContent: false,
-            opaque: true,
-            colSpan: restColumns.length + 1,
-          },
-        ] as typeof inputColumns;
-      } else {
-        const { parentGroupIndentLevel } = row.GroupingProps;
-        const [firstColumn, ...restColumns] = inputColumns;
-        const { getColumnValue, id } = firstColumn;
-        return [
-          {
-            ...firstColumn,
-            getColumnValue: (localRow, column) => {
-              return (
-                <Stack
-                  direction="row"
-                  sx={{
-                    alignItems: 'center',
-                    flexWrap: 'nowrap',
-                  }}
-                >
-                  <Box
-                    sx={{
-                      width: (parentGroupIndentLevel + 1) * 24,
-                      flex: 'none',
-                    }}
-                  />
-                  {(() => {
-                    if (getColumnValue) {
-                      return getColumnValue(localRow, column);
-                    }
-                    return row[id];
-                  })()}
-                </Stack>
-              );
-            },
-          } as typeof firstColumn,
-          ...restColumns,
-        ];
-      }
-    }
-    return inputColumns;
-  })();
-
   if (enableSmallScreenOptimization && isSmallScreenSize) {
+    const columns = (() => {
+      if (row.GroupingProps) {
+        if ('isGroupHeader' in row.GroupingProps) {
+          const { groupLabel, groupCollapsed, onChangeGroupCollapsed } =
+            row.GroupingProps;
+          const [firstColumn] = inputColumns;
+
+          return [
+            {
+              ...firstColumn,
+              getColumnValue: () => {
+                return (
+                  <Stack
+                    direction="row"
+                    sx={{
+                      alignItems: 'center',
+                      flexWrap: 'nowrap',
+                    }}
+                  >
+                    <TableGroupCollapseTool
+                      {...{ groupCollapsed, onChangeGroupCollapsed }}
+                    />
+                    {groupLabel}
+                  </Stack>
+                );
+              },
+              isGroupHeaderColumn: true,
+            },
+          ] as typeof inputColumns;
+        }
+      }
+      return inputColumns;
+    })();
+    const isGroupHeader =
+      row.GroupingProps && 'isGroupHeader' in row.GroupingProps;
+
+    const indentLevel = (() => {
+      if (row.GroupingProps) {
+        if ('isGroupHeader' in row.GroupingProps) {
+          return row.GroupingProps.indentLevel;
+        } else {
+          return row.GroupingProps.parentGroupIndentLevel + 1;
+        }
+      }
+      return 0;
+    })();
+
     const importantColumns = columns.filter(
       ({ holdsPriorityInformation = true }) => {
         return holdsPriorityInformation;
@@ -312,7 +269,7 @@ export const TableBodyRow = <T extends BaseDataRow>(
           alignItems: 'center',
           cursor: onClickRow ? 'pointer' : 'inherit',
           py: 2,
-          pl: 2,
+          pl: `calc(${spacing(2)} + ${indentLevel * 24}px)`,
           pr: 1,
         }}
       >
@@ -345,7 +302,7 @@ export const TableBodyRow = <T extends BaseDataRow>(
               }}
             />
             {(() => {
-              if (restColumns.length > 0) {
+              if (!isGroupHeader && restColumns.length > 0) {
                 return (
                   <Grid
                     container
@@ -465,6 +422,96 @@ export const TableBodyRow = <T extends BaseDataRow>(
       </Grid>
     );
   }
+
+  const columns = (() => {
+    if (row.GroupingProps) {
+      if ('isGroupHeader' in row.GroupingProps) {
+        const {
+          groupLabel,
+          indentLevel,
+          groupCollapsed,
+          onChangeGroupCollapsed,
+        } = row.GroupingProps;
+        const [firstColumn, secondColumn, ...restColumns] = inputColumns;
+
+        return [
+          {
+            ...firstColumn,
+            getColumnValue: () => {
+              return (
+                <Stack
+                  direction="row"
+                  sx={{
+                    alignItems: 'center',
+                    flexWrap: 'nowrap',
+                  }}
+                >
+                  {(() => {
+                    if (indentLevel > 0) {
+                      return (
+                        <Box
+                          sx={{
+                            width: indentLevel * 24,
+                            flex: 'none',
+                          }}
+                        />
+                      );
+                    }
+                  })()}
+                  <TableGroupCollapseTool
+                    {...{ groupCollapsed, onChangeGroupCollapsed }}
+                  />
+                  {groupLabel}
+                </Stack>
+              );
+            },
+            isGroupHeaderColumn: true,
+          },
+          {
+            ...secondColumn,
+            showBodyContent: false,
+            opaque: true,
+            colSpan: restColumns.length + 1,
+          },
+        ] as typeof inputColumns;
+      } else {
+        const { parentGroupIndentLevel } = row.GroupingProps;
+        const [firstColumn, ...restColumns] = inputColumns;
+        const { getColumnValue, id } = firstColumn;
+        return [
+          {
+            ...firstColumn,
+            getColumnValue: (localRow, column) => {
+              return (
+                <Stack
+                  direction="row"
+                  sx={{
+                    alignItems: 'center',
+                    flexWrap: 'nowrap',
+                  }}
+                >
+                  <Box
+                    sx={{
+                      width: (parentGroupIndentLevel + 1) * 24,
+                      flex: 'none',
+                    }}
+                  />
+                  {(() => {
+                    if (getColumnValue) {
+                      return getColumnValue(localRow, column);
+                    }
+                    return row[id];
+                  })()}
+                </Stack>
+              );
+            },
+          } as typeof firstColumn,
+          ...restColumns,
+        ];
+      }
+    }
+    return inputColumns;
+  })();
 
   return (
     <TableRow
