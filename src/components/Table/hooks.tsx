@@ -933,9 +933,8 @@ export const useTable = <DataRow extends BaseDataRow>(
           const rowNumber = rowStartIndex + 1 + index;
           const { GroupingProps } = row;
           const compositeId = (() => {
-            if (GroupingProps) {
-              const { parentGroupId } = GroupingProps;
-              return parentGroupId + row.id;
+            if (GroupingProps && 'isGroupHeader' in GroupingProps) {
+              return GroupingProps.groupId;
             }
             return row.id;
           })();
@@ -984,9 +983,8 @@ export const useTable = <DataRow extends BaseDataRow>(
         const rowNumber = rowStartIndex + 1 + index;
         const { GroupingProps } = row;
         const compositeId = (() => {
-          if (GroupingProps) {
-            const { parentGroupId } = GroupingProps;
-            return parentGroupId + row.id;
+          if (GroupingProps && 'isGroupHeader' in GroupingProps) {
+            return GroupingProps.groupId;
           }
           return row.id;
         })();
