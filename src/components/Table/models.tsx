@@ -22,6 +22,7 @@ export const ELLIPSIS_MENU_TOOL_COLUMN_ID = 'ellipsisMenuTool';
 
 export type BaseRecordsGroupProps = {
   parentGroupId?: string;
+  groupCollapsed: boolean;
 };
 
 export type RecordsGroupHeaderProps = BaseRecordsGroupProps & {
@@ -29,7 +30,7 @@ export type RecordsGroupHeaderProps = BaseRecordsGroupProps & {
   groupId: string;
   groupLabel?: ReactNode;
   indentLevel: number;
-  groupCollapsed: boolean;
+  onChangeGroupCollapsed?: (groupCollapsed: boolean) => void;
 };
 
 export type RecordsGroupMemberProps = Required<BaseRecordsGroupProps> & {

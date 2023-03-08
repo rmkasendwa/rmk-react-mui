@@ -156,8 +156,17 @@ export const TableBodyRow = <T extends BaseDataRow>(
   const columns = (() => {
     if (row.GroupingProps) {
       if ('isGroupHeader' in row.GroupingProps) {
-        const { groupLabel, indentLevel, groupCollapsed } = row.GroupingProps;
+        const {
+          groupLabel,
+          indentLevel,
+          groupCollapsed,
+          onChangeGroupCollapsed,
+        } = row.GroupingProps;
         const [firstColumn, ...restColumns] = inputColumns;
+        const changeCollapsedState = () => {
+          onChangeGroupCollapsed && onChangeGroupCollapsed(!groupCollapsed);
+        };
+
         return [
           {
             ...firstColumn,
@@ -182,15 +191,15 @@ export const TableBodyRow = <T extends BaseDataRow>(
                   })()}
                   {groupCollapsed ? (
                     <KeyboardArrowRightIcon
+                      onClick={changeCollapsedState}
                       sx={{
-                        ml: -1,
                         cursor: 'pointer',
                       }}
                     />
                   ) : (
                     <KeyboardArrowDownIcon
+                      onClick={changeCollapsedState}
                       sx={{
-                        ml: -1,
                         cursor: 'pointer',
                       }}
                     />

@@ -87,9 +87,7 @@ export const useSortOperationFieldSelectorTool = <
 
   return usePopupTool({
     ...rest,
-    label: sortLabel
-      ? sortLabel
-      : hasSortParams
+    label: hasSortParams
       ? (() => {
           if (selectedSortParams.length === 1) {
             return `${sortLabel}ed by ${selectedSortParams[0].label}`;
@@ -155,6 +153,7 @@ export const useSortOperationFieldSelectorTool = <
                 },
               ]);
             }
+            setOpenUnselectedSortableFields(false);
           },
         };
       if (selectedSortParams.length > 0) {

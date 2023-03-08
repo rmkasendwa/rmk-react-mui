@@ -1313,48 +1313,126 @@ export const BaseRecordsExplorer = <
                   const tableData = (() => {
                     if (groupedData) {
                       const groupRows: RecordRow[] = [];
+                      const allGroupIds: string[] = [];
+
+                      interface FlattenGroupHierachyOptions {
+                        indentLevel?: number;
+                        parentGroupId?: string;
+                        generateGroupHeaderRow?: boolean;
+                        parentGroupCollapsed?: boolean;
+                      }
                       const flattenGroupHierachy = (
                         inputGroupedData: typeof groupedData,
-                        nestIndex = 0,
-                        parentId?: string
+                        {
+                          indentLevel = 0,
+                          parentGroupId,
+                          generateGroupHeaderRow = true,
+                          parentGroupCollapsed = false,
+                        }: FlattenGroupHierachyOptions = {}
                       ) => {
                         inputGroupedData.forEach(
-                          ({ id: groupId, label, children, ...rest }) => {
-                            groupRows.push({
-                              id: groupId,
-                              ...rest,
-                              GroupingProps: {
-                                isGroupHeader: true,
-                                groupId: groupId,
-                                groupLabel: label,
-                                groupCollapsed:
-                                  !expandedGroups.includes(groupId) &&
-                                  !allGroupsExpanded,
-                                indentLevel: nestIndex,
-                                parentGroupId: parentId,
-                              },
-                            } as RecordRow);
+                          ({ id, label, children, ...rest }) => {
+                            const groupId = `group:${indentLevel}${id}${
+                              parentGroupId || ''
+                            }`;
+                            const groupCollapsed =
+                              parentGroupCollapsed ||
+                              (!expandedGroups.includes(groupId) &&
+                                !allGroupsExpanded);
+                            allGroupIds.push(groupId);
+                            if (generateGroupHeaderRow) {
+                              groupRows.push({
+                                id: groupId,
+                                ...rest,
+                                GroupingProps: {
+                                  isGroupHeader: true,
+                                  groupId,
+                                  groupLabel: label,
+                                  groupCollapsed,
+                                  indentLevel,
+                                  parentGroupId,
+                                  onChangeGroupCollapsed: (collapsed) => {
+                                    const groups = allGroupsExpanded
+                                      ? allGroupIds
+                                      : [...expandedGroups];
+                                    if (collapsed) {
+                                      groups.includes(groupId) &&
+                                        groups.splice(
+                                          groups.indexOf(groupId),
+                                          1
+                                        );
+                                    } else {
+                                      groups.includes(groupId) ||
+                                        groups.push(groupId);
+                                    }
+                                    setSearchParams(
+                                      {
+                                        expandedGroups: (() => {
+                                          if (groups.length > 0) {
+                                            if (
+                                              groupedData.length ===
+                                              groups.length
+                                            ) {
+                                              return 'All';
+                                            }
+                                            groups.includes('None') &&
+                                              groups.splice(
+                                                groups.indexOf('None'),
+                                                1
+                                              );
+                                            return groups;
+                                          } else {
+                                            return 'None';
+                                          }
+                                        })(),
+                                      },
+                                      {
+                                        replace: true,
+                                      }
+                                    );
+                                  },
+                                },
+                              } as RecordRow);
+                            }
 
                             const { children: nestedChildren, groupName } =
                               (children[0] as NestedDataGroup<RecordRow>) || {};
-                            if (nestedChildren && groupName) {
-                              return flattenGroupHierachy(
-                                children as NestedDataGroup<RecordRow>[],
-                                nestIndex + 1,
-                                groupId
-                              );
+                            if (!groupCollapsed) {
+                              if (nestedChildren && groupName) {
+                                return flattenGroupHierachy(
+                                  children as NestedDataGroup<RecordRow>[],
+                                  {
+                                    indentLevel: indentLevel + 1,
+                                    parentGroupId: groupId,
+                                    parentGroupCollapsed: groupCollapsed,
+                                  }
+                                );
+                              } else {
+                                (children as RecordRow[]).forEach(
+                                  ({ ...rest }) => {
+                                    groupRows.push({
+                                      ...rest,
+                                      GroupingProps: {
+                                        parentGroupId: groupId,
+                                        parentGroupIndentLevel: indentLevel,
+                                        groupCollapsed,
+                                      },
+                                    } as RecordRow);
+                                  }
+                                );
+                              }
                             } else {
-                              (children as RecordRow[]).forEach(
-                                ({ ...rest }) => {
-                                  groupRows.push({
-                                    ...rest,
-                                    GroupingProps: {
-                                      parentGroupId: groupId,
-                                      parentGroupIndentLevel: nestIndex,
-                                    },
-                                  } as RecordRow);
-                                }
-                              );
+                              if (nestedChildren && groupName) {
+                                return flattenGroupHierachy(
+                                  children as NestedDataGroup<RecordRow>[],
+                                  {
+                                    indentLevel: indentLevel + 1,
+                                    parentGroupId: groupId,
+                                    parentGroupCollapsed: groupCollapsed,
+                                    generateGroupHeaderRow: false,
+                                  }
+                                );
+                              }
                             }
                           }
                         );
