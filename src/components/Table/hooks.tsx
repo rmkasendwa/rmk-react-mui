@@ -45,6 +45,7 @@ import {
 } from './models';
 import TableBodyRow, { tableBodyRowClasses } from './TableBodyRow';
 import TableColumnToggleIconButton from './TableColumnToggleIconButton';
+import TableGroupCollapseTool from './TableGroupCollapseTool';
 import {
   expandTableColumnWidths,
   getColumnWidthStyles,
@@ -164,6 +165,8 @@ export const useTable = <DataRow extends BaseDataRow>(
     noWrap,
     getDisplayingColumns,
     getEllipsisMenuToolProps,
+    isGroupedTable = false,
+    TableGroupingProps,
     sx,
     ...rest
   } = props;
@@ -748,7 +751,15 @@ export const useTable = <DataRow extends BaseDataRow>(
                   sx={{
                     display: 'flex',
                     alignItems: 'center',
-                    pl: index <= 0 ? 3 : 1.5,
+                    pl: (() => {
+                      if (isGroupedTable) {
+                        return 1;
+                      }
+                      if (index <= 0) {
+                        return 3;
+                      }
+                      return 1.5;
+                    })(),
                     pr: columnSortable
                       ? 3
                       : index < displayingColumns.length - 1
@@ -775,6 +786,20 @@ export const useTable = <DataRow extends BaseDataRow>(
                     })(),
                   }}
                 >
+                  {(() => {
+                    if (isGroupedTable && index === 0) {
+                      return (
+                        <TableGroupCollapseTool
+                          groupCollapsed={
+                            TableGroupingProps?.allGroupsCollapsed || false
+                          }
+                          onChangeGroupCollapsed={
+                            TableGroupingProps?.onChangeAllGroupsCollapsed
+                          }
+                        />
+                      );
+                    }
+                  })()}
                   {showHeaderText && label ? (
                     <>
                       <Typography

@@ -190,6 +190,11 @@ export type TableVariant =
 
 export type TableBordersVariant = 'square' | 'rows' | 'columns' | 'none';
 
+export interface TableGroupingProps {
+  allGroupsCollapsed: boolean;
+  onChangeAllGroupsCollapsed?: (allGroupsCollapsed: boolean) => void;
+}
+
 export interface TableProps<DataRow extends BaseDataRow = any>
   extends Partial<Pick<MuiBaseTableProps, 'onClick' | 'sx' | 'className'>>,
     Pick<
@@ -247,7 +252,8 @@ export interface TableProps<DataRow extends BaseDataRow = any>
   getEllipsisMenuToolProps?: (
     row: DataRow
   ) => EllipsisMenuIconButtonProps | undefined | null;
-
+  isGroupedTable?: boolean;
+  TableGroupingProps?: TableGroupingProps;
   allPropsComputed?: boolean;
 
   // Sort props

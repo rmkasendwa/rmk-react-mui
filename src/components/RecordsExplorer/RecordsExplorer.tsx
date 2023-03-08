@@ -1448,6 +1448,30 @@ export const BaseRecordsExplorer = <
                       {...tableControlProps}
                       columns={baseTableColumns}
                       rows={tableData}
+                      {...(() => {
+                        if (groupedData) {
+                          return {
+                            isGroupedTable: true,
+                            TableGroupingProps: {
+                              allGroupsCollapsed: !allGroupsExpanded,
+                              onChangeAllGroupsCollapsed: (
+                                allGroupsExpanded
+                              ) => {
+                                setSearchParams(
+                                  {
+                                    expandedGroups: allGroupsExpanded
+                                      ? 'None'
+                                      : 'All',
+                                  },
+                                  {
+                                    replace: true,
+                                  }
+                                );
+                              },
+                            },
+                          };
+                        }
+                      })()}
                       stickyHeader
                       sx={{
                         minWidth,
