@@ -43,6 +43,7 @@ import {
   ELLIPSIS_MENU_TOOL_COLUMN_ID,
   TableProps,
 } from './models';
+import { tableBodyColumnClasses } from './TableBodyColumn';
 import TableBodyRow, { tableBodyRowClasses } from './TableBodyRow';
 import TableColumnToggleIconButton from './TableColumnToggleIconButton';
 import TableGroupCollapseTool from './TableGroupCollapseTool';
@@ -87,7 +88,6 @@ declare module '@mui/material/styles/components' {
   }
 }
 
-const OPAQUE_BG_CLASS_NAME = `MuiTableCell-opaque`;
 const TABLE_HEAD_ALPHA = 0.05;
 
 export function getTableUtilityClass(slot: string): string {
@@ -428,9 +428,6 @@ export const useTable = <DataRow extends BaseDataRow>(
           nextColumn.align = 'center';
           break;
       }
-      nextColumn.className = clsx(
-        nextColumn.opaque ? OPAQUE_BG_CLASS_NAME : null
-      );
 
       // Nowrap state
       switch (nextColumn.type) {
@@ -564,7 +561,7 @@ export const useTable = <DataRow extends BaseDataRow>(
         },
         [`tr.${tableRowClasses.root}`]: {
           [`
-            td.${tableCellClasses.root}:nth-of-type(odd).${OPAQUE_BG_CLASS_NAME}
+            td.${tableCellClasses.root}:nth-of-type(odd).${tableBodyColumnClasses.opaque}
           `]: {
             bgcolor: (palette.mode === 'light' ? darken : lighten)(
               parentBackgroundColor,
@@ -572,13 +569,13 @@ export const useTable = <DataRow extends BaseDataRow>(
             ),
           },
           [`
-            td.${tableCellClasses.root}:nth-of-type(even).${OPAQUE_BG_CLASS_NAME}
+            td.${tableCellClasses.root}:nth-of-type(even).${tableBodyColumnClasses.opaque}
           `]: {
             bgcolor: parentBackgroundColor,
           },
           [`&.odd`]: {
             [`
-              td.${tableCellClasses.root}:nth-of-type(odd).${OPAQUE_BG_CLASS_NAME}
+              td.${tableCellClasses.root}:nth-of-type(odd).${tableBodyColumnClasses.opaque}
             `]: {
               bgcolor: (palette.mode === 'light' ? darken : lighten)(
                 parentBackgroundColor,
@@ -586,7 +583,7 @@ export const useTable = <DataRow extends BaseDataRow>(
               ),
             },
             [`
-              td.${tableCellClasses.root}:nth-of-type(even).${OPAQUE_BG_CLASS_NAME}
+              td.${tableCellClasses.root}:nth-of-type(even).${tableBodyColumnClasses.opaque}
             `]: {
               bgcolor: (palette.mode === 'light' ? darken : lighten)(
                 parentBackgroundColor,
@@ -602,7 +599,7 @@ export const useTable = <DataRow extends BaseDataRow>(
         [`tr.${tableRowClasses.root}`]: {
           [`&.odd`]: {
             bgcolor: alpha(palette.text.primary, 0.02),
-            [`td.${OPAQUE_BG_CLASS_NAME}`]: {
+            [`td.${tableBodyColumnClasses.opaque}`]: {
               bgcolor: (palette.mode === 'light' ? darken : lighten)(
                 parentBackgroundColor,
                 0.02
@@ -610,7 +607,7 @@ export const useTable = <DataRow extends BaseDataRow>(
             },
           },
           [`&.even`]: {
-            [`td.${OPAQUE_BG_CLASS_NAME}`]: {
+            [`td.${tableBodyColumnClasses.opaque}`]: {
               bgcolor: parentBackgroundColor,
             },
           },
@@ -625,7 +622,7 @@ export const useTable = <DataRow extends BaseDataRow>(
           bgcolor: alpha(palette.text.primary, 0.02),
         },
         [`
-          td.${tableCellClasses.root}:nth-of-type(odd).${OPAQUE_BG_CLASS_NAME}
+          td.${tableCellClasses.root}:nth-of-type(odd).${tableBodyColumnClasses.opaque}
         `]: {
           bgcolor: (palette.mode === 'light' ? darken : lighten)(
             parentBackgroundColor,
@@ -633,7 +630,7 @@ export const useTable = <DataRow extends BaseDataRow>(
           ),
         },
         [`
-          td.${tableCellClasses.root}:nth-of-type(even).${OPAQUE_BG_CLASS_NAME}
+          td.${tableCellClasses.root}:nth-of-type(even).${tableBodyColumnClasses.opaque}
         `]: {
           bgcolor: parentBackgroundColor,
         },
@@ -655,7 +652,10 @@ export const useTable = <DataRow extends BaseDataRow>(
         th.${tableCellClasses.root},
         td.${tableCellClasses.root}
       `]: {
-        [`&:not(:nth-last-of-type(2)):not(:nth-last-of-type(1))`]: {
+        [`
+          &:not(:nth-last-of-type(2)):not(:nth-last-of-type(1)),
+          &.${tableBodyColumnClasses.groupHeaderColumn}
+        `]: {
           borderRightWidth: 1,
           borderRightStyle: 'solid',
         },
@@ -731,7 +731,7 @@ export const useTable = <DataRow extends BaseDataRow>(
                 key={String(id)}
                 className={clsx(
                   className,
-                  stickyHeader && OPAQUE_BG_CLASS_NAME
+                  stickyHeader && tableBodyColumnClasses.opaque
                 )}
                 {...{ style }}
                 sx={{
@@ -1252,7 +1252,7 @@ export const useTable = <DataRow extends BaseDataRow>(
           ...variantStyles,
           ...borderVariantStyles,
           ...sx,
-          [`.${OPAQUE_BG_CLASS_NAME}`]: {
+          [`.${tableBodyColumnClasses.opaque}`]: {
             bgcolor: parentBackgroundColor,
           },
         }}
@@ -1261,6 +1261,14 @@ export const useTable = <DataRow extends BaseDataRow>(
           <TableHead
             sx={{
               bgcolor: alpha(palette.text.primary, TABLE_HEAD_ALPHA),
+              ...(() => {
+                if (isGroupedTable) {
+                  return {
+                    position: 'sticky',
+                    top: 0,
+                  };
+                }
+              })(),
             }}
           >
             {tableHeaderRow}

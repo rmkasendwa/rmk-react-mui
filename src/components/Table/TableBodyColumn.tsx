@@ -29,6 +29,8 @@ import { mapTableColumnTypeToExoticDataType } from './utils';
 export interface TableBodyColumnClasses {
   /** Styles applied to the root element. */
   root: string;
+  groupHeaderColumn: string;
+  opaque: string;
 }
 
 export type TableBodyColumnClassKey = keyof TableBodyColumnClasses;
@@ -87,10 +89,16 @@ export function getTableBodyColumnUtilityClass(slot: string): string {
 }
 
 export const tableBodyColumnClasses: TableBodyColumnClasses =
-  generateUtilityClasses('MuiTableBodyColumn', ['root']);
+  generateUtilityClasses('MuiTableBodyColumn', [
+    'root',
+    'groupHeaderColumn',
+    'opaque',
+  ]);
 
 const slots = {
   root: ['root'],
+  groupHeaderColumn: ['groupHeaderColumn'],
+  opaque: ['opaque'],
 };
 
 export const TableBodyColumn = forwardRef<any, TableBodyColumnProps<any>>(
@@ -128,6 +136,8 @@ export const TableBodyColumn = forwardRef<any, TableBodyColumnProps<any>>(
       enableSmallScreenOptimization = false,
       showBodyContent = true,
       colSpan,
+      isGroupHeaderColumn = false,
+      opaque,
     } = props;
 
     const classes = composeClasses(
@@ -378,7 +388,11 @@ export const TableBodyColumn = forwardRef<any, TableBodyColumnProps<any>>(
       <TableCell
         ref={ref}
         {...{ align, colSpan }}
-        className={clsx(classes.root)}
+        className={clsx([
+          classes.root,
+          isGroupHeaderColumn && classes.groupHeaderColumn,
+          opaque && classes.opaque,
+        ])}
         onClick={(event) => {
           onClickColumn && onClickColumn(row, column);
           onClick && onClick(event);

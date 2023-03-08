@@ -126,7 +126,7 @@ export const TableBodyRow = <T extends BaseDataRow>(
     generateRowDataRef.current = generateRowData;
   }, [generateRowData, getRowProps]);
 
-  const { components, breakpoints } = useTheme();
+  const { components, breakpoints, palette } = useTheme();
   const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
 
   const { rowProps } = useMemo(() => {
@@ -194,10 +194,12 @@ export const TableBodyRow = <T extends BaseDataRow>(
                 </Stack>
               );
             },
+            isGroupHeaderColumn: true,
           },
           {
             ...secondColumn,
             showBodyContent: false,
+            opaque: true,
             colSpan: restColumns.length + 1,
           },
         ] as typeof inputColumns;
@@ -473,6 +475,16 @@ export const TableBodyRow = <T extends BaseDataRow>(
       sx={{
         verticalAlign: 'top',
         cursor: onClickRow ? 'pointer' : 'inherit',
+        ...(() => {
+          if (row.GroupingProps && 'isGroupHeader' in row.GroupingProps) {
+            return {
+              position: 'sticky',
+              top: 48,
+              zIndex: 2,
+              boxShadow: `0 -1px 2px -1px ${palette.divider}`,
+            };
+          }
+        })(),
         ...(components?.MuiTableBodyRow?.styleOverrides?.root as any),
         ...rowPropsSx,
         ...sx,
