@@ -19,16 +19,18 @@ import {
 export const getColumnWidthStyles = ({
   width,
   minWidth: inputMinWidth,
+  extraWidth = 0,
 }: TableColumn) => {
-  const minWidth = (() => {
-    if (inputMinWidth) {
-      if (width && width < inputMinWidth) {
-        return width;
+  const minWidth =
+    (() => {
+      if (inputMinWidth) {
+        if (width && width < inputMinWidth) {
+          return width;
+        }
+        return inputMinWidth;
       }
-      return inputMinWidth;
-    }
-    return 100;
-  })();
+      return 100;
+    })() + extraWidth;
   return {
     width,
     minWidth,

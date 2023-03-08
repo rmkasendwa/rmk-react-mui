@@ -140,4 +140,5 @@ export const contactTableProps = {
       ],
     };
   },
+  minColumnWidth: 220,
 } as Partial<TableProps<Contact>>;
