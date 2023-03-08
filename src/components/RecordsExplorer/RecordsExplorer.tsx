@@ -1249,6 +1249,7 @@ export const BaseRecordsExplorer = <
                                   groupCollapsed,
                                   indentLevel,
                                   parentGroupId,
+                                  childrenCount: children.length,
                                   onChangeGroupCollapsed: (collapsed) => {
                                     const allExpandedGroups = (() => {
                                       if (expandedGroupsInverted) {
