@@ -1153,7 +1153,7 @@ export const BaseRecordsExplorer = <
               columns: displayingColumns,
             });
 
-            const {
+            let {
               minWidth = getTableMinWidth(
                 allDisplayingColumns.map((column) => {
                   const { minWidth } = column;
@@ -1174,102 +1174,7 @@ export const BaseRecordsExplorer = <
                 }}
               >
                 {(() => {
-                  const baseTableProps: typeof viewProps = {
-                    ...viewProps,
-                    paging: false,
-                    enableColumnDisplayToggle,
-                    enableCheckboxAllRowSelector,
-                    enableCheckboxRowSelectors,
-                    enableSmallScreenOptimization,
-                    showRowNumber,
-                    bordersVariant: 'square',
-                    selectedColumnIds,
-                    ColumnDisplayToggleProps: {
-                      sx: {
-                        minWidth,
-                      },
-                    },
-                  };
-
-                  const tableControlProps: Partial<typeof viewProps> = {
-                    sortable: true,
-                    handleSortOperations: false,
-                    sortBy: selectedSortParams,
-                    onChangeSortBy: (sortOptions) => {
-                      if (
-                        sortOptions
-                          .map(
-                            ({ id, sortDirection }) =>
-                              String(id) + sortDirection
-                          )
-                          .join(',') !==
-                        selectedSortParams
-                          .map(
-                            ({ id, sortDirection }) =>
-                              String(id) + sortDirection
-                          )
-                          .join(',')
-                      ) {
-                        setSearchParams(
-                          {
-                            sortBy: sortOptions
-                              .map((sortBy) => {
-                                const { id } = sortBy;
-                                return [
-                                  sortableFields.find(
-                                    ({ id: currentId }) => currentId === id
-                                  )!,
-                                  sortBy,
-                                ];
-                              })
-                              .filter(
-                                ([selectedSortParam]) =>
-                                  selectedSortParam != null
-                              )
-                              .map(([selectedSortParam, { sortDirection }]) => {
-                                return {
-                                  ...selectedSortParam,
-                                  sortDirection: sortDirection || 'ASC',
-                                } as SelectedSortOption<RecordRow>;
-                              }),
-                            modifiedKeys: [
-                              ...new Set([
-                                ...(modifiedStateKeys || []),
-                                'sortBy',
-                              ]),
-                            ] as typeof modifiedStateKeys,
-                          },
-                          {
-                            replace: true,
-                          }
-                        );
-                      }
-                    },
-                    onChangeSelectedColumnIds: (localSelectedColumnIds) => {
-                      if (selectedColumnIds !== localSelectedColumnIds) {
-                        setSearchParams(
-                          {
-                            selectedColumns: localSelectedColumnIds.map(
-                              (selectedColumnId) => {
-                                return String(selectedColumnId);
-                              }
-                            ),
-                            modifiedKeys: [
-                              ...new Set([
-                                ...(modifiedStateKeys || []),
-                                'selectedColumns',
-                              ]),
-                            ] as typeof modifiedStateKeys,
-                          },
-                          {
-                            replace: true,
-                          }
-                        );
-                      }
-                    },
-                  };
-
-                  const { columns, sx } = baseTableProps;
+                  const { columns, sx } = viewProps;
                   const baseTableColumns = columns.map((column) => ({
                     ...column,
                   }));
@@ -1287,24 +1192,6 @@ export const BaseRecordsExplorer = <
                     },
                     bodySx: {
                       ...baseTableColumns[0].bodySx,
-                      zIndex: 1,
-                    },
-                    opaque: true,
-                  };
-
-                  allDisplayingColumns[0] = {
-                    ...allDisplayingColumns[0],
-                    sx: {
-                      ...allDisplayingColumns[0].sx,
-                      position: 'sticky',
-                      left: 0,
-                    },
-                    headerSx: {
-                      ...allDisplayingColumns[0].headerSx,
-                      zIndex: 5,
-                    },
-                    bodySx: {
-                      ...allDisplayingColumns[0].bodySx,
                       zIndex: 1,
                     },
                     opaque: true,
@@ -1438,10 +1325,133 @@ export const BaseRecordsExplorer = <
                         );
                       };
                       flattenGroupHierachy(groupedData);
+
+                      const extraWidth = 24 * selectedGroupParams.length;
+                      minWidth += extraWidth;
+
+                      baseTableColumns[0] = {
+                        ...baseTableColumns[0],
+                        extraWidth,
+                      };
+
                       return groupRows;
                     }
                     return filteredData;
                   })();
+
+                  const baseTableProps: typeof viewProps = {
+                    ...viewProps,
+                    paging: false,
+                    enableColumnDisplayToggle,
+                    enableCheckboxAllRowSelector,
+                    enableCheckboxRowSelectors,
+                    enableSmallScreenOptimization,
+                    showRowNumber,
+                    bordersVariant: 'square',
+                    selectedColumnIds,
+                    ColumnDisplayToggleProps: {
+                      sx: {
+                        minWidth,
+                      },
+                    },
+                  };
+
+                  const tableControlProps: Partial<typeof viewProps> = {
+                    sortable: true,
+                    handleSortOperations: false,
+                    sortBy: selectedSortParams,
+                    onChangeSortBy: (sortOptions) => {
+                      if (
+                        sortOptions
+                          .map(
+                            ({ id, sortDirection }) =>
+                              String(id) + sortDirection
+                          )
+                          .join(',') !==
+                        selectedSortParams
+                          .map(
+                            ({ id, sortDirection }) =>
+                              String(id) + sortDirection
+                          )
+                          .join(',')
+                      ) {
+                        setSearchParams(
+                          {
+                            sortBy: sortOptions
+                              .map((sortBy) => {
+                                const { id } = sortBy;
+                                return [
+                                  sortableFields.find(
+                                    ({ id: currentId }) => currentId === id
+                                  )!,
+                                  sortBy,
+                                ];
+                              })
+                              .filter(
+                                ([selectedSortParam]) =>
+                                  selectedSortParam != null
+                              )
+                              .map(([selectedSortParam, { sortDirection }]) => {
+                                return {
+                                  ...selectedSortParam,
+                                  sortDirection: sortDirection || 'ASC',
+                                } as SelectedSortOption<RecordRow>;
+                              }),
+                            modifiedKeys: [
+                              ...new Set([
+                                ...(modifiedStateKeys || []),
+                                'sortBy',
+                              ]),
+                            ] as typeof modifiedStateKeys,
+                          },
+                          {
+                            replace: true,
+                          }
+                        );
+                      }
+                    },
+                    onChangeSelectedColumnIds: (localSelectedColumnIds) => {
+                      if (selectedColumnIds !== localSelectedColumnIds) {
+                        setSearchParams(
+                          {
+                            selectedColumns: localSelectedColumnIds.map(
+                              (selectedColumnId) => {
+                                return String(selectedColumnId);
+                              }
+                            ),
+                            modifiedKeys: [
+                              ...new Set([
+                                ...(modifiedStateKeys || []),
+                                'selectedColumns',
+                              ]),
+                            ] as typeof modifiedStateKeys,
+                          },
+                          {
+                            replace: true,
+                          }
+                        );
+                      }
+                    },
+                  };
+
+                  allDisplayingColumns[0] = {
+                    ...allDisplayingColumns[0],
+                    sx: {
+                      ...allDisplayingColumns[0].sx,
+                      position: 'sticky',
+                      left: 0,
+                    },
+                    headerSx: {
+                      ...allDisplayingColumns[0].headerSx,
+                      zIndex: 5,
+                    },
+                    bodySx: {
+                      ...allDisplayingColumns[0].bodySx,
+                      zIndex: 1,
+                    },
+                    opaque: true,
+                  };
+
                   return (
                     <Table
                       {...baseTableProps}
