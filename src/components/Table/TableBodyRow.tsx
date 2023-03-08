@@ -333,9 +333,9 @@ export const TableBodyRow = <T extends BaseDataRow>(
               {...column}
               onClick={() => {
                 if (
+                  isClickable &&
                   onClickRow &&
-                  propagateClickToParentRowClickEvent &&
-                  !isClickable
+                  propagateClickToParentRowClickEvent
                 ) {
                   onClickRow(row);
                 }
@@ -457,9 +457,9 @@ export const TableBodyRow = <T extends BaseDataRow>(
                   column={ellipsisMenuToolColumn}
                   onClick={() => {
                     if (
+                      isClickable &&
                       onClickRow &&
-                      propagateClickToParentRowClickEvent &&
-                      !isClickable
+                      propagateClickToParentRowClickEvent
                     ) {
                       onClickRow(row);
                     }
@@ -649,9 +649,9 @@ export const TableBodyRow = <T extends BaseDataRow>(
             {...column}
             onClick={() => {
               if (
+                isClickable &&
                 onClickRow &&
-                propagateClickToParentRowClickEvent &&
-                !isClickable
+                propagateClickToParentRowClickEvent
               ) {
                 onClickRow(row);
               }
