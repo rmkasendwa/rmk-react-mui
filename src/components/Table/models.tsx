@@ -149,6 +149,7 @@ export interface TableColumn<
   dateTimeFormat?: string;
   defaultCountryCode?: CountryCode;
   holdsPriorityInformation?: boolean;
+  isGroupHeaderColumn?: boolean;
 }
 
 export interface ForEachDerivedColumnConfiguration<T> {
