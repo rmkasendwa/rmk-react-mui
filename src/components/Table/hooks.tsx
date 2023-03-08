@@ -537,12 +537,13 @@ export const useTable = <DataRow extends BaseDataRow>(
    * **********
    */
   const variantStyles: SxProps<Theme> = {
-    [`.${tableBodyClasses.root} tr.${tableRowClasses.hover}:hover`]: {
-      bgcolor: 'transparent',
-      [`.${tableCellClasses.root}:before`]: {
-        bgcolor: alpha(palette.primary.main, 0.1),
+    [`.${tableBodyClasses.root} tr.${tableRowClasses.hover}:not(.${tableBodyRowClasses.groupHeaderColumn}):hover`]:
+      {
+        bgcolor: 'transparent',
+        [`.${tableCellClasses.root}:before`]: {
+          bgcolor: alpha(palette.primary.main, 0.1),
+        },
       },
-    },
   };
 
   switch (variant) {
