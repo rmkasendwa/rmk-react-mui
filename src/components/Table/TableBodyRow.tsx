@@ -161,8 +161,12 @@ export const TableBodyRow = <T extends BaseDataRow>(
     const columns = (() => {
       if (row.GroupingProps) {
         if ('isGroupHeader' in row.GroupingProps) {
-          const { groupLabel, groupCollapsed, onChangeGroupCollapsed } =
-            row.GroupingProps;
+          const {
+            groupLabel,
+            groupCollapsed,
+            childrenCount,
+            onChangeGroupCollapsed,
+          } = row.GroupingProps;
           const [firstColumn] = inputColumns;
 
           return [
@@ -180,7 +184,32 @@ export const TableBodyRow = <T extends BaseDataRow>(
                     <TableGroupCollapseTool
                       {...{ groupCollapsed, onChangeGroupCollapsed }}
                     />
-                    {groupLabel || DEFAULT_GROUP_LABEL}
+                    <Typography
+                      component="div"
+                      variant="inherit"
+                      noWrap
+                      sx={{
+                        minWidth: 0,
+                      }}
+                    >
+                      {groupLabel || DEFAULT_GROUP_LABEL}
+                    </Typography>
+                    <Badge
+                      color="default"
+                      badgeContent={childrenCount}
+                      max={999}
+                      sx={{
+                        '&>.MuiBadge-badge': {
+                          position: 'relative',
+                          transform: 'none',
+                          bgcolor: (palette.mode === 'dark' ? lighten : darken)(
+                            palette.background.paper,
+                            0.1
+                          ),
+                          ml: 1,
+                        },
+                      }}
+                    />
                   </Stack>
                 );
               },
