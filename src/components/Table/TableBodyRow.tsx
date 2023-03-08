@@ -1,13 +1,17 @@
 import {
+  Badge,
   Box,
   ComponentsOverrides,
   ComponentsProps,
   ComponentsVariants,
   Grid,
   Stack,
+  Typography,
   unstable_composeClasses as composeClasses,
+  darken,
   generateUtilityClass,
   generateUtilityClasses,
+  lighten,
   useMediaQuery,
   useTheme,
   useThemeProps,
@@ -20,6 +24,7 @@ import { Fragment, useEffect, useMemo, useRef } from 'react';
 
 import {
   BaseDataRow,
+  DEFAULT_GROUP_LABEL,
   ELLIPSIS_MENU_TOOL_COLUMN_ID,
   TableRowProps,
 } from './models';
@@ -175,7 +180,7 @@ export const TableBodyRow = <T extends BaseDataRow>(
                     <TableGroupCollapseTool
                       {...{ groupCollapsed, onChangeGroupCollapsed }}
                     />
-                    {groupLabel}
+                    {groupLabel || DEFAULT_GROUP_LABEL}
                   </Stack>
                 );
               },
@@ -431,6 +436,7 @@ export const TableBodyRow = <T extends BaseDataRow>(
           indentLevel,
           groupCollapsed,
           onChangeGroupCollapsed,
+          childrenCount,
         } = row.GroupingProps;
         const [firstColumn, secondColumn, ...restColumns] = inputColumns;
 
@@ -461,7 +467,33 @@ export const TableBodyRow = <T extends BaseDataRow>(
                   <TableGroupCollapseTool
                     {...{ groupCollapsed, onChangeGroupCollapsed }}
                   />
-                  {groupLabel}
+                  <Typography
+                    component="div"
+                    variant="inherit"
+                    noWrap
+                    sx={{
+                      flex: 1,
+                      minWidth: 0,
+                    }}
+                  >
+                    {groupLabel || DEFAULT_GROUP_LABEL}
+                  </Typography>
+                  <Badge
+                    color="default"
+                    badgeContent={childrenCount}
+                    max={999}
+                    sx={{
+                      '&>.MuiBadge-badge': {
+                        position: 'relative',
+                        transform: 'none',
+                        bgcolor: (palette.mode === 'dark' ? lighten : darken)(
+                          palette.background.paper,
+                          0.1
+                        ),
+                        ml: 1,
+                      },
+                    }}
+                  />
                 </Stack>
               );
             },

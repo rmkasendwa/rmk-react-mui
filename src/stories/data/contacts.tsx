@@ -46,7 +46,8 @@ export const contacts = Array.from({ length: 1000 }).map((_, index) => {
       separator: ' ',
     }),
     phoneNumber: createMobilePhoneNumber('UK'),
-    status: contactStatuses[Math.floor(Math.random() * contactStatuses.length)],
+    status:
+      contactStatuses[Math.floor(Math.random() * (contactStatuses.length + 1))],
     email: randomEmail(),
     accountBalance: Math.round(Math.random() * 1000_000),
     source: contactSources[Math.floor(Math.random() * contactSources.length)],
@@ -88,15 +89,17 @@ export const tableColumns: TableColumn<Contact>[] = [
     type: 'enum',
     width: 100,
     getColumnValue: ({ status }) => {
-      return (
-        <EnumValueChip
-          value={status}
-          colors={{
-            Active: '#1F8D60',
-            Pending: '#C31521',
-          }}
-        />
-      );
+      if (status) {
+        return (
+          <EnumValueChip
+            value={status}
+            colors={{
+              Active: '#1F8D60',
+              Pending: '#C31521',
+            }}
+          />
+        );
+      }
     },
   },
   {

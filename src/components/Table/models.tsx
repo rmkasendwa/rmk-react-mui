@@ -1,6 +1,6 @@
 import '@infinite-debugger/rmk-js-extensions/Object';
 
-import { SxProps, Theme, TypographyProps } from '@mui/material';
+import { SxProps, Theme, Typography, TypographyProps } from '@mui/material';
 import { BoxProps } from '@mui/material/Box';
 import { PaginationProps } from '@mui/material/Pagination';
 import { TableProps as MuiBaseTableProps } from '@mui/material/Table';
@@ -19,6 +19,16 @@ import { TableColumnToggleIconButtonProps } from './TableColumnToggleIconButton'
 
 export const CHECKBOX_COLUMN_ID = 'checkbox';
 export const ELLIPSIS_MENU_TOOL_COLUMN_ID = 'ellipsisMenuTool';
+export const DEFAULT_GROUP_LABEL = (
+  <Typography
+    variant="body2"
+    sx={{
+      opacity: 0.3,
+    }}
+  >
+    (Empty)
+  </Typography>
+);
 
 export type BaseRecordsGroupProps = {
   parentGroupId?: string;
@@ -31,6 +41,7 @@ export type RecordsGroupHeaderProps = BaseRecordsGroupProps & {
   groupLabel?: ReactNode;
   indentLevel: number;
   onChangeGroupCollapsed?: (groupCollapsed: boolean) => void;
+  childrenCount: number;
 };
 
 export type RecordsGroupMemberProps = Required<BaseRecordsGroupProps> & {
