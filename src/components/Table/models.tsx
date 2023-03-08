@@ -20,17 +20,20 @@ import { TableColumnToggleIconButtonProps } from './TableColumnToggleIconButton'
 export const CHECKBOX_COLUMN_ID = 'checkbox';
 export const ELLIPSIS_MENU_TOOL_COLUMN_ID = 'ellipsisMenuTool';
 
-export type RecordsGroupHeaderProps = {
+export type BaseRecordsGroupProps = {
+  parentGroupId?: string;
+};
+
+export type RecordsGroupHeaderProps = BaseRecordsGroupProps & {
   isGroupHeader: true;
   groupId: string;
   groupLabel?: ReactNode;
   indentLevel: number;
   groupCollapsed: boolean;
-  parentGroupId?: string;
 };
 
-export type RecordsGroupMemberProps = {
-  parentGroupId: string;
+export type RecordsGroupMemberProps = Required<BaseRecordsGroupProps> & {
+  parentGroupIndentLevel: number;
 };
 
 export type RecordsGroupProps =

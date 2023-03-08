@@ -1284,15 +1284,6 @@ export const BaseRecordsExplorer = <
                     headerSx: {
                       ...baseTableColumns[0].headerSx,
                       zIndex: 5,
-                      ...(() => {
-                        if (groupedData) {
-                          return {
-                            '&>div': {
-                              pl: 2,
-                            },
-                          };
-                        }
-                      })(),
                     },
                     bodySx: {
                       ...baseTableColumns[0].bodySx,
@@ -1311,15 +1302,6 @@ export const BaseRecordsExplorer = <
                     headerSx: {
                       ...allDisplayingColumns[0].headerSx,
                       zIndex: 5,
-                      ...(() => {
-                        if (groupedData) {
-                          return {
-                            '&>div': {
-                              pl: 2,
-                            },
-                          };
-                        }
-                      })(),
                     },
                     bodySx: {
                       ...allDisplayingColumns[0].bodySx,
@@ -1368,6 +1350,7 @@ export const BaseRecordsExplorer = <
                                     ...rest,
                                     GroupingProps: {
                                       parentGroupId: groupId,
+                                      parentGroupIndentLevel: nestIndex,
                                     },
                                   } as RecordRow);
                                 }
