@@ -621,6 +621,7 @@ export const BaseRecordsExplorer = <
       filterBy: searchParamFilterBy,
       selectedColumns: searchParamSelectedColumns,
       expandedGroups: searchParamExpandedGroups,
+      expandedGroupsInverted: searchParamExpandedGroupsInverted,
       modifiedKeys: modifiedStateKeys,
     },
     setSearchParams,
@@ -637,6 +638,7 @@ export const BaseRecordsExplorer = <
         })
       ),
       expandedGroups: Yup.mixed<'All' | 'None' | string[]>(),
+      expandedGroupsInverted: Yup.boolean(),
       sortBy: Yup.array().of(
         Yup.object({
           id: Yup.mixed<keyof RecordRow>().required(),
@@ -1105,6 +1107,7 @@ export const BaseRecordsExplorer = <
         search: null,
         selectedColumns: null,
         expandedGroups: null,
+        expandedGroupsInverted: null,
         filterBy: null,
         modifiedKeys: null,
       },
@@ -1123,6 +1126,7 @@ export const BaseRecordsExplorer = <
     }
     return [];
   })();
+  const expandedGroupsInverted = Boolean(searchParamExpandedGroupsInverted);
 
   const viewElement = (() => {
     if (views) {
@@ -1224,8 +1228,15 @@ export const BaseRecordsExplorer = <
                             }`;
                             const groupCollapsed =
                               parentGroupCollapsed ||
-                              (!expandedGroups.includes(groupId) &&
-                                !allGroupsExpanded);
+                              (() => {
+                                if (expandedGroupsInverted) {
+                                  return expandedGroups.includes(groupId);
+                                }
+                                return (
+                                  !expandedGroups.includes(groupId) &&
+                                  !allGroupsExpanded
+                                );
+                              })();
                             allGroupIds.push(groupId);
                             if (generateGroupHeaderRow) {
                               groupRows.push({
@@ -1239,39 +1250,67 @@ export const BaseRecordsExplorer = <
                                   indentLevel,
                                   parentGroupId,
                                   onChangeGroupCollapsed: (collapsed) => {
-                                    const groups = allGroupsExpanded
-                                      ? allGroupIds
-                                      : [...expandedGroups];
+                                    const allExpandedGroups = (() => {
+                                      if (expandedGroupsInverted) {
+                                        return allGroupIds.filter((groupId) => {
+                                          return !expandedGroups.includes(
+                                            groupId
+                                          );
+                                        });
+                                      }
+                                      return allGroupsExpanded
+                                        ? [...allGroupIds]
+                                        : [...expandedGroups];
+                                    })();
                                     if (collapsed) {
-                                      groups.includes(groupId) &&
-                                        groups.splice(
-                                          groups.indexOf(groupId),
+                                      allExpandedGroups.includes(groupId) &&
+                                        allExpandedGroups.splice(
+                                          allExpandedGroups.indexOf(groupId),
                                           1
                                         );
                                     } else {
-                                      groups.includes(groupId) ||
-                                        groups.push(groupId);
+                                      allExpandedGroups.includes(groupId) ||
+                                        allExpandedGroups.push(groupId);
                                     }
+                                    const allCollapsedGroups =
+                                      allGroupIds.filter((groupId) => {
+                                        return !allExpandedGroups.includes(
+                                          groupId
+                                        );
+                                      });
+                                    const nextExpandedGroupsInverted =
+                                      allCollapsedGroups.length <
+                                      allExpandedGroups.length;
                                     setSearchParams(
                                       {
                                         expandedGroups: (() => {
-                                          if (groups.length > 0) {
+                                          if (allExpandedGroups.length > 0) {
                                             if (
                                               groupedData.length ===
-                                              groups.length
+                                              allExpandedGroups.length
                                             ) {
                                               return 'All';
                                             }
-                                            groups.includes('None') &&
-                                              groups.splice(
-                                                groups.indexOf('None'),
+                                            if (
+                                              allExpandedGroups.includes('None')
+                                            ) {
+                                              allExpandedGroups.splice(
+                                                allExpandedGroups.indexOf(
+                                                  'None'
+                                                ),
                                                 1
                                               );
-                                            return groups;
+                                            }
+                                            if (nextExpandedGroupsInverted) {
+                                              return allCollapsedGroups;
+                                            }
+                                            return allExpandedGroups;
                                           } else {
                                             return 'None';
                                           }
                                         })(),
+                                        expandedGroupsInverted:
+                                          nextExpandedGroupsInverted,
                                       },
                                       {
                                         replace: true,
@@ -1472,6 +1511,7 @@ export const BaseRecordsExplorer = <
                                     expandedGroups: allGroupsExpanded
                                       ? 'None'
                                       : 'All',
+                                    expandedGroupsInverted: null,
                                   },
                                   {
                                     replace: true,
