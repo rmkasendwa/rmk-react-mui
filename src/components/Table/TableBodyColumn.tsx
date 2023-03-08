@@ -127,6 +127,7 @@ export const TableBodyColumn = forwardRef<any, TableBodyColumnProps<any>>(
       noWrap,
       enableSmallScreenOptimization = false,
       showBodyContent = true,
+      colSpan,
     } = props;
 
     const classes = composeClasses(
@@ -376,7 +377,7 @@ export const TableBodyColumn = forwardRef<any, TableBodyColumnProps<any>>(
     return (
       <TableCell
         ref={ref}
-        {...{ align }}
+        {...{ align, colSpan }}
         className={clsx(classes.root)}
         onClick={(event) => {
           onClickColumn && onClickColumn(row, column);

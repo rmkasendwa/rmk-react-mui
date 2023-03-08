@@ -161,7 +161,7 @@ export const TableBodyRow = <T extends BaseDataRow>(
           groupCollapsed,
           onChangeGroupCollapsed,
         } = row.GroupingProps;
-        const [firstColumn, ...restColumns] = inputColumns;
+        const [firstColumn, secondColumn, ...restColumns] = inputColumns;
 
         return [
           {
@@ -194,14 +194,13 @@ export const TableBodyRow = <T extends BaseDataRow>(
                 </Stack>
               );
             },
-          } as typeof firstColumn,
-          ...restColumns.map((column) => {
-            return {
-              ...column,
-              showBodyContent: false,
-            };
-          }),
-        ];
+          },
+          {
+            ...secondColumn,
+            showBodyContent: false,
+            colSpan: restColumns.length + 1,
+          },
+        ] as typeof inputColumns;
       } else {
         const { parentGroupIndentLevel } = row.GroupingProps;
         const [firstColumn, ...restColumns] = inputColumns;
