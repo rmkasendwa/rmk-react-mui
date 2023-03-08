@@ -20,6 +20,7 @@ import TableRow, {
   TableRowProps as MuiTableRowProps,
 } from '@mui/material/TableRow';
 import clsx from 'clsx';
+import { omit } from 'lodash';
 import { Fragment, useEffect, useMemo, useRef } from 'react';
 
 import {
@@ -36,6 +37,7 @@ export interface TableBodyRowClasses {
   /** Styles applied to the root element. */
   root: string;
   smallScreen: string;
+  groupHeaderColumn: string;
 }
 
 export type TableBodyRowClassKey = keyof TableBodyRowClasses;
@@ -77,12 +79,13 @@ export function getTableBodyRowUtilityClass(slot: string): string {
 
 export const tableBodyRowClasses: TableBodyRowClasses = generateUtilityClasses(
   'MuiTableBodyRow',
-  ['root', 'smallScreen']
+  ['root', 'smallScreen', 'groupHeaderColumn']
 );
 
 const slots = {
   root: ['root'],
   smallScreen: ['smallScreen'],
+  groupHeaderColumn: ['groupHeaderColumn'],
 };
 
 export const TableBodyRow = <T extends BaseDataRow>(
@@ -157,6 +160,9 @@ export const TableBodyRow = <T extends BaseDataRow>(
 
   const { sx: rowPropsSx, ...rowPropsRest } = rowProps;
 
+  const isGroupHeader =
+    row.GroupingProps && 'isGroupHeader' in row.GroupingProps;
+
   if (enableSmallScreenOptimization && isSmallScreenSize) {
     const columns = (() => {
       if (row.GroupingProps) {
@@ -171,7 +177,7 @@ export const TableBodyRow = <T extends BaseDataRow>(
 
           return [
             {
-              ...firstColumn,
+              ...omit(firstColumn, 'onClickRow'),
               getColumnValue: () => {
                 return (
                   <Stack
@@ -220,8 +226,6 @@ export const TableBodyRow = <T extends BaseDataRow>(
       }
       return inputColumns;
     })();
-    const isGroupHeader =
-      row.GroupingProps && 'isGroupHeader' in row.GroupingProps;
 
     const indentLevel = (() => {
       if (row.GroupingProps) {
@@ -297,7 +301,11 @@ export const TableBodyRow = <T extends BaseDataRow>(
     return (
       <Grid
         {...rest}
-        className={clsx(classes.root, classes.smallScreen)}
+        className={clsx(
+          classes.root,
+          classes.smallScreen,
+          isGroupHeader && classes.groupHeaderColumn
+        )}
         container
         sx={{
           alignItems: 'center',
@@ -471,7 +479,7 @@ export const TableBodyRow = <T extends BaseDataRow>(
 
         return [
           {
-            ...firstColumn,
+            ...omit(firstColumn, 'onClickRow'),
             getColumnValue: () => {
               return (
                 <Stack
@@ -578,7 +586,7 @@ export const TableBodyRow = <T extends BaseDataRow>(
     <TableRow
       {...rowPropsRest}
       {...rest}
-      className={clsx(classes.root)}
+      className={clsx(classes.root, isGroupHeader && classes.groupHeaderColumn)}
       hover
       sx={{
         verticalAlign: 'top',
