@@ -193,7 +193,6 @@ export const PaginatedDropdownOptionList = forwardRef<
   // Refs
   const isInitialMountRef = useRef(true);
   const optionsRef = useRef(optionsProp);
-  const onCloseRef = useRef(onClose);
   const onSelectOptionRef = useRef(onSelectOption);
   const onLoadOptionsRef = useRef(onLoadOptions);
   const onChangeSearchTermRef = useRef(onChangeSearchTerm);
@@ -201,7 +200,6 @@ export const PaginatedDropdownOptionList = forwardRef<
   const onChangeAsyncOptionPagesMapRef = useRef(onChangeAsyncOptionPagesMap);
   useEffect(() => {
     optionsRef.current = optionsProp;
-    onCloseRef.current = onClose;
     onSelectOptionRef.current = onSelectOption;
     onLoadOptionsRef.current = onLoadOptions;
     onChangeSearchTermRef.current = onChangeSearchTerm;
@@ -404,6 +402,7 @@ export const PaginatedDropdownOptionList = forwardRef<
       setLocalSelectedOptions(nextOptions);
     }
     onChangeSelectedOptions && onChangeSelectedOptions(nextOptions);
+    !multiple && onClose && onClose();
   };
 
   useEffect(() => {
@@ -627,6 +626,7 @@ export const PaginatedDropdownOptionList = forwardRef<
               }
               onChangeSelectedOptions &&
                 onChangeSelectedOptions(selectableOptions);
+              !multiple && onClose && onClose();
             }}
             height={optionHeight}
           >

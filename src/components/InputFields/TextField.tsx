@@ -171,11 +171,18 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
     );
 
     const { loading, errorMessage, locked } = useLoadingContext();
-    const [inputValue, setInputValue] = useState('');
+    const [localInputValue, setLocalInputValue] = useState(value ?? '');
+
+    const inputValue = (() => {
+      if (onChangeRef.current && value != null) {
+        return value;
+      }
+      return localInputValue;
+    })();
 
     useEffect(() => {
       if (onChangeRef.current && value != null) {
-        setInputValue(value);
+        setLocalInputValue(value);
       }
     }, [value]);
 
@@ -285,7 +292,7 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
             value={inputValue}
             onChange={(event) => {
               if (!onChangeRef.current || value == null) {
-                setInputValue(event.target.value);
+                setLocalInputValue(event.target.value);
               }
               triggerChangeEvent(event.target.value);
             }}
@@ -306,7 +313,7 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
                               onClick={(event) => {
                                 event.preventDefault();
                                 if (!onChangeRef.current || value == null) {
-                                  setInputValue('');
+                                  setLocalInputValue('');
                                 }
                                 triggerChangeEvent('');
                               }}

@@ -595,6 +595,9 @@ export const DataDropdownField = forwardRef<
                               })(),
                               pr: 1,
                               mr: 0.5,
+                              '&>*': {
+                                flexWrap: 'nowrap',
+                              },
                               ...SelectedOptionPillPropsSx,
                             }}
                           >

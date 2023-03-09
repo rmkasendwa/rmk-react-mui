@@ -9,7 +9,7 @@ import {
   useThemeProps,
 } from '@mui/material';
 import clsx from 'clsx';
-import { forwardRef, useEffect, useRef, useState } from 'react';
+import { forwardRef } from 'react';
 
 import TextField, { TextFieldProps } from './InputFields/TextField';
 
@@ -70,7 +70,7 @@ export const SearchField = forwardRef<HTMLDivElement, SearchFieldProps>(
     const props = useThemeProps({ props: inProps, name: 'MuiSearchField' });
     const {
       className,
-      searchTerm: searchTermProp = '',
+      searchTerm,
       onSearch,
       onChangeSearchTerm,
       searchVelocity,
@@ -95,32 +95,6 @@ export const SearchField = forwardRef<HTMLDivElement, SearchFieldProps>(
 
     const { sx: InputPropsSx, ...InputPropsRest } = InputProps;
 
-    // Refs
-    const onSearchRef = useRef(onSearch);
-    const isInitialMountRef = useRef(true);
-    useEffect(() => {
-      onSearchRef.current = onSearch;
-    }, [onSearch]);
-
-    const [searchTerm, setSearchTerm] = useState(searchTermProp);
-
-    useEffect(() => {
-      if (searchTerm.length <= 0 && !isInitialMountRef.current) {
-        onSearchRef.current && onSearchRef.current(searchTerm);
-      }
-    }, [searchTerm]);
-
-    useEffect(() => {
-      setSearchTerm(searchTermProp);
-    }, [searchTermProp]);
-
-    useEffect(() => {
-      isInitialMountRef.current = false;
-      return () => {
-        isInitialMountRef.current = true;
-      };
-    }, []);
-
     return (
       <TextField
         ref={ref}
@@ -141,7 +115,6 @@ export const SearchField = forwardRef<HTMLDivElement, SearchFieldProps>(
         }}
         value={searchTerm}
         onChange={(event) => {
-          setSearchTerm(event.target.value);
           onChangeSearchTerm && onChangeSearchTerm(event.target.value);
           if (onSearch && searchVelocity === 'fast') {
             onSearch(event.target.value);
@@ -150,12 +123,14 @@ export const SearchField = forwardRef<HTMLDivElement, SearchFieldProps>(
         }}
         onKeyUp={(event) => {
           if (event.key === 'Enter' && onSearch) {
-            onSearch(searchTerm);
+            onSearch((event.target as any).value);
           }
           onKeyUp && onKeyUp(event);
         }}
         onBlur={(event) => {
-          onSearch && onSearch(searchTerm);
+          if (searchVelocity === 'slow' && onSearch) {
+            onSearch(event.target.value);
+          }
           onBlur && onBlur(event);
         }}
         enableLoadingState={false}
