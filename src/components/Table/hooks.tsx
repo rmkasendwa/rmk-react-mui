@@ -453,8 +453,8 @@ export const useTable = <DataRow extends BaseDataRow>(
   })();
 
   const selectedColumns = [
+    CHECKBOX_COLUMN_ID,
     ...selectedColumnIds,
-    'checkbox',
     ELLIPSIS_MENU_TOOL_COLUMN_ID,
   ]
     .map((selectedColumnId) => {

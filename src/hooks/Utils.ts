@@ -417,12 +417,10 @@ export const usePaginatedRecords = <T>(
   const recordsTotalCountRef = useRef(0);
   const hasNextPageRef = useRef(true);
   const limitRef = useRef(limit);
-  const offsetRef = useRef(offset);
   useEffect(() => {
     recordFinderRef.current = recordFinder;
     loadedPagesMapRef.current = loadedPagesMap;
     limitRef.current = limit;
-    offsetRef.current = offset;
   }, [limit, loadedPagesMap, offset, recordFinder]);
 
   const {
@@ -449,7 +447,7 @@ export const usePaginatedRecords = <T>(
     (params: PaginatedRequestParams = {}) => {
       revalidationKey; // Triggering reload whenever extra parameters change
       params = { ...params };
-      params.offset || (params.offset = offsetRef.current);
+      params.offset || (params.offset = offset);
       params.limit || (params.limit = limit);
       params.searchTerm || (params.searchTerm = searchTerm);
       return loadFromAPIService(async () => {
@@ -495,7 +493,14 @@ export const usePaginatedRecords = <T>(
         return responseData;
       });
     },
-    [limit, loadFromAPIService, loadedPages, revalidationKey, searchTerm]
+    [
+      limit,
+      loadFromAPIService,
+      loadedPages,
+      offset,
+      revalidationKey,
+      searchTerm,
+    ]
   );
 
   const loadNextPage = useCallback(
@@ -543,8 +548,13 @@ export const usePaginatedRecords = <T>(
   });
 
   useEffect(() => {
-    if (autoSync && (loadOnMount || !isInitialMountRef.current)) {
+    if (limit) {
       resetRef.current();
+    }
+  }, [limit]);
+
+  useEffect(() => {
+    if (autoSync && (loadOnMount || !isInitialMountRef.current)) {
       load();
     }
   }, [autoSync, load, loadOnMount]);
