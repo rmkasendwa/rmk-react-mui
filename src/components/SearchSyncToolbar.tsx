@@ -259,7 +259,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
       className,
       title,
       hasSearchTool = true,
-      searchTerm: searchTermProp = '',
+      searchTerm,
       searchFieldPlaceholder,
       hasSyncTool = true,
       load,
@@ -297,10 +297,6 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
     // Refs
     const isInitialMountRef = useRef(true);
     const anchorElementRef = useRef<HTMLDivElement | null>(null);
-    const onSearchRef = useRef(onSearch);
-    useEffect(() => {
-      onSearchRef.current = onSearch;
-    }, [onSearch]);
 
     const { sx: titlePropsSx, ...titlePropsRest } = TitleProps;
 
@@ -308,20 +304,9 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
     const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
 
     const [showFullToolWidth, setShowFullToolWidth] = useState(false);
-    const [searchTerm, setSearchTerm] = useState('');
     const [searchFieldOpen, setSearchFieldOpen] = useState(
-      searchTermProp.length > 0
+      Boolean(searchTerm && searchTerm.length > 0)
     );
-
-    useEffect(() => {
-      if (searchTerm.length <= 0 && !isInitialMountRef.current) {
-        onSearchRef.current && onSearchRef.current(searchTerm);
-      }
-    }, [searchTerm]);
-
-    useEffect(() => {
-      setSearchTerm(searchTermProp);
-    }, [searchTermProp]);
 
     useEffect(() => {
       if (anchorElementRef.current) {
@@ -415,10 +400,9 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                 }}
                 InputProps={{
                   disableUnderline: true,
-                  autoFocus: searchTermProp.length <= 0 && searchFieldOpen,
-                }}
-                onChange={(event) => {
-                  setSearchTerm(event.target.value);
+                  autoFocus: Boolean(
+                    (!searchTerm || searchTerm.length <= 0) && searchFieldOpen
+                  ),
                 }}
                 size="small"
               />
@@ -429,7 +413,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                 <Grid item xs sx={{ minWidth: 0 }}>
                   <ClickAwayListener
                     onClickAway={() => {
-                      if (searchTerm.length <= 0) {
+                      if (!searchTerm || searchTerm.length <= 0) {
                         setSearchFieldOpen(false);
                       }
                     }}
@@ -487,8 +471,10 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                               fullWidth
                               {...SearchFieldPropsRest}
                               InputProps={{
-                                autoFocus:
-                                  searchTermProp.length <= 0 && searchFieldOpen,
+                                autoFocus: Boolean(
+                                  (!searchTerm || searchTerm.length <= 0) &&
+                                    searchFieldOpen
+                                ),
                               }}
                               {...{
                                 searchTerm,
@@ -496,16 +482,13 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                                 onChangeSearchTerm,
                                 searchVelocity,
                               }}
-                              onChange={(event) => {
-                                setSearchTerm(event.target.value);
-                              }}
                               size="small"
                             />
                           );
                           return (
                             <ClickAwayListener
                               onClickAway={() => {
-                                if (searchTerm.length <= 0) {
+                                if (!searchTerm || searchTerm.length <= 0) {
                                   setSearchFieldOpen(false);
                                 }
                               }}
