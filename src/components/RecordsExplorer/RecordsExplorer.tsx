@@ -1374,6 +1374,15 @@ export const BaseRecordsExplorer = <
                         extraWidth,
                       };
 
+                      const firstDisplayingColumn = baseTableColumns.find(
+                        ({ id }) => {
+                          return id === displayingColumns[0].id;
+                        }
+                      );
+                      if (firstDisplayingColumn) {
+                        delete firstDisplayingColumn.width;
+                      }
+
                       return groupRows;
                     }
                     return filteredData;
@@ -1472,24 +1481,6 @@ export const BaseRecordsExplorer = <
                         );
                       }
                     },
-                  };
-
-                  allDisplayingColumns[0] = {
-                    ...allDisplayingColumns[0],
-                    sx: {
-                      ...allDisplayingColumns[0].sx,
-                      position: 'sticky',
-                      left: 0,
-                    },
-                    headerSx: {
-                      ...allDisplayingColumns[0].headerSx,
-                      zIndex: 5,
-                    },
-                    bodySx: {
-                      ...allDisplayingColumns[0].bodySx,
-                      zIndex: 1,
-                    },
-                    opaque: true,
                   };
 
                   return (
