@@ -26,6 +26,7 @@ import {
   BaseDataRow,
   DEFAULT_GROUP_LABEL,
   ELLIPSIS_MENU_TOOL_COLUMN_ID,
+  ROW_NUMBER_COLUMN_ID,
   TableRowProps,
 } from './models';
 import TableBodyColumn from './TableBodyColumn';
@@ -262,7 +263,7 @@ export const TableBodyRow = <T extends BaseDataRow>(
       return id === ELLIPSIS_MENU_TOOL_COLUMN_ID;
     });
     const rowNumberColumn = columns.find(({ id }) => {
-      return id === 'rowNumber';
+      return id === ROW_NUMBER_COLUMN_ID;
     });
     const column: typeof highestPriorityColumn = {
       ...highestPriorityColumn,

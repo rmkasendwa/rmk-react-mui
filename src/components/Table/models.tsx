@@ -18,6 +18,7 @@ import { RenderIfVisibleProps } from '../RenderIfVisible';
 import { TableColumnToggleIconButtonProps } from './TableColumnToggleIconButton';
 
 export const CHECKBOX_COLUMN_ID = 'checkbox';
+export const ROW_NUMBER_COLUMN_ID = 'rowNumber';
 export const ELLIPSIS_MENU_TOOL_COLUMN_ID = 'ellipsisMenuTool';
 export const DEFAULT_GROUP_LABEL = (
   <Typography
