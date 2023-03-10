@@ -5,6 +5,7 @@ import {
   BaseDataRow,
   CHECKBOX_COLUMN_ID,
   ELLIPSIS_MENU_TOOL_COLUMN_ID,
+  ROW_NUMBER_COLUMN_ID,
   TableColumn,
   TableColumnType,
   TableProps,
@@ -225,7 +226,7 @@ export const getComputedTableProps = <DataRow extends BaseDataRow>(
 
   if (showRowNumber) {
     computedColumns.push({
-      id: 'rowNumber' as any,
+      id: ROW_NUMBER_COLUMN_ID as any,
       label: 'Number',
       width: 60,
       align: 'right',

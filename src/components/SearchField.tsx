@@ -9,7 +9,7 @@ import {
   useThemeProps,
 } from '@mui/material';
 import clsx from 'clsx';
-import { forwardRef } from 'react';
+import { forwardRef, useState } from 'react';
 
 import TextField, { TextFieldProps } from './InputFields/TextField';
 
@@ -70,7 +70,7 @@ export const SearchField = forwardRef<HTMLDivElement, SearchFieldProps>(
     const props = useThemeProps({ props: inProps, name: 'MuiSearchField' });
     const {
       className,
-      searchTerm,
+      searchTerm: searchTermProp,
       onSearch,
       onChangeSearchTerm,
       searchVelocity,
@@ -94,6 +94,16 @@ export const SearchField = forwardRef<HTMLDivElement, SearchFieldProps>(
     );
 
     const { sx: InputPropsSx, ...InputPropsRest } = InputProps;
+    const [localSearchTerm, setLocalSearchTerm] = useState(
+      searchTermProp || ''
+    );
+
+    const searchTerm = (() => {
+      if (searchTermProp && onChangeSearchTerm) {
+        return searchTermProp;
+      }
+      return localSearchTerm;
+    })();
 
     return (
       <TextField
@@ -115,6 +125,9 @@ export const SearchField = forwardRef<HTMLDivElement, SearchFieldProps>(
         }}
         value={searchTerm}
         onChange={(event) => {
+          if (!searchTermProp || !onChangeSearchTerm) {
+            setLocalSearchTerm(event.target.value);
+          }
           onChangeSearchTerm && onChangeSearchTerm(event.target.value);
           if (onSearch && searchVelocity === 'fast') {
             onSearch(event.target.value);

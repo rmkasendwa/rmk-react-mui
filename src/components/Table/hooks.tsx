@@ -41,6 +41,7 @@ import {
   BaseDataRow,
   CHECKBOX_COLUMN_ID,
   ELLIPSIS_MENU_TOOL_COLUMN_ID,
+  ROW_NUMBER_COLUMN_ID,
   TableProps,
 } from './models';
 import { tableBodyColumnClasses } from './TableBodyColumn';
@@ -340,7 +341,9 @@ export const useTable = <DataRow extends BaseDataRow>(
     }
 
     if (showRowNumber) {
-      const numberColumn = allColumns.find(({ id }) => id === 'rowNumber');
+      const numberColumn = allColumns.find(
+        ({ id }) => id === ROW_NUMBER_COLUMN_ID
+      );
       if (numberColumn) {
         computedColumns.push({
           ...numberColumn,
@@ -454,6 +457,7 @@ export const useTable = <DataRow extends BaseDataRow>(
 
   const selectedColumns = [
     CHECKBOX_COLUMN_ID,
+    ROW_NUMBER_COLUMN_ID,
     ...selectedColumnIds,
     ELLIPSIS_MENU_TOOL_COLUMN_ID,
   ]
