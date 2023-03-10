@@ -129,7 +129,10 @@ export const SearchField = forwardRef<HTMLDivElement, SearchFieldProps>(
             setLocalSearchTerm(event.target.value);
           }
           onChangeSearchTerm && onChangeSearchTerm(event.target.value);
-          if (onSearch && searchVelocity === 'fast') {
+          if (
+            onSearch &&
+            (searchVelocity === 'fast' || event.target.value.length <= 0)
+          ) {
             onSearch(event.target.value);
           }
           onChange && onChange(event);
