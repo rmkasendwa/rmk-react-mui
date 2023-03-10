@@ -380,6 +380,7 @@ export const BaseRecordsExplorer = <
   // Refs
   const isInitialMountRef = useRef(true);
   const headerElementRef = useRef<HTMLDivElement | null>(null);
+  const bodyElementRef = useRef<HTMLDivElement | null>(null);
   const filterBySearchTermRef = useRef(filterBySearchTerm);
   const searchableFieldsRef = useRef(searchableFieldsProp);
   const filterFieldsRef = useRef(filterFieldsProp);
@@ -1514,6 +1515,7 @@ export const BaseRecordsExplorer = <
                           };
                         }
                       })()}
+                      scrollableElement={bodyElementRef.current}
                       stickyHeader
                       sx={{
                         minWidth,
@@ -1725,6 +1727,7 @@ export const BaseRecordsExplorer = <
       </Paper>
       <Box
         {...BodyPropsRest}
+        ref={bodyElementRef}
         component="section"
         sx={{
           position: 'relative',
