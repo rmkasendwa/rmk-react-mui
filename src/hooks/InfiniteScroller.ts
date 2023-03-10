@@ -3,9 +3,9 @@ import { ReactNode, useEffect, useRef, useState } from 'react';
 const LOAD_NEXT_BOUNDARY_THRESHOLD = 80;
 
 export interface UseLoadOnScrollToBottomOptions {
-  element?: HTMLElement;
+  element?: HTMLElement | null;
   bottomThreshold?: number;
-  load: () => void;
+  load?: () => void;
   onChangeScrollLength?: (scrollLength: {
     scrollTop: number;
     scrollLeft: number;
@@ -205,7 +205,8 @@ export const useLoadOnScrollToBottom = ({
         })();
         if (
           element.scrollHeight > element.offsetHeight &&
-          hasScrolledToBottom
+          hasScrolledToBottom &&
+          loadRef.current
         ) {
           loadRef.current();
         }

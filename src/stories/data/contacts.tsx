@@ -68,6 +68,7 @@ export const tableColumns: TableColumn<Contact>[] = [
               email={email}
               label={name}
               defaultAvatar="highContrastHueShiftingIntials"
+              defaultGravatar="robohash"
             />
           }
           variant="inherit"

@@ -69,6 +69,14 @@ export interface ProfileGravatarProps
       >
     > {
   email?: string;
+  defaultGravatar?:
+    | 'mp'
+    | 'identicon'
+    | 'monsterid'
+    | 'wavatar'
+    | 'retro'
+    | 'robohash'
+    | 'blank';
 }
 
 export function getProfileGravatarUtilityClass(slot: string): string {
@@ -96,6 +104,7 @@ export const ProfileGravatar = forwardRef<HTMLDivElement, ProfileGravatarProps>(
       src,
       sx,
       children,
+      defaultGravatar = 'blank',
       ...rest
     } = props;
 
@@ -153,7 +162,7 @@ export const ProfileGravatar = forwardRef<HTMLDivElement, ProfileGravatarProps>(
                 md5EmailHash: MD5(email).toString(),
               }),
               {
-                default: 'blank',
+                default: defaultGravatar,
                 size,
               }
             )}

@@ -269,6 +269,7 @@ export interface TableProps<DataRow extends BaseDataRow = any>
   isGroupedTable?: boolean;
   TableGroupingProps?: TableGroupingProps;
   allPropsComputed?: boolean;
+  scrollableElement?: HTMLElement | null;
 
   // Sort props
   sortable?: boolean;
