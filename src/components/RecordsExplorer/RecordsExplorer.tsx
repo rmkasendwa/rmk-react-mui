@@ -1,6 +1,8 @@
 import '@infinite-debugger/rmk-js-extensions/JSON';
 
+import { addSearchParams } from '@infinite-debugger/rmk-utils/paths';
 import AddIcon from '@mui/icons-material/Add';
+import HelpIcon from '@mui/icons-material/Help';
 import LockResetIcon from '@mui/icons-material/LockReset';
 import {
   Box,
@@ -9,8 +11,11 @@ import {
   ComponentsProps,
   ComponentsVariants,
   Divider,
+  Grid,
   Paper,
   PaperProps,
+  Slide,
+  Tooltip,
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
   generateUtilityClasses,
@@ -23,6 +28,7 @@ import {
 } from '@mui/material';
 import { BoxProps } from '@mui/material/Box';
 import clsx from 'clsx';
+import { FormikValues } from 'formik';
 import { omit } from 'lodash';
 import {
   ReactElement,
@@ -33,11 +39,20 @@ import {
   useMemo,
   useRef,
 } from 'react';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useLocation, useNavigate } from 'react-router-dom';
 import * as Yup from 'yup';
 
 import { useAuth } from '../../contexts/AuthContext';
+import { LoadingContext, LoadingProvider } from '../../contexts/LoadingContext';
 import { useReactRouterDOMSearchParams } from '../../hooks/ReactRouterDOM';
+import {
+  PaginatedRecordsFinderOptions,
+  UsePaginatedRecordsOptions,
+  useCreate,
+  usePaginatedRecords,
+  useRecord,
+  useUpdate,
+} from '../../hooks/Utils';
 import {
   SelectedSortOption,
   SortBy,
@@ -46,7 +61,11 @@ import {
   sortDirections,
 } from '../../interfaces/Sort';
 import { PermissionCode } from '../../interfaces/Users';
-import { PrimitiveDataType } from '../../interfaces/Utils';
+import {
+  CrudMode,
+  PaginatedResponseData,
+  PrimitiveDataType,
+} from '../../interfaces/Utils';
 import { sort } from '../../utils/Sort';
 import DataTablePagination from '../DataTablePagination';
 import FixedHeaderContentArea, {
@@ -55,6 +74,10 @@ import FixedHeaderContentArea, {
 import IconLoadingScreen, {
   IconLoadingScreenProps,
 } from '../IconLoadingScreen';
+import ModalForm, {
+  ModalFormFunctionChildren,
+  ModalFormProps,
+} from '../ModalForm';
 import SearchSyncToolbar, {
   SearchSyncToolbarProps,
   Tool,
@@ -176,7 +199,8 @@ export interface RecordsExplorerFunctionChildren<State> {
 
 export interface RecordsExplorerProps<
   RecordRow extends BaseDataRow = any,
-  View extends ViewOptionType = ViewOptionType
+  View extends ViewOptionType = ViewOptionType,
+  InitialValues extends FormikValues = FormikValues
 > extends Partial<Omit<PaperProps, 'title' | 'children'>>,
     Partial<Pick<FixedHeaderContentAreaProps, 'title'>>,
     Partial<
@@ -187,6 +211,16 @@ export interface RecordsExplorerProps<
         | 'enableCheckboxRowSelectors'
         | 'showRowNumber'
       >
+    >,
+    Partial<
+      Pick<
+        ModalFormProps<InitialValues>,
+        'validationSchema' | 'editableFields' | 'placement'
+      >
+    >,
+    Pick<
+      UsePaginatedRecordsOptions<RecordRow>,
+      'revalidationKey' | 'autoSync'
     > {
   rows?: RecordRow[];
   getTitle?: RecordsExplorerFunctionChildren<
@@ -281,6 +315,57 @@ export interface RecordsExplorerProps<
     grouping: GroupableField<RecordRow>
   ) => RecordRow[];
   showPaginationStats?: boolean;
+
+  // Form
+  editorForm?:
+    | ModalFormFunctionChildren<
+        InitialValues,
+        {
+          mode: CrudMode;
+          selectedRecord?: RecordRow | null;
+          loadingState: LoadingContext;
+        }
+      >
+    | ReactNode;
+  description?: ReactNode;
+  recordsFinder?: (
+    options: PaginatedRecordsFinderOptions
+  ) => Promise<PaginatedResponseData<RecordRow> | RecordRow[]>;
+  recordDetailsFinder?: (selectedRecordId: string) => Promise<RecordRow>;
+  getEditableRecordInitialValues?: (record: RecordRow) => any;
+  recordCreator?: (values: InitialValues) => any;
+  recordEditor?: (record: RecordRow, values: InitialValues) => any;
+  recordDeletor?: (record: RecordRow) => any;
+  recordKey?: string;
+  initialValues?: InitialValues;
+  editValidationSchema?: any | (() => any);
+  defaultPath?: string;
+  getTableDataReloadFunction?: (reloadFunction: () => void) => void;
+  getCreateFunction?: (createFunction: () => void) => void;
+  getEditFunction?: (editFunction: (record: RecordRow) => void) => void;
+  getDeleteFunction?: (editFunction: (record: RecordRow) => void) => void;
+  onEditRecord?: () => void;
+  getToolbarElement?: (toolbarElement: ReactElement) => ReactElement;
+
+  // View Path
+  templatePathToView?: string;
+  pathToView?: string;
+  getPathToView?: (record: RecordRow) => string;
+  getViewTitle?: (record: RecordRow) => ReactNode;
+
+  // Edit Path
+  templatePathToEdit?: string;
+  pathToEdit?: string;
+  getPathToEdit?: (record: RecordRow) => string;
+
+  showRecords?: boolean;
+
+  getExtraRowTools?: (record: RecordRow) => ReactNode;
+  extraActionsColumnWidth?: number;
+
+  SearchSyncToolbarProps?: Partial<SearchSyncToolbarProps>;
+
+  ModalFormProps?: Partial<ModalFormProps>;
 }
 
 export function getRecordsExplorerUtilityClass(slot: string): string {
@@ -308,13 +393,13 @@ export const BaseRecordsExplorer = <
     getTitle,
     sx,
     fillContentArea = true,
-    load,
-    loading,
-    errorMessage,
+    load: loadProp,
+    loading: loadingProp,
+    errorMessage: errorMessageProp,
     HeaderProps = {},
     BodyProps = {},
     IconLoadingScreenProps = {},
-    data,
+    data: dataProp,
     ViewOptionsButtonProps,
     filterFields: filterFieldsProp,
     sortableFields: sortableFieldsProp,
@@ -338,6 +423,28 @@ export const BaseRecordsExplorer = <
     enableCheckboxRowSelectors: enableCheckboxRowSelectorsProp,
     showRowNumber: showRowNumberProp,
     id,
+    recordCreator,
+    editorForm,
+    validationSchema,
+    initialValues,
+    placement = 'right',
+    ModalFormProps = {},
+    description,
+    autoSync = true,
+    defaultPath,
+    recordDetailsFinder,
+    recordEditor,
+    editableFields,
+    editValidationSchema,
+    getViewTitle,
+    onEditRecord,
+    pathToEdit,
+    getPathToEdit,
+    getEditableRecordInitialValues,
+    recordsFinder,
+    recordKey,
+    showRecords,
+    revalidationKey,
     ...rest
   } = omit(
     props,
@@ -376,9 +483,9 @@ export const BaseRecordsExplorer = <
   const { sx: HeaderPropsSx, ...HeaderPropsRest } = HeaderProps;
   const { sx: BodyPropsSx, ...BodyPropsRest } = BodyProps;
   const { ...SearchSyncToolBarPropsRest } = SearchSyncToolBarProps;
+  const { ...ModalFormPropsRest } = ModalFormProps;
 
   // Refs
-  const isInitialMountRef = useRef(true);
   const headerElementRef = useRef<HTMLDivElement | null>(null);
   const bodyElementRef = useRef<HTMLDivElement | null>(null);
   const filterBySearchTermRef = useRef(filterBySearchTerm);
@@ -390,6 +497,9 @@ export const BaseRecordsExplorer = <
   const getGroupableDataRef = useRef(getGroupableData);
   const viewsRef = useRef(views);
   const filterByPropRef = useRef(filterByProp);
+  const getEditableRecordInitialValuesRef = useRef(
+    getEditableRecordInitialValues
+  );
   useEffect(() => {
     filterBySearchTermRef.current = filterBySearchTerm;
     filterByPropRef.current = filterByProp;
@@ -400,10 +510,12 @@ export const BaseRecordsExplorer = <
     filterFieldsRef.current = filterFieldsProp;
     getGroupableDataRef.current = getGroupableData;
     viewsRef.current = views;
+    getEditableRecordInitialValuesRef.current = getEditableRecordInitialValues;
   }, [
     filterByProp,
     filterBySearchTerm,
     filterFieldsProp,
+    getEditableRecordInitialValues,
     getGroupableData,
     groupableFieldsProp,
     searchableFieldsProp,
@@ -412,8 +524,31 @@ export const BaseRecordsExplorer = <
     views,
   ]);
 
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
   const { palette, breakpoints } = useTheme();
   const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
+
+  const descriptionElement = (() => {
+    if (description) {
+      return (
+        <Grid
+          item
+          sx={{
+            display: 'flex',
+          }}
+        >
+          <Tooltip title={description}>
+            <HelpIcon
+              sx={{
+                fontSize: 18,
+              }}
+            />
+          </Tooltip>
+        </Grid>
+      );
+    }
+  })();
 
   // Resolving data operation fields
   const { filterFields, sortableFields, groupableFields, searchableFields } =
@@ -618,20 +753,7 @@ export const BaseRecordsExplorer = <
     }
   }, []);
 
-  const {
-    searchParams: {
-      view: searchParamView,
-      groupBy: searchParamGroupBy,
-      sortBy: searchParamSortBy,
-      search: searchTerm,
-      filterBy: searchParamFilterBy,
-      selectedColumns: searchParamSelectedColumns,
-      expandedGroups: searchParamExpandedGroups,
-      expandedGroupsInverted: searchParamExpandedGroupsInverted,
-      modifiedKeys: modifiedStateKeys,
-    },
-    setSearchParams,
-  } = useReactRouterDOMSearchParams({
+  const { searchParams, setSearchParams } = useReactRouterDOMSearchParams({
     mode: 'json',
     spec: {
       view: Yup.mixed<ViewOptionType>().oneOf([...viewOptionTypes]),
@@ -672,9 +794,27 @@ export const BaseRecordsExplorer = <
           .oneOf([...modifiedStateKeyTypes])
           .required()
       ),
+      createNewRecord: Yup.boolean(),
+      selectedRecord: Yup.string(),
+      editRecord: Yup.boolean(),
     },
     id,
   });
+
+  const {
+    view: searchParamView,
+    groupBy: searchParamGroupBy,
+    sortBy: searchParamSortBy,
+    search: searchTerm,
+    filterBy: searchParamFilterBy,
+    selectedColumns: searchParamSelectedColumns,
+    expandedGroups: searchParamExpandedGroups,
+    expandedGroupsInverted: searchParamExpandedGroupsInverted,
+    modifiedKeys: modifiedStateKeys,
+    createNewRecord,
+    selectedRecord: selectedRecordId,
+    editRecord,
+  } = searchParams;
 
   const viewType = (() => {
     if (searchParamView) {
@@ -774,6 +914,86 @@ export const BaseRecordsExplorer = <
     searchParamSelectedColumns || baseSelectedColumnIds || [];
 
   const { loggedInUserHasPermission } = useAuth();
+
+  const {
+    create,
+    creating,
+    created,
+    errorMessage: createErrorMessage,
+    reset: resetCreation,
+  } = useCreate(recordCreator!);
+
+  const {
+    load: loadRecordDetails,
+    loading: loadingRecordDetails,
+    errorMessage: loadingRecordDetailsErrorMessage,
+    record: selectedRecord,
+  } = useRecord(
+    async () => {
+      if (recordDetailsFinder) {
+        if (selectedRecordId) {
+          return recordDetailsFinder(selectedRecordId);
+        }
+      }
+    },
+    {
+      loadOnMount: false,
+    }
+  );
+
+  const {
+    update,
+    updating,
+    updated,
+    errorMessage: updateErrorMessage,
+    reset: resetUpdate,
+  } = useUpdate(recordEditor!);
+
+  const editInitialValues = useMemo(() => {
+    if (getEditableRecordInitialValuesRef.current && selectedRecord) {
+      return getEditableRecordInitialValuesRef.current(selectedRecord);
+    }
+    return { ...initialValues, ...(selectedRecord as any) };
+  }, [selectedRecord, initialValues]);
+
+  const {
+    allPageRecords: asyncData,
+    load,
+    loading,
+    errorMessage,
+  } = usePaginatedRecords(
+    async ({ limit, offset, getRequestController }) => {
+      if (recordsFinder) {
+        const optionsResponse = await recordsFinder({
+          searchTerm,
+          limit,
+          offset,
+          getRequestController,
+        });
+        if (Array.isArray(optionsResponse)) {
+          return {
+            records: optionsResponse,
+            recordsTotalCount: optionsResponse.length,
+          };
+        }
+        return optionsResponse;
+      }
+      return { records: [], recordsTotalCount: 0 };
+    },
+    {
+      revalidationKey: `${revalidationKey}${searchTerm}`,
+      loadOnMount: showRecords,
+      key: recordKey,
+      searchTerm,
+    }
+  );
+
+  const data = (() => {
+    if (recordsFinder && asyncData.length > 0) {
+      return asyncData;
+    }
+    return dataProp;
+  })();
 
   // Processing data
   const filteredData = useMemo(() => {
@@ -1095,14 +1315,6 @@ export const BaseRecordsExplorer = <
       );
     },
   });
-
-  // Initial mount ref
-  useEffect(() => {
-    isInitialMountRef.current = false;
-    return () => {
-      isInitialMountRef.current = true;
-    };
-  }, []);
 
   const resetToDefaultView = () => {
     setSearchParams(
@@ -1627,10 +1839,11 @@ export const BaseRecordsExplorer = <
           {...{
             title,
             searchTerm,
-            load,
-            loading,
             errorMessage,
           }}
+          load={loadProp ?? load}
+          loading={loadingProp ?? loading}
+          errorMessage={errorMessageProp ?? errorMessage}
           tools={[
             ...(() => {
               const tools: (ReactNode | Tool)[] = [];
@@ -1758,11 +1971,11 @@ export const BaseRecordsExplorer = <
                   recordLabelPlural,
                   recordLabelSingular,
                   pathToAddNew,
-                  errorMessage,
-                  load,
-                  loading,
                 }}
                 {...IconLoadingScreenProps}
+                load={loadProp ?? load}
+                loading={loadingProp ?? loading}
+                errorMessage={errorMessageProp ?? errorMessage}
                 recordsCount={filteredData.length}
               />
             );
@@ -1812,6 +2025,230 @@ export const BaseRecordsExplorer = <
           <AddIcon />
         </Button>
       ) : null}
+      {(() => {
+        if (
+          (selectedRecordId || (validationSchema && initialValues)) &&
+          editorForm
+        ) {
+          const hasFormProps = Boolean(validationSchema && initialValues);
+          const modalFormProps: Partial<ModalFormProps> = {
+            placement,
+            showCloseIconButton: false,
+            ...ModalFormPropsRest,
+            FormikProps: {
+              enableReinitialize: true,
+            },
+            SearchSyncToolbarProps: {
+              TitleProps: {
+                sx: {
+                  fontSize: 24,
+                  fontWeight: 500,
+                },
+              },
+            },
+          };
+          return (
+            <>
+              {/* Create Form */}
+              {hasFormProps ? (
+                <ModalForm
+                  lockSubmitIfNoChange={false}
+                  {...modalFormProps}
+                  {...{
+                    validationSchema,
+                    initialValues,
+                  }}
+                  open={Boolean(createNewRecord)}
+                  errorMessage={createErrorMessage}
+                  title={
+                    <Grid
+                      container
+                      sx={{
+                        alignItems: 'center',
+                        gap: 1,
+                      }}
+                    >
+                      <Grid item>Create New {recordLabelSingular}</Grid>
+                      {descriptionElement}
+                    </Grid>
+                  }
+                  submitButtonText="Create"
+                  loading={creating}
+                  onSubmit={async (values) => {
+                    if (recordCreator) {
+                      await create(values);
+                    }
+                  }}
+                  onClose={() => {
+                    resetCreation();
+                    if (created) {
+                      autoSync && load();
+                    }
+                    if (defaultPath) {
+                      navigate(defaultPath);
+                    } else {
+                      setSearchParams({
+                        createNewRecord: null,
+                      });
+                    }
+                  }}
+                  getModalElement={(modalElement) => {
+                    return (
+                      <Slide
+                        direction="left"
+                        in={createNewRecord}
+                        mountOnEnter
+                        unmountOnExit
+                      >
+                        {modalElement}
+                      </Slide>
+                    );
+                  }}
+                  submitted={created}
+                >
+                  {({ ...rest }) => {
+                    if (typeof editorForm === 'function') {
+                      return editorForm({
+                        mode: 'create',
+                        loadingState: {
+                          loading: false,
+                        },
+                        ...rest,
+                      });
+                    }
+                    return editorForm;
+                  }}
+                </ModalForm>
+              ) : null}
+
+              {/* Edit Form */}
+              {(() => {
+                const loadingState = {
+                  loading: loadingRecordDetails,
+                  errorMessage: loadingRecordDetailsErrorMessage,
+                  load: loadRecordDetails,
+                  locked: !editRecord,
+                };
+                return (
+                  <LoadingProvider value={loadingState}>
+                    <ModalForm
+                      showEditButton={Boolean(recordEditor)}
+                      {...modalFormProps}
+                      {...{
+                        editableFields,
+                      }}
+                      validationSchema={
+                        editValidationSchema || validationSchema
+                      }
+                      initialValues={editInitialValues || {}}
+                      open={Boolean(selectedRecordId)}
+                      errorMessage={updateErrorMessage}
+                      title={
+                        <Grid
+                          container
+                          sx={{
+                            alignItems: 'center',
+                            gap: 1,
+                          }}
+                        >
+                          <Grid item>
+                            {(() => {
+                              if (editRecord) {
+                                return `Edit ${recordLabelSingular}`;
+                              }
+                              if (getViewTitle && selectedRecord) {
+                                return getViewTitle(selectedRecord);
+                              }
+                              return recordLabelSingular;
+                            })()}
+                          </Grid>
+                          {descriptionElement}
+                        </Grid>
+                      }
+                      submitButtonText="Update"
+                      loading={updating}
+                      onSubmit={async (values) => {
+                        if (recordEditor && selectedRecord) {
+                          await update(selectedRecord, values);
+                        }
+                      }}
+                      onClose={() => {
+                        resetUpdate();
+                        if (updated) {
+                          onEditRecord && onEditRecord();
+                          autoSync && load();
+                        }
+                        if (defaultPath) {
+                          navigate(defaultPath);
+                        } else {
+                          setSearchParams({
+                            selectedRecord: null,
+                            editRecord: null,
+                          });
+                        }
+                      }}
+                      getModalElement={(modalElement) => {
+                        return (
+                          <Slide
+                            direction="left"
+                            in={Boolean(selectedRecordId)}
+                            mountOnEnter
+                            unmountOnExit
+                          >
+                            {modalElement}
+                          </Slide>
+                        );
+                      }}
+                      submitted={updated}
+                      editMode={editRecord}
+                      SearchSyncToolbarProps={{
+                        ...modalFormProps.SearchSyncToolbarProps,
+                        load: loadRecordDetails,
+                        loading: loadingRecordDetails,
+                        errorMessage: loadingRecordDetailsErrorMessage,
+                        hasSyncTool: true,
+                      }}
+                      onClickEdit={() => {
+                        const pathToEditRecord = (() => {
+                          if (pathToEdit) {
+                            return pathToEdit;
+                          }
+                          if (getPathToEdit && selectedRecord) {
+                            return getPathToEdit(selectedRecord);
+                          }
+                          return addSearchParams(
+                            pathname,
+                            {
+                              ...searchParams,
+                              editRecord: true,
+                            },
+                            {
+                              mode: 'json',
+                            }
+                          );
+                        })();
+                        navigate(pathToEditRecord);
+                      }}
+                    >
+                      {({ ...rest }) => {
+                        if (typeof editorForm === 'function') {
+                          return editorForm({
+                            mode: editRecord ? 'edit' : 'view',
+                            selectedRecord,
+                            loadingState,
+                            ...rest,
+                          });
+                        }
+                        return editorForm;
+                      }}
+                    </ModalForm>
+                  </LoadingProvider>
+                );
+              })()}
+            </>
+          );
+        }
+      })()}
     </Paper>
   );
 
