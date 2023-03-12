@@ -1246,7 +1246,8 @@ export const useTable = <DataRow extends BaseDataRow>(
           'lowercaseLabelPlural',
           'parentBackgroundColor',
           'currencyCode',
-          'emptyRowsLabel'
+          'emptyRowsLabel',
+          'scrollableElement'
         )}
         ref={ref}
         {...{ stickyHeader }}
