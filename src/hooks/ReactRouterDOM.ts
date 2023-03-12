@@ -202,6 +202,8 @@ export function useReactRouterDOMSearchParams<
                         );
                       }
                     }
+                  } else {
+                    (accumulator as any)[key] = allSearchParams[key];
                   }
                   return accumulator;
                 },
