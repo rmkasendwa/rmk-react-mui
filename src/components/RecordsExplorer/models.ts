@@ -140,6 +140,7 @@ export interface ConditionGroup<RecordRow extends BaseDataRow> {
 export type BaseDataGroup<RecordRow> = {
   groupName?: string;
   label?: ReactNode;
+  childrenCount: number;
 } & RecordRow;
 
 export type DataGroup<RecordRow extends BaseDataRow = any> =

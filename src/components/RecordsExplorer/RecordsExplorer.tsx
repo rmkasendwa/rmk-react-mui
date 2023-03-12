@@ -1207,6 +1207,7 @@ export const BaseRecordsExplorer = <
             return {
               ...group,
               label: getGroupLabel ? getGroupLabel(group) : group.groupName,
+              childrenCount: group.children.length,
             };
           })
           .sort((a, b) => {
@@ -1440,7 +1441,7 @@ export const BaseRecordsExplorer = <
                         }: FlattenGroupHierachyOptions = {}
                       ) => {
                         inputGroupedData.forEach(
-                          ({ id, label, children, ...rest }) => {
+                          ({ id, label, children, childrenCount, ...rest }) => {
                             const groupId = `group:${indentLevel}${id}${
                               parentGroupId || ''
                             }`;
@@ -1467,7 +1468,7 @@ export const BaseRecordsExplorer = <
                                   groupCollapsed,
                                   indentLevel,
                                   parentGroupId,
-                                  childrenCount: children.length,
+                                  childrenCount,
                                   onChangeGroupCollapsed: (collapsed) => {
                                     const allExpandedGroups = (() => {
                                       if (expandedGroupsInverted) {
