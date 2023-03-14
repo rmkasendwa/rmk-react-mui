@@ -568,18 +568,20 @@ export const TableBodyRow = <T extends BaseDataRow>(
                     flexWrap: 'nowrap',
                   }}
                 >
-                  <Box
-                    sx={{
-                      width: (parentGroupIndentLevel + 1) * 24,
-                      flex: 'none',
-                    }}
-                  />
-                  {(() => {
-                    if (getColumnValue) {
-                      return getColumnValue(localRow, column);
-                    }
-                    return row[id];
-                  })()}
+                  <>
+                    <Box
+                      sx={{
+                        width: (parentGroupIndentLevel + 1) * 24,
+                        flex: 'none',
+                      }}
+                    />
+                    {(() => {
+                      if (getColumnValue) {
+                        return getColumnValue(localRow, column);
+                      }
+                      return row[id];
+                    })()}
+                  </>
                 </Stack>
               );
             },
