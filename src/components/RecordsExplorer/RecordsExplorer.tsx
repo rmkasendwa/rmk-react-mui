@@ -198,7 +198,7 @@ export interface RecordsExplorerFunctionChildren<State> {
 }
 
 export interface RecordsExplorerProps<
-  RecordRow extends BaseDataRow = any,
+  RecordRow extends BaseDataRow = BaseDataRow,
   View extends ViewOptionType = ViewOptionType,
   InitialValues extends FormikValues = FormikValues
 > extends Partial<Omit<PaperProps, 'title' | 'children'>>,
@@ -222,7 +222,6 @@ export interface RecordsExplorerProps<
       UsePaginatedRecordsOptions<RecordRow>,
       'revalidationKey' | 'autoSync'
     > {
-  rows?: RecordRow[];
   getTitle?: RecordsExplorerFunctionChildren<
     RecordsExplorerChildrenOptions<RecordRow>
   >;
@@ -379,11 +378,12 @@ const slots = {
   root: ['root'],
 };
 
-export const BaseRecordsExplorer = <
+const BaseRecordsExplorer = <
   RecordRow extends BaseDataRow,
-  View extends ViewOptionType = ViewOptionType
+  View extends ViewOptionType,
+  InitialValues extends FormikValues
 >(
-  inProps: RecordsExplorerProps<RecordRow, View>,
+  inProps: RecordsExplorerProps<RecordRow, View, InitialValues>,
   ref: Ref<HTMLDivElement>
 ) => {
   const props = useThemeProps({ props: inProps, name: 'MuiRecordsExplorer' });
@@ -2276,9 +2276,12 @@ export const BaseRecordsExplorer = <
 
 export const RecordsExplorer = forwardRef(BaseRecordsExplorer) as <
   RecordRow extends BaseDataRow,
-  View extends ViewOptionType = ViewOptionType
+  View extends ViewOptionType,
+  InitialValues extends FormikValues
 >(
-  p: RecordsExplorerProps<RecordRow, View> & { ref?: Ref<HTMLDivElement> }
+  p: RecordsExplorerProps<RecordRow, View, InitialValues> & {
+    ref?: Ref<HTMLDivElement>;
+  }
 ) => ReactElement;
 
 export default RecordsExplorer;
