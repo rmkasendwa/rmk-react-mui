@@ -240,19 +240,13 @@ export const useFilterTool = <RecordRow extends BaseDataRow>({
                           <Box
                             sx={{
                               display: 'flex',
-                              justifyContent: 'end',
                             }}
                           >
                             {(() => {
                               switch (index) {
                                 case 0:
                                   return (
-                                    <Typography
-                                      variant="body2"
-                                      sx={{
-                                        pr: 2,
-                                      }}
-                                    >
+                                    <Typography variant="body2">
                                       Where
                                     </Typography>
                                   );
@@ -284,12 +278,7 @@ export const useFilterTool = <RecordRow extends BaseDataRow>({
                                   );
                                 default:
                                   return (
-                                    <Typography
-                                      variant="body2"
-                                      sx={{
-                                        pl: 2,
-                                      }}
-                                    >
+                                    <Typography variant="body2">
                                       {conjunction}
                                     </Typography>
                                   );
@@ -379,9 +368,9 @@ export const useFilterTool = <RecordRow extends BaseDataRow>({
                         </TableCell>
 
                         {/* Filter Value */}
-                        {selectedOperator ? (
-                          <TableCell>
-                            {(() => {
+                        <TableCell>
+                          {selectedOperator ? (
+                            (() => {
                               if (
                                 textFilterOperators.includes(
                                   selectedOperator as any
@@ -481,12 +470,17 @@ export const useFilterTool = <RecordRow extends BaseDataRow>({
                                     }}
                                     size="small"
                                     fullWidth
+                                    sx={{
+                                      minWidth: 150,
+                                    }}
                                   />
                                 );
                               }
-                            })()}
-                          </TableCell>
-                        ) : null}
+                            })()
+                          ) : (
+                            <>&nbsp;</>
+                          )}
+                        </TableCell>
 
                         {/* Clear Filter Condition */}
                         <TableCell

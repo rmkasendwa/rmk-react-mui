@@ -120,7 +120,7 @@ export function useReactRouterDOMSearchParams<
                   } catch (err: any) {
                     if (err.name === 'ValidationError') {
                       console.error(
-                        `useReactRouterDOMSearchParams: search param getter setter `,
+                        `useReactRouterDOMSearchParams: search param getter `,
                         err,
                         {
                           err,

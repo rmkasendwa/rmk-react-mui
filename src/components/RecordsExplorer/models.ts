@@ -112,9 +112,10 @@ export type ContentExistenceFilterOperator =
   typeof contentExistenceFilterOperator[number];
 
 export const filterOperators = [
-  ...textFilterOperators,
   ...enumFilterOperators,
+  ...textFilterOperators,
   ...numericFilterOperators,
+  ...contentExistenceFilterOperator,
 ] as const;
 export type FilterOperator =
   | EnumFilterOperator
