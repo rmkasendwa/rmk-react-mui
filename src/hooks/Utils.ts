@@ -417,11 +417,10 @@ export const usePaginatedRecords = <T>(
   const recordsTotalCountRef = useRef(0);
   const hasNextPageRef = useRef(true);
   const limitRef = useRef(limit);
-  useEffect(() => {
-    recordFinderRef.current = recordFinder;
-    loadedPagesMapRef.current = loadedPagesMap;
-    limitRef.current = limit;
-  }, [limit, loadedPagesMap, offset, recordFinder]);
+
+  recordFinderRef.current = recordFinder;
+  loadedPagesMapRef.current = loadedPagesMap;
+  limitRef.current = limit;
 
   const {
     load: loadFromAPIService,

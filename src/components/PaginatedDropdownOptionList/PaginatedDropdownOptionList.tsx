@@ -193,19 +193,17 @@ export const PaginatedDropdownOptionList = forwardRef<
   // Refs
   const isInitialMountRef = useRef(true);
   const optionsRef = useRef(optionsProp);
+  optionsRef.current = optionsProp;
   const onSelectOptionRef = useRef(onSelectOption);
+  onSelectOptionRef.current = onSelectOption;
   const onLoadOptionsRef = useRef(onLoadOptions);
+  onLoadOptionsRef.current = onLoadOptions;
   const onChangeSearchTermRef = useRef(onChangeSearchTerm);
+  onChangeSearchTermRef.current = onChangeSearchTerm;
   const getDropdownOptionsRef = useRef(getDropdownOptions);
+  getDropdownOptionsRef.current = getDropdownOptions;
   const onChangeAsyncOptionPagesMapRef = useRef(onChangeAsyncOptionPagesMap);
-  useEffect(() => {
-    optionsRef.current = optionsProp;
-    onSelectOptionRef.current = onSelectOption;
-    onLoadOptionsRef.current = onLoadOptions;
-    onChangeSearchTermRef.current = onChangeSearchTerm;
-    getDropdownOptionsRef.current = getDropdownOptions;
-    onChangeAsyncOptionPagesMapRef.current = onChangeAsyncOptionPagesMap;
-  }, [getDropdownOptions, onChangeAsyncOptionPagesMap, onChangeSearchTerm, onChangeSelectedOptions, onClose, onLoadOptions, onSelectOption, optionsProp]);
+  onChangeAsyncOptionPagesMapRef.current = onChangeAsyncOptionPagesMap;
 
   const sortOptionsRef = useRef(
     (
@@ -294,6 +292,8 @@ export const PaginatedDropdownOptionList = forwardRef<
       })(),
     }
   );
+  const loadAsyncOptionsRef = useRef(loadAsyncOptions);
+  loadAsyncOptionsRef.current = loadAsyncOptions;
 
   useEffect(() => {
     onChangeAsyncOptionPagesMapRef.current &&
@@ -314,9 +314,9 @@ export const PaginatedDropdownOptionList = forwardRef<
         (!optionsRef.current || optionsRef.current.length <= 0)) ||
         callGetDropdownOptions === 'always')
     ) {
-      loadAsyncOptions();
+      loadAsyncOptionsRef.current();
     }
-  }, [loadAsyncOptions, isAsyncOptionsLoaded, searchTerm, callGetDropdownOptions]);
+  }, [isAsyncOptionsLoaded, searchTerm, callGetDropdownOptions]);
 
   useEffect(() => {
     if (
