@@ -77,8 +77,8 @@ export type ModalFormFunctionChildren<
 > = (props: FormikProps<Values> & ExtraProps) => ReactNode;
 
 export interface ModalFormProps<Values extends FormikValues = any>
-  extends Omit<ModalPopupProps, 'children'>,
-    NonNullable<Pick<FormikConfig<Values>, 'validationSchema'>> {
+  extends Omit<ModalPopupProps, 'children' | 'onSubmit'>,
+    Required<Pick<FormikConfig<Values>, 'validationSchema' | 'onSubmit'>> {
   initialValues: Values;
   children: ModalFormFunctionChildren | ReactNode;
   successMessage?: string;
@@ -98,7 +98,6 @@ export interface ModalFormProps<Values extends FormikValues = any>
    * Determines if the submit button should be locked when the form is not valid.
    */
   lockSubmitIfFormInvalid?: boolean;
-  onSubmit: (values: any) => void;
   onSubmitSuccess?: () => void;
   onClickEdit?: () => void;
   SubmitButtonProps?: Partial<LoadingButtonProps>;
