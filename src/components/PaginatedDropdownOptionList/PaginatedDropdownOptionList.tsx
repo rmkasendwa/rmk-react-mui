@@ -285,7 +285,13 @@ export const PaginatedDropdownOptionList = forwardRef<
       key: dataKey,
       limit: limitProp,
       loadedPagesMap: asyncOptionPagesMap,
-      searchTerm,
+      ...(() => {
+        if (externallyPaginated) {
+          return {
+            searchTerm,
+          };
+        }
+      })(),
     }
   );
 
