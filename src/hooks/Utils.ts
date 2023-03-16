@@ -413,14 +413,17 @@ export const usePaginatedRecords = <T>(
     RecordFinderRequestController[]
   >([]);
   const recordFinderRef = useRef(recordFinder);
+  recordFinderRef.current = recordFinder;
   const loadedPagesMapRef = useRef(loadedPagesMap);
+  loadedPagesMapRef.current = loadedPagesMap;
   const recordsTotalCountRef = useRef(0);
   const hasNextPageRef = useRef(true);
   const limitRef = useRef(limit);
-
-  recordFinderRef.current = recordFinder;
-  loadedPagesMapRef.current = loadedPagesMap;
   limitRef.current = limit;
+  const offsetRef = useRef(offset);
+  offsetRef.current = offset;
+  const searchTermRef = useRef(searchTerm);
+  searchTermRef.current = searchTerm;
 
   const {
     load: loadFromAPIService,
@@ -446,9 +449,9 @@ export const usePaginatedRecords = <T>(
     (params: PaginatedRequestParams = {}) => {
       revalidationKey; // Triggering reload whenever extra parameters change
       params = { ...params };
-      params.offset || (params.offset = offset);
-      params.limit || (params.limit = limit);
-      params.searchTerm || (params.searchTerm = searchTerm);
+      params.offset || (params.offset = offsetRef.current);
+      params.limit || (params.limit = limitRef.current);
+      params.searchTerm || (params.searchTerm = searchTermRef.current);
       return loadFromAPIService(async () => {
         const localPendingRecordRequestControllers: RecordFinderRequestController[] =
           [];
@@ -492,15 +495,10 @@ export const usePaginatedRecords = <T>(
         return responseData;
       });
     },
-    [
-      limit,
-      loadFromAPIService,
-      loadedPages,
-      offset,
-      revalidationKey,
-      searchTerm,
-    ]
+    [loadFromAPIService, loadedPages, revalidationKey]
   );
+  const loadRef = useRef(load);
+  loadRef.current = load;
 
   const loadNextPage = useCallback(
     (params?: Omit<PaginatedRequestParams, 'limit' | 'offset'>) => {
@@ -547,16 +545,26 @@ export const usePaginatedRecords = <T>(
   });
 
   useEffect(() => {
-    if (limit) {
+    if (!isInitialMountRef.current && limit) {
       resetRef.current();
     }
   }, [limit]);
 
   useEffect(() => {
-    if (autoSync && (loadOnMount || !isInitialMountRef.current)) {
-      load();
+    if (loadOnMount && isInitialMountRef.current) {
+      loadRef.current();
     }
-  }, [autoSync, load, loadOnMount]);
+  }, [loadOnMount]);
+
+  useEffect(() => {
+    if (
+      !isInitialMountRef.current &&
+      autoSync &&
+      (limit || searchTerm || offset)
+    ) {
+      loadRef.current();
+    }
+  }, [autoSync, limit, offset, searchTerm]);
 
   useEffect(() => {
     isInitialMountRef.current = false;
