@@ -1,3 +1,4 @@
+import Box from '@mui/material/Box';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import React from 'react';
 
@@ -109,6 +110,9 @@ WithLoadFunction.args = {
 export const WithCrudFunctions = Template.bind({});
 WithCrudFunctions.args = {
   ...baseArgs,
+  validationSchema: {},
+  initialValues: {},
+  editorForm: <Box>Add form here</Box>,
   recordEditor: async (record, formValues) => {
     console.log('To be edited', { record, formValues });
   },
