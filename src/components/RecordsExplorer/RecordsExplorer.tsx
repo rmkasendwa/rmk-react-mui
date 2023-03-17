@@ -1,6 +1,5 @@
 import '@infinite-debugger/rmk-js-extensions/JSON';
 
-import { addSearchParams } from '@infinite-debugger/rmk-utils/paths';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import EditIcon from '@mui/icons-material/Edit';
@@ -739,53 +738,56 @@ const BaseRecordsExplorer = <
     }
   }, []);
 
-  const { searchParams, setSearchParams } = useReactRouterDOMSearchParams({
-    mode: 'json',
-    spec: {
-      view: Yup.mixed<ViewOptionType>().oneOf([...viewOptionTypes]),
-      groupBy: Yup.array().of(
-        Yup.object({
-          id: Yup.mixed<keyof RecordRow>().required(),
-          sortDirection: Yup.mixed<SortDirection>()
+  const { searchParams, setSearchParams, addSearchParamsToPath } =
+    useReactRouterDOMSearchParams({
+      mode: 'json',
+      spec: {
+        view: Yup.mixed<ViewOptionType>().oneOf([...viewOptionTypes]),
+        groupBy: Yup.array().of(
+          Yup.object({
+            id: Yup.mixed<keyof RecordRow>().required(),
+            sortDirection: Yup.mixed<SortDirection>()
+              .required()
+              .oneOf([...sortDirections]),
+          })
+        ),
+        expandedGroups: Yup.mixed<'All' | 'None' | string[]>(),
+        expandedGroupsInverted: Yup.boolean(),
+        sortBy: Yup.array().of(
+          Yup.object({
+            id: Yup.mixed<keyof RecordRow>().required(),
+            sortDirection: Yup.mixed<SortDirection>()
+              .required()
+              .oneOf([...sortDirections]),
+          })
+        ),
+        filterBy: Yup.object({
+          conjunction: Yup.mixed<Conjunction>().oneOf([...filterConjunctions]),
+          conditions: Yup.array()
+            .of(
+              Yup.object({
+                fieldId: Yup.mixed<keyof RecordRow>().required(),
+                operator: Yup.mixed<FilterOperator>().oneOf([
+                  ...filterOperators,
+                ]),
+                value: Yup.mixed<string | number | (string | number)[]>(),
+              })
+            )
+            .required(),
+        }).default(undefined),
+        search: Yup.string(),
+        selectedColumns: Yup.array().of(Yup.string().required()),
+        modifiedKeys: Yup.array().of(
+          Yup.mixed<ModifiedStatKey>()
+            .oneOf([...modifiedStateKeyTypes])
             .required()
-            .oneOf([...sortDirections]),
-        })
-      ),
-      expandedGroups: Yup.mixed<'All' | 'None' | string[]>(),
-      expandedGroupsInverted: Yup.boolean(),
-      sortBy: Yup.array().of(
-        Yup.object({
-          id: Yup.mixed<keyof RecordRow>().required(),
-          sortDirection: Yup.mixed<SortDirection>()
-            .required()
-            .oneOf([...sortDirections]),
-        })
-      ),
-      filterBy: Yup.object({
-        conjunction: Yup.mixed<Conjunction>().oneOf([...filterConjunctions]),
-        conditions: Yup.array()
-          .of(
-            Yup.object({
-              fieldId: Yup.mixed<keyof RecordRow>().required(),
-              operator: Yup.mixed<FilterOperator>().oneOf([...filterOperators]),
-              value: Yup.mixed<string | number | (string | number)[]>(),
-            })
-          )
-          .required(),
-      }).default(undefined),
-      search: Yup.string(),
-      selectedColumns: Yup.array().of(Yup.string().required()),
-      modifiedKeys: Yup.array().of(
-        Yup.mixed<ModifiedStatKey>()
-          .oneOf([...modifiedStateKeyTypes])
-          .required()
-      ),
-      createNewRecord: Yup.boolean(),
-      selectedRecord: Yup.string(),
-      editRecord: Yup.boolean(),
-    },
-    id,
-  });
+        ),
+        createNewRecord: Yup.boolean(),
+        selectedRecord: Yup.string(),
+        editRecord: Yup.boolean(),
+      },
+      id,
+    });
 
   const {
     view: searchParamView,
@@ -1359,6 +1361,17 @@ const BaseRecordsExplorer = <
     // TODO: Implement Delete function
   });
 
+  const pathToAddNewRecord = (() => {
+    if (pathToAddNew) {
+      return pathToAddNew;
+    }
+    if (recordCreator) {
+      return addSearchParamsToPath(pathname, {
+        createNewRecord: true,
+      });
+    }
+  })();
+
   const isEditable = Boolean(recordEditor || pathToEdit || getPathToEdit);
   const isDeletable = Boolean(recordDeletor);
 
@@ -1926,7 +1939,7 @@ const BaseRecordsExplorer = <
             ...(() => {
               const tools: (ReactNode | Tool)[] = [];
               if (
-                pathToAddNew &&
+                pathToAddNewRecord &&
                 (!hideAddNewButtonOnNoFilteredData ||
                   filteredData.length > 0) &&
                 (!permissionToAddNew ||
@@ -1942,7 +1955,7 @@ const BaseRecordsExplorer = <
                       ...(() => {
                         return {
                           component: RouterLink,
-                          to: pathToAddNew,
+                          to: pathToAddNewRecord,
                         };
                       })(),
                       sx: {
@@ -1963,7 +1976,7 @@ const BaseRecordsExplorer = <
                     ...(() => {
                       return {
                         component: RouterLink,
-                        to: pathToAddNew,
+                        to: pathToAddNewRecord,
                       };
                     })(),
                   });
@@ -2048,9 +2061,9 @@ const BaseRecordsExplorer = <
                 {...{
                   recordLabelPlural,
                   recordLabelSingular,
-                  pathToAddNew,
                 }}
                 {...IconLoadingScreenProps}
+                pathToAddNew={pathToAddNewRecord}
                 load={loadProp ?? load}
                 loading={loadingProp ?? loading}
                 errorMessage={errorMessageProp ?? errorMessage}
@@ -2083,10 +2096,10 @@ const BaseRecordsExplorer = <
           />
         </Paper>
       ) : null}
-      {pathToAddNew && fillContentArea && isSmallScreenSize ? (
+      {pathToAddNewRecord && fillContentArea && isSmallScreenSize ? (
         <Button
           component={RouterLink}
-          to={pathToAddNew}
+          to={pathToAddNewRecord}
           color="primary"
           variant="contained"
           sx={{
@@ -2269,16 +2282,9 @@ const BaseRecordsExplorer = <
                           if (getPathToEdit && selectedRecord) {
                             return getPathToEdit(selectedRecord);
                           }
-                          return addSearchParams(
-                            pathname,
-                            {
-                              ...searchParams,
-                              editRecord: true,
-                            },
-                            {
-                              mode: 'json',
-                            }
-                          );
+                          return addSearchParamsToPath(pathname, {
+                            editRecord: true,
+                          });
                         })();
                         navigate(pathToEditRecord);
                       }}

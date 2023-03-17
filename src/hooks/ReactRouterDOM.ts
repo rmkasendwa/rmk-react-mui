@@ -1,9 +1,10 @@
 import '@infinite-debugger/rmk-js-extensions/RegExp';
 
 import { diff } from '@infinite-debugger/rmk-utils/data';
+import { addSearchParams } from '@infinite-debugger/rmk-utils/paths';
 import { pick } from 'lodash';
 import hash from 'object-hash';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import * as Yup from 'yup';
 import { ObjectShape, OptionalObjectSchema, TypeOfShape } from 'yup/lib/object';
@@ -11,13 +12,20 @@ import { AnyObject } from 'yup/lib/types';
 
 export type RouterMode = 'string' | 'json';
 
-export type SetSearchParams<SearchParams = Record<string, string | null>> = (
+export type BaseSearchParams = Record<string, string | null>;
+
+export type SetSearchParams<SearchParams = BaseSearchParams> = (
   searchParams: SearchParams,
   navigateOptions?: {
     replace?: boolean | undefined;
     state?: any;
   }
 ) => void;
+
+export type AddSearchParamsToPath<SearchParams = BaseSearchParams> = (
+  pathname: string,
+  searchParams: SearchParams
+) => string;
 
 export function useReactRouterDOMSearchParams<
   ValidationSpec extends ObjectShape,
@@ -35,16 +43,23 @@ export function useReactRouterDOMSearchParams<
       [K in keyof SearchParamsObject]: SearchParamsObject[K] | null;
     }>
   >;
+  addSearchParamsToPath: AddSearchParamsToPath<
+    Partial<{
+      [K in keyof SearchParamsObject]: SearchParamsObject[K] | null;
+    }>
+  >;
 };
 
 export function useReactRouterDOMSearchParams(options: { mode?: 'string' }): {
   searchParams: URLSearchParams;
   setSearchParams: SetSearchParams;
+  addSearchParamsToPath: AddSearchParamsToPath;
 };
 
 export function useReactRouterDOMSearchParams(): {
   searchParams: URLSearchParams;
   setSearchParams: SetSearchParams;
+  addSearchParamsToPath: AddSearchParamsToPath;
 };
 
 export function useReactRouterDOMSearchParams<
@@ -63,15 +78,13 @@ export function useReactRouterDOMSearchParams<
 } = {}) {
   const [searchParams, baseSetSearchParams] = useSearchParams();
   const baseSetSearchParamsRef = useRef(baseSetSearchParams);
+  baseSetSearchParamsRef.current = baseSetSearchParams;
   const specRef = useRef(spec);
+  specRef.current = spec;
   const jsonSearchParamsCacheRef = useRef<any>({});
-  useEffect(() => {
-    baseSetSearchParamsRef.current = baseSetSearchParams;
-    specRef.current = spec;
-  }, [baseSetSearchParams, spec]);
 
-  const setSearchParams = useCallback<SetSearchParams>(
-    (searchParams, navigateOptions) => {
+  const getSearchParams = useCallback(
+    (searchParams: BaseSearchParams) => {
       const entries = new URL(window.location.href).searchParams.entries();
       const existingSearchParams: Record<string, string> = {};
       for (const [key, value] of entries) {
@@ -134,23 +147,44 @@ export function useReactRouterDOMSearchParams<
           }
         })(),
       };
-      const nextSearchParams = Object.keys(combinedSearchParams)
-        .filter((key) => {
-          return (
-            combinedSearchParams[key] != null &&
-            combinedSearchParams[key]!.length > 0
-          );
-        })
-        .reduce((accumulator, key) => {
-          accumulator[key] = combinedSearchParams[key]!;
-          return accumulator;
-        }, {} as Record<string, string | string[]>);
+      return {
+        existingSearchParams,
+        nextSearchParams: Object.keys(combinedSearchParams)
+          .filter((key) => {
+            return (
+              combinedSearchParams[key] != null &&
+              combinedSearchParams[key]!.length > 0
+            );
+          })
+          .reduce((accumulator, key) => {
+            accumulator[key] = combinedSearchParams[key]!;
+            return accumulator;
+          }, {} as Record<string, string | string[]>),
+      };
+    },
+    [id, mode]
+  );
+
+  const setSearchParams = useCallback<SetSearchParams>(
+    (searchParams, navigateOptions) => {
+      const { existingSearchParams, nextSearchParams } =
+        getSearchParams(searchParams);
 
       if (hash(nextSearchParams) !== hash(existingSearchParams)) {
         baseSetSearchParamsRef.current(nextSearchParams, navigateOptions);
       }
     },
-    [id, mode]
+    [getSearchParams]
+  );
+
+  const addSearchParamsToPath = useCallback<AddSearchParamsToPath>(
+    (pathname, searchParams) => {
+      return addSearchParams(
+        pathname,
+        getSearchParams(searchParams).nextSearchParams
+      );
+    },
+    [getSearchParams]
   );
 
   return {
@@ -233,5 +267,6 @@ export function useReactRouterDOMSearchParams<
       }
     })(),
     setSearchParams,
+    addSearchParamsToPath,
   };
 }

@@ -113,6 +113,9 @@ WithCrudFunctions.args = {
   validationSchema: {},
   initialValues: {},
   editorForm: <Box>Add form here</Box>,
+  recordCreator: async (formValues) => {
+    console.log('To be created', { formValues });
+  },
   recordEditor: async (record, formValues) => {
     console.log('To be edited', { record, formValues });
   },
