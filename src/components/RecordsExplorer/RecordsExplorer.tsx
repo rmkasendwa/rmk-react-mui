@@ -16,7 +16,6 @@ import {
   Grid,
   Paper,
   PaperProps,
-  Slide,
   Tooltip,
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
@@ -215,10 +214,7 @@ export interface RecordsExplorerProps<
       >
     >,
     Partial<
-      Pick<
-        ModalFormProps<InitialValues>,
-        'validationSchema' | 'editableFields' | 'placement'
-      >
+      Pick<ModalFormProps<InitialValues>, 'validationSchema' | 'editableFields'>
     >,
     Pick<
       UsePaginatedRecordsOptions<RecordRow>,
@@ -429,7 +425,6 @@ const BaseRecordsExplorer = <
     editorForm,
     validationSchema,
     initialValues,
-    placement = 'right',
     ModalFormProps = {},
     description,
     autoSync = true,
@@ -2115,7 +2110,6 @@ const BaseRecordsExplorer = <
         ) {
           const hasFormProps = Boolean(validationSchema && initialValues);
           const modalFormProps: Partial<ModalFormProps> = {
-            placement,
             showCloseIconButton: false,
             ...ModalFormPropsRest,
             FormikProps: {
@@ -2174,18 +2168,6 @@ const BaseRecordsExplorer = <
                         createNewRecord: null,
                       });
                     }
-                  }}
-                  getModalElement={(modalElement) => {
-                    return (
-                      <Slide
-                        direction="left"
-                        in={createNewRecord}
-                        mountOnEnter
-                        unmountOnExit
-                      >
-                        {modalElement}
-                      </Slide>
-                    );
                   }}
                   submitted={created}
                 >
@@ -2269,18 +2251,6 @@ const BaseRecordsExplorer = <
                             editRecord: null,
                           });
                         }
-                      }}
-                      getModalElement={(modalElement) => {
-                        return (
-                          <Slide
-                            direction="left"
-                            in={Boolean(selectedRecordId)}
-                            mountOnEnter
-                            unmountOnExit
-                          >
-                            {modalElement}
-                          </Slide>
-                        );
                       }}
                       submitted={updated}
                       editMode={editRecord}
