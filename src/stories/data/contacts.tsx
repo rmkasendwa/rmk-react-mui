@@ -1,4 +1,3 @@
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import PhoneIcon from '@mui/icons-material/Phone';
 import ShareIcon from '@mui/icons-material/Share';
 import { countries } from 'countries-list';
@@ -136,11 +135,6 @@ export const contactTableProps = {
       options: [
         { label: 'Call', icon: <PhoneIcon />, value: 'Call' },
         { label: 'Share', icon: <ShareIcon />, value: 'Share' },
-        {
-          label: 'Delete',
-          icon: <DeleteOutlineIcon />,
-          value: 'Delete',
-        },
       ],
     };
   },
