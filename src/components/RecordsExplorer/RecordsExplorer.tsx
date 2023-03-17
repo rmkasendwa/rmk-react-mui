@@ -2,6 +2,8 @@ import '@infinite-debugger/rmk-js-extensions/JSON';
 
 import { addSearchParams } from '@infinite-debugger/rmk-utils/paths';
 import AddIcon from '@mui/icons-material/Add';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import EditIcon from '@mui/icons-material/Edit';
 import HelpIcon from '@mui/icons-material/Help';
 import LockResetIcon from '@mui/icons-material/LockReset';
 import {
@@ -35,7 +37,6 @@ import {
   ReactNode,
   Ref,
   forwardRef,
-  useEffect,
   useMemo,
   useRef,
 } from 'react';
@@ -78,6 +79,7 @@ import ModalForm, {
   ModalFormFunctionChildren,
   ModalFormProps,
 } from '../ModalForm';
+import { DropdownOption } from '../PaginatedDropdownOptionList';
 import SearchSyncToolbar, {
   SearchSyncToolbarProps,
   Tool,
@@ -236,7 +238,7 @@ export interface RecordsExplorerProps<
   /**
    * The raw data to be processed for displaying.
    */
-  data: RecordRow[];
+  data?: RecordRow[];
   /**
    * The label to be used when reporting display stats for multiple records.
    *
@@ -359,7 +361,7 @@ export interface RecordsExplorerProps<
 
   showRecords?: boolean;
 
-  getExtraRowTools?: (record: RecordRow) => ReactNode;
+  getRecordTools?: (record: RecordRow) => DropdownOption[];
   extraActionsColumnWidth?: number;
 
   SearchSyncToolbarProps?: Partial<SearchSyncToolbarProps>;
@@ -445,6 +447,8 @@ const BaseRecordsExplorer = <
     recordKey,
     showRecords,
     revalidationKey,
+    recordDeletor,
+    getRecordTools,
     ...rest
   } = omit(
     props,
@@ -489,40 +493,27 @@ const BaseRecordsExplorer = <
   const headerElementRef = useRef<HTMLDivElement | null>(null);
   const bodyElementRef = useRef<HTMLDivElement | null>(null);
   const filterBySearchTermRef = useRef(filterBySearchTerm);
+  filterBySearchTermRef.current = filterBySearchTerm;
   const searchableFieldsRef = useRef(searchableFieldsProp);
+  searchableFieldsRef.current = searchableFieldsProp;
   const filterFieldsRef = useRef(filterFieldsProp);
+  filterFieldsRef.current = filterFieldsProp;
   const sortableFieldsRef = useRef(sortableFieldsProp);
+  sortableFieldsRef.current = sortableFieldsProp;
   const groupableFieldsRef = useRef(groupableFieldsProp);
+  groupableFieldsRef.current = groupableFieldsProp;
   const sortByPropRef = useRef(sortByProp);
+  sortByPropRef.current = sortByProp;
   const getGroupableDataRef = useRef(getGroupableData);
+  getGroupableDataRef.current = getGroupableData;
   const viewsRef = useRef(views);
+  viewsRef.current = views;
   const filterByPropRef = useRef(filterByProp);
+  filterByPropRef.current = filterByProp;
   const getEditableRecordInitialValuesRef = useRef(
     getEditableRecordInitialValues
   );
-  useEffect(() => {
-    filterBySearchTermRef.current = filterBySearchTerm;
-    filterByPropRef.current = filterByProp;
-    searchableFieldsRef.current = searchableFieldsProp;
-    groupableFieldsRef.current = groupableFieldsProp;
-    sortableFieldsRef.current = sortableFieldsProp;
-    sortByPropRef.current = sortByProp;
-    filterFieldsRef.current = filterFieldsProp;
-    getGroupableDataRef.current = getGroupableData;
-    viewsRef.current = views;
-    getEditableRecordInitialValuesRef.current = getEditableRecordInitialValues;
-  }, [
-    filterByProp,
-    filterBySearchTerm,
-    filterFieldsProp,
-    getEditableRecordInitialValues,
-    getGroupableData,
-    groupableFieldsProp,
-    searchableFieldsProp,
-    sortByProp,
-    sortableFieldsProp,
-    views,
-  ]);
+  getEditableRecordInitialValuesRef.current = getEditableRecordInitialValues;
 
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -992,7 +983,7 @@ const BaseRecordsExplorer = <
     if (recordsFinder && asyncData.length > 0) {
       return asyncData;
     }
-    return dataProp;
+    return dataProp || [];
   })();
 
   // Processing data
@@ -1347,6 +1338,35 @@ const BaseRecordsExplorer = <
   })();
   const expandedGroupsInverted = Boolean(searchParamExpandedGroupsInverted);
 
+  const editFunctionRef = useRef((record: RecordRow) => {
+    if (pathToEdit || getPathToEdit) {
+      navigate(
+        (() => {
+          if (pathToEdit) {
+            return pathToEdit;
+          }
+          if (getPathToEdit) {
+            return getPathToEdit(record);
+          }
+          return pathname;
+        })()
+      );
+    } else {
+      setSearchParams({
+        selectedRecord: record.id,
+        editRecord: true,
+      });
+    }
+  });
+
+  const deleteFunctionRef = useRef((record: RecordRow) => {
+    console.log({ record });
+    // TODO: Implement Delete function
+  });
+
+  const isEditable = Boolean(recordEditor || pathToEdit || getPathToEdit);
+  const isDeletable = Boolean(recordDeletor);
+
   const viewElement = (() => {
     if (views) {
       const selectedView = views.find(({ type }) => type === viewType);
@@ -1366,6 +1386,7 @@ const BaseRecordsExplorer = <
               enableCheckboxAllRowSelector = enableCheckboxAllRowSelectorProp,
               enableCheckboxRowSelectors = enableCheckboxRowSelectorsProp,
               showRowNumber = showRowNumberProp,
+              getEllipsisMenuToolProps,
             } = selectedView;
             const displayingColumns = selectedView.columns.filter(({ id }) => {
               return selectedColumnIds.includes(String(id) as any);
@@ -1622,6 +1643,67 @@ const BaseRecordsExplorer = <
                         minWidth,
                       },
                     },
+                    ...(() => {
+                      if (isEditable || isDeletable || getRecordTools) {
+                        return {
+                          getEllipsisMenuToolProps: (row) => {
+                            const ellipsisMenuToolProps = (() => {
+                              if (getEllipsisMenuToolProps) {
+                                return getEllipsisMenuToolProps(row);
+                              }
+                            })();
+                            const options =
+                              ellipsisMenuToolProps?.options || [];
+
+                            return {
+                              ...ellipsisMenuToolProps,
+                              options: [
+                                ...(() => {
+                                  if (isEditable) {
+                                    return [
+                                      {
+                                        label: 'Edit',
+                                        value: 'Edit',
+                                        icon: <EditIcon />,
+                                        onClick: () => {
+                                          editFunctionRef.current(row);
+                                        },
+                                      },
+                                    ];
+                                  }
+                                  return [];
+                                })(),
+                                ...(() => {
+                                  if (isDeletable) {
+                                    return [
+                                      {
+                                        label: 'Delete',
+                                        value: 'Delete',
+                                        icon: <DeleteOutlineIcon />,
+                                        onClick: () => {
+                                          deleteFunctionRef.current(row);
+                                        },
+                                      },
+                                    ];
+                                  }
+                                  return [];
+                                })(),
+                                ...options,
+                                ...(() => {
+                                  if (getRecordTools) {
+                                    return getRecordTools(row);
+                                  }
+                                  return [];
+                                })(),
+                              ],
+                            };
+                          },
+                        };
+                      }
+                      return {
+                        getEllipsisMenuToolProps,
+                      };
+                    })(),
                   };
 
                   const tableControlProps: Partial<typeof viewProps> = {

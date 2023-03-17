@@ -199,17 +199,15 @@ export const DataDropdownField = forwardRef<
   // Refs
   const anchorRef = useRef<HTMLInputElement>(null);
   const searchFieldRef = useRef<HTMLInputElement>(null);
-  const onChangeRef = useRef(onChange);
-  const optionsRef = useRef(options);
-  const selectedOptionRef = useRef(selectedOption);
   const asyncOptionPagesMapRef = useRef<Map<number, DropdownOption[]>>();
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
+  const optionsRef = useRef(options);
+  optionsRef.current = options;
+  const selectedOptionRef = useRef(selectedOption);
+  selectedOptionRef.current = selectedOption;
   const getSelectedOptionsRef = useRef(getSelectedOptions);
-  useEffect(() => {
-    onChangeRef.current = onChange;
-    optionsRef.current = options;
-    selectedOptionRef.current = selectedOption;
-    getSelectedOptionsRef.current = getSelectedOptions;
-  }, [getSelectedOptions, onChange, options, selectedOption]);
+  getSelectedOptionsRef.current = getSelectedOptions;
 
   const [searchTerm, setSearchTerm] = useState('');
 

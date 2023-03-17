@@ -275,11 +275,9 @@ const BaseTableCrud = <
   const getEditableRecordInitialValuesRef = useRef(
     getEditableRecordInitialValues
   );
+  getEditableRecordInitialValuesRef.current = getEditableRecordInitialValues;
   const getExtraRowToolsRef = useRef(getExtraRowTools);
-  useEffect(() => {
-    getEditableRecordInitialValuesRef.current = getEditableRecordInitialValues;
-    getExtraRowToolsRef.current = getExtraRowTools;
-  }, [getEditableRecordInitialValues, getExtraRowTools]);
+  getExtraRowToolsRef.current = getExtraRowTools;
 
   const {
     createRecordSearchParamKey,

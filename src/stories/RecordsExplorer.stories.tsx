@@ -105,3 +105,14 @@ WithLoadFunction.args = {
     console.log('Loading...');
   },
 } as RecordsExplorerProps;
+
+export const WithCrudFunctions = Template.bind({});
+WithCrudFunctions.args = {
+  ...baseArgs,
+  recordEditor: async (record, formValues) => {
+    console.log('To be edited', { record, formValues });
+  },
+  recordDeletor: async (record) => {
+    console.log('To be deleted', { record });
+  },
+} as RecordsExplorerProps;
