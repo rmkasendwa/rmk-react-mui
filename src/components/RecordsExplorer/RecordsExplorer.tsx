@@ -2322,7 +2322,7 @@ const BaseRecordsExplorer = <
                         load: loadRecordDetails,
                         loading: loadingRecordDetails,
                         errorMessage: loadingRecordDetailsErrorMessage,
-                        hasSyncTool: true,
+                        hasSyncTool: Boolean(recordDetailsFinder),
                       }}
                       onClickEdit={() => {
                         const pathToEditRecord = (() => {
