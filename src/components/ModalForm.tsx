@@ -443,23 +443,6 @@ export const BaseModalForm = <Values extends FormikValues>(
                               return (
                                 <>
                                   {(() => {
-                                    if (viewModeTools) {
-                                      return Children.toArray(
-                                        viewModeTools
-                                      ).map((tool, index) => {
-                                        return (
-                                          <Grid
-                                            item
-                                            key={index}
-                                            sx={{ minWidth: 0 }}
-                                          >
-                                            {tool}
-                                          </Grid>
-                                        );
-                                      });
-                                    }
-                                  })()}
-                                  {(() => {
                                     if (showEditButton) {
                                       return (
                                         <Grid item>
@@ -475,6 +458,23 @@ export const BaseModalForm = <Values extends FormikValues>(
                                           </Button>
                                         </Grid>
                                       );
+                                    }
+                                  })()}
+                                  {(() => {
+                                    if (viewModeTools) {
+                                      return Children.toArray(
+                                        viewModeTools
+                                      ).map((tool, index) => {
+                                        return (
+                                          <Grid
+                                            item
+                                            key={index}
+                                            sx={{ minWidth: 0 }}
+                                          >
+                                            {tool}
+                                          </Grid>
+                                        );
+                                      });
                                     }
                                   })()}
                                   {(() => {
