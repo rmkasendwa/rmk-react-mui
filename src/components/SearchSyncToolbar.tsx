@@ -227,6 +227,7 @@ export interface SearchSyncToolbarProps
    */
   tools?: (ReactNode | Tool)[];
   preTitleTools?: (ReactNode | Tool)[];
+  postSyncButtonTools?: (ReactNode | Tool)[];
   /**
    * Extra tools to be added to the toolbar.
    * Note: Tools will always over-write children.
@@ -268,6 +269,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
       onChangeSearchTerm,
       onSearch,
       preTitleTools = [],
+      postSyncButtonTools = [],
       children,
       TitleProps = {},
       searchFieldOpen: searchFieldOpenProp,
@@ -373,7 +375,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
           }}
         >
           {(() => {
-            if (preTitleTools && !isSmallScreenSize) {
+            if (preTitleTools.length > 0 && !isSmallScreenSize) {
               return getToolNodes(preTitleTools, showFullToolWidth).map(
                 (tool, index) => {
                   return (
@@ -540,7 +542,11 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
           })()}
           {(() => {
             if (isSmallScreenSize) {
-              const smallScreenDisplayableTools = [...preTitleTools, ...tools]
+              const smallScreenDisplayableTools = [
+                ...preTitleTools,
+                ...tools,
+                ...postSyncButtonTools,
+              ]
                 .filter((tool) => {
                   return (
                     tool &&
@@ -618,6 +624,19 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
             }
             if (syncButtonElement) {
               return <Grid item>{syncButtonElement}</Grid>;
+            }
+          })()}
+          {(() => {
+            if (postSyncButtonTools.length > 0 && !isSmallScreenSize) {
+              return getToolNodes(postSyncButtonTools, showFullToolWidth).map(
+                (tool, index) => {
+                  return (
+                    <Grid item key={index} sx={{ minWidth: 0 }}>
+                      {tool}
+                    </Grid>
+                  );
+                }
+              );
             }
           })()}
         </Grid>
