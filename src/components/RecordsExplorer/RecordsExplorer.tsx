@@ -2338,6 +2338,25 @@ const BaseRecordsExplorer = <
                         })();
                         navigate(pathToEditRecord);
                       }}
+                      viewModeTools={[
+                        ...(() => {
+                          if (isDeletable && selectedRecord) {
+                            return [
+                              <Button
+                                key="delete"
+                                variant="contained"
+                                color="error"
+                                onClick={() => {
+                                  deleteFunctionRef.current(selectedRecord);
+                                }}
+                              >
+                                Delete
+                              </Button>,
+                            ];
+                          }
+                          return [];
+                        })(),
+                      ]}
                     >
                       {({ ...rest }) => {
                         if (typeof editorForm === 'function') {
