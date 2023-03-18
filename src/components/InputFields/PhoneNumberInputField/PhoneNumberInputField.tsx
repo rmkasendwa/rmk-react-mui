@@ -17,12 +17,14 @@ import {
   useState,
 } from 'react';
 
+import { useLoadingContext } from '../../../contexts/LoadingContext';
 import { CountryCode } from '../../../interfaces/Countries';
 import PhoneNumberUtil, {
   isValidPhoneNumber,
   systemStandardPhoneNumberFormat,
 } from '../../../utils/PhoneNumberUtil';
 import CountryFieldValue from '../../CountryFieldValue';
+import FieldValueDisplay from '../../FieldValueDisplay';
 import PaginatedDropdownOptionList, {
   DropdownOption,
 } from '../../PaginatedDropdownOptionList';
@@ -80,6 +82,7 @@ export const PhoneNumberInputField = forwardRef<
     id,
     regionalCode: regionalCodeProp,
     sx,
+    enableLoadingState = true,
     ...rest
   },
   ref
@@ -89,6 +92,8 @@ export const PhoneNumberInputField = forwardRef<
   const anchorRef = useRef<HTMLButtonElement>(null);
 
   const { palette } = useTheme();
+
+  const { locked } = useLoadingContext();
 
   const [regionalCode, setRegionalCode] = useState<CountryCode | undefined>(
     regionalCodeProp
@@ -198,6 +203,26 @@ export const PhoneNumberInputField = forwardRef<
     };
   }, []);
 
+  if (enableLoadingState && locked) {
+    return (
+      <FieldValueDisplay
+        {...({} as any)}
+        {...rest.FieldValueDisplayProps}
+        {...{ label }}
+        value={(() => {
+          if (inputValue) {
+            return (
+              <CountryFieldValue
+                countryCode={regionalCode as CountryCode}
+                countryLabel={inputValue}
+              />
+            );
+          }
+        })()}
+      />
+    );
+  }
+
   return (
     <TextField
       ref={ref}
@@ -226,7 +251,7 @@ export const PhoneNumberInputField = forwardRef<
         setSanitizedInputValueRef.current(event.target.value);
       }}
       {...rest}
-      {...{ name, id, placeholder, disabled }}
+      {...{ name, id, placeholder, disabled, enableLoadingState }}
       InputProps={{
         ...InputProps,
         startAdornment: displayPhoneNumberCountry ? (
