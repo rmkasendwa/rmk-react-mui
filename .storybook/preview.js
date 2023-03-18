@@ -7,6 +7,7 @@ import { BrowserRouter } from 'react-router-dom';
 
 import { APIProvider } from '../src/contexts/APIContext';
 import { GlobalConfigurationProvider } from '../src/contexts/GlobalConfigurationContext';
+import { MessagingProvider } from '../src/contexts/MessagingContext';
 import { darkTheme, defaultTheme } from '../src/theme';
 
 const providerFn = ({ theme: { theme }, children }) => {
@@ -28,7 +29,7 @@ const providerFn = ({ theme: { theme }, children }) => {
         <APIProvider>
           <ThemeProvider theme={muiTheme}>
             <CssBaseline />
-            {children}
+            <MessagingProvider>{children}</MessagingProvider>
           </ThemeProvider>
         </APIProvider>
       </GlobalConfigurationProvider>

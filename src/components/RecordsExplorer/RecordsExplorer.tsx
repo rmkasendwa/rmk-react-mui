@@ -43,6 +43,7 @@ import * as Yup from 'yup';
 
 import { useAuth } from '../../contexts/AuthContext';
 import { LoadingContext, LoadingProvider } from '../../contexts/LoadingContext';
+import { useMessagingContext } from '../../contexts/MessagingContext';
 import { useReactRouterDOMSearchParams } from '../../hooks/ReactRouterDOM';
 import {
   PaginatedRecordsFinderOptions,
@@ -362,6 +363,8 @@ export interface RecordsExplorerProps<
   SearchSyncToolbarProps?: Partial<SearchSyncToolbarProps>;
 
   ModalFormProps?: Partial<ModalFormProps>;
+  recordCreateSuccessMessage?: ReactNode;
+  recordEditSuccessMessage?: ReactNode;
 }
 
 export function getRecordsExplorerUtilityClass(slot: string): string {
@@ -443,6 +446,8 @@ const BaseRecordsExplorer = <
     revalidationKey,
     recordDeletor,
     getRecordTools,
+    recordCreateSuccessMessage,
+    recordEditSuccessMessage,
     ...rest
   } = omit(
     props,
@@ -1375,6 +1380,8 @@ const BaseRecordsExplorer = <
   const isEditable = Boolean(recordEditor || pathToEdit || getPathToEdit);
   const isDeletable = Boolean(recordDeletor);
 
+  const { showSuccessMessage } = useMessagingContext();
+
   const viewElement = (() => {
     if (views) {
       const selectedView = views.find(({ type }) => type === viewType);
@@ -2144,10 +2151,8 @@ const BaseRecordsExplorer = <
                 <ModalForm
                   lockSubmitIfNoChange={false}
                   {...modalFormProps}
-                  {...{
-                    validationSchema,
-                    initialValues,
-                  }}
+                  initialValues={initialValues || {}}
+                  validationSchema={validationSchema || {}}
                   open={Boolean(createNewRecord)}
                   errorMessage={createErrorMessage}
                   title={
@@ -2173,6 +2178,10 @@ const BaseRecordsExplorer = <
                     resetCreation();
                     if (created) {
                       autoSync && load();
+                      showSuccessMessage(
+                        recordCreateSuccessMessage ||
+                          `The new ${lowercaseRecordLabelSingular} was created successfully`
+                      );
                     }
                     if (defaultPath) {
                       navigate(defaultPath);
@@ -2251,11 +2260,15 @@ const BaseRecordsExplorer = <
                         }
                       }}
                       onClose={() => {
-                        resetUpdate();
                         if (updated) {
                           onEditRecord && onEditRecord();
                           autoSync && load();
+                          showSuccessMessage(
+                            recordEditSuccessMessage ||
+                              `The ${lowercaseRecordLabelSingular} was updated successfully`
+                          );
                         }
+                        resetUpdate();
                         if (defaultPath) {
                           navigate(defaultPath);
                         } else {

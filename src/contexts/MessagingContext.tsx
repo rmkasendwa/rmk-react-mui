@@ -12,7 +12,11 @@ import {
 export interface IMessagingContext {
   showSuccessMessage: (message: ReactNode) => void;
 }
-export const MessagingContext = createContext<IMessagingContext>({} as any);
+export const MessagingContext = createContext<IMessagingContext>({
+  showSuccessMessage: () => {
+    // Do nothing
+  },
+});
 
 export interface IMessagingProviderProps {
   children: ReactNode;

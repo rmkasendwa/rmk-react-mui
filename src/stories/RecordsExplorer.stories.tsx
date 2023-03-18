@@ -1,11 +1,26 @@
-import Box from '@mui/material/Box';
+import { Grid } from '@mui/material';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { countries } from 'countries-list';
 import React from 'react';
 
+import CountryFieldValue from '../components/CountryFieldValue';
+import EnumValueChip from '../components/EnumValueChip';
+import FormikCurrencyInputField from '../components/FormikInputFields/FormikCurrencyInputField';
+import FormikDataDropdownField from '../components/FormikInputFields/FormikDataDropdownField';
+import FormikPhoneNumberInputField from '../components/FormikInputFields/FormikPhoneNumberInputField';
+import FormikTextField from '../components/FormikInputFields/FormikTextField';
 import RecordsExplorer, {
   RecordsExplorerProps,
 } from '../components/RecordsExplorer';
-import { contactTableProps, contacts, tableColumns } from './data/contacts';
+import {
+  contactSources,
+  contactStatuses,
+  contactTableProps,
+  contacts,
+  countryCodes,
+  createContactFormValidationSchema,
+  tableColumns,
+} from './data/contacts';
 
 export default {
   title: 'Components/Records Explorer',
@@ -110,9 +125,92 @@ WithLoadFunction.args = {
 export const WithCrudFunctions = Template.bind({});
 WithCrudFunctions.args = {
   ...baseArgs,
-  validationSchema: {},
-  initialValues: {},
-  editorForm: <Box>Add form here</Box>,
+  validationSchema: createContactFormValidationSchema,
+  initialValues: {
+    name: '',
+    status: undefined as any,
+    countryCode: undefined as any,
+    phoneNumber: '',
+    email: '',
+    source: undefined as any,
+    accountBalance: undefined as any,
+  },
+  editorForm: (
+    <Grid container spacing={2}>
+      <Grid item xs={12}>
+        <FormikTextField label="Name" name="name" fullWidth required />
+      </Grid>
+      <Grid item sm={6} xs={12}>
+        <FormikDataDropdownField
+          options={contactStatuses.map((status) => {
+            return {
+              label: (
+                <EnumValueChip
+                  value={status}
+                  colors={{
+                    Active: '#1F8D60',
+                    Pending: '#C31521',
+                  }}
+                />
+              ),
+              value: status,
+            };
+          })}
+          label="Status"
+          name="status"
+          fullWidth
+        />
+      </Grid>
+      <Grid item sm={6} xs={12}>
+        <FormikDataDropdownField
+          options={countryCodes.map((countryCode) => {
+            return {
+              label: <CountryFieldValue countryCode={countryCode} />,
+              searchableLabel: countries[countryCode].name,
+              value: countryCode,
+            };
+          })}
+          label="Country"
+          name="countryCode"
+          fullWidth
+          required
+        />
+      </Grid>
+      <Grid item sm={6} xs={12}>
+        <FormikPhoneNumberInputField
+          label="Phone Number"
+          name="phoneNumber"
+          fullWidth
+          required
+        />
+      </Grid>
+      <Grid item sm={6} xs={12}>
+        <FormikTextField label="Email" name="email" fullWidth required />
+      </Grid>
+      <Grid item sm={6} xs={12}>
+        <FormikDataDropdownField
+          options={contactSources.map((source) => {
+            return {
+              label: source,
+              searchableLabel: source,
+              value: source,
+            };
+          })}
+          label="Source"
+          name="source"
+          fullWidth
+          required
+        />
+      </Grid>
+      <Grid item sm={6} xs={12}>
+        <FormikCurrencyInputField
+          label="Account Balance"
+          name="accountBalance"
+          fullWidth
+        />
+      </Grid>
+    </Grid>
+  ),
   recordCreator: async (formValues) => {
     console.log('To be created', { formValues });
   },

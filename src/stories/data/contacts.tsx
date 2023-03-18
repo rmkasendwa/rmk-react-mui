@@ -1,3 +1,5 @@
+import '../../components/FormikInputFields/FormikPhoneNumberInputField';
+
 import PhoneIcon from '@mui/icons-material/Phone';
 import ShareIcon from '@mui/icons-material/Share';
 import { countries } from 'countries-list';
@@ -5,6 +7,7 @@ import randomEmail from 'random-email';
 import createMobilePhoneNumber from 'random-mobile-numbers';
 import React from 'react';
 import { names, uniqueNamesGenerator } from 'unique-names-generator';
+import * as Yup from 'yup';
 
 import CountryFieldValue from '../../components/CountryFieldValue';
 import EnumValueChip from '../../components/EnumValueChip';
@@ -13,20 +16,20 @@ import ProfileGravatar from '../../components/ProfileGravatar';
 import { TableColumn, TableProps } from '../../components/Table';
 import { CountryCode } from '../../interfaces/Countries';
 
-const countryCodes = Object.keys(countries) as CountryCode[];
+export const countryCodes = Object.keys(countries) as CountryCode[];
 
-const contactStatuses = ['Active', 'Pending'] as const;
-type ContactStatus = typeof contactStatuses[number];
+export const contactStatuses = ['Active', 'Pending'] as const;
+export type ContactStatus = typeof contactStatuses[number];
 
-const contactSources = [
+export const contactSources = [
   'Refferal',
   'Website',
   'Google Search',
   'Trip',
 ] as const;
-type ContactSource = typeof contactSources[number];
+export type ContactSource = typeof contactSources[number];
 
-type Contact = {
+export type Contact = {
   id: string;
   name: string;
   phoneNumber: string;
@@ -140,3 +143,23 @@ export const contactTableProps = {
   },
   minColumnWidth: 220,
 } as Partial<TableProps<Contact>>;
+
+export const createContactFormValidationSchema = Yup.object({
+  name: Yup.string().required('Please enter the contact name'),
+  status: Yup.mixed<ContactStatus>().oneOf([...contactStatuses]),
+  countryCode: Yup.string().required('Please select the country'),
+  phoneNumber: Yup.string()
+    .phoneNumber()
+    .required('Please enter the contact phone number'),
+  email: Yup.string()
+    .email('Please enter a valid email address')
+    .required('Please enter the contact email address'),
+  source: Yup.mixed<ContactSource>()
+    .oneOf([...contactSources])
+    .required('Please select the contact source'),
+  accountBalance: Yup.number(),
+});
+
+// export const CreateContactFormValues = Yup.InferType<
+//   typeof createContactFormValidationSchema
+// >;
