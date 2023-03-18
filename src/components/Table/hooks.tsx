@@ -832,7 +832,7 @@ export const useTable = <DataRow extends BaseDataRow>(
                                     isLastColumn &&
                                     enableColumnDisplayToggle
                                   ) {
-                                    return 42;
+                                    return 36;
                                   }
                                   return 0;
                                 })(),

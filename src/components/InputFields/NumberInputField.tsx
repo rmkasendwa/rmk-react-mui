@@ -1,20 +1,52 @@
 import { addThousandCommas } from '@infinite-debugger/rmk-utils/numbers';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
+import {
+  ComponentsOverrides,
+  ComponentsProps,
+  ComponentsVariants,
+  unstable_composeClasses as composeClasses,
+  generateUtilityClass,
+  generateUtilityClasses,
+  useThemeProps,
+} from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
+import clsx from 'clsx';
 import { forwardRef, useCallback, useEffect, useRef, useState } from 'react';
 
 import TextField, { TextFieldProps } from './TextField';
 
-export interface NumberInputFieldProps extends Omit<TextFieldProps, 'value'> {
-  value?: number;
-  step?: number;
-  decimalPlaces?: number;
-  min?: number;
-  max?: number;
-  valuePrefix?: string;
-  valueSuffix?: string;
+export interface NumberInputFieldClasses {
+  /** Styles applied to the root element. */
+  root: string;
+}
+
+export type NumberInputFieldClassKey = keyof NumberInputFieldClasses;
+
+// Adding theme prop types
+declare module '@mui/material/styles/props' {
+  interface ComponentsPropsList {
+    MuiNumberInputField: NumberInputFieldProps;
+  }
+}
+
+// Adding theme override types
+declare module '@mui/material/styles/overrides' {
+  interface ComponentNameToClassKey {
+    MuiNumberInputField: keyof NumberInputFieldClasses;
+  }
+}
+
+// Adding theme component types
+declare module '@mui/material/styles/components' {
+  interface Components<Theme = unknown> {
+    MuiNumberInputField?: {
+      defaultProps?: ComponentsProps['MuiNumberInputField'];
+      styleOverrides?: ComponentsOverrides<Theme>['MuiNumberInputField'];
+      variants?: ComponentsVariants['MuiNumberInputField'];
+    };
+  }
 }
 
 const findNumericCharacters = (number: string) => {
@@ -43,11 +75,35 @@ const getScaleFactor = (event: any) => {
   return 1;
 };
 
+export interface NumberInputFieldProps extends Omit<TextFieldProps, 'value'> {
+  value?: number;
+  step?: number;
+  decimalPlaces?: number;
+  min?: number;
+  max?: number;
+  valuePrefix?: string;
+  valueSuffix?: string;
+  valueScaleFactor?: number;
+}
+
+export function getNumberInputFieldUtilityClass(slot: string): string {
+  return generateUtilityClass('MuiNumberInputField', slot);
+}
+
+export const numberInputFieldClasses: NumberInputFieldClasses =
+  generateUtilityClasses('MuiNumberInputField', ['root']);
+
+const slots = {
+  root: ['root'],
+};
+
 export const NumberInputField = forwardRef<
   HTMLDivElement,
   NumberInputFieldProps
->(function NumberInputField(
-  {
+>(function NumberInputField(inProps, ref) {
+  const props = useThemeProps({ props: inProps, name: 'MuiNumberInputField' });
+  const {
+    className,
     step = 1,
     value,
     name,
@@ -63,10 +119,22 @@ export const NumberInputField = forwardRef<
     valueSuffix = '',
     endAdornment,
     sx,
+    valueScaleFactor = 1,
     ...rest
-  },
-  ref
-) {
+  } = props;
+
+  const classes = composeClasses(
+    slots,
+    getNumberInputFieldUtilityClass,
+    (() => {
+      if (className) {
+        return {
+          root: className,
+        };
+      }
+    })()
+  );
+
   const initialRenderRef = useRef(true);
   const [inputField, setInputField] = useState<HTMLInputElement | null>(null);
   const [inputValue, setInputValue] = useState('');
@@ -115,11 +183,18 @@ export const NumberInputField = forwardRef<
       value: {
         name,
         id,
-        value: isNaN(numericValue) ? 0 : numericValue,
+        value: (isNaN(numericValue) ? 0 : numericValue) / valueScaleFactor,
       },
     });
     onChangeProp && onChangeProp(event);
-  }, [extractNumericValue, id, inputValue, name, onChangeProp]);
+  }, [
+    extractNumericValue,
+    id,
+    inputValue,
+    name,
+    onChangeProp,
+    valueScaleFactor,
+  ]);
 
   const onChange = useCallback(
     ({ target }: any) => {
@@ -153,7 +228,7 @@ export const NumberInputField = forwardRef<
     if (!focused) {
       if (value !== undefined) {
         if (value != null && typeof value === 'number') {
-          let numericValue = value;
+          let numericValue = value * valueScaleFactor;
 
           if (min != null && numericValue < min) numericValue = min;
           if (max != null && numericValue > max) numericValue = max;
@@ -175,7 +250,7 @@ export const NumberInputField = forwardRef<
         });
       }
     }
-  }, [decimalPlaces, extractNumericValue, focused, max, min, value]);
+  }, [decimalPlaces, extractNumericValue, focused, max, min, value, valueScaleFactor]);
 
   useEffect(() => {
     setInputValue((prevInputValue) => {
@@ -254,6 +329,7 @@ export const NumberInputField = forwardRef<
     <TextField
       ref={ref}
       {...rest}
+      className={clsx(classes.root)}
       {...{ name, id, onChange, disabled }}
       value={inputValue}
       onFocus={(event) => {

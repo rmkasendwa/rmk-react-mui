@@ -1,7 +1,9 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import React from 'react';
 
-import { NumberInputField } from '../../components/InputFields/NumberInputField';
+import NumberInputField, {
+  NumberInputFieldProps,
+} from '../../components/InputFields/NumberInputField';
 
 export default {
   title: 'Components/Input Fields/Number Input Field',
@@ -18,4 +20,13 @@ const Template: ComponentStory<typeof NumberInputField> = (props) => {
 export const Default = Template.bind({});
 Default.args = {
   required: true,
-};
+} as NumberInputFieldProps;
+
+export const WithValueScaleFactor = Template.bind({});
+WithValueScaleFactor.args = {
+  valueScaleFactor: 100,
+  onChange: (event) => {
+    console.log(event.target.value);
+  },
+  required: true,
+} as NumberInputFieldProps;
