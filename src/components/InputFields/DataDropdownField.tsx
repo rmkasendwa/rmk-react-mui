@@ -275,7 +275,12 @@ export const DataDropdownField = forwardRef<
 
   const selectedOptionDisplayString = useMemo(() => {
     return selectedOptions
-      .map(({ label, searchableLabel }) => String(searchableLabel || label))
+      .filter(({ label, searchableLabel }) => {
+        return typeof label === 'string' || typeof searchableLabel === 'string';
+      })
+      .map(({ label, searchableLabel }) => {
+        return String(searchableLabel || label);
+      })
       .join(', ');
   }, [selectedOptions]);
 
