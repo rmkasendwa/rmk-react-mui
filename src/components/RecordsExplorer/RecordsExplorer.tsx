@@ -909,47 +909,6 @@ const BaseRecordsExplorer = <
   const { loggedInUserHasPermission } = useAuth();
 
   const {
-    create,
-    creating,
-    created,
-    errorMessage: createErrorMessage,
-    reset: resetCreation,
-  } = useCreate(recordCreator!);
-
-  const {
-    load: loadRecordDetails,
-    loading: loadingRecordDetails,
-    errorMessage: loadingRecordDetailsErrorMessage,
-    record: selectedRecord,
-  } = useRecord(
-    async () => {
-      if (recordDetailsFinder) {
-        if (selectedRecordId) {
-          return recordDetailsFinder(selectedRecordId);
-        }
-      }
-    },
-    {
-      loadOnMount: false,
-    }
-  );
-
-  const {
-    update,
-    updating,
-    updated,
-    errorMessage: updateErrorMessage,
-    reset: resetUpdate,
-  } = useUpdate(recordEditor!);
-
-  const editInitialValues = useMemo(() => {
-    if (getEditableRecordInitialValuesRef.current && selectedRecord) {
-      return getEditableRecordInitialValuesRef.current(selectedRecord);
-    }
-    return { ...initialValues, ...(selectedRecord as any) };
-  }, [selectedRecord, initialValues]);
-
-  const {
     allPageRecords: asyncData,
     load,
     loading,
@@ -1328,6 +1287,58 @@ const BaseRecordsExplorer = <
       }
     );
   };
+
+  const {
+    create,
+    creating,
+    created,
+    errorMessage: createErrorMessage,
+    reset: resetCreation,
+  } = useCreate(recordCreator!);
+
+  const {
+    load: loadRecordDetails,
+    loading: loadingRecordDetails,
+    errorMessage: loadingRecordDetailsErrorMessage,
+    record: loadedSelectedRecord,
+  } = useRecord(
+    async () => {
+      if (recordDetailsFinder) {
+        if (selectedRecordId) {
+          return recordDetailsFinder(selectedRecordId);
+        }
+      }
+    },
+    {
+      loadOnMount: false,
+    }
+  );
+
+  const selectedRecord = (() => {
+    if (loadedSelectedRecord) {
+      return loadedSelectedRecord;
+    }
+    if (data.length > 0 && selectedRecordId) {
+      return data.find(({ id }) => {
+        return id === selectedRecordId;
+      });
+    }
+  })();
+
+  const {
+    update,
+    updating,
+    updated,
+    errorMessage: updateErrorMessage,
+    reset: resetUpdate,
+  } = useUpdate(recordEditor!);
+
+  const editInitialValues = useMemo(() => {
+    if (getEditableRecordInitialValuesRef.current && selectedRecord) {
+      return getEditableRecordInitialValuesRef.current(selectedRecord);
+    }
+    return { ...initialValues, ...(selectedRecord as any) };
+  }, [selectedRecord, initialValues]);
 
   const allGroupsExpanded = Boolean(
     !searchParamExpandedGroups || searchParamExpandedGroups === 'All'
@@ -2130,7 +2141,6 @@ const BaseRecordsExplorer = <
         ) {
           const hasFormProps = Boolean(validationSchema && initialValues);
           const modalFormProps: Partial<ModalFormProps> = {
-            showCloseIconButton: false,
             ...ModalFormPropsRest,
             FormikProps: {
               enableReinitialize: true,
@@ -2163,11 +2173,11 @@ const BaseRecordsExplorer = <
                         gap: 1,
                       }}
                     >
-                      <Grid item>Create New {recordLabelSingular}</Grid>
+                      <Grid item>Add New {recordLabelSingular}</Grid>
                       {descriptionElement}
                     </Grid>
                   }
-                  submitButtonText="Create"
+                  submitButtonText={`Add ${recordLabelSingular}`}
                   loading={creating}
                   onSubmit={async (values) => {
                     if (recordCreator) {
@@ -2252,7 +2262,7 @@ const BaseRecordsExplorer = <
                           {descriptionElement}
                         </Grid>
                       }
-                      submitButtonText="Update"
+                      submitButtonText={`Update ${recordLabelSingular}`}
                       loading={updating}
                       onSubmit={async (values) => {
                         if (recordEditor && selectedRecord) {
