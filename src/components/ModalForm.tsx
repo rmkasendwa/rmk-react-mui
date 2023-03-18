@@ -13,7 +13,6 @@ import {
   Divider,
   Grid,
   GridProps,
-  IconButton,
   alpha,
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
@@ -275,21 +274,26 @@ export const BaseModalForm = <Values extends FormikValues>(
                 hasSyncTool={false}
                 {...SearchSyncToolbarPropsRest}
                 title={title}
+                {...(() => {
+                  if (showCloseIconButton && !isSubmitting) {
+                    return {
+                      postSyncButtonTools: [
+                        {
+                          type: 'icon-button',
+                          icon: <CloseIcon />,
+                          onClick: onClose,
+                        },
+                      ] as NonNullable<
+                        typeof SearchSyncToolbarPropsRest.postSyncButtonTools
+                      >,
+                    };
+                  }
+                })()}
                 sx={{
                   pr: `${spacing(2)} !important`,
                   ...SearchSyncToolbarPropsSx,
                 }}
-              >
-                {(() => {
-                  if (showCloseIconButton && !isSubmitting) {
-                    return (
-                      <IconButton onClick={onClose}>
-                        <CloseIcon />
-                      </IconButton>
-                    );
-                  }
-                })()}
-              </SearchSyncToolbar>
+              />
               <Divider />
               <Box sx={{ py: 0, px: 3 }}>
                 {staticEntityDetails ? (

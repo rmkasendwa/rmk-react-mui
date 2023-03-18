@@ -10,7 +10,6 @@ import {
   ComponentsVariants,
   Divider,
   Grid,
-  IconButton,
   Modal,
   ModalProps,
   alpha,
@@ -237,18 +236,23 @@ export const ModalPopup = forwardRef<HTMLDivElement, ModalPopupProps>(
                 hasSyncTool={false}
                 {...SearchSyncToolbarPropsRest}
                 {...{ title }}
-                sx={SearchSyncToolbarPropsSx}
-              >
-                {(() => {
+                {...(() => {
                   if (showCloseIconButton && !loading) {
-                    return (
-                      <IconButton onClick={onClose}>
-                        <CloseIcon />
-                      </IconButton>
-                    );
+                    return {
+                      postSyncButtonTools: [
+                        {
+                          type: 'icon-button',
+                          icon: <CloseIcon />,
+                          onClick: onClose,
+                        },
+                      ] as NonNullable<
+                        typeof SearchSyncToolbarPropsRest.postSyncButtonTools
+                      >,
+                    };
                   }
                 })()}
-              </SearchSyncToolbar>
+                sx={SearchSyncToolbarPropsSx}
+              />
               <Divider />
             </>
           ) : null}

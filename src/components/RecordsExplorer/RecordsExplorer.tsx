@@ -448,6 +448,8 @@ const BaseRecordsExplorer = <
     getRecordTools,
     recordCreateSuccessMessage,
     recordEditSuccessMessage,
+    pathToView,
+    getPathToView,
     ...rest
   } = omit(
     props,
@@ -1301,6 +1303,7 @@ const BaseRecordsExplorer = <
     loading: loadingRecordDetails,
     errorMessage: loadingRecordDetailsErrorMessage,
     record: loadedSelectedRecord,
+    reset: resetSelectedRecordState,
   } = useRecord(
     async () => {
       if (recordDetailsFinder) {
@@ -1352,6 +1355,7 @@ const BaseRecordsExplorer = <
   const expandedGroupsInverted = Boolean(searchParamExpandedGroupsInverted);
 
   const editFunctionRef = useRef((record: RecordRow) => {
+    resetSelectedRecordState();
     if (pathToEdit || getPathToEdit) {
       navigate(
         (() => {
@@ -1413,6 +1417,7 @@ const BaseRecordsExplorer = <
               enableCheckboxRowSelectors = enableCheckboxRowSelectorsProp,
               showRowNumber = showRowNumberProp,
               getEllipsisMenuToolProps,
+              onClickRow,
             } = selectedView;
             const displayingColumns = selectedView.columns.filter(({ id }) => {
               return selectedColumnIds.includes(String(id) as any);
@@ -1730,6 +1735,27 @@ const BaseRecordsExplorer = <
                         getEllipsisMenuToolProps,
                       };
                     })(),
+                    onClickRow:
+                      onClickRow ??
+                      (() => {
+                        if (editorForm) {
+                          return (record) => {
+                            const { id } = record;
+                            const pathToViewRecord = (() => {
+                              if (pathToView) {
+                                return pathToView;
+                              }
+                              if (getPathToView) {
+                                return getPathToView(record);
+                              }
+                              return addSearchParamsToPath(pathname, {
+                                selectedRecord: id,
+                              });
+                            })();
+                            navigate(pathToViewRecord);
+                          };
+                        }
+                      })(),
                   };
 
                   const tableControlProps: Partial<typeof viewProps> = {
@@ -2279,6 +2305,7 @@ const BaseRecordsExplorer = <
                           );
                         }
                         resetUpdate();
+                        resetSelectedRecordState();
                         if (defaultPath) {
                           navigate(defaultPath);
                         } else {
@@ -2289,7 +2316,7 @@ const BaseRecordsExplorer = <
                         }
                       }}
                       submitted={updated}
-                      editMode={editRecord}
+                      editMode={Boolean(editRecord)}
                       SearchSyncToolbarProps={{
                         ...modalFormProps.SearchSyncToolbarProps,
                         load: loadRecordDetails,

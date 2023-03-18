@@ -153,6 +153,7 @@ WithCrudFunctions.args = {
                   }}
                 />
               ),
+              searchableLabel: status,
               value: status,
             };
           })}
@@ -213,11 +214,20 @@ WithCrudFunctions.args = {
   ),
   recordCreator: async (formValues) => {
     console.log('To be created', { formValues });
+    return new Promise((resolve) => {
+      setTimeout(() => resolve(formValues), 3000);
+    });
   },
   recordEditor: async (record, formValues) => {
     console.log('To be edited', { record, formValues });
+    return new Promise((resolve) => {
+      setTimeout(() => resolve(formValues), 3000);
+    });
   },
   recordDeletor: async (record) => {
     console.log('To be deleted', { record });
+    return new Promise((resolve) => {
+      setTimeout(() => resolve(record), 3000);
+    });
   },
 } as RecordsExplorerProps;
