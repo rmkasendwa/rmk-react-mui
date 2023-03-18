@@ -32,7 +32,10 @@ import {
 } from 'react';
 import { mergeRefs } from 'react-merge-refs';
 
-import { LoadingProvider } from '../../contexts/LoadingContext';
+import {
+  LoadingProvider,
+  useLoadingContext,
+} from '../../contexts/LoadingContext';
 import { useRecord } from '../../hooks/Utils';
 import { isDescendant } from '../../utils/html';
 import FieldValueDisplay from '../FieldValueDisplay';
@@ -47,6 +50,7 @@ import TextField, { TextFieldProps } from './TextField';
 export interface DataDropdownFieldClasses {
   /** Styles applied to the root element. */
   root: string;
+  selectedOptionsWrapper: string;
 }
 
 export type DataDropdownFieldClassKey = keyof DataDropdownFieldClasses;
@@ -113,10 +117,14 @@ export function getDataDropdownFieldUtilityClass(slot: string): string {
 }
 
 export const dataDropdownFieldClasses: DataDropdownFieldClasses =
-  generateUtilityClasses('MuiDataDropdownField', ['root']);
+  generateUtilityClasses('MuiDataDropdownField', [
+    'root',
+    'selectedOptionsWrapper',
+  ]);
 
 const slots = {
   root: ['root'],
+  selectedOptionsWrapper: ['selectedOptionsWrapper'],
 };
 
 export const DataDropdownField = forwardRef<
@@ -160,6 +168,7 @@ export const DataDropdownField = forwardRef<
     startAdornment,
     endAdornment: endAdornmentProp,
     showDropdownIcon = true,
+    enableLoadingState = true,
     ...rest
   } = props;
 
@@ -377,6 +386,83 @@ export const DataDropdownField = forwardRef<
     }
   }, [canLoadAsyncSelectedOptions, loadAsyncSelectedOptions, value]);
 
+  const selectedOptionsElement = (() => {
+    if (!focused && selectedOptions.length > 0) {
+      return (
+        <>
+          {multiple ? (
+            selectedOptions.map(({ label, value }) => {
+              return (
+                <Box
+                  key={value}
+                  {...SelectedOptionPillPropsRest}
+                  sx={{
+                    fontSize: 14,
+                    bgcolor: alpha(palette.primary.main, 0.1),
+                    borderRadius: '20px',
+                    height: 25,
+                    py: 0.25,
+                    pl: (() => {
+                      if (['string', 'number'].includes(typeof label)) {
+                        return 1;
+                      }
+                      return 0.25;
+                    })(),
+                    pr: 1,
+                    mr: 0.5,
+                    '&>*': {
+                      flexWrap: 'nowrap',
+                    },
+                    ...SelectedOptionPillPropsSx,
+                  }}
+                >
+                  {label}
+                </Box>
+              );
+            })
+          ) : (
+            <Typography
+              component="div"
+              sx={{
+                fontSize: 14,
+              }}
+            >
+              {selectedOptions[0]?.label}
+            </Typography>
+          )}
+        </>
+      );
+    }
+  })();
+
+  const { locked } = useLoadingContext();
+
+  if (enableLoadingState && locked) {
+    return (
+      <FieldValueDisplay
+        {...({} as any)}
+        {...rest.FieldValueDisplayProps}
+        {...{ label }}
+        value={(() => {
+          if (selectedOptionsElement) {
+            return (
+              <Box
+                className={classes.selectedOptionsWrapper}
+                sx={{
+                  display: 'flex',
+                  whiteSpace: 'nowrap',
+                  gap: 0.5,
+                }}
+              >
+                {selectedOptionsElement}
+              </Box>
+            );
+          }
+        })()}
+      />
+    );
+  }
+
   if (value && loadingAsyncSelectedOptions) {
     return (
       <LoadingProvider
@@ -389,7 +475,9 @@ export const DataDropdownField = forwardRef<
           if (isTextVariant) {
             return <FieldValueDisplay {...{ label }} />;
           }
-          return <TextField {...rest} {...{ label, variant }} />;
+          return (
+            <TextField {...rest} {...{ label, variant, enableLoadingState }} />
+          );
         })()}
       </LoadingProvider>
     );
@@ -471,7 +559,7 @@ export const DataDropdownField = forwardRef<
               onClick={() => {
                 setOpen(true);
               }}
-              enableLoadingState={rest.enableLoadingState}
+              enableLoadingState={enableLoadingState}
             />
           );
         }
@@ -538,13 +626,19 @@ export const DataDropdownField = forwardRef<
               return selectedOptionDisplayString;
             })()}
             className={clsx(classes.root)}
-            {...{ variant, label, disabled, startAdornment }}
+            {...{
+              variant,
+              label,
+              disabled,
+              startAdornment,
+              enableLoadingState,
+            }}
             {...rest}
             endChildren={(() => {
-              if (searchable && !focused && selectedOptions.length > 0) {
+              if (selectedOptionsElement) {
                 return (
                   <Box
-                    className="data-dropdown-field-selected-option-wrapper"
+                    className={classes.selectedOptionsWrapper}
                     sx={{
                       position: 'absolute',
                       bottom: 0,
@@ -576,48 +670,7 @@ export const DataDropdownField = forwardRef<
                       })(),
                     }}
                   >
-                    {multiple ? (
-                      selectedOptions.map(({ label, value }) => {
-                        return (
-                          <Box
-                            key={value}
-                            {...SelectedOptionPillPropsRest}
-                            sx={{
-                              fontSize: 14,
-                              bgcolor: alpha(palette.primary.main, 0.1),
-                              borderRadius: '20px',
-                              height: 25,
-                              py: 0.25,
-                              pl: (() => {
-                                if (
-                                  ['string', 'number'].includes(typeof label)
-                                ) {
-                                  return 1;
-                                }
-                                return 0.25;
-                              })(),
-                              pr: 1,
-                              mr: 0.5,
-                              '&>*': {
-                                flexWrap: 'nowrap',
-                              },
-                              ...SelectedOptionPillPropsSx,
-                            }}
-                          >
-                            {label}
-                          </Box>
-                        );
-                      })
-                    ) : (
-                      <Typography
-                        component="div"
-                        sx={{
-                          fontSize: 14,
-                        }}
-                      >
-                        {selectedOptions[0]?.label}
-                      </Typography>
-                    )}
+                    {selectedOptionsElement}
                   </Box>
                 );
               }
@@ -637,13 +690,13 @@ export const DataDropdownField = forwardRef<
                   }
                   return {};
                 })(),
-                '&>.data-dropdown-field-selected-option-wrapper': {
+                [`&>.${classes.selectedOptionsWrapper}`]: {
                   width: 'calc(100% - 40px)',
                 },
                 ...(() => {
                   if (showClearButton) {
                     return {
-                      '&:hover>.data-dropdown-field-selected-option-wrapper': {
+                      [`&:hover>.${classes.selectedOptionsWrapper}`]: {
                         width: 'calc(100% - 72px)',
                       },
                     };
