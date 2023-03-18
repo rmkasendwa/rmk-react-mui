@@ -198,6 +198,18 @@ export interface RecordsExplorerFunctionChildren<State> {
   (state: State): ReactNode;
 }
 
+export type RecordsExplorerFunctionEditorForm<
+  RecordRow extends BaseDataRow = BaseDataRow,
+  InitialValues extends FormikValues = FormikValues
+> = ModalFormFunctionChildren<
+  InitialValues,
+  {
+    mode: CrudMode;
+    selectedRecord?: RecordRow | null;
+    loadingState: LoadingContext;
+  }
+>;
+
 export interface RecordsExplorerProps<
   RecordRow extends BaseDataRow = BaseDataRow,
   View extends ViewOptionType = ViewOptionType,
@@ -315,14 +327,7 @@ export interface RecordsExplorerProps<
 
   // Form
   editorForm?:
-    | ModalFormFunctionChildren<
-        InitialValues,
-        {
-          mode: CrudMode;
-          selectedRecord?: RecordRow | null;
-          loadingState: LoadingContext;
-        }
-      >
+    | RecordsExplorerFunctionEditorForm<RecordRow, InitialValues>
     | ReactNode;
   description?: ReactNode;
   recordsFinder?: (
