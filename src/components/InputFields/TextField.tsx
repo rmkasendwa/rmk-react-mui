@@ -258,6 +258,7 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
           }}
         >
           <MuiTextField
+            ref={ref}
             className={clsx(classes.root)}
             {...{
               size,

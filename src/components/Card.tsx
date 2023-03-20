@@ -126,7 +126,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(function Card(
       sx={{
         ...(() => {
           if (
-            (['card', 'inherit'] as (typeof layoutVariant)[]).includes(
+            (['card', 'inherit'] as typeof layoutVariant[]).includes(
               layoutVariant
             )
           ) {
