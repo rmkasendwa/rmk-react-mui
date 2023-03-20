@@ -9,7 +9,7 @@ import {
 
 export const expandedGroupsOptions = ['All', 'None'] as const;
 
-export type ExpandedGroupsOption = typeof expandedGroupsOptions[number];
+export type ExpandedGroupsOption = (typeof expandedGroupsOptions)[number];
 
 export interface SortToolOptions<RecordRow extends BaseDataRow = any>
   extends Pick<
