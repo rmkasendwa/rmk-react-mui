@@ -1,6 +1,6 @@
 {
   "name": "@infinite-debugger/react-mui",
-  "version": "0.4.0-alpha.156",
+  "version": "0.4.0-alpha.158",
   "description": "RMK React MUI is a React UI library of utility components, hooks and contexts",
   "keywords": [
     "react",
@@ -87,7 +87,7 @@
     "@mui/lab": "^5.0.0-alpha.106",
     "@mui/material": "^5.10.12",
     "@mui/styles": "^5.10.10",
-    "@mui/x-date-pickers": "^5.0.7",
+    "@mui/x-date-pickers": "^5.0.20",
     "@react-theming/storybook-addon": "^1.1.10",
     "@storybook/addon-actions": "^6.5.16",
     "@storybook/addon-essentials": "^6.5.16",
@@ -170,7 +170,7 @@
     "@mui/lab": ">=5.0.0-alpha.106",
     "@mui/material": ">=5.10.12",
     "@mui/styles": ">=5.10.10",
-    "@mui/x-date-pickers": ">=5.0.7",
+    "@mui/x-date-pickers": ">=5.0.20",
     "flag-icons": ">=6.6.6",
     "formik": ">=2.2.9",
     "google-libphonenumber": ">=3.2.31",
