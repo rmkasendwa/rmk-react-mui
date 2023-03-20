@@ -303,6 +303,7 @@ export interface RecordsExplorerProps<
    */
   hideAddNewButtonOnNoFilteredData?: boolean;
   id?: string;
+  searchTerm?: string;
   /**
    * Function to be called when user searches.
    */
@@ -455,6 +456,7 @@ const BaseRecordsExplorer = <
     recordEditSuccessMessage,
     pathToView,
     getPathToView,
+    searchTerm: searchTermProp,
     ...rest
   } = omit(
     props,
@@ -492,7 +494,8 @@ const BaseRecordsExplorer = <
 
   const { sx: HeaderPropsSx, ...HeaderPropsRest } = HeaderProps;
   const { sx: BodyPropsSx, ...BodyPropsRest } = BodyProps;
-  const { ...SearchSyncToolBarPropsRest } = SearchSyncToolBarProps;
+  const { onChangeSearchTerm, ...SearchSyncToolBarPropsRest } =
+    SearchSyncToolBarProps;
   const { ...ModalFormPropsRest } = ModalFormProps;
 
   // Refs
@@ -805,7 +808,7 @@ const BaseRecordsExplorer = <
     view: searchParamView,
     groupBy: searchParamGroupBy,
     sortBy: searchParamSortBy,
-    search: searchTerm,
+    search: searchParamSearchTerm,
     filterBy: searchParamFilterBy,
     selectedColumns: searchParamSelectedColumns,
     expandedGroups: searchParamExpandedGroups,
@@ -912,6 +915,13 @@ const BaseRecordsExplorer = <
 
   const selectedColumnIds =
     searchParamSelectedColumns || baseSelectedColumnIds || [];
+
+  const searchTerm = (() => {
+    if (searchTermProp) {
+      return searchTermProp;
+    }
+    return searchParamSearchTerm;
+  })();
 
   const { loggedInUserHasPermission } = useAuth();
 
@@ -1930,6 +1940,8 @@ const BaseRecordsExplorer = <
     }
   })();
 
+  const isSearchable = Boolean(searchableFields);
+
   const explorerElement = (
     <Paper
       ref={ref}
@@ -1975,6 +1987,8 @@ const BaseRecordsExplorer = <
       >
         <SearchSyncToolbar
           searchFieldPlaceholder={`Filter ${lowercaseRecordLabelPlural}`}
+          hasSearchTool={isSearchable}
+          searchFieldOpen
           {...SearchSyncToolBarPropsRest}
           {...{
             title,
@@ -2063,23 +2077,24 @@ const BaseRecordsExplorer = <
             })(),
           ]}
           onChangeSearchTerm={(searchTerm: string) => {
-            setSearchParams(
-              {
-                search: (() => {
-                  if (searchTerm) {
-                    return searchTerm;
-                  } else {
-                    return null;
-                  }
-                })(),
-              },
-              {
-                replace: true,
-              }
-            );
+            if (isSearchable) {
+              setSearchParams(
+                {
+                  search: (() => {
+                    if (searchTerm) {
+                      return searchTerm;
+                    } else {
+                      return null;
+                    }
+                  })(),
+                },
+                {
+                  replace: true,
+                }
+              );
+            }
+            onChangeSearchTerm && onChangeSearchTerm(searchTerm);
           }}
-          hasSearchTool={Boolean(searchableFields)}
-          searchFieldOpen
         />
         <Divider />
       </Paper>
