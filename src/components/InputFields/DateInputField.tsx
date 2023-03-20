@@ -4,8 +4,8 @@ import IconButton from '@mui/material/IconButton';
 import useTheme from '@mui/material/styles/useTheme';
 import Tooltip from '@mui/material/Tooltip';
 import useMediaQuery from '@mui/material/useMediaQuery';
+import { DatePickerProps } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { DatePickerProps } from '@mui/x-date-pickers/DatePicker';
 import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
 import { DesktopDateTimePicker } from '@mui/x-date-pickers/DesktopDateTimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -87,7 +87,7 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
       setSelectedDate(value ? new Date(value) : null);
     }, [value]);
 
-    const datePickerProps: DatePickerProps<any, any> = {
+    const datePickerProps: DatePickerProps<any> = {
       open,
       onClose: () => setOpen(false),
       value: selectedDate,
@@ -110,74 +110,76 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
           })()
         );
       },
-      renderInput: ({ value, ...params }) => {
-        if (params.inputProps) {
-          if (selectedDate) {
-            params.inputProps.value = format(selectedDate, displayFormat);
-          } else {
-            params.inputProps.value = '';
+      slots: {
+        textField: ({ value, ...params }) => {
+          if (params.inputProps) {
+            if (selectedDate) {
+              params.inputProps.value = format(selectedDate, displayFormat);
+            } else {
+              params.inputProps.value = '';
+            }
+            placeholder && (params.inputProps.placeholder = placeholder);
+            delete params.inputProps.onFocus;
+            delete params.inputProps.onChange;
+            delete params.inputProps.onBlur;
+            delete params.inputProps.disabled;
           }
-          placeholder && (params.inputProps.placeholder = placeholder);
-          delete params.inputProps.onFocus;
-          delete params.inputProps.onChange;
-          delete params.inputProps.onBlur;
-          delete params.inputProps.disabled;
-        }
-        if (params.InputProps) {
-          delete params.InputProps.endAdornment;
-          const selectDateIconButton = (
-            <IconButton
-              {...{ disabled }}
-              onClick={() => setOpen(true)}
-              sx={{ p: 0.4, ml: -0.5 }}
-            >
-              <EventIcon />
-            </IconButton>
-          );
-          params.InputProps.startAdornment = disabled ? (
-            selectDateIconButton
-          ) : (
-            <Tooltip title="Choose a date">{selectDateIconButton}</Tooltip>
-          );
-          if (showClearButton && selectedDate && !disabled) {
-            params.InputProps.endAdornment = (
-              <Tooltip title="Clear">
-                <IconButton
-                  className="date-input-clear-button"
-                  onClick={() => {
-                    setSelectedDate(null);
-                    triggerChangeEvent('');
-                  }}
-                  sx={{ p: 0.4 }}
-                >
-                  <CloseIcon />
-                </IconButton>
-              </Tooltip>
+          if (params.InputProps) {
+            delete params.InputProps.endAdornment;
+            const selectDateIconButton = (
+              <IconButton
+                {...{ disabled }}
+                onClick={() => setOpen(true)}
+                sx={{ p: 0.4, ml: -0.5 }}
+              >
+                <EventIcon />
+              </IconButton>
             );
+            params.InputProps.startAdornment = disabled ? (
+              selectDateIconButton
+            ) : (
+              <Tooltip title="Choose a date">{selectDateIconButton}</Tooltip>
+            );
+            if (showClearButton && selectedDate && !disabled) {
+              params.InputProps.endAdornment = (
+                <Tooltip title="Clear">
+                  <IconButton
+                    className="date-input-clear-button"
+                    onClick={() => {
+                      setSelectedDate(null);
+                      triggerChangeEvent('');
+                    }}
+                    sx={{ p: 0.4 }}
+                  >
+                    <CloseIcon />
+                  </IconButton>
+                </Tooltip>
+              );
+            }
           }
-        }
-        delete params.error;
-        return (
-          <TextField
-            {...{ value: value as string }}
-            {...params}
-            {...rest}
-            {...{ id, name, disabled }}
-            onClick={() => {
-              setOpen(true);
-            }}
-            ref={ref}
-            sx={{
-              '& .date-input-clear-button': {
-                visibility: 'hidden',
-              },
-              '&:hover .date-input-clear-button': {
-                visibility: 'visible',
-              },
-              ...sx,
-            }}
-          />
-        );
+          delete params.error;
+          return (
+            <TextField
+              {...{ value: value as string }}
+              {...params}
+              {...rest}
+              {...{ id, name, disabled }}
+              onClick={() => {
+                setOpen(true);
+              }}
+              ref={ref}
+              sx={{
+                '& .date-input-clear-button': {
+                  visibility: 'hidden',
+                },
+                '&:hover .date-input-clear-button': {
+                  visibility: 'visible',
+                },
+                ...sx,
+              }}
+            />
+          );
+        },
       },
       minDate: (() => {
         if (minDateProp) {
