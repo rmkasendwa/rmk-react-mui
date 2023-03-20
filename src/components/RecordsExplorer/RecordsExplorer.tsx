@@ -2176,14 +2176,6 @@ const BaseRecordsExplorer = <
             FormikProps: {
               enableReinitialize: true,
             },
-            SearchSyncToolbarProps: {
-              TitleProps: {
-                sx: {
-                  fontSize: 24,
-                  fontWeight: 500,
-                },
-              },
-            },
           };
           return (
             <>
