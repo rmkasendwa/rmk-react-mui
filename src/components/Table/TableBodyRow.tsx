@@ -308,6 +308,11 @@ export const TableBodyRow = <T extends BaseDataRow>(
           isGroupHeader && classes.groupHeaderColumn
         )}
         container
+        onClick={() => {
+          if (isClickable && onClickRow) {
+            onClickRow(row);
+          }
+        }}
         sx={{
           alignItems: 'center',
           cursor: isClickable ? 'pointer' : 'inherit',
