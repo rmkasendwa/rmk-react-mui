@@ -15,6 +15,8 @@ import { format } from 'date-fns';
 import { forwardRef, useCallback, useEffect, useMemo, useState } from 'react';
 import { mergeRefs } from 'react-merge-refs';
 
+import { useLoadingContext } from '../../contexts/LoadingContext';
+import FieldValueDisplay from '../FieldValueDisplay';
 import TextField, { TextFieldProps } from './TextField';
 
 export interface DateInputFieldProps extends TextFieldProps {
@@ -31,6 +33,7 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
       value,
       id,
       name,
+      label,
       placeholder,
       onChange,
       minDate: minDateProp,
@@ -40,6 +43,7 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
       displayFormat = '',
       disabled,
       sx,
+      enableLoadingState = true,
       ...rest
     },
     ref
@@ -55,6 +59,7 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
     const smallScreen = useMediaQuery(breakpoints.down('sm'));
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [open, setOpen] = useState(false);
+    const { locked } = useLoadingContext();
 
     const triggerChangeEvent = useCallback(
       (inputValue: any) => {
@@ -87,6 +92,21 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
     useEffect(() => {
       setSelectedDate(value ? new Date(value) : null);
     }, [value]);
+
+    if (enableLoadingState && locked) {
+      return (
+        <FieldValueDisplay
+          {...({} as any)}
+          {...rest.FieldValueDisplayProps}
+          {...{ label }}
+          value={(() => {
+            if (value) {
+              return format(new Date(value), displayFormat);
+            }
+          })()}
+        />
+      );
+    }
 
     const datePickerProps: DatePickerProps<any> = {
       open,
@@ -164,7 +184,7 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
               {...{ value: value as string }}
               {...params}
               {...rest}
-              {...{ id, name, disabled }}
+              {...{ id, name, disabled, label, enableLoadingState }}
               onClick={() => {
                 setOpen(true);
               }}
