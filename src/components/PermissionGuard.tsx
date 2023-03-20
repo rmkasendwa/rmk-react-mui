@@ -6,7 +6,7 @@ import {
   generateUtilityClasses,
   useThemeProps,
 } from '@mui/material';
-import { ReactNode, forwardRef } from 'react';
+import { FC, ReactNode } from 'react';
 
 import { useAuth } from '../contexts/AuthContext';
 import AccessDeniedPage from './ErrorPages/403Page';
@@ -56,24 +56,22 @@ export function getPermissionGuardUtilityClass(slot: string): string {
 export const PermissionGuardClasses: PermissionGuardClasses =
   generateUtilityClasses('MuiPermissionGuard', ['root']);
 
-export const PermissionGuard = forwardRef<HTMLDivElement, PermissionGuardProps>(
-  function PermissionGuard(inProps) {
-    const props = useThemeProps({ props: inProps, name: 'MuiPermissionGuard' });
-    const {
-      permission,
-      fallbackComponent = <AccessDeniedPage />,
-      children,
-    } = props;
+export const PermissionGuard: FC<PermissionGuardProps> = (inProps) => {
+  const props = useThemeProps({ props: inProps, name: 'MuiPermissionGuard' });
+  const {
+    permission,
+    fallbackComponent = <AccessDeniedPage />,
+    children,
+  } = props;
 
-    const { loggedInUserHasPermission, loadingCurrentSession } = useAuth();
-    if (loadingCurrentSession) {
-      return null;
-    }
-    if (loggedInUserHasPermission(permission)) {
-      return <>{children}</>;
-    }
-    return <>{fallbackComponent}</>;
+  const { loggedInUserHasPermission, loadingCurrentSession } = useAuth();
+  if (loadingCurrentSession) {
+    return null;
   }
-);
+  if (loggedInUserHasPermission(permission)) {
+    return <>{children}</>;
+  }
+  return <>{fallbackComponent}</>;
+};
 
 export default PermissionGuard;
