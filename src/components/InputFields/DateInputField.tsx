@@ -182,7 +182,7 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
             {...{ value: value as string }}
             {...params}
             {...rest}
-            {...{ id, name, disabled }}
+            {...{ id, name, disabled, label, enableLoadingState }}
             onClick={() => {
               setOpen(true);
             }}
