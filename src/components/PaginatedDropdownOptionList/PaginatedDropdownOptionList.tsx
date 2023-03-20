@@ -223,7 +223,7 @@ export const PaginatedDropdownOptionList = forwardRef<
     }
   );
 
-  const { palette, breakpoints } = useTheme();
+  const { palette, breakpoints, typography } = useTheme();
   const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
 
   const optionHeight = (() => {
@@ -340,6 +340,23 @@ export const PaginatedDropdownOptionList = forwardRef<
   })().sort(
     sortOptions && !externallyPaginated ? sortOptionsRef.current : () => 0
   );
+
+  const { minOptionWidth } = useMemo(() => {
+    return options.reduce(
+      (accumulator, { label, searchableLabel }) => {
+        const labelWidth = Math.ceil(
+          (String(searchableLabel || label).length * typography.htmlFontSize) /
+            2
+        );
+        labelWidth > accumulator.minOptionWidth &&
+          (accumulator.minOptionWidth = labelWidth);
+        return accumulator;
+      },
+      {
+        minOptionWidth: minWidth,
+      }
+    );
+  }, [minWidth, options, typography.htmlFontSize]);
 
   const filteredOptions = (() => {
     if (searchTerm && !externallyPaginated) {
@@ -568,6 +585,7 @@ export const PaginatedDropdownOptionList = forwardRef<
         sx={{
           minWidth,
           maxHeight,
+          width: minOptionWidth,
           boxSizing: 'border-box',
           overflowY: 'auto',
         }}
