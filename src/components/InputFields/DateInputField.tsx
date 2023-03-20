@@ -13,6 +13,7 @@ import { MobileDatePicker } from '@mui/x-date-pickers/MobileDatePicker';
 import { MobileDateTimePicker } from '@mui/x-date-pickers/MobileDateTimePicker';
 import { format } from 'date-fns';
 import { forwardRef, useCallback, useEffect, useMemo, useState } from 'react';
+import { mergeRefs } from 'react-merge-refs';
 
 import TextField, { TextFieldProps } from './TextField';
 
@@ -111,7 +112,7 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
         );
       },
       slots: {
-        textField: ({ value, ...params }) => {
+        textField: ({ value, ref: inputRef, ...params }) => {
           if (params.inputProps) {
             if (selectedDate) {
               params.inputProps.value = format(selectedDate, displayFormat);
@@ -167,7 +168,7 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
               onClick={() => {
                 setOpen(true);
               }}
-              ref={ref}
+              ref={mergeRefs([ref, inputRef as any])}
               sx={{
                 '& .date-input-clear-button': {
                   visibility: 'hidden',

@@ -1,4 +1,3 @@
-import * as queryString from 'query-string';
 import { FC, useEffect, useMemo } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 
@@ -61,7 +60,9 @@ export const AuthGuard: FC<AuthGuardProps> = ({
             navigate(
               (() => {
                 if (search) {
-                  return (queryString.parse(search || '') as any).return_to;
+                  return Object.fromEntries(
+                    new URLSearchParams(search).entries()
+                  ).return_to;
                 }
                 return indexPageRoutePath;
               })()
@@ -73,7 +74,9 @@ export const AuthGuard: FC<AuthGuardProps> = ({
             navigate(
               (() => {
                 if (search) {
-                  return (queryString.parse(search || '') as any).return_to;
+                  return Object.fromEntries(
+                    new URLSearchParams(search).entries()
+                  ).return_to;
                 }
                 return indexPageRoutePath;
               })()
