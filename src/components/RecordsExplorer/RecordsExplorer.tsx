@@ -19,7 +19,6 @@ import {
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
   generateUtilityClasses,
-  tableCellClasses,
   tableContainerClasses,
   tableHeadClasses,
   useMediaQuery,
@@ -90,7 +89,6 @@ import Table, {
   getComputedTableProps,
   getTableMinWidth,
   mapTableColumnTypeToPrimitiveDataType,
-  tableClasses,
 } from '../Table';
 import TimelineChart, { TimelineChartProps } from '../TimelineChart';
 import { useFilterTool } from './hooks/FilterTool';
@@ -1963,18 +1961,6 @@ const BaseRecordsExplorer = <
               flexDirection: 'column',
             };
           }
-          return {
-            [`
-          table.${tableClasses.root}.Mui-group-header-table,
-          thead.${tableHeadClasses.root},
-          th.${tableCellClasses.root}
-        `]: {
-              // top: 48,
-            },
-            [`.MuiCollapsibleSection-header`]: {
-              // top: 96,
-            },
-          };
         })(),
       }}
     >
