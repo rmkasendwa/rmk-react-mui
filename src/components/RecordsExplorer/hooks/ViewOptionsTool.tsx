@@ -28,7 +28,7 @@ import { Tool } from '../../SearchSyncToolbar';
 
 export const viewOptionTypes = ['Timeline', 'Grid', 'List'] as const;
 
-export type ViewOptionType = (typeof viewOptionTypes)[number];
+export type ViewOptionType = typeof viewOptionTypes[number];
 
 export interface ViewOption {
   label: ViewOptionType;

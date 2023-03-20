@@ -44,7 +44,7 @@ const baseArgs = {
     },
   ],
   recordLabelPlural: 'Contacts',
-} as RecordsExplorerProps<(typeof contacts)[number]>;
+} as RecordsExplorerProps<typeof contacts[number]>;
 
 export const Default = Template.bind({});
 Default.args = {

@@ -49,9 +49,9 @@ const baseArgs = {
   },
   validationSchema: {},
   children: <Box>Form</Box>,
-} as TableCrudProps<(typeof contacts)[number]>;
+} as TableCrudProps<typeof contacts[number]>;
 
 export const Default = Template.bind({});
 Default.args = {
   ...baseArgs,
-} as TableCrudProps<(typeof contacts)[number]>;
+} as TableCrudProps<typeof contacts[number]>;

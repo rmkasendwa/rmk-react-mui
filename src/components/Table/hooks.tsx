@@ -650,9 +650,7 @@ export const useTable = <DataRow extends BaseDataRow>(
   const borderVariantStyles: SxProps<Theme> = {};
 
   if (
-    (['square', 'columns'] as (typeof bordersVariant)[]).includes(
-      bordersVariant
-    )
+    (['square', 'columns'] as typeof bordersVariant[]).includes(bordersVariant)
   ) {
     Object.merge(borderVariantStyles, {
       [`
@@ -693,7 +691,7 @@ export const useTable = <DataRow extends BaseDataRow>(
     });
   }
   if (
-    (['columns', 'none'] as (typeof bordersVariant)[]).includes(bordersVariant)
+    (['columns', 'none'] as typeof bordersVariant[]).includes(bordersVariant)
   ) {
     Object.merge(borderVariantStyles, {
       [`
@@ -1066,7 +1064,7 @@ export const useTable = <DataRow extends BaseDataRow>(
     if (showHeaderRow && enableColumnDisplayToggle && !optimizeForSmallScreen) {
       const selectableColumns = allColumns.filter(({ id }) => {
         return !(
-          ['checkbox', ELLIPSIS_MENU_TOOL_COLUMN_ID] as (typeof id)[]
+          ['checkbox', ELLIPSIS_MENU_TOOL_COLUMN_ID] as typeof id[]
         ).includes(id);
       });
       return (
