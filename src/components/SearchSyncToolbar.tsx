@@ -294,7 +294,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
     );
 
     tools || (tools = [...Children.toArray(children)]);
-    const { ...SearchFieldPropsRest } = SearchFieldProps;
+    const { InputProps, ...SearchFieldPropsRest } = SearchFieldProps;
 
     // Refs
     const isInitialMountRef = useRef(true);
@@ -401,6 +401,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                   searchVelocity,
                 }}
                 InputProps={{
+                  ...InputProps,
                   disableUnderline: true,
                   autoFocus: Boolean(
                     (!searchTerm || searchTerm.length <= 0) && searchFieldOpen
@@ -473,6 +474,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                               fullWidth
                               {...SearchFieldPropsRest}
                               InputProps={{
+                                ...InputProps,
                                 autoFocus: Boolean(
                                   (!searchTerm || searchTerm.length <= 0) &&
                                     searchFieldOpen

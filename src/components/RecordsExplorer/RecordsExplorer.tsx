@@ -914,12 +914,7 @@ const BaseRecordsExplorer = <
   const selectedColumnIds =
     searchParamSelectedColumns || baseSelectedColumnIds || [];
 
-  const searchTerm = (() => {
-    if (searchTermProp) {
-      return searchTermProp;
-    }
-    return searchParamSearchTerm;
-  })();
+  const searchTerm = searchParamSearchTerm || searchTermProp;
 
   const { loggedInUserHasPermission } = useAuth();
 
@@ -951,7 +946,6 @@ const BaseRecordsExplorer = <
       revalidationKey: `${revalidationKey}${searchTerm}`,
       loadOnMount: showRecords,
       key: recordKey,
-      searchTerm,
     }
   );
 
@@ -1976,11 +1970,8 @@ const BaseRecordsExplorer = <
           hasSearchTool={isSearchable}
           searchFieldOpen
           {...SearchSyncToolBarPropsRest}
-          {...{
-            title,
-            searchTerm,
-            errorMessage,
-          }}
+          title={title}
+          searchTerm={searchParamSearchTerm}
           load={loadProp ?? load}
           loading={loadingProp ?? loading}
           errorMessage={errorMessageProp ?? errorMessage}
