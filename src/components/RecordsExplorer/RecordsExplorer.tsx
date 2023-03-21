@@ -302,6 +302,8 @@ export interface RecordsExplorerProps<
   hideAddNewButtonOnNoFilteredData?: boolean;
   id?: string;
   searchTerm?: string;
+  controlledSearchTerm?: string;
+  isSearchable?: boolean;
   /**
    * Function to be called when user searches.
    */
@@ -455,6 +457,8 @@ const BaseRecordsExplorer = <
     pathToView,
     getPathToView,
     searchTerm: searchTermProp,
+    isSearchable: isSearchableProp = true,
+    controlledSearchTerm,
     ...rest
   } = omit(
     props,
@@ -1932,7 +1936,7 @@ const BaseRecordsExplorer = <
     }
   })();
 
-  const isSearchable = Boolean(searchableFields);
+  const isSearchable = Boolean(isSearchableProp && searchableFields);
 
   const explorerElement = (
     <Paper
@@ -1971,7 +1975,7 @@ const BaseRecordsExplorer = <
           searchFieldOpen
           {...SearchSyncToolBarPropsRest}
           title={title}
-          searchTerm={searchParamSearchTerm}
+          searchTerm={searchParamSearchTerm || controlledSearchTerm}
           load={loadProp ?? load}
           loading={loadingProp ?? loading}
           errorMessage={errorMessageProp ?? errorMessage}
