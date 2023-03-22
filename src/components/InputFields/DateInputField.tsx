@@ -2,7 +2,14 @@ import 'react-datepicker/dist/react-datepicker.css';
 
 import CloseIcon from '@mui/icons-material/Close';
 import EventIcon from '@mui/icons-material/Event';
-import { Box, ClickAwayListener, Grow, Popper } from '@mui/material';
+import {
+  Box,
+  ClickAwayListener,
+  Grow,
+  Popper,
+  darken,
+  lighten,
+} from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import useTheme from '@mui/material/styles/useTheme';
 import Tooltip from '@mui/material/Tooltip';
@@ -61,7 +68,7 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
     }
     const anchorRef = useRef<HTMLInputElement>(null);
     const poperElementWrapperRef = useRef<HTMLDivElement>(null);
-    const { breakpoints } = useTheme();
+    const { palette, breakpoints } = useTheme();
     const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [open, setOpen] = useState(false);
@@ -248,7 +255,53 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
                     {...TransitionProps}
                     style={{ transformOrigin: '0 0 0' }}
                   >
-                    <Box ref={poperElementWrapperRef}>
+                    <Box
+                      ref={poperElementWrapperRef}
+                      sx={{
+                        [`
+                          .react-datepicker,
+                          .react-datepicker__header,
+                          .react-datepicker__time-container,
+                          .react-datepicker__time
+                        `]: {
+                          bgcolor: palette.background.paper,
+                          color: palette.text.primary,
+                          borderColor: palette.divider,
+                        },
+                        [`
+                          .react-datepicker__current-month,
+                          .react-datepicker-time__header,
+                          .react-datepicker-year-header,
+                          .react-datepicker__day-name,
+                          .react-datepicker__day,
+                          .react-datepicker__time-name
+                        `]: {
+                          color: palette.text.primary,
+                        },
+                        [`
+                          .react-datepicker__day,
+                          .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item
+                        `]: {
+                          color: palette.text.primary,
+                          '&:hover': {
+                            bgcolor: (palette.mode === 'dark'
+                              ? lighten
+                              : darken)(palette.background.paper, 0.13),
+                          },
+                        },
+                        [`
+                          .react-datepicker__day.react-datepicker__day--selected,
+                          .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item--selected
+                        `]: {
+                          '&,&:hover': {
+                            bgcolor: palette.primary.main,
+                            color: palette.getContrastText(
+                              palette.primary.main
+                            ),
+                          },
+                        },
+                      }}
+                    >
                       <ClickAwayListener
                         onClickAway={(event) => {
                           if (poperElementWrapperRef.current) {
