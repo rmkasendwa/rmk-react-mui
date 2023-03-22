@@ -1,21 +1,27 @@
+import 'react-datepicker/dist/react-datepicker.css';
+
 import CloseIcon from '@mui/icons-material/Close';
 import EventIcon from '@mui/icons-material/Event';
+import { Box, ClickAwayListener, Grow, Popper } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import useTheme from '@mui/material/styles/useTheme';
 import Tooltip from '@mui/material/Tooltip';
 import useMediaQuery from '@mui/material/useMediaQuery';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { DatePickerProps } from '@mui/x-date-pickers/DatePicker';
-import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
-import { DesktopDateTimePicker } from '@mui/x-date-pickers/DesktopDateTimePicker';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { MobileDatePicker } from '@mui/x-date-pickers/MobileDatePicker';
-import { MobileDateTimePicker } from '@mui/x-date-pickers/MobileDateTimePicker';
 import { format } from 'date-fns';
-import { forwardRef, useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import DatePicker from 'react-datepicker';
 
 import { useLoadingContext } from '../../contexts/LoadingContext';
+import { isDescendant } from '../../utils/html';
 import FieldValueDisplay from '../FieldValueDisplay';
+import ModalPopup from '../ModalPopup';
 import TextField, { TextFieldProps } from './TextField';
 
 export interface DateInputFieldProps extends TextFieldProps {
@@ -33,7 +39,6 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
       id,
       name,
       label,
-      placeholder,
       onChange,
       minDate: minDateProp,
       maxDate: maxDateProp,
@@ -54,8 +59,10 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
         displayFormat = 'MMM dd, yyyy';
       }
     }
+    const anchorRef = useRef<HTMLInputElement>(null);
+    const poperElementWrapperRef = useRef<HTMLDivElement>(null);
     const { breakpoints } = useTheme();
-    const smallScreen = useMediaQuery(breakpoints.down('sm'));
+    const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [open, setOpen] = useState(false);
     const { locked } = useLoadingContext();
@@ -107,126 +114,163 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
       );
     }
 
-    const datePickerProps: DatePickerProps<any, any> = {
-      open,
-      onClose: () => setOpen(false),
-      value: selectedDate,
-      onChange: (selectedDateInstance: any) => {
-        const date = selectedDateInstance as Date;
-        const selectedDate =
-          date && (!minDate || date >= minDate) && (!maxDate || date <= maxDate)
-            ? date
-            : null;
-        setSelectedDate(selectedDate);
-        triggerChangeEvent(
-          (() => {
-            if (selectedDate) {
-              if (enableTimeSelector) {
-                return selectedDate.toISOString();
-              }
-              return format(selectedDate, 'yyyy-MM-dd');
-            }
-            return '';
-          })()
-        );
-      },
-      renderInput: ({ value, ...params }) => {
-        if (params.inputProps) {
-          if (selectedDate) {
-            params.inputProps.value = format(selectedDate, displayFormat);
-          } else {
-            params.inputProps.value = '';
-          }
-          placeholder && (params.inputProps.placeholder = placeholder);
-          delete params.inputProps.onFocus;
-          delete params.inputProps.onChange;
-          delete params.inputProps.onBlur;
-          delete params.inputProps.disabled;
-        }
-        if (params.InputProps) {
-          delete params.InputProps.endAdornment;
-          const selectDateIconButton = (
-            <IconButton
-              {...{ disabled }}
-              onClick={() => setOpen(true)}
-              sx={{ p: 0.4, ml: -0.5 }}
-            >
-              <EventIcon />
-            </IconButton>
-          );
-          params.InputProps.startAdornment = disabled ? (
-            selectDateIconButton
-          ) : (
-            <Tooltip title="Choose a date">{selectDateIconButton}</Tooltip>
-          );
-          if (showClearButton && selectedDate && !disabled) {
-            params.InputProps.endAdornment = (
-              <Tooltip title="Clear">
-                <IconButton
-                  className="date-input-clear-button"
-                  onClick={() => {
-                    setSelectedDate(null);
-                    triggerChangeEvent('');
-                  }}
-                  sx={{ p: 0.4 }}
-                >
-                  <CloseIcon />
-                </IconButton>
-              </Tooltip>
-            );
-          }
-        }
-        delete params.error;
-        return (
-          <TextField
-            {...{ value: value as string }}
-            {...params}
-            {...rest}
-            {...{ id, name, disabled, label, enableLoadingState }}
-            onClick={() => {
-              setOpen(true);
-            }}
-            ref={ref}
-            sx={{
-              '& .date-input-clear-button': {
-                visibility: 'hidden',
-              },
-              '&:hover .date-input-clear-button': {
-                visibility: 'visible',
-              },
-              ...sx,
-            }}
-          />
-        );
-      },
-      minDate: (() => {
-        if (minDateProp) {
-          return new Date(minDateProp);
-        }
-      })(),
-      maxDate: (() => {
-        if (maxDateProp) {
-          return new Date(maxDateProp);
-        }
-      })(),
-    };
+    const selectDateIconButton = (
+      <IconButton
+        {...{ disabled }}
+        onClick={() => setOpen(true)}
+        sx={{ p: 0.4, ml: -0.5 }}
+      >
+        <EventIcon />
+      </IconButton>
+    );
 
     return (
-      <LocalizationProvider dateAdapter={AdapterDateFns}>
+      <>
+        <TextField
+          ref={ref}
+          {...rest}
+          {...{ id, name, disabled, label, enableLoadingState }}
+          value={selectedDate ? format(selectedDate, displayFormat) : ''}
+          InputProps={{
+            startAdornment: disabled ? (
+              selectDateIconButton
+            ) : (
+              <Tooltip title="Choose a date">{selectDateIconButton}</Tooltip>
+            ),
+            endAdornment: (() => {
+              if (showClearButton && selectedDate && !disabled) {
+                return (
+                  <Tooltip title="Clear">
+                    <IconButton
+                      className="date-input-clear-button"
+                      onClick={() => {
+                        setSelectedDate(null);
+                        triggerChangeEvent('');
+                      }}
+                      sx={{ p: 0.4 }}
+                    >
+                      <CloseIcon />
+                    </IconButton>
+                  </Tooltip>
+                );
+              }
+            })(),
+            ref: anchorRef,
+          }}
+          onClick={() => {
+            setOpen(true);
+          }}
+          sx={{
+            '& .date-input-clear-button': {
+              visibility: 'hidden',
+            },
+            '&:hover .date-input-clear-button': {
+              visibility: 'visible',
+            },
+            ...sx,
+          }}
+        />
         {(() => {
-          if (enableTimeSelector) {
-            if (smallScreen) {
-              return <MobileDateTimePicker {...(datePickerProps as any)} />;
-            }
-            return <DesktopDateTimePicker {...(datePickerProps as any)} />;
-          } else {
-            if (smallScreen) {
-              return <MobileDatePicker {...datePickerProps} />;
-            }
-            return <DesktopDatePicker {...datePickerProps} />;
+          const datePickerElement = (
+            <DatePicker
+              selected={selectedDate}
+              onChange={(date) => {
+                if (date) {
+                  const selectedDate =
+                    date &&
+                    (!minDate || date >= minDate) &&
+                    (!maxDate || date <= maxDate)
+                      ? date
+                      : null;
+                  setSelectedDate(selectedDate);
+                  triggerChangeEvent(
+                    (() => {
+                      if (selectedDate) {
+                        if (enableTimeSelector) {
+                          return selectedDate.toISOString();
+                        }
+                        return format(selectedDate, 'yyyy-MM-dd');
+                      }
+                      return '';
+                    })()
+                  );
+                } else {
+                  setSelectedDate(null);
+                }
+                setOpen(false);
+              }}
+              inline
+            />
+          );
+          if (isSmallScreenSize) {
+            return (
+              <ModalPopup
+                {...{ open }}
+                onClose={() => {
+                  setOpen(false);
+                }}
+                CardProps={{
+                  sx: {
+                    maxHeight: 'none',
+                  },
+                }}
+                CardBodyProps={{
+                  sx: {
+                    p: 0,
+                  },
+                }}
+                disableEscapeKeyDown={false}
+                disableAutoFocus={false}
+                showHeaderToolbar={false}
+                enableCloseOnBackdropClick
+                sx={{
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                {datePickerElement}
+              </ModalPopup>
+            );
           }
+          return (
+            <Popper
+              {...{ open }}
+              anchorEl={anchorRef.current}
+              transition
+              placement="bottom-start"
+              sx={{
+                zIndex: 1400,
+              }}
+            >
+              {({ TransitionProps }) => {
+                return (
+                  <Grow
+                    {...TransitionProps}
+                    style={{ transformOrigin: '0 0 0' }}
+                  >
+                    <Box ref={poperElementWrapperRef}>
+                      <ClickAwayListener
+                        onClickAway={(event) => {
+                          if (poperElementWrapperRef.current) {
+                            setOpen(
+                              isDescendant(
+                                poperElementWrapperRef.current,
+                                event.target as any
+                              )
+                            );
+                          }
+                        }}
+                      >
+                        {datePickerElement}
+                      </ClickAwayListener>
+                    </Box>
+                  </Grow>
+                );
+              }}
+            </Popper>
+          );
         })()}
-      </LocalizationProvider>
+      </>
     );
   }
 );
