@@ -197,9 +197,9 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
                 } else {
                   setSelectedDate(null);
                 }
-                setOpen(false);
               }}
               inline
+              showTimeSelect={enableTimeSelector}
             />
           );
           if (isSmallScreenSize) {
