@@ -99,7 +99,7 @@ export const SearchField = forwardRef<HTMLDivElement, SearchFieldProps>(
     );
 
     const searchTerm = (() => {
-      if (searchTermProp && onChangeSearchTerm) {
+      if (searchTermProp != null && onChangeSearchTerm) {
         return searchTermProp;
       }
       return localSearchTerm;
@@ -125,7 +125,7 @@ export const SearchField = forwardRef<HTMLDivElement, SearchFieldProps>(
         }}
         value={searchTerm}
         onChange={(event) => {
-          if (!searchTermProp || !onChangeSearchTerm) {
+          if (searchTermProp == null || !onChangeSearchTerm) {
             setLocalSearchTerm(event.target.value);
           }
           onChangeSearchTerm && onChangeSearchTerm(event.target.value);
