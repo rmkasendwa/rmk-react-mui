@@ -7,6 +7,7 @@ import {
   ClickAwayListener,
   Grow,
   Popper,
+  alpha,
   darken,
   lighten,
 } from '@mui/material';
@@ -205,6 +206,8 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
                   setSelectedDate(null);
                 }
               }}
+              minDate={minDate}
+              maxDate={maxDate}
               inline
               showTimeSelect={enableTimeSelector}
             />
@@ -283,11 +286,15 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
                           .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item
                         `]: {
                           color: palette.text.primary,
-                          '&:hover': {
-                            bgcolor: (palette.mode === 'dark'
-                              ? lighten
-                              : darken)(palette.background.paper, 0.13),
+                          '&.react-datepicker__day--disabled': {
+                            color: palette.text.disabled,
                           },
+                          '&:not(.react-datepicker__day--disabled):not(.react-datepicker__day--keyboard-selected):hover':
+                            {
+                              bgcolor: (palette.mode === 'dark'
+                                ? lighten
+                                : darken)(palette.background.paper, 0.13),
+                            },
                         },
                         [`
                           .react-datepicker__day.react-datepicker__day--selected,
@@ -300,6 +307,31 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
                             ),
                           },
                         },
+                        '.react-datepicker__day--keyboard-selected': {
+                          bgcolor: alpha(palette.primary.main, 0.3),
+                        },
+                        '.react-datepicker__month': {
+                          minWidth: (() => {
+                            if (
+                              anchorRef.current?.offsetWidth &&
+                              anchorRef.current.offsetWidth > 300
+                            ) {
+                              return anchorRef.current.offsetWidth;
+                            }
+                            return 300;
+                          })(),
+                          mx: 0,
+                        },
+                        '.react-datepicker__week,.react-datepicker__day-names':
+                          {
+                            display: 'flex',
+                            '.react-datepicker__day,.react-datepicker__day-name':
+                              {
+                                width: 'auto',
+                                flex: 1,
+                                minWidth: '1.7rem',
+                              },
+                          },
                       }}
                     >
                       <ClickAwayListener
