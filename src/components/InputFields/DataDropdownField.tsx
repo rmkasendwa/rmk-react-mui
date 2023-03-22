@@ -641,7 +641,6 @@ export const DataDropdownField = forwardRef<
                     className={classes.selectedOptionsWrapper}
                     sx={{
                       position: 'absolute',
-                      bottom: 0,
                       left: 0,
                       pointerEvents: 'none',
                       display: 'flex',
@@ -649,21 +648,48 @@ export const DataDropdownField = forwardRef<
                       gap: 0.5,
                       overflow: 'hidden',
                       ...(() => {
+                        if (rest.size === 'medium') {
+                          if (variant === 'standard') {
+                            return {
+                              top: 21,
+                            };
+                          }
+                          if (variant === 'filled') {
+                            return {
+                              top: 25,
+                            };
+                          }
+                          return {
+                            top: 17,
+                          };
+                        }
+                        if (variant === 'standard') {
+                          return {
+                            top: 19,
+                          };
+                        }
+                        if (variant === 'filled') {
+                          return {
+                            top: 21,
+                          };
+                        }
+                        return {
+                          top: 9,
+                        };
+                      })(),
+                      ...(() => {
                         if (variant === 'standard') {
                           return {
                             pb: '5px',
-                            bottom: 2,
                           };
                         }
                         if (variant === 'filled') {
                           return {
                             pb: '4px',
                             pl: '12px',
-                            bottom: -1,
                           };
                         }
                         return {
-                          height: '100%',
                           pl: '14px',
                           alignItems: 'center',
                         };
