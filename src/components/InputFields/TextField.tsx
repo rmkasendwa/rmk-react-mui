@@ -181,7 +181,7 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
     })();
 
     useEffect(() => {
-      if (onChangeRef.current && value != null) {
+      if (!onChangeRef.current && value != null) {
         setLocalInputValue(value);
       }
     }, [value]);
