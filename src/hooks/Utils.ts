@@ -447,7 +447,6 @@ export const usePaginatedRecords = <T>(
 
   const load = useCallback(
     (params: PaginatedRequestParams = {}) => {
-      revalidationKey; // Triggering reload whenever extra parameters change
       params = { ...params };
       params.offset || (params.offset = offsetRef.current);
       params.limit || (params.limit = limitRef.current);
@@ -495,7 +494,7 @@ export const usePaginatedRecords = <T>(
         return responseData;
       });
     },
-    [loadFromAPIService, loadedPages, revalidationKey]
+    [loadFromAPIService, loadedPages]
   );
   const loadRef = useRef(load);
   loadRef.current = load;
@@ -560,11 +559,11 @@ export const usePaginatedRecords = <T>(
     if (
       !isInitialMountRef.current &&
       autoSync &&
-      (limit || searchTerm || offset)
+      (limit || searchTerm || offset || revalidationKey)
     ) {
       loadRef.current();
     }
-  }, [autoSync, limit, offset, searchTerm]);
+  }, [autoSync, limit, offset, revalidationKey, searchTerm]);
 
   useEffect(() => {
     isInitialMountRef.current = false;
