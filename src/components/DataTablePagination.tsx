@@ -222,6 +222,7 @@ export const DataTablePagination = forwardRef<
               showClearButton={false}
               searchable={false}
               enableLoadingState={false}
+              showRichTextValue={false}
               variant="outlined"
               sx={{
                 [`.${inputBaseClasses.root}`]: {

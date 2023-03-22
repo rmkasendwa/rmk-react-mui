@@ -110,6 +110,7 @@ export interface DataDropdownFieldProps
   PaginatedDropdownOptionListProps?: Partial<PaginatedDropdownOptionListProps>;
   variant?: 'standard' | 'filled' | 'outlined' | 'text';
   showDropdownIcon?: boolean;
+  showRichTextValue?: boolean;
 }
 
 export function getDataDropdownFieldUtilityClass(slot: string): string {
@@ -169,6 +170,7 @@ export const DataDropdownField = forwardRef<
     endAdornment: endAdornmentProp,
     showDropdownIcon = true,
     enableLoadingState = true,
+    showRichTextValue = true,
     ...rest
   } = props;
 
@@ -387,7 +389,7 @@ export const DataDropdownField = forwardRef<
   }, [canLoadAsyncSelectedOptions, loadAsyncSelectedOptions, value]);
 
   const selectedOptionsElement = (() => {
-    if (!focused && selectedOptions.length > 0) {
+    if (showRichTextValue && !focused && selectedOptions.length > 0) {
       return (
         <>
           {multiple ? (
@@ -458,6 +460,7 @@ export const DataDropdownField = forwardRef<
               </Box>
             );
           }
+          return selectedOptionDisplayString;
         })()}
       />
     );
@@ -709,6 +712,7 @@ export const DataDropdownField = forwardRef<
                 [`& .${inputBaseClasses.input}`]: (() => {
                   if (
                     searchable &&
+                    showRichTextValue &&
                     !focused &&
                     selectedOptionDisplayString.length > 0
                   ) {

@@ -1975,7 +1975,7 @@ const BaseRecordsExplorer = <
           searchFieldOpen
           {...SearchSyncToolBarPropsRest}
           title={title}
-          searchTerm={searchParamSearchTerm || controlledSearchTerm}
+          searchTerm={searchParamSearchTerm || controlledSearchTerm || ''}
           load={loadProp ?? load}
           loading={loadingProp ?? loading}
           errorMessage={errorMessageProp ?? errorMessage}
