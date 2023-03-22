@@ -7,6 +7,7 @@
     "downlevelIteration": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
+    "inlineSourceMap": true,
     "jsx": "react-jsx",
     "lib": ["dom", "dom.iterable", "esnext"],
     "module": "es6",
@@ -17,7 +18,6 @@
     "noUnusedLocals": true,
     "outDir": "./lib/",
     "resolveJsonModule": true,
-    "sourceMap": false,
     "strict": true,
     "strictNullChecks": true,
     "target": "es5"
