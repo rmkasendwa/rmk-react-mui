@@ -289,7 +289,7 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
                           '&.react-datepicker__day--disabled': {
                             color: palette.text.disabled,
                           },
-                          '&:not(.react-datepicker__day--disabled):not(.react-datepicker__day--keyboard-selected):hover':
+                          '&:not(.react-datepicker__day--disabled):not(.react-datepicker__day--keyboard-selected):not(.react-datepicker__day--selected):not(.react-datepicker__time-list-item--selected):hover':
                             {
                               bgcolor: (palette.mode === 'dark'
                                 ? lighten
