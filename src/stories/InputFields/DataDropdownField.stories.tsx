@@ -18,8 +18,11 @@ export default {
 
 const lorem = new LoremIpsum();
 
-const Template: ComponentStory<typeof DataDropdownField> = (props) => {
-  return <DataDropdownField {...props} sx={{ minWidth: 300 }} />;
+const Template: ComponentStory<typeof DataDropdownField> = ({
+  sx,
+  ...props
+}) => {
+  return <DataDropdownField {...props} sx={{ width: 300, ...sx }} />;
 };
 
 export const Default = Template.bind({});
@@ -40,6 +43,15 @@ DisabledWithValue.args = {
   required: true,
   disabled: true,
   value: 'Two',
+  options: ['One', 'Two', 'Three'].map((value) => ({ label: value, value })),
+} as DataDropdownFieldProps;
+
+export const TextVariantWithPlaceholder = Template.bind({});
+TextVariantWithPlaceholder.args = {
+  label: 'Dropdown With Options',
+  required: true,
+  variant: 'text',
+  placeholder: 'Select an option',
   options: ['One', 'Two', 'Three'].map((value) => ({ label: value, value })),
 } as DataDropdownFieldProps;
 
