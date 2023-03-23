@@ -210,6 +210,7 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
               maxDate={maxDate}
               inline
               showTimeSelect={enableTimeSelector}
+              showTimeInput={enableTimeSelector}
             />
           );
           if (isSmallScreenSize) {
@@ -265,11 +266,16 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
                           .react-datepicker,
                           .react-datepicker__header,
                           .react-datepicker__time-container,
-                          .react-datepicker__time
+                          .react-datepicker__time,
+                          .react-datepicker-time__input
                         `]: {
                           bgcolor: palette.background.paper,
                           color: palette.text.primary,
                           borderColor: palette.divider,
+                        },
+                        '.react-datepicker__current-month': {
+                          borderBottom: `1px solid ${palette.divider}`,
+                          pb: 1,
                         },
                         [`
                           .react-datepicker__current-month,
@@ -320,7 +326,7 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
                             }
                             return 300;
                           })(),
-                          mx: 0,
+                          m: 0,
                         },
                         '.react-datepicker__week,.react-datepicker__day-names':
                           {
@@ -332,6 +338,16 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
                                 minWidth: '1.7rem',
                               },
                           },
+                        '.react-datepicker__input-time-container': {
+                          m: 0,
+                          py: 1.2,
+                          pl: 2,
+                          borderTop: `1px solid ${palette.divider}`,
+                        },
+                        '.react-datepicker-time__input': {
+                          borderWidth: 1,
+                          borderRadius: '4px',
+                        },
                       }}
                     >
                       <ClickAwayListener
