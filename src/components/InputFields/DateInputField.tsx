@@ -163,10 +163,12 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
                 );
               }
             })(),
+            onClick: () => {
+              if (!disabled) {
+                setOpen(true);
+              }
+            },
             ref: anchorRef,
-          }}
-          onClick={() => {
-            setOpen(true);
           }}
           sx={{
             '& .date-input-clear-button': {

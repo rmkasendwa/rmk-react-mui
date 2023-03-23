@@ -44,6 +44,7 @@ import PaginatedDropdownOptionList, {
   DropdownOption,
   PaginatedDropdownOptionListProps,
 } from '../PaginatedDropdownOptionList';
+import { getDropdownOptionLabel } from '../PaginatedDropdownOptionList/DropdownOption';
 import RetryErrorMessage from '../RetryErrorMessage';
 import TextField, { TextFieldProps } from './TextField';
 
@@ -100,6 +101,7 @@ export interface DataDropdownFieldProps
   dataKey?: string;
   value?: string | string[];
   selectedOption?: DropdownOption;
+  placeholderOption?: DropdownOption;
   getSelectedOptions?: (
     selectedValue: string | string[]
   ) => Promise<DropdownOption[]>;
@@ -393,7 +395,7 @@ export const DataDropdownField = forwardRef<
       return (
         <>
           {multiple ? (
-            selectedOptions.map(({ label, value }) => {
+            selectedOptions.map(({ label, icon, value }) => {
               return (
                 <Box
                   key={value}
@@ -418,7 +420,10 @@ export const DataDropdownField = forwardRef<
                     ...SelectedOptionPillPropsSx,
                   }}
                 >
-                  {label}
+                  {getDropdownOptionLabel({
+                    label,
+                    icon,
+                  })}
                 </Box>
               );
             })
@@ -542,6 +547,11 @@ export const DataDropdownField = forwardRef<
                     mt: 0,
                   },
                 },
+                onClick: () => {
+                  if (!disabled) {
+                    setOpen(true);
+                  }
+                },
                 sx: {
                   cursor: 'pointer',
                 },
@@ -559,9 +569,6 @@ export const DataDropdownField = forwardRef<
                   {endAdornment}
                 </Stack>
               }
-              onClick={() => {
-                setOpen(true);
-              }}
               enableLoadingState={enableLoadingState}
             />
           );
@@ -569,10 +576,6 @@ export const DataDropdownField = forwardRef<
         return (
           <TextField
             ref={ref}
-            onClick={(event) => {
-              event.preventDefault();
-              setOpen(true);
-            }}
             onFocus={(event) => {
               event.preventDefault();
               if (!isSmallScreenSize) {
@@ -613,6 +616,11 @@ export const DataDropdownField = forwardRef<
                 return props;
               })(),
               readOnly: !searchable || isSmallScreenSize,
+              onClick: () => {
+                if (!disabled) {
+                  setOpen(true);
+                }
+              },
               ref: anchorRef,
             }}
             inputProps={{
@@ -650,6 +658,13 @@ export const DataDropdownField = forwardRef<
                       whiteSpace: 'nowrap',
                       gap: 0.5,
                       overflow: 'hidden',
+                      ...(() => {
+                        if (disabled) {
+                          return {
+                            opacity: 0.38,
+                          };
+                        }
+                      })(),
                       ...(() => {
                         if (rest.size === 'medium') {
                           if (variant === 'standard') {
@@ -716,7 +731,10 @@ export const DataDropdownField = forwardRef<
                     !focused &&
                     selectedOptionDisplayString.length > 0
                   ) {
-                    return { color: 'transparent' };
+                    return {
+                      color: 'transparent',
+                      WebkitTextFillColor: 'transparent',
+                    };
                   }
                   return {};
                 })(),

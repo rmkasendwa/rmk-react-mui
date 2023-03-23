@@ -34,6 +34,15 @@ WithStaticOptions.args = {
   options: ['One', 'Two', 'Three'].map((value) => ({ label: value, value })),
 } as DataDropdownFieldProps;
 
+export const DisabledWithValue = Template.bind({});
+DisabledWithValue.args = {
+  label: 'Disabled Dropdown',
+  required: true,
+  disabled: true,
+  value: 'Two',
+  options: ['One', 'Two', 'Three'].map((value) => ({ label: value, value })),
+} as DataDropdownFieldProps;
+
 export const WithOverflowingOptions = Template.bind({});
 WithOverflowingOptions.args = {
   label: 'Paginated Dropdown List',

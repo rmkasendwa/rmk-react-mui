@@ -19,7 +19,7 @@ import MenuItem, { MenuItemProps } from '@mui/material/MenuItem';
 import clsx from 'clsx';
 import { ReactNode, forwardRef } from 'react';
 
-export type DropdownOptionVariant = 'text' | 'checkbox' | 'check';
+import { DropdownOption as DropdownOptionType } from '../../interfaces/Utils';
 
 export interface DropdownOptionClasses {
   /** Styles applied to the root element. */
@@ -54,12 +54,38 @@ declare module '@mui/material/styles/components' {
   }
 }
 
+export type DropdownOptionVariant = 'text' | 'checkbox' | 'check';
+
 export interface DropdownOptionProps extends MenuItemProps {
   height?: number;
   selectable?: boolean;
   variant?: DropdownOptionVariant;
   icon?: ReactNode;
 }
+
+export const getDropdownOptionLabel = ({
+  icon,
+  label,
+  iconWrapperClassName,
+}: Pick<DropdownOptionType, 'label' | 'icon'> & {
+  iconWrapperClassName?: string;
+}) => {
+  if (icon) {
+    return (
+      <Grid container sx={{ alignItems: 'center', gap: 1 }}>
+        <Grid
+          className={iconWrapperClassName}
+          item
+          sx={{ width: 24, display: 'flex' }}
+        >
+          {icon}
+        </Grid>
+        <Grid item>{label}</Grid>
+      </Grid>
+    );
+  }
+  return label;
+};
 
 export function getDropdownOptionUtilityClass(slot: string): string {
   return generateUtilityClass('MuiDropdownOption', slot);
@@ -103,23 +129,11 @@ export const DropdownOption = forwardRef<HTMLLIElement, DropdownOptionProps>(
 
     const { palette } = useTheme();
 
-    const label = (() => {
-      if (icon) {
-        return (
-          <Grid container sx={{ alignItems: 'center', gap: 1 }}>
-            <Grid
-              className={clsx(classes.iconContainer)}
-              item
-              sx={{ width: 24, display: 'flex' }}
-            >
-              {icon}
-            </Grid>
-            <Grid item>{children}</Grid>
-          </Grid>
-        );
-      }
-      return children;
-    })();
+    const label = getDropdownOptionLabel({
+      icon,
+      label: children,
+      iconWrapperClassName: clsx(classes.iconContainer),
+    });
 
     return (
       <MenuItem
