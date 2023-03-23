@@ -22,6 +22,7 @@ import ClickAwayListener from '@mui/material/ClickAwayListener';
 import Grow from '@mui/material/Grow';
 import Popper from '@mui/material/Popper';
 import clsx from 'clsx';
+import { pick } from 'lodash';
 import {
   forwardRef,
   useCallback,
@@ -565,11 +566,44 @@ export const DataDropdownField = forwardRef<
                   direction="row"
                 >
                   {startAdornment}
-                  {selectedOptions[0]?.label || rest.placeholder}
+                  {(() => {
+                    if (selectedOptionsElement) {
+                      return (
+                        <Box
+                          className={classes.selectedOptionsWrapper}
+                          sx={{
+                            pointerEvents: 'none',
+                            display: 'flex',
+                            whiteSpace: 'nowrap',
+                            gap: 0.5,
+                            overflow: 'hidden',
+                          }}
+                        >
+                          {selectedOptionsElement}
+                        </Box>
+                      );
+                    }
+                    if (rest.placeholder) {
+                      return (
+                        <Box
+                          sx={{
+                            opacity: 0.2,
+                          }}
+                        >
+                          {rest.placeholder}
+                        </Box>
+                      );
+                    }
+                  })()}
                   {endAdornment}
                 </Stack>
               }
               enableLoadingState={enableLoadingState}
+              sx={
+                {
+                  ...pick(sx, 'width', 'minWidth', 'maxWidth'),
+                } as any
+              }
             />
           );
         }
