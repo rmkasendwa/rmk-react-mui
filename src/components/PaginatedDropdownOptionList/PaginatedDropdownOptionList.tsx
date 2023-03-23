@@ -171,6 +171,7 @@ export const PaginatedDropdownOptionList = forwardRef<
     callGetDropdownOptions = 'whenNoOptions',
     keyboardFocusElement,
     showNoOptionsFoundMessage = true,
+    sx,
     ...rest
   } = omit(props, 'limit');
 
@@ -464,7 +465,17 @@ export const PaginatedDropdownOptionList = forwardRef<
   });
 
   return (
-    <Card {...rest} ref={ref} className={clsx(classes.root)}>
+    <Card
+      {...rest}
+      ref={ref}
+      className={clsx(classes.root)}
+      sx={{
+        ...sx,
+        minWidth,
+        maxHeight,
+        width: minOptionWidth,
+      }}
+    >
       {(() => {
         if (searchable) {
           return (
