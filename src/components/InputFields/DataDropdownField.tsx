@@ -174,6 +174,7 @@ export const DataDropdownField = forwardRef<
     showDropdownIcon = true,
     enableLoadingState = true,
     showRichTextValue = true,
+    placeholderOption,
     ...rest
   } = props;
 
@@ -392,11 +393,20 @@ export const DataDropdownField = forwardRef<
   }, [canLoadAsyncSelectedOptions, loadAsyncSelectedOptions, value]);
 
   const selectedOptionsElement = (() => {
-    if (showRichTextValue && !focused && selectedOptions.length > 0) {
+    const optionsToDisplay = (() => {
+      if (selectedOptions.length > 0) {
+        return selectedOptions;
+      }
+      if (placeholderOption) {
+        return [placeholderOption];
+      }
+      return [];
+    })();
+    if (showRichTextValue && !focused && optionsToDisplay.length > 0) {
       return (
         <>
           {multiple ? (
-            selectedOptions.map(({ label, icon, value }) => {
+            optionsToDisplay.map(({ label, icon, value }) => {
               return (
                 <Box
                   key={value}
@@ -435,7 +445,7 @@ export const DataDropdownField = forwardRef<
                 fontSize: 14,
               }}
             >
-              {selectedOptions[0]?.label}
+              {optionsToDisplay[0]?.label}
             </Typography>
           )}
         </>
@@ -668,7 +678,15 @@ export const DataDropdownField = forwardRef<
               ) {
                 return searchTerm;
               }
-              return selectedOptionDisplayString;
+              if (selectedOptionDisplayString) {
+                return selectedOptionDisplayString;
+              }
+              if (placeholderOption) {
+                return String(
+                  placeholderOption.searchableLabel || placeholderOption.label
+                );
+              }
+              return '';
             })()}
             className={clsx(classes.root)}
             {...{
@@ -763,7 +781,8 @@ export const DataDropdownField = forwardRef<
                     searchable &&
                     showRichTextValue &&
                     !focused &&
-                    selectedOptionDisplayString.length > 0
+                    (selectedOptionDisplayString.length > 0 ||
+                      placeholderOption)
                   ) {
                     return {
                       color: 'transparent',
