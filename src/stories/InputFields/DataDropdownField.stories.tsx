@@ -4,9 +4,11 @@ import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { LoremIpsum } from 'lorem-ipsum';
 import React from 'react';
 
+import FieldValue from '../../components/FieldValue';
 import DataDropdownField, {
   DataDropdownFieldProps,
 } from '../../components/InputFields/DataDropdownField';
+import ProfileGravatar from '../../components/ProfileGravatar';
 
 export default {
   title: 'Components/Input Fields/Data Dropdown Field',
@@ -289,4 +291,16 @@ WithEndAdornment.args = {
       <Typography variant="body2">Bcc</Typography>
     </Stack>
   ),
+} as DataDropdownFieldProps;
+
+export const WithPlaceholderOption = Template.bind({});
+WithPlaceholderOption.args = {
+  label: 'Dropdown With Options',
+  required: true,
+  options: ['One', 'Two', 'Three'].map((value) => ({ label: value, value })),
+  placeholderOption: {
+    label: (
+      <FieldValue icon={<ProfileGravatar size={20} />}>Placeholder</FieldValue>
+    ),
+  },
 } as DataDropdownFieldProps;
