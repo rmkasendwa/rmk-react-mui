@@ -1,10 +1,12 @@
+import { result } from 'lodash';
+
 import { SortOptions } from '../interfaces/Sort';
 import { PrimitiveDataType } from '../interfaces/Utils';
 
-export const sort = <T = any>(
-  a: T,
-  b: T,
-  sortParams: SortOptions<T>
+export const sort = <RecordRow = any>(
+  a: RecordRow,
+  b: RecordRow,
+  sortParams: SortOptions<RecordRow>
 ): number => {
   sortParams = [...sortParams];
   const currentSortParam = sortParams.shift()!;
@@ -21,8 +23,8 @@ export const sort = <T = any>(
     return baseType;
   })();
   const sortWeight = (() => {
-    const aSortValue = getSortValue ? getSortValue(a) : a[id];
-    const bSortValue = getSortValue ? getSortValue(b) : b[id];
+    const aSortValue = getSortValue ? getSortValue(a) : result(a, id);
+    const bSortValue = getSortValue ? getSortValue(b) : result(b, id);
     if (typeof aSortValue === type && typeof bSortValue === type) {
       switch (type) {
         case 'number':
