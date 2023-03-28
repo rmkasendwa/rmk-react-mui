@@ -28,7 +28,7 @@ import {
 import { BoxProps } from '@mui/material/Box';
 import clsx from 'clsx';
 import { FormikValues } from 'formik';
-import { omit } from 'lodash';
+import { omit, result } from 'lodash';
 import {
   ReactElement,
   ReactNode,
@@ -1151,16 +1151,17 @@ const BaseRecordsExplorer = <
 
         const groupedData = groupableData
           .reduce((accumulator, row: any) => {
+            const fieldValue = result(row, id);
             let existingGroup = accumulator.find(({ groupName }) => {
               return (
-                (row[id] == null && groupName === '') ||
-                (row[id] != null && groupName === String(row[id]))
+                (fieldValue == null && groupName === '') ||
+                (fieldValue != null && groupName === String(fieldValue))
               );
             })!;
             if (!existingGroup) {
               existingGroup = {
                 ...row,
-                groupName: row[id] != null ? String(row[id]) : '',
+                groupName: fieldValue != null ? String(fieldValue) : '',
               };
               accumulator.push(existingGroup);
             }
