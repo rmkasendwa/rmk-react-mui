@@ -199,11 +199,13 @@ export const BaseModalForm = <Values extends FormikValues>(
       case 'right':
       case 'left':
         props.CardProps = {
+          ...CardPropsRest,
           sx: {
             maxWidth: 600,
+            ...CardPropsSx,
             borderRadius: 0,
             height: '100%',
-            maxHeight: 'auto',
+            maxHeight: 'none',
           },
         };
         break;
