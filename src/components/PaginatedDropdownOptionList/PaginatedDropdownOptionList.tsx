@@ -359,6 +359,8 @@ export const PaginatedDropdownOptionList = forwardRef<
     );
   }, [minWidth, options, typography.htmlFontSize]);
 
+  const width = minOptionWidth + 50;
+
   const filteredOptions = (() => {
     if (searchTerm && !externallyPaginated) {
       return options.filter(
@@ -473,7 +475,7 @@ export const PaginatedDropdownOptionList = forwardRef<
         ...sx,
         minWidth,
         maxHeight,
-        width: minOptionWidth,
+        width,
       }}
     >
       {(() => {
@@ -596,7 +598,7 @@ export const PaginatedDropdownOptionList = forwardRef<
         sx={{
           minWidth,
           maxHeight,
-          width: minOptionWidth,
+          width,
           boxSizing: 'border-box',
           overflowY: 'auto',
         }}
