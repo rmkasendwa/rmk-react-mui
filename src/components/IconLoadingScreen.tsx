@@ -1,6 +1,6 @@
 import CloudSyncIcon from '@mui/icons-material/CloudSync';
 import { Box, Button, Stack, Typography, useTheme } from '@mui/material';
-import { FC } from 'react';
+import { FC, ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 
 import ErrorAlert from './ErrorAlert';
@@ -16,6 +16,7 @@ export interface IconLoadingScreenProps {
   loading?: boolean;
   errorMessage?: string;
   load?: () => void;
+  addNewButtonLabel?: ReactNode;
 }
 
 export const IconLoadingScreen: FC<IconLoadingScreenProps> = ({
@@ -29,6 +30,7 @@ export const IconLoadingScreen: FC<IconLoadingScreenProps> = ({
   loading,
   errorMessage,
   load,
+  addNewButtonLabel,
 }) => {
   recordLabelSingular ||
     (recordLabelSingular = recordLabelPlural.replace(/s$/gi, ''));
@@ -37,6 +39,8 @@ export const IconLoadingScreen: FC<IconLoadingScreenProps> = ({
   const lowercaseRecordLabelSingular = recordLabelSingular.toLowerCase();
   noRecordsStatement ||
     (noRecordsStatement = `Add ${lowercaseRecordLabelSingular}.`);
+
+  addNewButtonLabel || (addNewButtonLabel = `Add New ${recordLabelSingular}`);
 
   const { spacing } = useTheme();
 
@@ -104,7 +108,7 @@ export const IconLoadingScreen: FC<IconLoadingScreenProps> = ({
                   size="small"
                   sx={{ mt: `${spacing(2)} !important` }}
                 >
-                  Add New {recordLabelSingular}
+                  {addNewButtonLabel}
                 </Button>
               </>
             );
