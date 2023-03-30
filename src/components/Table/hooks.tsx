@@ -418,6 +418,7 @@ export const useTable = <DataRow extends BaseDataRow>(
           break;
         case 'phoneNumber':
           nextColumn.columnClassName = 'phone-number-column';
+          nextColumn.width || (nextColumn.width = 220);
           break;
         case 'currencyInput':
           nextColumn.align = 'right';
@@ -429,6 +430,14 @@ export const useTable = <DataRow extends BaseDataRow>(
         case 'checkbox':
           nextColumn.locked = true;
           nextColumn.align = 'center';
+          break;
+      }
+
+      // Date columns
+      switch (nextColumn.type) {
+        case 'date':
+        case 'timestamp':
+          nextColumn.width || (nextColumn.width = 220);
           break;
       }
 
