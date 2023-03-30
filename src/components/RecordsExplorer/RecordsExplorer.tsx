@@ -372,6 +372,7 @@ export interface RecordsExplorerProps<
   CreateModalFormProps?: Partial<ModalFormProps>;
   recordCreateSuccessMessage?: ReactNode;
   recordEditSuccessMessage?: ReactNode;
+  addNewButtonLabel?: ReactNode;
 }
 
 export function getRecordsExplorerUtilityClass(slot: string): string {
@@ -466,10 +467,11 @@ const BaseRecordsExplorer = <
     props,
     'recordLabelPlural',
     'recordLabelSingular',
-    'permissionToViewDetails'
+    'permissionToViewDetails',
+    'addNewButtonLabel'
   );
 
-  let { recordLabelPlural, recordLabelSingular } = props;
+  let { recordLabelPlural, recordLabelSingular, addNewButtonLabel } = props;
 
   const classes = composeClasses(
     slots,
@@ -495,6 +497,8 @@ const BaseRecordsExplorer = <
     (recordLabelSingular = recordLabelPlural.replace(/s$/gi, ''));
   const lowercaseRecordLabelPlural = recordLabelPlural.toLowerCase();
   const lowercaseRecordLabelSingular = recordLabelSingular.toLowerCase();
+
+  addNewButtonLabel || (addNewButtonLabel = `Add New ${recordLabelSingular}`);
 
   const { sx: HeaderPropsSx, ...HeaderPropsRest } = HeaderProps;
   const { sx: BodyPropsSx, ...BodyPropsRest } = BodyProps;
@@ -1998,7 +2002,7 @@ const BaseRecordsExplorer = <
                     tools.push({
                       icon: <AddIcon />,
                       type: 'icon-button',
-                      label: `Add New ${recordLabelSingular}`,
+                      label: addNewButtonLabel,
                       alwaysShowOn: 'All Screens',
                       ...(() => {
                         return {
@@ -2018,7 +2022,7 @@ const BaseRecordsExplorer = <
                   tools.push({
                     icon: <AddIcon />,
                     type: 'button',
-                    label: `Add New ${recordLabelSingular}`,
+                    label: addNewButtonLabel,
                     size: 'small',
                     variant: 'contained',
                     ...(() => {
@@ -2110,6 +2114,7 @@ const BaseRecordsExplorer = <
                 {...{
                   recordLabelPlural,
                   recordLabelSingular,
+                  addNewButtonLabel,
                 }}
                 {...IconLoadingScreenProps}
                 pathToAddNew={pathToAddNewRecord}
