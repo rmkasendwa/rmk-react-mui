@@ -412,6 +412,7 @@ export const DataDropdownField = forwardRef<
                   key={value}
                   {...SelectedOptionPillPropsRest}
                   sx={{
+                    display: 'flex',
                     fontSize: 14,
                     bgcolor: alpha(palette.primary.main, 0.1),
                     borderRadius: '20px',

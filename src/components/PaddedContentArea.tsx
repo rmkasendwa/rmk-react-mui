@@ -127,7 +127,6 @@ export const PaddedContentArea = forwardRef<
       {children}
     </Box>
   );
-  return <Box></Box>;
 });
 
 export default PaddedContentArea;

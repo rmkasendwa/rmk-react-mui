@@ -2,7 +2,9 @@ import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { LoremIpsum } from 'lorem-ipsum';
 import React from 'react';
 
-import PaginatedDropdownOptionList from '../components/PaginatedDropdownOptionList';
+import PaginatedDropdownOptionList, {
+  PaginatedDropdownOptionListProps,
+} from '../components/PaginatedDropdownOptionList';
 
 export default {
   title: 'Components/Paginated Dropdown Option List',
@@ -26,7 +28,7 @@ Default.args = {
     label: `${index + 1}. ${lorem.generateWords(4)}`,
     value: index,
   })),
-};
+} as PaginatedDropdownOptionListProps;
 
 export const WithOptions = Template.bind({});
 WithOptions.args = {
@@ -34,7 +36,7 @@ WithOptions.args = {
     label: `${index + 1}. ${lorem.generateWords(4)}`,
     value: index,
   })),
-};
+} as PaginatedDropdownOptionListProps;
 
 export const MultipleSelect = Template.bind({});
 MultipleSelect.args = {
@@ -43,16 +45,13 @@ MultipleSelect.args = {
     value: index,
   })),
   multiple: true,
-};
+} as PaginatedDropdownOptionListProps;
 
 export const LoadingWithEmptyOptions = Template.bind({});
 LoadingWithEmptyOptions.args = {
   options: [],
-  loadOptions: () => {
-    console.log('Loading options');
-  },
   loading: true,
-};
+} as PaginatedDropdownOptionListProps;
 
 export const LoadingWithOptions = Template.bind({});
 LoadingWithOptions.args = {
@@ -60,8 +59,5 @@ LoadingWithOptions.args = {
     label: `${index + 1}. ${lorem.generateWords(4)}`,
     value: index,
   })),
-  loadOptions: () => {
-    console.log('Loading options');
-  },
   loading: true,
-};
+} as PaginatedDropdownOptionListProps;

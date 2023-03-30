@@ -369,6 +369,7 @@ export interface RecordsExplorerProps<
   SearchSyncToolbarProps?: Partial<SearchSyncToolbarProps>;
 
   ModalFormProps?: Partial<ModalFormProps>;
+  CreateModalFormProps?: Partial<ModalFormProps>;
   recordCreateSuccessMessage?: ReactNode;
   recordEditSuccessMessage?: ReactNode;
 }
@@ -434,6 +435,7 @@ const BaseRecordsExplorer = <
     validationSchema,
     initialValues,
     ModalFormProps = {},
+    CreateModalFormProps = {},
     description,
     autoSync = true,
     defaultPath,
@@ -499,6 +501,7 @@ const BaseRecordsExplorer = <
   const { onChangeSearchTerm, ...SearchSyncToolBarPropsRest } =
     SearchSyncToolBarProps;
   const { ...ModalFormPropsRest } = ModalFormProps;
+  const { ...CreateModalFormPropsRest } = CreateModalFormProps;
 
   // Refs
   const headerElementRef = useRef<HTMLDivElement | null>(null);
@@ -2180,11 +2183,6 @@ const BaseRecordsExplorer = <
               {hasFormProps ? (
                 <ModalForm
                   lockSubmitIfNoChange={false}
-                  {...modalFormProps}
-                  initialValues={initialValues || {}}
-                  validationSchema={validationSchema || {}}
-                  open={Boolean(createNewRecord)}
-                  errorMessage={createErrorMessage}
                   title={
                     <Grid
                       container
@@ -2198,6 +2196,12 @@ const BaseRecordsExplorer = <
                     </Grid>
                   }
                   submitButtonText={`Add ${recordLabelSingular}`}
+                  {...modalFormProps}
+                  {...CreateModalFormPropsRest}
+                  initialValues={initialValues || {}}
+                  validationSchema={validationSchema || {}}
+                  open={Boolean(createNewRecord)}
+                  errorMessage={createErrorMessage}
                   loading={creating}
                   onSubmit={async (values) => {
                     if (recordCreator) {
