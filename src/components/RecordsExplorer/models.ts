@@ -123,12 +123,12 @@ export type FilterOperator =
   | NumericFilterOperator
   | ContentExistenceFilterOperator;
 
-export const filterConjunctions = ['and', 'or'];
+export const filterConjunctions = ['and', 'or'] as const;
 
 export type Conjunction = typeof filterConjunctions[number];
 
 export interface Condition<RecordRow extends BaseDataRow> {
-  fieldId: keyof RecordRow | string;
+  fieldId: keyof RecordRow;
   operator?: FilterOperator;
   value?: string | number | (string | number)[];
 }
