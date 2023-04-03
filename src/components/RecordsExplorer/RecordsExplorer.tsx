@@ -373,6 +373,11 @@ export interface RecordsExplorerProps<
   recordCreateSuccessMessage?: ReactNode;
   recordEditSuccessMessage?: ReactNode;
   addNewButtonLabel?: ReactNode;
+
+  showViewOptionsTool?: boolean;
+  showGroupTool?: boolean;
+  showSortTool?: boolean;
+  showFilterTool?: boolean;
 }
 
 export function getRecordsExplorerUtilityClass(slot: string): string {
@@ -462,6 +467,10 @@ const BaseRecordsExplorer = <
     searchTerm: searchTermProp,
     isSearchable: isSearchableProp = true,
     controlledSearchTerm,
+    showViewOptionsTool = true,
+    showGroupTool = true,
+    showSortTool = true,
+    showFilterTool = true,
     ...rest
   } = omit(
     props,
@@ -2034,19 +2043,19 @@ const BaseRecordsExplorer = <
                   });
                 }
               }
-              if (ViewOptionsButtonProps || views) {
+              if (showViewOptionsTool && (ViewOptionsButtonProps || views)) {
                 tools.push(viewOptionsTool);
               }
 
-              if (groupableFields.length > 0) {
+              if (showGroupTool && groupableFields.length > 0) {
                 tools.push(groupTool);
               }
 
-              if (sortableFields.length > 0) {
+              if (showSortTool && sortableFields.length > 0) {
                 tools.push(sortTool);
               }
 
-              if (filterFields.length > 0) {
+              if (showFilterTool && filterFields.length > 0) {
                 tools.push(filterTool);
               }
 
