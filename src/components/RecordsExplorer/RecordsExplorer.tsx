@@ -154,6 +154,8 @@ const modifiedStateKeyTypes = [
   'sortBy',
   'filterBy',
   'selectedColumns',
+  'search',
+  'expandedGroups',
 ] as const;
 
 type ModifiedStatKey = typeof modifiedStateKeyTypes[number];
@@ -934,7 +936,14 @@ const BaseRecordsExplorer = <
   const selectedColumnIds =
     searchParamSelectedColumns || baseSelectedColumnIds || [];
 
-  const searchTerm = searchParamSearchTerm || searchTermProp;
+  const searchTerm = (() => {
+    if (searchParamSearchTerm) {
+      return searchParamSearchTerm;
+    }
+    if (searchTermProp && !modifiedStateKeys?.includes('search')) {
+      return searchTermProp;
+    }
+  })();
 
   const { loggedInUserHasPermission } = useAuth();
 
@@ -1611,6 +1620,12 @@ const BaseRecordsExplorer = <
                                         })(),
                                         expandedGroupsInverted:
                                           nextExpandedGroupsInverted,
+                                        modifiedKeys: [
+                                          ...new Set([
+                                            ...(modifiedStateKeys || []),
+                                            'expandedGroups',
+                                          ]),
+                                        ] as typeof modifiedStateKeys,
                                       },
                                       {
                                         replace: true,
@@ -2085,6 +2100,9 @@ const BaseRecordsExplorer = <
                       return null;
                     }
                   })(),
+                  modifiedKeys: [
+                    ...new Set([...(modifiedStateKeys || []), 'search']),
+                  ] as typeof modifiedStateKeys,
                 },
                 {
                   replace: true,

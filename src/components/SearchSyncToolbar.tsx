@@ -74,6 +74,7 @@ declare module '@mui/material/styles/components' {
 
 export interface BaseToolOptions {
   alwaysShowOn?: 'Large Screen' | 'Small Screen' | 'All Screens';
+  component?: any;
 }
 
 export interface ButtonTool
