@@ -20,6 +20,7 @@ import TableRow, {
   TableRowProps as MuiTableRowProps,
 } from '@mui/material/TableRow';
 import clsx from 'clsx';
+import { result } from 'lodash';
 import { Fragment, useEffect, useMemo, useRef } from 'react';
 
 import {
@@ -293,7 +294,7 @@ export const TableBodyRow = <T extends BaseDataRow>(
               if (getColumnValue) {
                 return getColumnValue(row, highestPriorityColumn);
               }
-              return row[id];
+              return result(row, id);
             })()}
           </>
         );
@@ -584,7 +585,7 @@ export const TableBodyRow = <T extends BaseDataRow>(
                       if (getColumnValue) {
                         return getColumnValue(localRow, column);
                       }
-                      return row[id];
+                      return result(row, id);
                     })()}
                   </>
                 </Stack>

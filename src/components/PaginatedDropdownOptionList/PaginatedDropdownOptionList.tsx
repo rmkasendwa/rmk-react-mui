@@ -470,8 +470,6 @@ export const PaginatedDropdownOptionList = forwardRef<
       className={clsx(classes.root)}
       sx={{
         ...sx,
-        minWidth,
-        maxHeight,
       }}
     >
       {(() => {

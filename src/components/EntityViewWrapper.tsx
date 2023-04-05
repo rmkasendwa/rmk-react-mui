@@ -1,7 +1,6 @@
 import EditIcon from '@mui/icons-material/Edit';
-import Button from '@mui/material/Button';
-import { FC } from 'react';
-import { Link } from 'react-router-dom';
+import { FC, forwardRef } from 'react';
+import { Link as RouterLink } from 'react-router-dom';
 
 import FixedHeaderContentArea, {
   FixedHeaderContentAreaProps,
@@ -21,20 +20,21 @@ export const EntityViewWrapper: FC<EntityViewWrapperProps> = ({
     <FixedHeaderContentArea
       {...rest}
       tools={[
-        ...(() => {
+        ...((): NonNullable<typeof tools> => {
           if (pathToEdit) {
             return [
-              <Button
-                key="editButton"
-                color="primary"
-                variant="contained"
-                size="small"
-                startIcon={<EditIcon />}
-                component={Link}
-                to={pathToEdit}
-              >
-                Edit
-              </Button>,
+              {
+                type: 'icon-button',
+                icon: <EditIcon />,
+                label: 'Edit',
+                LinkComponent: forwardRef<HTMLAnchorElement, any>(
+                  function ParentLink(linkProps, ref) {
+                    return (
+                      <RouterLink ref={ref} to={pathToEdit} {...linkProps} />
+                    );
+                  }
+                ),
+              },
             ];
           }
           return [];
