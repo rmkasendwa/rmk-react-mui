@@ -991,7 +991,7 @@ const BaseRecordsExplorer = <
     return dataProp || [];
   })();
 
-  // Processing data
+  //#region Filtering data
   const filteredData = useMemo(() => {
     // Filtering data
     const dataFilteredByFilterFields = (() => {
@@ -1111,6 +1111,7 @@ const BaseRecordsExplorer = <
       }
       return data;
     })();
+
     const filteredData = (() => {
       if (searchTerm && searchTerm.length > 0) {
         if (filterBySearchTermRef.current) {
@@ -1123,8 +1124,8 @@ const BaseRecordsExplorer = <
           return dataFilteredByFilterFields.filter((row) => {
             return searchableFields.some(({ id, getFilterValue }) => {
               const searchValues: string[] = [];
-              if (typeof row[id] === 'string') {
-                searchValues.push(row[id] as any);
+              if (typeof result(row, id) === 'string') {
+                searchValues.push(result(row, id) as any);
               }
               if (getFilterValue) {
                 const filterValue = getFilterValue(row);
@@ -1164,6 +1165,7 @@ const BaseRecordsExplorer = <
     selectedConditionGroup,
     selectedSortParams,
   ]);
+  //#endregion
 
   // Grouping data
   const groupedData = useMemo(() => {
