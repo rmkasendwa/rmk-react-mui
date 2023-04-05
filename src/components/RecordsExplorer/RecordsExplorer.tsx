@@ -43,7 +43,10 @@ import * as Yup from 'yup';
 import { useAuth } from '../../contexts/AuthContext';
 import { LoadingContext, LoadingProvider } from '../../contexts/LoadingContext';
 import { useMessagingContext } from '../../contexts/MessagingContext';
-import { useReactRouterDOMSearchParams } from '../../hooks/ReactRouterDOM';
+import {
+  ParamStorage,
+  useReactRouterDOMSearchParams,
+} from '../../hooks/ReactRouterDOM';
 import {
   PaginatedRecordsFinderOptions,
   UsePaginatedRecordsOptions,
@@ -380,6 +383,7 @@ export interface RecordsExplorerProps<
   showGroupTool?: boolean;
   showSortTool?: boolean;
   showFilterTool?: boolean;
+  stateStorage?: ParamStorage;
 }
 
 export function getRecordsExplorerUtilityClass(slot: string): string {
@@ -473,6 +477,7 @@ const BaseRecordsExplorer = <
     showGroupTool = true,
     showSortTool = true,
     showFilterTool = true,
+    stateStorage,
     ...rest
   } = omit(
     props,
@@ -822,6 +827,7 @@ const BaseRecordsExplorer = <
         editRecord: Yup.boolean(),
       },
       id,
+      paramStorage: stateStorage,
     });
 
   const {
@@ -1900,6 +1906,12 @@ const BaseRecordsExplorer = <
                                       ? 'None'
                                       : 'All',
                                     expandedGroupsInverted: null,
+                                    modifiedKeys: [
+                                      ...new Set([
+                                        ...(modifiedStateKeys || []),
+                                        'expandedGroups',
+                                      ]),
+                                    ] as typeof modifiedStateKeys,
                                   },
                                   {
                                     replace: true,
