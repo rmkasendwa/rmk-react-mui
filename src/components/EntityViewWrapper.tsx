@@ -27,7 +27,7 @@ export const EntityViewWrapper: FC<EntityViewWrapperProps> = ({
                 type: 'icon-button',
                 icon: <EditIcon />,
                 label: 'Edit',
-                LinkComponent: forwardRef<HTMLAnchorElement, any>(
+                component: forwardRef<HTMLAnchorElement, any>(
                   function ParentLink(linkProps, ref) {
                     return (
                       <RouterLink ref={ref} to={pathToEdit} {...linkProps} />
