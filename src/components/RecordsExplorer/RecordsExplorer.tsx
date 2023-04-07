@@ -1177,14 +1177,19 @@ const BaseRecordsExplorer = <
         nestIndex = 0
       ): NestedDataGroup<RecordRow>[] | DataGroup<RecordRow>[] => {
         const currentGroupParams = groupParams[nestIndex];
-        const { id, getGroupLabel } = currentGroupParams;
+        const { id, getSortValue, getGroupLabel } = currentGroupParams;
         const groupableData = getGroupableDataRef.current
           ? getGroupableDataRef.current(inputGroupableData, currentGroupParams)
           : inputGroupableData;
 
         const groupedData = groupableData
           .reduce((accumulator, row: any) => {
-            const fieldValue = result(row, id);
+            const fieldValue = (() => {
+              if (getSortValue) {
+                return getSortValue(row);
+              }
+              return result(row, id);
+            })();
             let existingGroup = accumulator.find(({ groupName }) => {
               return (
                 (fieldValue == null && groupName === '') ||
