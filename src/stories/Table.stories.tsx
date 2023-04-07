@@ -224,19 +224,6 @@ WithDynamicRowData.args = {
       isHere: Math.round(Math.random() * 10) % 2 === 0,
     };
   }),
-  generateRowData: (account: any) => {
-    return {
-      number: (
-        <Box sx={{ whiteSpace: 'nowrap' }}>
-          <Box component="span" sx={{ color: 'green' }}>
-            $$$
-          </Box>
-          &nbsp;
-          {account.number}
-        </Box>
-      ),
-    };
-  },
   paging: false,
   stickyHeader: true,
   sx: {
