@@ -249,7 +249,7 @@ export const useRecord = <LoadableRecord>(
     defaultValue,
     key,
     loadOnMount = true,
-    autoSync = true,
+    autoSync = false,
   }: UseRecordOptions<LoadableRecord> = {}
 ) => {
   // Refs

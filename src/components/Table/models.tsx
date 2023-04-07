@@ -187,7 +187,6 @@ export interface TableRowProps<DataRow extends BaseDataRow = any>
   > {
   columns: Array<TableColumn<DataRow>>;
   row: DataRow;
-  generateRowData?: (currentEntity: DataRow) => any;
   getRowProps?: GetRowProps;
   onClickRow?: (currentEntity: DataRow) => void;
   minColumnWidth?: number;
@@ -220,7 +219,6 @@ export interface TableProps<DataRow extends BaseDataRow = any>
       | 'defaultDateFormat'
       | 'defaultDateTimeFormat'
       | 'editable'
-      | 'generateRowData'
       | 'minColumnWidth'
       | 'noWrap'
       | 'onClickRow'

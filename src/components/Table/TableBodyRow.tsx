@@ -21,7 +21,7 @@ import TableRow, {
 } from '@mui/material/TableRow';
 import clsx from 'clsx';
 import { result } from 'lodash';
-import { Fragment, useEffect, useMemo, useRef } from 'react';
+import { Fragment, useRef } from 'react';
 
 import {
   BaseDataRow,
@@ -97,7 +97,6 @@ export const TableBodyRow = <T extends BaseDataRow>(
     columns: inputColumns,
     row,
     getRowProps,
-    generateRowData,
     decimalPlaces: rowDecimalPlaces,
     textTransform: rowTextTransform = false,
     editable: rowEditable,
@@ -129,16 +128,12 @@ export const TableBodyRow = <T extends BaseDataRow>(
 
   // Refs
   const getRowPropsRef = useRef(getRowProps);
-  const generateRowDataRef = useRef(generateRowData);
-  useEffect(() => {
-    getRowPropsRef.current = getRowProps;
-    generateRowDataRef.current = generateRowData;
-  }, [generateRowData, getRowProps]);
+  getRowPropsRef.current = getRowProps;
 
   const { components, breakpoints, palette, spacing } = useTheme();
   const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
 
-  const { rowProps } = useMemo(() => {
+  const { rowProps } = (() => {
     return {
       rowProps: (() => {
         if (getRowPropsRef.current) {
@@ -146,18 +141,8 @@ export const TableBodyRow = <T extends BaseDataRow>(
         }
         return {};
       })(),
-      ...(() => {
-        if (generateRowDataRef.current) {
-          return Object.fromEntries(
-            Object.entries(generateRowDataRef.current(row)).filter(
-              ([, value]) => value != null
-            )
-          );
-        }
-        return {};
-      })(),
     };
-  }, [row]);
+  })();
 
   const { sx: rowPropsSx, ...rowPropsRest } = rowProps;
 

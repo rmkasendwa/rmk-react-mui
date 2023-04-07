@@ -114,7 +114,8 @@ export const LoadingTypography = forwardRef<
   const typographyElement = (
     <Typography
       ref={ref}
-      {...rest}
+      component="div"
+      {...(rest as any)}
       className={clsx(classes.root)}
       sx={{
         ...sx,
