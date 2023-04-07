@@ -601,14 +601,23 @@ const BaseRecordsExplorer = <
                       ENUM_TABLE_COLUMN_TYPES.includes(type)
                     );
                   })
-                  .map(({ id, label, type = 'enum', getFilterValue }) => {
-                    return {
+                  .map(
+                    ({
                       id,
-                      label: String(label),
-                      type: type as PrimitiveDataType,
-                      getSortValue: getFilterValue as any,
-                    };
-                  })
+                      label,
+                      type = 'enum',
+                      getFilterValue,
+                      getColumnValue,
+                    }) => {
+                      return {
+                        id,
+                        label: String(label),
+                        type: type as PrimitiveDataType,
+                        getSortValue: getFilterValue as any,
+                        getGroupLabel: getColumnValue as any,
+                      };
+                    }
+                  )
               );
               groupableFields.forEach((groupableField) => {
                 const { id: groupableFieldId } = groupableField;

@@ -825,7 +825,10 @@ export const useTable = <DataRow extends BaseDataRow>(
                         {label}
                       </Typography>
                       {(() => {
-                        if (columnSortable) {
+                        if (
+                          columnSortable &&
+                          (!enableColumnDisplayToggle || !isLastColumn)
+                        ) {
                           const sortDirection = (() => {
                             if (sortBy[0] && sortBy[0].id === id) {
                               return sortBy[0].sortDirection || 'ASC';
@@ -836,15 +839,7 @@ export const useTable = <DataRow extends BaseDataRow>(
                               sx={{
                                 position: 'absolute',
                                 top: 0,
-                                right: (() => {
-                                  if (
-                                    isLastColumn &&
-                                    enableColumnDisplayToggle
-                                  ) {
-                                    return 36;
-                                  }
-                                  return 0;
-                                })(),
+                                right: 0,
                                 height: '100%',
                                 fontSize: 10,
                                 lineHeight: 1,
