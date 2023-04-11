@@ -46,6 +46,7 @@ declare module '@mui/material/styles/components' {
 export interface PermissionGuardProps {
   permission: string | string[];
   fallbackComponent?: ReactNode;
+  showFallbackComponent?: boolean;
   children: ReactNode;
 }
 
@@ -61,6 +62,7 @@ export const PermissionGuard: FC<PermissionGuardProps> = (inProps) => {
   const {
     permission,
     fallbackComponent = <AccessDeniedPage />,
+    showFallbackComponent = true,
     children,
   } = props;
 
@@ -71,7 +73,10 @@ export const PermissionGuard: FC<PermissionGuardProps> = (inProps) => {
   if (loggedInUserHasPermission(permission)) {
     return <>{children}</>;
   }
-  return <>{fallbackComponent}</>;
+  if (showFallbackComponent) {
+    return <>{fallbackComponent}</>;
+  }
+  return null;
 };
 
 export default PermissionGuard;
