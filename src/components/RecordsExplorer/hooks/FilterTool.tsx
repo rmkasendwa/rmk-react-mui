@@ -15,7 +15,7 @@ import {
   Typography,
   tableCellClasses,
 } from '@mui/material';
-import { omit } from 'lodash';
+import { omit, result } from 'lodash';
 import { useEffect, useMemo, useRef } from 'react';
 
 import { PopupToolOptions, usePopupTool } from '../../../hooks/Tools';
@@ -83,18 +83,19 @@ export const useFilterTool = <RecordRow extends BaseDataRow>({
         const { getFieldOptionLabel } = dropdownField;
         const options: DropdownOption[] = [];
         data.forEach((row) => {
+          const fieldValue = result(row, field.id) as any;
           if (
-            (row as any)[field.id] &&
+            fieldValue &&
             !options.find(({ value }) => {
-              return value === (row as any)[field.id];
+              return value === fieldValue;
             })
           ) {
             options.push({
               label: getFieldOptionLabel
                 ? getFieldOptionLabel(row)
-                : (row as any)[field.id],
-              searchableLabel: (row as any)[field.id],
-              value: (row as any)[field.id],
+                : fieldValue,
+              searchableLabel: fieldValue,
+              value: fieldValue,
             });
           }
         });
