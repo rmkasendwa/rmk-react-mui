@@ -884,12 +884,12 @@ const BaseRecordsExplorer = <
       return searchParamGroupBy || [];
     })()
       .filter(({ id }) => {
-        return groupByParams[id];
+        return result(groupByParams, id);
       })
       .map((groupByParam) => {
         return {
           ...groupByParam,
-          ...groupByParams[groupByParam.id],
+          ...(result(groupByParams, groupByParam.id) as any),
         };
       })
       .map((groupByParam) => {
@@ -917,12 +917,12 @@ const BaseRecordsExplorer = <
       return searchParamSortBy || [];
     })()
       .filter(({ id }) => {
-        return sortByParams[id];
+        return result(sortByParams, id);
       })
       .map((sortByParam) => {
         return {
           ...sortByParam,
-          ...sortByParams[sortByParam.id],
+          ...(result(sortByParams, sortByParam.id) as any),
         };
       })
       .map((sortByParams) => {
@@ -1025,7 +1025,7 @@ const BaseRecordsExplorer = <
               [selectedConditionGroup.conjunction === 'and' ? 'every' : 'some'](
                 ({ operator, value, fieldId }) => {
                   const { rawFieldValue, formattedFieldValue }: any = (() => {
-                    const rawFieldValue = (row as any)[fieldId];
+                    const rawFieldValue = result(row, fieldId);
                     const filterField = filterFields!.find(
                       ({ id }) => id === fieldId
                     );
