@@ -16,14 +16,14 @@ import {
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import clsx from 'clsx';
-import { Form, Formik, FormikHelpers, FormikProps, FormikValues } from 'formik';
-import { Children, ReactNode, forwardRef } from 'react';
+import { FormikValues } from 'formik';
+import { Children, ReactElement, ReactNode, Ref, forwardRef } from 'react';
 
 import { useLoadingContext } from '../contexts/LoadingContext';
 import { useMessagingContext } from '../contexts/MessagingContext';
 import ErrorAlert from './ErrorAlert';
-import ErrorFieldHighlighter from './ErrorFieldHighlighter';
 import FixedHeaderContentArea from './FixedHeaderContentArea';
+import FormikForm, { FormikFormProps } from './FormikForm';
 import { PaddedContentAreaProps } from './PaddedContentArea';
 
 export interface FormWrapperClasses {
@@ -58,15 +58,15 @@ declare module '@mui/material/styles/components' {
   }
 }
 
-export interface FormWrapperProps<Values extends FormikValues = FormikValues>
-  extends Omit<PaddedContentAreaProps, 'onSubmit' | 'children'> {
-  initialValues?: Values;
-  validationSchema?: any;
-  onSubmit?: (
-    values: any,
-    formikHelpers: FormikHelpers<Values>
-  ) => void | Promise<any>;
-  children?: ((props: FormikProps<Values>) => ReactNode) | ReactNode;
+export interface FormWrapperProps<Values extends FormikValues = any>
+  extends Partial<
+      Omit<
+        FormikFormProps<Values>,
+        'title' | 'ref' | 'initialValues' | 'validationSchema'
+      >
+    >,
+    Pick<FormikFormProps<Values>, 'initialValues' | 'validationSchema'>,
+    Omit<PaddedContentAreaProps, 'onSubmit' | 'children'> {
   formTools?: ReactNode | ReactNode[];
   SubmitButtonProps?: Partial<ButtonProps>;
   CancelButtonProps?: Partial<ButtonProps>;
@@ -88,136 +88,140 @@ const slots = {
   root: ['root'],
 };
 
-export const FormWrapper = forwardRef<HTMLDivElement, FormWrapperProps>(
-  function FormWrapper(inProps, ref) {
-    const props = useThemeProps({ props: inProps, name: 'MuiFormWrapper' });
-    const {
-      className,
-      children,
-      title,
-      breadcrumbs,
-      initialValues = {},
-      validationSchema,
-      onSubmit,
-      tools,
-      formTools,
-      SubmitButtonProps = {},
-      CancelButtonProps = {},
-      cancelButtonAction = 'navigate-to-previous-page',
-      errorMessage: errorMessageProp,
-      successMessage,
-      ...rest
-    } = props;
+export const BaseFormWrapper = <Values extends FormikValues>(
+  inProps: FormWrapperProps<Values>,
+  ref: Ref<HTMLDivElement>
+) => {
+  const props = useThemeProps({ props: inProps, name: 'MuiFormWrapper' });
+  const {
+    className,
+    children,
+    title,
+    breadcrumbs,
+    initialValues,
+    validationSchema,
+    onSubmit,
+    tools,
+    formTools,
+    SubmitButtonProps = {},
+    CancelButtonProps = {},
+    cancelButtonAction = 'navigate-to-previous-page',
+    errorMessage: errorMessageProp,
+    successMessage,
+    ...rest
+  } = props;
 
-    const classes = composeClasses(
-      slots,
-      getFormWrapperUtilityClass,
-      (() => {
-        if (className) {
-          return {
-            root: className,
-          };
-        }
-      })()
-    );
+  const classes = composeClasses(
+    slots,
+    getFormWrapperUtilityClass,
+    (() => {
+      if (className) {
+        return {
+          root: className,
+        };
+      }
+    })()
+  );
 
-    const { ...SubmitButtonPropsRest } = SubmitButtonProps;
-    const { ...CancelButtonPropsRest } = CancelButtonProps;
+  const { ...SubmitButtonPropsRest } = SubmitButtonProps;
+  const { ...CancelButtonPropsRest } = CancelButtonProps;
 
-    const { breakpoints } = useTheme();
-    const smallScreen = useMediaQuery(breakpoints.down('sm'));
+  const { breakpoints } = useTheme();
+  const smallScreen = useMediaQuery(breakpoints.down('sm'));
 
-    const { showSuccessMessage } = useMessagingContext();
+  const { showSuccessMessage } = useMessagingContext();
 
-    const {
-      load,
-      loading,
-      errorMessage: loadingContextErrorMessage,
-    } = useLoadingContext();
+  const {
+    load,
+    loading,
+    errorMessage: loadingContextErrorMessage,
+  } = useLoadingContext();
 
-    const errorMessage = errorMessageProp || loadingContextErrorMessage;
+  const errorMessage = errorMessageProp || loadingContextErrorMessage;
 
-    return (
-      <FixedHeaderContentArea
-        {...{ title, breadcrumbs, tools }}
-        ref={ref}
-        {...rest}
-        className={clsx(classes.root)}
+  return (
+    <FixedHeaderContentArea
+      {...{ title, breadcrumbs, tools }}
+      ref={ref}
+      {...rest}
+      className={clsx(classes.root)}
+    >
+      {errorMessage && (
+        <Box sx={{ mb: 2 }}>
+          <ErrorAlert message={errorMessage} retry={load} />
+        </Box>
+      )}
+      <FormikForm
+        {...{ initialValues, validationSchema }}
+        onSubmit={async (values, formikHelpers) => {
+          onSubmit && (await onSubmit(values, formikHelpers));
+          successMessage && showSuccessMessage(successMessage);
+        }}
+        enableReinitialize
       >
-        {errorMessage && (
-          <Box sx={{ mb: 2 }}>
-            <ErrorAlert message={errorMessage} retry={load} />
-          </Box>
-        )}
-        <Formik
-          {...{ initialValues, validationSchema }}
-          onSubmit={async (values, formikHelpers) => {
-            onSubmit && (await onSubmit(values, formikHelpers));
-            successMessage && showSuccessMessage(successMessage);
-          }}
-          enableReinitialize
-        >
-          {({ isSubmitting, ...rest }) => {
-            return (
-              <Form noValidate>
-                <ErrorFieldHighlighter />
-                {typeof children === 'function'
-                  ? children({ isSubmitting, ...rest })
-                  : children}
-                {!loading && !errorMessage ? (
-                  <Grid container spacing={1} sx={{ mt: 2 }}>
-                    {smallScreen ? null : <Grid item xs />}
-                    <Grid item xs={smallScreen}>
-                      <Button
-                        color="inherit"
-                        variant="contained"
-                        onClick={() => {
-                          if (
-                            cancelButtonAction === 'navigate-to-previous-page'
-                          ) {
-                            window.history.back();
-                          }
-                        }}
-                        {...CancelButtonPropsRest}
-                      >
-                        Cancel
-                      </Button>
-                    </Grid>
-                    {(() => {
-                      if (formTools) {
-                        return Children.toArray(formTools).map(
-                          (tool, index) => {
-                            return (
-                              <Grid item key={index} xs={smallScreen}>
-                                {tool}
-                              </Grid>
-                            );
-                          }
-                        );
-                      }
-                    })()}
-                    <Grid item xs={smallScreen}>
-                      <LoadingButton
-                        color="success"
-                        variant="contained"
-                        startIcon={<SaveIcon />}
-                        fullWidth={smallScreen}
-                        type="submit"
-                        loading={isSubmitting}
-                        {...SubmitButtonPropsRest}
-                      >
-                        Save Changes
-                      </LoadingButton>
-                    </Grid>
+        {({ isSubmitting, ...rest }) => {
+          return (
+            <>
+              {typeof children === 'function'
+                ? children({ isSubmitting, ...rest })
+                : children}
+              {!loading && !errorMessage ? (
+                <Grid container spacing={1} sx={{ mt: 2 }}>
+                  {smallScreen ? null : <Grid item xs />}
+                  <Grid item xs={smallScreen}>
+                    <Button
+                      color="inherit"
+                      variant="contained"
+                      onClick={() => {
+                        if (
+                          cancelButtonAction === 'navigate-to-previous-page'
+                        ) {
+                          window.history.back();
+                        }
+                      }}
+                      {...CancelButtonPropsRest}
+                    >
+                      Cancel
+                    </Button>
                   </Grid>
-                ) : null}
-              </Form>
-            );
-          }}
-        </Formik>
-      </FixedHeaderContentArea>
-    );
-  }
-);
+                  {(() => {
+                    if (formTools) {
+                      return Children.toArray(formTools).map((tool, index) => {
+                        return (
+                          <Grid item key={index} xs={smallScreen}>
+                            {tool}
+                          </Grid>
+                        );
+                      });
+                    }
+                  })()}
+                  <Grid item xs={smallScreen}>
+                    <LoadingButton
+                      color="success"
+                      variant="contained"
+                      startIcon={<SaveIcon />}
+                      fullWidth={smallScreen}
+                      type="submit"
+                      loading={isSubmitting}
+                      {...SubmitButtonPropsRest}
+                    >
+                      Save Changes
+                    </LoadingButton>
+                  </Grid>
+                </Grid>
+              ) : null}
+            </>
+          );
+        }}
+      </FormikForm>
+    </FixedHeaderContentArea>
+  );
+};
+
+export const FormWrapper = forwardRef(BaseFormWrapper) as <
+  Values extends FormikValues
+>(
+  p: FormWrapperProps<Values> & { ref?: Ref<HTMLDivElement> }
+) => ReactElement;
 
 export default FormWrapper;
