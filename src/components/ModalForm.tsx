@@ -121,7 +121,7 @@ const slots = {
 
 export const BaseModalForm = <Values extends FormikValues>(
   inProps: ModalFormProps<Values>,
-  ref: Ref<HTMLTableElement>
+  ref: Ref<HTMLDivElement>
 ) => {
   const props = useThemeProps({ props: inProps, name: 'MuiModalForm' });
   const {
