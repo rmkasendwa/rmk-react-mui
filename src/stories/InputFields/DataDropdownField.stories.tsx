@@ -37,6 +37,7 @@ WithStaticOptions.args = {
   label: 'Dropdown With Options',
   required: true,
   options: ['One', 'Two', 'Three'].map((value) => ({ label: value, value })),
+  size: 'medium',
 } as DataDropdownFieldProps;
 
 export const DisabledWithValue = Template.bind({});

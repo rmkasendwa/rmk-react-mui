@@ -721,6 +721,11 @@ export const DataDropdownField = forwardRef<
                       ...(() => {
                         if (rest.size === 'medium') {
                           if (variant === 'standard') {
+                            if (!label) {
+                              return {
+                                top: 5,
+                              };
+                            }
                             return {
                               top: 21,
                             };
@@ -735,6 +740,11 @@ export const DataDropdownField = forwardRef<
                           };
                         }
                         if (variant === 'standard') {
+                          if (!label) {
+                            return {
+                              top: 3,
+                            };
+                          }
                           return {
                             top: 19,
                           };
