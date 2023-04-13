@@ -23,6 +23,7 @@ import { useLoadingContext } from '../contexts/LoadingContext';
 import { useMessagingContext } from '../contexts/MessagingContext';
 import ErrorAlert from './ErrorAlert';
 import FixedHeaderContentArea from './FixedHeaderContentArea';
+import { formikErrorFieldHighlighterClasses } from './FormikErrorFieldHighlighter';
 import FormikForm, { FormikFormProps } from './FormikForm';
 import { PaddedContentAreaProps } from './PaddedContentArea';
 
@@ -145,6 +146,20 @@ export const BaseFormWrapper = <Values extends FormikValues>(
       ref={ref}
       {...rest}
       className={clsx(classes.root)}
+      BodyProps={{
+        sx: {
+          [`&,&>form,.${formikErrorFieldHighlighterClasses.root}`]: {
+            display: 'flex',
+            flexDirection: 'column',
+            minHeight: 0,
+            flex: 1,
+          },
+        },
+      }}
+      sx={{
+        bottom: 'auto',
+        maxHeight: '100%',
+      }}
     >
       {errorMessage && (
         <Box sx={{ mb: 2 }}>
@@ -162,11 +177,19 @@ export const BaseFormWrapper = <Values extends FormikValues>(
         {({ isSubmitting, ...rest }) => {
           return (
             <>
-              {typeof children === 'function'
-                ? children({ isSubmitting, ...rest })
-                : children}
+              <Box
+                sx={{
+                  flex: 1,
+                  minHeight: 0,
+                  overflowY: 'auto',
+                }}
+              >
+                {typeof children === 'function'
+                  ? children({ isSubmitting, ...rest })
+                  : children}
+              </Box>
               {!loading && !errorMessage ? (
-                <Grid container spacing={1} sx={{ mt: 2 }}>
+                <Grid container spacing={1} sx={{ py: 2 }}>
                   {smallScreen ? null : <Grid item xs />}
                   <Grid item xs={smallScreen}>
                     <Button
