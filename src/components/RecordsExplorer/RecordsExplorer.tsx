@@ -34,6 +34,7 @@ import {
   ReactNode,
   Ref,
   forwardRef,
+  useEffect,
   useMemo,
   useRef,
 } from 'react';
@@ -350,6 +351,7 @@ export interface RecordsExplorerProps<
   defaultPath?: string;
   getTableDataReloadFunction?: (reloadFunction: () => void) => void;
   getCreateFunction?: (createFunction: () => void) => void;
+  getViewFunction?: (viewFunction: (record: RecordRow) => void) => void;
   getEditFunction?: (editFunction: (record: RecordRow) => void) => void;
   getDeleteFunction?: (editFunction: (record: RecordRow) => void) => void;
   onEditRecord?: () => void;
@@ -480,6 +482,7 @@ const BaseRecordsExplorer = <
     showSortTool = true,
     showFilterTool = true,
     stateStorage,
+    getViewFunction,
     ...rest
   } = omit(
     props,
@@ -551,6 +554,30 @@ const BaseRecordsExplorer = <
     getEditableRecordInitialValues
   );
   getEditableRecordInitialValuesRef.current = getEditableRecordInitialValues;
+  const getViewFunctionRef = useRef(getViewFunction);
+  getViewFunctionRef.current = getViewFunction;
+
+  const viewFunctionRef = useRef((record: RecordRow) => {
+    const { id } = record;
+    const pathToViewRecord = (() => {
+      if (pathToView) {
+        return pathToView;
+      }
+      if (getPathToView) {
+        return getPathToView(record);
+      }
+      return addSearchParamsToPath(pathname, {
+        selectedRecord: id,
+      });
+    })();
+    navigate(pathToViewRecord);
+  });
+
+  useEffect(() => {
+    if (getViewFunctionRef.current) {
+      getViewFunctionRef.current(viewFunctionRef.current);
+    }
+  }, []);
 
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -1807,21 +1834,7 @@ const BaseRecordsExplorer = <
                       onClickRow ??
                       (() => {
                         if (editorForm) {
-                          return (record) => {
-                            const { id } = record;
-                            const pathToViewRecord = (() => {
-                              if (pathToView) {
-                                return pathToView;
-                              }
-                              if (getPathToView) {
-                                return getPathToView(record);
-                              }
-                              return addSearchParamsToPath(pathname, {
-                                selectedRecord: id,
-                              });
-                            })();
-                            navigate(pathToViewRecord);
-                          };
+                          return viewFunctionRef.current;
                         }
                       })(),
                   };
@@ -2308,7 +2321,7 @@ const BaseRecordsExplorer = <
               {/* Edit Form */}
               {(() => {
                 const loadingState = {
-                  loading: loadingRecordDetails,
+                  loading: loadingRecordDetails || loadingProp || loading,
                   errorMessage: loadingRecordDetailsErrorMessage,
                   load: loadRecordDetails,
                   locked: !editRecord,
