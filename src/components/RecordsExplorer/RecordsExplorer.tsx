@@ -375,6 +375,7 @@ export interface RecordsExplorerProps<
 
   ModalFormProps?: Partial<ModalFormProps>;
   CreateModalFormProps?: Partial<ModalFormProps>;
+  ViewModalFormProps?: Partial<ModalFormProps>;
   recordCreateSuccessMessage?: ReactNode;
   recordEditSuccessMessage?: ReactNode;
   addNewButtonLabel?: ReactNode;
@@ -448,6 +449,7 @@ const BaseRecordsExplorer = <
     initialValues,
     ModalFormProps = {},
     CreateModalFormProps = {},
+    ViewModalFormProps = {},
     description,
     autoSync = true,
     defaultPath,
@@ -522,6 +524,7 @@ const BaseRecordsExplorer = <
     SearchSyncToolBarProps;
   const { ...ModalFormPropsRest } = ModalFormProps;
   const { ...CreateModalFormPropsRest } = CreateModalFormProps;
+  const { ...ViewModalFormPropsRest } = ViewModalFormProps;
 
   // Refs
   const headerElementRef = useRef<HTMLDivElement | null>(null);
@@ -2314,16 +2317,6 @@ const BaseRecordsExplorer = <
                   <LoadingProvider value={loadingState}>
                     <ModalForm
                       showEditButton={Boolean(recordEditor)}
-                      {...modalFormProps}
-                      {...{
-                        editableFields,
-                      }}
-                      validationSchema={
-                        editValidationSchema || validationSchema
-                      }
-                      initialValues={editInitialValues || {}}
-                      open={Boolean(selectedRecordId)}
-                      errorMessage={updateErrorMessage}
                       title={
                         <Grid
                           container
@@ -2347,6 +2340,15 @@ const BaseRecordsExplorer = <
                         </Grid>
                       }
                       submitButtonText={`Update ${recordLabelSingular}`}
+                      {...ViewModalFormPropsRest}
+                      {...modalFormProps}
+                      editableFields={editableFields}
+                      validationSchema={
+                        editValidationSchema || validationSchema
+                      }
+                      initialValues={editInitialValues || {}}
+                      open={Boolean(selectedRecordId)}
+                      errorMessage={updateErrorMessage}
                       loading={updating}
                       onSubmit={async (values) => {
                         if (recordEditor && selectedRecord) {

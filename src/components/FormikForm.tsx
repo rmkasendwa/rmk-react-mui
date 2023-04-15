@@ -60,6 +60,7 @@ export interface FormikFormProps<Values extends FormikValues = any>
     Pick<FormikConfig<Values>, 'enableReinitialize'> {
   initialValues: Values;
   children: FormikFormFunctionChildren | ReactNode;
+  FormikProps?: Partial<FormikConfig<Values>>;
 }
 
 export function getFormikFormUtilityClass(slot: string): string {
@@ -75,7 +76,7 @@ const slots = {
   root: ['root'],
 };
 
-export const BaseFormikForm = <Values extends FormikValues>(
+const BaseFormikForm = <Values extends FormikValues>(
   inProps: FormikFormProps<Values>,
   ref: Ref<HTMLDivElement>
 ) => {
@@ -87,6 +88,7 @@ export const BaseFormikForm = <Values extends FormikValues>(
     onSubmit,
     enableReinitialize,
     children,
+    FormikProps = {},
     ...rest
   } = props;
 
@@ -105,6 +107,7 @@ export const BaseFormikForm = <Values extends FormikValues>(
   return (
     <Formik
       {...{ validationSchema, initialValues, onSubmit, enableReinitialize }}
+      {...FormikProps}
     >
       {({ ...formProps }) => {
         return (

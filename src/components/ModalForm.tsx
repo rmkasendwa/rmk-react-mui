@@ -21,7 +21,7 @@ import {
   useThemeProps,
 } from '@mui/material';
 import clsx from 'clsx';
-import { Form, Formik, FormikConfig, FormikProps, FormikValues } from 'formik';
+import { FormikValues } from 'formik';
 import { isEmpty, pick } from 'lodash';
 import {
   Children,
@@ -34,7 +34,11 @@ import {
 } from 'react';
 
 import ErrorAlert from './ErrorAlert';
-import ErrorFieldHighlighter from './ErrorFieldHighlighter';
+import { formikErrorFieldHighlighterClasses } from './FormikErrorFieldHighlighter';
+import FormikForm, {
+  FormikFormFunctionChildren,
+  FormikFormProps,
+} from './FormikForm';
 import ModalPopup, { ModalPopupProps } from './ModalPopup';
 import SearchSyncToolbar from './SearchSyncToolbar';
 
@@ -73,13 +77,18 @@ declare module '@mui/material/styles/components' {
 export type ModalFormFunctionChildren<
   Values extends FormikValues = any,
   ExtraProps = Record<string, unknown>
-> = (props: FormikProps<Values> & ExtraProps) => ReactNode;
+> = FormikFormFunctionChildren<Values, ExtraProps>;
 
 export interface ModalFormProps<Values extends FormikValues = any>
   extends Omit<ModalPopupProps, 'children' | 'onSubmit'>,
-    Required<Pick<FormikConfig<Values>, 'validationSchema' | 'onSubmit'>> {
-  initialValues: Values;
-  children: ModalFormFunctionChildren | ReactNode;
+    Pick<
+      FormikFormProps<Values>,
+      | 'validationSchema'
+      | 'initialValues'
+      | 'onSubmit'
+      | 'children'
+      | 'FormikProps'
+    > {
   successMessage?: string;
   submitted?: boolean;
   submitButtonText?: string;
@@ -102,7 +111,6 @@ export interface ModalFormProps<Values extends FormikValues = any>
   SubmitButtonProps?: Partial<LoadingButtonProps>;
   ActionButtonProps?: Partial<ButtonProps>;
   ActionButtonAreaProps?: Partial<GridProps>;
-  FormikProps?: Partial<FormikConfig<Values>>;
   editableFields?: (keyof Values)[];
 }
 
@@ -128,7 +136,7 @@ export const BaseModalForm = <Values extends FormikValues>(
     className,
     initialValues,
     validationSchema,
-    FormikProps = {},
+    FormikProps,
     children,
     errorMessage,
     successMessage,
@@ -243,17 +251,16 @@ export const BaseModalForm = <Values extends FormikValues>(
         maxHeight: '80%',
         ...placementCardPropsSx,
         ...CardPropsSx,
-        form: {
+        [`form, .${formikErrorFieldHighlighterClasses.root}`]: {
           display: 'flex',
           flexDirection: 'column',
-          height: '100%',
+          flex: 1,
           minHeight: 0,
         },
       }}
     >
-      <Formik
-        {...{ initialValues, validationSchema, onSubmit }}
-        {...FormikProps}
+      <FormikForm
+        {...{ initialValues, validationSchema, onSubmit, FormikProps }}
         enableReinitialize
       >
         {({ isSubmitting, values, isValid, ...rest }) => {
@@ -269,8 +276,7 @@ export const BaseModalForm = <Values extends FormikValues>(
             })()
           );
           return (
-            <Form noValidate>
-              <ErrorFieldHighlighter />
+            <>
               <SearchSyncToolbar
                 hasSearchTool={false}
                 hasSyncTool={false}
@@ -545,10 +551,10 @@ export const BaseModalForm = <Values extends FormikValues>(
                   );
                 })()}
               </Grid>
-            </Form>
+            </>
           );
         }}
-      </Formik>
+      </FormikForm>
     </Card>
   );
 
