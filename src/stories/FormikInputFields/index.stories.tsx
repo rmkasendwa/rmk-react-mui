@@ -1,9 +1,9 @@
 import { Box, Button, Container, Grid, Typography } from '@mui/material';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
-import { Form, Formik } from 'formik';
+import React from 'react';
 import * as Yup from 'yup';
 
-import ErrorFieldHighlighter from '../../components/ErrorFieldHighlighter';
+import FormikForm from '../../components/FormikForm';
 import FormikCurrencyInputField from '../../components/FormikInputFields/FormikCurrencyInputField';
 import FormikNumberInputField from '../../components/FormikInputFields/FormikNumberInputField';
 
@@ -49,43 +49,32 @@ const Template: ComponentStory<typeof FormikNumberInputField> = (props) => {
         eius temporibus? Repellat iste molestiae, voluptas laborum consequatur
         labore excepturi.
       </Typography>
-      <Formik
+      <FormikForm
         {...{ initialValues, validationSchema }}
         onSubmit={(values) => {
           console.log({ values });
         }}
       >
-        {() => {
-          return (
-            <Form noValidate>
-              <ErrorFieldHighlighter />
-              <Box sx={{ my: 5 }}>
-                <Grid container columnSpacing={3} sx={{ mb: 3 }}>
-                  <Grid item sm={6}>
-                    <FormikNumberInputField
-                      label="Number"
-                      name="number"
-                      {...props}
-                    />
-                  </Grid>
-                  <Grid item sm={6}>
-                    <FormikCurrencyInputField
-                      label="Currency"
-                      name="currency"
-                      {...props}
-                    />
-                  </Grid>
-                </Grid>
-                <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                  <Button type="submit" variant="contained" size="large">
-                    Submit
-                  </Button>
-                </Box>
-              </Box>
-            </Form>
-          );
-        }}
-      </Formik>
+        <Box sx={{ my: 5 }}>
+          <Grid container columnSpacing={3} sx={{ mb: 3 }}>
+            <Grid item sm={6}>
+              <FormikNumberInputField label="Number" name="number" {...props} />
+            </Grid>
+            <Grid item sm={6}>
+              <FormikCurrencyInputField
+                label="Currency"
+                name="currency"
+                {...props}
+              />
+            </Grid>
+          </Grid>
+          <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+            <Button type="submit" variant="contained" size="large">
+              Submit
+            </Button>
+          </Box>
+        </Box>
+      </FormikForm>
       <Typography>
         Lorem ipsum dolor sit, amet consectetur adipisicing elit. Aliquam nobis
         reprehenderit adipisci officia consequuntur dicta sapiente porro quod,
