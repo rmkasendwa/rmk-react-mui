@@ -5,13 +5,17 @@ module.exports = {
     '@storybook/addon-essentials',
     '@storybook/preset-create-react-app',
     '@react-theming/storybook-addon',
+    '@storybook/addon-mdx-gfm',
   ],
-  framework: '@storybook/react',
-  core: {
-    builder: 'webpack5',
+  framework: {
+    name: '@storybook/react-webpack5',
+    options: {},
   },
   features: {
     emotionAlias: false,
   },
   staticDirs: ['../public'],
+  docs: {
+    autodocs: true,
+  },
 };

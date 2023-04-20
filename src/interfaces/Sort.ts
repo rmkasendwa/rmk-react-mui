@@ -4,7 +4,7 @@ import { PrimitiveDataType } from './Utils';
 
 export const sortDirections = ['ASC', 'DESC'] as const;
 
-export type SortDirection = typeof sortDirections[number];
+export type SortDirection = (typeof sortDirections)[number];
 
 export interface SortOption<T = any> {
   id: keyof T;
