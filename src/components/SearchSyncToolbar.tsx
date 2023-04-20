@@ -571,7 +571,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                         [
                           'All Screens',
                           'Small Screen',
-                        ] as typeof tool.alwaysShowOn[]
+                        ] as (typeof tool.alwaysShowOn)[]
                       ).includes(tool.alwaysShowOn) &&
                       tool.type === 'icon-button'
                     ) {

@@ -162,7 +162,7 @@ const modifiedStateKeyTypes = [
   'expandedGroups',
 ] as const;
 
-type ModifiedStatKey = typeof modifiedStateKeyTypes[number];
+type ModifiedStatKey = (typeof modifiedStateKeyTypes)[number];
 
 export interface BaseDataView {
   type: ViewOptionType;
@@ -900,7 +900,7 @@ const BaseRecordsExplorer = <
         accumulator[groupByParam.id] = groupByParam;
         return accumulator;
       },
-      {} as Record<keyof RecordRow, typeof groupableFields[number]>
+      {} as Record<keyof RecordRow, (typeof groupableFields)[number]>
     );
 
     return (() => {
@@ -934,7 +934,7 @@ const BaseRecordsExplorer = <
     const sortByParams = sortableFields.reduce((accumulator, sortByParam) => {
       accumulator[sortByParam.id] = sortByParam;
       return accumulator;
-    }, {} as Record<keyof RecordRow, typeof sortableFields[number]>);
+    }, {} as Record<keyof RecordRow, (typeof sortableFields)[number]>);
 
     return (() => {
       if (

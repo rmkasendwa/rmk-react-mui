@@ -458,12 +458,12 @@ const BaseTableCrud = <
     }
   );
 
-  const editInitialValues = useMemo(() => {
+  const editInitialValues = (() => {
     if (getEditableRecordInitialValuesRef.current && selectedRecord) {
       return getEditableRecordInitialValuesRef.current(selectedRecord);
     }
     return { ...initialValues, ...(selectedRecord as any) };
-  }, [selectedRecord, initialValues]);
+  })();
 
   useEffect(() => {
     if (viewableRecordId) {
@@ -917,7 +917,7 @@ const BaseTableCrud = <
                       validationSchema={
                         editValidationSchema || validationSchema
                       }
-                      initialValues={editInitialValues || {}}
+                      initialValues={editInitialValues}
                       open={Boolean(viewableRecordId)}
                       errorMessage={updateErrorMessage}
                       title={

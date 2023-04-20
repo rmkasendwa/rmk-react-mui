@@ -19,7 +19,7 @@ import { CountryCode } from '../../interfaces/Countries';
 export const countryCodes = Object.keys(countries) as CountryCode[];
 
 export const contactStatuses = ['Active', 'Pending'] as const;
-export type ContactStatus = typeof contactStatuses[number];
+export type ContactStatus = (typeof contactStatuses)[number];
 
 export const contactSources = [
   'Refferal',
@@ -27,7 +27,7 @@ export const contactSources = [
   'Google Search',
   'Trip',
 ] as const;
-export type ContactSource = typeof contactSources[number];
+export type ContactSource = (typeof contactSources)[number];
 
 export type Contact = {
   id: string;

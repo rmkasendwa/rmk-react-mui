@@ -23,7 +23,7 @@ export const APIContext = createContext<IAPIContext>({} as any);
 
 export const APIProvider: FC<{
   children: ReactNode;
-  onSessionExpired: () => void;
+  onSessionExpired?: () => void;
 }> = ({ children, onSessionExpired }) => {
   // Refs
   const onSessionExpiredRef = useRef(onSessionExpired);
@@ -52,7 +52,7 @@ export const APIProvider: FC<{
   );
 
   useEffect(() => {
-    if (sessionExpired) {
+    if (sessionExpired && onSessionExpiredRef.current) {
       onSessionExpiredRef.current();
     }
   }, [sessionExpired]);

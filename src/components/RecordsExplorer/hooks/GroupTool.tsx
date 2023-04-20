@@ -7,7 +7,7 @@ import { useSortOperationFieldSelectorTool } from './SortOperationFieldSelectorT
 
 export const expandedGroupsOptions = ['All', 'None'] as const;
 
-export type ExpandedGroupsOption = typeof expandedGroupsOptions[number];
+export type ExpandedGroupsOption = (typeof expandedGroupsOptions)[number];
 
 export interface GroupToolOptions<RecordRow extends BaseDataRow = any> {
   groupableFields: GroupableField<RecordRow>[];
