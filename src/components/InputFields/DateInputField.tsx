@@ -213,6 +213,9 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
               inline
               showTimeSelect={enableTimeSelector}
               showTimeInput={enableTimeSelector}
+              peekNextMonth
+              showMonthDropdown
+              showYearDropdown
             />
           );
           if (isSmallScreenSize) {

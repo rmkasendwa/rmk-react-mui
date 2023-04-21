@@ -24,6 +24,8 @@ import Popper from '@mui/material/Popper';
 import clsx from 'clsx';
 import { pick } from 'lodash';
 import {
+  ReactElement,
+  Ref,
   forwardRef,
   useCallback,
   useEffect,
@@ -82,11 +84,11 @@ declare module '@mui/material/styles/components' {
   }
 }
 
-export interface DataDropdownFieldProps
+export interface DataDropdownFieldProps<Entity = any>
   extends Omit<TextFieldProps, 'value' | 'variant'>,
     Partial<
       Pick<
-        PaginatedDropdownOptionListProps,
+        PaginatedDropdownOptionListProps<Entity>,
         | 'optionVariant'
         | 'onSelectOption'
         | 'searchable'
@@ -95,10 +97,10 @@ export interface DataDropdownFieldProps
         | 'externallyPaginated'
         | 'limit'
         | 'sortOptions'
+        | 'options'
       >
     > {
   disableEmptyOption?: boolean;
-  options?: DropdownOption[];
   dataKey?: string;
   value?: string | string[];
   selectedOption?: DropdownOption;
@@ -131,10 +133,10 @@ const slots = {
   selectedOptionsWrapper: ['selectedOptionsWrapper'],
 };
 
-export const DataDropdownField = forwardRef<
-  HTMLDivElement,
-  DataDropdownFieldProps
->(function DataDropdownField(inProps, ref) {
+const BaseDataDropdownField = <Entity,>(
+  inProps: DataDropdownFieldProps<Entity>,
+  ref: Ref<HTMLDivElement>
+) => {
   const props = useThemeProps({ props: inProps, name: 'MuiDataDropdownField' });
   const {
     className,
@@ -956,6 +958,12 @@ export const DataDropdownField = forwardRef<
       })()}
     </>
   );
-});
+};
+
+export const DataDropdownField = forwardRef(BaseDataDropdownField) as <Entity>(
+  p: DataDropdownFieldProps<Entity> & {
+    ref?: Ref<HTMLDivElement>;
+  }
+) => ReactElement;
 
 export default DataDropdownField;

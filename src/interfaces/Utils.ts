@@ -104,7 +104,7 @@ export type ExoticDataType =
 
 export type DropdownOptionValue = string | number;
 
-export interface DropdownOption
+export interface DropdownOption<Entity = any>
   extends Partial<Pick<MenuItemProps, 'onClick' | 'sx'>> {
   value: DropdownOptionValue;
   label: ReactNode;
@@ -117,10 +117,11 @@ export interface DropdownOption
   isDropdownOptionWrapped?: boolean;
   component?: ElementType;
   ref?: MutableRefObject<HTMLElement | null>;
+  entity?: Entity;
 }
 
-export interface EllipsisMenuToolProps {
-  options: DropdownOption[];
+export interface EllipsisMenuToolProps<Entity = any> {
+  options: DropdownOption<Entity>[];
 }
 
 export type CrudMode = 'create' | 'view' | 'edit' | 'delete';
