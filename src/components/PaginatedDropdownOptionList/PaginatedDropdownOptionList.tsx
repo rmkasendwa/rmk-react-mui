@@ -22,6 +22,8 @@ import clsx from 'clsx';
 import { omit } from 'lodash';
 import {
   Fragment,
+  ReactElement,
+  Ref,
   forwardRef,
   useEffect,
   useMemo,
@@ -44,9 +46,9 @@ import ReloadIconButton from '../ReloadIconButton';
 import SearchField, { SearchFieldProps } from '../SearchField';
 import DropdownOption, { DropdownOptionVariant } from './DropdownOption';
 
-export interface DropdownOption
+export interface DropdownOption<Entity = any>
   extends Pick<MenuItemProps, 'onClick'>,
-    BaseDropdownOption {}
+    BaseDropdownOption<Entity> {}
 
 const DEFAULT_DROPDOWN_MENU_MAX_HEIGHT = 200;
 
@@ -83,13 +85,13 @@ declare module '@mui/material/styles/components' {
   }
 }
 
-export interface PaginatedDropdownOptionListProps
+export interface PaginatedDropdownOptionListProps<Entity = any>
   extends Partial<
       Pick<CardProps, 'sx' | 'className' | 'variant' | 'elevation'>
     >,
     Pick<InfiniteScrollBoxProps, 'keyboardFocusElement'> {
-  options?: DropdownOption[];
-  selectedOptions?: DropdownOption[];
+  options?: DropdownOption<Entity>[];
+  selectedOptions?: DropdownOption<Entity>[];
   sortOptions?: boolean;
   minWidth?: number;
   maxHeight?: number;
@@ -98,8 +100,8 @@ export interface PaginatedDropdownOptionListProps
   multiple?: boolean;
   loading?: boolean;
   onClose?: () => void;
-  onSelectOption?: (selectedOption: DropdownOption) => void;
-  onChangeSelectedOptions?: (selectedOptions: DropdownOption[]) => void;
+  onSelectOption?: (selectedOption: DropdownOption<Entity>) => void;
+  onChangeSelectedOptions?: (selectedOptions: DropdownOption<Entity>[]) => void;
   optionVariant?: DropdownOptionVariant;
   searchable?: boolean;
   searchTerm?: string;
@@ -110,15 +112,17 @@ export interface PaginatedDropdownOptionListProps
   // Async options
   getDropdownOptions?: (
     options: PaginatedRecordsFinderOptions
-  ) => Promise<PaginatedResponseData<DropdownOption> | DropdownOption[]>;
-  onLoadOptions?: (options: DropdownOption[]) => void;
+  ) => Promise<
+    PaginatedResponseData<DropdownOption<Entity>> | DropdownOption<Entity>[]
+  >;
+  onLoadOptions?: (options: DropdownOption<Entity>[]) => void;
   callGetDropdownOptions?: 'always' | 'whenNoOptions';
   externallyPaginated?: boolean;
   dataKey?: string;
   limit?: number;
-  asyncOptionPagesMap?: Map<number, DropdownOption[]>;
+  asyncOptionPagesMap?: Map<number, DropdownOption<Entity>[]>;
   onChangeAsyncOptionPagesMap?: (
-    asyncOptionPagesMap: Map<number, DropdownOption[]>
+    asyncOptionPagesMap: Map<number, DropdownOption<Entity>[]>
   ) => void;
 }
 
@@ -135,10 +139,10 @@ const slots = {
   root: ['root'],
 };
 
-export const PaginatedDropdownOptionList = forwardRef<
-  HTMLDivElement,
-  PaginatedDropdownOptionListProps
->(function PaginatedDropdownOptionList(inProps, ref) {
+const BasePaginatedDropdownOptionList = <Entity,>(
+  inProps: PaginatedDropdownOptionListProps<Entity>,
+  ref: Ref<HTMLDivElement>
+) => {
   const props = useThemeProps({
     props: inProps,
     name: 'MuiPaginatedDropdownOptionList',
@@ -448,7 +452,13 @@ export const PaginatedDropdownOptionList = forwardRef<
       }
       setScrolledToSelectedOption(true);
     }
-  }, [optionHeight, filteredOptions, scrollableDropdownWrapper, scrolledToSelectedOption, selectedOptionsProp]);
+  }, [
+    optionHeight,
+    filteredOptions,
+    scrollableDropdownWrapper,
+    scrolledToSelectedOption,
+    selectedOptionsProp,
+  ]);
 
   useEffect(() => {
     isInitialMountRef.current = false;
@@ -701,6 +711,14 @@ export const PaginatedDropdownOptionList = forwardRef<
       ) : null}
     </Card>
   );
-});
+};
+
+export const PaginatedDropdownOptionList = forwardRef(
+  BasePaginatedDropdownOptionList
+) as <Entity>(
+  p: PaginatedDropdownOptionListProps<Entity> & {
+    ref?: Ref<HTMLDivElement>;
+  }
+) => ReactElement;
 
 export default PaginatedDropdownOptionList;

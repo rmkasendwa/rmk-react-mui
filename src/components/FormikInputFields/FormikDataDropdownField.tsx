@@ -1,16 +1,14 @@
-import { forwardRef } from 'react';
+import { ReactElement, Ref, forwardRef } from 'react';
 
 import { useAggregatedFormikContext } from '../../hooks/Formik';
 import DataDropdownField, {
   DataDropdownFieldProps,
 } from '../InputFields/DataDropdownField';
 
-export interface FormikDataDropdownFieldProps extends DataDropdownFieldProps {}
+export interface FormikDataDropdownFieldProps<Entity = any>
+  extends DataDropdownFieldProps<Entity> {}
 
-export const FormikDataDropdownField = forwardRef<
-  HTMLDivElement,
-  FormikDataDropdownFieldProps
->(function FormikDataDropdownField(
+const BaseFormikDataDropdownField = <Entity,>(
   {
     name,
     value: valueProp,
@@ -19,9 +17,9 @@ export const FormikDataDropdownField = forwardRef<
     error: errorProp,
     helperText: helperTextProp,
     ...rest
-  },
-  ref
-) {
+  }: DataDropdownFieldProps<Entity>,
+  ref: Ref<HTMLDivElement>
+) => {
   const { value, onChange, onBlur, error, helperText } =
     useAggregatedFormikContext({
       value: valueProp,
@@ -39,6 +37,14 @@ export const FormikDataDropdownField = forwardRef<
       {...({ name, value, onChange, onBlur, error, helperText } as any)}
     />
   );
-});
+};
+
+export const FormikDataDropdownField = forwardRef(
+  BaseFormikDataDropdownField
+) as <Entity>(
+  p: FormikDataDropdownFieldProps<Entity> & {
+    ref?: Ref<HTMLDivElement>;
+  }
+) => ReactElement;
 
 export default FormikDataDropdownField;
