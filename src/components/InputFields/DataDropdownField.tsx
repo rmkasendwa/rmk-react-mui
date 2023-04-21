@@ -98,16 +98,18 @@ export interface DataDropdownFieldProps<Entity = any>
         | 'limit'
         | 'sortOptions'
         | 'options'
+        | 'onChangeSelectedOptions'
       >
     > {
+  onChangeSelectedOption?: (selectedOption?: DropdownOption<Entity>) => void;
   disableEmptyOption?: boolean;
   dataKey?: string;
   value?: string | string[];
-  selectedOption?: DropdownOption;
-  placeholderOption?: DropdownOption;
+  selectedOption?: DropdownOption<Entity>;
+  placeholderOption?: DropdownOption<Entity>;
   getSelectedOptions?: (
     selectedValue: string | string[]
-  ) => Promise<DropdownOption[]>;
+  ) => Promise<DropdownOption<Entity>[]>;
   dropdownListMaxHeight?: number;
   optionPaging?: boolean;
   onChangeSearchTerm?: (searchTerm: string) => void;
@@ -177,6 +179,8 @@ const BaseDataDropdownField = <Entity,>(
     enableLoadingState = true,
     showRichTextValue = true,
     placeholderOption,
+    onChangeSelectedOptions: onChangeSelectedOptionsProp,
+    onChangeSelectedOption,
     ...rest
   } = props;
 
@@ -231,7 +235,24 @@ const BaseDataDropdownField = <Entity,>(
   const [open, setOpen] = useState(false);
   const [focused, setFocused] = useState(false);
 
+  //#region Selected Options
+  const onChangeSelectedOptionsRef = useRef(onChangeSelectedOptionsProp);
+  onChangeSelectedOptionsRef.current = onChangeSelectedOptionsProp;
+  const onChangeSelectedOptionRef = useRef(onChangeSelectedOption);
+  onChangeSelectedOptionRef.current = onChangeSelectedOption;
+
   const [selectedOptions, setSelectedOptions] = useState<DropdownOption[]>([]);
+
+  useEffect(() => {
+    if (multiple) {
+      onChangeSelectedOptionsRef.current &&
+        onChangeSelectedOptionsRef.current(selectedOptions);
+    } else {
+      onChangeSelectedOptionRef.current &&
+        onChangeSelectedOptionRef.current(selectedOptions[0]);
+    }
+  }, [multiple, selectedOptions]);
+  //#endregion
 
   const selectedOptionValue = useMemo(() => {
     if (multiple) {

@@ -160,7 +160,7 @@ const BasePaginatedDropdownOptionList = <Entity,>(
     loading: loadingProp,
     getDropdownOptions,
     onSelectOption,
-    onChangeSelectedOptions: onChangeSelectedOptions,
+    onChangeSelectedOptions,
     optionVariant,
     searchable = false,
     searchTerm: searchTermProp = '',
