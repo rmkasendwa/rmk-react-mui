@@ -268,7 +268,7 @@ export const useRecord = <LoadableRecord>(
     record,
     setRecord,
     ...rest
-  } = useAPIService(defaultValue!, key, loadOnMount);
+  } = useAPIService(defaultValue, key, loadOnMount);
 
   const load = useCallback(
     (...args: any) => {
