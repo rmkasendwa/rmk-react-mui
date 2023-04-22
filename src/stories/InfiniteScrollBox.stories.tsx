@@ -1,6 +1,6 @@
 import { Typography } from '@mui/material';
 import Button from '@mui/material/Button';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 import { LoremIpsum } from 'lorem-ipsum';
 import React, { useMemo, useState } from 'react';
 
@@ -9,11 +9,11 @@ import InfiniteScrollBox from '../components/InfiniteScrollBox';
 export default {
   title: 'Components/Infinite Scroll Box',
   component: InfiniteScrollBox,
-} as ComponentMeta<typeof InfiniteScrollBox>;
+} as Meta<typeof InfiniteScrollBox>;
 
 const lorem = new LoremIpsum();
 
-const DefaultTemplate: ComponentStory<typeof InfiniteScrollBox> = ({
+const DefaultTemplate: StoryFn<typeof InfiniteScrollBox> = ({
   sx,
   ...rest
 }) => {
@@ -69,10 +69,7 @@ const DefaultTemplate: ComponentStory<typeof InfiniteScrollBox> = ({
   );
 };
 
-const PaginTemplate: ComponentStory<typeof InfiniteScrollBox> = ({
-  sx,
-  ...rest
-}) => {
+const PaginTemplate: StoryFn<typeof InfiniteScrollBox> = ({ sx, ...rest }) => {
   const dataSet = useMemo(() => {
     return Array.from({ length: 1000 }).map((_, index) => {
       const label = `${index + 1}. ${lorem.generateWords(4)}`;

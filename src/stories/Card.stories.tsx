@@ -1,5 +1,5 @@
 import Box from '@mui/material/Box';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 
 import Card, { CardProps } from '../components/Card';
@@ -7,9 +7,9 @@ import Card, { CardProps } from '../components/Card';
 export default {
   title: 'Components/Card',
   component: Card,
-} as ComponentMeta<typeof Card>;
+} as Meta<typeof Card>;
 
-const Template: ComponentStory<typeof Card> = (props) => {
+const Template: StoryFn<typeof Card> = (props) => {
   return (
     <Box sx={{ height: '100vh', p: 3 }}>
       <Card {...props} />

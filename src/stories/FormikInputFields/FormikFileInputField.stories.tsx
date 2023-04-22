@@ -1,6 +1,6 @@
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 import { Form, Formik } from 'formik';
 
 import { FormikFileInputField } from '../../components/FormikInputFields/FormikFileInputField';
@@ -11,13 +11,13 @@ export default {
   parameters: {
     layout: 'centered',
   },
-} as ComponentMeta<typeof FormikFileInputField>;
+} as Meta<typeof FormikFileInputField>;
 
 const initialValues = {
   field: null,
 };
 
-const Template: ComponentStory<typeof FormikFileInputField> = (props) => {
+const Template: StoryFn<typeof FormikFileInputField> = (props) => {
   return (
     <Formik
       initialValues={initialValues}

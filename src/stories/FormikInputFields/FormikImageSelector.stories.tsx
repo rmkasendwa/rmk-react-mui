@@ -1,7 +1,7 @@
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 import { Form, Formik } from 'formik';
 
 import { FormikImageSelector } from '../../components/FormikInputFields/FormikImageSelector';
@@ -9,13 +9,13 @@ import { FormikImageSelector } from '../../components/FormikInputFields/FormikIm
 export default {
   title: 'Components/Formik Input Fields/Formik Image Selector',
   component: FormikImageSelector,
-} as ComponentMeta<typeof FormikImageSelector>;
+} as Meta<typeof FormikImageSelector>;
 
 const initialValues = {
   field: null,
 };
 
-const Template: ComponentStory<typeof FormikImageSelector> = (props) => {
+const Template: StoryFn<typeof FormikImageSelector> = (props) => {
   return (
     <Container maxWidth="md" sx={{ p: 3 }}>
       <Formik

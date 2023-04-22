@@ -1,4 +1,4 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 
 import { PhoneNumberInputField } from '../../components/InputFields/PhoneNumberInputField';
@@ -9,9 +9,9 @@ export default {
   parameters: {
     layout: 'centered',
   },
-} as ComponentMeta<typeof PhoneNumberInputField>;
+} as Meta<typeof PhoneNumberInputField>;
 
-const Template: ComponentStory<typeof PhoneNumberInputField> = (props) => {
+const Template: StoryFn<typeof PhoneNumberInputField> = (props) => {
   return (
     <PhoneNumberInputField
       label="Phone Number"

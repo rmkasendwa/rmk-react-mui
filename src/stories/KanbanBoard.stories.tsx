@@ -5,7 +5,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import Chip from '@mui/material/Chip';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 import { LoremIpsum } from 'lorem-ipsum';
 
 import KanbanBoard from '../components/KanbanBoard';
@@ -14,7 +14,7 @@ import { LaneProps } from '../components/KanbanBoard/Lane';
 export default {
   title: 'Components/KanbanBoard',
   component: KanbanBoard,
-} as ComponentMeta<typeof KanbanBoard>;
+} as Meta<typeof KanbanBoard>;
 
 const lorem = new LoremIpsum({
   sentencesPerParagraph: {
@@ -75,7 +75,7 @@ const BASE_LANES = Array.from({ length: 6 }).map((_, laneIndex) => {
   } as LaneProps;
 });
 
-const Template: ComponentStory<typeof KanbanBoard> = (props) => {
+const Template: StoryFn<typeof KanbanBoard> = (props) => {
   return <KanbanBoard showCardCount {...props} />;
 };
 

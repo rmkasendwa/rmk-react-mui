@@ -1,4 +1,4 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 
 import { CreditCardNumberInputField } from '../../components/InputFields/CreditCardNumberInputField';
@@ -10,9 +10,9 @@ export default {
   parameters: {
     layout: 'centered',
   },
-} as ComponentMeta<typeof CreditCardNumberInputField>;
+} as Meta<typeof CreditCardNumberInputField>;
 
-const Template: ComponentStory<typeof CreditCardNumberInputField> = (props) => {
+const Template: StoryFn<typeof CreditCardNumberInputField> = (props) => {
   return (
     <CreditCardNumberInputField
       label="Credit/Debit Card"

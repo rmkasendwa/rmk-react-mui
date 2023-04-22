@@ -1,5 +1,5 @@
 import Box from '@mui/material/Box';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 import uniqid from 'uniqid';
 
@@ -8,9 +8,9 @@ import Table, { TableProps } from '../components/Table';
 export default {
   title: 'Components/Table',
   component: Table,
-} as ComponentMeta<typeof Table>;
+} as Meta<typeof Table>;
 
-const Template: ComponentStory<typeof Table> = (props) => {
+const Template: StoryFn<typeof Table> = (props) => {
   return (
     <Box sx={{ height: '100vh' }}>
       <Table variant="stripped" {...props} />

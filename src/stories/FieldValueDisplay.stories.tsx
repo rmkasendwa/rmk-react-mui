@@ -1,6 +1,6 @@
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 import Chip from '@mui/material/Chip';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 
 import FieldValueDisplay, {
@@ -13,9 +13,9 @@ export default {
   parameters: {
     layout: 'centered',
   },
-} as ComponentMeta<typeof FieldValueDisplay>;
+} as Meta<typeof FieldValueDisplay>;
 
-const Template: ComponentStory<typeof FieldValueDisplay> = (props) => {
+const Template: StoryFn<typeof FieldValueDisplay> = (props) => {
   return <FieldValueDisplay {...props} />;
 };
 

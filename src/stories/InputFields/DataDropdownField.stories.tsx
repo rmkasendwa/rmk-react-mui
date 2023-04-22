@@ -1,6 +1,6 @@
 import AppleIcon from '@mui/icons-material/Apple';
 import { Stack, Typography } from '@mui/material';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 import { LoremIpsum } from 'lorem-ipsum';
 import React from 'react';
 
@@ -16,14 +16,11 @@ export default {
   parameters: {
     layout: 'centered',
   },
-} as ComponentMeta<typeof DataDropdownField>;
+} as Meta<typeof DataDropdownField>;
 
 const lorem = new LoremIpsum();
 
-const Template: ComponentStory<typeof DataDropdownField> = ({
-  sx,
-  ...props
-}) => {
+const Template: StoryFn<typeof DataDropdownField> = ({ sx, ...props }) => {
   return <DataDropdownField {...props} sx={{ width: 300, ...sx }} />;
 };
 

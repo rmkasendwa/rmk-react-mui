@@ -1,4 +1,4 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 import { LoremIpsum } from 'lorem-ipsum';
 import React from 'react';
 
@@ -12,13 +12,11 @@ export default {
   parameters: {
     layout: 'centered',
   },
-} as ComponentMeta<typeof PaginatedDropdownOptionList>;
+} as Meta<typeof PaginatedDropdownOptionList>;
 
 const lorem = new LoremIpsum();
 
-const Template: ComponentStory<typeof PaginatedDropdownOptionList> = (
-  props
-) => {
+const Template: StoryFn<typeof PaginatedDropdownOptionList> = (props) => {
   return <PaginatedDropdownOptionList {...props} />;
 };
 

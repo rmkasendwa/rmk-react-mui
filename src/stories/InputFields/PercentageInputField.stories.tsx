@@ -1,4 +1,4 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 
 import { PercentageInputField } from '../../components/InputFields/PercentageInputField';
 
@@ -8,9 +8,9 @@ export default {
   parameters: {
     layout: 'centered',
   },
-} as ComponentMeta<typeof PercentageInputField>;
+} as Meta<typeof PercentageInputField>;
 
-const Template: ComponentStory<typeof PercentageInputField> = (props) => {
+const Template: StoryFn<typeof PercentageInputField> = (props) => {
   return (
     <PercentageInputField
       label="Percentage Input Field"

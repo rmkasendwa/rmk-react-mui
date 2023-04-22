@@ -1,5 +1,5 @@
 import { Box } from '@mui/material';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 
 import TableCrud, { TableCrudProps } from '../components/TableCrud';
@@ -8,9 +8,9 @@ import { contactTableProps, contacts, tableColumns } from './data/contacts';
 export default {
   title: 'Components/Table Crud',
   component: TableCrud,
-} as ComponentMeta<typeof TableCrud>;
+} as Meta<typeof TableCrud>;
 
-const Template: ComponentStory<typeof TableCrud> = (props) => {
+const Template: StoryFn<typeof TableCrud> = (props) => {
   return (
     <Box
       sx={{

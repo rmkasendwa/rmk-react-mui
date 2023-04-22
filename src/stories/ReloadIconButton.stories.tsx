@@ -1,4 +1,4 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 
 import ReloadIconButton, {
@@ -11,9 +11,9 @@ export default {
   parameters: {
     layout: 'centered',
   },
-} as ComponentMeta<typeof ReloadIconButton>;
+} as Meta<typeof ReloadIconButton>;
 
-const Template: ComponentStory<typeof ReloadIconButton> = (props) => {
+const Template: StoryFn<typeof ReloadIconButton> = (props) => {
   return <ReloadIconButton {...props} />;
 };
 

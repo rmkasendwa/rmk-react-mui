@@ -1,7 +1,7 @@
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 import { Form, Formik } from 'formik';
 
 import { FormikFileUploader } from '../../components/FormikInputFields/FormikFileUploader';
@@ -9,13 +9,13 @@ import { FormikFileUploader } from '../../components/FormikInputFields/FormikFil
 export default {
   title: 'Components/Formik Input Fields/Formik File Uploader',
   component: FormikFileUploader,
-} as ComponentMeta<typeof FormikFileUploader>;
+} as Meta<typeof FormikFileUploader>;
 
 const initialValues = {
   field: null,
 };
 
-const Template: ComponentStory<typeof FormikFileUploader> = (props) => {
+const Template: StoryFn<typeof FormikFileUploader> = (props) => {
   return (
     <Container maxWidth="lg" sx={{ p: 3 }}>
       <Formik

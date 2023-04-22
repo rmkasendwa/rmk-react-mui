@@ -1,4 +1,4 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 
 import ProfileGravatar, {
@@ -11,9 +11,9 @@ export default {
   parameters: {
     layout: 'centered',
   },
-} as ComponentMeta<typeof ProfileGravatar>;
+} as Meta<typeof ProfileGravatar>;
 
-const Template: ComponentStory<typeof ProfileGravatar> = (props) => {
+const Template: StoryFn<typeof ProfileGravatar> = (props) => {
   return <ProfileGravatar {...props} />;
 };
 

@@ -1,4 +1,4 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 import { Form, Formik } from 'formik';
 
 import { FormikPasswordField } from '../../components/FormikInputFields/FormikPasswordField';
@@ -9,13 +9,13 @@ export default {
   parameters: {
     layout: 'centered',
   },
-} as ComponentMeta<typeof FormikPasswordField>;
+} as Meta<typeof FormikPasswordField>;
 
 const initialValues = {
   field: 'Default Field Value',
 };
 
-const Template: ComponentStory<typeof FormikPasswordField> = (props) => {
+const Template: StoryFn<typeof FormikPasswordField> = (props) => {
   return (
     <Formik
       initialValues={initialValues}

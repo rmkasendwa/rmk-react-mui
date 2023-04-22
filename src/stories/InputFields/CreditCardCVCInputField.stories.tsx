@@ -1,4 +1,4 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 
 import { CreditCardCVCInputField } from '../../components/InputFields/CreditCardCVCInputField';
@@ -10,9 +10,9 @@ export default {
   parameters: {
     layout: 'centered',
   },
-} as ComponentMeta<typeof CreditCardCVCInputField>;
+} as Meta<typeof CreditCardCVCInputField>;
 
-const Template: ComponentStory<typeof CreditCardCVCInputField> = (props) => {
+const Template: StoryFn<typeof CreditCardCVCInputField> = (props) => {
   return (
     <CreditCardCVCInputField
       label="CVC / CVV"

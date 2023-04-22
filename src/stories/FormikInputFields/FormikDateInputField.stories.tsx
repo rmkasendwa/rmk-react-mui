@@ -1,4 +1,4 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 import { Form, Formik } from 'formik';
 
 import { FormikDateInputField } from '../../components/FormikInputFields/FormikDateInputField';
@@ -9,13 +9,13 @@ export default {
   parameters: {
     layout: 'centered',
   },
-} as ComponentMeta<typeof FormikDateInputField>;
+} as Meta<typeof FormikDateInputField>;
 
 const initialValues = {
   field: new Date().toISOString(),
 };
 
-const Template: ComponentStory<typeof FormikDateInputField> = (props) => {
+const Template: StoryFn<typeof FormikDateInputField> = (props) => {
   return (
     <Formik
       initialValues={initialValues}

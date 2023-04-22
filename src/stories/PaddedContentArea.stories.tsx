@@ -1,5 +1,5 @@
 import { Box, BoxProps, Card, Typography } from '@mui/material';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 
 import PaddedContentArea from '../components/PaddedContentArea';
@@ -7,9 +7,9 @@ import PaddedContentArea from '../components/PaddedContentArea';
 export default {
   title: 'Components/Padded Content Area',
   component: PaddedContentArea,
-} as ComponentMeta<typeof PaddedContentArea>;
+} as Meta<typeof PaddedContentArea>;
 
-const Template: ComponentStory<typeof Box> = ({ children, ...rest }) => {
+const Template: StoryFn<typeof Box> = ({ children, ...rest }) => {
   return <Box {...rest}>{children}</Box>;
 };
 

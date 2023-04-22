@@ -1,5 +1,5 @@
 import { Box, BoxProps, alpha } from '@mui/material';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 
 import RenderIfVisible from '../components/RenderIfVisible';
@@ -7,9 +7,9 @@ import RenderIfVisible from '../components/RenderIfVisible';
 export default {
   title: 'Components/Render If Visible',
   component: RenderIfVisible,
-} as ComponentMeta<typeof RenderIfVisible>;
+} as Meta<typeof RenderIfVisible>;
 
-const Template: ComponentStory<typeof Box> = ({ children, ...rest }) => {
+const Template: StoryFn<typeof Box> = ({ children, ...rest }) => {
   return <Box {...rest}>{children}</Box>;
 };
 

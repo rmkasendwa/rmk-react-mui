@@ -1,4 +1,4 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 
 import LoadingTypography, {
@@ -12,9 +12,9 @@ export default {
   parameters: {
     layout: 'centered',
   },
-} as ComponentMeta<typeof LoadingTypography>;
+} as Meta<typeof LoadingTypography>;
 
-const Template: ComponentStory<typeof LoadingTypography> = (props) => {
+const Template: StoryFn<typeof LoadingTypography> = (props) => {
   return (
     <LoadingProvider
       value={{

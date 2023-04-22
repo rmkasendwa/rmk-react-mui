@@ -1,5 +1,5 @@
 import Container from '@mui/material/Container';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 
 import RadioButtonsField, {
@@ -9,9 +9,9 @@ import RadioButtonsField, {
 export default {
   title: 'Components/Input Fields/Radio Buttons Field',
   component: RadioButtonsField,
-} as ComponentMeta<typeof RadioButtonsField>;
+} as Meta<typeof RadioButtonsField>;
 
-const Template: ComponentStory<typeof RadioButtonsField> = (props) => {
+const Template: StoryFn<typeof RadioButtonsField> = (props) => {
   return (
     <Container maxWidth="md" sx={{ pt: 6 }}>
       <RadioButtonsField {...props} />

@@ -1,6 +1,6 @@
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 import { Form, Formik } from 'formik';
 
 import { FormikPercentageInputField } from '../../components/FormikInputFields/FormikPercentageInputField';
@@ -11,13 +11,13 @@ export default {
   parameters: {
     layout: 'centered',
   },
-} as ComponentMeta<typeof FormikPercentageInputField>;
+} as Meta<typeof FormikPercentageInputField>;
 
 const initialValues = {
   field: 45,
 };
 
-const Template: ComponentStory<typeof FormikPercentageInputField> = (props) => {
+const Template: StoryFn<typeof FormikPercentageInputField> = (props) => {
   return (
     <Formik
       initialValues={initialValues}
