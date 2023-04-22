@@ -19,6 +19,7 @@ import { ReactNode, forwardRef } from 'react';
 
 import { useLoadingContext } from '../contexts/LoadingContext';
 import { LoadingProps } from '../interfaces/Utils';
+import ReloadIconButton from './ReloadIconButton';
 import SearchSyncToolbar, { SearchSyncToolbarProps } from './SearchSyncToolbar';
 
 export interface CardClasses {
@@ -93,6 +94,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(function Card(
     CardBodyProps = {},
     layoutVariant = 'paper',
     wrapToolbarInCard = false,
+    sx,
     ...rest
   } = props;
 
@@ -149,7 +151,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(function Card(
   if (layoutVariant === 'card') {
     if (wrapToolbarInCard) {
       return (
-        <MuiCard ref={ref} {...rest} className={clsx(classes.root)}>
+        <MuiCard ref={ref} {...rest} className={clsx(classes.root)} sx={sx}>
           <Box
             sx={{
               pl: 3,
@@ -173,7 +175,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(function Card(
 
   if (layoutVariant === 'inherit') {
     return (
-      <Box ref={ref} {...rest} className={clsx(classes.root)}>
+      <Box ref={ref} {...rest} className={clsx(classes.root)} sx={sx}>
         <Box
           sx={{
             pl: 3,
@@ -189,17 +191,42 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(function Card(
   }
 
   return (
-    <Paper ref={ref} {...rest} className={clsx(classes.root)}>
-      {title && (
-        <Paper
-          elevation={0}
-          component="header"
-          sx={{ position: 'sticky', top: 0, zIndex: 5 }}
-        >
-          {searchSyncToolBar}
-          <Divider />
-        </Paper>
-      )}
+    <Paper
+      ref={ref}
+      {...rest}
+      className={clsx(classes.root)}
+      sx={{
+        position: 'relative',
+        ...sx,
+      }}
+    >
+      {(() => {
+        if (title) {
+          return (
+            <Paper
+              elevation={0}
+              component="header"
+              sx={{ position: 'sticky', top: 0, zIndex: 5 }}
+            >
+              {searchSyncToolBar}
+              <Divider />
+            </Paper>
+          );
+        }
+        if (load || loading || errorMessage) {
+          return (
+            <ReloadIconButton
+              {...{ load, loading, errorMessage }}
+              sx={{
+                position: 'absolute',
+                top: spacing(1),
+                right: spacing(1),
+                zIndex: 1,
+              }}
+            />
+          );
+        }
+      })()}
       <Box
         {...CardBodyPropsRest}
         component="section"
