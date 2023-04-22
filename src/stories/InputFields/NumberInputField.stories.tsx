@@ -1,4 +1,4 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 
 import NumberInputField, {
@@ -11,9 +11,9 @@ export default {
   parameters: {
     layout: 'centered',
   },
-} as ComponentMeta<typeof NumberInputField>;
+} as Meta<typeof NumberInputField>;
 
-const Template: ComponentStory<typeof NumberInputField> = (props) => {
+const Template: StoryFn<typeof NumberInputField> = (props) => {
   return <NumberInputField label="Number" {...props} sx={{ minWidth: 300 }} />;
 };
 

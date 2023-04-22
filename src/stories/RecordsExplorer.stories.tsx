@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 import { countries } from 'countries-list';
 import React from 'react';
 
@@ -25,9 +25,9 @@ import {
 export default {
   title: 'Components/Records Explorer',
   component: RecordsExplorer,
-} as ComponentMeta<typeof RecordsExplorer>;
+} as Meta<typeof RecordsExplorer>;
 
-const Template: ComponentStory<typeof RecordsExplorer> = (props) => (
+const Template: StoryFn<typeof RecordsExplorer> = (props) => (
   <RecordsExplorer {...props} />
 );
 

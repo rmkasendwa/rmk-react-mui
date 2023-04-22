@@ -68,6 +68,7 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
       }
     }
     const anchorRef = useRef<HTMLInputElement>(null);
+    const changedRef = useRef(false);
     const poperElementWrapperRef = useRef<HTMLDivElement>(null);
     const { palette, breakpoints } = useTheme();
     const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
@@ -165,6 +166,7 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
             })(),
             onClick: () => {
               if (!disabled) {
+                changedRef.current = false;
                 setOpen(true);
               }
             },
@@ -207,6 +209,8 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
                 } else {
                   setSelectedDate(null);
                 }
+                changedRef.current = true;
+                setOpen(false);
               }}
               minDate={minDate}
               maxDate={maxDate}
@@ -216,6 +220,7 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
               peekNextMonth
               showMonthDropdown
               showYearDropdown
+              dropdownMode="select"
             />
           );
           if (isSmallScreenSize) {
@@ -322,15 +327,7 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
                           bgcolor: alpha(palette.primary.main, 0.3),
                         },
                         '.react-datepicker__month': {
-                          minWidth: (() => {
-                            if (
-                              anchorRef.current?.offsetWidth &&
-                              anchorRef.current.offsetWidth > 300
-                            ) {
-                              return anchorRef.current.offsetWidth;
-                            }
-                            return 300;
-                          })(),
+                          minWidth: 320,
                           m: 0,
                         },
                         '.react-datepicker__week,.react-datepicker__day-names':
@@ -353,11 +350,17 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
                           borderWidth: 1,
                           borderRadius: '4px',
                         },
+                        '.react-datepicker__header__dropdown--select': {
+                          pt: 1,
+                        },
                       }}
                     >
                       <ClickAwayListener
                         onClickAway={(event) => {
-                          if (poperElementWrapperRef.current) {
+                          if (
+                            poperElementWrapperRef.current &&
+                            changedRef.current === false
+                          ) {
                             setOpen(
                               isDescendant(
                                 poperElementWrapperRef.current,

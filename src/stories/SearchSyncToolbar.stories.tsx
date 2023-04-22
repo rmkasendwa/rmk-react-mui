@@ -1,4 +1,4 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 
 import SearchSyncToolbar, {
@@ -8,9 +8,9 @@ import SearchSyncToolbar, {
 export default {
   title: 'Components/Search Sync Toolbar',
   component: SearchSyncToolbar,
-} as ComponentMeta<typeof SearchSyncToolbar>;
+} as Meta<typeof SearchSyncToolbar>;
 
-const Template: ComponentStory<typeof SearchSyncToolbar> = ({ ...rest }) => {
+const Template: StoryFn<typeof SearchSyncToolbar> = ({ ...rest }) => {
   return <SearchSyncToolbar {...rest} />;
 };
 

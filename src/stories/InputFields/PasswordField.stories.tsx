@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 import { FC, useCallback, useState } from 'react';
 
 import PasswordField, {
@@ -12,7 +12,7 @@ export default {
   parameters: {
     layout: 'centered',
   },
-} as ComponentMeta<typeof PasswordField>;
+} as Meta<typeof PasswordField>;
 
 const DoublePasswordField: FC<PasswordFieldProps> = (props) => {
   const [showPassword, setShowPassword] = useState(false);
@@ -43,7 +43,7 @@ const DoublePasswordField: FC<PasswordFieldProps> = (props) => {
   );
 };
 
-const Template: ComponentStory<typeof PasswordField> = ({
+const Template: StoryFn<typeof PasswordField> = ({
   story,
   ...props
 }: PasswordFieldProps & { story?: string }) => {

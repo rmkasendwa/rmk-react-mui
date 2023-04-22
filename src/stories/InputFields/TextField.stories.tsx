@@ -1,4 +1,4 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 
 import { TextField } from '../../components/InputFields/TextField';
 
@@ -8,9 +8,9 @@ export default {
   parameters: {
     layout: 'centered',
   },
-} as ComponentMeta<typeof TextField>;
+} as Meta<typeof TextField>;
 
-const Template: ComponentStory<typeof TextField> = (props) => {
+const Template: StoryFn<typeof TextField> = (props) => {
   return <TextField label="Short Text" {...props} sx={{ minWidth: 300 }} />;
 };
 

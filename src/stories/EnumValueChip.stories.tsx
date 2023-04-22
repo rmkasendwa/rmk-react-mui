@@ -1,5 +1,5 @@
 import { alpha } from '@mui/system/colorManipulator';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 
 import EnumValueChip from '../components/EnumValueChip';
@@ -10,9 +10,9 @@ export default {
   parameters: {
     layout: 'centered',
   },
-} as ComponentMeta<typeof EnumValueChip>;
+} as Meta<typeof EnumValueChip>;
 
-const Template: ComponentStory<typeof EnumValueChip> = (props) => (
+const Template: StoryFn<typeof EnumValueChip> = (props) => (
   <EnumValueChip
     {...props}
     colors={{

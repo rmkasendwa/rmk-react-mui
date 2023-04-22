@@ -1,4 +1,4 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 
 import InternalErrorPage from '../../components/ErrorPages/500Page';
@@ -6,9 +6,9 @@ import InternalErrorPage from '../../components/ErrorPages/500Page';
 export default {
   title: 'Components/Error Pages/500 Page',
   component: InternalErrorPage,
-} as ComponentMeta<typeof InternalErrorPage>;
+} as Meta<typeof InternalErrorPage>;
 
-const Template: ComponentStory<typeof InternalErrorPage> = (props) => {
+const Template: StoryFn<typeof InternalErrorPage> = (props) => {
   return <InternalErrorPage {...props} />;
 };
 

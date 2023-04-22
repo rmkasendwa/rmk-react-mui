@@ -1,5 +1,5 @@
 import { Box, Button, Container, Grid, Typography } from '@mui/material';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 import * as Yup from 'yup';
 
@@ -10,7 +10,7 @@ import FormikNumberInputField from '../../components/FormikInputFields/FormikNum
 export default {
   title: 'Components/Formik Input Fields',
   component: FormikNumberInputField,
-} as ComponentMeta<typeof FormikNumberInputField>;
+} as Meta<typeof FormikNumberInputField>;
 
 const validationSchema = Yup.object({
   number: Yup.number().required('Please provide the number'),
@@ -22,7 +22,7 @@ const initialValues = {
   currency: undefined,
 };
 
-const Template: ComponentStory<typeof FormikNumberInputField> = (props) => {
+const Template: StoryFn<typeof FormikNumberInputField> = (props) => {
   return (
     <Container maxWidth="md" sx={{ pt: 4 }}>
       <Typography>

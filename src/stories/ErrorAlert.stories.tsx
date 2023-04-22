@@ -1,4 +1,4 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 
 import ErrorAlert, { ErrorAlertProps } from '../components/ErrorAlert';
@@ -9,9 +9,9 @@ export default {
   parameters: {
     layout: 'centered',
   },
-} as ComponentMeta<typeof ErrorAlert>;
+} as Meta<typeof ErrorAlert>;
 
-const Template: ComponentStory<typeof ErrorAlert> = (props) => (
+const Template: StoryFn<typeof ErrorAlert> = (props) => (
   <ErrorAlert {...props} />
 );
 

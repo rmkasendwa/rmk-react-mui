@@ -1,4 +1,4 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 
 import { FileInputField } from '../../components/InputFields/FileInputField';
 
@@ -8,9 +8,9 @@ export default {
   parameters: {
     layout: 'centered',
   },
-} as ComponentMeta<typeof FileInputField>;
+} as Meta<typeof FileInputField>;
 
-const Template: ComponentStory<typeof FileInputField> = (props) => {
+const Template: StoryFn<typeof FileInputField> = (props) => {
   return (
     <FileInputField
       label="File Input Field"

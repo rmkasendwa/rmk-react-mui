@@ -1,4 +1,4 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 
 import SearchField, { SearchFieldProps } from '../components/SearchField';
@@ -9,9 +9,9 @@ export default {
   parameters: {
     layout: 'centered',
   },
-} as ComponentMeta<typeof SearchField>;
+} as Meta<typeof SearchField>;
 
-const Template: ComponentStory<typeof SearchField> = ({ sx, ...rest }) => {
+const Template: StoryFn<typeof SearchField> = ({ sx, ...rest }) => {
   return (
     <SearchField
       {...rest}

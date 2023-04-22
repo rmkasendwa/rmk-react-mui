@@ -1,4 +1,4 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 import { Form, Formik } from 'formik';
 
 import { FormikDataDropdownField } from '../../components/FormikInputFields/FormikDataDropdownField';
@@ -9,13 +9,13 @@ export default {
   parameters: {
     layout: 'centered',
   },
-} as ComponentMeta<typeof FormikDataDropdownField>;
+} as Meta<typeof FormikDataDropdownField>;
 
 const initialValues = {
   field: 'OPTION_TWO',
 };
 
-const Template: ComponentStory<typeof FormikDataDropdownField> = (props) => {
+const Template: StoryFn<typeof FormikDataDropdownField> = (props) => {
   return (
     <Formik
       initialValues={initialValues}

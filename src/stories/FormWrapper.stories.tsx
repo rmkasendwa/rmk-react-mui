@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 import * as Yup from 'yup';
 
@@ -11,9 +11,9 @@ import FormWrapper, { FormWrapperProps } from '../components/FormWrapper';
 export default {
   title: 'Components/Form Wrapper',
   component: FormWrapper,
-} as ComponentMeta<typeof FormWrapper>;
+} as Meta<typeof FormWrapper>;
 
-const Template: ComponentStory<typeof FormWrapper> = (props) => {
+const Template: StoryFn<typeof FormWrapper> = (props) => {
   return <FormWrapper {...props} />;
 };
 

@@ -1,4 +1,4 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 
 import {
@@ -12,9 +12,9 @@ export default {
   parameters: {
     layout: 'centered',
   },
-} as ComponentMeta<typeof DateInputField>;
+} as Meta<typeof DateInputField>;
 
-const Template: ComponentStory<typeof DateInputField> = (props) => {
+const Template: StoryFn<typeof DateInputField> = (props) => {
   return <DateInputField {...props} sx={{ minWidth: 300 }} />;
 };
 

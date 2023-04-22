@@ -1,5 +1,5 @@
 import Container from '@mui/material/Container';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 
 import ImageSelector from '../components/ImageSelector';
@@ -8,9 +8,9 @@ import { FileUploadFunction } from '../interfaces/Utils';
 export default {
   title: 'Components/Image Selector',
   component: ImageSelector,
-} as ComponentMeta<typeof ImageSelector>;
+} as Meta<typeof ImageSelector>;
 
-const Template: ComponentStory<typeof ImageSelector> = ({ ...rest }) => (
+const Template: StoryFn<typeof ImageSelector> = ({ ...rest }) => (
   <Container maxWidth="md" sx={{ p: 3 }}>
     <ImageSelector {...rest} />
   </Container>

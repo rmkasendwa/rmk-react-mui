@@ -1,5 +1,5 @@
 import Container from '@mui/material/Container';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 
 import FileUploader from '../components/FileUploader';
 import { FileDownloadFunction, FileUploadFunction } from '../interfaces/Utils';
@@ -7,9 +7,9 @@ import { FileDownloadFunction, FileUploadFunction } from '../interfaces/Utils';
 export default {
   title: 'Components/File Uploader',
   component: FileUploader,
-} as ComponentMeta<typeof FileUploader>;
+} as Meta<typeof FileUploader>;
 
-const Template: ComponentStory<typeof FileUploader> = (props) => (
+const Template: StoryFn<typeof FileUploader> = (props) => (
   <Container maxWidth="lg" sx={{ p: 3 }}>
     <FileUploader {...props} />
   </Container>

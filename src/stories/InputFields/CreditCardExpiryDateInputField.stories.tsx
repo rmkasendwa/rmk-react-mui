@@ -1,4 +1,4 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 
 import { CreditCardExpiryDateInputField } from '../../components/InputFields/CreditCardExpiryDateInputField';
@@ -10,11 +10,9 @@ export default {
   parameters: {
     layout: 'centered',
   },
-} as ComponentMeta<typeof CreditCardExpiryDateInputField>;
+} as Meta<typeof CreditCardExpiryDateInputField>;
 
-const Template: ComponentStory<typeof CreditCardExpiryDateInputField> = (
-  props
-) => {
+const Template: StoryFn<typeof CreditCardExpiryDateInputField> = (props) => {
   return (
     <CreditCardExpiryDateInputField
       label="Expiry date"

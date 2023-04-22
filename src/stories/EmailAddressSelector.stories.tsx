@@ -1,7 +1,7 @@
 import '@infinite-debugger/rmk-js-extensions/String';
 
 import Container from '@mui/material/Container';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 import { LoremIpsum } from 'lorem-ipsum';
 import randomEmail from 'random-email';
 import React from 'react';
@@ -14,11 +14,11 @@ import EmailAddressSelector, {
 export default {
   title: 'Components/Email Address Selector',
   component: EmailAddressSelector,
-} as ComponentMeta<typeof EmailAddressSelector>;
+} as Meta<typeof EmailAddressSelector>;
 
 const lorem = new LoremIpsum();
 
-const Template: ComponentStory<typeof EmailAddressSelector> = (props) => (
+const Template: StoryFn<typeof EmailAddressSelector> = (props) => (
   <Container maxWidth="lg" sx={{ p: 3 }}>
     <EmailAddressSelector {...props} />
   </Container>

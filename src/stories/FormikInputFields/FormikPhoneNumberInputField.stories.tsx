@@ -1,4 +1,4 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 import { Form, Formik } from 'formik';
 
 import { FormikPhoneNumberInputField } from '../../components/FormikInputFields/FormikPhoneNumberInputField';
@@ -9,15 +9,13 @@ export default {
   parameters: {
     layout: 'centered',
   },
-} as ComponentMeta<typeof FormikPhoneNumberInputField>;
+} as Meta<typeof FormikPhoneNumberInputField>;
 
 const initialValues = {
   field: '',
 };
 
-const Template: ComponentStory<typeof FormikPhoneNumberInputField> = (
-  props
-) => {
+const Template: StoryFn<typeof FormikPhoneNumberInputField> = (props) => {
   return (
     <Formik
       initialValues={initialValues}
