@@ -1833,7 +1833,7 @@ const BaseRecordsExplorer = <
                     onClickRow:
                       onClickRow ??
                       (() => {
-                        if (editorForm) {
+                        if (editorForm || getPathToView) {
                           return viewFunctionRef.current;
                         }
                       })(),
