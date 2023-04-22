@@ -32,3 +32,16 @@ WithTitle.args = {
   labelPlural: 'Elements',
   countFinder,
 } as CountCardProps;
+
+export const WithAVeryLongLabel = Template.bind({});
+WithAVeryLongLabel.args = {
+  labelPlural: 'Pneumonoultramicroscopicsilicovolcanoconioses',
+  labelSingular: 'Pneumonoultramicroscopicsilicovolcanoconiosis',
+  countFinder,
+} as CountCardProps;
+
+export const WithPathToViewCountedRecords = Template.bind({});
+WithPathToViewCountedRecords.args = {
+  countFinder,
+  pathToViewCountedRecords: '/path/to/view/counted/records',
+} as CountCardProps;
