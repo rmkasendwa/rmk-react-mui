@@ -3,18 +3,23 @@ import {
   ComponentsOverrides,
   ComponentsProps,
   ComponentsVariants,
+  Link,
+  alpha,
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
   generateUtilityClasses,
+  useTheme,
   useThemeProps,
 } from '@mui/material';
 import clsx from 'clsx';
 import { omit } from 'lodash';
-import { forwardRef } from 'react';
+import { forwardRef, useEffect, useRef, useState } from 'react';
+import { mergeRefs } from 'react-merge-refs';
+import { Link as RouterLink } from 'react-router-dom';
 
 import { useRecord } from '../hooks/Utils';
 import Card, { CardProps } from './Card';
-import LoadingTypography from './LoadingTypography';
+import LoadingTypography, { LoadingTypographyProps } from './LoadingTypography';
 
 export interface CountCardClasses {
   /** Styles applied to the root element. */
@@ -52,6 +57,9 @@ export interface CountCardProps extends Partial<CardProps> {
   countFinder: () => Promise<number>;
   labelPlural?: string;
   labelSingular?: string;
+  CountProps?: Partial<LoadingTypographyProps>;
+  LabelProps?: Partial<LoadingTypographyProps>;
+  pathToViewCountedRecords?: string;
 }
 
 export function getCountCardUtilityClass(slot: string): string {
@@ -75,6 +83,9 @@ export const CountCard = forwardRef<HTMLDivElement, CountCardProps>(
       title,
       className,
       CardBodyProps = {},
+      CountProps = {},
+      LabelProps = {},
+      pathToViewCountedRecords,
       sx,
       ...rest
     } = omit(props, 'labelPlural', 'labelSingular');
@@ -94,6 +105,31 @@ export const CountCard = forwardRef<HTMLDivElement, CountCardProps>(
     );
 
     const { sx: CardBodyPropsSx, ...CardBodyPropsRest } = CardBodyProps;
+    const { sx: CountPropsSx, ...CountPropsRest } = CountProps;
+    const { sx: LabelPropsSx, ...LabelPropsRest } = LabelProps;
+
+    const { palette } = useTheme();
+
+    //#region Card size detection
+    const cardElementRef = useRef<HTMLDivElement | null>(null);
+    const [cardElementWidth, setCardElementWidth] = useState(0);
+    const isSmallScreen = cardElementWidth <= 350;
+    useEffect(() => {
+      if (cardElementRef.current) {
+        const cardElement = cardElementRef.current;
+        const windowResizeCallback = () => {
+          setCardElementWidth(cardElement.offsetWidth);
+        };
+        window.addEventListener('resize', windowResizeCallback);
+        windowResizeCallback();
+        return () => {
+          window.removeEventListener('resize', windowResizeCallback);
+        };
+      } else {
+        setCardElementWidth(0);
+      }
+    }, []);
+    //#endregion
 
     if (!labelPlural) {
       if (typeof title === 'string') {
@@ -115,7 +151,7 @@ export const CountCard = forwardRef<HTMLDivElement, CountCardProps>(
 
     return (
       <Card
-        ref={ref}
+        ref={mergeRefs([cardElementRef, ref])}
         {...rest}
         {...{ title, load, loading, errorMessage }}
         className={clsx(classes.root)}
@@ -137,21 +173,73 @@ export const CountCard = forwardRef<HTMLDivElement, CountCardProps>(
           },
         }}
       >
+        {(() => {
+          const sx: typeof CountPropsSx = {
+            ...CountPropsSx,
+            fontWeight: 400,
+            lineHeight: 1,
+            width: '100%',
+            ...(() => {
+              if (isSmallScreen && cardElementWidth > 0) {
+                return {
+                  fontSize: Math.floor(cardElementWidth / 2.5),
+                };
+              }
+              return {
+                fontSize: 144,
+              };
+            })(),
+          };
+          const children = count != null ? addThousandCommas(count) : '--';
+          if (pathToViewCountedRecords) {
+            return (
+              <Link
+                color="primary"
+                {...CountPropsRest}
+                component={RouterLink}
+                to={pathToViewCountedRecords}
+                underline="none"
+                noWrap
+                align="center"
+                sx={{
+                  ...sx,
+                  display: 'block',
+                }}
+              >
+                {children}
+              </Link>
+            );
+          }
+          return (
+            <LoadingTypography
+              color="primary"
+              {...CountPropsRest}
+              noWrap
+              align="center"
+              {...{ sx }}
+            >
+              {children}
+            </LoadingTypography>
+          );
+        })()}
         <LoadingTypography
+          {...LabelPropsRest}
           noWrap
           align="center"
           sx={{
-            fontSize: 100,
-            lineHeight: 1.2,
-          }}
-        >
-          {count != null ? addThousandCommas(count) : '--'}
-        </LoadingTypography>
-        <LoadingTypography
-          noWrap
-          align="center"
-          sx={{
-            fontSize: 32,
+            color: alpha(palette.text.secondary, 0.38),
+            width: '100%',
+            ...LabelPropsSx,
+            ...(() => {
+              if (isSmallScreen && cardElementWidth > 0) {
+                return {
+                  fontSize: Math.floor(cardElementWidth / 8.75),
+                };
+              }
+              return {
+                fontSize: 40,
+              };
+            })(),
           }}
         >
           {(() => {
