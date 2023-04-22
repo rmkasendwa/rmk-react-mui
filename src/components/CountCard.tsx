@@ -145,7 +145,7 @@ export const CountCard = forwardRef<HTMLDivElement, CountCardProps>(
             lineHeight: 1.2,
           }}
         >
-          {addThousandCommas(count ?? 0)}
+          {count != null ? addThousandCommas(count) : '--'}
         </LoadingTypography>
         <LoadingTypography
           noWrap
