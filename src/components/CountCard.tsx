@@ -112,13 +112,14 @@ export const CountCard = forwardRef<HTMLDivElement, CountCardProps>(
 
     //#region Card size detection
     const cardElementRef = useRef<HTMLDivElement | null>(null);
-    const [cardElementWidth, setCardElementWidth] = useState(0);
-    const isSmallScreen = cardElementWidth <= 350;
+    const [cardElementDimension, setCardElementDimension] = useState(0);
+    const isSmallScreen = cardElementDimension <= 350;
     useEffect(() => {
       if (cardElementRef.current) {
         const cardElement = cardElementRef.current;
         const windowResizeCallback = () => {
-          setCardElementWidth(cardElement.offsetWidth);
+          const { offsetHeight, offsetWidth } = cardElement;
+          setCardElementDimension(Math.min(offsetHeight, offsetWidth));
         };
         window.addEventListener('resize', windowResizeCallback);
         windowResizeCallback();
@@ -126,7 +127,7 @@ export const CountCard = forwardRef<HTMLDivElement, CountCardProps>(
           window.removeEventListener('resize', windowResizeCallback);
         };
       } else {
-        setCardElementWidth(0);
+        setCardElementDimension(0);
       }
     }, []);
     //#endregion
@@ -180,9 +181,9 @@ export const CountCard = forwardRef<HTMLDivElement, CountCardProps>(
             lineHeight: 1,
             width: '100%',
             ...(() => {
-              if (isSmallScreen && cardElementWidth > 0) {
+              if (isSmallScreen && cardElementDimension > 0) {
                 return {
-                  fontSize: Math.floor(cardElementWidth / 2.5),
+                  fontSize: Math.floor(cardElementDimension / 2.5),
                 };
               }
               return {
@@ -231,9 +232,9 @@ export const CountCard = forwardRef<HTMLDivElement, CountCardProps>(
             width: '100%',
             ...LabelPropsSx,
             ...(() => {
-              if (isSmallScreen && cardElementWidth > 0) {
+              if (isSmallScreen && cardElementDimension > 0) {
                 return {
-                  fontSize: Math.floor(cardElementWidth / 8.75),
+                  fontSize: Math.floor(cardElementDimension / 8.75),
                 };
               }
               return {
