@@ -1,4 +1,6 @@
 import {
+  Box,
+  ButtonProps,
   ComponentsOverrides,
   ComponentsProps,
   ComponentsVariants,
@@ -15,7 +17,6 @@ import {
   useThemeProps,
 } from '@mui/material';
 import Card, { CardProps } from '@mui/material/Card';
-import MenuItem, { MenuItemProps } from '@mui/material/MenuItem';
 import useTheme from '@mui/material/styles/useTheme';
 import Typography from '@mui/material/Typography';
 import clsx from 'clsx';
@@ -47,7 +48,7 @@ import SearchField, { SearchFieldProps } from '../SearchField';
 import DropdownOption, { DropdownOptionVariant } from './DropdownOption';
 
 export interface DropdownOption<Entity = any>
-  extends Pick<MenuItemProps, 'onClick'>,
+  extends Pick<ButtonProps, 'onClick'>,
     BaseDropdownOption<Entity> {}
 
 const DEFAULT_DROPDOWN_MENU_MAX_HEIGHT = 200;
@@ -594,11 +595,19 @@ const BasePaginatedDropdownOptionList = <Entity,>(
             (!getDropdownOptions || isAsyncOptionsLoaded)
           ) {
             return [
-              <MenuItem key={0} disabled>
+              <Box
+                key={0}
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  height: optionHeight,
+                  px: 2,
+                }}
+              >
                 <Typography variant="body2" color={palette.error.main}>
                   No options found
                 </Typography>
-              </MenuItem>,
+              </Box>,
             ];
           }
           return [];

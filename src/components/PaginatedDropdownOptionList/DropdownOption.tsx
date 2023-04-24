@@ -3,6 +3,8 @@ import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import LockIcon from '@mui/icons-material/Lock';
 import {
+  Button,
+  ButtonProps,
   ComponentsOverrides,
   ComponentsProps,
   ComponentsVariants,
@@ -15,7 +17,6 @@ import {
   useThemeProps,
 } from '@mui/material';
 import Box from '@mui/material/Box';
-import MenuItem, { MenuItemProps } from '@mui/material/MenuItem';
 import clsx from 'clsx';
 import { ReactNode, forwardRef } from 'react';
 
@@ -56,9 +57,10 @@ declare module '@mui/material/styles/components' {
 
 export type DropdownOptionVariant = 'text' | 'checkbox' | 'check';
 
-export interface DropdownOptionProps extends MenuItemProps {
+export interface DropdownOptionProps extends Omit<ButtonProps, 'variant'> {
   height?: number;
   selectable?: boolean;
+  selected?: boolean;
   variant?: DropdownOptionVariant;
   icon?: ReactNode;
 }
@@ -99,159 +101,168 @@ const slots = {
   iconContainer: ['iconContainer'],
 };
 
-export const DropdownOption = forwardRef<HTMLLIElement, DropdownOptionProps>(
-  function DropdownOption(inProps, ref) {
-    const props = useThemeProps({ props: inProps, name: 'MuiDropdownOption' });
-    const {
-      className,
-      height,
-      selectable = true,
-      onClick,
-      variant = 'text',
-      selected,
-      icon,
-      children,
-      sx,
-      ...rest
-    } = props;
+export const DropdownOption = forwardRef<
+  HTMLButtonElement,
+  DropdownOptionProps
+>(function DropdownOption(inProps, ref) {
+  const props = useThemeProps({ props: inProps, name: 'MuiDropdownOption' });
+  const {
+    className,
+    height,
+    selectable = true,
+    onClick,
+    variant = 'text',
+    selected,
+    icon,
+    children,
+    sx,
+    ...rest
+  } = props;
 
-    const classes = composeClasses(
-      slots,
-      getDropdownOptionUtilityClass,
-      (() => {
-        if (className) {
-          return {
-            root: className,
-          };
+  const classes = composeClasses(
+    slots,
+    getDropdownOptionUtilityClass,
+    (() => {
+      if (className) {
+        return {
+          root: className,
+        };
+      }
+    })()
+  );
+
+  const { palette } = useTheme();
+
+  const label = getDropdownOptionLabel({
+    icon,
+    label: children,
+    iconWrapperClassName: clsx(classes.iconContainer),
+  });
+
+  return (
+    <Button
+      ref={ref}
+      {...rest}
+      className={clsx(classes.root)}
+      onClick={(event) => {
+        if (selectable) {
+          onClick && onClick(event);
+        } else {
+          event.stopPropagation();
         }
-      })()
-    );
-
-    const { palette } = useTheme();
-
-    const label = getDropdownOptionLabel({
-      icon,
-      label: children,
-      iconWrapperClassName: clsx(classes.iconContainer),
-    });
-
-    return (
-      <MenuItem
-        ref={ref}
-        {...rest}
-        {...{ selected }}
-        className={clsx(classes.root)}
-        onClick={(event) => {
-          if (selectable) {
-            onClick && onClick(event);
-          } else {
-            event.stopPropagation();
+      }}
+      fullWidth
+      sx={{
+        borderRadius: 0,
+        color: palette.text.primary,
+        minHeight: `${height}px !important`,
+        fontSize: 14,
+        lineHeight: `24px`,
+        p: 0,
+        display: 'flex',
+        justifyContent: 'start',
+        textAlign: 'left',
+        alignItems: 'center',
+        ...(() => {
+          if (selected) {
+            return {
+              bgcolor: alpha(palette.primary.main, 0.08),
+              ...(() => {
+                if (selectable) {
+                  return {
+                    '&:hover': {
+                      bgcolor: alpha(palette.primary.main, 0.12),
+                    },
+                  };
+                } else {
+                  return {
+                    cursor: 'inherit',
+                    '&:hover': {
+                      bgcolor: alpha(palette.primary.main, 0.08),
+                    },
+                  };
+                }
+              })(),
+            };
           }
-        }}
+        })(),
+        ...(() => {
+          if (selectable) {
+            return {
+              cursor: 'pointer',
+            };
+          }
+          return { cursor: 'inherit' };
+        })(),
+        ...sx,
+      }}
+      disableRipple={!selectable}
+      disabled={!selectable}
+    >
+      <Box
         sx={{
-          minHeight: `${height}px !important`,
-          fontSize: 14,
-          lineHeight: `24px`,
-          p: 0,
-          display: 'flex',
-          alignItems: 'center',
-          '&.Mui-selected': {
-            bgcolor: alpha(palette.primary.main, 0.08),
-            ...(() => {
-              if (selectable) {
-                return {
-                  '&:hover': {
-                    bgcolor: alpha(palette.primary.main, 0.12),
-                  },
-                };
-              } else {
-                return {
-                  cursor: 'inherit',
-                  '&:hover': {
-                    bgcolor: alpha(palette.primary.main, 0.08),
-                  },
-                };
-              }
-            })(),
-          },
-          ...(() => {
-            if (selectable) {
-              return {
-                cursor: 'pointer',
-              };
-            }
-            return { cursor: 'inherit' };
-          })(),
-          ...sx,
+          py: 0.75,
+          px: 2,
+          width: `100%`,
         }}
-        disableRipple={!selectable}
-        disabled={!selectable}
       >
-        <Box
-          sx={{
-            py: 0.75,
-            px: 2,
-            width: `100%`,
-          }}
-        >
-          {(() => {
-            switch (variant) {
-              case 'checkbox':
-                return (
-                  <Grid container sx={{ alignItems: 'center' }}>
-                    <Grid item sx={{ display: 'flex', width: 30 }}>
-                      {(() => {
-                        if (selectable) {
-                          if (selected) {
-                            return <CheckBoxIcon color="inherit" />;
-                          }
-                          return (
-                            <CheckBoxOutlineBlankIcon
-                              color="inherit"
-                              sx={{ opacity: 0.15 }}
-                            />
-                          );
+        {(() => {
+          switch (variant) {
+            case 'checkbox':
+              return (
+                <Grid container sx={{ alignItems: 'center' }}>
+                  <Grid item sx={{ display: 'flex', width: 30 }}>
+                    {(() => {
+                      if (selectable) {
+                        if (selected) {
+                          return <CheckBoxIcon color="inherit" />;
                         }
-                        return <LockIcon color="inherit" />;
-                      })()}
-                    </Grid>
-                    <Grid item xs sx={{ minWidth: 0 }}>
-                      {label}
-                    </Grid>
+                        return (
+                          <CheckBoxOutlineBlankIcon
+                            color="inherit"
+                            sx={{ opacity: 0.15 }}
+                          />
+                        );
+                      }
+                      return <LockIcon color="inherit" />;
+                    })()}
                   </Grid>
-                );
-              case 'check':
-                return (
-                  <Grid container sx={{ alignItems: 'center' }}>
-                    <Grid item sx={{ display: 'flex', width: 30 }}>
-                      {(() => {
-                        if (selectable) {
-                          if (selected) {
-                            return <CheckIcon color="inherit" />;
-                          }
-                          return (
-                            <CheckBoxOutlineBlankIcon
-                              color="inherit"
-                              sx={{ opacity: 0.15 }}
-                            />
-                          );
+                  <Grid item xs sx={{ minWidth: 0 }}>
+                    {label}
+                  </Grid>
+                </Grid>
+              );
+            case 'check':
+              return (
+                <Grid container sx={{ alignItems: 'center' }}>
+                  <Grid item sx={{ display: 'flex', width: 30 }}>
+                    {(() => {
+                      if (selectable) {
+                        if (selected) {
+                          return <CheckIcon color="inherit" />;
                         }
-                        return <LockIcon color="inherit" />;
-                      })()}
-                    </Grid>
-                    <Grid item xs sx={{ minWidth: 0 }}>
-                      {label}
-                    </Grid>
+                        return (
+                          <CheckBoxOutlineBlankIcon
+                            color="inherit"
+                            sx={{ opacity: 0.15 }}
+                          />
+                        );
+                      }
+                      return <LockIcon color="inherit" />;
+                    })()}
                   </Grid>
-                );
-              case 'text':
-                return label;
-            }
-          })()}
-        </Box>
-      </MenuItem>
-    );
-  }
-);
+                  <Grid item xs sx={{ minWidth: 0 }}>
+                    {label}
+                  </Grid>
+                </Grid>
+              );
+            case 'text':
+              return label;
+          }
+        })()}
+      </Box>
+    </Button>
+  );
+});
 
 export default DropdownOption;

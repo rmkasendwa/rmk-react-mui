@@ -1,4 +1,4 @@
-import { MenuItemProps } from '@mui/material/MenuItem';
+import { ButtonProps } from '@mui/material';
 import { ElementType, MutableRefObject, ReactNode } from 'react';
 
 export interface PaginatedRequestParams {
@@ -105,7 +105,7 @@ export type ExoticDataType =
 export type DropdownOptionValue = string | number;
 
 export interface DropdownOption<Entity = any>
-  extends Partial<Pick<MenuItemProps, 'onClick' | 'sx'>> {
+  extends Partial<Pick<ButtonProps, 'onClick' | 'sx'>> {
   value: DropdownOptionValue;
   label: ReactNode;
   description?: ReactNode;
