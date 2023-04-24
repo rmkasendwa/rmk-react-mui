@@ -108,3 +108,39 @@ LoadingWithOptions.args = {
   })),
   loading: true,
 } as PaginatedDropdownOptionListProps;
+
+const asyncSelectedOptionsDataSet = Array.from({ length: 1000 }).map(
+  (_, index) => {
+    const label = `${index + 1}. ${lorem.generateWords(4)}`;
+    return {
+      label,
+      value: String(index),
+    };
+  }
+);
+export const WithAsyncOptions = Template.bind({});
+WithAsyncOptions.args = {
+  getDropdownOptions: async () => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(asyncSelectedOptionsDataSet);
+      }, 500);
+    });
+  },
+  getSelectedOptions: (selectedValue) => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        if (typeof selectedValue === 'string') {
+          resolve(
+            asyncSelectedOptionsDataSet.filter(({ value }) => {
+              return value === selectedValue;
+            })
+          );
+        } else {
+          resolve([]);
+        }
+      }, 3000);
+    });
+  },
+  value: '6',
+} as PaginatedDropdownOptionListProps;

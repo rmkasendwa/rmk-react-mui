@@ -23,6 +23,7 @@ export interface UseQueryOptions {
   key?: string;
   loadOnMount?: boolean;
   autoSync?: boolean;
+  revalidationKey?: string;
 }
 
 const DEFAULT_SYNC_TIMEOUT = 5 * 60 * 1000;
@@ -242,7 +243,6 @@ export const useDelete = <DeleteFunction extends TAPIFunction>(
 export interface UseRecordOptions<LoadableRecord> extends UseQueryOptions {
   defaultValue?: LoadableRecord;
 }
-
 export const useRecord = <LoadableRecord>(
   recordFinder?: TAPIFunction<LoadableRecord>,
   {
@@ -250,6 +250,7 @@ export const useRecord = <LoadableRecord>(
     key,
     loadOnMount = true,
     autoSync = false,
+    revalidationKey,
   }: UseRecordOptions<LoadableRecord> = {}
 ) => {
   // Refs
@@ -291,6 +292,12 @@ export const useRecord = <LoadableRecord>(
       load();
     }
   }, [load, loadOnMount]);
+
+  useEffect(() => {
+    if (!isInitialMountRef.current && revalidationKey) {
+      load();
+    }
+  }, [load, revalidationKey]);
 
   useEffect(() => {
     if (autoSync && !busy && !loading && !errorMessage) {
@@ -392,7 +399,6 @@ export interface UsePaginatedRecordsOptions<T = any>
   revalidationKey?: string;
   loadedPagesMap?: Map<number, T[]>;
 }
-
 export const usePaginatedRecords = <T>(
   recordFinder: PaginatedRecordsFinder<T>,
   {
