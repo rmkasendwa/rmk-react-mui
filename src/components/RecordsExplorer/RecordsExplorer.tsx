@@ -879,10 +879,14 @@ const BaseRecordsExplorer = <
     expandedGroups: searchParamExpandedGroups,
     expandedGroupsInverted: searchParamExpandedGroupsInverted,
     modifiedKeys: modifiedStateKeys,
-    createNewRecord,
+    createNewRecord: searchParamCreateNewRecord,
     selectedRecord: selectedRecordId,
     editRecord,
   } = searchParams;
+
+  const createNewRecord = Boolean(
+    searchParamCreateNewRecord || (pathToAddNew && pathname === pathToAddNew)
+  );
 
   const viewType = (() => {
     if (searchParamView) {
@@ -2276,7 +2280,7 @@ const BaseRecordsExplorer = <
                   {...CreateModalFormPropsRest}
                   initialValues={initialValues || {}}
                   validationSchema={validationSchema || {}}
-                  open={Boolean(createNewRecord)}
+                  open={createNewRecord}
                   errorMessage={createErrorMessage}
                   loading={creating}
                   onSubmit={async (values) => {
