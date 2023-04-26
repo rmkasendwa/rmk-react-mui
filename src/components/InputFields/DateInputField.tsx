@@ -1,21 +1,25 @@
-import 'react-datepicker/dist/react-datepicker.css';
-
 import CloseIcon from '@mui/icons-material/Close';
 import EventIcon from '@mui/icons-material/Event';
 import {
   Box,
   ClickAwayListener,
+  ComponentsOverrides,
+  ComponentsProps,
+  ComponentsVariants,
   Grow,
   Popper,
-  alpha,
-  darken,
-  lighten,
+  unstable_composeClasses as composeClasses,
+  generateUtilityClass,
+  generateUtilityClasses,
+  useThemeProps,
 } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import useTheme from '@mui/material/styles/useTheme';
 import Tooltip from '@mui/material/Tooltip';
 import useMediaQuery from '@mui/material/useMediaQuery';
+import clsx from 'clsx';
 import { format } from 'date-fns';
+import { omit } from 'lodash';
 import {
   forwardRef,
   useCallback,
@@ -24,13 +28,45 @@ import {
   useRef,
   useState,
 } from 'react';
-import DatePicker from 'react-datepicker';
 
 import { useLoadingContext } from '../../contexts/LoadingContext';
 import { isDescendant } from '../../utils/html';
+import DatePicker, { DatePickerProps } from '../DatePicker';
 import FieldValueDisplay from '../FieldValueDisplay';
 import ModalPopup from '../ModalPopup';
 import TextField, { TextFieldProps } from './TextField';
+
+export interface DateInputFieldClasses {
+  /** Styles applied to the root element. */
+  root: string;
+}
+
+export type DateInputFieldClassKey = keyof DateInputFieldClasses;
+
+// Adding theme prop types
+declare module '@mui/material/styles/props' {
+  interface ComponentsPropsList {
+    MuiDateInputField: DateInputFieldProps;
+  }
+}
+
+// Adding theme override types
+declare module '@mui/material/styles/overrides' {
+  interface ComponentNameToClassKey {
+    MuiDateInputField: keyof DateInputFieldClasses;
+  }
+}
+
+// Adding theme component types
+declare module '@mui/material/styles/components' {
+  interface Components<Theme = unknown> {
+    MuiDateInputField?: {
+      defaultProps?: ComponentsProps['MuiDateInputField'];
+      styleOverrides?: ComponentsOverrides<Theme>['MuiDateInputField'];
+      variants?: ComponentsVariants['MuiDateInputField'];
+    };
+  }
+}
 
 export interface DateInputFieldProps extends TextFieldProps {
   value?: string;
@@ -38,11 +74,35 @@ export interface DateInputFieldProps extends TextFieldProps {
   maxDate?: string;
   enableTimeSelector?: boolean;
   displayFormat?: string;
+  DatePickerProps?: Partial<
+    Omit<
+      DatePickerProps,
+      | 'onChange'
+      | 'selected'
+      | 'minDate'
+      | 'maxDate'
+      | 'showTimeSelect'
+      | 'showTimeInput'
+    >
+  >;
 }
 
+export function getDateInputFieldUtilityClass(slot: string): string {
+  return generateUtilityClass('MuiDateInputField', slot);
+}
+
+export const dateInputFieldClasses: DateInputFieldClasses =
+  generateUtilityClasses('MuiDateInputField', ['root']);
+
+const slots = {
+  root: ['root'],
+};
+
 export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
-  function DateInputField(
-    {
+  function DateInputField(inProps, ref) {
+    const props = useThemeProps({ props: inProps, name: 'MuiDateInputField' });
+    const {
+      className,
       value,
       id,
       name,
@@ -52,14 +112,27 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
       maxDate: maxDateProp,
       showClearButton = true,
       enableTimeSelector = false,
-      displayFormat = '',
       disabled,
       sx,
       enableLoadingState = true,
+      DatePickerProps = {},
       ...rest
-    },
-    ref
-  ) {
+    } = omit(props, 'displayFormat');
+
+    let { displayFormat = '' } = props;
+
+    const classes = composeClasses(
+      slots,
+      getDateInputFieldUtilityClass,
+      (() => {
+        if (className) {
+          return {
+            root: className,
+          };
+        }
+      })()
+    );
+
     if (!displayFormat) {
       if (enableTimeSelector) {
         displayFormat = 'MMM dd, yyyy hh:mm aa';
@@ -67,10 +140,13 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
         displayFormat = 'MMM dd, yyyy';
       }
     }
+
+    const { ...DatePickerPropsRest } = DatePickerProps;
+
     const anchorRef = useRef<HTMLInputElement>(null);
     const changedRef = useRef(false);
     const poperElementWrapperRef = useRef<HTMLDivElement>(null);
-    const { palette, breakpoints } = useTheme();
+    const { breakpoints } = useTheme();
     const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [open, setOpen] = useState(false);
@@ -138,6 +214,7 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
         <TextField
           ref={ref}
           {...rest}
+          className={clsx(classes.root)}
           {...{ id, name, disabled, label, enableLoadingState }}
           value={selectedDate ? format(selectedDate, displayFormat) : ''}
           InputProps={{
@@ -185,6 +262,7 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
         {(() => {
           const datePickerElement = (
             <DatePicker
+              {...DatePickerPropsRest}
               selected={selectedDate}
               onChange={(date) => {
                 if (date) {
@@ -214,13 +292,8 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
               }}
               minDate={minDate}
               maxDate={maxDate}
-              inline
               showTimeSelect={enableTimeSelector}
               showTimeInput={enableTimeSelector}
-              peekNextMonth
-              showMonthDropdown
-              showYearDropdown
-              dropdownMode="select"
             />
           );
           if (isSmallScreenSize) {
@@ -269,92 +342,7 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
                     {...TransitionProps}
                     style={{ transformOrigin: '0 0 0' }}
                   >
-                    <Box
-                      ref={poperElementWrapperRef}
-                      sx={{
-                        [`
-                          .react-datepicker,
-                          .react-datepicker__header,
-                          .react-datepicker__time-container,
-                          .react-datepicker__time,
-                          .react-datepicker-time__input
-                        `]: {
-                          bgcolor: palette.background.paper,
-                          color: palette.text.primary,
-                          borderColor: palette.divider,
-                        },
-                        '.react-datepicker__current-month': {
-                          borderBottom: `1px solid ${palette.divider}`,
-                          pb: 1,
-                        },
-                        [`
-                          .react-datepicker__current-month,
-                          .react-datepicker-time__header,
-                          .react-datepicker-year-header,
-                          .react-datepicker__day-name,
-                          .react-datepicker__day,
-                          .react-datepicker__time-name
-                        `]: {
-                          color: palette.text.primary,
-                        },
-                        [`
-                          .react-datepicker__day,
-                          .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item
-                        `]: {
-                          color: palette.text.primary,
-                          '&.react-datepicker__day--disabled': {
-                            color: palette.text.disabled,
-                          },
-                          '&:not(.react-datepicker__day--disabled):not(.react-datepicker__day--keyboard-selected):not(.react-datepicker__day--selected):not(.react-datepicker__time-list-item--selected):hover':
-                            {
-                              bgcolor: (palette.mode === 'dark'
-                                ? lighten
-                                : darken)(palette.background.paper, 0.13),
-                            },
-                        },
-                        [`
-                          .react-datepicker__day.react-datepicker__day--selected,
-                          .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item--selected
-                        `]: {
-                          '&,&:hover': {
-                            bgcolor: palette.primary.main,
-                            color: palette.getContrastText(
-                              palette.primary.main
-                            ),
-                          },
-                        },
-                        '.react-datepicker__day--keyboard-selected': {
-                          bgcolor: alpha(palette.primary.main, 0.3),
-                        },
-                        '.react-datepicker__month': {
-                          minWidth: 320,
-                          m: 0,
-                        },
-                        '.react-datepicker__week,.react-datepicker__day-names':
-                          {
-                            display: 'flex',
-                            '.react-datepicker__day,.react-datepicker__day-name':
-                              {
-                                width: 'auto',
-                                flex: 1,
-                                minWidth: '1.7rem',
-                              },
-                          },
-                        '.react-datepicker__input-time-container': {
-                          m: 0,
-                          py: 1.2,
-                          pl: 2,
-                          borderTop: `1px solid ${palette.divider}`,
-                        },
-                        '.react-datepicker-time__input': {
-                          borderWidth: 1,
-                          borderRadius: '4px',
-                        },
-                        '.react-datepicker__header__dropdown--select': {
-                          pt: 1,
-                        },
-                      }}
-                    >
+                    <Box ref={poperElementWrapperRef}>
                       <ClickAwayListener
                         onClickAway={(event) => {
                           if (

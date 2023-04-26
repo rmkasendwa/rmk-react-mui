@@ -3,5 +3,3 @@
 	Licensed under the MIT License (MIT), see
 	http://jedwatson.github.io/classnames
 */
-
-/*! countries-list v2.6.1 by Annexare | MIT */
