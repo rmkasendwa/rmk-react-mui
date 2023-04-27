@@ -121,6 +121,9 @@ import {
 export interface RecordsExplorerClasses {
   /** Styles applied to the root element. */
   root: string;
+  header: string;
+  section: string;
+  footer: string;
 }
 
 export type RecordsExplorerClassKey = keyof RecordsExplorerClasses;
@@ -394,10 +397,18 @@ export function getRecordsExplorerUtilityClass(slot: string): string {
 }
 
 export const recordsExplorerClasses: RecordsExplorerClasses =
-  generateUtilityClasses('MuiRecordsExplorer', ['root']);
+  generateUtilityClasses('MuiRecordsExplorer', [
+    'root',
+    'header',
+    'section',
+    'footer',
+  ]);
 
 const slots = {
   root: ['root'],
+  header: ['header'],
+  section: ['section'],
+  footer: ['footer'],
 };
 
 const BaseRecordsExplorer = <
@@ -2046,6 +2057,7 @@ const BaseRecordsExplorer = <
         elevation={0}
         {...HeaderPropsRest}
         ref={headerElementRef}
+        className={clsx(classes.header, HeaderPropsRest.className)}
         component="header"
         sx={{ position: 'sticky', top: 0, zIndex: 100, ...HeaderPropsSx }}
       >
@@ -2165,6 +2177,7 @@ const BaseRecordsExplorer = <
       <Box
         {...BodyPropsRest}
         ref={bodyElementRef}
+        className={clsx(classes.section, BodyPropsRest.className)}
         component="section"
         sx={{
           position: 'relative',
@@ -2208,10 +2221,222 @@ const BaseRecordsExplorer = <
           }
           return children;
         })()}
+
+        {/* Popups */}
+        {(() => {
+          if (
+            (selectedRecordId || (validationSchema && initialValues)) &&
+            editorForm
+          ) {
+            const hasFormProps = Boolean(validationSchema && initialValues);
+            const modalFormProps: Partial<ModalFormProps> = {
+              ...ModalFormPropsRest,
+              FormikProps: {
+                enableReinitialize: true,
+              },
+            };
+            return (
+              <>
+                {/* Create Form */}
+                {hasFormProps ? (
+                  <ModalForm
+                    lockSubmitIfNoChange={false}
+                    title={
+                      <Grid
+                        container
+                        sx={{
+                          alignItems: 'center',
+                          gap: 1,
+                        }}
+                      >
+                        <Grid item>Add New {recordLabelSingular}</Grid>
+                        {descriptionElement}
+                      </Grid>
+                    }
+                    submitButtonText={`Add ${recordLabelSingular}`}
+                    {...modalFormProps}
+                    {...CreateModalFormPropsRest}
+                    initialValues={initialValues || {}}
+                    validationSchema={validationSchema || {}}
+                    open={createNewRecord}
+                    errorMessage={createErrorMessage}
+                    loading={creating}
+                    onSubmit={async (values) => {
+                      if (recordCreator) {
+                        await create(values);
+                      }
+                    }}
+                    onClose={() => {
+                      resetCreation();
+                      if (created) {
+                        autoSync && load();
+                        showSuccessMessage(
+                          recordCreateSuccessMessage ||
+                            `The new ${lowercaseRecordLabelSingular} was created successfully`
+                        );
+                      }
+                      if (defaultPath) {
+                        navigate(defaultPath);
+                      } else {
+                        setSearchParams({
+                          createNewRecord: null,
+                        });
+                      }
+                    }}
+                    submitted={created}
+                  >
+                    {({ ...rest }) => {
+                      if (typeof editorForm === 'function') {
+                        return editorForm({
+                          mode: 'create',
+                          loadingState: {
+                            loading: false,
+                          },
+                          ...rest,
+                        });
+                      }
+                      return editorForm;
+                    }}
+                  </ModalForm>
+                ) : null}
+
+                {/* Edit Form */}
+                {(() => {
+                  const loadingState = {
+                    loading: loadingRecordDetails || loadingProp || loading,
+                    errorMessage: loadingRecordDetailsErrorMessage,
+                    load: loadRecordDetails,
+                    locked: !editRecord,
+                  };
+                  return (
+                    <LoadingProvider value={loadingState}>
+                      <ModalForm
+                        showEditButton={Boolean(recordEditor)}
+                        title={
+                          <Grid
+                            container
+                            sx={{
+                              alignItems: 'center',
+                              gap: 1,
+                            }}
+                          >
+                            <Grid item>
+                              {(() => {
+                                if (editRecord) {
+                                  return `Edit ${recordLabelSingular}`;
+                                }
+                                if (getViewTitle && selectedRecord) {
+                                  return getViewTitle(selectedRecord);
+                                }
+                                return recordLabelSingular;
+                              })()}
+                            </Grid>
+                            {descriptionElement}
+                          </Grid>
+                        }
+                        submitButtonText={`Update ${recordLabelSingular}`}
+                        {...ViewModalFormPropsRest}
+                        {...modalFormProps}
+                        editableFields={editableFields}
+                        validationSchema={
+                          editValidationSchema || validationSchema
+                        }
+                        initialValues={editInitialValues || {}}
+                        open={Boolean(selectedRecordId)}
+                        errorMessage={updateErrorMessage}
+                        loading={updating}
+                        onSubmit={async (values) => {
+                          if (recordEditor && selectedRecord) {
+                            await update(selectedRecord, values);
+                          }
+                        }}
+                        onClose={() => {
+                          if (updated) {
+                            onEditRecord && onEditRecord();
+                            autoSync && load();
+                            showSuccessMessage(
+                              recordEditSuccessMessage ||
+                                `The ${lowercaseRecordLabelSingular} was updated successfully`
+                            );
+                          }
+                          resetUpdate();
+                          resetSelectedRecordState();
+                          if (defaultPath) {
+                            navigate(defaultPath);
+                          } else {
+                            setSearchParams({
+                              selectedRecord: null,
+                              editRecord: null,
+                            });
+                          }
+                        }}
+                        submitted={updated}
+                        editMode={Boolean(editRecord)}
+                        SearchSyncToolbarProps={{
+                          ...modalFormProps.SearchSyncToolbarProps,
+                          load: loadRecordDetails,
+                          loading: loadingRecordDetails,
+                          errorMessage: loadingRecordDetailsErrorMessage,
+                          hasSyncTool: Boolean(recordDetailsFinder),
+                        }}
+                        onClickEdit={() => {
+                          const pathToEditRecord = (() => {
+                            if (pathToEdit) {
+                              return pathToEdit;
+                            }
+                            if (getPathToEdit && selectedRecord) {
+                              return getPathToEdit(selectedRecord);
+                            }
+                            return addSearchParamsToPath(pathname, {
+                              editRecord: true,
+                            });
+                          })();
+                          navigate(pathToEditRecord);
+                        }}
+                        viewModeTools={[
+                          ...(() => {
+                            if (isDeletable && selectedRecord) {
+                              return [
+                                <Button
+                                  key="delete"
+                                  variant="contained"
+                                  color="error"
+                                  onClick={() => {
+                                    deleteFunctionRef.current(selectedRecord);
+                                  }}
+                                >
+                                  Delete
+                                </Button>,
+                              ];
+                            }
+                            return [];
+                          })(),
+                        ]}
+                      >
+                        {({ ...rest }) => {
+                          if (typeof editorForm === 'function') {
+                            return editorForm({
+                              mode: editRecord ? 'edit' : 'view',
+                              selectedRecord,
+                              loadingState,
+                              ...rest,
+                            });
+                          }
+                          return editorForm;
+                        }}
+                      </ModalForm>
+                    </LoadingProvider>
+                  );
+                })()}
+              </>
+            );
+          }
+        })()}
       </Box>
       {!isSmallScreenSize && showPaginationStats && filteredData.length > 0 ? (
         <Paper
           elevation={0}
+          className={clsx(classes.footer)}
           component="footer"
           sx={{ position: 'sticky', bottom: 0, zIndex: 5 }}
         >
@@ -2245,215 +2470,6 @@ const BaseRecordsExplorer = <
           <AddIcon />
         </Button>
       ) : null}
-      {(() => {
-        if (
-          (selectedRecordId || (validationSchema && initialValues)) &&
-          editorForm
-        ) {
-          const hasFormProps = Boolean(validationSchema && initialValues);
-          const modalFormProps: Partial<ModalFormProps> = {
-            ...ModalFormPropsRest,
-            FormikProps: {
-              enableReinitialize: true,
-            },
-          };
-          return (
-            <>
-              {/* Create Form */}
-              {hasFormProps ? (
-                <ModalForm
-                  lockSubmitIfNoChange={false}
-                  title={
-                    <Grid
-                      container
-                      sx={{
-                        alignItems: 'center',
-                        gap: 1,
-                      }}
-                    >
-                      <Grid item>Add New {recordLabelSingular}</Grid>
-                      {descriptionElement}
-                    </Grid>
-                  }
-                  submitButtonText={`Add ${recordLabelSingular}`}
-                  {...modalFormProps}
-                  {...CreateModalFormPropsRest}
-                  initialValues={initialValues || {}}
-                  validationSchema={validationSchema || {}}
-                  open={createNewRecord}
-                  errorMessage={createErrorMessage}
-                  loading={creating}
-                  onSubmit={async (values) => {
-                    if (recordCreator) {
-                      await create(values);
-                    }
-                  }}
-                  onClose={() => {
-                    resetCreation();
-                    if (created) {
-                      autoSync && load();
-                      showSuccessMessage(
-                        recordCreateSuccessMessage ||
-                          `The new ${lowercaseRecordLabelSingular} was created successfully`
-                      );
-                    }
-                    if (defaultPath) {
-                      navigate(defaultPath);
-                    } else {
-                      setSearchParams({
-                        createNewRecord: null,
-                      });
-                    }
-                  }}
-                  submitted={created}
-                >
-                  {({ ...rest }) => {
-                    if (typeof editorForm === 'function') {
-                      return editorForm({
-                        mode: 'create',
-                        loadingState: {
-                          loading: false,
-                        },
-                        ...rest,
-                      });
-                    }
-                    return editorForm;
-                  }}
-                </ModalForm>
-              ) : null}
-
-              {/* Edit Form */}
-              {(() => {
-                const loadingState = {
-                  loading: loadingRecordDetails || loadingProp || loading,
-                  errorMessage: loadingRecordDetailsErrorMessage,
-                  load: loadRecordDetails,
-                  locked: !editRecord,
-                };
-                return (
-                  <LoadingProvider value={loadingState}>
-                    <ModalForm
-                      showEditButton={Boolean(recordEditor)}
-                      title={
-                        <Grid
-                          container
-                          sx={{
-                            alignItems: 'center',
-                            gap: 1,
-                          }}
-                        >
-                          <Grid item>
-                            {(() => {
-                              if (editRecord) {
-                                return `Edit ${recordLabelSingular}`;
-                              }
-                              if (getViewTitle && selectedRecord) {
-                                return getViewTitle(selectedRecord);
-                              }
-                              return recordLabelSingular;
-                            })()}
-                          </Grid>
-                          {descriptionElement}
-                        </Grid>
-                      }
-                      submitButtonText={`Update ${recordLabelSingular}`}
-                      {...ViewModalFormPropsRest}
-                      {...modalFormProps}
-                      editableFields={editableFields}
-                      validationSchema={
-                        editValidationSchema || validationSchema
-                      }
-                      initialValues={editInitialValues || {}}
-                      open={Boolean(selectedRecordId)}
-                      errorMessage={updateErrorMessage}
-                      loading={updating}
-                      onSubmit={async (values) => {
-                        if (recordEditor && selectedRecord) {
-                          await update(selectedRecord, values);
-                        }
-                      }}
-                      onClose={() => {
-                        if (updated) {
-                          onEditRecord && onEditRecord();
-                          autoSync && load();
-                          showSuccessMessage(
-                            recordEditSuccessMessage ||
-                              `The ${lowercaseRecordLabelSingular} was updated successfully`
-                          );
-                        }
-                        resetUpdate();
-                        resetSelectedRecordState();
-                        if (defaultPath) {
-                          navigate(defaultPath);
-                        } else {
-                          setSearchParams({
-                            selectedRecord: null,
-                            editRecord: null,
-                          });
-                        }
-                      }}
-                      submitted={updated}
-                      editMode={Boolean(editRecord)}
-                      SearchSyncToolbarProps={{
-                        ...modalFormProps.SearchSyncToolbarProps,
-                        load: loadRecordDetails,
-                        loading: loadingRecordDetails,
-                        errorMessage: loadingRecordDetailsErrorMessage,
-                        hasSyncTool: Boolean(recordDetailsFinder),
-                      }}
-                      onClickEdit={() => {
-                        const pathToEditRecord = (() => {
-                          if (pathToEdit) {
-                            return pathToEdit;
-                          }
-                          if (getPathToEdit && selectedRecord) {
-                            return getPathToEdit(selectedRecord);
-                          }
-                          return addSearchParamsToPath(pathname, {
-                            editRecord: true,
-                          });
-                        })();
-                        navigate(pathToEditRecord);
-                      }}
-                      viewModeTools={[
-                        ...(() => {
-                          if (isDeletable && selectedRecord) {
-                            return [
-                              <Button
-                                key="delete"
-                                variant="contained"
-                                color="error"
-                                onClick={() => {
-                                  deleteFunctionRef.current(selectedRecord);
-                                }}
-                              >
-                                Delete
-                              </Button>,
-                            ];
-                          }
-                          return [];
-                        })(),
-                      ]}
-                    >
-                      {({ ...rest }) => {
-                        if (typeof editorForm === 'function') {
-                          return editorForm({
-                            mode: editRecord ? 'edit' : 'view',
-                            selectedRecord,
-                            loadingState,
-                            ...rest,
-                          });
-                        }
-                        return editorForm;
-                      }}
-                    </ModalForm>
-                  </LoadingProvider>
-                );
-              })()}
-            </>
-          );
-        }
-      })()}
     </Paper>
   );
 

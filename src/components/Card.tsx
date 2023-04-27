@@ -25,6 +25,8 @@ import SearchSyncToolbar, { SearchSyncToolbarProps } from './SearchSyncToolbar';
 export interface CardClasses {
   /** Styles applied to the root element. */
   root: string;
+  header: string;
+  section: string;
 }
 
 export type CardClassKey = keyof CardClasses;
@@ -71,11 +73,13 @@ export function getCardUtilityClass(slot: string): string {
 
 export const cardClasses: CardClasses = generateUtilityClasses(
   'MuiCardWithTools',
-  ['root']
+  ['root', 'header', 'section']
 );
 
 const slots = {
   root: ['root'],
+  header: ['header'],
+  section: ['section'],
 };
 
 export const Card = forwardRef<HTMLDivElement, CardProps>(function Card(
@@ -112,7 +116,11 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(function Card(
 
   const { sx: SearchSyncToolbarPropsSx, ...SearchSyncToolbarPropsRest } =
     SearchSyncToolbarProps;
-  const { sx: CardBodyPropsSx, ...CardBodyPropsRest } = CardBodyProps;
+  const {
+    sx: CardBodyPropsSx,
+    className: CardBodyPropsClassName,
+    ...CardBodyPropsRest
+  } = CardBodyProps;
   const { loading: contextLoading, errorMessage: contextErrorMessage } =
     useLoadingContext();
   const { spacing } = useTheme();
@@ -206,6 +214,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(function Card(
             <Paper
               elevation={0}
               component="header"
+              className={clsx(classes.header)}
               sx={{ position: 'sticky', top: 0, zIndex: 5 }}
             >
               {searchSyncToolBar}
@@ -229,6 +238,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(function Card(
       })()}
       <Box
         {...CardBodyPropsRest}
+        className={clsx(classes.section, CardBodyPropsClassName)}
         component="section"
         sx={{ pt: 2, px: 3, pb: 3, ...CardBodyPropsSx }}
       >
