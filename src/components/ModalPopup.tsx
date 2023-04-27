@@ -302,7 +302,7 @@ export const ModalPopup = forwardRef<HTMLDivElement, ModalPopupProps>(
                     return (
                       <Grid item>
                         <Button
-                          variant="outlined"
+                          variant="text"
                           color="inherit"
                           {...closeActionButtonPropsRest}
                           onClick={onClose}
