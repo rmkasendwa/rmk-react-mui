@@ -390,7 +390,7 @@ export const BaseModalForm = <Values extends FormikValues>(
                                   return (
                                     <Grid item>
                                       <Button
-                                        variant="outlined"
+                                        variant="text"
                                         color="inherit"
                                         {...ActionButtonPropsRest}
                                         onClick={onClose}
@@ -427,7 +427,7 @@ export const BaseModalForm = <Values extends FormikValues>(
                                     {!isSubmitting ? (
                                       <Grid item>
                                         <Button
-                                          variant="outlined"
+                                          variant="text"
                                           color="inherit"
                                           {...ActionButtonPropsRest}
                                           onClick={onClose}
@@ -490,7 +490,7 @@ export const BaseModalForm = <Values extends FormikValues>(
                                       return (
                                         <Grid item>
                                           <Button
-                                            variant="outlined"
+                                            variant="text"
                                             color="inherit"
                                             {...ActionButtonPropsRest}
                                             onClick={onClose}
@@ -528,7 +528,7 @@ export const BaseModalForm = <Values extends FormikValues>(
                           return (
                             <Grid item>
                               <Button
-                                variant="outlined"
+                                variant="text"
                                 color="inherit"
                                 {...ActionButtonPropsRest}
                                 {...CloseActionButtonPropsRest}
