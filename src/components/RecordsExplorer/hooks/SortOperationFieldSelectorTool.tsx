@@ -37,12 +37,12 @@ const itemTypes = {
   LIST_ITEM: 'listItem',
 };
 
-const DraggableSortableField: FC<{
+const DraggableSortedField: FC<{
   id: string;
-  moveItem: (draggedId: string, id: string) => void;
-  commitItemMovement: () => void;
+  moveSortedField: (draggedId: string, id: string) => void;
+  commitSortedFieldMovement: () => void;
   children: ReactNode;
-}> = ({ id, moveItem, commitItemMovement, children }) => {
+}> = ({ id, moveSortedField, commitSortedFieldMovement, children }) => {
   const ref = useRef<HTMLDivElement | null>(null);
   const dragHandleElementRef = useRef<HTMLDivElement | null>(null);
 
@@ -61,11 +61,11 @@ const DraggableSortableField: FC<{
     accept: itemTypes.LIST_ITEM,
     hover: ({ id: draggedId }: { id: string; type: string }) => {
       if (draggedId !== id) {
-        moveItem(draggedId, id);
+        moveSortedField(draggedId, id);
       }
     },
     drop: () => {
-      commitItemMovement();
+      commitSortedFieldMovement();
     },
   });
 
@@ -96,7 +96,7 @@ const DraggableSortableField: FC<{
   );
 };
 
-const DraggableSortableFieldsContainer = <RecordRow extends BaseDataRow>({
+const DraggableSortedFieldsContainer = <RecordRow extends BaseDataRow>({
   sortableFields,
   selectedSortParams: selectedSortParamsProp,
   unselectedSortableFields,
@@ -134,10 +134,10 @@ const DraggableSortableFieldsContainer = <RecordRow extends BaseDataRow>({
       {selectedSortParams.map(
         ({ id, label, type = 'string', sortLabels, sortDirection }, index) => {
           return (
-            <DraggableSortableField
+            <DraggableSortedField
               key={String(id)}
               id={String(id)}
-              moveItem={(draggedId: string, hoveredId: string): void => {
+              moveSortedField={(draggedId: string, hoveredId: string): void => {
                 const draggedIndex = selectedSortParams.findIndex(({ id }) => {
                   return id === draggedId;
                 });
@@ -151,7 +151,7 @@ const DraggableSortableFieldsContainer = <RecordRow extends BaseDataRow>({
                 nextSelectedSortParams.splice(hoveredIndex, 0, draggedItem);
                 setSelectedSortParams(nextSelectedSortParams);
               }}
-              commitItemMovement={() => {
+              commitSortedFieldMovement={() => {
                 onChangeSelectedSortParams(selectedSortParams);
               }}
             >
@@ -273,7 +273,7 @@ const DraggableSortableFieldsContainer = <RecordRow extends BaseDataRow>({
                   <CloseIcon />
                 </IconButton>
               </Grid>
-            </DraggableSortableField>
+            </DraggableSortedField>
           );
         }
       )}
@@ -411,7 +411,7 @@ export const useSortOperationFieldSelectorTool = <
       if (selectedSortParams.length > 0) {
         return (
           <DndProvider backend={HTML5Backend}>
-            <DraggableSortableFieldsContainer
+            <DraggableSortedFieldsContainer
               {...{
                 selectedSortParams,
                 onChangeSelectedSortParams,
