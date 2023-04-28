@@ -63,7 +63,6 @@ const SortFieldDragLayer: FC = () => {
       <Paper
         elevation={2}
         sx={{
-          alignItems: 'center',
           py: 0.5,
           px: 1,
           ...(() => {
@@ -81,7 +80,13 @@ const SortFieldDragLayer: FC = () => {
           pointerEvents: 'none',
         }}
       >
-        <Grid container columnSpacing={1}>
+        <Grid
+          container
+          columnSpacing={1}
+          sx={{
+            alignItems: 'center',
+          }}
+        >
           {children}
           <Grid item>
             <Box
