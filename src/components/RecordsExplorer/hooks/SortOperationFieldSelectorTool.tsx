@@ -2,6 +2,7 @@ import AddIcon from '@mui/icons-material/Add';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt';
 import CloseIcon from '@mui/icons-material/Close';
+import DragHandleIcon from '@mui/icons-material/DragHandle';
 import {
   Box,
   Button,
@@ -13,13 +14,16 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
-import { useEffect, useRef, useState } from 'react';
+import { FC, ReactNode, useEffect, useRef, useState } from 'react';
+import { DndProvider, useDrag, useDrop } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 
 import { PopupToolOptions, usePopupTool } from '../../../hooks/Tools';
 import {
   OnSelectSortOption,
   SelectedSortOption,
   SortDirection,
+  SortOption,
   SortableFields,
 } from '../../../interfaces/Sort';
 import SortIcon from '../../Icons/SortIcon';
@@ -28,6 +32,254 @@ import PaginatedDropdownOptionList, {
   PaginatedDropdownOptionListProps,
 } from '../../PaginatedDropdownOptionList';
 import { BaseDataRow } from '../../Table';
+
+const itemTypes = {
+  LIST_ITEM: 'listItem',
+};
+
+const DraggableSortableField: FC<{
+  id: string;
+  moveItem: (draggedId: string, id: string) => void;
+  commitItemMovement: () => void;
+  children: ReactNode;
+}> = ({ id, moveItem, commitItemMovement, children }) => {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const dragHandleElementRef = useRef<HTMLDivElement | null>(null);
+
+  const [{ handlerId, isDragging }, connectDrag, connectPreview] = useDrag({
+    type: itemTypes.LIST_ITEM,
+    item: { id },
+    collect: (monitor) => {
+      return {
+        handlerId: monitor.getHandlerId(),
+        isDragging: monitor.isDragging(),
+      };
+    },
+  });
+
+  const [, connectDrop] = useDrop({
+    accept: itemTypes.LIST_ITEM,
+    hover: ({ id: draggedId }: { id: string; type: string }) => {
+      if (draggedId !== id) {
+        moveItem(draggedId, id);
+      }
+    },
+    drop: () => {
+      commitItemMovement();
+    },
+  });
+
+  connectDrag(dragHandleElementRef);
+  connectPreview(ref);
+  connectDrop(ref);
+
+  return (
+    <Grid
+      ref={ref}
+      container
+      spacing={1}
+      data-handler-id={handlerId}
+      sx={{ alignItems: 'center', mb: 1, opacity: isDragging ? 0 : 1 }}
+    >
+      {children}
+      <Grid item>
+        <Box
+          ref={dragHandleElementRef}
+          sx={{
+            display: 'flex',
+          }}
+        >
+          <DragHandleIcon />
+        </Box>
+      </Grid>
+    </Grid>
+  );
+};
+
+const DraggableSortableFieldsContainer = <RecordRow extends BaseDataRow>({
+  sortableFields,
+  selectedSortParams: selectedSortParamsProp,
+  unselectedSortableFields,
+  onChangeSelectedSortParams,
+}: {
+  sortableFields: SortableFields<RecordRow>;
+  selectedSortParams: SelectedSortOption<RecordRow>[];
+  unselectedSortableFields: SortOption<RecordRow>[];
+  onChangeSelectedSortParams: (
+    selectedSortParams: SelectedSortOption<RecordRow>[]
+  ) => void;
+}) => {
+  const [selectedSortParams, setSelectedSortParams] = useState(() => {
+    return selectedSortParamsProp;
+  });
+
+  useEffect(() => {
+    setSelectedSortParams((prevSelectedSortParams) => {
+      if (
+        selectedSortParamsProp.map(({ id }) => id).join(',') !==
+        prevSelectedSortParams.map(({ id }) => id).join(',')
+      ) {
+        return selectedSortParamsProp;
+      }
+      return prevSelectedSortParams;
+    });
+  }, [selectedSortParamsProp]);
+
+  return (
+    <Box
+      sx={{
+        position: 'relative',
+      }}
+    >
+      {selectedSortParams.map(
+        ({ id, label, type = 'string', sortLabels, sortDirection }, index) => {
+          return (
+            <DraggableSortableField
+              key={String(id)}
+              id={String(id)}
+              moveItem={(draggedId: string, hoveredId: string): void => {
+                const draggedIndex = selectedSortParams.findIndex(({ id }) => {
+                  return id === draggedId;
+                });
+                const hoveredIndex = selectedSortParams.findIndex(({ id }) => {
+                  return id === hoveredId;
+                });
+                const draggedItem = selectedSortParams[draggedIndex];
+
+                const nextSelectedSortParams = [...selectedSortParams];
+                nextSelectedSortParams.splice(draggedIndex, 1);
+                nextSelectedSortParams.splice(hoveredIndex, 0, draggedItem);
+                setSelectedSortParams(nextSelectedSortParams);
+              }}
+              commitItemMovement={() => {
+                onChangeSelectedSortParams(selectedSortParams);
+              }}
+            >
+              <Grid item xs>
+                <DataDropdownField
+                  value={String(id)}
+                  onChange={(event) => {
+                    const value = event.target.value;
+                    const fieldSelectedSortParam = sortableFields.find(
+                      ({ id }) => id === value
+                    );
+                    if (fieldSelectedSortParam && index !== -1) {
+                      const nextSortParams = [...selectedSortParams];
+                      nextSortParams[index] = {
+                        ...fieldSelectedSortParam,
+                        sortDirection,
+                      };
+                      onChangeSelectedSortParams([...nextSortParams]);
+                    }
+                  }}
+                  options={[
+                    {
+                      label,
+                      value: String(id),
+                    },
+                    ...unselectedSortableFields.map(({ id, label }) => {
+                      return {
+                        label,
+                        value: String(id),
+                      };
+                    }),
+                  ]}
+                  showClearButton={false}
+                  size="small"
+                />
+              </Grid>
+              <Grid item>
+                <Stack direction="row">
+                  {(
+                    [
+                      {
+                        sortDirection: 'ASC',
+                      },
+                      {
+                        sortDirection: 'DESC',
+                      },
+                    ] as {
+                      sortDirection: SortDirection;
+                    }[]
+                  ).map(({ sortDirection: baseSortDirection }) => {
+                    return (
+                      <Button
+                        key={baseSortDirection}
+                        color={
+                          sortDirection === baseSortDirection
+                            ? 'primary'
+                            : 'inherit'
+                        }
+                        onClick={() => {
+                          const selectedSortParam = selectedSortParams.find(
+                            ({ id: currentId }) => currentId === id
+                          );
+                          if (selectedSortParam) {
+                            selectedSortParam.sortDirection = baseSortDirection;
+                            onChangeSelectedSortParams([...selectedSortParams]);
+                          }
+                        }}
+                        variant={
+                          sortDirection === baseSortDirection
+                            ? 'contained'
+                            : 'text'
+                        }
+                      >
+                        {(() => {
+                          const sorts = (() => {
+                            if (sortLabels) {
+                              return [...sortLabels];
+                            }
+                            switch (type) {
+                              case 'number':
+                              case 'date':
+                                return [0, 9];
+                              case 'boolean':
+                                return ['T', 'F'];
+                              case 'string':
+                              default:
+                                return ['A', 'Z'];
+                            }
+                          })();
+
+                          const [a, b] =
+                            baseSortDirection === 'ASC'
+                              ? sorts
+                              : sorts.reverse();
+
+                          return (
+                            <>
+                              {a} <ArrowRightAltIcon /> {b}
+                            </>
+                          );
+                        })()}
+                      </Button>
+                    );
+                  })}
+                </Stack>
+              </Grid>
+              <Grid item>
+                <IconButton
+                  onClick={() => {
+                    const selectedSortParamIndex = selectedSortParams.findIndex(
+                      ({ id: currentId }) => currentId === id
+                    );
+                    if (selectedSortParamIndex !== -1) {
+                      selectedSortParams.splice(selectedSortParamIndex, 1);
+                      onChangeSelectedSortParams([...selectedSortParams]);
+                    }
+                  }}
+                >
+                  <CloseIcon />
+                </IconButton>
+              </Grid>
+            </DraggableSortableField>
+          );
+        }
+      )}
+    </Box>
+  );
+};
 
 export interface SortOperationFieldSelectorToolOptions<
   RecordRow extends BaseDataRow = any
@@ -158,150 +410,15 @@ export const useSortOperationFieldSelectorTool = <
         };
       if (selectedSortParams.length > 0) {
         return (
-          <>
-            {selectedSortParams.map(
-              (
-                { id, label, type = 'string', sortLabels, sortDirection },
-                index
-              ) => {
-                return (
-                  <Grid
-                    key={String(id)}
-                    container
-                    alignItems="center"
-                    spacing={1}
-                    sx={{ mb: 1 }}
-                  >
-                    <Grid item xs>
-                      <DataDropdownField
-                        value={String(id)}
-                        onChange={(event) => {
-                          const value = event.target.value;
-                          const fieldSelectedSortParam = sortableFields.find(
-                            ({ id }) => id === value
-                          );
-                          if (fieldSelectedSortParam && index !== -1) {
-                            const nextSortParams = [...selectedSortParams];
-                            nextSortParams[index] = {
-                              ...fieldSelectedSortParam,
-                              sortDirection,
-                            };
-                            onChangeSelectedSortParams([...nextSortParams]);
-                          }
-                        }}
-                        options={[
-                          {
-                            label,
-                            value: String(id),
-                          },
-                          ...unselectedSortableFields.map(({ id, label }) => {
-                            return {
-                              label,
-                              value: String(id),
-                            };
-                          }),
-                        ]}
-                        showClearButton={false}
-                        size="small"
-                      />
-                    </Grid>
-                    <Grid item>
-                      <Stack direction="row">
-                        {(
-                          [
-                            {
-                              sortDirection: 'ASC',
-                            },
-                            {
-                              sortDirection: 'DESC',
-                            },
-                          ] as {
-                            sortDirection: SortDirection;
-                          }[]
-                        ).map(({ sortDirection: baseSortDirection }) => {
-                          return (
-                            <Button
-                              key={baseSortDirection}
-                              color={
-                                sortDirection === baseSortDirection
-                                  ? 'primary'
-                                  : 'inherit'
-                              }
-                              onClick={() => {
-                                const selectedSortParam =
-                                  selectedSortParams.find(
-                                    ({ id: currentId }) => currentId === id
-                                  );
-                                if (selectedSortParam) {
-                                  selectedSortParam.sortDirection =
-                                    baseSortDirection;
-                                  onChangeSelectedSortParams([
-                                    ...selectedSortParams,
-                                  ]);
-                                }
-                              }}
-                              variant={
-                                sortDirection === baseSortDirection
-                                  ? 'contained'
-                                  : 'text'
-                              }
-                            >
-                              {(() => {
-                                const sorts = (() => {
-                                  if (sortLabels) {
-                                    return [...sortLabels];
-                                  }
-                                  switch (type) {
-                                    case 'number':
-                                    case 'date':
-                                      return [0, 9];
-                                    case 'boolean':
-                                      return ['T', 'F'];
-                                    case 'string':
-                                    default:
-                                      return ['A', 'Z'];
-                                  }
-                                })();
-
-                                const [a, b] =
-                                  baseSortDirection === 'ASC'
-                                    ? sorts
-                                    : sorts.reverse();
-
-                                return (
-                                  <>
-                                    {a} <ArrowRightAltIcon /> {b}
-                                  </>
-                                );
-                              })()}
-                            </Button>
-                          );
-                        })}
-                      </Stack>
-                    </Grid>
-                    <Grid item>
-                      <IconButton
-                        onClick={() => {
-                          const selectedSortParamIndex =
-                            selectedSortParams.findIndex(
-                              ({ id: currentId }) => currentId === id
-                            );
-                          if (selectedSortParamIndex !== -1) {
-                            selectedSortParams.splice(
-                              selectedSortParamIndex,
-                              1
-                            );
-                            onChangeSelectedSortParams([...selectedSortParams]);
-                          }
-                        }}
-                      >
-                        <CloseIcon />
-                      </IconButton>
-                    </Grid>
-                  </Grid>
-                );
-              }
-            )}
+          <DndProvider backend={HTML5Backend}>
+            <DraggableSortableFieldsContainer
+              {...{
+                selectedSortParams,
+                onChangeSelectedSortParams,
+                sortableFields,
+                unselectedSortableFields,
+              }}
+            />
             {unselectedSortableFields.length > 0 ? (
               <>
                 <Button
@@ -346,7 +463,7 @@ export const useSortOperationFieldSelectorTool = <
                 </Popper>
               </>
             ) : null}
-          </>
+          </DndProvider>
         );
       }
       return (
