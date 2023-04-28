@@ -75,6 +75,7 @@ declare module '@mui/material/styles/components' {
 export interface BaseToolOptions {
   alwaysShowOn?: 'Large Screen' | 'Small Screen' | 'All Screens';
   component?: any;
+  getToolElement?: (element: ReactNode) => ReactNode;
 }
 
 export interface ButtonTool
@@ -116,86 +117,93 @@ export const getToolNodes = (
         return baseTool;
       } else {
         const tool = omit(baseTool as Tool, 'alwaysShowOn') as Tool;
-        if ('element' in tool) {
-          return tool.element;
-        }
-        if ('type' in tool) {
-          switch (tool.type) {
-            case 'icon-button': {
-              const { label, icon, title, popupElement, ...rest } = omit(
-                tool,
-                'type'
-              );
-              return (
-                <>
-                  <Tooltip
-                    title={title || label}
-                    PopperProps={{
-                      sx: {
-                        pointerEvents: 'none',
-                      },
-                    }}
-                  >
-                    <IconButton {...rest}>{icon}</IconButton>
-                  </Tooltip>
-                  {popupElement}
-                </>
-              );
-            }
-            case 'button': {
-              const { label, icon, title, sx, popupElement, ...rest } = omit(
-                tool,
-                'type'
-              );
-              const buttonElement = (() => {
-                if (!showFullToolWidth) {
-                  return (
-                    <>
-                      <Tooltip
-                        title={title || label}
-                        PopperProps={{
-                          sx: {
-                            pointerEvents: 'none',
-                          },
-                        }}
-                      >
-                        <Button
-                          {...rest}
-                          sx={{
-                            ...sx,
-                            minWidth: 'auto',
-                            px: 1,
-                            '&>svg': {
-                              fontSize: 20,
-                            },
-                            [`.${buttonClasses.endIcon}`]: {
-                              m: 0,
-                            },
-                          }}
-                        >
-                          {icon}
-                        </Button>
-                      </Tooltip>
-                      {popupElement}
-                    </>
-                  );
-                }
+        const { getToolElement } = tool;
+        const toolElement = (() => {
+          if ('element' in tool) {
+            return tool.element;
+          }
+          if ('type' in tool) {
+            switch (tool.type) {
+              case 'icon-button': {
+                const { label, icon, title, popupElement, ...rest } = omit(
+                  tool,
+                  'type'
+                );
                 return (
                   <>
-                    <Button startIcon={icon} {...rest} {...{ sx }}>
-                      {label}
-                    </Button>
+                    <Tooltip
+                      title={title || label}
+                      PopperProps={{
+                        sx: {
+                          pointerEvents: 'none',
+                        },
+                      }}
+                    >
+                      <IconButton {...rest}>{icon}</IconButton>
+                    </Tooltip>
                     {popupElement}
                   </>
                 );
-              })();
-              if (title) {
-                return <Tooltip {...{ title }}>{buttonElement}</Tooltip>;
               }
-              return buttonElement;
+              case 'button': {
+                const { label, icon, title, sx, popupElement, ...rest } = omit(
+                  tool,
+                  'type'
+                );
+                const buttonElement = (() => {
+                  if (!showFullToolWidth) {
+                    return (
+                      <>
+                        <Tooltip
+                          title={title || label}
+                          PopperProps={{
+                            sx: {
+                              pointerEvents: 'none',
+                            },
+                          }}
+                        >
+                          <Button
+                            {...rest}
+                            sx={{
+                              ...sx,
+                              minWidth: 'auto',
+                              px: 1,
+                              '&>svg': {
+                                fontSize: 20,
+                              },
+                              [`.${buttonClasses.endIcon}`]: {
+                                m: 0,
+                              },
+                            }}
+                          >
+                            {icon}
+                          </Button>
+                        </Tooltip>
+                        {popupElement}
+                      </>
+                    );
+                  }
+                  return (
+                    <>
+                      <Button startIcon={icon} {...rest} {...{ sx }}>
+                        {label}
+                      </Button>
+                      {popupElement}
+                    </>
+                  );
+                })();
+                if (title) {
+                  return <Tooltip {...{ title }}>{buttonElement}</Tooltip>;
+                }
+                return buttonElement;
+              }
             }
           }
+        })();
+        if (getToolElement) {
+          return getToolElement(toolElement);
         }
+        return toolElement;
       }
     });
 };

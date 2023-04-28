@@ -10,13 +10,14 @@ import {
   Grid,
   Grow,
   IconButton,
+  Paper,
   Popper,
   Stack,
   Typography,
 } from '@mui/material';
 import { FC, ReactNode, useEffect, useRef, useState } from 'react';
-import { DndProvider, useDrag, useDrop } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
+import { DndProvider, useDrag, useDragLayer, useDrop } from 'react-dnd';
+import { HTML5Backend, getEmptyImage } from 'react-dnd-html5-backend';
 
 import { PopupToolOptions, usePopupTool } from '../../../hooks/Tools';
 import {
@@ -37,6 +38,66 @@ const itemTypes = {
   LIST_ITEM: 'listItem',
 };
 
+const SortFieldDragLayer: FC = () => {
+  const { itemType, isDragging, item, delta } = useDragLayer((monitor) => ({
+    item: monitor.getItem(),
+    itemType: monitor.getItemType(),
+    initialOffset: monitor.getInitialSourceClientOffset(),
+    currentOffset: monitor.getSourceClientOffset(),
+    delta: monitor.getDifferenceFromInitialOffset(),
+    isDragging: monitor.isDragging(),
+  }));
+
+  if (!isDragging || itemType !== itemTypes.LIST_ITEM || !item) {
+    return null;
+  }
+
+  const { children, elementOffsetTop } = item;
+
+  return (
+    <Box
+      sx={{
+        height: 0,
+      }}
+    >
+      <Paper
+        elevation={2}
+        sx={{
+          alignItems: 'center',
+          py: 0.5,
+          px: 1,
+          ...(() => {
+            if (!delta) {
+              return {
+                display: 'none',
+              };
+            }
+            return {
+              position: 'absolute',
+              top: elementOffsetTop,
+              transform: `translateY(${delta.y}px)`,
+            };
+          })(),
+          pointerEvents: 'none',
+        }}
+      >
+        <Grid container columnSpacing={1}>
+          {children}
+          <Grid item>
+            <Box
+              sx={{
+                display: 'flex',
+              }}
+            >
+              <DragHandleIcon />
+            </Box>
+          </Grid>
+        </Grid>
+      </Paper>
+    </Box>
+  );
+};
+
 const DraggableSortedField: FC<{
   id: string;
   moveSortedField: (draggedId: string, id: string) => void;
@@ -48,7 +109,7 @@ const DraggableSortedField: FC<{
 
   const [{ handlerId, isDragging }, connectDrag, connectPreview] = useDrag({
     type: itemTypes.LIST_ITEM,
-    item: { id },
+    item: { id, children, elementOffsetTop: ref.current?.offsetTop },
     collect: (monitor) => {
       return {
         handlerId: monitor.getHandlerId(),
@@ -69,17 +130,20 @@ const DraggableSortedField: FC<{
     },
   });
 
+  useEffect(() => {
+    connectPreview(getEmptyImage(), { captureDraggingState: true });
+  }, [connectPreview]);
+
   connectDrag(dragHandleElementRef);
-  connectPreview(ref);
   connectDrop(ref);
 
   return (
     <Grid
       ref={ref}
       container
-      spacing={1}
+      columnSpacing={1}
       data-handler-id={handlerId}
-      sx={{ alignItems: 'center', mb: 1, opacity: isDragging ? 0 : 1 }}
+      sx={{ alignItems: 'center', py: 0.5, opacity: isDragging ? 0 : 1 }}
     >
       {children}
       <Grid item>
@@ -87,6 +151,7 @@ const DraggableSortedField: FC<{
           ref={dragHandleElementRef}
           sx={{
             display: 'flex',
+            cursor: 'grab',
           }}
         >
           <DragHandleIcon />
@@ -277,6 +342,7 @@ const DraggableSortedFieldsContainer = <RecordRow extends BaseDataRow>({
           );
         }
       )}
+      <SortFieldDragLayer />
     </Box>
   );
 };
