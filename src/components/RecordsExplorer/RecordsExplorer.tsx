@@ -343,6 +343,7 @@ export interface RecordsExplorerProps<
   recordsFinder?: (
     options: PaginatedRecordsFinderOptions
   ) => Promise<PaginatedResponseData<RecordRow> | RecordRow[]>;
+  getRecordLoadFunction?: (loadFunction: () => void) => void;
   recordDetailsFinder?: (selectedRecordId: string) => Promise<RecordRow>;
   getEditableRecordInitialValues?: (record: RecordRow) => any;
   recordCreator?: (values: InitialValues) => any;
@@ -494,6 +495,7 @@ const BaseRecordsExplorer = <
     showFilterTool = true,
     stateStorage,
     getViewFunction,
+    getRecordLoadFunction,
     ...rest
   } = omit(
     props,
@@ -567,6 +569,8 @@ const BaseRecordsExplorer = <
   getEditableRecordInitialValuesRef.current = getEditableRecordInitialValues;
   const getViewFunctionRef = useRef(getViewFunction);
   getViewFunctionRef.current = getViewFunction;
+  const getRecordLoadFunctionRef = useRef(getRecordLoadFunction);
+  getRecordLoadFunctionRef.current = getRecordLoadFunction;
 
   const viewFunctionRef = useRef((record: RecordRow) => {
     const { id } = record;
@@ -1037,6 +1041,12 @@ const BaseRecordsExplorer = <
       key: recordKey,
     }
   );
+
+  useEffect(() => {
+    if (getRecordLoadFunctionRef.current) {
+      getRecordLoadFunctionRef.current(load);
+    }
+  }, [load]);
 
   const data = (() => {
     if (recordsFinder && asyncData.length > 0) {
