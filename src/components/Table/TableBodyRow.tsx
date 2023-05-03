@@ -111,6 +111,7 @@ export const TableBodyRow = <T extends BaseDataRow>(
     defaultCountryCode: rowDefaultCountryCode,
     noWrap: rowNoWrap,
     enableSmallScreenOptimization = false,
+    getToolTipWrappedColumnNode,
     ...rest
   } = props;
 
@@ -321,7 +322,12 @@ export const TableBodyRow = <T extends BaseDataRow>(
           >
             <TableBodyColumn
               key={String(id)}
-              {...{ column, row, enableSmallScreenOptimization }}
+              {...{
+                column,
+                row,
+                enableSmallScreenOptimization,
+                getToolTipWrappedColumnNode,
+              }}
               {...column}
               onClick={() => {
                 if (
@@ -444,6 +450,7 @@ export const TableBodyRow = <T extends BaseDataRow>(
                     noWrap,
                     sx,
                     enableSmallScreenOptimization,
+                    getToolTipWrappedColumnNode,
                   }}
                   {...ellipsisMenuToolColumn}
                   column={ellipsisMenuToolColumn}
@@ -639,6 +646,7 @@ export const TableBodyRow = <T extends BaseDataRow>(
               dateTimeFormat,
               defaultCountryCode,
               noWrap,
+              getToolTipWrappedColumnNode,
             }}
             {...column}
             onClick={() => {

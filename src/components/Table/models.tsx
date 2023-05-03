@@ -7,7 +7,7 @@ import { TableProps as MuiBaseTableProps } from '@mui/material/Table';
 import { TableCellProps } from '@mui/material/TableCell';
 import { TablePaginationProps } from '@mui/material/TablePagination';
 import { TableRowProps as MuiTableRowProps } from '@mui/material/TableRow';
-import { ReactNode } from 'react';
+import { ReactElement, ReactNode } from 'react';
 
 import { CountryCode } from '../../interfaces/Countries';
 import { SortBy, SortOptions } from '../../interfaces/Sort';
@@ -162,6 +162,10 @@ export interface TableColumn<
   defaultCountryCode?: CountryCode;
   holdsPriorityInformation?: boolean;
   isGroupHeaderColumn?: boolean;
+  getToolTipWrappedColumnNode?: (
+    tableColumnNode: ReactElement,
+    row: DataRow
+  ) => ReactElement;
 }
 
 export interface ForEachDerivedColumnConfiguration<T> {
@@ -184,6 +188,7 @@ export interface TableRowProps<DataRow extends BaseDataRow = any>
     | 'noWrap'
     | 'opaque'
     | 'textTransform'
+    | 'getToolTipWrappedColumnNode'
   > {
   columns: Array<TableColumn<DataRow>>;
   row: DataRow;
@@ -223,6 +228,7 @@ export interface TableProps<DataRow extends BaseDataRow = any>
       | 'noWrap'
       | 'onClickRow'
       | 'textTransform'
+      | 'getToolTipWrappedColumnNode'
     >,
     Partial<
       Pick<
