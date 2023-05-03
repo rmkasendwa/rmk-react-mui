@@ -167,6 +167,7 @@ export const useTable = <DataRow extends BaseDataRow>(
     getEllipsisMenuToolProps,
     isGroupedTable = false,
     TableGroupingProps,
+    getToolTipWrappedColumnNode,
     sx,
     ...rest
   } = props;
@@ -1002,6 +1003,7 @@ export const useTable = <DataRow extends BaseDataRow>(
                     row,
                     textTransform,
                     enableSmallScreenOptimization,
+                    getToolTipWrappedColumnNode,
                   }}
                   columns={displayingColumns}
                   getRowProps={forEachRowProps}
@@ -1050,6 +1052,7 @@ export const useTable = <DataRow extends BaseDataRow>(
                   onClickRow,
                   row,
                   textTransform,
+                  getToolTipWrappedColumnNode,
                 }}
                 columns={displayingColumns}
                 getRowProps={forEachRowProps}

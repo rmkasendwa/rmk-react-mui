@@ -138,6 +138,7 @@ export const TableBodyColumn = forwardRef<any, TableBodyColumnProps<any>>(
       colSpan,
       isGroupHeaderColumn = false,
       opaque,
+      getToolTipWrappedColumnNode,
     } = props;
 
     const classes = composeClasses(
@@ -314,118 +315,126 @@ export const TableBodyColumn = forwardRef<any, TableBodyColumnProps<any>>(
       return { formattedColumnValue, baseColumnValue: (row as any)[id] };
     })();
 
-    const tableColumnContentElement = (
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          ...(() => {
-            if (!enableSmallScreenOptimization || !isSmallScreenSize) {
-              return {
-                alignItems:
-                  ({ left: 'start', right: 'end' } as any)[align] || align,
-              };
-            }
-          })(),
-          minWidth: 0,
-        }}
-      >
-        {(() => {
-          if (formattedColumnValue) {
-            return (
-              <FieldValue
-                {...{
-                  editable,
-                  editMode,
-                  onFieldValueUpdated,
-                  editField,
-                  validationRules,
-                  noWrap,
-                }}
-                {...columnTypographyPropsRest}
-                editField={(() => {
-                  if (getEditField) {
-                    return getEditField(row, column);
-                  }
-                  return editField;
-                })()}
-                editableValue={(() => {
-                  const editableValue = (() => {
-                    if (getEditableColumnValue) {
-                      return getEditableColumnValue(row, column);
+    const tableColumnNode = (() => {
+      const tableColumnContentElement = (
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            ...(() => {
+              if (!enableSmallScreenOptimization || !isSmallScreenSize) {
+                return {
+                  alignItems:
+                    ({ left: 'start', right: 'end' } as any)[align] || align,
+                };
+              }
+            })(),
+            minWidth: 0,
+          }}
+        >
+          {(() => {
+            if (formattedColumnValue) {
+              return (
+                <FieldValue
+                  {...{
+                    editable,
+                    editMode,
+                    onFieldValueUpdated,
+                    editField,
+                    validationRules,
+                    noWrap,
+                  }}
+                  {...columnTypographyPropsRest}
+                  editField={(() => {
+                    if (getEditField) {
+                      return getEditField(row, column);
                     }
-                    return baseColumnValue;
-                  })();
-                  return editableValue ?? null;
-                })()}
-                fieldValueEditor={(() => {
-                  if (fieldValueEditor) {
-                    return (updatedValue) => {
-                      return fieldValueEditor(row, updatedValue, column);
-                    };
-                  }
-                })()}
-                onChangeEditMode={(editMode) => setEditMode(editMode)}
-                type={mapTableColumnTypeToExoticDataType(type)}
-                showDefaultValue={false}
-                sx={{
-                  ...columnTypographyPropsSx,
-                }}
-              >
-                {formattedColumnValue}
-              </FieldValue>
-            );
-          }
-        })()}
-      </Box>
-    );
+                    return editField;
+                  })()}
+                  editableValue={(() => {
+                    const editableValue = (() => {
+                      if (getEditableColumnValue) {
+                        return getEditableColumnValue(row, column);
+                      }
+                      return baseColumnValue;
+                    })();
+                    return editableValue ?? null;
+                  })()}
+                  fieldValueEditor={(() => {
+                    if (fieldValueEditor) {
+                      return (updatedValue) => {
+                        return fieldValueEditor(row, updatedValue, column);
+                      };
+                    }
+                  })()}
+                  onChangeEditMode={(editMode) => setEditMode(editMode)}
+                  type={mapTableColumnTypeToExoticDataType(type)}
+                  showDefaultValue={false}
+                  sx={{
+                    ...columnTypographyPropsSx,
+                  }}
+                >
+                  {formattedColumnValue}
+                </FieldValue>
+              );
+            }
+          })()}
+        </Box>
+      );
 
-    if (enableSmallScreenOptimization && isSmallScreenSize) {
-      return tableColumnContentElement;
+      if (enableSmallScreenOptimization && isSmallScreenSize) {
+        return tableColumnContentElement;
+      }
+
+      return (
+        <TableCell
+          ref={ref}
+          {...{ align, colSpan }}
+          className={clsx([
+            classes.root,
+            isGroupHeaderColumn && classes.groupHeaderColumn,
+            opaque && classes.opaque,
+          ])}
+          onClick={(event) => {
+            onClickColumn && onClickColumn(row, column);
+            onClick && onClick(event);
+          }}
+          sx={{
+            py: 1,
+            px: 3,
+            cursor: onClickColumn ? 'pointer' : 'inherit',
+            position: 'relative',
+            overflow: 'hidden',
+            ['&:before']: {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              bottom: 0,
+              left: 0,
+              width: `calc(100% + 1px)`,
+              pointerEvents: 'none',
+            },
+            ...(() => {
+              if (editMode) {
+                return {
+                  p: 0,
+                };
+              }
+            })(),
+            ...sx,
+            ...(bodySx as any),
+          }}
+        >
+          {tableColumnContentElement}
+        </TableCell>
+      );
+    })();
+
+    if (getToolTipWrappedColumnNode) {
+      return getToolTipWrappedColumnNode(tableColumnNode, row);
     }
 
-    return (
-      <TableCell
-        ref={ref}
-        {...{ align, colSpan }}
-        className={clsx([
-          classes.root,
-          isGroupHeaderColumn && classes.groupHeaderColumn,
-          opaque && classes.opaque,
-        ])}
-        onClick={(event) => {
-          onClickColumn && onClickColumn(row, column);
-          onClick && onClick(event);
-        }}
-        sx={{
-          py: 1,
-          px: 3,
-          cursor: onClickColumn ? 'pointer' : 'inherit',
-          position: 'relative',
-          overflow: 'hidden',
-          ['&:before']: {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            bottom: 0,
-            left: 0,
-            width: `calc(100% + 1px)`,
-            pointerEvents: 'none',
-          },
-          ...(() => {
-            if (editMode) {
-              return {
-                p: 0,
-              };
-            }
-          })(),
-          ...sx,
-          ...(bodySx as any),
-        }}
-      >
-        {tableColumnContentElement}
-      </TableCell>
-    );
+    return tableColumnNode;
   }
 );
 
