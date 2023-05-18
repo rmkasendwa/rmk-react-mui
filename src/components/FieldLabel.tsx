@@ -1,7 +1,10 @@
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import {
   ComponentsOverrides,
   ComponentsProps,
   ComponentsVariants,
+  Grid,
+  Tooltip,
   Typography,
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
@@ -10,7 +13,7 @@ import {
   useThemeProps,
 } from '@mui/material';
 import clsx from 'clsx';
-import { forwardRef } from 'react';
+import { ReactNode, forwardRef } from 'react';
 
 import LoadingTypography, { LoadingTypographyProps } from './LoadingTypography';
 
@@ -49,6 +52,8 @@ declare module '@mui/material/styles/components' {
 export interface FieldLabelProps extends LoadingTypographyProps {
   required?: boolean;
   enableLoadingState?: boolean;
+  labelSuffix?: ReactNode;
+  helpTip?: ReactNode;
 }
 
 export function getFieldLabelUtilityClass(slot: string): string {
@@ -72,6 +77,8 @@ export const FieldLabel = forwardRef<HTMLElement, FieldLabelProps>(
       children,
       className,
       enableLoadingState = true,
+      labelSuffix,
+      helpTip,
       sx,
       ...rest
     } = props;
@@ -93,32 +100,70 @@ export const FieldLabel = forwardRef<HTMLElement, FieldLabelProps>(
     const LabelComponent = enableLoadingState ? LoadingTypography : Typography;
 
     return (
-      <LabelComponent
-        ref={ref as any}
-        className={clsx(classes.root, className)}
-        {...{ component: 'div' }}
-        variant="body2"
-        noWrap
-        {...rest}
-        sx={{
-          fontWeight: 500,
-          ...(() => {
-            if (required) {
-              return {
-                '&:after': {
-                  content: '"*"',
-                  ml: 0.2,
-                  color: palette.error.main,
-                },
-              };
-            }
-          })(),
-          ...((components?.MuiFieldLabel?.styleOverrides?.root as any) || {}),
-          ...sx,
-        }}
-      >
-        {children}
-      </LabelComponent>
+      <Grid container>
+        <Grid
+          item
+          sx={{
+            minWidth: 0,
+          }}
+        >
+          <LabelComponent
+            ref={ref as any}
+            className={clsx(classes.root, className)}
+            {...{ component: 'div' }}
+            variant="body2"
+            noWrap
+            {...rest}
+            sx={{
+              fontWeight: 500,
+              ...((components?.MuiFieldLabel?.styleOverrides?.root as any) ||
+                {}),
+              ...sx,
+            }}
+          >
+            {children}
+          </LabelComponent>
+        </Grid>
+        {(() => {
+          if (required) {
+            return (
+              <Grid item>
+                <LabelComponent sx={{ ml: 1, color: palette.error.main }}>
+                  *
+                </LabelComponent>
+              </Grid>
+            );
+          }
+        })()}
+        {(() => {
+          if (helpTip) {
+            return (
+              <Grid item>
+                <Tooltip
+                  title={helpTip}
+                  sx={{
+                    display: 'flex',
+                  }}
+                >
+                  <InfoOutlinedIcon
+                    sx={{
+                      fontSize: 16,
+                      ml: 2,
+                      color: palette.text.secondary,
+                    }}
+                  />
+                </Tooltip>
+              </Grid>
+            );
+          }
+        })()}
+        <Grid item xs />
+        {(() => {
+          if (labelSuffix) {
+            return <Grid item>{labelSuffix}</Grid>;
+          }
+        })()}
+      </Grid>
     );
   }
 );
