@@ -191,7 +191,7 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
         <FieldValueDisplay
           {...({} as any)}
           {...FieldValueDisplayPropsRest}
-          {...{ label, value }}
+          {...{ label, value, disabled }}
         />
       );
     }
@@ -350,7 +350,7 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
         <FieldValueDisplay
           {...FieldValueDisplayPropsRest}
           {...({} as any)}
-          {...{ label, required }}
+          {...{ label, required, disabled }}
           value={textField}
         />
       );

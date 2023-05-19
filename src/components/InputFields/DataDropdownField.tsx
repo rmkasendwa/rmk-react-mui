@@ -275,7 +275,11 @@ const BaseDataDropdownField = <Entity,>(
       if (getSelectedOptions) {
         return getSelectedOptions(value);
       }
-      if (getDropdownOptions) {
+      if (
+        getDropdownOptions &&
+        value &&
+        (!Array.isArray(value) || value.length > 0)
+      ) {
         const dropdownOptionsResponse = await getDropdownOptions({});
         const options = Array.isArray(dropdownOptionsResponse)
           ? dropdownOptionsResponse

@@ -42,3 +42,24 @@ LabelWrapped.args = {
     ),
   },
 } as TextFieldProps;
+
+export const LabelWrappedDisabled = Template.bind({});
+LabelWrappedDisabled.args = {
+  required: true,
+  labelWrapped: true,
+  FieldValueDisplayProps: {
+    helpTip: 'This is a help tip',
+    labelSuffix: (
+      <Typography
+        variant="body2"
+        color="primary"
+        sx={{
+          fontSize: 12,
+        }}
+      >
+        This is a suffix
+      </Typography>
+    ),
+  },
+  disabled: true,
+} as TextFieldProps;

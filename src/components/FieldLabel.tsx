@@ -54,6 +54,7 @@ export interface FieldLabelProps extends LoadingTypographyProps {
   enableLoadingState?: boolean;
   labelSuffix?: ReactNode;
   helpTip?: ReactNode;
+  disabled?: boolean;
 }
 
 export function getFieldLabelUtilityClass(slot: string): string {
@@ -79,6 +80,7 @@ export const FieldLabel = forwardRef<HTMLElement, FieldLabelProps>(
       enableLoadingState = true,
       labelSuffix,
       helpTip,
+      disabled,
       sx,
       ...rest
     } = props;
@@ -104,6 +106,13 @@ export const FieldLabel = forwardRef<HTMLElement, FieldLabelProps>(
         container
         sx={{
           alignItems: 'center',
+          ...(() => {
+            if (disabled) {
+              return {
+                opacity: 0.3,
+              };
+            }
+          })(),
         }}
       >
         <Grid
