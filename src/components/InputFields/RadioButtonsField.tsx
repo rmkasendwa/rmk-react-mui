@@ -96,6 +96,7 @@ export const RadioButtonsField = forwardRef<
     label,
     error,
     options,
+    disabled,
     ...rest
   } = props;
 
@@ -117,9 +118,14 @@ export const RadioButtonsField = forwardRef<
   const { sx: RadioPropsSx, ...RadioPropsRest } = RadioProps;
 
   return (
-    <FormControl ref={ref} {...rest} className={clsx(classes.root)}>
+    <FormControl
+      ref={ref}
+      {...{ disabled }}
+      {...rest}
+      className={clsx(classes.root)}
+    >
       {label ? (
-        <FieldLabel {...{ required }} {...FieldLabelPropsRest}>
+        <FieldLabel {...{ required, disabled }} {...FieldLabelPropsRest}>
           {label}
         </FieldLabel>
       ) : null}

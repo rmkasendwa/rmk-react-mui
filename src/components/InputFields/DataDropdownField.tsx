@@ -408,9 +408,9 @@ const BaseDataDropdownField = <Entity,>(
         const selectedValue = [...(Array.isArray(value) ? value : [value])];
         if (
           canLoadAsyncSelectedOptions &&
-          (prevSelectedOptions.length <= 0 ||
-            selectedValue.join(';') !==
-              prevSelectedOptions.map(({ value }) => value).join(';'))
+          selectedValue.length > 0 &&
+          selectedValue.join(';') !==
+            prevSelectedOptions.map(({ value }) => value).join(';')
         ) {
           loadAsyncSelectedOptions(value);
         }
