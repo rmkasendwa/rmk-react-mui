@@ -61,7 +61,7 @@ declare module '@mui/material/styles/components' {
 export interface FieldValueDisplayProps<
   FieldValue extends ReactNode = ReactNode
 > extends Partial<BoxProps>,
-    Pick<FieldLabelProps, 'required'>,
+    Pick<FieldLabelProps, 'required' | 'labelSuffix' | 'helpTip'>,
     Pick<
       FieldValueProps<FieldValue>,
       | 'editable'
@@ -129,6 +129,8 @@ export const BaseFieldValueDisplay = <FieldValue extends ReactNode>(
     onFieldValueUpdated,
     className,
     enableLoadingState = true,
+    labelSuffix,
+    helpTip,
     sx,
     ...rest
   } = props;
@@ -203,7 +205,7 @@ export const BaseFieldValueDisplay = <FieldValue extends ReactNode>(
       {displayLabel && (
         <FieldLabel
           className={clsx(classes.label, LabelPropsClassName)}
-          {...{ enableLoadingState, required }}
+          {...{ enableLoadingState, required, labelSuffix, helpTip }}
           {...LabelPropsRest}
           sx={{
             ...(components?.MuiFieldValueDisplay?.styleOverrides?.label as any),
