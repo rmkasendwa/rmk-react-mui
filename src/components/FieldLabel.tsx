@@ -100,7 +100,12 @@ export const FieldLabel = forwardRef<HTMLElement, FieldLabelProps>(
     const LabelComponent = enableLoadingState ? LoadingTypography : Typography;
 
     return (
-      <Grid container>
+      <Grid
+        container
+        sx={{
+          alignItems: 'center',
+        }}
+      >
         <Grid
           item
           sx={{
@@ -127,8 +132,24 @@ export const FieldLabel = forwardRef<HTMLElement, FieldLabelProps>(
         {(() => {
           if (required) {
             return (
-              <Grid item>
-                <LabelComponent sx={{ ml: 1, color: palette.error.main }}>
+              <Grid
+                item
+                sx={{
+                  display: 'flex',
+                }}
+              >
+                <LabelComponent
+                  {...{ component: 'div' }}
+                  variant="body2"
+                  sx={{
+                    fontWeight: 500,
+                    ...((components?.MuiFieldLabel?.styleOverrides
+                      ?.root as any) || {}),
+                    ...sx,
+                    ml: 1,
+                    color: palette.error.main,
+                  }}
+                >
                   *
                 </LabelComponent>
               </Grid>
@@ -138,13 +159,13 @@ export const FieldLabel = forwardRef<HTMLElement, FieldLabelProps>(
         {(() => {
           if (helpTip) {
             return (
-              <Grid item>
-                <Tooltip
-                  title={helpTip}
-                  sx={{
-                    display: 'flex',
-                  }}
-                >
+              <Grid
+                item
+                sx={{
+                  display: 'flex',
+                }}
+              >
+                <Tooltip title={helpTip}>
                   <InfoOutlinedIcon
                     sx={{
                       fontSize: 16,

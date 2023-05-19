@@ -1,5 +1,5 @@
 import { CssBaseline } from '@mui/material';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { ThemeProvider } from '@mui/material/styles';
 import { Preview } from '@storybook/react';
 import React, { useEffect } from 'react';
 import { BrowserRouter } from 'react-router-dom';
