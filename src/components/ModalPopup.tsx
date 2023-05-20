@@ -29,7 +29,6 @@ import {
   forwardRef,
   useEffect,
   useRef,
-  useState,
 } from 'react';
 
 import SearchSyncToolbar, { SearchSyncToolbarProps } from './SearchSyncToolbar';
@@ -88,6 +87,7 @@ export interface ModalPopupProps
   modalElement?: ReactElement;
   getModalElement?: (modalElement: ReactElement) => ReactElement;
   placement?: 'top' | 'right' | 'bottom' | 'left' | 'center';
+  popupStatsElement?: ReactNode;
 }
 
 export function getModalPopupUtilityClass(slot: string): string {
@@ -127,6 +127,7 @@ export const ModalPopup = forwardRef<HTMLDivElement, ModalPopupProps>(
       getModalElement,
       placement = 'center',
       headerElement,
+      popupStatsElement,
       ...rest
     } = props;
 
@@ -199,23 +200,6 @@ export const ModalPopup = forwardRef<HTMLDivElement, ModalPopupProps>(
       onCloseRef.current = onClose;
     }, [onClose]);
 
-    const [detailsContainerElement, setDetailsContainerElement] =
-      useState<HTMLDivElement | null>(null);
-    const [, setDetailsContainerHeight] = useState(0);
-
-    useEffect(() => {
-      if (detailsContainerElement) {
-        const windowResizeEventCallback = () => {
-          setDetailsContainerHeight(detailsContainerElement.offsetHeight);
-        };
-        window.addEventListener('resize', windowResizeEventCallback);
-        setDetailsContainerHeight(detailsContainerElement.offsetHeight);
-        return () => {
-          window.removeEventListener('resize', windowResizeEventCallback);
-        };
-      }
-    }, [detailsContainerElement]);
-
     modalElement ||
       (modalElement = (
         <Card
@@ -281,15 +265,7 @@ export const ModalPopup = forwardRef<HTMLDivElement, ModalPopupProps>(
               ...CardBodyPropsSx,
             }}
           >
-            {children ? (
-              <Box
-                ref={(detailsContainerElement: HTMLDivElement | null) => {
-                  setDetailsContainerElement(detailsContainerElement);
-                }}
-              >
-                {children}
-              </Box>
-            ) : null}
+            {children}
           </Box>
           {showActionsToolbar ? (
             <>
@@ -328,6 +304,15 @@ export const ModalPopup = forwardRef<HTMLDivElement, ModalPopupProps>(
                         >
                           {closeActionButtonPropsChildren ?? 'Close'}
                         </Button>
+                      </Grid>
+                    );
+                  }
+                })()}
+                {(() => {
+                  if (popupStatsElement) {
+                    return (
+                      <Grid item xs>
+                        {popupStatsElement}
                       </Grid>
                     );
                   }
