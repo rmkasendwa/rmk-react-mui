@@ -3,27 +3,50 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import {
   Box,
   Button,
+  Grid,
   Stack,
   Step,
   StepLabel,
   Stepper,
   Typography,
+  alpha,
   useTheme,
 } from '@mui/material';
 import { useRef, useState } from 'react';
 
 import ImportIcon from '../../components/Icons/ImportIcon';
+import DataDropdownField from '../../components/InputFields/DataDropdownField';
 import ModalPopup from '../../components/ModalPopup';
-import { RecordsExplorer } from '../../components/RecordsExplorer';
+import {
+  RecordsExplorer,
+  RecordsExplorerProps,
+} from '../../components/RecordsExplorer';
 import { ButtonTool } from '../../components/SearchSyncToolbar';
 import { TableColumn } from '../../components/Table';
+import { DropdownOption } from '../../interfaces/Utils';
 
 const steps = ['Upload a file', 'Preview data', 'Map data', 'Import'] as const;
 type Step = (typeof steps)[number];
 
-export interface ImportToolOptions {}
+export interface ImportToolOptions
+  extends Partial<
+    Pick<RecordsExplorerProps, 'recordLabelPlural' | 'recordLabelSingular'>
+  > {
+  importFields: DropdownOption[];
+}
 
-export const useImportTool = ({}: ImportToolOptions = {}): ButtonTool => {
+export const useImportTool = ({
+  recordLabelPlural,
+  recordLabelSingular,
+  importFields,
+}: ImportToolOptions): ButtonTool => {
+  if (!recordLabelPlural) {
+    recordLabelPlural = 'Records';
+  }
+
+  recordLabelSingular ||
+    (recordLabelSingular = recordLabelPlural.replace(/s$/gi, ''));
+
   const inputFieldRef = useRef<HTMLInputElement | null>(null);
   const { palette } = useTheme();
   const [open, setOpen] = useState(true);
@@ -76,20 +99,35 @@ export const useImportTool = ({}: ImportToolOptions = {}): ButtonTool => {
           },
         }}
         {...(() => {
-          if (activeStep === 'Preview data') {
-            return {
-              actionButtons: [
-                <Button
-                  key={0}
-                  variant="contained"
-                  onClick={() => {
-                    setActiveStep('Map data');
-                  }}
-                >
-                  Confirm your file
-                </Button>,
-              ],
-            };
+          switch (activeStep) {
+            case 'Preview data':
+              return {
+                actionButtons: [
+                  <Button
+                    key={0}
+                    variant="contained"
+                    onClick={() => {
+                      setActiveStep('Map data');
+                    }}
+                  >
+                    Confirm your file
+                  </Button>,
+                ],
+              };
+            case 'Map data':
+              return {
+                actionButtons: [
+                  <Button
+                    key={0}
+                    variant="contained"
+                    onClick={() => {
+                      setActiveStep('Import');
+                    }}
+                  >
+                    Confirm mapping
+                  </Button>,
+                ],
+              };
           }
         })()}
         showHeaderToolbar={false}
@@ -198,6 +236,7 @@ export const useImportTool = ({}: ImportToolOptions = {}): ButtonTool => {
               return (
                 <RecordsExplorer
                   title="Preview first 10 lines of your file"
+                  {...{ recordLabelPlural, recordLabelSingular }}
                   data={data.slice(0, 10)}
                   views={[
                     {
@@ -207,6 +246,118 @@ export const useImportTool = ({}: ImportToolOptions = {}): ButtonTool => {
                   ]}
                   elevation={0}
                 />
+              );
+            case 'Map data':
+              return (
+                <Stack
+                  sx={{
+                    gap: 3,
+                  }}
+                >
+                  <Grid
+                    container
+                    sx={{
+                      px: 3,
+                    }}
+                  >
+                    <Grid
+                      item
+                      sx={{
+                        width: 220,
+                      }}
+                    >
+                      <Typography variant="body2" noWrap>
+                        File Field Header
+                      </Typography>
+                    </Grid>
+                    <Grid
+                      item
+                      xs
+                      sx={{
+                        minWidth: 0,
+                      }}
+                    >
+                      <Typography variant="body2" noWrap>
+                        Data
+                      </Typography>
+                    </Grid>
+                    <Grid
+                      item
+                      sx={{
+                        width: 250,
+                      }}
+                    >
+                      <Typography variant="body2" noWrap>
+                        {recordLabelSingular} Attribute
+                      </Typography>
+                    </Grid>
+                  </Grid>
+
+                  {dataColumns.map(({ id: columnId, label }, index) => {
+                    return (
+                      <Box
+                        key={index}
+                        sx={{
+                          p: 3,
+                          bgcolor: alpha(palette.primary.main, 0.05),
+                          borderRadius: '4px',
+                          border: `1px solid ${palette.divider}`,
+                        }}
+                      >
+                        <Grid container>
+                          <Grid
+                            item
+                            sx={{
+                              width: 220,
+                            }}
+                          >
+                            <Typography variant="body2" noWrap>
+                              {label}
+                            </Typography>
+                          </Grid>
+                          <Grid
+                            item
+                            xs
+                            sx={{
+                              minWidth: 0,
+                            }}
+                          >
+                            {data.slice(0, 3).map((row, index) => {
+                              return (
+                                <Typography key={index} variant="body2" noWrap>
+                                  {row[columnId]}
+                                </Typography>
+                              );
+                            })}
+                          </Grid>
+                          <Grid
+                            item
+                            sx={{
+                              width: 250,
+                            }}
+                          >
+                            <DataDropdownField
+                              options={[
+                                {
+                                  label: 'Do not import',
+                                  value: 'do_not_import',
+                                },
+                                ...importFields,
+                              ]}
+                              value="do_not_import"
+                              fullWidth
+                              InputProps={{
+                                sx: {
+                                  bgcolor: palette.background.paper,
+                                },
+                              }}
+                            />
+                          </Grid>
+                        </Grid>
+                      </Box>
+                    );
+                  })}
+                </Stack>
               );
           }
         })()}

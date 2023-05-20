@@ -10,7 +10,22 @@ export default {
 } as Meta<typeof SearchSyncToolbar>;
 
 const Template: StoryFn<typeof SearchSyncToolbar> = () => {
-  const importTool = useImportTool();
+  const importTool = useImportTool({
+    importFields: [
+      {
+        value: 'firstName',
+        label: 'First Name',
+      },
+      {
+        value: 'lastName',
+        label: 'Last Name',
+      },
+      {
+        value: 'phoneNumber',
+        label: 'Phone Number',
+      },
+    ],
+  });
   return <SearchSyncToolbar tools={[importTool]} />;
 };
 
