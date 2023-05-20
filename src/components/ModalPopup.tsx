@@ -31,6 +31,7 @@ import {
   useRef,
 } from 'react';
 
+import ErrorAlert from './ErrorAlert';
 import SearchSyncToolbar, { SearchSyncToolbarProps } from './SearchSyncToolbar';
 
 export interface ModalPopupClasses {
@@ -128,6 +129,7 @@ export const ModalPopup = forwardRef<HTMLDivElement, ModalPopupProps>(
       placement = 'center',
       headerElement,
       popupStatsElement,
+      errorMessage,
       ...rest
     } = props;
 
@@ -266,6 +268,11 @@ export const ModalPopup = forwardRef<HTMLDivElement, ModalPopupProps>(
             }}
           >
             {children}
+            {errorMessage ? (
+              <Box sx={{ position: 'sticky', bottom: 0 }}>
+                <ErrorAlert message={errorMessage} />
+              </Box>
+            ) : null}
           </Box>
           {showActionsToolbar ? (
             <>

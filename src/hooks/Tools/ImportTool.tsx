@@ -56,6 +56,31 @@ export const useImportTool = ({
   const [dataColumns, setDataColumns] = useState<TableColumn[]>([]);
   const [mappedFields, setMappedFields] = useState<Record<string, string>>({});
 
+  const multipleFieldsMappedtoSameAttribute = (() => {
+    const valueCount: Record<string, string[]> = {};
+    const multipleFieldsMappedtoSameAttribute = [];
+
+    // Count the occurrence of each value
+    for (const key in mappedFields) {
+      const value = mappedFields[key];
+      if (valueCount[value]) {
+        valueCount[value].push(key);
+      } else {
+        valueCount[value] = [key];
+      }
+    }
+
+    // Find keys with the same value
+    for (const value in valueCount) {
+      const keys = valueCount[value];
+      if (keys.length > 1) {
+        multipleFieldsMappedtoSameAttribute.push(...keys);
+      }
+    }
+
+    return multipleFieldsMappedtoSameAttribute;
+  })();
+
   return {
     label: 'Import',
     icon: <ImportIcon />,
@@ -132,6 +157,14 @@ export const useImportTool = ({
                   {ignoredColumnCount === 1 ? '' : 's'}
                 </Typography>
               ),
+            };
+          }
+        })()}
+        {...(() => {
+          if (multipleFieldsMappedtoSameAttribute.length > 0) {
+            return {
+              errorMessage:
+                'Multiple file fields cannot be mapped to the same attribute.',
             };
           }
         })()}
@@ -222,9 +255,17 @@ export const useImportTool = ({
                       }}
                     />
                     <Box
+                      onClick={() => {
+                        inputFieldRef.current?.click();
+                      }}
                       sx={{
                         border: `2px dashed ${palette.divider}`,
                         borderRadius: '4px',
+                        cursor: 'pointer',
+                        opacity: 0.5,
+                        '&:hover': {
+                          opacity: 1,
+                        },
                       }}
                     >
                       <Stack
@@ -246,18 +287,11 @@ export const useImportTool = ({
                             fontWeight: 'bold',
                           }}
                         >
-                          Drag and drop files here
+                          Select your file or drag and drop it here
                         </Typography>
-                        <Typography variant="body2">or</Typography>
-                        <Button
-                          onClick={() => {
-                            inputFieldRef.current?.click();
-                          }}
-                          variant="contained"
-                          size="medium"
-                        >
-                          Browse files
-                        </Button>
+                        <Typography variant="body2">
+                          .csv, .xlsx or .txt
+                        </Typography>
                       </Stack>
                     </Box>
                   </>
@@ -410,6 +444,9 @@ export const useImportTool = ({
                                   },
                                 }}
                                 showClearButton={false}
+                                error={multipleFieldsMappedtoSameAttribute.includes(
+                                  String(columnId)
+                                )}
                               />
                             </Grid>
                           </Grid>
