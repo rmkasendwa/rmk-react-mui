@@ -14,8 +14,8 @@ import {
 } from '@mui/material';
 import { ReactNode, useRef, useState } from 'react';
 
-import ModalPopup from '../components/ModalPopup';
-import { ButtonTool } from '../components/SearchSyncToolbar';
+import ModalPopup from '../../components/ModalPopup';
+import { ButtonTool } from '../../components/SearchSyncToolbar';
 
 export interface PopupToolOptions extends Partial<ButtonTool> {
   bodyContent: ReactNode;
@@ -34,7 +34,7 @@ export const usePopupTool = ({
   footerContent,
   wrapBodyContentInCard = true,
   ...rest
-}: PopupToolOptions) => {
+}: PopupToolOptions): ButtonTool => {
   const { sx: BodyContentPropsSx, ...BodyContentPropsRest } = BodyContentProps;
   const anchorRef = useRef<HTMLButtonElement | null>(null);
 
@@ -102,7 +102,7 @@ export const usePopupTool = ({
     return bodyContent;
   })();
 
-  const tool: ButtonTool = {
+  return {
     color: 'inherit',
     ...rest,
     ref: anchorRef,
@@ -166,5 +166,4 @@ export const usePopupTool = ({
       );
     })(),
   };
-  return tool;
 };

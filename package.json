@@ -81,7 +81,7 @@
     "@emotion/react": "^11.10.5",
     "@emotion/styled": "^11.10.5",
     "@infinite-debugger/rmk-js-extensions": "^0.1.0-alpha.13",
-    "@infinite-debugger/rmk-utils": "^0.1.0-alpha.12",
+    "@infinite-debugger/rmk-utils": "^0.1.0-alpha.18",
     "@mui/base": "^5.0.0-alpha.114",
     "@mui/icons-material": "^5.10.9",
     "@mui/lab": "^5.0.0-alpha.106",

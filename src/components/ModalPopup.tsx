@@ -69,6 +69,7 @@ declare module '@mui/material/styles/components' {
 export interface ModalPopupProps
   extends Partial<Omit<ModalProps, 'children' | 'title'>> {
   title?: ReactNode;
+  headerElement?: ReactNode;
   children?: ReactNode;
   loading?: boolean;
   errorMessage?: string;
@@ -125,6 +126,7 @@ export const ModalPopup = forwardRef<HTMLDivElement, ModalPopupProps>(
       enableCloseOnBackdropClick = false,
       getModalElement,
       placement = 'center',
+      headerElement,
       ...rest
     } = props;
 
@@ -229,33 +231,46 @@ export const ModalPopup = forwardRef<HTMLDivElement, ModalPopupProps>(
             ...CardPropsSx,
           }}
         >
-          {showHeaderToolbar ? (
-            <>
-              <SearchSyncToolbar
-                hasSearchTool={false}
-                hasSyncTool={false}
-                {...SearchSyncToolbarPropsRest}
-                {...{ title }}
-                {...(() => {
-                  if (showCloseIconButton && !loading) {
-                    return {
-                      postSyncButtonTools: [
-                        {
-                          type: 'icon-button',
-                          icon: <CloseIcon />,
-                          onClick: onClose,
-                        },
-                      ] as NonNullable<
-                        typeof SearchSyncToolbarPropsRest.postSyncButtonTools
-                      >,
-                    };
-                  }
-                })()}
-                sx={SearchSyncToolbarPropsSx}
-              />
-              <Divider />
-            </>
-          ) : null}
+          {(() => {
+            if (showHeaderToolbar || headerElement) {
+              return (
+                <>
+                  {(() => {
+                    if (headerElement) {
+                      return headerElement;
+                    }
+                    if (showHeaderToolbar) {
+                      return (
+                        <SearchSyncToolbar
+                          hasSearchTool={false}
+                          hasSyncTool={false}
+                          {...SearchSyncToolbarPropsRest}
+                          {...{ title }}
+                          {...(() => {
+                            if (showCloseIconButton && !loading) {
+                              return {
+                                postSyncButtonTools: [
+                                  {
+                                    type: 'icon-button',
+                                    icon: <CloseIcon />,
+                                    onClick: onClose,
+                                  },
+                                ] as NonNullable<
+                                  typeof SearchSyncToolbarPropsRest.postSyncButtonTools
+                                >,
+                              };
+                            }
+                          })()}
+                          sx={SearchSyncToolbarPropsSx}
+                        />
+                      );
+                    }
+                  })()}
+                  <Divider />
+                </>
+              );
+            }
+          })()}
           <Box
             {...CardBodyPropsRest}
             sx={{
