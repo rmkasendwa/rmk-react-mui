@@ -48,6 +48,9 @@ export const useImportTool = ({
   recordLabelSingular ||
     (recordLabelSingular = recordLabelPlural.replace(/s$/gi, ''));
 
+  const lowercaseRecordLabelPlural = recordLabelPlural.toLowerCase();
+  const lowercaseRecordLabelSingular = recordLabelSingular.toLowerCase();
+
   const inputFieldRef = useRef<HTMLInputElement | null>(null);
   const { palette } = useTheme();
   const [open, setOpen] = useState(true);
@@ -81,6 +84,12 @@ export const useImportTool = ({
     return multipleFieldsMappedtoSameAttribute;
   })();
 
+  const errorMessage = (() => {
+    if (multipleFieldsMappedtoSameAttribute.length > 0) {
+      return 'Multiple file fields cannot be mapped to the same attribute.';
+    }
+  })();
+
   return {
     label: 'Import',
     icon: <ImportIcon />,
@@ -95,6 +104,7 @@ export const useImportTool = ({
         onClose={() => {
           setOpen(false);
         }}
+        errorMessage={errorMessage}
         CardProps={{
           sx: {
             maxHeight: 'none',
@@ -109,6 +119,22 @@ export const useImportTool = ({
               }
             })(),
           },
+        }}
+        CardBodyProps={{
+          sx: {
+            p: 0,
+            position: 'relative',
+            display: 'flex',
+            flexDirection: 'column',
+          },
+        }}
+        CloseActionButtonProps={{
+          children: (() => {
+            if (activeStep === 'Upload a file') {
+              return 'Close';
+            }
+            return 'Cancel';
+          })(),
         }}
         {...(() => {
           switch (activeStep) {
@@ -127,19 +153,38 @@ export const useImportTool = ({
                 ],
               };
             case 'Map data':
-              return {
-                actionButtons: [
-                  <Button
-                    key={0}
-                    variant="contained"
-                    onClick={() => {
-                      setActiveStep('Import');
-                    }}
-                  >
-                    Confirm mapping
-                  </Button>,
-                ],
-              };
+              if (!errorMessage) {
+                return {
+                  actionButtons: [
+                    <Button
+                      key={0}
+                      variant="contained"
+                      onClick={() => {
+                        setActiveStep('Import');
+                      }}
+                    >
+                      Confirm mapping
+                    </Button>,
+                  ],
+                };
+              }
+              break;
+            case 'Import':
+              if (!errorMessage) {
+                return {
+                  actionButtons: [
+                    <Button
+                      key={0}
+                      variant="contained"
+                      onClick={() => {
+                        // TODO: call data import function
+                      }}
+                    >
+                      Import {recordLabelPlural}
+                    </Button>,
+                  ],
+                };
+              }
           }
         })()}
         {...(() => {
@@ -160,22 +205,6 @@ export const useImportTool = ({
             };
           }
         })()}
-        {...(() => {
-          if (multipleFieldsMappedtoSameAttribute.length > 0) {
-            return {
-              errorMessage:
-                'Multiple file fields cannot be mapped to the same attribute.',
-            };
-          }
-        })()}
-        CardBodyProps={{
-          sx: {
-            p: 0,
-            position: 'relative',
-            display: 'flex',
-            flexDirection: 'column',
-          },
-        }}
         sx={{
           alignItems: 'center',
           justifyContent: 'center',
@@ -454,6 +483,26 @@ export const useImportTool = ({
                       );
                     })}
                   </Stack>
+                );
+              case 'Import':
+                return (
+                  <>
+                    <Typography
+                      variant="h2"
+                      sx={{
+                        fontSize: 24,
+                      }}
+                    >
+                      Confirm {recordLabelPlural} Importation
+                    </Typography>
+                    <Typography>
+                      {data.length}{' '}
+                      {data.length === 1
+                        ? lowercaseRecordLabelSingular
+                        : lowercaseRecordLabelPlural}{' '}
+                      will be imported when you confirm
+                    </Typography>
+                  </>
                 );
             }
           })()}
