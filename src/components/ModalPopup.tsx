@@ -273,7 +273,12 @@ export const ModalPopup = forwardRef<HTMLDivElement, ModalPopupProps>(
               <Grid
                 container
                 spacing={2}
-                sx={{ py: 2, px: 3, flexDirection: 'row-reverse' }}
+                sx={{
+                  py: 2,
+                  px: 3,
+                  flexDirection: 'row-reverse',
+                  alignItems: 'center',
+                }}
               >
                 {(() => {
                   if (actionButtons) {
