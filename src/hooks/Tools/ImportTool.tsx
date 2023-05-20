@@ -117,6 +117,24 @@ export const useImportTool = ({
               };
           }
         })()}
+        {...(() => {
+          if (activeStep === 'Map data') {
+            const importedColumnCount = Object.keys(mappedFields).length;
+            const ignoredColumnCount = dataColumns.length - importedColumnCount;
+            return {
+              popupStatsElement: (
+                <Typography variant="body2" noWrap>
+                  <strong>
+                    {importedColumnCount} column
+                    {importedColumnCount === 1 ? '' : 's'}
+                  </strong>{' '}
+                  to be imported. Ignored {ignoredColumnCount} column
+                  {ignoredColumnCount === 1 ? '' : 's'}
+                </Typography>
+              ),
+            };
+          }
+        })()}
         CardBodyProps={{
           sx: {
             p: 0,
