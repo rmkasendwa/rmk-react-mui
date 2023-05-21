@@ -61,7 +61,10 @@ import ModalForm, {
   ModalFormProps,
 } from './ModalForm';
 import { PageTitleProps } from './PageTitle';
-import SearchSyncToolbar, { SearchSyncToolbarProps } from './SearchSyncToolbar';
+import SearchSyncToolbar, {
+  SearchSyncToolbarProps,
+  Tool,
+} from './SearchSyncToolbar';
 import Table, { BaseDataRow, TableProps } from './Table';
 
 export interface TableCrudClasses {
@@ -113,6 +116,7 @@ export interface TableCrudProps<
       'revalidationKey' | 'autoSync'
     > {
   title?: ReactNode;
+  postCreateButtonTools?: Tool[];
   children?:
     | ModalFormFunctionChildren<
         InitialValues,
@@ -207,6 +211,7 @@ const BaseTableCrud = <
     editableFields,
     revalidationKey = '',
     tools = [],
+    postCreateButtonTools = [],
     children,
     PaginatedTableWrapperProps = {},
     pathToAddNew,
@@ -549,6 +554,7 @@ const BaseTableCrud = <
           }
           return [];
         })(),
+        ...postCreateButtonTools,
       ]}
       sx={{
         [`.${outlinedInputClasses.root}`]: {
