@@ -14,7 +14,7 @@ import {
   useTheme,
 } from '@mui/material';
 import { omit } from 'lodash';
-import { ReactNode, useRef, useState } from 'react';
+import { ReactNode, useEffect, useRef, useState } from 'react';
 
 import IconLoadingScreen from '../../components/IconLoadingScreen';
 import ImportIcon from '../../components/Icons/ImportIcon';
@@ -98,6 +98,38 @@ export const useImportTool = ({
     return multipleFieldsMappedtoSameAttribute;
   })();
 
+  const [isDragging, setIsDragging] = useState(false);
+
+  useEffect(() => {
+    if (activeStep === 'Upload a file') {
+      const dragOverEventCallback = (event: Event) => {
+        event.preventDefault();
+        setIsDragging(true);
+      };
+      const dragLeaveEventCallback = (event: Event) => {
+        event.preventDefault();
+        setIsDragging(false);
+      };
+      const dragEnterEvents = ['drag', 'dragstart', 'dragenter', 'dragover'];
+      dragEnterEvents.forEach((event) => {
+        window.addEventListener(event, dragOverEventCallback);
+      });
+
+      const dragLeaveEvents = ['dragleave', 'drop', 'dragend'];
+      dragLeaveEvents.forEach((event) => {
+        window.addEventListener(event, dragLeaveEventCallback);
+      });
+      return () => {
+        dragEnterEvents.forEach((event) => {
+          window.removeEventListener(event, dragOverEventCallback);
+        });
+        dragLeaveEvents.forEach((event) => {
+          window.removeEventListener(event, dragLeaveEventCallback);
+        });
+      };
+    }
+  }, [activeStep]);
+
   const {
     mutate: importRecords,
     mutating: importingRecords,
@@ -134,8 +166,41 @@ export const useImportTool = ({
     resetImportation();
   };
 
+  const handleSelectedFile = (file: File) => {
+    if (
+      file.name &&
+      ALLOWED_FILE_FORMATS.includes(file.name.split('.').pop() as string)
+    ) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const fileData = event.target?.result;
+        if (fileData) {
+          const data = parseCSV(fileData as string);
+          if (data.length > 0) {
+            setActiveStep('Preview data');
+            setData(data);
+            setDataColumns(
+              Object.keys(data[0]).map((key) => {
+                return {
+                  id: key,
+                  label: key,
+                };
+              })
+            );
+          } else {
+            // TODO: 'Show error message';
+          }
+        }
+      };
+      reader.onerror = function (err) {
+        console.error(err);
+      };
+      reader.readAsText(file);
+    }
+  };
+
   return {
-    label: 'Import',
+    label: `Import ${recordLabelPlural}`,
     icon: <ImportIcon />,
     type: 'button',
     onClick: () => {
@@ -321,47 +386,22 @@ export const useImportTool = ({
                             style={{ display: 'none' }}
                             onChange={() => {
                               const file = inputFieldRef.current?.files?.[0];
-                              if (!file) {
-                                return;
-                              }
-
-                              if (
-                                file.name &&
-                                ALLOWED_FILE_FORMATS.includes(
-                                  file.name.split('.').pop() as string
-                                )
-                              ) {
-                                const reader = new FileReader();
-                                reader.onload = (event) => {
-                                  const fileData = event.target?.result;
-                                  if (fileData) {
-                                    const data = parseCSV(fileData as string);
-                                    if (data.length > 0) {
-                                      setActiveStep('Preview data');
-                                      setData(data);
-                                      setDataColumns(
-                                        Object.keys(data[0]).map((key) => {
-                                          return {
-                                            id: key,
-                                            label: key,
-                                          };
-                                        })
-                                      );
-                                    } else {
-                                      // TODO: 'Show error message';
-                                    }
-                                  }
-                                };
-                                reader.onerror = function (err) {
-                                  console.error(err);
-                                };
-                                reader.readAsText(file);
+                              if (file) {
+                                handleSelectedFile(file);
                               }
                             }}
                           />
                           <Box
                             onClick={() => {
                               inputFieldRef.current?.click();
+                            }}
+                            onDrop={(event) => {
+                              event.preventDefault();
+                              setIsDragging(false);
+                              const file = event.dataTransfer.files[0];
+                              if (file) {
+                                handleSelectedFile(file);
+                              }
                             }}
                             sx={{
                               border: `2px dashed ${palette.divider}`,
@@ -386,17 +426,35 @@ export const useImportTool = ({
                                   fontSize: 80,
                                 }}
                               />
-                              <Typography
-                                variant="body1"
-                                sx={{
-                                  fontWeight: 'bold',
-                                }}
-                              >
-                                Select your file or drag and drop it here
-                              </Typography>
-                              <Typography variant="body2">
-                                .csv, .xlsx or .txt
-                              </Typography>
+                              {(() => {
+                                if (isDragging) {
+                                  return (
+                                    <Typography
+                                      variant="body1"
+                                      sx={{
+                                        fontWeight: 'bold',
+                                      }}
+                                    >
+                                      Drop the file here
+                                    </Typography>
+                                  );
+                                }
+                                return (
+                                  <>
+                                    <Typography
+                                      variant="body1"
+                                      sx={{
+                                        fontWeight: 'bold',
+                                      }}
+                                    >
+                                      Select your file or drag and drop it here
+                                    </Typography>
+                                    <Typography variant="body2">
+                                      .csv, .xlsx or .txt
+                                    </Typography>
+                                  </>
+                                );
+                              })()}
                             </Stack>
                           </Box>
                         </>
