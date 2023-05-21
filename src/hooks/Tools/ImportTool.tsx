@@ -101,34 +101,34 @@ export const useImportTool = ({
   const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
-    if (activeStep === 'Upload a file') {
-      const dragOverEventCallback = (event: Event) => {
+    if (activeStep === 'Upload a file' && open) {
+      const dragOverEventCallback = (event: DragEvent) => {
         event.preventDefault();
         setIsDragging(true);
       };
-      const dragLeaveEventCallback = (event: Event) => {
+      const dragLeaveEventCallback = (event: DragEvent) => {
         event.preventDefault();
         setIsDragging(false);
       };
       const dragEnterEvents = ['drag', 'dragstart', 'dragenter', 'dragover'];
       dragEnterEvents.forEach((event) => {
-        window.addEventListener(event, dragOverEventCallback);
+        document.addEventListener(event, dragOverEventCallback as any);
       });
 
-      const dragLeaveEvents = ['dragleave', 'drop', 'dragend'];
+      const dragLeaveEvents = ['dragend', 'dragleave', 'drop'];
       dragLeaveEvents.forEach((event) => {
-        window.addEventListener(event, dragLeaveEventCallback);
+        document.addEventListener(event, dragLeaveEventCallback as any);
       });
       return () => {
         dragEnterEvents.forEach((event) => {
-          window.removeEventListener(event, dragOverEventCallback);
+          document.removeEventListener(event, dragOverEventCallback as any);
         });
         dragLeaveEvents.forEach((event) => {
-          window.removeEventListener(event, dragLeaveEventCallback);
+          document.removeEventListener(event, dragLeaveEventCallback as any);
         });
       };
     }
-  }, [activeStep]);
+  }, [activeStep, open]);
 
   const {
     mutate: importRecords,
@@ -178,7 +178,14 @@ export const useImportTool = ({
           const data = parseCSV(fileData as string);
           if (data.length > 0) {
             setActiveStep('Preview data');
-            setData(data);
+            setData(
+              data.map((row, index) => {
+                return {
+                  ...row,
+                  id: index,
+                };
+              })
+            );
             setDataColumns(
               Object.keys(data[0]).map((key) => {
                 return {
@@ -208,7 +215,16 @@ export const useImportTool = ({
     },
     popupElement: (
       <ModalPopup
-        title={`Import ${recordLabelPlural}`}
+        title={(() => {
+          if (
+            activeStep === 'Import' &&
+            !importingRecords &&
+            !recordsImported
+          ) {
+            return `Confirm ${recordLabelPlural} Importation`;
+          }
+          return `Import ${recordLabelPlural}`;
+        })()}
         open={open}
         onClose={handleClose}
         errorMessage={errorMessage}
@@ -299,8 +315,8 @@ export const useImportTool = ({
         })()}
         //#endregion
         {...(() => {
-          if (activeStep === 'Map data') {
-            const importedColumnCount = Object.keys(mappedFields).length;
+          const importedColumnCount = Object.keys(mappedFields).length;
+          if (activeStep === 'Map data' && importedColumnCount > 0) {
             const ignoredColumnCount = dataColumns.length - importedColumnCount;
             return {
               popupStatsElement: (
@@ -341,23 +357,29 @@ export const useImportTool = ({
           }
           return (
             <>
-              <Box
-                sx={{
-                  px: 3,
-                  py: 2,
-                }}
-              >
-                <Stepper
-                  activeStep={importSteps.indexOf(activeStep)}
-                  alternativeLabel
-                >
-                  {importSteps.map((label) => (
-                    <Step key={label}>
-                      <StepLabel>{label}</StepLabel>
-                    </Step>
-                  ))}
-                </Stepper>
-              </Box>
+              {(() => {
+                if (activeStep !== 'Import') {
+                  return (
+                    <Box
+                      sx={{
+                        px: 3,
+                        py: 2,
+                      }}
+                    >
+                      <Stepper
+                        activeStep={importSteps.indexOf(activeStep)}
+                        alternativeLabel
+                      >
+                        {importSteps.map((label) => (
+                          <Step key={label}>
+                            <StepLabel>{label}</StepLabel>
+                          </Step>
+                        ))}
+                      </Stepper>
+                    </Box>
+                  );
+                }
+              })()}
               <Box
                 sx={{
                   position: 'relative',
@@ -411,6 +433,15 @@ export const useImportTool = ({
                               '&:hover': {
                                 opacity: 1,
                               },
+                              ...(() => {
+                                if (isDragging) {
+                                  return {
+                                    opacity: 1,
+                                    border: `2px dashed ${palette.primary.main}`,
+                                    bgcolor: alpha(palette.primary.main, 0.1),
+                                  };
+                                }
+                              })(),
                             }}
                           >
                             <Stack
@@ -641,23 +672,13 @@ export const useImportTool = ({
                       );
                     case 'Import':
                       return (
-                        <>
-                          <Typography
-                            variant="h2"
-                            sx={{
-                              fontSize: 24,
-                            }}
-                          >
-                            Confirm {recordLabelPlural} Importation
-                          </Typography>
-                          <Typography>
-                            {addThousandCommas(data.length)}{' '}
-                            {data.length === 1
-                              ? lowercaseRecordLabelSingular
-                              : lowercaseRecordLabelPlural}{' '}
-                            will be imported when you confirm
-                          </Typography>
-                        </>
+                        <Typography>
+                          {addThousandCommas(data.length)}{' '}
+                          {data.length === 1
+                            ? lowercaseRecordLabelSingular
+                            : lowercaseRecordLabelPlural}{' '}
+                          will be imported when you confirm
+                        </Typography>
                       );
                   }
                 })()}
