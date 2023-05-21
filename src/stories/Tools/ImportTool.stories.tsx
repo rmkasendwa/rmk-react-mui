@@ -1,16 +1,20 @@
+import { Button } from '@mui/material';
 import { Meta, StoryFn } from '@storybook/react';
+import { omit } from 'lodash';
 import React from 'react';
 
-import SearchSyncToolbar from '../../components/SearchSyncToolbar';
-import { useImportTool } from '../../hooks/Tools/ImportTool';
+import { ImportToolOptions, useImportTool } from '../../hooks/Tools/ImportTool';
 
 export default {
   title: 'Hooks/Tools/Import Tool',
-  component: SearchSyncToolbar,
-} as Meta<typeof SearchSyncToolbar>;
+  component: Button,
+  parameters: {
+    layout: 'centered',
+  },
+} as Meta<typeof useImportTool>;
 
-const Template: StoryFn<typeof SearchSyncToolbar> = () => {
-  const importTool = useImportTool({
+const Template: StoryFn<typeof useImportTool> = ({ ...rest }) => {
+  const { label, icon, popupElement, ...toolPropsRest } = useImportTool({
     importFields: [
       {
         value: 'firstName',
@@ -33,9 +37,19 @@ const Template: StoryFn<typeof SearchSyncToolbar> = () => {
         }, 5000);
       });
     },
+    ...rest,
   });
-  return <SearchSyncToolbar tools={[importTool]} />;
+  return (
+    <>
+      <Button startIcon={icon} {...omit(toolPropsRest, 'title', 'type')}>
+        {label}
+      </Button>
+      {popupElement}
+    </>
+  );
 };
 
 export const Default = Template.bind({});
-Default.args = {};
+Default.args = {
+  recordLabelPlural: 'Contacts',
+} as ImportToolOptions;
