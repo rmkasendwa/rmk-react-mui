@@ -25,6 +25,14 @@ const Template: StoryFn<typeof SearchSyncToolbar> = () => {
         label: 'Phone Number',
       },
     ],
+    recordsImporter: async (records) => {
+      console.log({ records });
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(records);
+        }, 10000);
+      });
+    },
   });
   return <SearchSyncToolbar tools={[importTool]} />;
 };
