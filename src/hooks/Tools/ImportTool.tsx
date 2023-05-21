@@ -29,8 +29,15 @@ import { TableColumn } from '../../components/Table';
 import { DropdownOption } from '../../interfaces/Utils';
 import { useMutation } from '../Utils';
 
-const steps = ['Upload a file', 'Preview data', 'Map data', 'Import'] as const;
-type Step = (typeof steps)[number];
+export const importSteps = [
+  'Upload a file',
+  'Preview data',
+  'Map data',
+  'Import',
+] as const;
+export type ImportStep = (typeof importSteps)[number];
+
+export const ALLOWED_FILE_FORMATS = ['csv'];
 
 export interface ImportToolOptions
   extends Partial<
@@ -61,7 +68,7 @@ export const useImportTool = ({
   const inputFieldRef = useRef<HTMLInputElement | null>(null);
   const { palette } = useTheme();
   const [open, setOpen] = useState(false);
-  const [activeStep, setActiveStep] = useState<Step>('Upload a file');
+  const [activeStep, setActiveStep] = useState<ImportStep>('Upload a file');
   const [data, setData] = useState<any[]>([]);
   const [dataColumns, setDataColumns] = useState<TableColumn[]>([]);
   const [mappedFields, setMappedFields] = useState<Record<string, string>>({});
@@ -276,10 +283,10 @@ export const useImportTool = ({
                 }}
               >
                 <Stepper
-                  activeStep={steps.indexOf(activeStep)}
+                  activeStep={importSteps.indexOf(activeStep)}
                   alternativeLabel
                 >
-                  {steps.map((label) => (
+                  {importSteps.map((label) => (
                     <Step key={label}>
                       <StepLabel>{label}</StepLabel>
                     </Step>
@@ -312,13 +319,20 @@ export const useImportTool = ({
                             type="file"
                             accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
                             style={{ display: 'none' }}
-                            onChange={(event) => {
+                            onChange={() => {
+                              const file = inputFieldRef.current?.files?.[0];
+                              if (!file) {
+                                return;
+                              }
+
                               if (
-                                event.target.files &&
-                                event.target.files.length > 0
+                                file.name &&
+                                ALLOWED_FILE_FORMATS.includes(
+                                  file.name.split('.').pop() as string
+                                )
                               ) {
                                 const reader = new FileReader();
-                                reader.onload = function (event) {
+                                reader.onload = (event) => {
                                   const fileData = event.target?.result;
                                   if (fileData) {
                                     const data = parseCSV(fileData as string);
@@ -341,7 +355,7 @@ export const useImportTool = ({
                                 reader.onerror = function (err) {
                                   console.error(err);
                                 };
-                                reader.readAsText(event.target.files[0]);
+                                reader.readAsText(file);
                               }
                             }}
                           />
@@ -387,12 +401,25 @@ export const useImportTool = ({
                           </Box>
                         </>
                       );
-                    case 'Preview data':
+                    case 'Preview data': {
+                      const maxRecordsToPreview = 100;
+                      const dataToPreview = data.slice(0, maxRecordsToPreview);
                       return (
                         <RecordsExplorer
-                          title="Preview first 10 lines of your file"
+                          title={(() => {
+                            if (dataToPreview.length < data.length) {
+                              return `Preview first ${addThousandCommas(
+                                maxRecordsToPreview
+                              )} ${
+                                dataToPreview.length === 1
+                                  ? lowercaseRecordLabelSingular
+                                  : lowercaseRecordLabelPlural
+                              } of your file`;
+                            }
+                            return `${recordLabelPlural} in your file`;
+                          })()}
                           {...{ recordLabelPlural, recordLabelSingular }}
-                          data={data.slice(0, 10)}
+                          data={dataToPreview}
                           views={[
                             {
                               type: 'List',
@@ -402,6 +429,7 @@ export const useImportTool = ({
                           elevation={0}
                         />
                       );
+                    }
                     case 'Map data':
                       return (
                         <Stack
