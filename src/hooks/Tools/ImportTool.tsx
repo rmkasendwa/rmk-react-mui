@@ -7,7 +7,7 @@ import {
   Grid,
   Stack,
   Step,
-  StepLabel,
+  StepButton,
   Stepper,
   Typography,
   alpha,
@@ -72,6 +72,7 @@ export const useImportTool = ({
   const [data, setData] = useState<any[]>([]);
   const [dataColumns, setDataColumns] = useState<TableColumn[]>([]);
   const [mappedFields, setMappedFields] = useState<Record<string, string>>({});
+  const [completedSteps, setCompletedSteps] = useState<ImportStep[]>([]);
 
   const multipleFieldsMappedtoSameAttribute = (() => {
     const valueCount: Record<string, string[]> = {};
@@ -163,6 +164,7 @@ export const useImportTool = ({
     setData([]);
     setDataColumns([]);
     setMappedFields({});
+    setCompletedSteps([]);
     resetImportation();
   };
 
@@ -178,6 +180,7 @@ export const useImportTool = ({
           const data = parseCSV(fileData as string);
           if (data.length > 0) {
             setActiveStep('Preview data');
+            setCompletedSteps([...completedSteps, 'Upload a file']);
             setData(
               data.map((row, index) => {
                 return {
@@ -271,6 +274,7 @@ export const useImportTool = ({
                       variant="contained"
                       onClick={() => {
                         setActiveStep('Map data');
+                        setCompletedSteps([...completedSteps, 'Preview data']);
                       }}
                     >
                       Confirm your file
@@ -286,6 +290,7 @@ export const useImportTool = ({
                         variant="contained"
                         onClick={() => {
                           setActiveStep('Import');
+                          setCompletedSteps([...completedSteps, 'Map data']);
                         }}
                       >
                         Confirm mapping
@@ -357,29 +362,32 @@ export const useImportTool = ({
           }
           return (
             <>
-              {(() => {
-                if (activeStep !== 'Import') {
-                  return (
-                    <Box
-                      sx={{
-                        px: 3,
-                        py: 2,
-                      }}
+              <Box
+                sx={{
+                  px: 3,
+                  py: 2,
+                }}
+              >
+                <Stepper
+                  activeStep={importSteps.indexOf(activeStep)}
+                  alternativeLabel
+                >
+                  {importSteps.map((label) => (
+                    <Step
+                      key={label}
+                      completed={completedSteps.includes(label)}
                     >
-                      <Stepper
-                        activeStep={importSteps.indexOf(activeStep)}
-                        alternativeLabel
+                      <StepButton
+                        onClick={() => {
+                          setActiveStep(label);
+                        }}
                       >
-                        {importSteps.map((label) => (
-                          <Step key={label}>
-                            <StepLabel>{label}</StepLabel>
-                          </Step>
-                        ))}
-                      </Stepper>
-                    </Box>
-                  );
-                }
-              })()}
+                        {label}
+                      </StepButton>
+                    </Step>
+                  ))}
+                </Stepper>
+              </Box>
               <Box
                 sx={{
                   position: 'relative',
@@ -627,7 +635,10 @@ export const useImportTool = ({
                                         },
                                         ...importFields,
                                       ]}
-                                      value="do_not_import"
+                                      value={
+                                        mappedFields[String(columnId)] ||
+                                        'do_not_import'
+                                      }
                                       onChange={(event) => {
                                         if (
                                           !event.target.value ||
@@ -672,12 +683,12 @@ export const useImportTool = ({
                       );
                     case 'Import':
                       return (
-                        <Typography>
+                        <Typography align="center">
                           {addThousandCommas(data.length)}{' '}
                           {data.length === 1
                             ? lowercaseRecordLabelSingular
                             : lowercaseRecordLabelPlural}{' '}
-                          will be imported when you confirm
+                          will be imported
                         </Typography>
                       );
                   }
