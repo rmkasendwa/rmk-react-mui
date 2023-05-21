@@ -14,7 +14,7 @@ import {
   useTheme,
 } from '@mui/material';
 import { omit } from 'lodash';
-import { useRef, useState } from 'react';
+import { ReactNode, useRef, useState } from 'react';
 
 import IconLoadingScreen from '../../components/IconLoadingScreen';
 import ImportIcon from '../../components/Icons/ImportIcon';
@@ -38,6 +38,7 @@ export interface ImportToolOptions
   > {
   importFields: DropdownOption[];
   recordsImporter: (data: any[]) => Promise<any>;
+  importSuccessMessage?: ReactNode;
 }
 
 export const useImportTool = ({
@@ -45,6 +46,7 @@ export const useImportTool = ({
   recordLabelSingular,
   importFields,
   recordsImporter,
+  importSuccessMessage,
 }: ImportToolOptions): ButtonTool => {
   if (!recordLabelPlural) {
     recordLabelPlural = 'Records';
@@ -254,6 +256,13 @@ export const useImportTool = ({
               <IconLoadingScreen
                 load={importRecords}
                 loading={importingRecords}
+                isLoaded={recordsImported}
+                isLoadingMessage={`Importing ${lowercaseRecordLabelPlural}...`}
+                isLoadedMessage={
+                  importSuccessMessage ||
+                  `${recordLabelPlural} imported successfully!`
+                }
+                Icon={ImportIcon}
                 {...{ errorMessage, recordLabelPlural, recordLabelSingular }}
               />
             );

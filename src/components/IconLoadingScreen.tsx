@@ -14,6 +14,9 @@ export interface IconLoadingScreenProps {
   Icon?: FC<any>;
   LoadingIcon?: FC<any>;
   loading?: boolean;
+  isLoadingMessage?: ReactNode;
+  isLoadedMessage?: ReactNode;
+  isLoaded?: boolean;
   errorMessage?: string;
   load?: () => void;
   addNewButtonLabel?: ReactNode;
@@ -31,6 +34,9 @@ export const IconLoadingScreen: FC<IconLoadingScreenProps> = ({
   errorMessage,
   load,
   addNewButtonLabel,
+  isLoadingMessage,
+  isLoadedMessage,
+  isLoaded,
 }) => {
   recordLabelSingular ||
     (recordLabelSingular = recordLabelPlural.replace(/s$/gi, ''));
@@ -79,12 +85,31 @@ export const IconLoadingScreen: FC<IconLoadingScreenProps> = ({
           if (loading) {
             return (
               <Typography align="center" variant="body2">
-                Loading {lowercaseRecordLabelPlural}, please wait...
+                {(() => {
+                  if (isLoadingMessage) {
+                    return isLoadingMessage;
+                  }
+                  return (
+                    <>Loading {lowercaseRecordLabelPlural}, please wait...</>
+                  );
+                })()}
               </Typography>
             );
           }
           if (errorMessage) {
             return <ErrorAlert message={errorMessage} retry={load} />;
+          }
+          if (isLoaded) {
+            return (
+              <Typography align="center" variant="body2">
+                {(() => {
+                  if (isLoadedMessage) {
+                    return isLoadedMessage;
+                  }
+                  return <>{recordLabelPlural} loaded successfully</>;
+                })()}
+              </Typography>
+            );
           }
           if (pathToAddNew) {
             return (

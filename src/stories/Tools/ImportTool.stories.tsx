@@ -30,7 +30,7 @@ const Template: StoryFn<typeof SearchSyncToolbar> = () => {
       return new Promise((resolve) => {
         setTimeout(() => {
           resolve(records);
-        }, 10000);
+        }, 5000);
       });
     },
   });
