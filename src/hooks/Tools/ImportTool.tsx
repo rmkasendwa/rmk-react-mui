@@ -60,7 +60,7 @@ export const useImportTool = ({
 
   const inputFieldRef = useRef<HTMLInputElement | null>(null);
   const { palette } = useTheme();
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const [activeStep, setActiveStep] = useState<Step>('Upload a file');
   const [data, setData] = useState<any[]>([]);
   const [dataColumns, setDataColumns] = useState<TableColumn[]>([]);

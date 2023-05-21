@@ -2,7 +2,7 @@ import { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 
 import SearchSyncToolbar from '../../components/SearchSyncToolbar';
-import { useImportTool } from '../../hooks/Tools';
+import { useImportTool } from '../../hooks/Tools/ImportTool';
 
 export default {
   title: 'Hooks/Tools/Import Tool',
