@@ -4,6 +4,7 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import {
   Box,
   Button,
+  Divider,
   Grid,
   Stack,
   Step,
@@ -388,17 +389,24 @@ export const useImportTool = ({
                   ))}
                 </Stepper>
               </Box>
+              <Divider />
               <Box
                 sx={{
                   position: 'relative',
                   flex: 1,
+                  minHeight: 0,
+                  overflowY: 'auto',
                   ...(() => {
                     switch (activeStep) {
                       case 'Upload a file':
-                      case 'Map data':
                       case 'Import':
                         return {
                           p: 3,
+                        };
+                      case 'Map data':
+                        return {
+                          px: 3,
+                          pb: 3,
                         };
                     }
                   })(),
@@ -529,15 +537,16 @@ export const useImportTool = ({
                     }
                     case 'Map data':
                       return (
-                        <Stack
-                          sx={{
-                            gap: 2,
-                          }}
-                        >
+                        <>
                           <Grid
                             container
                             sx={{
-                              px: 3,
+                              p: 3,
+                              position: 'sticky',
+                              top: 0,
+                              bgcolor: palette.background.paper,
+                              borderBottom: `1px solid ${palette.divider}`,
+                              zIndex: 5,
                             }}
                           >
                             <Grid
@@ -573,113 +582,126 @@ export const useImportTool = ({
                             </Grid>
                           </Grid>
 
-                          {dataColumns.map(({ id: columnId, label }, index) => {
-                            const isFieldMapped = Boolean(
-                              mappedFields[String(columnId)]
-                            );
-                            return (
-                              <Box
-                                key={index}
-                                sx={{
-                                  p: 3,
-                                  bgcolor: alpha(palette.primary.main, 0.05),
-                                  borderRadius: '4px',
-                                  border: `1px solid ${
-                                    isFieldMapped
-                                      ? alpha(palette.primary.main, 0.7)
-                                      : palette.divider
-                                  }`,
-                                }}
-                              >
-                                <Grid container>
-                                  <Grid
-                                    item
+                          <Stack
+                            sx={{
+                              gap: 2,
+                            }}
+                          >
+                            {dataColumns.map(
+                              ({ id: columnId, label }, index) => {
+                                const isFieldMapped = Boolean(
+                                  mappedFields[String(columnId)]
+                                );
+                                return (
+                                  <Box
+                                    key={index}
                                     sx={{
-                                      width: 220,
+                                      p: 3,
+                                      bgcolor: alpha(
+                                        palette.primary.main,
+                                        0.05
+                                      ),
+                                      borderRadius: '4px',
+                                      border: `1px solid ${
+                                        isFieldMapped
+                                          ? alpha(palette.primary.main, 0.7)
+                                          : palette.divider
+                                      }`,
                                     }}
                                   >
-                                    <Typography variant="body2" noWrap>
-                                      {label}
-                                    </Typography>
-                                  </Grid>
-                                  <Grid
-                                    item
-                                    xs
-                                    sx={{
-                                      minWidth: 0,
-                                    }}
-                                  >
-                                    {data.slice(0, 3).map((row, index) => {
-                                      return (
-                                        <Typography
-                                          key={index}
-                                          variant="body2"
-                                          noWrap
-                                        >
-                                          {row[columnId]}
+                                    <Grid container>
+                                      <Grid
+                                        item
+                                        sx={{
+                                          width: 220,
+                                        }}
+                                      >
+                                        <Typography variant="body2" noWrap>
+                                          {label}
                                         </Typography>
-                                      );
-                                    })}
-                                  </Grid>
-                                  <Grid
-                                    item
-                                    sx={{
-                                      width: 250,
-                                    }}
-                                  >
-                                    <DataDropdownField
-                                      options={[
-                                        {
-                                          label: 'Do not import',
-                                          value: 'do_not_import',
-                                        },
-                                        ...importFields,
-                                      ]}
-                                      value={
-                                        mappedFields[String(columnId)] ||
-                                        'do_not_import'
-                                      }
-                                      onChange={(event) => {
-                                        if (
-                                          !event.target.value ||
-                                          event.target.value === 'do_not_import'
-                                        ) {
-                                          setMappedFields(
-                                            (prevMappedFields) => {
-                                              return omit(
-                                                prevMappedFields,
-                                                columnId
+                                      </Grid>
+                                      <Grid
+                                        item
+                                        xs
+                                        sx={{
+                                          minWidth: 0,
+                                        }}
+                                      >
+                                        {data.slice(0, 3).map((row, index) => {
+                                          return (
+                                            <Typography
+                                              key={index}
+                                              variant="body2"
+                                              noWrap
+                                            >
+                                              {row[columnId]}
+                                            </Typography>
+                                          );
+                                        })}
+                                      </Grid>
+                                      <Grid
+                                        item
+                                        sx={{
+                                          width: 250,
+                                        }}
+                                      >
+                                        <DataDropdownField
+                                          options={[
+                                            {
+                                              label: 'Do not import',
+                                              value: 'do_not_import',
+                                            },
+                                            ...importFields,
+                                          ]}
+                                          value={
+                                            mappedFields[String(columnId)] ||
+                                            'do_not_import'
+                                          }
+                                          onChange={(event) => {
+                                            if (
+                                              !event.target.value ||
+                                              event.target.value ===
+                                                'do_not_import'
+                                            ) {
+                                              setMappedFields(
+                                                (prevMappedFields) => {
+                                                  return omit(
+                                                    prevMappedFields,
+                                                    columnId
+                                                  );
+                                                }
+                                              );
+                                            } else {
+                                              setMappedFields(
+                                                (prevMappedFields) => {
+                                                  return {
+                                                    ...prevMappedFields,
+                                                    [columnId]:
+                                                      event.target.value,
+                                                  };
+                                                }
                                               );
                                             }
-                                          );
-                                        } else {
-                                          setMappedFields(
-                                            (prevMappedFields) => {
-                                              return {
-                                                ...prevMappedFields,
-                                                [columnId]: event.target.value,
-                                              };
-                                            }
-                                          );
-                                        }
-                                      }}
-                                      fullWidth
-                                      InputProps={{
-                                        sx: {
-                                          bgcolor: palette.background.paper,
-                                        },
-                                      }}
-                                      showClearButton={false}
-                                      error={multipleFieldsMappedtoSameAttribute.includes(
-                                        String(columnId)
-                                      )}
-                                    />
-                                  </Grid>
-                                </Grid>
-                              </Box>
-                            );
-                          })}
-                        </Stack>
+                                          }}
+                                          fullWidth
+                                          InputProps={{
+                                            sx: {
+                                              bgcolor: palette.background.paper,
+                                            },
+                                          }}
+                                          showClearButton={false}
+                                          error={multipleFieldsMappedtoSameAttribute.includes(
+                                            String(columnId)
+                                          )}
+                                        />
+                                      </Grid>
+                                    </Grid>
+                                  </Box>
+                                );
+                              }
+                            )}
+                          </Stack>
+                        </>
                       );
                     case 'Import':
                       return (
