@@ -354,6 +354,7 @@ export const BaseModalForm = <Values extends FormikValues>(
                               isSubmitting,
                               values,
                               isValid,
+                              formHasChanges,
                               ...rest,
                             })
                           : children;
