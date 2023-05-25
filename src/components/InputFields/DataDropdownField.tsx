@@ -108,7 +108,7 @@ export interface DataDropdownFieldProps<Entity = any>
   selectedOption?: DropdownOption<Entity>;
   placeholderOption?: DropdownOption<Entity>;
   getSelectedOptions?: (
-    selectedValue: string | string[]
+    selectedValue: string[]
   ) => Promise<DropdownOption<Entity>[]>;
   dropdownListMaxHeight?: number;
   optionPaging?: boolean;
@@ -412,7 +412,7 @@ const BaseDataDropdownField = <Entity,>(
           selectedValue.join(';') !==
             prevSelectedOptions.map(({ value }) => value).join(';')
         ) {
-          loadAsyncSelectedOptions(value);
+          loadAsyncSelectedOptions(selectedValue);
         }
         return prevSelectedOptions;
       });

@@ -1,3 +1,5 @@
+import ErrorIcon from '@mui/icons-material/Error';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import {
   Box,
   ButtonProps,
@@ -11,12 +13,12 @@ import {
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
   generateUtilityClasses,
-  iconButtonClasses,
   inputBaseClasses,
   useMediaQuery,
   useThemeProps,
 } from '@mui/material';
 import Card, { CardProps } from '@mui/material/Card';
+import CircularProgress from '@mui/material/CircularProgress';
 import useTheme from '@mui/material/styles/useTheme';
 import Typography from '@mui/material/Typography';
 import clsx from 'clsx';
@@ -43,7 +45,6 @@ import {
 import InfiniteScrollBox, {
   InfiniteScrollBoxProps,
 } from '../InfiniteScrollBox';
-import ReloadIconButton from '../ReloadIconButton';
 import SearchField, { SearchFieldProps } from '../SearchField';
 import DropdownOption, { DropdownOptionVariant } from './DropdownOption';
 
@@ -698,16 +699,38 @@ const BasePaginatedDropdownOptionList = <Entity,>(
             height={optionHeight}
           >
             <Grid container sx={{ alignItems: 'center', gap: 1 }}>
-              <Grid item>
-                <ReloadIconButton
-                  {...{ loading: loading || loadingProp, errorMessage }}
-                  sx={{
-                    pointerEvents: 'none',
-                    [`& .${iconButtonClasses.root}`]: {
-                      p: 0,
-                    },
-                  }}
-                />
+              <Grid
+                item
+                sx={{
+                  display: 'flex',
+                }}
+              >
+                {(() => {
+                  if (loading || loadingProp) {
+                    return <CircularProgress size={24} color="inherit" />;
+                  }
+                  const refreshButton = <RefreshIcon color="inherit" />;
+                  if (errorMessage) {
+                    return (
+                      <Grid
+                        container
+                        sx={{
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexWrap: 'nowrap',
+                        }}
+                      >
+                        <Grid item display="flex">
+                          <Tooltip title={errorMessage}>
+                            <ErrorIcon color="error" />
+                          </Tooltip>
+                        </Grid>
+                        <Grid item>{refreshButton}</Grid>
+                      </Grid>
+                    );
+                  }
+                  return refreshButton;
+                })()}
               </Grid>
               {!loading && !loadingProp ? (
                 <Grid item xs sx={{ minWidth: 0 }}>
