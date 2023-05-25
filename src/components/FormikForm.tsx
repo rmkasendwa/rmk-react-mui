@@ -50,7 +50,11 @@ declare module '@mui/material/styles/components' {
 export type FormikFormFunctionChildren<
   Values extends FormikValues = any,
   ExtraProps = Record<string, unknown>
-> = (props: FormikProps<Values> & ExtraProps) => ReactNode;
+> = (
+  props: FormikProps<Values> & {
+    formHasChanges?: boolean;
+  } & ExtraProps
+) => ReactNode;
 
 export interface FormikFormProps<Values extends FormikValues = any>
   extends Partial<
