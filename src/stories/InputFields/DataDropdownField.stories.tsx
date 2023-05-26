@@ -21,7 +21,7 @@ export default {
 const lorem = new LoremIpsum();
 
 const Template: StoryFn<typeof DataDropdownField> = ({ sx, ...props }) => {
-  return <DataDropdownField {...props} sx={{ width: 300, ...sx }} />;
+  return <DataDropdownField {...props} sx={{ width: 400, ...sx }} />;
 };
 
 export const Default = Template.bind({});
@@ -93,6 +93,20 @@ MultipleSelectWithValue.args = {
   SelectProps: {
     multiple: true,
   },
+} as DataDropdownFieldProps;
+
+export const MultipleSelectWithMultiline = Template.bind({});
+MultipleSelectWithMultiline.args = {
+  label: 'Multiple Select',
+  required: true,
+  options: Array.from({ length: 100 }).map((_, index) => ({
+    label: `${index + 1}. ${lorem.generateWords(4)}`,
+    value: index,
+  })),
+  SelectProps: {
+    multiple: true,
+  },
+  multiline: true,
 } as DataDropdownFieldProps;
 
 export const WithSelectedOptionProp = Template.bind({});
