@@ -1,6 +1,8 @@
 import CloseIcon from '@mui/icons-material/Close';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {
+  Chip,
+  ChipProps,
   ComponentsOverrides,
   ComponentsProps,
   ComponentsVariants,
@@ -8,7 +10,7 @@ import {
   Stack,
   Tooltip,
   Typography,
-  alpha,
+  chipClasses,
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
   generateUtilityClasses,
@@ -17,7 +19,7 @@ import {
   useTheme,
   useThemeProps,
 } from '@mui/material';
-import Box, { BoxProps } from '@mui/material/Box';
+import Box from '@mui/material/Box';
 import ClickAwayListener from '@mui/material/ClickAwayListener';
 import Grow from '@mui/material/Grow';
 import Popper from '@mui/material/Popper';
@@ -113,7 +115,7 @@ export interface DataDropdownFieldProps<Entity = any>
   dropdownListMaxHeight?: number;
   optionPaging?: boolean;
   onChangeSearchTerm?: (searchTerm: string) => void;
-  SelectedOptionPillProps?: Partial<BoxProps>;
+  SelectedOptionPillProps?: Partial<ChipProps>;
   PaginatedDropdownOptionListProps?: Partial<PaginatedDropdownOptionListProps>;
   variant?: 'standard' | 'filled' | 'outlined' | 'text';
   showDropdownIcon?: boolean;
@@ -211,7 +213,7 @@ const BaseDataDropdownField = <Entity,>(
 
   const multiple = SelectProps?.multiple;
 
-  const { palette, breakpoints } = useTheme();
+  const { breakpoints } = useTheme();
 
   const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
 
@@ -435,35 +437,32 @@ const BaseDataDropdownField = <Entity,>(
           {multiple ? (
             optionsToDisplay.map(({ label, icon, value }) => {
               return (
-                <Box
+                <Chip
                   key={value}
                   {...SelectedOptionPillPropsRest}
-                  sx={{
-                    display: 'flex',
-                    fontSize: 14,
-                    bgcolor: alpha(palette.primary.main, 0.1),
-                    borderRadius: '20px',
-                    height: 25,
-                    py: 0.25,
-                    pl: (() => {
-                      if (['string', 'number'].includes(typeof label)) {
-                        return 1;
-                      }
-                      return 0.25;
-                    })(),
-                    pr: 1,
-                    mr: 0.5,
-                    '&>*': {
-                      flexWrap: 'nowrap',
-                    },
-                    ...SelectedOptionPillPropsSx,
-                  }}
-                >
-                  {getDropdownOptionLabel({
+                  label={getDropdownOptionLabel({
                     label,
                     icon,
                   })}
-                </Box>
+                  onDelete={() => {
+                    setSelectedOptions((prevSelectedOptions) => {
+                      const nextSelectedOptions = prevSelectedOptions.filter(
+                        ({ value: optionValue }) => {
+                          return optionValue !== value;
+                        }
+                      );
+                      triggerChangeEvent(nextSelectedOptions);
+                      return nextSelectedOptions;
+                    });
+                  }}
+                  size="small"
+                  sx={{
+                    ...SelectedOptionPillPropsSx,
+                    [`.${chipClasses.deleteIcon}`]: {
+                      pointerEvents: 'all',
+                    },
+                  }}
+                />
               );
             })
           ) : (
