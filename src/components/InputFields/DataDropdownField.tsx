@@ -101,6 +101,7 @@ export interface DataDropdownFieldProps<Entity = any>
         | 'sortOptions'
         | 'options'
         | 'onChangeSelectedOptions'
+        | 'multiple'
       >
     > {
   onChangeSelectedOption?: (selectedOption?: DropdownOption<Entity>) => void;
@@ -154,7 +155,7 @@ const BaseDataDropdownField = <Entity,>(
     onChange,
     onFocus,
     onBlur,
-    InputProps,
+    InputProps = {},
     dropdownListMaxHeight,
     optionPaging = true,
     selectedOption,
@@ -183,6 +184,7 @@ const BaseDataDropdownField = <Entity,>(
     placeholderOption,
     onChangeSelectedOptions: onChangeSelectedOptionsProp,
     onChangeSelectedOption,
+    multiple: multipleProp,
     ...rest
   } = props;
 
@@ -210,14 +212,17 @@ const BaseDataDropdownField = <Entity,>(
   const { ...PaginatedDropdownOptionListPropsRest } =
     PaginatedDropdownOptionListProps;
   const { sx: WrapperPropsSx, ...WrapperPropsRest } = WrapperProps;
+  const { sx: InputPropsSx, ...InputPropsRest } = InputProps;
 
-  const multiple = SelectProps?.multiple;
+  const multiple = multipleProp || SelectProps?.multiple;
 
   const { breakpoints } = useTheme();
 
   const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
 
   const [options, setOptions] = useState<DropdownOption[]>(optionsProp || []);
+
+  const [selectedOptionsRowSpan, setSelectedOptionsRowSpan] = useState(1);
 
   // Refs
   const anchorRef = useRef<HTMLInputElement>(null);
@@ -495,8 +500,18 @@ const BaseDataDropdownField = <Entity,>(
                 className={classes.selectedOptionsWrapper}
                 sx={{
                   display: 'flex',
-                  whiteSpace: 'nowrap',
                   gap: 0.5,
+                  ...(() => {
+                    if (rest.multiline) {
+                      return {
+                        flexWrap: 'wrap',
+                      };
+                    }
+                    return {
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                    };
+                  })(),
                 }}
               >
                 {selectedOptionsElement}
@@ -611,9 +626,18 @@ const BaseDataDropdownField = <Entity,>(
                           sx={{
                             pointerEvents: 'none',
                             display: 'flex',
-                            whiteSpace: 'nowrap',
                             gap: 0.5,
-                            overflow: 'hidden',
+                            ...(() => {
+                              if (rest.multiline) {
+                                return {
+                                  flexWrap: 'wrap',
+                                };
+                              }
+                              return {
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                              };
+                            })(),
                           }}
                         >
                           {selectedOptionsElement}
@@ -678,7 +702,7 @@ const BaseDataDropdownField = <Entity,>(
             }}
             InputProps={{
               endAdornment,
-              ...InputProps,
+              ...InputPropsRest,
               ...(() => {
                 const props: Partial<typeof InputProps> = {};
                 if (selectedOptions.length > 0) {
@@ -693,6 +717,16 @@ const BaseDataDropdownField = <Entity,>(
                 }
               },
               ref: anchorRef,
+              sx: {
+                ...(() => {
+                  if (rest.multiline) {
+                    return {
+                      alignItems: 'start',
+                    };
+                  }
+                })(),
+                ...InputPropsSx,
+              },
             }}
             inputProps={{
               ref: searchFieldRef,
@@ -724,19 +758,44 @@ const BaseDataDropdownField = <Entity,>(
               enableLoadingState,
             }}
             {...rest}
+            {...(() => {
+              if (rest.multiline) {
+                return {
+                  rows: selectedOptionsRowSpan,
+                };
+              }
+            })()}
             endChildren={(() => {
               if (selectedOptionsElement) {
                 return (
                   <Box
                     className={classes.selectedOptionsWrapper}
+                    ref={(el: HTMLDivElement) => {
+                      if (el) {
+                        setSelectedOptionsRowSpan(
+                          Math.ceil(el.clientHeight / 24)
+                        );
+                      } else {
+                        setSelectedOptionsRowSpan(1);
+                      }
+                    }}
                     sx={{
                       position: 'absolute',
                       left: 0,
                       pointerEvents: 'none',
                       display: 'flex',
-                      whiteSpace: 'nowrap',
                       gap: 0.5,
-                      overflow: 'hidden',
+                      ...(() => {
+                        if (rest.multiline) {
+                          return {
+                            flexWrap: 'wrap',
+                          };
+                        }
+                        return {
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                        };
+                      })(),
                       ...(() => {
                         if (disabled) {
                           return {
@@ -824,6 +883,7 @@ const BaseDataDropdownField = <Entity,>(
                     return {
                       color: 'transparent',
                       WebkitTextFillColor: 'transparent',
+                      visibility: 'hidden',
                     };
                   }
                   return {};
@@ -834,7 +894,7 @@ const BaseDataDropdownField = <Entity,>(
                 ...(() => {
                   if (showClearButton) {
                     return {
-                      [`&:hover>.${classes.selectedOptionsWrapper}`]: {
+                      [`&>.${classes.selectedOptionsWrapper}`]: {
                         width: 'calc(100% - 72px)',
                       },
                     };
