@@ -100,12 +100,10 @@ MultipleSelectWithMultiline.args = {
   label: 'Multiple Select',
   required: true,
   options: Array.from({ length: 100 }).map((_, index) => ({
-    label: `${index + 1}. ${lorem.generateWords(4)}`,
+    label: `${index + 1}. ${lorem.generateWords(2)}`,
     value: index,
   })),
-  SelectProps: {
-    multiple: true,
-  },
+  multiple: true,
   multiline: true,
 } as DataDropdownFieldProps;
 

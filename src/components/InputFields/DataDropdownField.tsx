@@ -155,7 +155,7 @@ const BaseDataDropdownField = <Entity,>(
     onChange,
     onFocus,
     onBlur,
-    InputProps,
+    InputProps = {},
     dropdownListMaxHeight,
     optionPaging = true,
     selectedOption,
@@ -212,6 +212,7 @@ const BaseDataDropdownField = <Entity,>(
   const { ...PaginatedDropdownOptionListPropsRest } =
     PaginatedDropdownOptionListProps;
   const { sx: WrapperPropsSx, ...WrapperPropsRest } = WrapperProps;
+  const { sx: InputPropsSx, ...InputPropsRest } = InputProps;
 
   const multiple = multipleProp || SelectProps?.multiple;
 
@@ -701,7 +702,7 @@ const BaseDataDropdownField = <Entity,>(
             }}
             InputProps={{
               endAdornment,
-              ...InputProps,
+              ...InputPropsRest,
               ...(() => {
                 const props: Partial<typeof InputProps> = {};
                 if (selectedOptions.length > 0) {
@@ -716,6 +717,16 @@ const BaseDataDropdownField = <Entity,>(
                 }
               },
               ref: anchorRef,
+              sx: {
+                ...(() => {
+                  if (rest.multiline) {
+                    return {
+                      alignItems: 'start',
+                    };
+                  }
+                })(),
+                ...InputPropsSx,
+              },
             }}
             inputProps={{
               ref: searchFieldRef,
@@ -764,6 +775,8 @@ const BaseDataDropdownField = <Entity,>(
                         setSelectedOptionsRowSpan(
                           Math.ceil(el.clientHeight / 24)
                         );
+                      } else {
+                        setSelectedOptionsRowSpan(1);
                       }
                     }}
                     sx={{
@@ -881,7 +894,9 @@ const BaseDataDropdownField = <Entity,>(
                 ...(() => {
                   if (showClearButton) {
                     return {
-                      width: 'calc(100% - 72px)',
+                      [`&>.${classes.selectedOptionsWrapper}`]: {
+                        width: 'calc(100% - 72px)',
+                      },
                     };
                   }
                 })(),
