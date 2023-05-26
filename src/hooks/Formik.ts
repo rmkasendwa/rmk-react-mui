@@ -22,16 +22,16 @@ export const useAggregatedFormikContext = ({
 
   const onChange = useCallback<NonNullable<typeof onChangeProp>>(
     (event) => {
-      onChangeProp && onChangeProp(event);
       handleChange && handleChange(event);
+      onChangeProp && onChangeProp(event);
     },
     [handleChange, onChangeProp]
   );
 
   const onBlur = useCallback<NonNullable<typeof onBlurProp>>(
     (event) => {
-      onBlurProp && onBlurProp(event);
       handleBlur && handleBlur(event);
+      onBlurProp && onBlurProp(event);
     },
     [handleBlur, onBlurProp]
   );
