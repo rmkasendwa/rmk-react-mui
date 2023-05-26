@@ -893,8 +893,15 @@ const BaseDataDropdownField = <Entity,>(
                 },
                 ...(() => {
                   if (showClearButton) {
+                    if (rest.multiline) {
+                      return {
+                        [`&>.${classes.selectedOptionsWrapper}`]: {
+                          width: 'calc(100% - 72px)',
+                        },
+                      };
+                    }
                     return {
-                      [`&>.${classes.selectedOptionsWrapper}`]: {
+                      [`&:hover>.${classes.selectedOptionsWrapper}`]: {
                         width: 'calc(100% - 72px)',
                       },
                     };
