@@ -297,6 +297,7 @@ const BasePaginatedDropdownOptionList = <Entity,>(
           };
         }
       })(),
+      canLoadNextPage: externallyPaginated,
     }
   );
   const loadAsyncOptionsRef = useRef(loadAsyncOptions);

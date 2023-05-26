@@ -398,6 +398,7 @@ export interface UsePaginatedRecordsOptions<T = any>
     UseQueryOptions {
   revalidationKey?: string;
   loadedPagesMap?: Map<number, T[]>;
+  canLoadNextPage?: boolean;
 }
 export const usePaginatedRecords = <T>(
   recordFinder: PaginatedRecordsFinder<T>,
@@ -411,6 +412,7 @@ export const usePaginatedRecords = <T>(
     loadedPagesMap,
     revalidationKey,
     autoSync = true,
+    canLoadNextPage,
   }: UsePaginatedRecordsOptions<T> = {}
 ) => {
   // Refs
@@ -507,7 +509,7 @@ export const usePaginatedRecords = <T>(
 
   const loadNextPage = useCallback(
     (params?: Omit<PaginatedRequestParams, 'limit' | 'offset'>) => {
-      if (!loading && hasNextPageRef.current) {
+      if (canLoadNextPage && !loading && hasNextPageRef.current) {
         const lastPageOffset = [...loadedPages.keys()].sort((a, b) => b - a)[0];
         const lastPageRecords = loadedPages.get(lastPageOffset);
         if (lastPageRecords && lastPageOffset != null) {
@@ -519,7 +521,7 @@ export const usePaginatedRecords = <T>(
         }
       }
     },
-    [limit, load, loadedPages, loading]
+    [canLoadNextPage, limit, load, loadedPages, loading]
   );
 
   const resetRef = useRef(() => {
