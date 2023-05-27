@@ -1,7 +1,7 @@
 import { TextFieldProps } from '@mui/material';
 import { FormikContextType, useFormikContext } from 'formik';
 import { get, isEmpty } from 'lodash';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 
 interface UseAggregatedFormikContextProps
   extends Pick<
@@ -20,6 +20,15 @@ export const useAggregatedFormikContext = ({
   const { values, handleBlur, setFieldValue, touched, errors } =
     (useFormikContext() as FormikContextType<any>) || {};
 
+  const setFieldValueRef = useRef(setFieldValue);
+  setFieldValueRef.current = setFieldValue;
+  const onChangePropRef = useRef(onChangeProp);
+  onChangePropRef.current = onChangeProp;
+  const onBlurPropRef = useRef(onBlurProp);
+  onBlurPropRef.current = onBlurProp;
+  const handleBlurRef = useRef(handleBlur);
+  handleBlurRef.current = handleBlur;
+
   const { rootPropertyPath, propertyPath } = useMemo((): {
     rootPropertyPath?: string;
     propertyPath?: string;
@@ -37,23 +46,20 @@ export const useAggregatedFormikContext = ({
     (event) => {
       if (propertyPath && rootPropertyPath) {
         if (event.target.value) {
-          setFieldValue(propertyPath, event.target.value);
+          setFieldValueRef.current(propertyPath, event.target.value);
         } else {
-          setFieldValue(rootPropertyPath, undefined);
+          setFieldValueRef.current(rootPropertyPath, undefined);
         }
       }
-      onChangeProp && onChangeProp(event);
+      onChangePropRef.current && onChangePropRef.current(event);
     },
-    [onChangeProp, propertyPath, rootPropertyPath, setFieldValue]
+    [propertyPath, rootPropertyPath]
   );
 
-  const onBlur = useCallback<NonNullable<typeof onBlurProp>>(
-    (event) => {
-      handleBlur && handleBlur(event);
-      onBlurProp && onBlurProp(event);
-    },
-    [handleBlur, onBlurProp]
-  );
+  const onBlur = useCallback<NonNullable<typeof onBlurProp>>((event) => {
+    handleBlurRef.current && handleBlurRef.current(event);
+    onBlurPropRef.current && onBlurPropRef.current(event);
+  }, []);
 
   return {
     value:
