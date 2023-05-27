@@ -374,38 +374,12 @@ const BaseDataDropdownField = <Entity,>(
         const prevSelectedOptionsValues = prevSelectedOptions.map(
           ({ value }) => value
         );
-        if (
-          selectedValue.length > 0 &&
-          !selectedValue.every((value) =>
-            prevSelectedOptionsValues.includes(value)
-          )
-        ) {
-          if (selectedOption?.value && selectedOptionRef.current) {
-            const nextSelectedOptions = [selectedOptionRef.current];
-            const nextSelectedOptionsValues = nextSelectedOptions.map(
-              ({ value }) => value
-            );
-            if (
-              selectedValue.every((value) =>
-                nextSelectedOptionsValues.includes(value)
-              )
-            ) {
-              return nextSelectedOptions;
-            }
-          }
 
-          const nextSelectedOptions = selectedValue
-            .map((value) => {
-              return optionsRef.current.find(
-                ({ value: optionValue }) => value === optionValue
-              )!;
-            })
-            .filter((option) => option);
-
+        if (selectedOption?.value && selectedOptionRef.current) {
+          const nextSelectedOptions = [selectedOptionRef.current];
           const nextSelectedOptionsValues = nextSelectedOptions.map(
             ({ value }) => value
           );
-
           if (
             selectedValue.every((value) =>
               nextSelectedOptionsValues.includes(value)
@@ -413,10 +387,36 @@ const BaseDataDropdownField = <Entity,>(
           ) {
             return nextSelectedOptions;
           }
+        }
 
-          if (canLoadAsyncSelectedOptions) {
-            loadAsyncSelectedOptions(selectedValue);
-          }
+        const nextSelectedOptions = selectedValue
+          .map((value) => {
+            return optionsRef.current.find(
+              ({ value: optionValue }) => value === optionValue
+            )!;
+          })
+          .filter((option) => option);
+
+        const nextSelectedOptionsValues = nextSelectedOptions.map(
+          ({ value }) => value
+        );
+
+        if (
+          selectedValue.every((value) =>
+            nextSelectedOptionsValues.includes(value)
+          )
+        ) {
+          return nextSelectedOptions;
+        }
+
+        if (
+          !selectedValue.every((value) =>
+            prevSelectedOptionsValues.includes(value)
+          ) &&
+          canLoadAsyncSelectedOptions &&
+          selectedValue.length > 0
+        ) {
+          loadAsyncSelectedOptions(selectedValue);
         }
         return prevSelectedOptions;
       });
