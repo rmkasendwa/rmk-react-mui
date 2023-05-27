@@ -1,6 +1,6 @@
 import { TextFieldProps } from '@mui/material';
 import { FormikContextType, useFormikContext } from 'formik';
-import { get } from 'lodash';
+import { get, isEmpty } from 'lodash';
 import { useCallback, useMemo } from 'react';
 
 interface UseAggregatedFormikContextProps
@@ -17,24 +17,8 @@ export const useAggregatedFormikContext = ({
   helperText,
   error,
 }: UseAggregatedFormikContextProps) => {
-  const { values, handleBlur, handleChange, touched, errors } =
+  const { values, handleBlur, setFieldValue, touched, errors } =
     (useFormikContext() as FormikContextType<any>) || {};
-
-  const onChange = useCallback<NonNullable<typeof onChangeProp>>(
-    (event) => {
-      handleChange && handleChange(event);
-      onChangeProp && onChangeProp(event);
-    },
-    [handleChange, onChangeProp]
-  );
-
-  const onBlur = useCallback<NonNullable<typeof onBlurProp>>(
-    (event) => {
-      handleBlur && handleBlur(event);
-      onBlurProp && onBlurProp(event);
-    },
-    [handleBlur, onBlurProp]
-  );
 
   const { rootPropertyPath, propertyPath } = useMemo((): {
     rootPropertyPath?: string;
@@ -49,12 +33,37 @@ export const useAggregatedFormikContext = ({
     return {};
   }, [name]);
 
+  const onChange = useCallback<NonNullable<typeof onChangeProp>>(
+    (event) => {
+      if (propertyPath && rootPropertyPath) {
+        if (event.target.value) {
+          setFieldValue(propertyPath, event.target.value);
+        } else {
+          setFieldValue(rootPropertyPath, undefined);
+        }
+      }
+      onChangeProp && onChangeProp(event);
+    },
+    [onChangeProp, propertyPath, rootPropertyPath, setFieldValue]
+  );
+
+  const onBlur = useCallback<NonNullable<typeof onBlurProp>>(
+    (event) => {
+      handleBlur && handleBlur(event);
+      onBlurProp && onBlurProp(event);
+    },
+    [handleBlur, onBlurProp]
+  );
+
   return {
     value:
       value ??
       (() => {
-        if (values && propertyPath && get(values, propertyPath) != null) {
-          return get(values, propertyPath);
+        if (values && propertyPath) {
+          const value = get(values, propertyPath);
+          if (value != null && (typeof value !== 'object' || !isEmpty(value))) {
+            return value;
+          }
         }
       })(),
     onChange,
