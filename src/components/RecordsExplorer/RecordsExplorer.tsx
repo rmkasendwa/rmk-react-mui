@@ -2279,11 +2279,11 @@ const BaseRecordsExplorer = <
                     onClose={() => {
                       resetCreation();
                       if (created) {
-                        autoSync && load();
                         showSuccessMessage(
                           recordCreateSuccessMessage ||
                             `The new ${lowercaseRecordLabelSingular} was created successfully`
                         );
+                        autoSync && setTimeout(() => load(), 1000);
                       }
                       if (defaultPath) {
                         navigate(defaultPath);
