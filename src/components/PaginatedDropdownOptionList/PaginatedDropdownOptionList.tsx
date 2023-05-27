@@ -721,12 +721,24 @@ const BasePaginatedDropdownOptionList = <Entity,>(
                           flexWrap: 'nowrap',
                         }}
                       >
-                        <Grid item display="flex">
+                        <Grid
+                          item
+                          sx={{
+                            display: 'flex',
+                          }}
+                        >
                           <Tooltip title={errorMessage}>
                             <ErrorIcon color="error" />
                           </Tooltip>
                         </Grid>
-                        <Grid item>{refreshButton}</Grid>
+                        <Grid
+                          item
+                          sx={{
+                            display: 'flex',
+                          }}
+                        >
+                          {refreshButton}
+                        </Grid>
                       </Grid>
                     );
                   }
