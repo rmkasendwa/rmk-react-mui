@@ -236,6 +236,8 @@ const BaseDataDropdownField = <Entity,>(
   selectedOptionRef.current = selectedOption;
   const getSelectedOptionsRef = useRef(getSelectedOptions);
   getSelectedOptionsRef.current = getSelectedOptions;
+  const valueRef = useRef(value);
+  valueRef.current = value;
 
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -274,29 +276,32 @@ const BaseDataDropdownField = <Entity,>(
 
   const {
     load: loadAsyncSelectedOptions,
-    record: asyncSelectedOptions,
     loading: loadingAsyncSelectedOptions,
     errorMessage: asyncSelectedOptionsErrorMessage,
   } = useRecord(
     (async (value) => {
-      if (getSelectedOptions) {
-        return getSelectedOptions(value);
-      }
-      if (
-        getDropdownOptions &&
-        value &&
-        (!Array.isArray(value) || value.length > 0)
-      ) {
-        const dropdownOptionsResponse = await getDropdownOptions({});
-        const options = Array.isArray(dropdownOptionsResponse)
-          ? dropdownOptionsResponse
-          : dropdownOptionsResponse.records;
-        const selectedValue = Array.isArray(value) ? value : [value];
-        return options.filter(({ value }) => {
-          return selectedValue.includes(String(value));
-        });
-      }
-      return [];
+      const asyncSelectedOptions = await (async () => {
+        if (getSelectedOptions) {
+          return getSelectedOptions(value);
+        }
+        if (
+          getDropdownOptions &&
+          value &&
+          (!Array.isArray(value) || value.length > 0)
+        ) {
+          const dropdownOptionsResponse = await getDropdownOptions({});
+          const options = Array.isArray(dropdownOptionsResponse)
+            ? dropdownOptionsResponse
+            : dropdownOptionsResponse.records;
+          const selectedValue = Array.isArray(value) ? value : [value];
+          return options.filter(({ value }) => {
+            return selectedValue.includes(String(value));
+          });
+        }
+        return [];
+      })();
+      setSelectedOptions(asyncSelectedOptions);
+      return asyncSelectedOptions;
     }) as NonNullable<typeof getSelectedOptions>,
     {
       autoSync: false,
@@ -361,70 +366,68 @@ const BaseDataDropdownField = <Entity,>(
   }, [optionsProp, sortOptions]);
 
   useEffect(() => {
-    const fieldValues = Array.isArray(value) ? value : [value];
-    setSelectedOptions((prevSelectedOptions) => {
-      const nextSelectedOptions = fieldValues
-        .map((value) => {
-          return optionsRef.current.find(
-            ({ value: optionValue }) => value === optionValue
-          )!;
-        })
-        .filter((option) => option);
-      if (
-        prevSelectedOptions.map(({ value }) => value).join() !==
-        nextSelectedOptions.map(({ value }) => value).join()
-      ) {
-        return nextSelectedOptions;
-      }
-      return prevSelectedOptions;
-    });
-  }, [value]);
-
-  useEffect(() => {
-    setSelectedOptions((prevSelectedOptions) => {
-      if (selectedOption?.value && selectedOptionRef.current) {
-        const nextSelectedOptions = [selectedOptionRef.current];
-        if (
-          nextSelectedOptions.map(({ value }) => value).join(';') !==
-          prevSelectedOptions.map(({ value }) => value).join(';')
-        ) {
-          return nextSelectedOptions;
-        }
-      }
-      return prevSelectedOptions;
-    });
-  }, [selectedOption?.value]);
-
-  useEffect(() => {
-    if (asyncSelectedOptions && asyncSelectedOptions.length > 0) {
+    if (!loadingAsyncSelectedOptions) {
       setSelectedOptions((prevSelectedOptions) => {
+        const selectedValue = value
+          ? [...(Array.isArray(value) ? value : [value])]
+          : [];
+        const prevSelectedOptionsValues = prevSelectedOptions.map(
+          ({ value }) => value
+        );
         if (
-          asyncSelectedOptions.map(({ value }) => value).join(';') !==
-          prevSelectedOptions.map(({ value }) => value).join(';')
-        ) {
-          return asyncSelectedOptions;
-        }
-        return prevSelectedOptions;
-      });
-    }
-  }, [asyncSelectedOptions]);
-
-  useEffect(() => {
-    if (value) {
-      setSelectedOptions((prevSelectedOptions) => {
-        const selectedValue = [...(Array.isArray(value) ? value : [value])];
-        if (
-          canLoadAsyncSelectedOptions &&
           selectedValue.length > 0 &&
-          selectedValue.join(';') !==
-            prevSelectedOptions.map(({ value }) => value).join(';')
+          !selectedValue.every((value) =>
+            prevSelectedOptionsValues.includes(value)
+          )
         ) {
-          loadAsyncSelectedOptions(selectedValue);
+          if (selectedOption?.value && selectedOptionRef.current) {
+            const nextSelectedOptions = [selectedOptionRef.current];
+            const nextSelectedOptionsValues = nextSelectedOptions.map(
+              ({ value }) => value
+            );
+            if (
+              selectedValue.every((value) =>
+                nextSelectedOptionsValues.includes(value)
+              )
+            ) {
+              return nextSelectedOptions;
+            }
+          }
+
+          const nextSelectedOptions = selectedValue
+            .map((value) => {
+              return optionsRef.current.find(
+                ({ value: optionValue }) => value === optionValue
+              )!;
+            })
+            .filter((option) => option);
+
+          const nextSelectedOptionsValues = nextSelectedOptions.map(
+            ({ value }) => value
+          );
+
+          if (
+            selectedValue.every((value) =>
+              nextSelectedOptionsValues.includes(value)
+            )
+          ) {
+            return nextSelectedOptions;
+          }
+
+          if (canLoadAsyncSelectedOptions) {
+            loadAsyncSelectedOptions(selectedValue);
+          }
         }
         return prevSelectedOptions;
       });
     }
-  }, [canLoadAsyncSelectedOptions, loadAsyncSelectedOptions, value]);
+  }, [
+    canLoadAsyncSelectedOptions,
+    loadAsyncSelectedOptions,
+    loadingAsyncSelectedOptions,
+    selectedOption?.value,
+    value,
+  ]);
 
   const selectedOptionsElement = (() => {
     const optionsToDisplay = (() => {
