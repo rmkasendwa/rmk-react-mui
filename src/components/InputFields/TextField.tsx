@@ -349,9 +349,9 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
       return (
         <FieldValueDisplay
           {...FieldValueDisplayPropsRest}
-          {...({} as any)}
           {...{ label, required, disabled }}
           value={textField}
+          enableLoadingState={false}
         />
       );
     }

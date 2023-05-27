@@ -219,7 +219,11 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
     }, []);
 
     if (enableLoadingState && (loading || errorMessage)) {
-      return <LoadingTypography>{valueProp}</LoadingTypography>;
+      return (
+        <LoadingTypography enableLoadingState={enableLoadingState}>
+          {valueProp}
+        </LoadingTypography>
+      );
     }
 
     const value = (() => {
@@ -459,6 +463,7 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
             ref={ref as any}
             className={clsx(classes.root)}
             variant="body2"
+            enableLoadingState={enableLoadingState}
             {...{ component: 'div' }}
             {...omit(rest, 'editableValue')}
             sx={{

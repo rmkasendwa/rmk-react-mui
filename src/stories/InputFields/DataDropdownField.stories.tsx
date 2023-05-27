@@ -73,9 +73,7 @@ MultipleSelect.args = {
     label: `${index + 1}. ${lorem.generateWords(4)}`,
     value: index,
   })),
-  SelectProps: {
-    multiple: true,
-  },
+  multiple: true,
 } as DataDropdownFieldProps;
 
 export const MultipleSelectWithValue = Template.bind({});
@@ -90,9 +88,7 @@ MultipleSelectWithValue.args = {
     })),
   ],
   value: [2, '', 5, 11],
-  SelectProps: {
-    multiple: true,
-  },
+  multiple: true,
 } as DataDropdownFieldProps;
 
 export const MultipleSelectWithMultiline = Template.bind({});
@@ -138,9 +134,7 @@ WithReactElementOptionLabels.args = {
       value: index,
     };
   }),
-  SelectProps: {
-    multiple: true,
-  },
+  multiple: true,
 } as DataDropdownFieldProps;
 
 export const WithSelectedOptionPillProps = Template.bind({});
@@ -154,9 +148,7 @@ WithSelectedOptionPillProps.args = {
     };
   }),
   placeholder: 'Multiple select with placeholder',
-  SelectProps: {
-    multiple: true,
-  },
+  multiple: true,
   SelectedOptionPillProps: {
     sx: {
       bgcolor: 'transparent',
@@ -239,9 +231,7 @@ WithOptionIcons.args = {
       value: index,
     };
   }),
-  SelectProps: {
-    multiple: true,
-  },
+  multiple: true,
 } as DataDropdownFieldProps;
 
 const asyncSelectedOptionsDataSet = Array.from({ length: 1000 }).map(
@@ -260,28 +250,23 @@ WithAsyncSelectedOptions.args = {
     return new Promise((resolve) => {
       setTimeout(() => {
         resolve(asyncSelectedOptionsDataSet);
-      }, 500);
+      }, 10000);
     });
   },
   getSelectedOptions: (selectedValue) => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        if (typeof selectedValue === 'string') {
-          resolve(
-            asyncSelectedOptionsDataSet.filter(({ value }) => {
-              return value === selectedValue;
-            })
-          );
-        } else {
-          resolve([]);
-        }
-      }, 3000);
+        resolve(
+          asyncSelectedOptionsDataSet.filter(({ value }) => {
+            return selectedValue.includes(value);
+          })
+        );
+      }, 100000);
     });
   },
-  value: '6',
-  SelectProps: {
-    multiple: true,
-  },
+  value: ['6'],
+  multiple: true,
+  labelWrapped: true,
 } as DataDropdownFieldProps;
 
 export const WithEndAdornment = Template.bind({});
