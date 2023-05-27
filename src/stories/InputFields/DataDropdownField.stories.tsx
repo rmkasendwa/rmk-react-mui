@@ -250,7 +250,7 @@ WithAsyncSelectedOptions.args = {
     return new Promise((resolve) => {
       setTimeout(() => {
         resolve(asyncSelectedOptionsDataSet);
-      }, 10000);
+      }, 3000);
     });
   },
   getSelectedOptions: (selectedValue) => {
@@ -261,7 +261,7 @@ WithAsyncSelectedOptions.args = {
             return selectedValue.includes(value);
           })
         );
-      }, 100000);
+      }, 3000);
     });
   },
   value: ['6'],
