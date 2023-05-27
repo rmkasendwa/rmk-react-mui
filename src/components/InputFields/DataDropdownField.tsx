@@ -540,7 +540,10 @@ const BaseDataDropdownField = <Entity,>(
             return <FieldValueDisplay {...{ label }} />;
           }
           return (
-            <TextField {...rest} {...{ label, variant, enableLoadingState }} />
+            <TextField
+              {...rest}
+              {...{ label, variant, enableLoadingState, sx }}
+            />
           );
         })()}
       </LoadingProvider>

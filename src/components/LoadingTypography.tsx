@@ -76,7 +76,9 @@ export const waveAnimation = keyframes`
 
 export interface LoadingTypographyProps
   extends Omit<TypographyProps, 'ref'>,
-    Pick<SkeletonProps, 'animation'> {}
+    Pick<SkeletonProps, 'animation'> {
+  enableLoadingState?: boolean;
+}
 
 export function getLoadingTypographyUtilityClass(slot: string): string {
   return generateUtilityClass('MuiLoadingTypography', slot);
@@ -94,7 +96,14 @@ export const LoadingTypography = forwardRef<
   LoadingTypographyProps
 >(function LoadingTypography(inProps, ref) {
   const props = useThemeProps({ props: inProps, name: 'MuiLoadingTypography' });
-  const { className, children, animation = 'pulse', sx, ...rest } = props;
+  const {
+    className,
+    children,
+    animation = 'pulse',
+    enableLoadingState = true,
+    sx,
+    ...rest
+  } = props;
 
   const classes = composeClasses(
     slots,
@@ -120,7 +129,7 @@ export const LoadingTypography = forwardRef<
       sx={{
         ...sx,
         ...(() => {
-          if (loading || errorMessage) {
+          if (enableLoadingState && (loading || errorMessage)) {
             return {
               borderRadius: '4px',
               '&,*': {
@@ -172,7 +181,7 @@ export const LoadingTypography = forwardRef<
       }}
     >
       {(() => {
-        if (loading || errorMessage) {
+        if (enableLoadingState && (loading || errorMessage)) {
           return (
             <Typography
               component="span"
@@ -191,7 +200,7 @@ export const LoadingTypography = forwardRef<
     </Typography>
   );
 
-  if (loading || errorMessage) {
+  if (enableLoadingState && (loading || errorMessage)) {
     return <Box>{typographyElement}</Box>;
   }
 

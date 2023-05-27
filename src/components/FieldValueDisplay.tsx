@@ -269,7 +269,7 @@ export const BaseFieldValueDisplay = <FieldValue extends ReactNode>(
 export const FieldValueDisplay = forwardRef(BaseFieldValueDisplay) as <
   FieldValue extends ReactNode = ReactNode
 >(
-  p: FieldValueDisplayProps<FieldValue> & { ref?: Ref<HTMLDivElement> }
+  p: FieldValueDisplayProps<FieldValue> & { ref?: Ref<any> }
 ) => ReactElement;
 
 export default FieldValueDisplay;
