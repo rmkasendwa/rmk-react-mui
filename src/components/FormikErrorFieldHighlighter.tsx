@@ -14,6 +14,7 @@ import clsx from 'clsx';
 import { useFormikContext } from 'formik';
 import { forwardRef, useEffect, useRef } from 'react';
 import { mergeRefs } from 'react-merge-refs';
+import scrollIntoView from 'scroll-into-view-if-needed';
 
 export interface FormikErrorFieldHighlighterClasses {
   /** Styles applied to the root element. */
@@ -107,14 +108,18 @@ export const FormikErrorFieldHighlighter = forwardRef<
     if (submitCount > 0 && !isValid && formElementsWrapperRef.current) {
       const fieldsWithError =
         formElementsWrapperRef.current.querySelectorAll('.Mui-error');
-      fieldsWithError[0]?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center',
-      });
-      fieldsWithError.forEach((field) => {
-        field.classList.add(classes.flicker);
-        setTimeout(() => field.classList.remove(classes.flicker), 1000);
-      });
+      if (fieldsWithError.length > 0) {
+        scrollIntoView(fieldsWithError[0], {
+          scrollMode: 'if-needed',
+          behavior: 'smooth',
+          block: 'center',
+          inline: 'center',
+        });
+        fieldsWithError.forEach((field) => {
+          field.classList.add(classes.flicker);
+          setTimeout(() => field.classList.remove(classes.flicker), 1000);
+        });
+      }
     }
   }, [classes.flicker, isValid, submitCount]);
 
