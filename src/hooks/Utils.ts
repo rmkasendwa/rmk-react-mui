@@ -19,7 +19,7 @@ import {
   TaggedAPIRequest,
 } from '../interfaces/Utils';
 
-export interface UseQueryOptions {
+export interface QueryOptions {
   key?: string;
   loadOnMount?: boolean;
   autoSync?: boolean;
@@ -29,6 +29,7 @@ export interface UseQueryOptions {
 const DEFAULT_SYNC_TIMEOUT = 5 * 60 * 1000;
 const WINDOW_BLUR_THRESHOLD = 60 * 1000;
 
+//#region useAPIService
 export const useAPIService = <T>(
   defaultValue: T,
   key?: string,
@@ -143,9 +144,11 @@ export const useAPIService = <T>(
     reset: resetRef.current,
   };
 };
+//#endregion
 
 type Awaited<T> = T extends PromiseLike<infer U> ? U : T;
 
+//#region useMutation
 export const useMutation = <MutateFunction extends TAPIFunction>(
   inputMutate: MutateFunction
 ) => {
@@ -179,7 +182,9 @@ export const useMutation = <MutateFunction extends TAPIFunction>(
     ...rest,
   };
 };
+//#endregion
 
+//#region useCreate
 export const useCreate = <CreateFunction extends TAPIFunction>(
   inputCreate: CreateFunction
 ) => {
@@ -201,7 +206,9 @@ export const useCreate = <CreateFunction extends TAPIFunction>(
     ...rest,
   };
 };
+//#endregion
 
+//#region useUpdate
 export const useUpdate = <UpdateFunction extends TAPIFunction>(
   inputUpdate: UpdateFunction
 ) => {
@@ -217,7 +224,9 @@ export const useUpdate = <UpdateFunction extends TAPIFunction>(
     ...rest,
   };
 };
+//#endregion
 
+//#region useDelete
 export const useDelete = <DeleteFunction extends TAPIFunction>(
   inputDelete: DeleteFunction
 ) => {
@@ -239,8 +248,10 @@ export const useDelete = <DeleteFunction extends TAPIFunction>(
     ...rest,
   };
 };
+//#endregion
 
-export interface UseRecordOptions<LoadableRecord> extends UseQueryOptions {
+//#region useRecord
+export interface UseRecordOptions<LoadableRecord> extends QueryOptions {
   defaultValue?: LoadableRecord;
 }
 export const useRecord = <LoadableRecord>(
@@ -364,10 +375,12 @@ export const useRecord = <LoadableRecord>(
     ...rest,
   };
 };
+//#endregion
 
+//#region useRecords
 export const useRecords = <LoadableRecord>(
   recordFinder?: TAPIFunction<LoadableRecord[]>,
-  { ...inputRest }: UseQueryOptions = {}
+  { ...inputRest }: QueryOptions = {}
 ) => {
   const { record, setRecord, ...rest } = useRecord(recordFinder, {
     defaultValue: [],
@@ -380,28 +393,47 @@ export const useRecords = <LoadableRecord>(
     ...rest,
   };
 };
+//#endregion
 
+//#region usePaginatedRecords
 export interface RecordFinderRequestController {
   cancelRequest: () => void;
 }
 
-export type PaginatedRecordsFinderOptions = PaginatedRequestParams & {
+export type PaginatedRecordsFinderOptions<
+  PaginatedResponseDataExtensions extends Record<string, any> = any
+> = PaginatedRequestParams & {
   getRequestController?: (controller: RecordFinderRequestController) => void;
+  lastLoadedPage?: ResponsePage<any, PaginatedResponseDataExtensions>;
 };
 
-export type PaginatedRecordsFinder<T> = (
-  options: PaginatedRecordsFinderOptions
-) => Promise<PaginatedResponseData<T>>;
+export type ResponsePage<
+  DataRow,
+  PaginatedResponseDataExtensions extends Record<string, any> = any
+> = PaginatedResponseData<DataRow> & PaginatedResponseDataExtensions;
 
-export interface UsePaginatedRecordsOptions<T = any>
+export type PaginatedRecordsFinder<
+  DataRow,
+  PaginatedResponseDataExtensions extends Record<string, any> = any
+> = (
+  options: PaginatedRecordsFinderOptions<PaginatedResponseDataExtensions>
+) => Promise<ResponsePage<DataRow, PaginatedResponseDataExtensions>>;
+
+export interface PaginatedRecordsOptions<DataRow = any>
   extends PaginatedRequestParams,
-    UseQueryOptions {
+    QueryOptions {
   revalidationKey?: string;
-  loadedPagesMap?: Map<number, T[]>;
+  loadedPagesMap?: Map<number, DataRow[]>;
   canLoadNextPage?: boolean;
 }
-export const usePaginatedRecords = <T>(
-  recordFinder: PaginatedRecordsFinder<T>,
+export const usePaginatedRecords = <
+  DataRow,
+  PaginatedResponseDataExtensions extends Record<string, any>
+>(
+  recordFinder: PaginatedRecordsFinder<
+    DataRow,
+    PaginatedResponseDataExtensions
+  >,
   {
     key,
     loadOnMount = true,
@@ -412,8 +444,8 @@ export const usePaginatedRecords = <T>(
     loadedPagesMap,
     revalidationKey,
     autoSync = true,
-    canLoadNextPage,
-  }: UsePaginatedRecordsOptions<T> = {}
+    canLoadNextPage = true,
+  }: PaginatedRecordsOptions<DataRow> = {}
 ) => {
   // Refs
   const isInitialMountRef = useRef(true);
@@ -433,13 +465,17 @@ export const usePaginatedRecords = <T>(
   const searchTermRef = useRef(searchTerm);
   searchTermRef.current = searchTerm;
 
+  const lastLoadedPageRef = useRef<
+    ResponsePage<DataRow, PaginatedResponseDataExtensions> | undefined
+  >(undefined);
+
   const {
     load: loadFromAPIService,
     loading,
     record: responseData,
     reset: baseReset,
     ...rest
-  } = useAPIService<PaginatedResponseData<T> | null>(
+  } = useAPIService<PaginatedResponseData<DataRow> | null>(
     null,
     (() => {
       if (key) {
@@ -450,7 +486,7 @@ export const usePaginatedRecords = <T>(
   );
 
   const loadedPages = useMemo(() => {
-    return loadedPagesMapRef.current || new Map<number, T[]>();
+    return loadedPagesMapRef.current || new Map<number, DataRow[]>();
   }, []);
 
   const load = useCallback(
@@ -469,6 +505,7 @@ export const usePaginatedRecords = <T>(
               localPendingRecordRequestControllers.push(requestController);
               pendingRecordRequestControllers.current.push(requestController);
             },
+            lastLoadedPage: lastLoadedPageRef.current,
           })
           .finally(() => {
             if (localPendingRecordRequestControllers.length > 0) {
@@ -491,14 +528,20 @@ export const usePaginatedRecords = <T>(
             }
           });
 
-        const { records, recordsTotalCount } = responseData;
+        const { records, recordsTotalCount, hasNextPage } = responseData;
         loadedPages.set(params.offset!, records);
         const allPageRecords = [...loadedPages.keys()]
           .sort((a, b) => a - b)
           .map((key) => loadedPages.get(key)!)
           .flat();
+        lastLoadedPageRef.current = responseData;
         recordsTotalCountRef.current = recordsTotalCount;
-        hasNextPageRef.current = allPageRecords.length < recordsTotalCount;
+        hasNextPageRef.current = (() => {
+          if (hasNextPage != null) {
+            return hasNextPage;
+          }
+          return allPageRecords.length < recordsTotalCount;
+        })();
         return responseData;
       });
     },
@@ -593,6 +636,8 @@ export const usePaginatedRecords = <T>(
     loadNextPage,
     responseData,
     reset: resetRef.current,
+    hasNextPage: hasNextPageRef.current,
     ...rest,
   };
 };
+//#endregion

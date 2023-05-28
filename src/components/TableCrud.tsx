@@ -47,7 +47,7 @@ import {
 import { LoadingContext, LoadingProvider } from '../contexts/LoadingContext';
 import { useReactRouterDOMSearchParams } from '../hooks/ReactRouterDOM';
 import {
-  UsePaginatedRecordsOptions,
+  PaginatedRecordsOptions,
   useCreate,
   useDelete,
   usePaginatedRecords,
@@ -111,10 +111,7 @@ export interface TableCrudProps<
       >
     >,
     Pick<PageTitleProps, 'tools'>,
-    Pick<
-      UsePaginatedRecordsOptions<RecordRow>,
-      'revalidationKey' | 'autoSync'
-    > {
+    Pick<PaginatedRecordsOptions<RecordRow>, 'revalidationKey' | 'autoSync'> {
   title?: ReactNode;
   postCreateButtonTools?: Tool[];
   children?:
@@ -130,7 +127,7 @@ export interface TableCrudProps<
   description?: ReactNode;
   recordsFinder: (
     options: Pick<
-      UsePaginatedRecordsOptions<RecordRow>,
+      PaginatedRecordsOptions<RecordRow>,
       'limit' | 'offset' | 'searchTerm'
     >
   ) => Promise<PaginatedResponseData<RecordRow>>;
