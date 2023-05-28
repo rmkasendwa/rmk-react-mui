@@ -12,6 +12,7 @@ export interface PaginatedResponseData<DataRow> {
   recordsTotalCount: number;
   records: DataRow[];
   hasNextPage?: boolean;
+  loadedPageKey?: number;
 }
 
 export type TAPIFunction<T = any> = (...args: any) => Promise<T>;
