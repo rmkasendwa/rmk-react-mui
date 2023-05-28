@@ -12,10 +12,7 @@ import {
 import clsx from 'clsx';
 import { forwardRef, useEffect, useState } from 'react';
 
-import {
-  UsePaginatedRecordsOptions,
-  usePaginatedRecords,
-} from '../hooks/Utils';
+import { PaginatedRecordsOptions, usePaginatedRecords } from '../hooks/Utils';
 import { PaginatedResponseData } from '../interfaces/Utils';
 import Card, { CardProps } from './Card';
 import IconLoadingScreen from './IconLoadingScreen';
@@ -58,10 +55,10 @@ export interface ExternallyPaginatedTableCardProps<
   RecordRow extends BaseDataRow = any
 > extends Omit<TableProps<RecordRow>, 'rows'>,
     NonNullable<Pick<CardProps, 'title'>>,
-    Pick<UsePaginatedRecordsOptions<RecordRow>, 'revalidationKey'> {
+    Pick<PaginatedRecordsOptions<RecordRow>, 'revalidationKey'> {
   recordsFinder: (
     options: Pick<
-      UsePaginatedRecordsOptions<RecordRow>,
+      PaginatedRecordsOptions<RecordRow>,
       'limit' | 'offset' | 'searchTerm'
     >
   ) => Promise<PaginatedResponseData<RecordRow>>;

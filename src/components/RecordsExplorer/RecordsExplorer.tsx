@@ -50,7 +50,7 @@ import {
 } from '../../hooks/ReactRouterDOM';
 import {
   PaginatedRecordsFinderOptions,
-  UsePaginatedRecordsOptions,
+  PaginatedRecordsOptions,
   useCreate,
   usePaginatedRecords,
   useRecord,
@@ -235,10 +235,7 @@ export interface RecordsExplorerProps<
     Partial<
       Pick<ModalFormProps<InitialValues>, 'validationSchema' | 'editableFields'>
     >,
-    Pick<
-      UsePaginatedRecordsOptions<RecordRow>,
-      'revalidationKey' | 'autoSync'
-    > {
+    Pick<PaginatedRecordsOptions<RecordRow>, 'revalidationKey' | 'autoSync'> {
   getTitle?: RecordsExplorerFunctionChildren<
     RecordsExplorerChildrenOptions<RecordRow>
   >;

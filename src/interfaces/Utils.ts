@@ -8,9 +8,10 @@ export interface PaginatedRequestParams {
   searchTerm?: string;
 }
 
-export interface PaginatedResponseData<T> {
+export interface PaginatedResponseData<DataRow> {
   recordsTotalCount: number;
-  records: T[];
+  records: DataRow[];
+  hasNextPage?: boolean;
 }
 
 export type TAPIFunction<T = any> = (...args: any) => Promise<T>;
