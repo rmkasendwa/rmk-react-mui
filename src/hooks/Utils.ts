@@ -571,6 +571,7 @@ export const usePaginatedRecords = <
     loadedPages.clear();
     recordsTotalCountRef.current = 0;
     hasNextPageRef.current = true;
+    lastLoadedPageRef.current = undefined;
     const requestControllersToClear = [
       ...pendingRecordRequestControllers.current,
     ];
@@ -605,6 +606,15 @@ export const usePaginatedRecords = <
       loadRef.current();
     }
   }, [loadOnMount]);
+
+  useEffect(() => {
+    if (
+      !isInitialMountRef.current &&
+      (limit || searchTerm || revalidationKey)
+    ) {
+      resetRef.current();
+    }
+  }, [limit, revalidationKey, searchTerm]);
 
   useEffect(() => {
     if (
