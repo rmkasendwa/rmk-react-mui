@@ -405,6 +405,7 @@ export type PaginatedRecordsFinderOptions<
 > = PaginatedRequestParams & {
   getRequestController?: (controller: RecordFinderRequestController) => void;
   lastLoadedPage?: ResponsePage<any, PaginatedResponseDataExtensions>;
+  isLoadingNextPage?: boolean;
 };
 
 export type ResponsePage<
@@ -489,12 +490,20 @@ export const usePaginatedRecords = <
     return loadedPagesMapRef.current || new Map<number, DataRow[]>();
   }, []);
 
+  type LoadOptions = PaginatedRequestParams & {
+    isLoadingNextPage?: boolean;
+  };
   const load = useCallback(
-    (params: PaginatedRequestParams = {}) => {
+    (params: LoadOptions = {}) => {
       params = { ...params };
       params.offset || (params.offset = offsetRef.current);
       params.limit || (params.limit = limitRef.current);
       params.searchTerm || (params.searchTerm = searchTermRef.current);
+      params.isLoadingNextPage ?? (params.isLoadingNextPage = false);
+
+      if (!params.isLoadingNextPage) {
+        lastLoadedPageRef.current = undefined;
+      }
       return loadFromAPIService(async () => {
         const localPendingRecordRequestControllers: RecordFinderRequestController[] =
           [];
@@ -528,8 +537,14 @@ export const usePaginatedRecords = <
             }
           });
 
-        const { records, recordsTotalCount, hasNextPage } = responseData;
-        loadedPages.set(params.offset!, records);
+        if (!params.isLoadingNextPage) {
+          loadedPages.clear();
+          recordsTotalCountRef.current = 0;
+        }
+
+        const { records, recordsTotalCount, hasNextPage, loadedPageKey } =
+          responseData;
+        loadedPages.set(loadedPageKey ?? params.offset!, records);
         const allPageRecords = [...loadedPages.keys()]
           .sort((a, b) => a - b)
           .map((key) => loadedPages.get(key)!)
@@ -560,6 +575,7 @@ export const usePaginatedRecords = <
             ...params,
             offset: lastPageOffset + lastPageRecords.length,
             limit: limit || lastPageRecords.length,
+            isLoadingNextPage: true,
           });
         }
       }
@@ -596,18 +612,6 @@ export const usePaginatedRecords = <
   });
 
   useEffect(() => {
-    if (!isInitialMountRef.current && limit) {
-      resetRef.current();
-    }
-  }, [limit]);
-
-  useEffect(() => {
-    if (loadOnMount && isInitialMountRef.current) {
-      loadRef.current();
-    }
-  }, [loadOnMount]);
-
-  useEffect(() => {
     if (
       !isInitialMountRef.current &&
       (limit || searchTerm || revalidationKey)
@@ -615,6 +619,12 @@ export const usePaginatedRecords = <
       resetRef.current();
     }
   }, [limit, revalidationKey, searchTerm]);
+
+  useEffect(() => {
+    if (loadOnMount && isInitialMountRef.current) {
+      loadRef.current();
+    }
+  }, [loadOnMount]);
 
   useEffect(() => {
     if (
