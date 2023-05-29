@@ -12,7 +12,7 @@ import {
 } from '@mui/material';
 import clsx from 'clsx';
 import { useFormikContext } from 'formik';
-import { forwardRef, useEffect, useRef } from 'react';
+import { ReactNode, forwardRef, useCallback, useEffect, useRef } from 'react';
 import { mergeRefs } from 'react-merge-refs';
 import scrollIntoView from 'scroll-into-view-if-needed';
 
@@ -63,7 +63,18 @@ export const flickerAnimation = keyframes`
   }
 `;
 
-export interface FormikErrorFieldHighlighterProps extends Partial<BoxProps> {}
+export type FormikErrorFieldHighlighterFunctionChildrenProps = {
+  scrollToErrorFields: () => void;
+};
+
+export type FormikErrorFieldHighlighterFunctionChildren = (
+  props: FormikErrorFieldHighlighterFunctionChildrenProps
+) => ReactNode;
+
+export interface FormikErrorFieldHighlighterProps
+  extends Partial<Omit<BoxProps, 'children'>> {
+  children: FormikErrorFieldHighlighterFunctionChildren | ReactNode;
+}
 
 export function getFormikErrorFieldHighlighterUtilityClass(
   slot: string
@@ -104,8 +115,8 @@ export const FormikErrorFieldHighlighter = forwardRef<
   const formElementsWrapperRef = useRef<HTMLDivElement>();
   const { isValid, submitCount } = useFormikContext();
 
-  useEffect(() => {
-    if (submitCount > 0 && !isValid && formElementsWrapperRef.current) {
+  const scrollToErrorFields = useCallback(() => {
+    if (!isValid && formElementsWrapperRef.current) {
       const fieldsWithError =
         formElementsWrapperRef.current.querySelectorAll('.Mui-error');
       if (fieldsWithError.length > 0) {
@@ -121,7 +132,16 @@ export const FormikErrorFieldHighlighter = forwardRef<
         });
       }
     }
-  }, [classes.flicker, isValid, submitCount]);
+  }, [classes.flicker, isValid]);
+
+  const scrollToErrorFieldsRef = useRef(scrollToErrorFields);
+  scrollToErrorFieldsRef.current = scrollToErrorFields;
+
+  useEffect(() => {
+    if (submitCount > 0 && !isValid) {
+      scrollToErrorFieldsRef.current();
+    }
+  }, [isValid, submitCount]);
 
   return (
     <Box
@@ -135,7 +155,9 @@ export const FormikErrorFieldHighlighter = forwardRef<
         },
       }}
     >
-      {children}
+      {typeof children === 'function'
+        ? children({ scrollToErrorFields })
+        : children}
     </Box>
   );
 });

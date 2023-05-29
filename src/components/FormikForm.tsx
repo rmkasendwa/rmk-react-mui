@@ -1,3 +1,4 @@
+import { diff } from '@infinite-debugger/rmk-utils/data';
 import {
   ComponentsOverrides,
   ComponentsProps,
@@ -9,9 +10,11 @@ import {
 } from '@mui/material';
 import clsx from 'clsx';
 import { Form, Formik, FormikConfig, FormikProps, FormikValues } from 'formik';
+import { isEmpty } from 'lodash';
 import { ReactElement, ReactNode, Ref, forwardRef } from 'react';
 
 import FormikErrorFieldHighlighter, {
+  FormikErrorFieldHighlighterFunctionChildrenProps,
   FormikErrorFieldHighlighterProps,
 } from './FormikErrorFieldHighlighter';
 
@@ -51,9 +54,10 @@ export type FormikFormFunctionChildren<
   Values extends FormikValues = any,
   ExtraProps = Record<string, unknown>
 > = (
-  props: FormikProps<Values> & {
-    formHasChanges?: boolean;
-  } & ExtraProps
+  props: FormikProps<Values> &
+    FormikErrorFieldHighlighterFunctionChildrenProps & {
+      formHasChanges?: boolean;
+    } & ExtraProps
 ) => ReactNode;
 
 export interface FormikFormProps<
@@ -115,7 +119,8 @@ const BaseFormikForm = <Values extends FormikValues>(
       {...{ validationSchema, initialValues, onSubmit, enableReinitialize }}
       {...FormikProps}
     >
-      {({ ...formProps }) => {
+      {({ values, ...formProps }) => {
+        const formHasChanges = !isEmpty(diff(values, initialValues));
         return (
           <Form noValidate>
             <FormikErrorFieldHighlighter
@@ -123,11 +128,16 @@ const BaseFormikForm = <Values extends FormikValues>(
               {...rest}
               className={clsx(classes.root)}
             >
-              {typeof children === 'function'
-                ? children({
-                    ...formProps,
-                  })
-                : children}
+              {({ ...fieldHighlighterProps }) => {
+                return typeof children === 'function'
+                  ? children({
+                      values,
+                      formHasChanges,
+                      ...fieldHighlighterProps,
+                      ...formProps,
+                    })
+                  : children;
+              }}
             </FormikErrorFieldHighlighter>
           </Form>
         );
