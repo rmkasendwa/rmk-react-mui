@@ -1101,7 +1101,7 @@ const BaseTableCrud = <
                           selectedRecord,
                           loadingState,
                           ...rest,
-                        });
+                        } as any);
                       }
                       return children;
                     })()}
