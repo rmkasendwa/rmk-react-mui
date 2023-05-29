@@ -56,14 +56,16 @@ export type FormikFormFunctionChildren<
   } & ExtraProps
 ) => ReactNode;
 
-export interface FormikFormProps<Values extends FormikValues = any>
-  extends Partial<
+export interface FormikFormProps<
+  Values extends FormikValues = any,
+  ExtraProps = Record<string, unknown>
+> extends Partial<
       Omit<FormikErrorFieldHighlighterProps, 'onSubmit' | 'children' | 'ref'>
     >,
     Required<Pick<FormikConfig<Values>, 'validationSchema' | 'onSubmit'>>,
     Pick<FormikConfig<Values>, 'enableReinitialize'> {
   initialValues: Values;
-  children: FormikFormFunctionChildren | ReactNode;
+  children: FormikFormFunctionChildren<Values, ExtraProps> | ReactNode;
   FormikProps?: Partial<FormikConfig<Values>>;
 }
 
