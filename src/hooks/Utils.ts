@@ -420,12 +420,18 @@ export type PaginatedRecordsFinder<
   options: PaginatedRecordsFinderOptions<PaginatedResponseDataExtensions>
 ) => Promise<ResponsePage<DataRow, PaginatedResponseDataExtensions>>;
 
+export const PAGINATION_RECORDS_BASE_REFRESH_INTERVAL = 5000;
+
 export interface PaginatedRecordsOptions<DataRow = any>
   extends PaginatedRequestParams,
     QueryOptions {
+  /**
+   * The revalidation key. If revalidationKey changes and autoSync is set to true. The records will synchronize
+   */
   revalidationKey?: string;
   loadedPagesMap?: Map<number, DataRow[]>;
   canLoadNextPage?: boolean;
+  refreshInterval?: number;
 }
 export const usePaginatedRecords = <
   DataRow,
@@ -446,6 +452,7 @@ export const usePaginatedRecords = <
     revalidationKey,
     autoSync = true,
     canLoadNextPage = true,
+    refreshInterval,
   }: PaginatedRecordsOptions<DataRow> = {}
 ) => {
   // Refs
@@ -466,6 +473,8 @@ export const usePaginatedRecords = <
   const searchTermRef = useRef(searchTerm);
   searchTermRef.current = searchTerm;
 
+  const nextSyncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   const lastLoadedPageRef = useRef<
     ResponsePage<DataRow, PaginatedResponseDataExtensions> | undefined
   >(undefined);
@@ -475,6 +484,7 @@ export const usePaginatedRecords = <
     loading,
     record: responseData,
     reset: baseReset,
+    errorMessage,
     ...rest
   } = useAPIService<PaginatedResponseData<DataRow> | null>(
     null,
@@ -637,6 +647,60 @@ export const usePaginatedRecords = <
   }, [autoSync, limit, offset, revalidationKey, searchTerm]);
 
   useEffect(() => {
+    if (
+      autoSync &&
+      refreshInterval &&
+      refreshInterval >= PAGINATION_RECORDS_BASE_REFRESH_INTERVAL &&
+      !loading &&
+      !errorMessage
+    ) {
+      let blurTime: number;
+      const mouseMoveEventCallback = () => {
+        if (nextSyncTimeoutRef.current !== null) {
+          clearTimeout(nextSyncTimeoutRef.current);
+        }
+        nextSyncTimeoutRef.current = setTimeout(() => {
+          loadRef.current();
+        }, refreshInterval);
+      };
+      const visiblityChangeEventCallback = (event?: Event) => {
+        if (nextSyncTimeoutRef.current !== null) {
+          clearTimeout(nextSyncTimeoutRef.current);
+        }
+        window.removeEventListener('mousemove', mouseMoveEventCallback);
+        if (document.hidden) {
+          blurTime = Date.now();
+        } else {
+          window.addEventListener('mousemove', mouseMoveEventCallback);
+          mouseMoveEventCallback();
+          if (
+            event &&
+            blurTime != null &&
+            Date.now() - blurTime >= WINDOW_BLUR_THRESHOLD
+          ) {
+            loadRef.current();
+          }
+        }
+      };
+      document.addEventListener(
+        'visibilitychange',
+        visiblityChangeEventCallback
+      );
+      visiblityChangeEventCallback();
+      return () => {
+        window.removeEventListener('mousemove', mouseMoveEventCallback);
+        document.removeEventListener(
+          'visibilitychange',
+          visiblityChangeEventCallback
+        );
+        if (nextSyncTimeoutRef.current !== null) {
+          clearTimeout(nextSyncTimeoutRef.current);
+        }
+      };
+    }
+  }, [autoSync, errorMessage, loading, refreshInterval]);
+
+  useEffect(() => {
     isInitialMountRef.current = false;
     return () => {
       isInitialMountRef.current = true;
@@ -657,6 +721,7 @@ export const usePaginatedRecords = <
     responseData,
     reset: resetRef.current,
     hasNextPage: hasNextPageRef.current,
+    errorMessage,
     ...rest,
   };
 };

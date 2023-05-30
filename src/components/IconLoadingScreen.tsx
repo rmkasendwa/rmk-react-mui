@@ -16,6 +16,7 @@ import {
 } from '@mui/material';
 import clsx from 'clsx';
 import { omit } from 'lodash';
+import { singular } from 'pluralize';
 import { FC, ReactNode, forwardRef } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -122,8 +123,7 @@ export const IconLoadingScreen = forwardRef<any, IconLoadingScreenProps>(
       })()
     );
 
-    recordLabelSingular ||
-      (recordLabelSingular = recordLabelPlural.replace(/s$/gi, ''));
+    recordLabelSingular || (recordLabelSingular = singular(recordLabelPlural));
 
     const lowercaseRecordLabelPlural = recordLabelPlural.toLowerCase();
     const lowercaseRecordLabelSingular = recordLabelSingular.toLowerCase();
