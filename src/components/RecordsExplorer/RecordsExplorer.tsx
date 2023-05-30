@@ -29,6 +29,7 @@ import { BoxProps } from '@mui/material/Box';
 import clsx from 'clsx';
 import { FormikValues } from 'formik';
 import { omit, result } from 'lodash';
+import { singular } from 'pluralize';
 import {
   ReactElement,
   ReactNode,
@@ -235,7 +236,10 @@ export interface RecordsExplorerProps<
     Partial<
       Pick<ModalFormProps<InitialValues>, 'validationSchema' | 'editableFields'>
     >,
-    Pick<PaginatedRecordsOptions<RecordRow>, 'revalidationKey' | 'autoSync'> {
+    Pick<
+      PaginatedRecordsOptions<RecordRow>,
+      'revalidationKey' | 'autoSync' | 'refreshInterval'
+    > {
   getTitle?: RecordsExplorerFunctionChildren<
     RecordsExplorerChildrenOptions<RecordRow>
   >;
@@ -388,6 +392,7 @@ export interface RecordsExplorerProps<
   showSortTool?: boolean;
   showFilterTool?: boolean;
   stateStorage?: ParamStorage;
+  PaginatedRecordsOptions?: Partial<PaginatedRecordsOptions<RecordRow>>;
 }
 
 export function getRecordsExplorerUtilityClass(slot: string): string {
@@ -493,6 +498,8 @@ const BaseRecordsExplorer = <
     stateStorage,
     getViewFunction,
     getRecordLoadFunction,
+    refreshInterval,
+    PaginatedRecordsOptions,
     ...rest
   } = omit(
     props,
@@ -524,8 +531,7 @@ const BaseRecordsExplorer = <
     }
   }
 
-  recordLabelSingular ||
-    (recordLabelSingular = recordLabelPlural.replace(/s$/gi, ''));
+  recordLabelSingular || (recordLabelSingular = singular(recordLabelPlural));
   const lowercaseRecordLabelPlural = recordLabelPlural.toLowerCase();
   const lowercaseRecordLabelSingular = recordLabelSingular.toLowerCase();
 
@@ -1036,6 +1042,8 @@ const BaseRecordsExplorer = <
       revalidationKey: `${revalidationKey}${searchTerm}`,
       loadOnMount: showRecords,
       key: recordKey,
+      refreshInterval,
+      ...PaginatedRecordsOptions,
     }
   );
 
