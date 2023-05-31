@@ -18,6 +18,7 @@ import {
   TAPIFunction,
   TaggedAPIRequest,
 } from '../interfaces/Utils';
+import { usePolling } from './Polling';
 
 export interface QueryOptions {
   key?: string;
@@ -26,8 +27,7 @@ export interface QueryOptions {
   revalidationKey?: string;
 }
 
-const DEFAULT_SYNC_TIMEOUT = 5 * 60 * 1000;
-const WINDOW_BLUR_THRESHOLD = 60 * 1000;
+export type GetStaleWhileRevalidateFunction<T> = (data: T) => void;
 
 //#region useAPIService
 export const useAPIService = <T>(
@@ -260,13 +260,11 @@ export const useRecord = <LoadableRecord>(
     defaultValue,
     key,
     loadOnMount = true,
-    autoSync = false,
     revalidationKey,
   }: UseRecordOptions<LoadableRecord> = {}
 ) => {
   // Refs
   const isInitialMountRef = useRef(true);
-  const nextSyncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const recordFinderRef = useRef(recordFinder);
   useEffect(() => {
     recordFinderRef.current = recordFinder;
@@ -294,10 +292,6 @@ export const useRecord = <LoadableRecord>(
     [baseLoad]
   ) as NonNullable<typeof recordFinder>;
 
-  const poll = useCallback(() => {
-    return baseLoad(recordFinderRef.current, undefined, true);
-  }, [baseLoad]);
-
   useEffect(() => {
     if (loadOnMount && isInitialMountRef.current) {
       load();
@@ -309,54 +303,6 @@ export const useRecord = <LoadableRecord>(
       load();
     }
   }, [load, revalidationKey]);
-
-  useEffect(() => {
-    if (autoSync && !busy && !loading && !errorMessage) {
-      let blurTime: number;
-      const mouseMoveEventCallback = () => {
-        if (nextSyncTimeoutRef.current !== null) {
-          clearTimeout(nextSyncTimeoutRef.current);
-        }
-        nextSyncTimeoutRef.current = setTimeout(() => {
-          poll();
-        }, DEFAULT_SYNC_TIMEOUT);
-      };
-      const visiblityChangeEventCallback = (event?: Event) => {
-        if (nextSyncTimeoutRef.current !== null) {
-          clearTimeout(nextSyncTimeoutRef.current);
-        }
-        window.removeEventListener('mousemove', mouseMoveEventCallback);
-        if (document.hidden) {
-          blurTime = Date.now();
-        } else {
-          window.addEventListener('mousemove', mouseMoveEventCallback);
-          mouseMoveEventCallback();
-          if (
-            event &&
-            blurTime != null &&
-            Date.now() - blurTime >= WINDOW_BLUR_THRESHOLD
-          ) {
-            poll();
-          }
-        }
-      };
-      document.addEventListener(
-        'visibilitychange',
-        visiblityChangeEventCallback
-      );
-      visiblityChangeEventCallback();
-      return () => {
-        window.removeEventListener('mousemove', mouseMoveEventCallback);
-        document.removeEventListener(
-          'visibilitychange',
-          visiblityChangeEventCallback
-        );
-        if (nextSyncTimeoutRef.current !== null) {
-          clearTimeout(nextSyncTimeoutRef.current);
-        }
-      };
-    }
-  }, [autoSync, busy, errorMessage, loading, poll]);
 
   useEffect(() => {
     isInitialMountRef.current = false;
@@ -404,6 +350,7 @@ export type PaginatedRecordsFinderOptions<
   PaginatedResponseDataExtensions extends Record<string, any> = any
 > = PaginatedRequestParams & {
   getRequestController?: (controller: RecordFinderRequestController) => void;
+  getStaleWhileRevalidate?: GetStaleWhileRevalidateFunction<any>;
   lastLoadedPage?: ResponsePage<any, PaginatedResponseDataExtensions>;
   isLoadingNextPage?: boolean;
 };
@@ -473,8 +420,6 @@ export const usePaginatedRecords = <
   const searchTermRef = useRef(searchTerm);
   searchTermRef.current = searchTerm;
 
-  const nextSyncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
   const lastLoadedPageRef = useRef<
     ResponsePage<DataRow, PaginatedResponseDataExtensions> | undefined
   >(undefined);
@@ -517,12 +462,36 @@ export const usePaginatedRecords = <
       return loadFromAPIService(async () => {
         const localPendingRecordRequestControllers: RecordFinderRequestController[] =
           [];
+
+        const processResponseData = (
+          responseData: ResponsePage<DataRow, PaginatedResponseDataExtensions>
+        ) => {
+          const { records, recordsTotalCount, hasNextPage, loadedPageKey } =
+            responseData;
+          loadedPages.set(loadedPageKey ?? params.offset!, records);
+          const allPageRecords = [...loadedPages.keys()]
+            .sort((a, b) => a - b)
+            .map((key) => loadedPages.get(key)!)
+            .flat();
+          lastLoadedPageRef.current = responseData;
+          recordsTotalCountRef.current = recordsTotalCount;
+          hasNextPageRef.current = (() => {
+            if (hasNextPage != null) {
+              return hasNextPage;
+            }
+            return allPageRecords.length < recordsTotalCount;
+          })();
+        };
+
         const responseData = await recordFinderRef
           .current({
             ...params,
             getRequestController: (requestController) => {
               localPendingRecordRequestControllers.push(requestController);
               pendingRecordRequestControllers.current.push(requestController);
+            },
+            getStaleWhileRevalidate: (data) => {
+              processResponseData(data);
             },
             lastLoadedPage: lastLoadedPageRef.current,
           })
@@ -552,21 +521,7 @@ export const usePaginatedRecords = <
           recordsTotalCountRef.current = 0;
         }
 
-        const { records, recordsTotalCount, hasNextPage, loadedPageKey } =
-          responseData;
-        loadedPages.set(loadedPageKey ?? params.offset!, records);
-        const allPageRecords = [...loadedPages.keys()]
-          .sort((a, b) => a - b)
-          .map((key) => loadedPages.get(key)!)
-          .flat();
-        lastLoadedPageRef.current = responseData;
-        recordsTotalCountRef.current = recordsTotalCount;
-        hasNextPageRef.current = (() => {
-          if (hasNextPage != null) {
-            return hasNextPage;
-          }
-          return allPageRecords.length < recordsTotalCount;
-        })();
+        processResponseData(responseData);
         return responseData;
       });
     },
@@ -646,59 +601,13 @@ export const usePaginatedRecords = <
     }
   }, [autoSync, limit, offset, revalidationKey, searchTerm]);
 
-  useEffect(() => {
-    if (
-      autoSync &&
-      refreshInterval &&
-      refreshInterval >= PAGINATION_RECORDS_BASE_REFRESH_INTERVAL &&
-      !loading &&
-      !errorMessage
-    ) {
-      let blurTime: number;
-      const mouseMoveEventCallback = () => {
-        if (nextSyncTimeoutRef.current !== null) {
-          clearTimeout(nextSyncTimeoutRef.current);
-        }
-        nextSyncTimeoutRef.current = setTimeout(() => {
-          loadRef.current();
-        }, refreshInterval);
-      };
-      const visiblityChangeEventCallback = (event?: Event) => {
-        if (nextSyncTimeoutRef.current !== null) {
-          clearTimeout(nextSyncTimeoutRef.current);
-        }
-        window.removeEventListener('mousemove', mouseMoveEventCallback);
-        if (document.hidden) {
-          blurTime = Date.now();
-        } else {
-          window.addEventListener('mousemove', mouseMoveEventCallback);
-          mouseMoveEventCallback();
-          if (
-            event &&
-            blurTime != null &&
-            Date.now() - blurTime >= WINDOW_BLUR_THRESHOLD
-          ) {
-            loadRef.current();
-          }
-        }
-      };
-      document.addEventListener(
-        'visibilitychange',
-        visiblityChangeEventCallback
-      );
-      visiblityChangeEventCallback();
-      return () => {
-        window.removeEventListener('mousemove', mouseMoveEventCallback);
-        document.removeEventListener(
-          'visibilitychange',
-          visiblityChangeEventCallback
-        );
-        if (nextSyncTimeoutRef.current !== null) {
-          clearTimeout(nextSyncTimeoutRef.current);
-        }
-      };
-    }
-  }, [autoSync, errorMessage, loading, refreshInterval]);
+  usePolling({
+    load,
+    autoSync,
+    errorMessage,
+    loading,
+    refreshInterval,
+  });
 
   useEffect(() => {
     isInitialMountRef.current = false;
