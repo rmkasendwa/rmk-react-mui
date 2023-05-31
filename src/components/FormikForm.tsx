@@ -57,6 +57,7 @@ export type FormikFormFunctionChildren<
   props: FormikProps<Values> &
     FormikErrorFieldHighlighterFunctionChildrenProps & {
       formHasChanges?: boolean;
+      changedValues?: Partial<Values>;
     } & ExtraProps
 ) => ReactNode;
 
@@ -120,7 +121,8 @@ const BaseFormikForm = <Values extends FormikValues>(
       {...FormikProps}
     >
       {({ values, ...formProps }) => {
-        const formHasChanges = !isEmpty(diff(values, initialValues));
+        const changedValues = diff(values, initialValues);
+        const formHasChanges = !isEmpty(changedValues);
         return (
           <Form noValidate>
             <FormikErrorFieldHighlighter
@@ -133,6 +135,7 @@ const BaseFormikForm = <Values extends FormikValues>(
                   ? children({
                       values,
                       formHasChanges,
+                      changedValues,
                       ...fieldHighlighterProps,
                       ...formProps,
                     })
