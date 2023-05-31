@@ -30,7 +30,7 @@ import {
 
 import { LoadingProvider, useLoadingContext } from '../contexts/LoadingContext';
 import { useMessagingContext } from '../contexts/MessagingContext';
-import { useRecord } from '../hooks/Utils';
+import { useMutation, useRecord } from '../hooks/Utils';
 import { CrudMode } from '../interfaces/Utils';
 import ErrorAlert from './ErrorAlert';
 import FixedHeaderContentArea from './FixedHeaderContentArea';
@@ -179,6 +179,25 @@ const BaseFormWrapper = <RecordRow, Values extends FormikValues>(
     }
   );
 
+  const {
+    mutate,
+    mutating,
+    mutated,
+    errorMessage: mutatingErrorMessage,
+    reset: resetMutationState,
+  } = useMutation(async (...args: Parameters<NonNullable<typeof onSubmit>>) => {
+    if (onSubmit) {
+      return onSubmit(...args);
+    }
+  });
+
+  useEffect(() => {
+    if (mutated) {
+      successMessage && showSuccessMessage(successMessage);
+      resetMutationState();
+    }
+  }, [mutated, resetMutationState, showSuccessMessage, successMessage]);
+
   useEffect(() => {
     if (recordFinder && mode === 'edit') {
       loadRecord();
@@ -192,7 +211,8 @@ const BaseFormWrapper = <RecordRow, Values extends FormikValues>(
     return { ...initialValues, ...(loadedRecord as any) };
   }, [loadedRecord, initialValues]);
 
-  const errorMessage = errorMessageProp || loadingContextErrorMessage;
+  const errorMessage =
+    errorMessageProp || loadingContextErrorMessage || mutatingErrorMessage;
 
   return (
     <FixedHeaderContentArea
@@ -223,7 +243,7 @@ const BaseFormWrapper = <RecordRow, Values extends FormikValues>(
       <LoadingProvider
         value={{
           load: loadRecord,
-          loading: loadingRecord || loading,
+          loading: loadingRecord || loading || mutating,
           errorMessage: loadingRecordErrorMessage || loadingContextErrorMessage,
         }}
       >
@@ -231,8 +251,7 @@ const BaseFormWrapper = <RecordRow, Values extends FormikValues>(
           validationSchema={validationSchema}
           initialValues={editInitialValues}
           onSubmit={async (values, formikHelpers) => {
-            onSubmit && (await onSubmit(values, formikHelpers));
-            successMessage && showSuccessMessage(successMessage);
+            mutate(values, formikHelpers);
           }}
           enableReinitialize
         >
