@@ -10,7 +10,7 @@ import {
 } from '@mui/material';
 import Box from '@mui/material/Box';
 import clsx from 'clsx';
-import { Fragment, forwardRef, useRef } from 'react';
+import { Fragment, forwardRef, useState } from 'react';
 import { mergeRefs } from 'react-merge-refs';
 
 import {
@@ -107,8 +107,7 @@ export const InfiniteScrollBox = forwardRef<
 
   const { sx: PagingContainerSx, ...PagingContainerRest } = PagingContainer;
 
-  // Refs
-  const elementRef = useRef<HTMLDivElement>();
+  const [element, setElement] = useState<HTMLDivElement | null>(null);
 
   const {
     dataElementsContainerHeight,
@@ -129,12 +128,12 @@ export const InfiniteScrollBox = forwardRef<
     keyboardFocusElement,
     dataElementLength,
     onChangeScrollLength,
-    element: elementRef.current,
+    element,
   });
 
   return (
     <Box
-      ref={mergeRefs([elementRef, ref])}
+      ref={mergeRefs([ref, (element: any) => setElement(element)])}
       {...rest}
       className={clsx(classes.root)}
       tabIndex={0}
