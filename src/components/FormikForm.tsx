@@ -121,7 +121,7 @@ const BaseFormikForm = <Values extends FormikValues>(
       {...FormikProps}
     >
       {({ values, ...formProps }) => {
-        const changedValues = diff(values, initialValues);
+        const changedValues = diff(values, initialValues, true);
         const formHasChanges = !isEmpty(changedValues);
         return (
           <Form noValidate>

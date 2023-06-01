@@ -255,7 +255,7 @@ const BaseFormWrapper = <RecordRow, Values extends FormikValues>(
           }}
           enableReinitialize
         >
-          {({ isSubmitting, ...rest }) => {
+          {({ isSubmitting, formHasChanges, ...rest }) => {
             return (
               <>
                 <Box
@@ -266,7 +266,7 @@ const BaseFormWrapper = <RecordRow, Values extends FormikValues>(
                   }}
                 >
                   {typeof children === 'function'
-                    ? children({ isSubmitting, ...rest })
+                    ? children({ isSubmitting, formHasChanges, ...rest })
                     : children}
                 </Box>
                 {!loading && !errorMessage ? (
@@ -309,6 +309,7 @@ const BaseFormWrapper = <RecordRow, Values extends FormikValues>(
                         fullWidth={smallScreen}
                         type="submit"
                         loading={isSubmitting}
+                        disabled={isSubmitting || !formHasChanges}
                         {...SubmitButtonPropsRest}
                       >
                         Save Changes
