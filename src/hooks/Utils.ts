@@ -365,7 +365,9 @@ export type PaginatedRecordsFinder<
   PaginatedResponseDataExtensions extends Record<string, any> = any
 > = (
   options: PaginatedRecordsFinderOptions<PaginatedResponseDataExtensions>
-) => Promise<ResponsePage<DataRow, PaginatedResponseDataExtensions>>;
+) => Promise<
+  ResponsePage<DataRow, PaginatedResponseDataExtensions> | DataRow[]
+>;
 
 export const PAGINATION_RECORDS_BASE_REFRESH_INTERVAL = 5000;
 
@@ -430,6 +432,7 @@ export const usePaginatedRecords = <
     record: responseData,
     reset: baseReset,
     errorMessage,
+    setRecord,
     ...rest
   } = useAPIService<PaginatedResponseData<DataRow> | null>(
     null,
@@ -481,6 +484,7 @@ export const usePaginatedRecords = <
             }
             return allPageRecords.length < recordsTotalCount;
           })();
+          setRecord(responseData);
         };
 
         const responseData = await recordFinderRef
@@ -491,7 +495,18 @@ export const usePaginatedRecords = <
               pendingRecordRequestControllers.current.push(requestController);
             },
             getStaleWhileRevalidate: (data) => {
-              processResponseData(data);
+              processResponseData(
+                (() => {
+                  if (Array.isArray(data)) {
+                    return {
+                      records: data,
+                      recordsTotalCount: data.length,
+                      hasNextPage: false,
+                    };
+                  }
+                  return data;
+                })()
+              );
             },
             lastLoadedPage: lastLoadedPageRef.current,
           })
@@ -521,11 +536,22 @@ export const usePaginatedRecords = <
           recordsTotalCountRef.current = 0;
         }
 
-        processResponseData(responseData);
+        processResponseData(
+          (() => {
+            if (Array.isArray(responseData)) {
+              return {
+                records: responseData,
+                recordsTotalCount: responseData.length,
+                hasNextPage: false,
+              } as any;
+            }
+            return responseData;
+          })()
+        );
         return responseData;
       });
     },
-    [loadFromAPIService, loadedPages]
+    [loadFromAPIService, loadedPages, setRecord]
   );
   const loadRef = useRef(load);
   loadRef.current = load;

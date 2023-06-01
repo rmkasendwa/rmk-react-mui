@@ -1020,13 +1020,19 @@ const BaseRecordsExplorer = <
     loading,
     errorMessage,
   } = usePaginatedRecords(
-    async ({ limit, offset, getRequestController }) => {
+    async ({
+      limit,
+      offset,
+      getRequestController,
+      getStaleWhileRevalidate,
+    }) => {
       if (recordsFinder) {
         const optionsResponse = await recordsFinder({
           searchTerm,
           limit,
           offset,
           getRequestController,
+          getStaleWhileRevalidate,
         });
         if (Array.isArray(optionsResponse)) {
           return {
