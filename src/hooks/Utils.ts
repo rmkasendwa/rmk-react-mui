@@ -477,12 +477,12 @@ export const usePaginatedRecords = <
             .map((key) => loadedPages.get(key)!)
             .flat();
           lastLoadedPageRef.current = responseData;
-          recordsTotalCountRef.current = recordsTotalCount;
+          recordsTotalCountRef.current = recordsTotalCount ?? records.length;
           hasNextPageRef.current = (() => {
             if (hasNextPage != null) {
               return hasNextPage;
             }
-            return allPageRecords.length < recordsTotalCount;
+            return allPageRecords.length < recordsTotalCountRef.current;
           })();
           setRecord(responseData);
         };

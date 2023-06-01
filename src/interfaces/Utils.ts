@@ -9,8 +9,8 @@ export interface PaginatedRequestParams {
 }
 
 export interface PaginatedResponseData<DataRow> {
-  recordsTotalCount: number;
   records: DataRow[];
+  recordsTotalCount?: number;
   hasNextPage?: boolean;
   loadedPageKey?: number;
 }
