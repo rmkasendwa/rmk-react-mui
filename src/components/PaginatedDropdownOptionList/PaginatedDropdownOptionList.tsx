@@ -267,21 +267,20 @@ const BasePaginatedDropdownOptionList = <Entity,>(
     errorMessage,
     loadedPages,
   } = usePaginatedRecords(
-    async ({ limit, offset, getRequestController }) => {
+    async ({
+      limit,
+      offset,
+      getRequestController,
+      getStaleWhileRevalidate,
+    }) => {
       if (getDropdownOptions) {
-        const optionsResponse = await getDropdownOptions({
+        return getDropdownOptions({
           searchTerm,
           limit,
           offset,
           getRequestController,
+          getStaleWhileRevalidate,
         });
-        if (Array.isArray(optionsResponse)) {
-          return {
-            records: optionsResponse,
-            recordsTotalCount: optionsResponse.length,
-          };
-        }
-        return optionsResponse;
       }
       return { records: [], recordsTotalCount: 0 };
     },
@@ -614,7 +613,11 @@ const BasePaginatedDropdownOptionList = <Entity,>(
           }
           return [];
         })()}
-        dataElementLength={optionHeight}
+        dataElementLength={(() => {
+          if (paging) {
+            return optionHeight;
+          }
+        })()}
         focusedElementIndex={focusedOptionIndex}
         onChangeFocusedDataElement={(index) => {
           setFocusedOptionIndex(index);
