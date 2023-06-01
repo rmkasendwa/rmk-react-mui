@@ -1027,22 +1027,15 @@ const BaseRecordsExplorer = <
       getStaleWhileRevalidate,
     }) => {
       if (recordsFinder) {
-        const optionsResponse = await recordsFinder({
+        return recordsFinder({
           searchTerm,
           limit,
           offset,
           getRequestController,
           getStaleWhileRevalidate,
         });
-        if (Array.isArray(optionsResponse)) {
-          return {
-            records: optionsResponse,
-            recordsTotalCount: optionsResponse.length,
-          };
-        }
-        return optionsResponse;
       }
-      return { records: [], recordsTotalCount: 0 };
+      return [];
     },
     {
       revalidationKey: `${revalidationKey}${searchTerm}`,

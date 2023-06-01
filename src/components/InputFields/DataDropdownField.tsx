@@ -41,7 +41,7 @@ import {
   LoadingProvider,
   useLoadingContext,
 } from '../../contexts/LoadingContext';
-import { useRecord } from '../../hooks/Utils';
+import { useRecords } from '../../hooks/Utils';
 import { isDescendant } from '../../utils/html';
 import FieldValueDisplay from '../FieldValueDisplay';
 import ModalPopup from '../ModalPopup';
@@ -236,8 +236,15 @@ const BaseDataDropdownField = <Entity,>(
   selectedOptionRef.current = selectedOption;
   const getSelectedOptionsRef = useRef(getSelectedOptions);
   getSelectedOptionsRef.current = getSelectedOptions;
+
   const valueRef = useRef(value);
   valueRef.current = value;
+  const stringifiedValue = (() => {
+    if (value != null) {
+      return JSON.stringify(value);
+    }
+    return value;
+  })();
 
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -278,7 +285,7 @@ const BaseDataDropdownField = <Entity,>(
     load: loadAsyncSelectedOptions,
     loading: loadingAsyncSelectedOptions,
     errorMessage: asyncSelectedOptionsErrorMessage,
-  } = useRecord(
+  } = useRecords(
     (async (value) => {
       const asyncSelectedOptions = await (async () => {
         if (getSelectedOptions) {
@@ -368,6 +375,12 @@ const BaseDataDropdownField = <Entity,>(
   useEffect(() => {
     if (!loadingAsyncSelectedOptions) {
       setSelectedOptions((prevSelectedOptions) => {
+        const value = (() => {
+          if (stringifiedValue != null) {
+            return JSON.parse(stringifiedValue);
+          }
+          return stringifiedValue;
+        })();
         const selectedValue = value
           ? [...(Array.isArray(value) ? value : [value])]
           : [];
@@ -426,7 +439,7 @@ const BaseDataDropdownField = <Entity,>(
     loadAsyncSelectedOptions,
     loadingAsyncSelectedOptions,
     selectedOption?.value,
-    value,
+    stringifiedValue,
   ]);
 
   const selectedOptionsElement = (() => {
@@ -889,7 +902,6 @@ const BaseDataDropdownField = <Entity,>(
                     return {
                       color: 'transparent',
                       WebkitTextFillColor: 'transparent',
-                      visibility: 'hidden',
                     };
                   }
                   return {};
