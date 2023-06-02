@@ -344,7 +344,7 @@ export const useCacheableData = <Data>(
     record,
     setRecord,
     ...rest
-  } = useAPIService(null, loadOnMount);
+  } = useAPIService<Data | null>(null, loadOnMount);
 
   const load = useCallback(() => {
     return baseLoad(async () => {
