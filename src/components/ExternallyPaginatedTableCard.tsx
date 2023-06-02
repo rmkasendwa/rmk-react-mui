@@ -62,7 +62,6 @@ export interface ExternallyPaginatedTableCardProps<
       'limit' | 'offset' | 'searchTerm'
     >
   ) => Promise<PaginatedResponseData<RecordRow>>;
-  recordKey?: string;
   limit?: number;
   CardProps?: Partial<CardProps>;
   pathToAddNew?: string;
@@ -94,7 +93,6 @@ export const ExternallyPaginatedTableCard = forwardRef<
     className,
     title,
     recordsFinder,
-    recordKey,
     revalidationKey,
     CardProps = {},
     pathToAddNew,
@@ -153,7 +151,6 @@ export const ExternallyPaginatedTableCard = forwardRef<
       {
         limit,
         offset,
-        key: recordKey,
         revalidationKey: `${revalidationKey}${searchTerm}`,
       }
     );

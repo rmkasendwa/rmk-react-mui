@@ -120,7 +120,6 @@ export interface PaginatedDropdownOptionListProps<Entity = any>
   onLoadOptions?: (options: DropdownOption<Entity>[]) => void;
   callGetDropdownOptions?: 'always' | 'whenNoOptions';
   externallyPaginated?: boolean;
-  dataKey?: string;
   limit?: number;
   asyncOptionPagesMap?: Map<number, DropdownOption<Entity>[]>;
   onChangeAsyncOptionPagesMap?: (
@@ -169,7 +168,6 @@ const BasePaginatedDropdownOptionList = <Entity,>(
     onChangeSearchTerm,
     SearchFieldProps = {},
     externallyPaginated,
-    dataKey,
     asyncOptionPagesMap,
     onChangeAsyncOptionPagesMap,
     sortOptions = false,
@@ -286,7 +284,6 @@ const BasePaginatedDropdownOptionList = <Entity,>(
     },
     {
       loadOnMount: false,
-      key: dataKey,
       limit: limitProp,
       loadedPagesMap: asyncOptionPagesMap,
       ...(() => {

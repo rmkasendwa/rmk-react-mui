@@ -11,17 +11,16 @@ import {
 
 import { CANCELLED_API_REQUEST_MESSAGE } from '../constants';
 import { APIContext } from '../contexts/APIContext';
-import { useCachedData } from '../contexts/DataStoreContext';
 import {
   PaginatedRequestParams,
   PaginatedResponseData,
+  RecordFinderRequestController,
   TAPIFunction,
   TaggedAPIRequest,
 } from '../interfaces/Utils';
 import { usePolling } from './Polling';
 
 export interface QueryOptions {
-  key?: string;
   loadOnMount?: boolean;
   autoSync?: boolean;
   revalidationKey?: string;
@@ -30,30 +29,16 @@ export interface QueryOptions {
 export type GetStaleWhileRevalidateFunction<T> = (data: T) => void;
 
 //#region useAPIService
-export const useAPIService = <T>(
-  defaultValue: T,
-  key?: string,
-  loadOnMount = false
-) => {
+export const useAPIService = <T>(defaultValue: T, loadOnMount = false) => {
   const baseDefaultValue = defaultValue;
   const isComponentMountedRef = useRef(true);
   const taggedAPIRequestsRef = useRef<TaggedAPIRequest[]>([]);
-  const { data, updateData } = useCachedData();
-  if (key && data[key]) {
-    defaultValue = data[key];
-  }
   const { call } = useContext(APIContext);
   const [record, setRecord] = useState<T>(defaultValue);
   const [loaded, setLoaded] = useState(false);
   const [loading, setLoading] = useState(loadOnMount);
   const [busy, setBusy] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-
-  useEffect(() => {
-    if (key && data[key] && isComponentMountedRef.current) {
-      setRecord(data[key]);
-    }
-  }, [data, key]);
 
   const load = useCallback(
     async (apiFunction?: TAPIFunction, tag?: string, polling = false) => {
@@ -76,11 +61,6 @@ export const useAPIService = <T>(
             if (response != null) {
               if (isComponentMountedRef.current) {
                 setRecord(response);
-              }
-              if (key) {
-                updateData({
-                  [key]: response,
-                });
               }
             }
             if (isComponentMountedRef.current) {
@@ -111,7 +91,7 @@ export const useAPIService = <T>(
         return response;
       }
     },
-    [call, key, updateData]
+    [call]
   );
 
   const resetRef = useRef(() => {
@@ -162,9 +142,7 @@ export const useMutation = <MutateFunction extends TAPIFunction>(
   } = useAPIService<Awaited<ReturnType<MutateFunction>> | null>(null);
 
   const inputMutateRef = useRef(inputMutate);
-  useEffect(() => {
-    inputMutateRef.current = inputMutate;
-  }, [inputMutate]);
+  inputMutateRef.current = inputMutate;
 
   const mutate = useCallback(
     (...args: any) => {
@@ -258,7 +236,6 @@ export const useRecord = <LoadableRecord>(
   recordFinder?: TAPIFunction<LoadableRecord>,
   {
     defaultValue,
-    key,
     loadOnMount = true,
     revalidationKey,
   }: UseRecordOptions<LoadableRecord> = {}
@@ -266,9 +243,7 @@ export const useRecord = <LoadableRecord>(
   // Refs
   const isInitialMountRef = useRef(true);
   const recordFinderRef = useRef(recordFinder);
-  useEffect(() => {
-    recordFinderRef.current = recordFinder;
-  }, [recordFinder]);
+  recordFinderRef.current = recordFinder;
 
   const {
     load: baseLoad,
@@ -278,7 +253,7 @@ export const useRecord = <LoadableRecord>(
     record,
     setRecord,
     ...rest
-  } = useAPIService(defaultValue, key, loadOnMount);
+  } = useAPIService(defaultValue, loadOnMount);
 
   const load = useCallback(
     (...args: any) => {
@@ -341,11 +316,93 @@ export const useRecords = <LoadableRecord>(
 };
 //#endregion
 
-//#region usePaginatedRecords
-export interface RecordFinderRequestController {
-  cancelRequest: () => void;
-}
+//#region useCacheableData
+export type CacheableDataFinderOptions = {
+  getRequestController?: (controller: RecordFinderRequestController) => void;
+  getStaleWhileRevalidate?: GetStaleWhileRevalidateFunction<any>;
+};
+export type CacheableDataFinder<Data> = (
+  options: CacheableDataFinderOptions
+) => Promise<Data>;
+export interface CacheableDataOptions extends QueryOptions {}
+export const useCacheableData = <Data>(
+  recordFinder?: CacheableDataFinder<Data>,
+  { loadOnMount = true, revalidationKey }: CacheableDataOptions = {}
+) => {
+  // Refs
+  const isInitialMountRef = useRef(true);
+  const recordFinderRef = useRef(recordFinder);
+  recordFinderRef.current = recordFinder;
 
+  const pendingDataRequestControllerRef =
+    useRef<RecordFinderRequestController | null>(null);
+
+  const {
+    load: baseLoad,
+    loading,
+    errorMessage,
+    record,
+    setRecord,
+    ...rest
+  } = useAPIService(null, loadOnMount);
+
+  const load = useCallback(() => {
+    return baseLoad(async () => {
+      if (recordFinderRef.current) {
+        if (pendingDataRequestControllerRef.current) {
+          pendingDataRequestControllerRef.current.cancelRequest();
+          pendingDataRequestControllerRef.current = null;
+        }
+
+        const responseData = await recordFinderRef
+          .current({
+            getRequestController: (requestController) => {
+              pendingDataRequestControllerRef.current = requestController;
+            },
+            getStaleWhileRevalidate: (data) => {
+              setRecord(data);
+            },
+          })
+          .finally(() => {
+            pendingDataRequestControllerRef.current = null;
+          });
+
+        return responseData;
+      }
+    });
+  }, [baseLoad, setRecord]);
+
+  useEffect(() => {
+    if (loadOnMount && isInitialMountRef.current) {
+      load();
+    }
+  }, [load, loadOnMount]);
+
+  useEffect(() => {
+    if (!isInitialMountRef.current && revalidationKey) {
+      load();
+    }
+  }, [load, revalidationKey]);
+
+  useEffect(() => {
+    isInitialMountRef.current = false;
+    return () => {
+      isInitialMountRef.current = true;
+    };
+  }, []);
+
+  return {
+    load,
+    loading,
+    errorMessage,
+    data: record,
+    setData: setRecord,
+    ...rest,
+  };
+};
+//#endregion
+
+//#region usePaginatedRecords
 export type PaginatedRecordsFinderOptions<
   PaginatedResponseDataExtensions extends Record<string, any> = any
 > = PaginatedRequestParams & {
@@ -391,12 +448,10 @@ export const usePaginatedRecords = <
     PaginatedResponseDataExtensions
   >,
   {
-    key,
     loadOnMount = true,
     limit = 100,
     offset = 0,
     searchTerm,
-    showRecords = true,
     loadedPagesMap,
     revalidationKey,
     autoSync = true,
@@ -434,15 +489,7 @@ export const usePaginatedRecords = <
     errorMessage,
     setRecord,
     ...rest
-  } = useAPIService<PaginatedResponseData<DataRow> | null>(
-    null,
-    (() => {
-      if (key) {
-        return `${key}_${limit}_${offset}_${String(showRecords)}`;
-      }
-    })(),
-    loadOnMount
-  );
+  } = useAPIService<PaginatedResponseData<DataRow> | null>(null, loadOnMount);
 
   const loadedPages = useMemo(() => {
     return loadedPagesMapRef.current || new Map<number, DataRow[]>();
