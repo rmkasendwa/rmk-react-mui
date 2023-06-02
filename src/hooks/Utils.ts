@@ -514,24 +514,56 @@ export const usePaginatedRecords = <
           [];
 
         const processResponseData = (
-          responseData: ResponsePage<DataRow, PaginatedResponseDataExtensions>
+          responseData:
+            | ResponsePage<DataRow, PaginatedResponseDataExtensions>
+            | DataRow[]
         ) => {
+          const isResponsePaginated =
+            'records' in responseData && responseData.recordsTotalCount != null;
+          const paginatedResponseData = (() => {
+            if (Array.isArray(responseData)) {
+              return {
+                records: responseData,
+                recordsTotalCount: responseData.length,
+                hasNextPage: false,
+                loadedPageKey: 0,
+              } as ResponsePage<DataRow, PaginatedResponseDataExtensions>;
+            }
+            if (responseData.recordsTotalCount == null) {
+              return {
+                ...responseData,
+                hasNextPage: false,
+                loadedPageKey: 0,
+              };
+            }
+            return responseData;
+          })();
+
           const { records, recordsTotalCount, hasNextPage, loadedPageKey } =
-            responseData;
+            paginatedResponseData;
+
+          if (!isResponsePaginated) {
+            loadedPages.clear();
+          }
+
           loadedPages.set(loadedPageKey ?? params.offset!, records);
+
           const allPageRecords = [...loadedPages.keys()]
             .sort((a, b) => a - b)
             .map((key) => loadedPages.get(key)!)
             .flat();
-          lastLoadedPageRef.current = responseData;
+          lastLoadedPageRef.current = paginatedResponseData;
           recordsTotalCountRef.current = recordsTotalCount ?? records.length;
           hasNextPageRef.current = (() => {
             if (hasNextPage != null) {
               return hasNextPage;
             }
-            return allPageRecords.length < recordsTotalCountRef.current;
+            return (
+              isResponsePaginated &&
+              allPageRecords.length < recordsTotalCountRef.current
+            );
           })();
-          setRecord(responseData);
+          setRecord(paginatedResponseData);
         };
 
         const responseData = await recordFinderRef
@@ -542,18 +574,7 @@ export const usePaginatedRecords = <
               pendingRecordRequestControllers.current.push(requestController);
             },
             getStaleWhileRevalidate: (data) => {
-              processResponseData(
-                (() => {
-                  if (Array.isArray(data)) {
-                    return {
-                      records: data,
-                      recordsTotalCount: data.length,
-                      hasNextPage: false,
-                    };
-                  }
-                  return data;
-                })()
-              );
+              processResponseData(data);
             },
             lastLoadedPage: lastLoadedPageRef.current,
           })
@@ -583,18 +604,7 @@ export const usePaginatedRecords = <
           recordsTotalCountRef.current = 0;
         }
 
-        processResponseData(
-          (() => {
-            if (Array.isArray(responseData)) {
-              return {
-                records: responseData,
-                recordsTotalCount: responseData.length,
-                hasNextPage: false,
-              } as any;
-            }
-            return responseData;
-          })()
-        );
+        processResponseData(responseData);
         return responseData;
       });
     },

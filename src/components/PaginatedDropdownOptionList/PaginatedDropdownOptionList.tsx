@@ -167,7 +167,7 @@ const BasePaginatedDropdownOptionList = <Entity,>(
     searchTerm: searchTermProp = '',
     onChangeSearchTerm,
     SearchFieldProps = {},
-    externallyPaginated,
+    externallyPaginated = false,
     asyncOptionPagesMap,
     onChangeAsyncOptionPagesMap,
     sortOptions = false,
