@@ -350,7 +350,6 @@ export interface RecordsExplorerProps<
   recordCreator?: (values: InitialValues) => any;
   recordEditor?: (record: RecordRow, values: InitialValues) => any;
   recordDeletor?: (record: RecordRow) => any;
-  recordKey?: string;
   initialValues?: InitialValues;
   editValidationSchema?: any | (() => any);
   defaultPath?: string;
@@ -479,7 +478,6 @@ const BaseRecordsExplorer = <
     getPathToEdit,
     getEditableRecordInitialValues,
     recordsFinder,
-    recordKey,
     showRecords,
     revalidationKey,
     recordDeletor,
@@ -1040,7 +1038,6 @@ const BaseRecordsExplorer = <
     {
       revalidationKey: `${revalidationKey}${searchTerm}`,
       loadOnMount: showRecords,
-      key: recordKey,
       refreshInterval,
       ...PaginatedRecordsOptions,
     }

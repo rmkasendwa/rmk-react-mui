@@ -136,7 +136,6 @@ export interface TableCrudProps<
   recordCreator?: (values: InitialValues) => any;
   recordEditor?: (record: RecordRow, values: InitialValues) => any;
   recordDeletor?: (record: RecordRow) => any;
-  recordKey?: string;
   initialValues?: InitialValues;
   editValidationSchema?: any | (() => any);
   defaultPath?: string;
@@ -202,7 +201,6 @@ const BaseTableCrud = <
     recordCreator,
     recordEditor,
     recordDeletor,
-    recordKey,
     initialValues,
     validationSchema,
     editableFields,
@@ -356,7 +354,6 @@ const BaseTableCrud = <
       {
         limit,
         offset,
-        key: recordKey,
         revalidationKey: `${revalidationKey}${searchTerm}`,
         loadOnMount: showRecords,
         autoSync,

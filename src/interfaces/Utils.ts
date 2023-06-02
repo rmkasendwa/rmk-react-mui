@@ -1,6 +1,10 @@
 import { ButtonProps } from '@mui/material';
 import { ElementType, MutableRefObject, ReactNode } from 'react';
 
+export interface RecordFinderRequestController {
+  cancelRequest: () => void;
+}
+
 export interface PaginatedRequestParams {
   limit?: number;
   offset?: number;
@@ -16,11 +20,6 @@ export interface PaginatedResponseData<DataRow> {
 }
 
 export type TAPIFunction<T = any> = (...args: any) => Promise<T>;
-
-export interface ReduxAction {
-  type: string;
-  payload?: any;
-}
 
 export interface RequestController {
   cancelRequest: () => void;

@@ -41,7 +41,11 @@ import {
   LoadingProvider,
   useLoadingContext,
 } from '../../contexts/LoadingContext';
-import { useRecords } from '../../hooks/Utils';
+import {
+  CacheableDataFinderOptions,
+  useCacheableData,
+} from '../../hooks/Utils';
+import { PaginatedResponseData } from '../../interfaces/Utils';
 import { isDescendant } from '../../utils/html';
 import FieldValueDisplay from '../FieldValueDisplay';
 import ModalPopup from '../ModalPopup';
@@ -111,7 +115,8 @@ export interface DataDropdownFieldProps<Entity = any>
   selectedOption?: DropdownOption<Entity>;
   placeholderOption?: DropdownOption<Entity>;
   getSelectedOptions?: (
-    selectedValue: string[]
+    selectedValue: string[],
+    options: CacheableDataFinderOptions
   ) => Promise<DropdownOption<Entity>[]>;
   dropdownListMaxHeight?: number;
   optionPaging?: boolean;
@@ -285,31 +290,45 @@ const BaseDataDropdownField = <Entity,>(
     load: loadAsyncSelectedOptions,
     loading: loadingAsyncSelectedOptions,
     errorMessage: asyncSelectedOptionsErrorMessage,
-  } = useRecords(
-    (async (value) => {
+  } = useCacheableData(
+    async ({ getRequestController, getStaleWhileRevalidate }) => {
       const asyncSelectedOptions = await (async () => {
-        if (getSelectedOptions) {
-          return getSelectedOptions(value);
-        }
-        if (
-          getDropdownOptions &&
-          value &&
-          (!Array.isArray(value) || value.length > 0)
-        ) {
-          const dropdownOptionsResponse = await getDropdownOptions({});
-          const options = Array.isArray(dropdownOptionsResponse)
-            ? dropdownOptionsResponse
-            : dropdownOptionsResponse.records;
-          const selectedValue = Array.isArray(value) ? value : [value];
-          return options.filter(({ value }) => {
-            return selectedValue.includes(String(value));
+        const selectedValue = value
+          ? [...(Array.isArray(value) ? value : [value])]
+          : [];
+        if (getSelectedOptions && selectedValue.length > 0) {
+          return getSelectedOptions(selectedValue, {
+            getRequestController,
+            getStaleWhileRevalidate,
           });
+        }
+        if (getDropdownOptions && selectedValue.length > 0) {
+          const processOptionsResponse = (
+            dropdownOptionsResponse:
+              | DropdownOption<Entity>[]
+              | PaginatedResponseData<DropdownOption<Entity>>
+          ) => {
+            const options = Array.isArray(dropdownOptionsResponse)
+              ? dropdownOptionsResponse
+              : dropdownOptionsResponse.records;
+            return options.filter(({ value }) => {
+              return selectedValue.includes(String(value));
+            });
+          };
+          const dropdownOptionsResponse = await getDropdownOptions({
+            getStaleWhileRevalidate: (dropdownOptionsResponse) => {
+              setSelectedOptions(
+                processOptionsResponse(dropdownOptionsResponse)
+              );
+            },
+          });
+          return processOptionsResponse(dropdownOptionsResponse);
         }
         return [];
       })();
       setSelectedOptions(asyncSelectedOptions);
       return asyncSelectedOptions;
-    }) as NonNullable<typeof getSelectedOptions>,
+    },
     {
       autoSync: false,
       loadOnMount: false,
@@ -429,7 +448,7 @@ const BaseDataDropdownField = <Entity,>(
           canLoadAsyncSelectedOptions &&
           selectedValue.length > 0
         ) {
-          loadAsyncSelectedOptions(selectedValue);
+          loadAsyncSelectedOptions();
         }
         return prevSelectedOptions;
       });
@@ -540,7 +559,10 @@ const BaseDataDropdownField = <Entity,>(
     );
   }
 
-  if (value && loadingAsyncSelectedOptions) {
+  if (
+    (value && selectedOptions.length <= 0 && loadingAsyncSelectedOptions) ||
+    asyncSelectedOptionsErrorMessage
+  ) {
     return (
       <LoadingProvider
         value={{
@@ -570,7 +592,7 @@ const BaseDataDropdownField = <Entity,>(
       <RetryErrorMessage
         message={asyncSelectedOptionsErrorMessage}
         retry={() => {
-          loadAsyncSelectedOptions(value);
+          loadAsyncSelectedOptions();
         }}
       />
     );
