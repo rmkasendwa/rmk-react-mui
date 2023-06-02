@@ -44,25 +44,22 @@ export const useLoadOnScrollToBottom = ({
   keyboardFocusElement: keyboardFocusElementProp,
 }: UseLoadOnScrollToBottomOptions) => {
   // Refs
-  const loadRef = useRef(load);
-  const onChangeScrollLengthRef = useRef(onChangeScrollLength);
   const isInitialMountRef = useRef(true);
+
+  const loadRef = useRef(load);
+  loadRef.current = load;
+
+  const onChangeScrollLengthRef = useRef(onChangeScrollLength);
+  onChangeScrollLengthRef.current = onChangeScrollLength;
+
   const onChangeFocusedDataElementRef = useRef(onChangeFocusedDataElement);
+  onChangeFocusedDataElementRef.current = onChangeFocusedDataElement;
+
   const onSelectDataElementRef = useRef(onSelectDataElement);
+  onSelectDataElementRef.current = onSelectDataElement;
+
   const onCloseRef = useRef(onClose);
-  useEffect(() => {
-    loadRef.current = load;
-    onChangeScrollLengthRef.current = onChangeScrollLength;
-    onChangeFocusedDataElementRef.current = onChangeFocusedDataElement;
-    onSelectDataElementRef.current = onSelectDataElement;
-    onCloseRef.current = onClose;
-  }, [
-    load,
-    onChangeFocusedDataElement,
-    onChangeScrollLength,
-    onClose,
-    onSelectDataElement,
-  ]);
+  onCloseRef.current = onClose;
 
   const limit = (() => {
     return (
@@ -70,7 +67,7 @@ export const useLoadOnScrollToBottom = ({
         if (element?.offsetHeight && dataElementLength) {
           return Math.ceil(element.offsetHeight / dataElementLength);
         }
-        return 0;
+        return dataElementLength ?? 0;
       })() + 1
     );
   })();
@@ -220,8 +217,9 @@ export const useLoadOnScrollToBottom = ({
         }
       };
       element.addEventListener('scroll', scrollEventCallback);
-      scrollEventCallback();
+      const scrollCallbackTimeout = setTimeout(() => scrollEventCallback(), 0);
       return () => {
+        clearTimeout(scrollCallbackTimeout);
         element.removeEventListener('scroll', scrollEventCallback);
       };
     }
