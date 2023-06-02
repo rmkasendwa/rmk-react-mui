@@ -291,7 +291,7 @@ const BaseDataDropdownField = <Entity,>(
     loading: loadingAsyncSelectedOptions,
     errorMessage: asyncSelectedOptionsErrorMessage,
   } = useCacheableData(
-    async ({ getRequestController, getStaleWhileRevalidate }) => {
+    async ({ getRequestController }) => {
       const asyncSelectedOptions = await (async () => {
         const selectedValue = value
           ? [...(Array.isArray(value) ? value : [value])]
@@ -299,7 +299,9 @@ const BaseDataDropdownField = <Entity,>(
         if (getSelectedOptions && selectedValue.length > 0) {
           return getSelectedOptions(selectedValue, {
             getRequestController,
-            getStaleWhileRevalidate,
+            getStaleWhileRevalidate: (asyncSelectedOptions) => {
+              setSelectedOptions(asyncSelectedOptions);
+            },
           });
         }
         if (getDropdownOptions && selectedValue.length > 0) {
