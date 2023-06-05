@@ -1,84 +1,122 @@
-import Skeleton from '@mui/material/Skeleton';
+import {
+  CardProps,
+  ComponentsOverrides,
+  ComponentsProps,
+  ComponentsVariants,
+  unstable_composeClasses as composeClasses,
+  generateUtilityClass,
+  generateUtilityClasses,
+  useThemeProps,
+} from '@mui/material';
 import useTheme from '@mui/material/styles/useTheme';
-import Typography from '@mui/material/Typography';
-import { FC } from 'react';
+import clsx from 'clsx';
+import { forwardRef } from 'react';
 
-import { useLoadingContext } from '../contexts/LoadingContext';
 import Card from './Card';
-import ErrorSkeleton from './ErrorSkeleton';
 import FieldLabel from './FieldLabel';
+import LoadingTypography from './LoadingTypography';
 
-export interface SingleFieldCardProps {
+export interface SingleFieldCardClasses {
+  /** Styles applied to the root element. */
+  root: string;
+}
+
+export type SingleFieldCardClassKey = keyof SingleFieldCardClasses;
+
+// Adding theme prop types
+declare module '@mui/material/styles/props' {
+  interface ComponentsPropsList {
+    MuiSingleFieldCard: SingleFieldCardProps;
+  }
+}
+
+// Adding theme override types
+declare module '@mui/material/styles/overrides' {
+  interface ComponentNameToClassKey {
+    MuiSingleFieldCard: keyof SingleFieldCardClasses;
+  }
+}
+
+// Adding theme component types
+declare module '@mui/material/styles/components' {
+  interface Components<Theme = unknown> {
+    MuiSingleFieldCard?: {
+      defaultProps?: ComponentsProps['MuiSingleFieldCard'];
+      styleOverrides?: ComponentsOverrides<Theme>['MuiSingleFieldCard'];
+      variants?: ComponentsVariants['MuiSingleFieldCard'];
+    };
+  }
+}
+
+export interface SingleFieldCardProps extends Partial<CardProps> {
   label: string;
   value?: string | number;
 }
 
-export const SingleFieldCard: FC<SingleFieldCardProps> = ({ label, value }) => {
-  const theme = useTheme();
-  const { loading, errorMessage } = useLoadingContext();
+export function getSingleFieldCardUtilityClass(slot: string): string {
+  return generateUtilityClass('MuiSingleFieldCard', slot);
+}
 
-  return (
-    <Card
-      sx={{
-        borderTop: `6px solid ${theme.palette.primary.main}`,
-      }}
-    >
-      {(() => {
-        const labelSkeletonWidth = label.length * 14;
-        const valueSkeletonWidth = label.length * 20;
+export const singleFieldCardClasses: SingleFieldCardClasses =
+  generateUtilityClasses('MuiSingleFieldCard', ['root']);
 
-        if (errorMessage) {
-          return (
-            <>
-              <ErrorSkeleton
-                sx={{
-                  width: labelSkeletonWidth,
-                  mx: 'auto',
-                }}
-              />
-              <ErrorSkeleton
-                sx={{
-                  width: valueSkeletonWidth,
-                  height: 36,
-                  mx: 'auto',
-                }}
-              />
-            </>
-          );
-        }
-
-        if (loading) {
-          return (
-            <>
-              <Skeleton sx={{ width: labelSkeletonWidth, mx: 'auto' }} />
-              <Skeleton
-                sx={{ width: valueSkeletonWidth, height: 36, mx: 'auto' }}
-              />
-            </>
-          );
-        }
-
-        return (
-          <>
-            <FieldLabel align="center">{label}</FieldLabel>
-            <Typography
-              variant="body1"
-              align="center"
-              sx={{
-                fontSize: 24,
-                fontWeight: 'bold',
-                [theme.breakpoints.down('lg')]: {
-                  fontSize: 18,
-                },
-              }}
-            >
-              {value || '-'}
-            </Typography>
-          </>
-        );
-      })()}
-    </Card>
-  );
+const slots = {
+  root: ['root'],
 };
+
+export const SingleFieldCard = forwardRef<HTMLDivElement, SingleFieldCardProps>(
+  function SingleFieldCard(inProps, ref) {
+    const props = useThemeProps({ props: inProps, name: 'MuiSingleFieldCard' });
+    const { className, label, value, sx, ...rest } = props;
+
+    const classes = composeClasses(
+      slots,
+      getSingleFieldCardUtilityClass,
+      (() => {
+        if (className) {
+          return {
+            root: className,
+          };
+        }
+      })()
+    );
+
+    const { palette, breakpoints } = useTheme();
+
+    return (
+      <Card
+        ref={ref}
+        {...rest}
+        className={clsx(classes.root)}
+        sx={{
+          borderTop: `6px solid ${palette.primary.main}`,
+          ...sx,
+        }}
+      >
+        <FieldLabel
+          align="center"
+          ContainerGridProps={{
+            justifyContent: 'center',
+          }}
+        >
+          {label}
+        </FieldLabel>
+        <LoadingTypography
+          variant="body1"
+          align="center"
+          sx={{
+            fontSize: 24,
+            fontWeight: 'bold',
+            [breakpoints.down('lg')]: {
+              fontSize: 18,
+            },
+          }}
+        >
+          {value || '-'}
+        </LoadingTypography>
+      </Card>
+    );
+  }
+);
 
 export default SingleFieldCard;

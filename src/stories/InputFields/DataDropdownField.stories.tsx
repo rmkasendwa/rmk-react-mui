@@ -267,6 +267,7 @@ WithAsyncSelectedOptions.args = {
   value: ['6'],
   multiple: true,
   labelWrapped: true,
+  required: true,
 } as DataDropdownFieldProps;
 
 export const WithEndAdornment = Template.bind({});
