@@ -4,6 +4,7 @@ import {
   ComponentsProps,
   ComponentsVariants,
   Grid,
+  GridProps,
   Tooltip,
   Typography,
   unstable_composeClasses as composeClasses,
@@ -55,6 +56,7 @@ export interface FieldLabelProps extends LoadingTypographyProps {
   labelSuffix?: ReactNode;
   helpTip?: ReactNode;
   disabled?: boolean;
+  ContainerGridProps?: Partial<GridProps>;
 }
 
 export function getFieldLabelUtilityClass(slot: string): string {
@@ -82,6 +84,7 @@ export const FieldLabel = forwardRef<HTMLElement, FieldLabelProps>(
       helpTip,
       disabled,
       sx,
+      ContainerGridProps = {},
       ...rest
     } = props;
 
@@ -100,12 +103,16 @@ export const FieldLabel = forwardRef<HTMLElement, FieldLabelProps>(
     const { palette, components } = useTheme();
 
     const LabelComponent = enableLoadingState ? LoadingTypography : Typography;
+    const { sx: ContainerGridPropsSx, ...ContainerGridPropsRest } =
+      ContainerGridProps;
 
     return (
       <Grid
+        {...ContainerGridPropsRest}
         container
         sx={{
           alignItems: 'center',
+          ...ContainerGridPropsSx,
           ...(() => {
             if (disabled) {
               return {
@@ -187,10 +194,14 @@ export const FieldLabel = forwardRef<HTMLElement, FieldLabelProps>(
             );
           }
         })()}
-        <Grid item xs />
         {(() => {
           if (labelSuffix) {
-            return <Grid item>{labelSuffix}</Grid>;
+            return (
+              <>
+                <Grid item xs />
+                <Grid item>{labelSuffix}</Grid>
+              </>
+            );
           }
         })()}
       </Grid>
