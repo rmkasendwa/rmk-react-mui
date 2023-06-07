@@ -31,8 +31,10 @@ import {
   forwardRef,
   useEffect,
   useRef,
+  useState,
 } from 'react';
 
+import { Draft, DraftsManager } from '../models/Drafts';
 import ErrorAlert from './ErrorAlert';
 import { formikErrorFieldHighlighterClasses } from './FormikErrorFieldHighlighter';
 import FormikForm, {
@@ -112,6 +114,8 @@ export interface ModalFormProps<Values extends FormikValues = any>
   ActionButtonProps?: Partial<ButtonProps>;
   ActionButtonAreaProps?: Partial<GridProps>;
   editableFields?: (keyof Values)[];
+  draftManager?: DraftsManager;
+  draft?: Pick<Draft, 'id' | 'data' | 'draftMessage' | 'draftUrl'>;
 }
 
 export function getModalFormUtilityClass(slot: string): string {
@@ -168,6 +172,8 @@ export const BaseModalForm = <Values extends FormikValues>(
     CloseActionButtonProps = {},
     editableFields,
     placement = 'center',
+    draftManager,
+    draft: draftProp,
     ...rest
   } = props;
 
@@ -226,11 +232,35 @@ export const BaseModalForm = <Values extends FormikValues>(
 
   // Refs
   const onSubmitSuccessRef = useRef(onSubmitSuccess);
+  onSubmitSuccessRef.current = onSubmitSuccess;
   const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+  const draftManagerRef = useRef(draftManager);
+  draftManagerRef.current = draftManager;
+
+  const [draftConfig, setDraftConfig] = useState<{
+    isDraftLoaded: boolean;
+    initialDraft: Values | null;
+  }>({ isDraftLoaded: false, initialDraft: null });
+
+  const { isDraftLoaded, initialDraft } = draftConfig;
+
   useEffect(() => {
-    onSubmitSuccessRef.current = onSubmitSuccess;
-    onCloseRef.current = onClose;
-  }, [onClose, onSubmitSuccess]);
+    if (draftManagerRef.current && draftProp?.id) {
+      const { openDraft, findDraft, closeDraft } = draftManagerRef.current;
+      openDraft(draftProp.id);
+      (async () => {
+        const draft = await findDraft(draftProp.id);
+        setDraftConfig({
+          initialDraft: draft,
+          isDraftLoaded: true,
+        });
+      })();
+      return () => {
+        closeDraft(draftProp.id);
+      };
+    }
+  }, [draftProp?.id]);
 
   useEffect(() => {
     if (submitted && !successMessage) {
@@ -260,7 +290,8 @@ export const BaseModalForm = <Values extends FormikValues>(
       }}
     >
       <FormikForm
-        {...{ initialValues, validationSchema, onSubmit, FormikProps }}
+        {...{ validationSchema, onSubmit, FormikProps }}
+        initialValues={initialDraft || initialValues}
         enableReinitialize
       >
         {({ isSubmitting, values, isValid, ...rest }) => {
@@ -275,6 +306,19 @@ export const BaseModalForm = <Values extends FormikValues>(
               return diff(values, initialValues);
             })()
           );
+
+          if (
+            draftManager &&
+            draftProp?.id &&
+            isDraftLoaded &&
+            (formHasChanges || initialDraft)
+          ) {
+            draftManager.updateDraft({
+              ...draftProp,
+              data: values,
+            });
+          }
+
           return (
             <>
               <SearchSyncToolbar
