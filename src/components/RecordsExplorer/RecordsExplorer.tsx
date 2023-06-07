@@ -63,13 +63,13 @@ import {
   SortDirection,
   SortableFields,
   sortDirections,
-} from '../../interfaces/Sort';
-import { PermissionCode } from '../../interfaces/Users';
+} from '../../models/Sort';
+import { PermissionCode } from '../../models/Users';
 import {
   CrudMode,
   PaginatedResponseData,
   PrimitiveDataType,
-} from '../../interfaces/Utils';
+} from '../../models/Utils';
 import { sort } from '../../utils/Sort';
 import DataTablePagination from '../DataTablePagination';
 import FixedHeaderContentArea, {

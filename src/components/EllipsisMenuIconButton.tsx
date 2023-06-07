@@ -20,7 +20,7 @@ import clsx from 'clsx';
 import { forwardRef, useRef, useState } from 'react';
 import { mergeRefs } from 'react-merge-refs';
 
-import { EllipsisMenuToolProps } from '../interfaces/Utils';
+import { EllipsisMenuToolProps } from '../models/Utils';
 import PaginatedDropdownOptionList, {
   PaginatedDropdownOptionListProps,
 } from './PaginatedDropdownOptionList';

@@ -11,8 +11,8 @@ import {
 } from 'react';
 
 import { useAPIService } from '../hooks/Utils';
-import { PermissionCode } from '../interfaces/Users';
-import { TAPIFunction } from '../interfaces/Utils';
+import { PermissionCode } from '../models/Users';
+import { TAPIFunction } from '../models/Utils';
 import { useAPIContext } from './APIContext';
 import { useCachedData } from './DataStoreContext';
 

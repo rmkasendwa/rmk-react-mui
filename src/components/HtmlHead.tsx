@@ -9,7 +9,7 @@ import {
 } from '@mui/material';
 import { FC, useEffect } from 'react';
 
-import { PageHistory } from '../interfaces/Page';
+import { PageHistory } from '../models/Page';
 
 export const getRouteHistory = (): PageHistory => {
   return StorageManager.get('page-history') || [];

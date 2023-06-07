@@ -9,9 +9,9 @@ import { TablePaginationProps } from '@mui/material/TablePagination';
 import { TableRowProps as MuiTableRowProps } from '@mui/material/TableRow';
 import { ReactElement, ReactNode } from 'react';
 
-import { CountryCode } from '../../interfaces/Countries';
-import { SortBy, SortOptions } from '../../interfaces/Sort';
-import { DropdownOption, ExoticDataType } from '../../interfaces/Utils';
+import { CountryCode } from '../../models/Countries';
+import { SortBy, SortOptions } from '../../models/Sort';
+import { DropdownOption, ExoticDataType } from '../../models/Utils';
 import { EllipsisMenuIconButtonProps } from '../EllipsisMenuIconButton';
 import { FieldValueProps } from '../FieldValue';
 import { RenderIfVisibleProps } from '../RenderIfVisible';

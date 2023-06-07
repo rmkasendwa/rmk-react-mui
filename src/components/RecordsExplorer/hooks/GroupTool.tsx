@@ -1,6 +1,6 @@
 import ListAltIcon from '@mui/icons-material/ListAlt';
 
-import { SelectedSortOption } from '../../../interfaces/Sort';
+import { SelectedSortOption } from '../../../models/Sort';
 import { BaseDataRow } from '../../Table';
 import { GroupableField } from '../models';
 import { useSortOperationFieldSelectorTool } from './SortOperationFieldSelectorTool';

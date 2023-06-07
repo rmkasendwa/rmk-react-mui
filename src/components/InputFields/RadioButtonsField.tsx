@@ -18,7 +18,7 @@ import RadioGroup, { RadioGroupProps } from '@mui/material/RadioGroup';
 import clsx from 'clsx';
 import { ReactNode, forwardRef } from 'react';
 
-import { DropdownOption } from '../../interfaces/Utils';
+import { DropdownOption } from '../../models/Utils';
 import FieldLabel, { FieldLabelProps } from '../FieldLabel';
 
 export interface RadioButtonsFieldClasses {

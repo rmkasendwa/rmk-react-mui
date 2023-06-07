@@ -11,7 +11,7 @@ import {
   useState,
 } from 'react';
 
-import { TAPIFunction } from '../interfaces/Utils';
+import { TAPIFunction } from '../models/Utils';
 import { REDIRECTION_ERROR_MESSAGES } from '../utils/JWT';
 
 export interface IAPIContext {

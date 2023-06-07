@@ -12,7 +12,7 @@ import {
 import clsx from 'clsx';
 import { forwardRef } from 'react';
 
-import { CountryCode } from '../interfaces/Countries';
+import { CountryCode } from '../models/Countries';
 import PhoneNumberUtil, {
   isValidPhoneNumber,
   systemStandardPhoneNumberFormat,

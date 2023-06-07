@@ -6,7 +6,7 @@ import {
   PhoneNumberUtil as PhoneNumberUtilConstructor,
 } from 'google-libphonenumber';
 
-import { CountryCode } from '../interfaces/Countries';
+import { CountryCode } from '../models/Countries';
 
 const PhoneNumberUtil = new PhoneNumberUtilConstructor();
 

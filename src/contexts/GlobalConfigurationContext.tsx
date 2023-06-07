@@ -1,7 +1,7 @@
 import { FC, ReactNode, createContext, useContext, useState } from 'react';
 
 import { DEFAULT_COUNTRY_CODE, DEFAULT_CURRENCY_CODE } from '../constants';
-import { CountryCode } from '../interfaces/Countries';
+import { CountryCode } from '../models/Countries';
 
 export interface GlobalConfigurationContext {
   countryCode: CountryCode;

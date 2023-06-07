@@ -1,8 +1,8 @@
 import { TextFieldProps } from '@mui/material';
 import { ReactNode } from 'react';
 
-import { SortOption } from '../../interfaces/Sort';
-import { PrimitiveDataType } from '../../interfaces/Utils';
+import { SortOption } from '../../models/Sort';
+import { PrimitiveDataType } from '../../models/Utils';
 import { DataDropdownFieldProps } from '../InputFields/DataDropdownField';
 import { DateInputFieldProps } from '../InputFields/DateInputField';
 import { NumberInputFieldProps } from '../InputFields/NumberInputField';

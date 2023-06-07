@@ -20,7 +20,7 @@ import Box from '@mui/material/Box';
 import clsx from 'clsx';
 import { ReactNode, forwardRef } from 'react';
 
-import { DropdownOption as DropdownOptionType } from '../../interfaces/Utils';
+import { DropdownOption as DropdownOptionType } from '../../models/Utils';
 
 export interface DropdownOptionClasses {
   /** Styles applied to the root element. */

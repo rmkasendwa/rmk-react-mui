@@ -27,7 +27,7 @@ import {
   FileContainer,
   FileUploadFunction,
   LoadableFile,
-} from '../interfaces/Utils';
+} from '../models/Utils';
 import { flickerElement } from '../utils/page';
 import CloseButton from './CloseButton';
 import ImagePreview from './ImagePreview';

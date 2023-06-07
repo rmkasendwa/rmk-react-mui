@@ -34,7 +34,7 @@ import * as Yup from 'yup';
 
 import { useLoadingContext } from '../contexts/LoadingContext';
 import { useUpdate } from '../hooks/Utils';
-import { ExoticDataType } from '../interfaces/Utils';
+import { ExoticDataType } from '../models/Utils';
 import FormikCurrencyInputField from './FormikInputFields/FormikCurrencyInputField';
 import FormikDateInputField from './FormikInputFields/FormikDateInputField';
 import FormikNumberInputField from './FormikInputFields/FormikNumberInputField';

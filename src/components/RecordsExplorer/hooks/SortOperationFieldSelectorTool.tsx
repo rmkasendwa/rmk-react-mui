@@ -26,7 +26,7 @@ import {
   SortDirection,
   SortOption,
   SortableFields,
-} from '../../../interfaces/Sort';
+} from '../../../models/Sort';
 import SortIcon from '../../Icons/SortIcon';
 import DataDropdownField from '../../InputFields/DataDropdownField';
 import PaginatedDropdownOptionList, {

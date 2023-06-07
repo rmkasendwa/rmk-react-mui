@@ -41,7 +41,7 @@ import {
 import {
   DropdownOption as BaseDropdownOption,
   PaginatedResponseData,
-} from '../../interfaces/Utils';
+} from '../../models/Utils';
 import InfiniteScrollBox, {
   InfiniteScrollBoxProps,
 } from '../InfiniteScrollBox';

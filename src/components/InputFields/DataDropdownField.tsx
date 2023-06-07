@@ -45,7 +45,7 @@ import {
   CacheableDataFinderOptions,
   useCacheableData,
 } from '../../hooks/Utils';
-import { PaginatedResponseData } from '../../interfaces/Utils';
+import { PaginatedResponseData } from '../../models/Utils';
 import { isDescendant } from '../../utils/html';
 import FieldValueDisplay from '../FieldValueDisplay';
 import ModalPopup from '../ModalPopup';

@@ -16,7 +16,7 @@ import { countries } from 'countries-list';
 import { omit } from 'lodash';
 import { forwardRef } from 'react';
 
-import { CountryCode } from '../interfaces/Countries';
+import { CountryCode } from '../models/Countries';
 import FieldValue, { FieldValueProps } from './FieldValue';
 
 export interface CountryFieldValueClasses {
