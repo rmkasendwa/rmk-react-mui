@@ -1,6 +1,6 @@
 import { FormControlLabel, Switch } from '@mui/material';
 
-import { SelectedSortOption } from '../../../interfaces/Sort';
+import { SelectedSortOption } from '../../../models/Sort';
 import { BaseDataRow } from '../../Table';
 import {
   SortOperationFieldSelectorToolOptions,

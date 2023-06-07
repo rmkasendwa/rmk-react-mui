@@ -27,7 +27,7 @@ import {
   FileContainer,
   FileDownloadFunction,
   FileUploadFunction,
-} from '../interfaces/Utils';
+} from '../models/Utils';
 import { flickerElement } from '../utils/page';
 import FileIcon from './FileIcon';
 import { TextFieldProps } from './InputFields/TextField';

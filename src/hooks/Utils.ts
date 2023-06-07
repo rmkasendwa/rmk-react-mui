@@ -17,7 +17,7 @@ import {
   RecordFinderRequestController,
   TAPIFunction,
   TaggedAPIRequest,
-} from '../interfaces/Utils';
+} from '../models/Utils';
 import { usePolling } from './Polling';
 
 export interface QueryOptions {

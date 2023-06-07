@@ -1,6 +1,6 @@
 import { countries as countriesMap } from 'countries-list';
 
-import { CountryCode } from '../../../interfaces/Countries';
+import { CountryCode } from '../../../models/Countries';
 import PhoneNumberUtil from '../../../utils/PhoneNumberUtil';
 
 export interface Country {

@@ -1,6 +1,6 @@
 import '@infinite-debugger/rmk-js-extensions/Object';
 
-import { ExoticDataType, PrimitiveDataType } from '../../interfaces/Utils';
+import { ExoticDataType, PrimitiveDataType } from '../../models/Utils';
 import {
   BaseDataRow,
   CHECKBOX_COLUMN_ID,

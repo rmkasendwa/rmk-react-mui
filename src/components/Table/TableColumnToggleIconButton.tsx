@@ -11,7 +11,7 @@ import {
 import clsx from 'clsx';
 import { ReactElement, Ref, forwardRef } from 'react';
 
-import { DropdownOption } from '../../interfaces/Utils';
+import { DropdownOption } from '../../models/Utils';
 import EllipsisMenuIconButton, {
   EllipsisMenuIconButtonProps,
 } from '../EllipsisMenuIconButton';

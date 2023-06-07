@@ -31,7 +31,7 @@ import {
 import { LoadingProvider, useLoadingContext } from '../contexts/LoadingContext';
 import { useMessagingContext } from '../contexts/MessagingContext';
 import { useMutation, useRecord } from '../hooks/Utils';
-import { CrudMode } from '../interfaces/Utils';
+import { CrudMode } from '../models/Utils';
 import ErrorAlert from './ErrorAlert';
 import FixedHeaderContentArea from './FixedHeaderContentArea';
 import { formikErrorFieldHighlighterClasses } from './FormikErrorFieldHighlighter';

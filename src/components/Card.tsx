@@ -18,7 +18,7 @@ import clsx from 'clsx';
 import { ReactNode, forwardRef } from 'react';
 
 import { useLoadingContext } from '../contexts/LoadingContext';
-import { LoadingProps } from '../interfaces/Utils';
+import { LoadingProps } from '../models/Utils';
 import ReloadIconButton from './ReloadIconButton';
 import SearchSyncToolbar, { SearchSyncToolbarProps } from './SearchSyncToolbar';
 

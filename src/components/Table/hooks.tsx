@@ -32,7 +32,7 @@ import clsx from 'clsx';
 import { omit } from 'lodash';
 import { ReactNode, Ref, useEffect, useMemo, useRef, useState } from 'react';
 
-import { SortDirection, SortOptions } from '../../interfaces/Sort';
+import { SortDirection, SortOptions } from '../../models/Sort';
 import { sort } from '../../utils/Sort';
 import DataTablePagination from '../DataTablePagination';
 import EllipsisMenuIconButton from '../EllipsisMenuIconButton';

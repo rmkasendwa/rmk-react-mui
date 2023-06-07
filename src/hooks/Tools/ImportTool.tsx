@@ -27,7 +27,7 @@ import {
 } from '../../components/RecordsExplorer';
 import { ButtonTool } from '../../components/SearchSyncToolbar';
 import { TableColumn } from '../../components/Table';
-import { DropdownOption } from '../../interfaces/Utils';
+import { DropdownOption } from '../../models/Utils';
 import { useMutation } from '../Utils';
 
 export const importSteps = [

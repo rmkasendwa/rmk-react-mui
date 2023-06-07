@@ -54,7 +54,7 @@ import {
   useRecord,
   useUpdate,
 } from '../hooks/Utils';
-import { CrudMode, PaginatedResponseData } from '../interfaces/Utils';
+import { CrudMode, PaginatedResponseData } from '../models/Utils';
 import IconLoadingScreen from './IconLoadingScreen';
 import ModalForm, {
   ModalFormFunctionChildren,

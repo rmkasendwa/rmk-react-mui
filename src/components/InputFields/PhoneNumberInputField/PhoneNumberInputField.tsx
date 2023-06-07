@@ -18,7 +18,7 @@ import {
 } from 'react';
 
 import { useLoadingContext } from '../../../contexts/LoadingContext';
-import { CountryCode } from '../../../interfaces/Countries';
+import { CountryCode } from '../../../models/Countries';
 import PhoneNumberUtil, {
   isValidPhoneNumber,
   systemStandardPhoneNumberFormat,

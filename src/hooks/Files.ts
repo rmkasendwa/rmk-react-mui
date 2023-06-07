@@ -7,7 +7,7 @@ import {
   FileDownloadFunction,
   FileUploadFunction,
   LoadableFile,
-} from '../interfaces/Utils';
+} from '../models/Utils';
 
 export interface UseFileUploadOptions
   extends Pick<

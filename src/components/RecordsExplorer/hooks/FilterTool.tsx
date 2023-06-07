@@ -19,7 +19,7 @@ import { omit, result } from 'lodash';
 import { useEffect, useMemo, useRef } from 'react';
 
 import { PopupToolOptions, usePopupTool } from '../../../hooks/Tools/PopupTool';
-import { PrimitiveDataType } from '../../../interfaces/Utils';
+import { PrimitiveDataType } from '../../../models/Utils';
 import DataDropdownField, {
   DataDropdownFieldProps,
 } from '../../InputFields/DataDropdownField';

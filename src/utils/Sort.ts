@@ -1,7 +1,7 @@
 import { result } from 'lodash';
 
-import { SortOptions } from '../interfaces/Sort';
-import { PrimitiveDataType } from '../interfaces/Utils';
+import { SortOptions } from '../models/Sort';
+import { PrimitiveDataType } from '../models/Utils';
 
 export const sort = <RecordRow = any>(
   a: RecordRow,
