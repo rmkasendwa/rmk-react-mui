@@ -13,6 +13,7 @@ import {
   Divider,
   Grid,
   GridProps,
+  Typography,
   alpha,
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
@@ -149,7 +150,7 @@ export const BaseModalForm = <Values extends FormikValues>(
     title,
     submitted = false,
     submitButtonText = 'Submit',
-    onClose,
+    onClose: onCloseProp,
     staticEntityDetails,
     editMode = true,
     showEditButton = true,
@@ -233,10 +234,28 @@ export const BaseModalForm = <Values extends FormikValues>(
   // Refs
   const onSubmitSuccessRef = useRef(onSubmitSuccess);
   onSubmitSuccessRef.current = onSubmitSuccess;
-  const onCloseRef = useRef(onClose);
-  onCloseRef.current = onClose;
   const draftManagerRef = useRef(draftManager);
   draftManagerRef.current = draftManager;
+  const formHasChangesRef = useRef(false);
+
+  const [isClosingWithChanges, setIsClosingWithChanges] = useState(false);
+
+  const onClose = (saveDraft = false) => {
+    if (formHasChangesRef.current && !isClosingWithChanges) {
+      setIsClosingWithChanges(true);
+      return;
+    }
+    if (!saveDraft && draftManagerRef.current && draftProp?.id) {
+      const { closeDraft, deleteDraft } = draftManagerRef.current;
+      closeDraft(draftProp.id);
+      deleteDraft(draftProp.id);
+    }
+    formHasChangesRef.current = false;
+    setIsClosingWithChanges(false);
+    onCloseProp && onCloseProp();
+  };
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
 
   const [draftConfig, setDraftConfig] = useState<{
     isDraftLoaded: boolean;
@@ -264,7 +283,7 @@ export const BaseModalForm = <Values extends FormikValues>(
 
   useEffect(() => {
     if (submitted && !successMessage) {
-      onCloseRef.current && onCloseRef.current();
+      onCloseRef.current();
       onSubmitSuccessRef.current && onSubmitSuccessRef.current();
     }
   }, [submitted, successMessage]);
@@ -306,6 +325,7 @@ export const BaseModalForm = <Values extends FormikValues>(
               return diff(values, initialValues);
             })()
           );
+          formHasChangesRef.current = formHasChanges;
 
           if (
             draftManager &&
@@ -317,6 +337,82 @@ export const BaseModalForm = <Values extends FormikValues>(
               ...draftProp,
               data: values,
             });
+          }
+
+          if (isClosingWithChanges) {
+            return (
+              <>
+                <SearchSyncToolbar
+                  hasSearchTool={false}
+                  hasSyncTool={false}
+                  {...SearchSyncToolbarPropsRest}
+                  title="Confirm"
+                  postSyncButtonTools={[
+                    {
+                      type: 'icon-button',
+                      label: 'Close',
+                      icon: <CloseIcon />,
+                      onClick: () => onClose(),
+                    },
+                  ]}
+                  sx={{
+                    pr: `${spacing(2)} !important`,
+                    ...SearchSyncToolbarPropsSx,
+                  }}
+                />
+                <Divider />
+                <Box sx={{ py: 2, px: 3 }}>
+                  <Typography variant="body2">
+                    Please confirm that you want to close this form. All changes
+                    that have been made will be discarded.
+                  </Typography>
+                </Box>
+                <Divider />
+                <Grid
+                  container
+                  spacing={2}
+                  {...ActionButtonAreaPropsRest}
+                  sx={{
+                    py: 2,
+                    px: 3,
+                    flexDirection: 'row-reverse',
+                    ...ActionButtonAreaPropsSx,
+                  }}
+                >
+                  <Grid item>
+                    <Button
+                      variant="contained"
+                      color="error"
+                      onClick={() => onClose()}
+                    >
+                      Close
+                    </Button>
+                  </Grid>
+                  {draftManager && draftProp?.id ? (
+                    <Grid item>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => onClose(true)}
+                      >
+                        Save as draft
+                      </Button>
+                    </Grid>
+                  ) : null}
+                  <Grid item>
+                    <Button
+                      variant="text"
+                      color="inherit"
+                      onClick={() => {
+                        setIsClosingWithChanges(false);
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  </Grid>
+                </Grid>
+              </>
+            );
           }
 
           return (
@@ -333,7 +429,7 @@ export const BaseModalForm = <Values extends FormikValues>(
                         {
                           type: 'icon-button',
                           icon: <CloseIcon />,
-                          onClick: onClose,
+                          onClick: () => onClose(),
                         },
                       ] as NonNullable<
                         typeof SearchSyncToolbarPropsRest.postSyncButtonTools
@@ -387,7 +483,7 @@ export const BaseModalForm = <Values extends FormikValues>(
                             <Alert
                               variant="filled"
                               severity="success"
-                              onClose={onClose}
+                              onClose={() => onClose()}
                             >
                               {successMessage}
                             </Alert>
@@ -438,7 +534,7 @@ export const BaseModalForm = <Values extends FormikValues>(
                                         variant="text"
                                         color="inherit"
                                         {...ActionButtonPropsRest}
-                                        onClick={onClose}
+                                        onClick={() => onClose()}
                                         sx={ActionButtonPropsSx}
                                       >
                                         Close
@@ -475,7 +571,7 @@ export const BaseModalForm = <Values extends FormikValues>(
                                           variant="text"
                                           color="inherit"
                                           {...ActionButtonPropsRest}
-                                          onClick={onClose}
+                                          onClick={() => onClose()}
                                           sx={{
                                             color: alpha(
                                               palette.text.primary,
@@ -538,7 +634,7 @@ export const BaseModalForm = <Values extends FormikValues>(
                                             variant="text"
                                             color="inherit"
                                             {...ActionButtonPropsRest}
-                                            onClick={onClose}
+                                            onClick={() => onClose()}
                                             sx={ActionButtonPropsSx}
                                           >
                                             Close
@@ -577,7 +673,7 @@ export const BaseModalForm = <Values extends FormikValues>(
                                 color="inherit"
                                 {...ActionButtonPropsRest}
                                 {...CloseActionButtonPropsRest}
-                                onClick={onClose}
+                                onClick={() => onClose()}
                                 sx={
                                   {
                                     color: alpha(palette.text.primary, 0.5),
