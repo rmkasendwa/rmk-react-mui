@@ -116,7 +116,7 @@ export interface ModalFormProps<Values extends FormikValues = any>
   ActionButtonAreaProps?: Partial<GridProps>;
   editableFields?: (keyof Values)[];
   draftManager?: DraftsManager;
-  draft?: Pick<Draft, 'id' | 'data' | 'draftMessage' | 'draftUrl'>;
+  draft?: Pick<Draft, 'id' | 'draftMessage' | 'draftUrl'>;
 }
 
 export function getModalFormUtilityClass(slot: string): string {
@@ -175,6 +175,7 @@ export const BaseModalForm = <Values extends FormikValues>(
     placement = 'center',
     draftManager,
     draft: draftProp,
+    open,
     ...rest
   } = props;
 
@@ -265,7 +266,7 @@ export const BaseModalForm = <Values extends FormikValues>(
   const { isDraftLoaded, initialDraft } = draftConfig;
 
   useEffect(() => {
-    if (draftManagerRef.current && draftProp?.id) {
+    if (draftManagerRef.current && draftProp?.id && open) {
       const { openDraft, findDraft, closeDraft } = draftManagerRef.current;
       openDraft(draftProp.id);
       (async () => {
@@ -279,7 +280,7 @@ export const BaseModalForm = <Values extends FormikValues>(
         closeDraft(draftProp.id);
       };
     }
-  }, [draftProp?.id]);
+  }, [draftProp?.id, open]);
 
   useEffect(() => {
     if (submitted && !successMessage) {
@@ -702,7 +703,7 @@ export const BaseModalForm = <Values extends FormikValues>(
   return (
     <ModalPopup
       {...rest}
-      {...{ modalElement, title, placement }}
+      {...{ modalElement, title, placement, open }}
       ref={ref}
       className={clsx(classes.root)}
     />
