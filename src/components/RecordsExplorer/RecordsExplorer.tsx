@@ -1070,7 +1070,11 @@ const BaseRecordsExplorer = <
       getRequestController,
       getStaleWhileRevalidate,
     }) => {
-      const usableRecordsFinder = (() => {
+      const selectedRecordsFinder = (() => {
+        if (recordsFinder) {
+          return recordsFinder;
+        }
+
         if (
           dataPresets &&
           selectedDataPresetIndex != null &&
@@ -1078,14 +1082,10 @@ const BaseRecordsExplorer = <
         ) {
           return dataPresets[selectedDataPresetIndex].recordsFinder;
         }
-
-        if (recordsFinder) {
-          return recordsFinder;
-        }
       })();
 
-      if (usableRecordsFinder) {
-        return usableRecordsFinder({
+      if (selectedRecordsFinder) {
+        return selectedRecordsFinder({
           searchTerm,
           limit,
           offset,
@@ -2111,7 +2111,7 @@ const BaseRecordsExplorer = <
   };
 
   const title = (() => {
-    if (dataPresets && dataPresets.length > 0) {
+    if (!recordsFinder && dataPresets && dataPresets.length > 0) {
       return (
         <DataDropdownField
           variant="text"
