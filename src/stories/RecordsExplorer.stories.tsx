@@ -260,5 +260,4 @@ WithDataPresets.args = {
       key: 'website-contacts',
     },
   ],
-  selectedDataPresetId: 'website-contacts',
 } as RecordsExplorerProps;

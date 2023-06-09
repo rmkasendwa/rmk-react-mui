@@ -223,7 +223,9 @@ const BaseDataDropdownField = <Entity,>(
 
   const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
 
-  const [options, setOptions] = useState<DropdownOption[]>(optionsProp || []);
+  const [options, setOptions] = useState<DropdownOption[]>(() => {
+    return optionsProp || [];
+  });
 
   const [selectedOptionsRowSpan, setSelectedOptionsRowSpan] = useState(1);
 
@@ -260,7 +262,30 @@ const BaseDataDropdownField = <Entity,>(
   const onChangeSelectedOptionRef = useRef(onChangeSelectedOption);
   onChangeSelectedOptionRef.current = onChangeSelectedOption;
 
-  const [selectedOptions, setSelectedOptions] = useState<DropdownOption[]>([]);
+  const [selectedOptions, setSelectedOptions] = useState<DropdownOption[]>(
+    () => {
+      const selectedValue = value
+        ? [...(Array.isArray(value) ? value : [value])]
+        : [];
+
+      const selectedOptions = selectedValue
+        .map((value) => {
+          return optionsRef.current.find(
+            ({ value: optionValue }) => value === optionValue
+          )!;
+        })
+        .filter((option) => option);
+
+      const selectedOptionsValues = selectedOptions.map(({ value }) => value);
+      if (
+        selectedValue.every((value) => selectedOptionsValues.includes(value))
+      ) {
+        return selectedOptions;
+      }
+
+      return [];
+    }
+  );
 
   useEffect(() => {
     if (multiple) {
