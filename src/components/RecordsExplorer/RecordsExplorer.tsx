@@ -104,7 +104,6 @@ import {
   ViewOptionType,
   ViewOptionsToolOptions,
   useViewOptionsTool,
-  viewOptionTypes,
 } from './hooks/ViewOptionsTool';
 import {
   ConditionGroup,
@@ -858,7 +857,7 @@ const BaseRecordsExplorer = <
     useReactRouterDOMSearchParams({
       mode: 'json',
       spec: {
-        view: Yup.mixed<ViewOptionType>().oneOf([...viewOptionTypes]),
+        view: Yup.string(),
         groupBy: Yup.array().of(
           Yup.object({
             id: Yup.mixed<keyof RecordRow>().required(),

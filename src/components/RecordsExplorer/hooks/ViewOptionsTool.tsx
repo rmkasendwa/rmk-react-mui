@@ -28,45 +28,67 @@ import { Tool } from '../../SearchSyncToolbar';
 
 export const viewOptionTypes = ['Timeline', 'Grid', 'List'] as const;
 
-export type ViewOptionType = (typeof viewOptionTypes)[number];
+export type ViewOptionType<ViewType extends string = string> =
+  | (typeof viewOptionTypes)[number]
+  | ViewType;
 
-export interface ViewOption {
-  label: ViewOptionType;
+export interface ViewOption<ViewType extends string = string> {
+  label: ViewOptionType<ViewType>;
   icon: ReactNode;
 }
 
-const viewOptions: ViewOption[] = [
+const defaultViewOptions: ViewOption[] = [
   { label: 'Timeline', icon: <ViewTimelineIcon /> },
   { label: 'Grid', icon: <GridViewIcon /> },
   { label: 'List', icon: <ListIcon /> },
 ];
 
-const DEFAULT_VIEW_OPTIONS_TYPES = viewOptions.map(({ label }) => label);
+const DEFAULT_VIEW_OPTIONS_TYPES = defaultViewOptions.map(({ label }) => label);
 
-export interface ViewOptionsToolOptions {
-  onChangeViewType?: (viewType: ViewOptionType) => void;
-  viewType?: ViewOptionType;
-  viewOptionTypes?: ViewOptionType[];
+export interface ViewOptionsToolOptions<ViewType extends string = string> {
+  viewOptions?: ViewOption<ViewType>[];
+  onChangeViewType?: (viewType: ViewOptionType<ViewType>) => void;
+  viewType?: ViewOptionType<ViewType>;
+  viewOptionTypes?: ViewOptionType<ViewType>[];
   expandedIfHasLessOptions?: boolean;
 }
 
-export const useViewOptionsTool = ({
+export const useViewOptionsTool = <ViewType extends string = string>({
   onChangeViewType,
   viewType = 'List',
-  viewOptionTypes = DEFAULT_VIEW_OPTIONS_TYPES,
+  viewOptionTypes = DEFAULT_VIEW_OPTIONS_TYPES as any,
   expandedIfHasLessOptions = false,
+  viewOptions = defaultViewOptions as any,
   ...rest
-}: ViewOptionsToolOptions) => {
+}: ViewOptionsToolOptions<ViewType>) => {
   const { palette, breakpoints } = useTheme();
   const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
 
+  // Refs
   const anchorRef = useRef<HTMLButtonElement>(null);
+  const viewOptionsRef = useRef(viewOptions);
+  viewOptionsRef.current = viewOptions;
+
   const [open, setOpen] = useState(false);
 
   const options = useMemo(() => {
-    return viewOptionTypes
+    return [
+      ...new Set([
+        ...viewOptionTypes,
+        ...viewOptionsRef.current
+          .filter(({ label }) => {
+            return !DEFAULT_VIEW_OPTIONS_TYPES.includes(label);
+          })
+          .map(({ label }) => label),
+      ]),
+    ]
       .map((viewOptionType) => {
-        return viewOptions.find(({ label }) => viewOptionType === label)!;
+        return [...viewOptionsRef.current, ...defaultViewOptions].find(
+          ({ label }) => viewOptionType === label
+        )!;
+      })
+      .filter((viewOption) => {
+        return viewOption;
       })
       .map(({ label, icon }) => {
         return {
@@ -90,9 +112,10 @@ export const useViewOptionsTool = ({
     selectedOptions,
   } = useMemo(() => {
     return {
-      viewOption: viewOptions.find(({ label }) => {
-        return label === viewType;
-      })!,
+      viewOption:
+        [...viewOptionsRef.current, ...defaultViewOptions].find(({ label }) => {
+          return label === viewType;
+        }) || viewOptionsRef.current[0],
       selectedOptions: options.filter(({ value }) => {
         return value === viewType;
       }),
