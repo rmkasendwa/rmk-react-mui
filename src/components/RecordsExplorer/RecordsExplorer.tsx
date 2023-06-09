@@ -200,6 +200,8 @@ export interface RecordsExplorerChildrenOptions<RecordRow extends BaseDataRow> {
   sortBy?: SortBy<RecordRow>;
   groupableFields?: GroupableField<RecordRow>[];
   groupBy?: SortBy<RecordRow>;
+  loading?: boolean;
+  errorMessage?: string;
 }
 
 export interface RecordsExplorerFunctionChildren<State> {
@@ -2027,6 +2029,8 @@ const BaseRecordsExplorer = <
     sortBy: selectedSortParams,
     groupableFields,
     groupBy: selectedGroupParams,
+    loading,
+    errorMessage,
   };
 
   const title = (() => {
