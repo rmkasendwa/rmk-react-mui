@@ -1,3 +1,4 @@
+import { createDateWithoutTimezoneOffset } from '@infinite-debugger/rmk-utils/dates';
 import { addThousandCommas } from '@infinite-debugger/rmk-utils/numbers';
 import {
   Box,
@@ -223,7 +224,7 @@ export const TableBodyColumn = forwardRef<any, TableBodyColumnProps<any>>(
           case 'date':
             if (textTransform && dateFormat) {
               formattedColumnValue = formatDate(
-                new Date(formattedColumnValue),
+                createDateWithoutTimezoneOffset(formattedColumnValue),
                 dateFormat
               );
             }
@@ -231,7 +232,7 @@ export const TableBodyColumn = forwardRef<any, TableBodyColumnProps<any>>(
           case 'dateTime':
             if (textTransform && dateTimeFormat) {
               formattedColumnValue = formatDate(
-                new Date(formattedColumnValue),
+                createDateWithoutTimezoneOffset(formattedColumnValue),
                 dateTimeFormat
               );
             }

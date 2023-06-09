@@ -1,6 +1,6 @@
 {
   "name": "@infinite-debugger/react-mui",
-  "version": "0.7.0-alpha.3",
+  "version": "0.7.0-alpha.4",
   "description": "RMK React MUI is a React UI library of utility components, hooks and contexts",
   "keywords": [
     "react",
@@ -81,7 +81,7 @@
     "@emotion/react": "^11.10.5",
     "@emotion/styled": "^11.10.5",
     "@infinite-debugger/rmk-js-extensions": "^0.1.0-alpha.13",
-    "@infinite-debugger/rmk-utils": "^0.1.0-alpha.18",
+    "@infinite-debugger/rmk-utils": "^0.1.0-alpha.22",
     "@mui/base": "^5.0.0-alpha.114",
     "@mui/icons-material": "^5.10.9",
     "@mui/lab": "^5.0.0-alpha.106",

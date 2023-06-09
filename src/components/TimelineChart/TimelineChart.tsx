@@ -14,7 +14,7 @@ import {
   useThemeProps,
 } from '@mui/material';
 import clsx from 'clsx';
-import { format as formatDate } from 'date-fns';
+import formatDate from 'date-fns/format';
 import getDaysInMonth from 'date-fns/getDaysInMonth';
 import {
   ReactElement,
