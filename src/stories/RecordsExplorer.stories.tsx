@@ -1,3 +1,5 @@
+import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
+import MapIcon from '@mui/icons-material/Map';
 import { Grid } from '@mui/material';
 import { Meta, StoryFn } from '@storybook/react';
 import { countries } from 'countries-list';
@@ -55,6 +57,23 @@ export const Timeline = Template.bind({});
 Timeline.args = {
   ...baseArgs,
   view: 'Timeline',
+} as RecordsExplorerProps;
+
+export const WithExtraViewOptions = Template.bind({});
+WithExtraViewOptions.args = {
+  ...baseArgs,
+  ViewOptionsButtonProps: {
+    viewOptions: [
+      {
+        label: 'Map',
+        icon: <MapIcon />,
+      },
+      {
+        label: 'Heat Map',
+        icon: <LocalFireDepartmentIcon />,
+      },
+    ],
+  },
 } as RecordsExplorerProps;
 
 export const WithDefaultGroupByOption = Template.bind({});
