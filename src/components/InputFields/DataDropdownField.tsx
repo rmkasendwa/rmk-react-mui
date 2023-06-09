@@ -110,7 +110,6 @@ export interface DataDropdownFieldProps<Entity = any>
     > {
   onChangeSelectedOption?: (selectedOption?: DropdownOption<Entity>) => void;
   disableEmptyOption?: boolean;
-  dataKey?: string;
   value?: string | string[];
   selectedOption?: DropdownOption<Entity>;
   placeholderOption?: DropdownOption<Entity>;
@@ -154,7 +153,6 @@ const BaseDataDropdownField = <Entity,>(
     name,
     id,
     value,
-    dataKey,
     options: optionsProp,
     sortOptions,
     onChange,
@@ -510,8 +508,15 @@ const BaseDataDropdownField = <Entity,>(
           ) : (
             <Typography
               component="div"
+              variant="inherit"
               sx={{
-                fontSize: 14,
+                ...(() => {
+                  if (!isTextVariant) {
+                    return {
+                      fontSize: 14,
+                    };
+                  }
+                })(),
               }}
             >
               {optionsToDisplay[0]?.label}
@@ -703,11 +708,10 @@ const BaseDataDropdownField = <Entity,>(
                 </Stack>
               }
               enableLoadingState={enableLoadingState}
-              sx={
-                {
-                  ...pick(sx, 'width', 'minWidth', 'maxWidth'),
-                } as any
-              }
+              sx={{
+                ...pick(sx as any, 'width', 'minWidth', 'maxWidth'),
+                display: 'inline-block',
+              }}
             />
           );
         }
@@ -972,7 +976,7 @@ const BaseDataDropdownField = <Entity,>(
             {...(() => {
               if (isTextVariant) {
                 return {
-                  searchable: true,
+                  searchable: searchable ?? true,
                 };
               }
             })()}
@@ -981,7 +985,7 @@ const BaseDataDropdownField = <Entity,>(
               ...(() => {
                 if (isSmallScreenSize) {
                   return {
-                    searchable: true,
+                    searchable: searchable ?? true,
                     maxHeight:
                       dropdownListMaxHeight ?? window.innerHeight - 240,
                     sx: {
@@ -996,7 +1000,6 @@ const BaseDataDropdownField = <Entity,>(
               searchTerm,
               options,
               selectedOptions,
-              dataKey,
               getDropdownOptions,
               callGetDropdownOptions,
               externallyPaginated,

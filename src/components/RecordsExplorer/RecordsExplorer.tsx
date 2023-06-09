@@ -78,6 +78,7 @@ import FixedHeaderContentArea, {
 import IconLoadingScreen, {
   IconLoadingScreenProps,
 } from '../IconLoadingScreen';
+import DataDropdownField from '../InputFields/DataDropdownField';
 import ModalForm, {
   ModalFormFunctionChildren,
   ModalFormProps,
@@ -164,6 +165,7 @@ const modifiedStateKeyTypes = [
   'selectedColumns',
   'search',
   'expandedGroups',
+  'selectedDataPreset',
 ] as const;
 
 type ModifiedStatKey = (typeof modifiedStateKeyTypes)[number];
@@ -219,6 +221,18 @@ export type RecordsExplorerFunctionEditorForm<
     loadingState: LoadingContext;
   }
 >;
+
+export type RecordsFinder<RecordRow extends BaseDataRow = BaseDataRow> = (
+  options: PaginatedRecordsFinderOptions
+) => Promise<PaginatedResponseData<RecordRow> | RecordRow[]>;
+
+export type RecordsExplorerDataPreset<
+  RecordRow extends BaseDataRow = BaseDataRow
+> = {
+  title: ReactNode;
+  key?: string;
+  recordsFinder: RecordsFinder<RecordRow>;
+};
 
 export interface RecordsExplorerProps<
   RecordRow extends BaseDataRow = BaseDataRow,
@@ -343,9 +357,7 @@ export interface RecordsExplorerProps<
     | RecordsExplorerFunctionEditorForm<RecordRow, InitialValues>
     | ReactNode;
   description?: ReactNode;
-  recordsFinder?: (
-    options: PaginatedRecordsFinderOptions
-  ) => Promise<PaginatedResponseData<RecordRow> | RecordRow[]>;
+  recordsFinder?: RecordsFinder<RecordRow>;
   getRecordLoadFunction?: (loadFunction: () => void) => void;
   recordDetailsFinder?: (selectedRecordId: string) => Promise<RecordRow>;
   getEditableRecordInitialValues?: (record: RecordRow) => any;
@@ -394,6 +406,8 @@ export interface RecordsExplorerProps<
   showFilterTool?: boolean;
   stateStorage?: ParamStorage;
   PaginatedRecordsOptions?: Partial<PaginatedRecordsOptions<RecordRow>>;
+  dataPresets?: RecordsExplorerDataPreset<RecordRow>[];
+  selectedDataPresetId?: string | number;
 }
 
 export function getRecordsExplorerUtilityClass(slot: string): string {
@@ -500,6 +514,8 @@ const BaseRecordsExplorer = <
     getRecordLoadFunction,
     refreshInterval,
     PaginatedRecordsOptions,
+    dataPresets,
+    selectedDataPresetId: selectedDataPresetIdProp,
     ...rest
   } = omit(
     props,
@@ -546,6 +562,7 @@ const BaseRecordsExplorer = <
   const { ...ViewModalFormPropsRest } = ViewModalFormProps;
 
   // Refs
+  const isInitialMountRef = useRef(true);
   const headerElementRef = useRef<HTMLDivElement | null>(null);
   const bodyElementRef = useRef<HTMLDivElement | null>(null);
   const filterBySearchTermRef = useRef(filterBySearchTerm);
@@ -574,6 +591,8 @@ const BaseRecordsExplorer = <
   getViewFunctionRef.current = getViewFunction;
   const getRecordLoadFunctionRef = useRef(getRecordLoadFunction);
   getRecordLoadFunctionRef.current = getRecordLoadFunction;
+  const dataPresetsRef = useRef(dataPresets);
+  dataPresetsRef.current = dataPresets;
 
   const viewFunctionRef = useRef((record: RecordRow) => {
     const { id } = record;
@@ -882,6 +901,7 @@ const BaseRecordsExplorer = <
         createNewRecord: Yup.boolean(),
         selectedRecord: Yup.string(),
         editRecord: Yup.boolean(),
+        selectedDataPreset: Yup.number(),
       },
       id,
       paramStorage: stateStorage,
@@ -900,6 +920,7 @@ const BaseRecordsExplorer = <
     createNewRecord: searchParamCreateNewRecord,
     selectedRecord: selectedRecordId,
     editRecord,
+    selectedDataPreset: searchParamSelectedDataPreset,
   } = searchParams;
 
   const createNewRecord = Boolean(
@@ -1000,6 +1021,29 @@ const BaseRecordsExplorer = <
     }
   }, [modifiedStateKeys, searchParamFilterBy]);
 
+  const selectedDataPresetIndex = (() => {
+    if (dataPresets && dataPresets.length > 0) {
+      if (searchParamSelectedDataPreset != null) {
+        return searchParamSelectedDataPreset;
+      }
+      if (selectedDataPresetIdProp) {
+        if (
+          typeof selectedDataPresetIdProp === 'number' &&
+          dataPresets[selectedDataPresetIdProp]
+        ) {
+          return selectedDataPresetIdProp;
+        }
+        const presetIndex = dataPresets.findIndex(
+          ({ key }) => key === selectedDataPresetIdProp
+        );
+        if (presetIndex >= 0) {
+          return presetIndex;
+        }
+      }
+      return 0;
+    }
+  })();
+
   const selectedColumnIds =
     searchParamSelectedColumns || baseSelectedColumnIds || [];
 
@@ -1026,8 +1070,22 @@ const BaseRecordsExplorer = <
       getRequestController,
       getStaleWhileRevalidate,
     }) => {
-      if (recordsFinder) {
-        return recordsFinder({
+      const usableRecordsFinder = (() => {
+        if (
+          dataPresets &&
+          selectedDataPresetIndex != null &&
+          dataPresets[selectedDataPresetIndex]
+        ) {
+          return dataPresets[selectedDataPresetIndex].recordsFinder;
+        }
+
+        if (recordsFinder) {
+          return recordsFinder;
+        }
+      })();
+
+      if (usableRecordsFinder) {
+        return usableRecordsFinder({
           searchTerm,
           limit,
           offset,
@@ -1046,13 +1104,24 @@ const BaseRecordsExplorer = <
   );
 
   useEffect(() => {
+    if (
+      !isInitialMountRef.current &&
+      dataPresetsRef.current &&
+      dataPresetsRef.current.length > 0 &&
+      selectedDataPresetIndex != null
+    ) {
+      load();
+    }
+  }, [load, selectedDataPresetIndex]);
+
+  useEffect(() => {
     if (getRecordLoadFunctionRef.current) {
       getRecordLoadFunctionRef.current(load);
     }
   }, [load]);
 
   const data = (() => {
-    if (recordsFinder && asyncData.length > 0) {
+    if ((recordsFinder || dataPresets) && asyncData.length > 0) {
       return asyncData;
     }
     return dataProp || [];
@@ -1399,6 +1468,7 @@ const BaseRecordsExplorer = <
         expandedGroups: null,
         expandedGroupsInverted: null,
         filterBy: null,
+        selectedDataPreset: null,
         modifiedKeys: null,
       },
       {
@@ -1513,6 +1583,13 @@ const BaseRecordsExplorer = <
   const isDeletable = Boolean(recordDeletor);
 
   const { showSuccessMessage } = useMessagingContext();
+
+  useEffect(() => {
+    isInitialMountRef.current = false;
+    return () => {
+      isInitialMountRef.current = true;
+    };
+  }, []);
 
   const viewElement = (() => {
     if (views) {
@@ -2034,6 +2111,42 @@ const BaseRecordsExplorer = <
   };
 
   const title = (() => {
+    if (dataPresets && dataPresets.length > 0) {
+      return (
+        <DataDropdownField
+          variant="text"
+          value={String(selectedDataPresetIndex)}
+          options={dataPresets.map((dataPreset, index) => {
+            const { title } = dataPreset;
+            return {
+              label: title,
+              value: String(index),
+              entity: dataPreset,
+            };
+          })}
+          onChange={(event) => {
+            const { value } = event.target;
+            setSearchParams(
+              {
+                selectedDataPreset: value ? +value : null,
+                modifiedKeys: [
+                  ...new Set([
+                    ...(modifiedStateKeys || []),
+
+                    'selectedDataPreset',
+                  ]),
+                ] as typeof modifiedStateKeys,
+              },
+              {
+                replace: true,
+              }
+            );
+          }}
+          showClearButton={false}
+          searchable={dataPresets.length > 10}
+        />
+      );
+    }
     if (titleProp) {
       return titleProp;
     }

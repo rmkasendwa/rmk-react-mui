@@ -231,3 +231,34 @@ WithCrudFunctions.args = {
     });
   },
 } as RecordsExplorerProps;
+
+export const WithDataPresets = Template.bind({});
+WithDataPresets.args = {
+  ...baseArgs,
+  dataPresets: [
+    {
+      title: 'All Contacts',
+      recordsFinder: async () => {
+        return contacts;
+      },
+    },
+    {
+      title: 'Active Contacts',
+      recordsFinder: async () => {
+        return contacts.filter(({ status }) => {
+          return status === 'Active';
+        });
+      },
+    },
+    {
+      title: 'Contacts From Website',
+      recordsFinder: async () => {
+        return contacts.filter(({ source }) => {
+          return source === 'Website';
+        });
+      },
+      key: 'website-contacts',
+    },
+  ],
+  selectedDataPresetId: 'website-contacts',
+} as RecordsExplorerProps;
