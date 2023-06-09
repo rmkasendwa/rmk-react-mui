@@ -1,5 +1,6 @@
 import '@infinite-debugger/rmk-js-extensions/String';
 
+import { createDateWithoutTimezoneOffset } from '@infinite-debugger/rmk-utils/dates';
 import {
   ComponentsOverrides,
   ComponentsProps,
@@ -97,7 +98,9 @@ export const TimeStampDisplay = forwardRef<HTMLElement, TimeStampDisplayProps>(
       })()
     );
 
-    const [date, setDate] = useState(new Date(timestamp));
+    const [date, setDate] = useState(() => {
+      return createDateWithoutTimezoneOffset(timestamp);
+    });
 
     useEffect(() => {
       setDate(new Date(timestamp));

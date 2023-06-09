@@ -1,3 +1,4 @@
+import { createDateWithoutTimezoneOffset } from '@infinite-debugger/rmk-utils/dates';
 import CloseIcon from '@mui/icons-material/Close';
 import EventIcon from '@mui/icons-material/Event';
 import {
@@ -18,7 +19,7 @@ import useTheme from '@mui/material/styles/useTheme';
 import Tooltip from '@mui/material/Tooltip';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import clsx from 'clsx';
-import { format } from 'date-fns';
+import formatDate from 'date-fns/format';
 import { omit } from 'lodash';
 import {
   forwardRef,
@@ -192,7 +193,10 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
           {...{ label }}
           value={(() => {
             if (value) {
-              return format(new Date(value), displayFormat);
+              return formatDate(
+                createDateWithoutTimezoneOffset(value),
+                displayFormat
+              );
             }
           })()}
         />
@@ -216,7 +220,14 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
           {...rest}
           className={clsx(classes.root)}
           {...{ id, name, disabled, label, enableLoadingState }}
-          value={selectedDate ? format(selectedDate, displayFormat) : ''}
+          value={
+            selectedDate
+              ? formatDate(
+                  createDateWithoutTimezoneOffset(selectedDate),
+                  displayFormat
+                )
+              : ''
+          }
           InputProps={{
             startAdornment: disabled ? (
               selectDateIconButton
@@ -279,7 +290,10 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
                         if (enableTimeSelector) {
                           return selectedDate.toISOString();
                         }
-                        return format(selectedDate, 'yyyy-MM-dd');
+                        return formatDate(
+                          createDateWithoutTimezoneOffset(selectedDate),
+                          'yyyy-MM-dd'
+                        );
                       }
                       return '';
                     })()
