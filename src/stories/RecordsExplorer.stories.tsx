@@ -1,6 +1,6 @@
 import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
 import MapIcon from '@mui/icons-material/Map';
-import { Grid } from '@mui/material';
+import { Box, Grid, Typography } from '@mui/material';
 import { Meta, StoryFn } from '@storybook/react';
 import { countries } from 'countries-list';
 import React from 'react';
@@ -56,7 +56,7 @@ Default.args = {
 export const Timeline = Template.bind({});
 Timeline.args = {
   ...baseArgs,
-  view: 'Timeline',
+  selectedView: 'Timeline',
 } as RecordsExplorerProps;
 
 export const WithExtraViewOptions = Template.bind({});
@@ -73,6 +73,24 @@ WithExtraViewOptions.args = {
         icon: <LocalFireDepartmentIcon />,
       },
     ],
+  },
+  children: ({ selectedView, data }) => {
+    switch (selectedView) {
+      case 'Map':
+        return (
+          <Box>
+            <Typography>Map</Typography>
+            {JSON.stringify(data)}
+          </Box>
+        );
+      case 'Heat Map':
+        return (
+          <Box>
+            <Typography>Heat Map</Typography>
+            {JSON.stringify(data)}
+          </Box>
+        );
+    }
   },
 } as RecordsExplorerProps;
 
