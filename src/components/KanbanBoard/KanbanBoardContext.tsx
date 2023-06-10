@@ -1,4 +1,3 @@
-import { BoxProps } from '@mui/material/Box';
 import {
   Dispatch,
   FC,
@@ -11,70 +10,17 @@ import {
   useState,
 } from 'react';
 
-import { LaneProps } from './Lane';
-
-export type KanbanBoardId = string | number;
-
-export interface KanbanBoardTool {
-  icon?: ReactNode;
-  label: string;
-}
-
-export interface KanbanBoardLaneTool extends KanbanBoardTool {
-  onClick?: (laneId: KanbanBoardId) => void;
-}
-
-export type KanbanBoardLaneToolItem = KanbanBoardLaneTool | 'DIVIDER';
-
-export interface KanbanBoardCardTool extends KanbanBoardTool {
-  onClick?: (laneId: KanbanBoardId, cardId: KanbanBoardId) => void;
-}
-
-export type KanbanBoardCardToolItem = KanbanBoardCardTool | 'DIVIDER';
-
-export interface CardIdentifier {
-  id: KanbanBoardId;
-  laneId: KanbanBoardId;
-}
-
-export interface Card extends CardIdentifier, Omit<BoxProps, 'title' | 'id'> {
-  title: ReactNode;
-  description: ReactNode;
-  draggable?: boolean;
-  tools?: KanbanBoardCardToolItem[];
-}
-
-export interface Lane extends Omit<BoxProps, 'title' | 'id'> {
-  id: KanbanBoardId;
-  title: ReactNode;
-  cards: Card[];
-  showCardCount?: boolean;
-  loading?: boolean;
-  errorMessage?: string;
-  footer?: ReactNode;
-  draggable?: boolean;
-  tools?: KanbanBoardLaneToolItem[];
-}
-
-export interface DropResult {
-  addedIndex?: number | null;
-  removedIndex?: number | null;
-  payload?: any;
-}
-
-export type CardClickHandler = (
-  cardId: KanbanBoardId,
-  laneId: KanbanBoardId
-) => void;
-
-export type CardMoveAcrossLanesHandler = (
-  fromLaneId: KanbanBoardId,
-  toLaneId: KanbanBoardId,
-  cardId: KanbanBoardId
-) => void;
+import { KanbanBoardLaneProps } from './KanbanBoardLane';
+import {
+  CardClickHandler,
+  CardMoveAcrossLanesHandler,
+  DropResult,
+  KanbanBoardId,
+  Lane,
+} from './models';
 
 export interface KanbanBoardContext {
-  lanes: LaneProps[];
+  lanes: KanbanBoardLaneProps[];
   onCardDrop?: (laneId: KanbanBoardId | null, dropResult: DropResult) => void;
   onLaneDrop?: (dropResult: DropResult) => void;
   toLaneId?: KanbanBoardId | null;

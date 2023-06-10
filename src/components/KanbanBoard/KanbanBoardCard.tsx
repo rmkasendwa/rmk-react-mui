@@ -1,3 +1,4 @@
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import useTheme from '@mui/material/styles/useTheme';
@@ -6,12 +7,13 @@ import Typography from '@mui/material/Typography';
 import { alpha } from '@mui/system/colorManipulator';
 import { FC } from 'react';
 
-import CardTools from './CardTools';
-import { Card as CardType, useKanbanBoardContext } from './KanbanBoardContext';
+import EllipsisMenuIconButton from '../EllipsisMenuIconButton';
+import { useKanbanBoardContext } from './KanbanBoardContext';
+import { Card } from './models';
 
-export interface CardProps extends CardType {}
+export interface KanbanBoardCardProps extends Card {}
 
-export const Card: FC<CardProps> = ({
+export const KanbanBoardCard: FC<KanbanBoardCardProps> = ({
   id,
   laneId,
   title,
@@ -71,7 +73,14 @@ export const Card: FC<CardProps> = ({
           if (tools) {
             return (
               <Grid item display="flex">
-                <CardTools tools={tools} cardId={id} laneId={laneId} />
+                <EllipsisMenuIconButton
+                  options={tools}
+                  sx={{
+                    p: 0,
+                  }}
+                >
+                  <MoreHorizIcon />
+                </EllipsisMenuIconButton>
               </Grid>
             );
           }
@@ -90,4 +99,4 @@ export const Card: FC<CardProps> = ({
   );
 };
 
-export default Card;
+export default KanbanBoardCard;

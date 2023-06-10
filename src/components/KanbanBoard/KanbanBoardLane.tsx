@@ -13,17 +13,18 @@ import {
   Draggable as BaseDraggable,
 } from 'react-smooth-dnd';
 
+import EllipsisMenuIconButton from '../EllipsisMenuIconButton';
 import RenderIfVisible from '../RenderIfVisible';
-import Card from './Card';
-import { Lane as LaneType, useKanbanBoardContext } from './KanbanBoardContext';
-import LaneTools from './LaneTools';
+import KanbanBoardCard from './KanbanBoardCard';
+import { useKanbanBoardContext } from './KanbanBoardContext';
+import { Lane } from './models';
 
 const Container = BaseContainer as any;
 const Draggable = BaseDraggable as any;
 
-export interface LaneProps extends LaneType {}
+export interface KanbanBoardLaneProps extends Lane {}
 
-const Lane: FC<LaneProps> = ({
+const KanbanBoardLane: FC<KanbanBoardLaneProps> = ({
   id,
   title,
   showCardCount = false,
@@ -45,9 +46,6 @@ const Lane: FC<LaneProps> = ({
     onCardMoveAcrossLanes,
   } = useKanbanBoardContext();
 
-  let yPaddedHeight = 40;
-  footer && (yPaddedHeight += 40);
-
   return (
     <Box
       {...rest}
@@ -68,12 +66,12 @@ const Lane: FC<LaneProps> = ({
           border: `1px solid ${alpha(palette.text.primary, 0.2)}`,
           borderRadius: 2,
           height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
           '& .smooth-dnd-container': {
-            minHeight: `calc(100% - ${yPaddedHeight}px)`,
-            maxHeight: `calc(100% - ${yPaddedHeight}px)`,
+            flex: 1,
             px: 1,
             width: 360,
-            flex: '1 1 0%',
             overflow: 'hidden auto',
             alignSelf: 'center',
             flexDirection: 'column',
@@ -130,7 +128,7 @@ const Lane: FC<LaneProps> = ({
               if (tools) {
                 return (
                   <Grid item display="flex">
-                    <LaneTools tools={tools} laneId={id} />
+                    <EllipsisMenuIconButton options={tools} />
                   </Grid>
                 );
               }
@@ -155,55 +153,52 @@ const Lane: FC<LaneProps> = ({
             })()}
           </Grid>
         </Box>
-        <RenderIfVisible
-          stayRendered
-          unWrapChildrenIfVisible
-          sx={{
-            minHeight: `calc(100% - ${yPaddedHeight}px)`,
-            maxHeight: `calc(100% - ${yPaddedHeight}px)`,
-            width: 360,
+        <Container
+          groupName="col"
+          onDrop={({ addedIndex, removedIndex, payload }: any) => {
+            onCardDrop && onCardDrop(id, { addedIndex, removedIndex, payload });
           }}
+          getChildPayload={(index: any) => cards[index]}
+          dragClass="card-ghost"
+          dropClass="card-ghost-drop"
+          onDragEnd={({ isSource, payload }: any) => {
+            if (isSource) {
+              onCardMoveAcrossLanes &&
+                fromLaneId != null &&
+                toLaneId != null &&
+                onCardMoveAcrossLanes(fromLaneId, toLaneId, payload.id);
+            }
+          }}
+          onDragEnter={() => {
+            setToLaneId && setToLaneId(id);
+          }}
+          onDragStart={({ isSource }: any) => {
+            if (isSource && setFromLaneId) {
+              setFromLaneId(id);
+            }
+          }}
+          dropPlaceholder={{
+            animationDuration: 150,
+            showOnTop: true,
+            className: 'drop-preview',
+          }}
+          animationDuration={200}
         >
-          <Container
-            groupName="col"
-            onDrop={({ addedIndex, removedIndex, payload }: any) => {
-              onCardDrop &&
-                onCardDrop(id, { addedIndex, removedIndex, payload });
-            }}
-            getChildPayload={(index: any) => cards[index]}
-            dragClass="card-ghost"
-            dropClass="card-ghost-drop"
-            onDragEnd={({ isSource, payload }: any) => {
-              if (isSource) {
-                onCardMoveAcrossLanes &&
-                  fromLaneId != null &&
-                  toLaneId != null &&
-                  onCardMoveAcrossLanes(fromLaneId, toLaneId, payload.id);
-              }
-            }}
-            onDragEnter={() => {
-              setToLaneId && setToLaneId(id);
-            }}
-            onDragStart={({ isSource }: any) => {
-              if (isSource && setFromLaneId) {
-                setFromLaneId(id);
-              }
-            }}
-            dropPlaceholder={{
-              animationDuration: 150,
-              showOnTop: true,
-              className: 'drop-preview',
-            }}
-            animationDuration={200}
-          >
-            {cards.map(({ id: cardId, draggable = true, sx, ...rest }) => {
-              const cardStyles: any = {};
-              if (!draggable) {
-                cardStyles.bgcolor = alpha(palette.background.paper, 0.6);
-                cardStyles.userSelect = 'none';
-              }
-              const card = (
-                <Card
+          {cards.map(({ id: cardId, draggable = true, sx, ...rest }) => {
+            const cardStyles: any = {};
+            if (!draggable) {
+              cardStyles.bgcolor = alpha(palette.background.paper, 0.6);
+              cardStyles.userSelect = 'none';
+            }
+            const card = (
+              <RenderIfVisible
+                unWrapChildrenIfVisible
+                stayRendered
+                sx={{
+                  height: 300,
+                }}
+              >
+                <KanbanBoardCard
                   {...{ id: cardId, ...rest }}
                   sx={{
                     ...cardStyles,
@@ -211,18 +206,18 @@ const Lane: FC<LaneProps> = ({
                   }}
                   laneId={id}
                 />
+              </RenderIfVisible>
+            );
+            if (!draggable) {
+              return (
+                <Box key={cardId} className="undraggable-wrapper">
+                  {card}
+                </Box>
               );
-              if (!draggable) {
-                return (
-                  <Box key={cardId} className="undraggable-wrapper">
-                    {card}
-                  </Box>
-                );
-              }
-              return <Draggable key={cardId}>{card}</Draggable>;
-            })}
-          </Container>
-        </RenderIfVisible>
+            }
+            return <Draggable key={cardId}>{card}</Draggable>;
+          })}
+        </Container>
         {footer && (
           <Box
             component="footer"
@@ -242,4 +237,4 @@ const Lane: FC<LaneProps> = ({
   );
 };
 
-export default Lane;
+export default KanbanBoardLane;
