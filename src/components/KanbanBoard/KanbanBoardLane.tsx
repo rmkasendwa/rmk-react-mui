@@ -128,7 +128,12 @@ const KanbanBoardLane: FC<KanbanBoardLaneProps> = ({
               if (tools) {
                 return (
                   <Grid item display="flex">
-                    <EllipsisMenuIconButton options={tools} />
+                    <EllipsisMenuIconButton
+                      options={tools}
+                      sx={{
+                        p: 0,
+                      }}
+                    />
                   </Grid>
                 );
               }
