@@ -407,7 +407,9 @@ export interface RecordsExplorerProps<
   addNewButtonLabel?: ReactNode;
 
   showViewOptionsTool?: boolean;
-  showGroupTool?: boolean;
+  showGroupTool?:
+    | boolean
+    | ((state: RecordsExplorerChildrenOptions<RecordRow>) => boolean);
   showSortTool?: boolean;
   showFilterTool?: boolean;
   stateStorage?: ParamStorage;
@@ -2267,7 +2269,15 @@ const BaseRecordsExplorer = <
                 tools.push(viewOptionsTool);
               }
 
-              if (showGroupTool && groupableFields.length > 0) {
+              if (
+                (() => {
+                  if (typeof showGroupTool === 'function') {
+                    return showGroupTool(state);
+                  }
+                  return showGroupTool;
+                })() &&
+                groupableFields.length > 0
+              ) {
                 tools.push(groupTool);
               }
 
