@@ -11,7 +11,7 @@ import { Card as CardType, KanbanBoardContext } from './KanbanBoardContext';
 
 export interface CardProps extends CardType {}
 
-const Card: FC<CardProps> = ({
+export const Card: FC<CardProps> = ({
   id,
   laneId,
   title,
