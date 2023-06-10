@@ -94,7 +94,7 @@ const Lane: FC<LaneProps> = ({
                 <Badge
                   badgeContent={cards.length}
                   color="primary"
-                  max={99}
+                  max={999}
                   sx={{
                     '&>.MuiBadge-badge': {
                       position: 'relative',

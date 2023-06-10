@@ -476,6 +476,7 @@ export const usePaginatedRecords = <
   offsetRef.current = offset;
   const searchTermRef = useRef(searchTerm);
   searchTermRef.current = searchTerm;
+  const allPageRecordsRef = useRef<DataRow[]>([]);
 
   const lastLoadedPageRef = useRef<
     ResponsePage<DataRow, PaginatedResponseDataExtensions> | undefined
@@ -548,7 +549,7 @@ export const usePaginatedRecords = <
 
           loadedPages.set(loadedPageKey ?? params.offset!, records);
 
-          const allPageRecords = [...loadedPages.keys()]
+          allPageRecordsRef.current = [...loadedPages.keys()]
             .sort((a, b) => a - b)
             .map((key) => loadedPages.get(key)!)
             .flat();
@@ -560,7 +561,7 @@ export const usePaginatedRecords = <
             }
             return (
               isResponsePaginated &&
-              allPageRecords.length < recordsTotalCountRef.current
+              allPageRecordsRef.current.length < recordsTotalCountRef.current
             );
           })();
           setRecord(paginatedResponseData);
@@ -701,10 +702,7 @@ export const usePaginatedRecords = <
 
   return {
     currentPageRecords: loadedPages.get(offset) || [],
-    allPageRecords: [...loadedPages.keys()]
-      .sort((a, b) => a - b)
-      .map((key) => loadedPages.get(key)!)
-      .flat(),
+    allPageRecords: allPageRecordsRef.current,
     recordsTotalCount: recordsTotalCountRef.current,
     loadedPages,
     load,

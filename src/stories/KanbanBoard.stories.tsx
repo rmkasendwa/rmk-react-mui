@@ -7,6 +7,7 @@ import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import { Meta, StoryFn } from '@storybook/react';
 import { LoremIpsum } from 'lorem-ipsum';
+import React from 'react';
 
 import KanbanBoard from '../components/KanbanBoard';
 import { LaneProps } from '../components/KanbanBoard/Lane';
@@ -226,5 +227,56 @@ WithCardTools.args = {
         };
       }),
     };
+  }),
+};
+
+export const StressTest = Template.bind({});
+StressTest.args = {
+  lanes: Array.from({ length: 6 }).map((_, laneIndex) => {
+    return {
+      id: laneIndex,
+      title: lorem.generateWords(3),
+      showCardCount: true,
+      draggable: laneIndex % 2 === 0,
+      cards: Array.from({ length: Math.round(Math.random() * 500) }).map(
+        (_, cardIndex) => {
+          return {
+            id: `${laneIndex}${cardIndex}`,
+            laneId: laneIndex,
+            title: `${cardIndex + 1}. ${lorem.generateWords(5)}`,
+            description: (
+              <>
+                <Typography>{lorem.generateWords(40)}</Typography>
+                <Typography sx={{ pointerEvents: 'auto' }}>
+                  {lorem.generateWords(10)}
+                </Typography>
+              </>
+            ),
+            draggable: cardIndex % 2 === 0,
+          };
+        }
+      ),
+      footer: (
+        <Grid container p={1}>
+          <Grid item>
+            <Typography variant="body2">
+              Footer{' '}
+              <Chip
+                label={lorem.generateWords(1)}
+                size="small"
+                variant="outlined"
+                component="span"
+              />
+            </Typography>
+          </Grid>
+          <Grid item xs />
+          <Grid item>
+            <Typography variant="body2" color="primary">
+              Manage
+            </Typography>
+          </Grid>
+        </Grid>
+      ),
+    } as LaneProps;
   }),
 };
