@@ -7,23 +7,21 @@ import {
   Draggable as BaseDraggable,
 } from 'react-smooth-dnd';
 
-import { Lane as LaneType, useKanbanBoardContext } from './KanbanBoardContext';
-import Lane from './Lane';
+import RenderIfVisible from '../RenderIfVisible';
+import { useKanbanBoardContext } from './KanbanBoardContext';
+import KanbanBoardLane from './KanbanBoardLane';
+import { Lane } from './models';
 
 const Container = BaseContainer as any;
 const Draggable = BaseDraggable as any;
 
-export interface DragAndDropContainerProps
-  extends Pick<LaneType, 'showCardCount' | 'loading' | 'errorMessage'>,
+export interface KanbanBoardDragAndDropContainerProps
+  extends Pick<Lane, 'showCardCount' | 'loading' | 'errorMessage'>,
     BoxProps {}
 
-const DragAndDropContainer: FC<DragAndDropContainerProps> = ({
-  showCardCount = false,
-  loading = false,
-  errorMessage,
-  sx,
-  ...rest
-}) => {
+const KanbanBoardDragAndDropContainer: FC<
+  KanbanBoardDragAndDropContainerProps
+> = ({ showCardCount = false, loading = false, errorMessage, sx, ...rest }) => {
   const { lanes, onLaneDrop, dragging, setDragging } = useKanbanBoardContext();
   const { palette } = useTheme();
   const [boardWrapper, setBoardWrapper] = useState<HTMLDivElement | null>(null);
@@ -94,28 +92,27 @@ const DragAndDropContainer: FC<DragAndDropContainerProps> = ({
         setBoardWrapper(boardWrapper);
       }}
       sx={{
+        display: 'flex',
+        flexDirection: 'row',
         overflowY: 'hidden',
         py: 1,
         px: 3,
-        display: 'flex',
-        flexDirection: 'row',
         alignItems: 'flex-start',
         height: '100%',
         width: '100%',
         position: 'absolute',
         ...sx,
         [`
+          &>.smooth-dnd-container.horizontal
+        `]: {
+          gap: 2,
+        },
+        [`
           &>.smooth-dnd-container.horizontal>.smooth-dnd-draggable-wrapper,
           &>.smooth-dnd-container.horizontal>.undraggable-wrapper
         `]: {
           display: 'inline-block',
           height: '100%',
-        },
-        [`
-          &>.smooth-dnd-container.horizontal>.smooth-dnd-draggable-wrapper:not(:last-of-type),
-          &>.smooth-dnd-container.horizontal>.undraggable-wrapper:not(:last-of-type)
-        `]: {
-          mr: 2,
         },
         '& .smooth-dnd-draggable-wrapper .column-drag-handle': {
           cursor: 'grab',
@@ -147,7 +144,7 @@ const DragAndDropContainer: FC<DragAndDropContainerProps> = ({
           setDragging && setDragging(false);
         }}
         style={{
-          display: 'block',
+          display: 'flex',
           whiteSpace: 'nowrap',
           position: 'relative',
           height: '100%',
@@ -163,10 +160,18 @@ const DragAndDropContainer: FC<DragAndDropContainerProps> = ({
             );
           }
           const lane = (
-            <Lane
-              {...{ id, ...rest, showCardCount, loading, errorMessage }}
-              sx={{ ...laneStyles, ...sx }}
-            />
+            <RenderIfVisible
+              stayRendered
+              sx={{
+                height: '100%',
+                width: 362,
+              }}
+            >
+              <KanbanBoardLane
+                {...{ id, ...rest, showCardCount, loading, errorMessage }}
+                sx={{ ...laneStyles, ...sx }}
+              />
+            </RenderIfVisible>
           );
           if (!draggable) {
             return (
@@ -182,4 +187,4 @@ const DragAndDropContainer: FC<DragAndDropContainerProps> = ({
   );
 };
 
-export default DragAndDropContainer;
+export default KanbanBoardDragAndDropContainer;

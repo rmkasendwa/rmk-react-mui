@@ -10,7 +10,7 @@ import { LoremIpsum } from 'lorem-ipsum';
 import React from 'react';
 
 import KanbanBoard from '../components/KanbanBoard';
-import { LaneProps } from '../components/KanbanBoard/Lane';
+import { KanbanBoardLaneProps } from '../components/KanbanBoard/KanbanBoardLane';
 
 export default {
   title: 'Components/KanbanBoard',
@@ -73,7 +73,7 @@ const BASE_LANES = Array.from({ length: 6 }).map((_, laneIndex) => {
         </Grid>
       </Grid>
     ),
-  } as LaneProps;
+  } as KanbanBoardLaneProps;
 });
 
 const Template: StoryFn<typeof KanbanBoard> = (props) => {
@@ -95,8 +95,8 @@ WithLaneTools.args = {
             {
               icon: <AllInboxIcon />,
               label: 'One Tool With Icon',
-              onClick: (laneId) => {
-                console.log({ laneId });
+              onClick: (event) => {
+                console.log({ event });
               },
             },
           ],
@@ -107,8 +107,8 @@ WithLaneTools.args = {
           tools: [
             {
               label: 'One Tool Without Icon',
-              onClick: (laneId) => {
-                console.log({ laneId });
+              onClick: (event) => {
+                console.log({ event });
               },
             },
           ],
@@ -120,7 +120,6 @@ WithLaneTools.args = {
             { label: 'Edit column' },
             { label: 'Manage automation' },
             { label: 'Archive all cards' },
-            'DIVIDER',
             { label: 'Copy column link' },
             { label: 'Delete column' },
           ],
@@ -132,7 +131,6 @@ WithLaneTools.args = {
             { label: 'Edit column', icon: <EditIcon /> },
             { label: 'Manage automation' },
             { label: 'Archive all cards', icon: <ArchiveIcon /> },
-            'DIVIDER',
             { label: 'Copy column link' },
             { label: 'Delete column' },
           ],
@@ -144,14 +142,14 @@ WithLaneTools.args = {
         {
           icon: <AccountTreeIcon />,
           label: 'Tool With Icon',
-          onClick: (laneId) => {
-            console.log({ laneId });
+          onClick: (event) => {
+            console.log({ event });
           },
         },
         {
           label: 'Tool With Just Label',
-          onClick: (laneId) => {
-            console.log({ laneId });
+          onClick: (event) => {
+            console.log({ event });
           },
         },
       ],
@@ -175,8 +173,8 @@ WithCardTools.args = {
                 {
                   icon: <AllInboxIcon />,
                   label: 'One Tool With Icon',
-                  onClick: (laneId, cardId) => {
-                    console.log({ cardId, laneId });
+                  onClick: (event) => {
+                    console.log({ event });
                   },
                 },
               ],
@@ -187,8 +185,8 @@ WithCardTools.args = {
               tools: [
                 {
                   label: 'One Tool Without Icon',
-                  onClick: (laneId, cardId) => {
-                    console.log({ cardId, laneId });
+                  onClick: (event) => {
+                    console.log({ event });
                   },
                 },
               ],
@@ -199,7 +197,6 @@ WithCardTools.args = {
               tools: [
                 { label: 'Edit card' },
                 { label: 'Archive card' },
-                'DIVIDER',
                 { label: 'Copy card link' },
                 { label: 'Delete card' },
               ],
@@ -210,7 +207,6 @@ WithCardTools.args = {
               tools: [
                 { label: 'Edit card', icon: <EditIcon /> },
                 { label: 'Archive card', icon: <ArchiveIcon /> },
-                'DIVIDER',
                 { label: 'Copy card link' },
                 { label: 'Delete card' },
               ],
@@ -277,6 +273,6 @@ StressTest.args = {
           </Grid>
         </Grid>
       ),
-    } as LaneProps;
+    } as KanbanBoardLaneProps;
   }),
 };
