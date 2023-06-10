@@ -1105,7 +1105,7 @@ const BaseRecordsExplorer = <
       return [];
     },
     {
-      revalidationKey: `${revalidationKey}${searchTerm}`,
+      revalidationKey,
       loadOnMount: showRecords,
       refreshInterval,
       ...PaginatedRecordsOptions,
