@@ -7,14 +7,15 @@ import useTheme from '@mui/material/styles/useTheme';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import { alpha, darken } from '@mui/system/colorManipulator';
-import { FC, useContext } from 'react';
+import { FC } from 'react';
 import {
   Container as BaseContainer,
   Draggable as BaseDraggable,
 } from 'react-smooth-dnd';
 
+import RenderIfVisible from '../RenderIfVisible';
 import Card from './Card';
-import { KanbanBoardContext, Lane as LaneType } from './KanbanBoardContext';
+import { Lane as LaneType, useKanbanBoardContext } from './KanbanBoardContext';
 import LaneTools from './LaneTools';
 
 const Container = BaseContainer as any;
@@ -42,7 +43,7 @@ const Lane: FC<LaneProps> = ({
     fromLaneId,
     toLaneId,
     onCardMoveAcrossLanes,
-  } = useContext(KanbanBoardContext);
+  } = useKanbanBoardContext();
 
   let yPaddedHeight = 40;
   footer && (yPaddedHeight += 40);
@@ -69,6 +70,7 @@ const Lane: FC<LaneProps> = ({
           height: '100%',
           '& .smooth-dnd-container': {
             minHeight: `calc(100% - ${yPaddedHeight}px)`,
+            maxHeight: `calc(100% - ${yPaddedHeight}px)`,
             px: 1,
             width: 360,
             flex: '1 1 0%',
@@ -76,7 +78,6 @@ const Lane: FC<LaneProps> = ({
             alignSelf: 'center',
             flexDirection: 'column',
             justifyContent: 'space-between',
-            maxHeight: `calc(100% - ${yPaddedHeight}px)`,
           },
           [`
             & .smooth-dnd-container>.smooth-dnd-draggable-wrapper,
@@ -154,63 +155,74 @@ const Lane: FC<LaneProps> = ({
             })()}
           </Grid>
         </Box>
-        <Container
-          groupName="col"
-          onDrop={({ addedIndex, removedIndex, payload }: any) => {
-            onCardDrop && onCardDrop(id, { addedIndex, removedIndex, payload });
+        <RenderIfVisible
+          stayRendered
+          unWrapChildrenIfVisible
+          sx={{
+            minHeight: `calc(100% - ${yPaddedHeight}px)`,
+            maxHeight: `calc(100% - ${yPaddedHeight}px)`,
+            width: 360,
           }}
-          getChildPayload={(index: any) => cards[index]}
-          dragClass="card-ghost"
-          dropClass="card-ghost-drop"
-          onDragEnd={({ isSource, payload }: any) => {
-            if (isSource) {
-              onCardMoveAcrossLanes &&
-                fromLaneId != null &&
-                toLaneId != null &&
-                onCardMoveAcrossLanes(fromLaneId, toLaneId, payload.id);
-            }
-          }}
-          onDragEnter={() => {
-            setToLaneId && setToLaneId(id);
-          }}
-          onDragStart={({ isSource }: any) => {
-            if (isSource && setFromLaneId) {
-              setFromLaneId(id);
-            }
-          }}
-          dropPlaceholder={{
-            animationDuration: 150,
-            showOnTop: true,
-            className: 'drop-preview',
-          }}
-          animationDuration={200}
         >
-          {cards.map(({ id: cardId, draggable = true, sx, ...rest }) => {
-            const cardStyles: any = {};
-            if (!draggable) {
-              cardStyles.bgcolor = alpha(palette.background.paper, 0.6);
-              cardStyles.userSelect = 'none';
-            }
-            const card = (
-              <Card
-                {...{ id: cardId, ...rest }}
-                sx={{
-                  ...cardStyles,
-                  ...sx,
-                }}
-                laneId={id}
-              />
-            );
-            if (!draggable) {
-              return (
-                <Box key={cardId} className="undraggable-wrapper">
-                  {card}
-                </Box>
+          <Container
+            groupName="col"
+            onDrop={({ addedIndex, removedIndex, payload }: any) => {
+              onCardDrop &&
+                onCardDrop(id, { addedIndex, removedIndex, payload });
+            }}
+            getChildPayload={(index: any) => cards[index]}
+            dragClass="card-ghost"
+            dropClass="card-ghost-drop"
+            onDragEnd={({ isSource, payload }: any) => {
+              if (isSource) {
+                onCardMoveAcrossLanes &&
+                  fromLaneId != null &&
+                  toLaneId != null &&
+                  onCardMoveAcrossLanes(fromLaneId, toLaneId, payload.id);
+              }
+            }}
+            onDragEnter={() => {
+              setToLaneId && setToLaneId(id);
+            }}
+            onDragStart={({ isSource }: any) => {
+              if (isSource && setFromLaneId) {
+                setFromLaneId(id);
+              }
+            }}
+            dropPlaceholder={{
+              animationDuration: 150,
+              showOnTop: true,
+              className: 'drop-preview',
+            }}
+            animationDuration={200}
+          >
+            {cards.map(({ id: cardId, draggable = true, sx, ...rest }) => {
+              const cardStyles: any = {};
+              if (!draggable) {
+                cardStyles.bgcolor = alpha(palette.background.paper, 0.6);
+                cardStyles.userSelect = 'none';
+              }
+              const card = (
+                <Card
+                  {...{ id: cardId, ...rest }}
+                  sx={{
+                    ...cardStyles,
+                    ...sx,
+                  }}
+                  laneId={id}
+                />
               );
-            }
-            return <Draggable key={cardId}>{card}</Draggable>;
-          })}
-        </Container>
+              if (!draggable) {
+                return (
+                  <Box key={cardId} className="undraggable-wrapper">
+                    {card}
+                  </Box>
+                );
+              }
+              return <Draggable key={cardId}>{card}</Draggable>;
+            })}
+          </Container>
+        </RenderIfVisible>
         {footer && (
           <Box
             component="footer"
