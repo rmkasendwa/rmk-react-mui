@@ -1,7 +1,18 @@
+import {
+  ComponentsOverrides,
+  ComponentsProps,
+  ComponentsVariants,
+  unstable_composeClasses as composeClasses,
+  generateUtilityClass,
+  generateUtilityClasses,
+  useThemeProps,
+} from '@mui/material';
 import Box, { BoxProps } from '@mui/material/Box';
 import useTheme from '@mui/material/styles/useTheme';
 import { darken } from '@mui/system/colorManipulator';
-import { FC, useEffect, useState } from 'react';
+import clsx from 'clsx';
+import { forwardRef, useEffect, useState } from 'react';
+import { mergeRefs } from 'react-merge-refs';
 import {
   Container as BaseContainer,
   Draggable as BaseDraggable,
@@ -15,13 +26,85 @@ import { Lane } from './models';
 const Container = BaseContainer as any;
 const Draggable = BaseDraggable as any;
 
+export interface KanbanBoardDragAndDropContainerClasses {
+  /** Styles applied to the root element. */
+  root: string;
+}
+
+export type KanbanBoardDragAndDropContainerClassKey =
+  keyof KanbanBoardDragAndDropContainerClasses;
+
+// Adding theme prop types
+declare module '@mui/material/styles/props' {
+  interface ComponentsPropsList {
+    MuiKanbanBoardDragAndDropContainer: KanbanBoardDragAndDropContainerProps;
+  }
+}
+
+// Adding theme override types
+declare module '@mui/material/styles/overrides' {
+  interface ComponentNameToClassKey {
+    MuiKanbanBoardDragAndDropContainer: keyof KanbanBoardDragAndDropContainerClasses;
+  }
+}
+
+// Adding theme component types
+declare module '@mui/material/styles/components' {
+  interface Components<Theme = unknown> {
+    MuiKanbanBoardDragAndDropContainer?: {
+      defaultProps?: ComponentsProps['MuiKanbanBoardDragAndDropContainer'];
+      styleOverrides?: ComponentsOverrides<Theme>['MuiKanbanBoardDragAndDropContainer'];
+      variants?: ComponentsVariants['MuiKanbanBoardDragAndDropContainer'];
+    };
+  }
+}
+
 export interface KanbanBoardDragAndDropContainerProps
   extends Pick<Lane, 'showCardCount' | 'loading' | 'errorMessage'>,
-    BoxProps {}
+    Partial<BoxProps> {}
 
-const KanbanBoardDragAndDropContainer: FC<
+export function getKanbanBoardDragAndDropContainerUtilityClass(
+  slot: string
+): string {
+  return generateUtilityClass('MuiKanbanBoardDragAndDropContainer', slot);
+}
+
+export const kanbanBoardDragAndDropContainerClasses: KanbanBoardDragAndDropContainerClasses =
+  generateUtilityClasses('MuiKanbanBoardDragAndDropContainer', ['root']);
+
+const slots = {
+  root: ['root'],
+};
+
+export const KanbanBoardDragAndDropContainer = forwardRef<
+  any,
   KanbanBoardDragAndDropContainerProps
-> = ({ showCardCount = false, loading = false, errorMessage, sx, ...rest }) => {
+>(function KanbanBoardDragAndDropContainer(inProps, ref) {
+  const props = useThemeProps({
+    props: inProps,
+    name: 'MuiKanbanBoardDragAndDropContainer',
+  });
+  const {
+    className,
+    showCardCount = false,
+    loading = false,
+    errorMessage,
+    sx,
+    ...rest
+  } = props;
+
+  const classes = composeClasses(
+    slots,
+    getKanbanBoardDragAndDropContainerUtilityClass,
+    (() => {
+      if (className) {
+        return {
+          root: className,
+        };
+      }
+    })()
+  );
+
   const { lanes, onLaneDrop, dragging, setDragging } = useKanbanBoardContext();
   const { palette } = useTheme();
   const [boardWrapper, setBoardWrapper] = useState<HTMLDivElement | null>(null);
@@ -88,9 +171,13 @@ const KanbanBoardDragAndDropContainer: FC<
   return (
     <Box
       {...rest}
-      ref={(boardWrapper: HTMLDivElement | null) => {
-        setBoardWrapper(boardWrapper);
-      }}
+      ref={mergeRefs([
+        (boardWrapper: HTMLDivElement | null) => {
+          setBoardWrapper(boardWrapper);
+        },
+        ref,
+      ])}
+      className={clsx(classes.root)}
       sx={{
         display: 'flex',
         flexDirection: 'row',
@@ -185,6 +272,6 @@ const KanbanBoardDragAndDropContainer: FC<
       </Container>
     </Box>
   );
-};
+});
 
 export default KanbanBoardDragAndDropContainer;
