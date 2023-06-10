@@ -6,6 +6,7 @@ import {
   SetStateAction,
   createContext,
   useCallback,
+  useContext,
   useEffect,
   useState,
 } from 'react';
@@ -169,4 +170,8 @@ export const KanbanBoardProvider: FC<KanbanBoardProviderProps> = ({
       {children}
     </KanbanBoardContext.Provider>
   );
+};
+
+export const useKanbanBoardContext = () => {
+  return useContext(KanbanBoardContext);
 };

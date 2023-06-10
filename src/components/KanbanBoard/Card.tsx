@@ -4,10 +4,10 @@ import useTheme from '@mui/material/styles/useTheme';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import { alpha } from '@mui/system/colorManipulator';
-import { FC, useContext } from 'react';
+import { FC } from 'react';
 
 import CardTools from './CardTools';
-import { Card as CardType, KanbanBoardContext } from './KanbanBoardContext';
+import { Card as CardType, useKanbanBoardContext } from './KanbanBoardContext';
 
 export interface CardProps extends CardType {}
 
@@ -21,7 +21,7 @@ export const Card: FC<CardProps> = ({
   ...rest
 }) => {
   const { palette } = useTheme();
-  const { onCardClick } = useContext(KanbanBoardContext);
+  const { onCardClick } = useKanbanBoardContext();
 
   return (
     <Box

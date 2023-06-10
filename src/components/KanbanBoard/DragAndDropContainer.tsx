@@ -1,13 +1,13 @@
 import Box, { BoxProps } from '@mui/material/Box';
 import useTheme from '@mui/material/styles/useTheme';
 import { darken } from '@mui/system/colorManipulator';
-import { FC, useContext, useEffect, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import {
   Container as BaseContainer,
   Draggable as BaseDraggable,
 } from 'react-smooth-dnd';
 
-import { KanbanBoardContext, Lane as LaneType } from './KanbanBoardContext';
+import { Lane as LaneType, useKanbanBoardContext } from './KanbanBoardContext';
 import Lane from './Lane';
 
 const Container = BaseContainer as any;
@@ -24,8 +24,7 @@ const DragAndDropContainer: FC<DragAndDropContainerProps> = ({
   sx,
   ...rest
 }) => {
-  const { lanes, onLaneDrop, dragging, setDragging } =
-    useContext(KanbanBoardContext);
+  const { lanes, onLaneDrop, dragging, setDragging } = useKanbanBoardContext();
   const { palette } = useTheme();
   const [boardWrapper, setBoardWrapper] = useState<HTMLDivElement | null>(null);
 
