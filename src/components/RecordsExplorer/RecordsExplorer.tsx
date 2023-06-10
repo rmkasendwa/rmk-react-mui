@@ -258,6 +258,11 @@ export interface RecordsExplorerProps<
   getTitle?: RecordsExplorerFunctionChildren<
     RecordsExplorerChildrenOptions<RecordRow>
   >;
+  getWrappedTitle?: RecordsExplorerFunctionChildren<
+    RecordsExplorerChildrenOptions<RecordRow> & {
+      title: ReactNode;
+    }
+  >;
   children?:
     | RecordsExplorerFunctionChildren<RecordsExplorerChildrenOptions<RecordRow>>
     | ReactNode;
@@ -349,7 +354,9 @@ export interface RecordsExplorerProps<
     data: RecordRow[],
     grouping: GroupableField<RecordRow>
   ) => RecordRow[];
-  showPaginationStats?: boolean;
+  showPaginationStats?:
+    | boolean
+    | ((state: RecordsExplorerChildrenOptions<RecordRow>) => boolean);
 
   // Form
   editorForm?:
@@ -441,6 +448,7 @@ const BaseRecordsExplorer = <
     className,
     title: titleProp,
     getTitle,
+    getWrappedTitle,
     sx,
     fillContentArea = true,
     load: loadProp,
@@ -2193,7 +2201,17 @@ const BaseRecordsExplorer = <
           hasSearchTool={isSearchable}
           searchFieldOpen
           {...SearchSyncToolBarPropsRest}
-          title={title}
+          title={(() => {
+            if (title) {
+              if (getWrappedTitle) {
+                return getWrappedTitle({
+                  ...state,
+                  title,
+                });
+              }
+              return title;
+            }
+          })()}
           searchTerm={searchParamSearchTerm || controlledSearchTerm || ''}
           load={loadProp ?? load}
           loading={loadingProp ?? loading}
@@ -2560,7 +2578,14 @@ const BaseRecordsExplorer = <
           }
         })()}
       </Box>
-      {!isSmallScreenSize && showPaginationStats && filteredData.length > 0 ? (
+      {!isSmallScreenSize &&
+      (() => {
+        if (typeof showPaginationStats === 'function') {
+          return showPaginationStats(state);
+        }
+        return showPaginationStats;
+      })() &&
+      filteredData.length > 0 ? (
         <Paper
           elevation={0}
           className={clsx(classes.footer)}
