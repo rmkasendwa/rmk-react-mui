@@ -2368,13 +2368,21 @@ const BaseRecordsExplorer = <
               />
             );
           }
-          if (viewElement) {
-            return viewElement;
-          }
-          if (typeof children === 'function') {
-            return children(state);
-          }
-          return children;
+          return (
+            <>
+              {(() => {
+                if (viewElement) {
+                  return viewElement;
+                }
+              })()}
+              {(() => {
+                if (typeof children === 'function') {
+                  return children(state);
+                }
+                return children;
+              })()}
+            </>
+          );
         })()}
 
         {/* Popups */}
