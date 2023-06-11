@@ -17,7 +17,7 @@ import { forwardRef, useEffect, useRef, useState } from 'react';
 import { mergeRefs } from 'react-merge-refs';
 import { Link as RouterLink } from 'react-router-dom';
 
-import { useRecord } from '../hooks/Utils';
+import { CacheableDataFinderOptions, useCacheableData } from '../hooks/Utils';
 import Card, { CardProps } from './Card';
 import LoadingTypography, { LoadingTypographyProps } from './LoadingTypography';
 
@@ -54,7 +54,7 @@ declare module '@mui/material/styles/components' {
 }
 
 export interface CountCardProps extends Partial<CardProps> {
-  countFinder: () => Promise<number>;
+  countFinder: (options: CacheableDataFinderOptions) => Promise<number>;
   labelPlural?: string;
   labelSingular?: string;
   CountProps?: Partial<LoadingTypographyProps>;
@@ -144,11 +144,11 @@ export const CountCard = forwardRef<HTMLDivElement, CountCardProps>(
     }
 
     const {
-      record: count,
+      data: count,
       load,
       loading,
       errorMessage,
-    } = useRecord(countFinder);
+    } = useCacheableData(countFinder);
 
     return (
       <Card
