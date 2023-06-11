@@ -249,6 +249,7 @@ export const KanbanBoardDragAndDropContainer = forwardRef<
           const lane = (
             <RenderIfVisible
               stayRendered
+              displayPlaceholder={false}
               sx={{
                 height: '100%',
                 width: 362,

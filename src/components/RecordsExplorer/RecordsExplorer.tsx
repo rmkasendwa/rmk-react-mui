@@ -1656,7 +1656,7 @@ const BaseRecordsExplorer = <
               showRowNumber = showRowNumberProp,
               getEllipsisMenuToolProps,
               onClickRow,
-            } = selectedView;
+            } = { ...selectedView, ...ListViewProps };
             const displayingColumns = selectedView.columns.filter(({ id }) => {
               return selectedColumnIds.includes(String(id) as any);
             });

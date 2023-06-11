@@ -2,8 +2,8 @@ import '@infinite-debugger/rmk-js-extensions/RegExp';
 
 import { diff } from '@infinite-debugger/rmk-utils/data';
 import { addSearchParams } from '@infinite-debugger/rmk-utils/paths';
+import hashIt from 'hash-it';
 import { pick } from 'lodash';
-import hash from 'object-hash';
 import { useCallback, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import * as Yup from 'yup';
@@ -84,6 +84,11 @@ export function useReactRouterDOMSearchParams<
   id?: string;
   paramStorage?: ParamStorage;
 } = {}) {
+  const hashedId = (() => {
+    if (id) {
+      return hashIt(id).toString(36).slice(0, 3);
+    }
+  })();
   const [searchParams, baseSetSearchParams] = useSearchParams();
 
   const [inMemorySearchParams, setInMemorySearchParams] = useState<
@@ -139,8 +144,8 @@ export function useReactRouterDOMSearchParams<
             case 'json':
               return keys.reduce((accumulator, key) => {
                 const searchParamKey = (() => {
-                  if (id) {
-                    return `${key}:${id}`;
+                  if (hashedId) {
+                    return `${key}:${hashedId}`;
                   }
                   return key;
                 })();
@@ -190,7 +195,7 @@ export function useReactRouterDOMSearchParams<
           }, {} as Record<string, string>),
       };
     },
-    [id, mode, paramStorage]
+    [hashedId, mode, paramStorage]
   );
 
   const setSearchParams = useCallback<SetSearchParams>(
@@ -198,7 +203,7 @@ export function useReactRouterDOMSearchParams<
       const { existingSearchParams, nextSearchParams } =
         getSearchParams(searchParams);
 
-      if (hash(nextSearchParams) !== hash(existingSearchParams)) {
+      if (hashIt(nextSearchParams) !== hashIt(existingSearchParams)) {
         switch (paramStorage) {
           case 'url':
             baseSetSearchParamsRef.current(nextSearchParams, navigateOptions);
@@ -252,9 +257,9 @@ export function useReactRouterDOMSearchParams<
               const nextSearchParams = Object.keys(allSearchParams).reduce(
                 (accumulator, key) => {
                   const objectKey = (() => {
-                    if (id) {
+                    if (hashedId) {
                       return key.replace(
-                        new RegExp(`:${RegExp.escape(id)}$`),
+                        new RegExp(`:${RegExp.escape(hashedId)}$`),
                         ''
                       );
                     }
