@@ -272,6 +272,7 @@ export const KanbanBoardLane = forwardRef<any, KanbanBoardLaneProps>(
                 <RenderIfVisible
                   unWrapChildrenIfVisible
                   stayRendered
+                  displayPlaceholder={false}
                   sx={{
                     height: 300,
                   }}

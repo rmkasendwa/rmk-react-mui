@@ -1,4 +1,4 @@
-import hash from 'object-hash';
+import hashIt from 'hash-it';
 import { useCallback, useEffect, useRef } from 'react';
 
 export type SetSearchPrams = (
@@ -50,7 +50,7 @@ export const useSetSearchParam = (baseSetSearchParams: SetSearchPrams) => {
           return accumulator;
         }, {} as Record<string, string | string[]>);
 
-      if (hash(nextSearchParams) !== hash(existingSearchParams)) {
+      if (hashIt(nextSearchParams) !== hashIt(existingSearchParams)) {
         baseSetSearchParamsRef.current(nextSearchParams, navigateOptions);
       }
     },

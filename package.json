@@ -1,6 +1,6 @@
 {
   "name": "@infinite-debugger/react-mui",
-  "version": "0.7.0-alpha.22",
+  "version": "0.7.0-alpha.23",
   "description": "RMK React MUI is a React UI library of utility components, hooks and contexts",
   "keywords": [
     "react",
@@ -71,7 +71,6 @@
   },
   "dependencies": {
     "clsx": "^1.2.1",
-    "object-hash": "^3.0.0",
     "react-merge-refs": "^2.0.1",
     "react-smooth-dnd": "^0.11.1"
   },
@@ -106,7 +105,6 @@
     "@types/jest": "^29.2.1",
     "@types/lodash": "^4.14.187",
     "@types/node": "^18.11.9",
-    "@types/object-hash": "^2.2.1",
     "@types/pluralize": "^0.0.29",
     "@types/react": "^18.0.25",
     "@types/react-datepicker": "^4.10.0",
@@ -135,6 +133,7 @@
     "formik": "^2.2.9",
     "fs-extra": "^10.1.0",
     "google-libphonenumber": "^3.2.31",
+    "hash-it": "^6.0.0",
     "husky": "^8.0.1",
     "import-sort-style-module": "^6.0.0",
     "lorem-ipsum": "^2.0.8",
