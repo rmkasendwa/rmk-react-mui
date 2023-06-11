@@ -63,6 +63,7 @@ export interface IconLoadingScreenProps extends Partial<BoxProps> {
   Icon?: FC<any>;
   LoadingIcon?: FC<any>;
   loading?: boolean;
+  message?: ReactNode;
   isLoadingMessage?: ReactNode;
   isLoadedMessage?: ReactNode;
   isLoaded?: boolean;
@@ -98,6 +99,7 @@ export const IconLoadingScreen = forwardRef<any, IconLoadingScreenProps>(
       loading,
       errorMessage,
       load,
+      message,
       isLoadingMessage,
       isLoadedMessage,
       isLoaded,
@@ -229,6 +231,13 @@ export const IconLoadingScreen = forwardRef<any, IconLoadingScreenProps>(
               return (
                 <Typography align="center" variant="body2">
                   No {lowercaseRecordLabelPlural} found.
+                </Typography>
+              );
+            }
+            if (message) {
+              return (
+                <Typography align="center" variant="body2">
+                  {message}
                 </Typography>
               );
             }
