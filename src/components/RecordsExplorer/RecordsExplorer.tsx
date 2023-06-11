@@ -203,6 +203,8 @@ export interface RecordsExplorerChildrenOptions<RecordRow extends BaseDataRow> {
   groupBy?: SortBy<RecordRow>;
   loading?: boolean;
   errorMessage?: string;
+  searchParamSelectedDataPreset?: string | number;
+  selectedDataPreset?: RecordsExplorerDataPreset<RecordRow>;
 }
 
 export interface RecordsExplorerFunctionChildren<State> {
@@ -418,6 +420,9 @@ export interface RecordsExplorerProps<
   selectedDataPresetId?: string | number;
   tools?: Tool[];
   bottomTools?: Tool[];
+  getBottomTools?: (
+    state: RecordsExplorerChildrenOptions<RecordRow>
+  ) => Tool[] | undefined;
   ListViewProps?: Partial<Omit<ListView<RecordRow>, 'columns'>>;
 }
 
@@ -529,7 +534,8 @@ const BaseRecordsExplorer = <
     dataPresets,
     selectedDataPresetId: selectedDataPresetIdProp,
     tools: toolsProp,
-    bottomTools,
+    bottomTools: bottomToolsProp,
+    getBottomTools,
     ListViewProps,
     ...rest
   } = omit(
@@ -916,7 +922,7 @@ const BaseRecordsExplorer = <
         createNewRecord: Yup.boolean(),
         selectedRecord: Yup.string(),
         editRecord: Yup.boolean(),
-        selectedDataPreset: Yup.number(),
+        selectedDataPreset: Yup.mixed<string | number>(),
       },
       id,
       paramStorage: stateStorage,
@@ -1039,7 +1045,24 @@ const BaseRecordsExplorer = <
   const selectedDataPresetIndex = (() => {
     if (dataPresets && dataPresets.length > 0) {
       if (searchParamSelectedDataPreset != null) {
-        return searchParamSelectedDataPreset;
+        if (
+          typeof searchParamSelectedDataPreset === 'number' &&
+          dataPresets[searchParamSelectedDataPreset]
+        ) {
+          return searchParamSelectedDataPreset;
+        }
+        if (typeof searchParamSelectedDataPreset === 'string') {
+          const presetIndex = dataPresets.findIndex(({ key, title }) => {
+            return (
+              (key && key === searchParamSelectedDataPreset) ||
+              (typeof title === 'string' &&
+                title === searchParamSelectedDataPreset)
+            );
+          });
+          if (presetIndex >= 0) {
+            return presetIndex;
+          }
+        }
       }
       if (selectedDataPresetIdProp) {
         if (
@@ -1056,6 +1079,16 @@ const BaseRecordsExplorer = <
         }
       }
       return 0;
+    }
+  })();
+
+  const selectedDataPreset = (() => {
+    if (
+      selectedDataPresetIndex != null &&
+      dataPresets &&
+      dataPresets.length > 0
+    ) {
+      return dataPresets[selectedDataPresetIndex];
     }
   })();
 
@@ -1090,12 +1123,8 @@ const BaseRecordsExplorer = <
           return recordsFinder;
         }
 
-        if (
-          dataPresets &&
-          selectedDataPresetIndex != null &&
-          dataPresets[selectedDataPresetIndex]
-        ) {
-          return dataPresets[selectedDataPresetIndex].recordsFinder;
+        if (selectedDataPreset) {
+          return selectedDataPreset.recordsFinder;
         }
       })();
 
@@ -2124,6 +2153,8 @@ const BaseRecordsExplorer = <
     groupBy: selectedGroupParams,
     loading,
     errorMessage,
+    searchParamSelectedDataPreset,
+    selectedDataPreset,
   };
 
   const title = (() => {
@@ -2144,11 +2175,24 @@ const BaseRecordsExplorer = <
             const { value } = event.target;
             setSearchParams(
               {
-                selectedDataPreset: value ? +value : null,
+                selectedDataPreset: (() => {
+                  if (value) {
+                    const numericValue = +value;
+                    if (dataPresets[numericValue]) {
+                      if (dataPresets[numericValue].key) {
+                        return dataPresets[numericValue].key;
+                      }
+                      if (typeof dataPresets[numericValue].title === 'string') {
+                        return String(dataPresets[numericValue].title);
+                      }
+                      return numericValue;
+                    }
+                  }
+                  return null;
+                })(),
                 modifiedKeys: [
                   ...new Set([
                     ...(modifiedStateKeys || []),
-
                     'selectedDataPreset',
                   ]),
                 ] as typeof modifiedStateKeys,
@@ -2617,6 +2661,12 @@ const BaseRecordsExplorer = <
             return showPaginationStats;
           })() &&
           filteredData.length > 0;
+        const bottomTools = (() => {
+          if (getBottomTools) {
+            return getBottomTools(state);
+          }
+          return bottomToolsProp;
+        })();
         if (
           shouldShowPaginationStats ||
           (bottomTools && bottomTools.length > 0)
