@@ -416,6 +416,9 @@ export interface RecordsExplorerProps<
   PaginatedRecordsOptions?: Partial<PaginatedRecordsOptions<RecordRow>>;
   dataPresets?: RecordsExplorerDataPreset<RecordRow>[];
   selectedDataPresetId?: string | number;
+  tools?: Tool[];
+  bottomTools?: Tool[];
+  ListViewProps?: Partial<Omit<ListView<RecordRow>, 'columns'>>;
 }
 
 export function getRecordsExplorerUtilityClass(slot: string): string {
@@ -525,6 +528,9 @@ const BaseRecordsExplorer = <
     PaginatedRecordsOptions,
     dataPresets,
     selectedDataPresetId: selectedDataPresetIdProp,
+    tools: toolsProp,
+    bottomTools,
+    ListViewProps,
     ...rest
   } = omit(
     props,
@@ -1870,6 +1876,7 @@ const BaseRecordsExplorer = <
 
                   const baseTableProps: typeof viewProps = {
                     ...viewProps,
+                    ...ListViewProps,
                     paging: false,
                     enableColumnDisplayToggle,
                     enableCheckboxAllRowSelector,
@@ -2301,6 +2308,10 @@ const BaseRecordsExplorer = <
                 });
               }
 
+              if (toolsProp) {
+                tools.push(...toolsProp);
+              }
+
               return tools;
             })(),
           ]}
@@ -2596,30 +2607,50 @@ const BaseRecordsExplorer = <
           }
         })()}
       </Box>
-      {!isSmallScreenSize &&
-      (() => {
-        if (typeof showPaginationStats === 'function') {
-          return showPaginationStats(state);
+      {(() => {
+        const shouldShowPaginationStats =
+          !isSmallScreenSize &&
+          (() => {
+            if (typeof showPaginationStats === 'function') {
+              return showPaginationStats(state);
+            }
+            return showPaginationStats;
+          })() &&
+          filteredData.length > 0;
+        if (
+          shouldShowPaginationStats ||
+          (bottomTools && bottomTools.length > 0)
+        ) {
+          return (
+            <Paper
+              elevation={0}
+              className={clsx(classes.footer)}
+              component="footer"
+              sx={{ position: 'sticky', bottom: 0, zIndex: 5 }}
+            >
+              <Divider />
+              <SearchSyncToolbar
+                title={
+                  shouldShowPaginationStats ? (
+                    <DataTablePagination
+                      labelPlural={lowercaseRecordLabelPlural}
+                      lowercaseLabelPlural={lowercaseRecordLabelPlural}
+                      labelSingular={lowercaseRecordLabelSingular}
+                      filteredCount={filteredData.length}
+                      totalCount={data.length}
+                      sx={{
+                        p: 0,
+                      }}
+                    />
+                  ) : null
+                }
+                hasSearchTool={false}
+                tools={bottomTools}
+              />
+            </Paper>
+          );
         }
-        return showPaginationStats;
-      })() &&
-      filteredData.length > 0 ? (
-        <Paper
-          elevation={0}
-          className={clsx(classes.footer)}
-          component="footer"
-          sx={{ position: 'sticky', bottom: 0, zIndex: 5 }}
-        >
-          <Divider />
-          <DataTablePagination
-            labelPlural={lowercaseRecordLabelPlural}
-            lowercaseLabelPlural={lowercaseRecordLabelPlural}
-            labelSingular={lowercaseRecordLabelSingular}
-            filteredCount={filteredData.length}
-            totalCount={data.length}
-          />
-        </Paper>
-      ) : null}
+      })()}
       {pathToAddNewRecord && fillContentArea && isSmallScreenSize ? (
         <Button
           component={RouterLink}
@@ -2650,6 +2681,8 @@ const BaseRecordsExplorer = <
           sx: {
             display: 'flex',
             flexDirection: 'column',
+            overflowY: '',
+            overflowX: '',
           },
         }}
         sx={{
