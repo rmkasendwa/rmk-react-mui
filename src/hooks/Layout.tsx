@@ -1,6 +1,6 @@
 import { Grid, GridProps, useMediaQuery, useTheme } from '@mui/material';
 import { cloneDeep } from 'lodash';
-import { ReactNode } from 'react';
+import { ReactNode, useMemo, useRef } from 'react';
 
 import { useAuth } from '../contexts/AuthContext';
 import { PermissionCode } from '../models/Users';
@@ -28,39 +28,44 @@ export const usePermissionRegulatedGridLayout = ({
   const isLargeScreen = useMediaQuery(breakpoints.up('md'));
   const { loggedInUserHasPermission } = useAuth();
 
-  const gridLayoutItems = layoutRows
-    .reduce((accumulator, { columns: baseColumns }) => {
-      const columns = cloneDeep(baseColumns).filter(({ permission }) => {
-        return !permission || loggedInUserHasPermission(permission);
-      });
+  const layoutRowsRef = useRef(layoutRows);
+  layoutRowsRef.current = layoutRows;
 
-      if (columns.length > 0) {
-        const totalColumnSpan = columns.reduce(
-          (accumulator, { span }) => accumulator + span,
-          0
-        );
+  const gridLayoutItems = useMemo(() => {
+    return layoutRowsRef.current
+      .reduce((accumulator, { columns: baseColumns }) => {
+        const columns = cloneDeep(baseColumns).filter(({ permission }) => {
+          return !permission || loggedInUserHasPermission(permission);
+        });
 
-        if (totalColumnSpan !== 12) {
-          const evenColumnSpan = Math.floor(12 / columns.length);
-          const remainderColumnSpan = 12 % columns.length;
-          columns.forEach((column) => {
-            column.span = evenColumnSpan;
-          });
-          columns[0].span += remainderColumnSpan;
+        if (columns.length > 0) {
+          const totalColumnSpan = columns.reduce(
+            (accumulator, { span }) => accumulator + span,
+            0
+          );
+
+          if (totalColumnSpan !== 12) {
+            const evenColumnSpan = Math.floor(12 / columns.length);
+            const remainderColumnSpan = 12 % columns.length;
+            columns.forEach((column) => {
+              column.span = evenColumnSpan;
+            });
+            columns[0].span += remainderColumnSpan;
+          }
+
+          accumulator.push(...columns);
         }
 
-        accumulator.push(...columns);
-      }
-
-      return accumulator;
-    }, [] as GridLayoutColumn[])
-    .map(({ node, span }, index) => {
-      return (
-        <Grid key={index} item md={span} xs={12}>
-          {node}
-        </Grid>
-      );
-    });
+        return accumulator;
+      }, [] as GridLayoutColumn[])
+      .map(({ node, span }, index) => {
+        return (
+          <Grid key={index} item md={span} xs={12}>
+            {node}
+          </Grid>
+        );
+      });
+  }, [loggedInUserHasPermission]);
 
   if (gridLayoutItems.length > 0) {
     return (
