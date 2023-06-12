@@ -1,6 +1,8 @@
 import { Grid, GridProps, useMediaQuery, useTheme } from '@mui/material';
+import { cloneDeep } from 'lodash';
 import { ReactNode } from 'react';
 
+import { useAuth } from '../contexts/AuthContext';
 import { PermissionCode } from '../models/Users';
 
 export interface GridLayoutColumn {
@@ -24,10 +26,32 @@ export const usePermissionRegulatedGridLayout = ({
 }: PermissionRegulatedGridLayoutOptions) => {
   const { breakpoints } = useTheme();
   const isLargeScreen = useMediaQuery(breakpoints.up('md'));
+  const { loggedInUserHasPermission } = useAuth();
 
   const gridLayoutItems = layoutRows
-    .reduce((accumulator, { columns }) => {
-      accumulator.push(...columns);
+    .reduce((accumulator, { columns: baseColumns }) => {
+      const columns = cloneDeep(baseColumns).filter(({ permission }) => {
+        return !permission || loggedInUserHasPermission(permission);
+      });
+
+      if (columns.length > 0) {
+        const totalColumnSpan = columns.reduce(
+          (accumulator, { span }) => accumulator + span,
+          0
+        );
+
+        if (totalColumnSpan !== 12) {
+          const evenColumnSpan = Math.floor(12 / columns.length);
+          const remainderColumnSpan = 12 % columns.length;
+          columns.forEach((column) => {
+            column.span = evenColumnSpan;
+          });
+          columns[0].span += remainderColumnSpan;
+        }
+
+        accumulator.push(...columns);
+      }
+
       return accumulator;
     }, [] as GridLayoutColumn[])
     .map(({ node, span }, index) => {
