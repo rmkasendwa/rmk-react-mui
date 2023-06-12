@@ -65,6 +65,7 @@ export interface CardProps
   CardBodyProps?: Partial<BoxProps>;
   layoutVariant?: 'paper' | 'card' | 'inherit';
   wrapToolbarInCard?: boolean;
+  showToolbarDivider?: boolean;
 }
 
 export function getCardUtilityClass(slot: string): string {
@@ -98,6 +99,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(function Card(
     CardBodyProps = {},
     layoutVariant = 'paper',
     wrapToolbarInCard = false,
+    showToolbarDivider = true,
     sx,
     ...rest
   } = props;
@@ -168,7 +170,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(function Card(
           >
             {searchSyncToolBar}
           </Box>
-          <Divider />
+          {showToolbarDivider ? <Divider /> : null}
           {children}
         </MuiCard>
       );
@@ -192,7 +194,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(function Card(
         >
           {searchSyncToolBar}
         </Box>
-        <Divider />
+        {showToolbarDivider ? <Divider /> : null}
         {children}
       </Box>
     );
@@ -218,7 +220,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(function Card(
               sx={{ position: 'sticky', top: 0, zIndex: 5 }}
             >
               {searchSyncToolBar}
-              <Divider />
+              {showToolbarDivider ? <Divider /> : null}
             </Paper>
           );
         }
