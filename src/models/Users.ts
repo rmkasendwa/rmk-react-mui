@@ -1,4 +1,6 @@
-export type PermissionCode = 'ALL_FUNCTIONS' | string;
+export type PermissionCode<PermisionType extends string = string> =
+  | 'ALL_FUNCTIONS'
+  | PermisionType;
 
 export interface User {
   email: string;
