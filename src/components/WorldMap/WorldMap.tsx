@@ -8,8 +8,11 @@ import {
   Tooltip,
   TooltipProps,
   unstable_composeClasses as composeClasses,
+  darken,
   generateUtilityClass,
   generateUtilityClasses,
+  lighten,
+  useTheme,
   useThemeProps,
 } from '@mui/material';
 import { RawTimeZone } from '@vvo/tzdb';
@@ -122,6 +125,8 @@ export const WorldMap = forwardRef<SVGSVGElement, WorldMapProps>(
       })()
     );
 
+    const { palette } = useTheme();
+
     const [selectedTimeZone, setSelectedTimeZone] = useState<
       RawTimeZone | undefined
     >();
@@ -142,27 +147,43 @@ export const WorldMap = forwardRef<SVGSVGElement, WorldMapProps>(
       const id = `${d.properties?.id}`;
       // Time zone corresponding to the polygon.
       const timeZone = findTimeZone(id);
+      const { tooltipContent, ...countryPathPropsForCountry } =
+        CountriesProps?.[timeZone?.countryCode as CountryCode] || {};
+
       const { fill, opacity, stroke } = (() => {
+        const darkgreyColor = (palette.mode === 'light' ? lighten : darken)(
+          palette.text.primary,
+          0.5
+        );
+        const greyColor = (palette.mode === 'light' ? lighten : darken)(
+          palette.text.primary,
+          0.6
+        );
+        const lightgreyColor = (palette.mode === 'light' ? darken : lighten)(
+          palette.background.paper,
+          0.15
+        );
+
         if (timeZone) {
           if (selectedTimeZone === timeZone) {
             return {
               opacity: 1.0,
-              stroke: 'darkgrey',
-              fill: 'darkgrey',
+              stroke: darkgreyColor,
+              fill: darkgreyColor,
             };
           } else if (highlightedTimeZone === timeZone) {
             return {
               opacity: 0.75,
-              stroke: 'darkgrey',
-              fill: 'darkgrey',
+              stroke: darkgreyColor,
+              fill: darkgreyColor,
             };
           } else if (
             selectedTimeZone?.rawOffsetInMinutes === timeZone.rawOffsetInMinutes
           ) {
             return {
               opacity: 0.7,
-              stroke: 'grey',
-              fill: 'lightgrey',
+              stroke: greyColor,
+              fill: lightgreyColor,
             };
           } else if (
             highlightedTimeZone?.rawOffsetInMinutes ===
@@ -170,22 +191,24 @@ export const WorldMap = forwardRef<SVGSVGElement, WorldMapProps>(
           ) {
             return {
               opacity: 0.6,
-              stroke: 'grey',
-              fill: 'lightgrey',
+              stroke: greyColor,
+              fill: lightgreyColor,
             };
           }
         }
+
+        const { opacity, stroke, fill } = {
+          ...BaseCountryPathProps,
+          ...countryPathPropsForCountry,
+        };
         return {
-          opacity: 0.4,
-          stroke: 'lightgrey',
-          fill: 'lightgrey',
+          opacity: opacity ?? 0.4,
+          stroke: stroke ?? lightgreyColor,
+          fill: fill ?? lightgreyColor,
         };
       })();
 
       const generatedPath = pathGenerator(d) || undefined;
-
-      const { tooltipContent, ...countryPathPropsForCountry } =
-        CountriesProps?.[timeZone?.countryCode as CountryCode] || {};
 
       const title = (() => {
         if (timeZone) {
@@ -245,21 +268,19 @@ export const WorldMap = forwardRef<SVGSVGElement, WorldMapProps>(
 
       const pathNode = (
         <path
-          opacity={opacity}
-          fill={fill}
           strokeWidth={0.5}
-          stroke={stroke}
+          fill={fill}
           {...BaseCountryPathProps}
           {...countryPathPropsForCountry}
+          stroke={stroke}
+          opacity={opacity}
           id={id}
           data-testid={id}
           d={generatedPath}
           onClick={(event) => {
-            // We have a few "unresolved" areas on map. We ignore clicking on those areas.
             setSelectedTimeZone(findTimeZone((event.target as any).id));
           }}
           onMouseEnter={(event) => {
-            // We have a few "unresolved" areas on map. We ignore clicking on those areas.
             setHighlightedTimeZone(findTimeZone((event.target as any).id));
           }}
         />
@@ -278,7 +299,7 @@ export const WorldMap = forwardRef<SVGSVGElement, WorldMapProps>(
               tooltip: {
                 sx: {
                   p: 0,
-                  maxWidth: 'none',
+                  maxWidth: 300,
                 },
               },
             }}
