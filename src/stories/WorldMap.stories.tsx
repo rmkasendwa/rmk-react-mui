@@ -1,3 +1,4 @@
+import { Box } from '@mui/material';
 import { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 
@@ -10,12 +11,22 @@ export default {
 
 const Template: StoryFn<typeof WorldMap> = (props) => {
   return (
-    <WorldMap
-      {...props}
+    <Box
       sx={{
         width: '100%',
+        height: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        position: 'fixed',
       }}
-    />
+    >
+      <WorldMap
+        {...props}
+        sx={{
+          width: '100%',
+        }}
+      />
+    </Box>
   );
 };
 
