@@ -241,8 +241,11 @@ export const BaseModalForm = <Values extends FormikValues>(
 
   const [isClosingWithChanges, setIsClosingWithChanges] = useState(false);
 
-  const onClose = (saveDraft = false) => {
-    if (formHasChangesRef.current && !isClosingWithChanges) {
+  const onClose = ({
+    saveDraft = false,
+    force = false,
+  }: { saveDraft?: boolean; force?: boolean } = {}) => {
+    if (formHasChangesRef.current && !isClosingWithChanges && !force) {
       setIsClosingWithChanges(true);
       return;
     }
@@ -284,7 +287,7 @@ export const BaseModalForm = <Values extends FormikValues>(
 
   useEffect(() => {
     if (submitted && !successMessage) {
-      onCloseRef.current();
+      onCloseRef.current({ force: true });
       onSubmitSuccessRef.current && onSubmitSuccessRef.current();
     }
   }, [submitted, successMessage]);
@@ -394,7 +397,9 @@ export const BaseModalForm = <Values extends FormikValues>(
                       <Button
                         variant="contained"
                         color="primary"
-                        onClick={() => onClose(true)}
+                        onClick={() => {
+                          onClose({ saveDraft: true });
+                        }}
                       >
                         Save as draft
                       </Button>
@@ -484,7 +489,9 @@ export const BaseModalForm = <Values extends FormikValues>(
                             <Alert
                               variant="filled"
                               severity="success"
-                              onClose={() => onClose()}
+                              onClose={() => {
+                                onClose({ force: true });
+                              }}
                             >
                               {successMessage}
                             </Alert>
