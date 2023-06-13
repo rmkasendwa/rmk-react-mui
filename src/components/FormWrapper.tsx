@@ -220,12 +220,6 @@ const BaseFormWrapper = <RecordRow, Values extends FormikValues>(
     }
   }, [mutated, resetMutationState, showSuccessMessage, successMessage]);
 
-  useEffect(() => {
-    if (recordFinder && mode === 'edit') {
-      loadRecord();
-    }
-  }, [loadRecord, mode, recordFinder]);
-
   const editInitialValues = useMemo(() => {
     if (getEditableRecordInitialValuesRef.current && loadedRecord) {
       return getEditableRecordInitialValuesRef.current(loadedRecord);
