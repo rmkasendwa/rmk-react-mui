@@ -70,12 +70,18 @@ type PolygonFeature = GeoJSON.Feature<
   GeoJSON.GeoJsonProperties
 >;
 
+export type CountriesProps = Record<
+  CountryCode,
+  SVGAttributes<any> & {
+    tooltipContent?: ReactNode | ((timeZone: RawTimeZone) => ReactNode);
+  }
+>;
+
 export interface WorldMapProps extends Partial<SvgIconProps> {
   getCountryTooltipContent?: (timeZone: RawTimeZone) => ReactNode;
   TooltipProps?: Partial<TooltipProps>;
-  countryPathProps?: {
-    [countryCode in CountryCode]: SVGAttributes<any>;
-  };
+  BaseCountryPathProps?: SVGAttributes<any>;
+  CountriesProps?: CountriesProps;
 }
 
 export function getWorldMapUtilityClass(slot: string): string {
@@ -98,7 +104,8 @@ export const WorldMap = forwardRef<SVGSVGElement, WorldMapProps>(
       className,
       sx,
       getCountryTooltipContent,
-      countryPathProps,
+      BaseCountryPathProps,
+      CountriesProps,
       TooltipProps,
       ...rest
     } = props;
@@ -176,8 +183,18 @@ export const WorldMap = forwardRef<SVGSVGElement, WorldMapProps>(
       })();
 
       const generatedPath = pathGenerator(d) || undefined;
+
+      const { tooltipContent, ...countryPathPropsForCountry } =
+        CountriesProps?.[timeZone?.countryCode as CountryCode] || {};
+
       const title = (() => {
         if (timeZone) {
+          if (tooltipContent) {
+            if (typeof tooltipContent === 'function') {
+              return tooltipContent(timeZone);
+            }
+            return tooltipContent;
+          }
           if (getCountryTooltipContent) {
             return getCountryTooltipContent(timeZone);
           }
@@ -226,14 +243,13 @@ export const WorldMap = forwardRef<SVGSVGElement, WorldMapProps>(
         }
       })();
 
-      const countryPathPropsForCountry = countryPathProps?.[id as CountryCode];
-
       const pathNode = (
         <path
           opacity={opacity}
           fill={fill}
           strokeWidth={0.5}
           stroke={stroke}
+          {...BaseCountryPathProps}
           {...countryPathPropsForCountry}
           id={id}
           data-testid={id}
