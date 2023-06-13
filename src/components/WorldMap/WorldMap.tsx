@@ -2,6 +2,7 @@ import {
   ComponentsOverrides,
   ComponentsProps,
   ComponentsVariants,
+  Stack,
   SvgIcon,
   SvgIconProps,
   Tooltip,
@@ -28,6 +29,7 @@ import { Topology } from 'topojson-specification';
 
 import { CountryCode } from '../../models/Countries';
 import CountryFieldValue from '../CountryFieldValue';
+import FieldValueDisplay from '../FieldValueDisplay';
 import timezoneTopoJson from './assets/timezones.json';
 import { findTimeZone } from './utils';
 
@@ -179,13 +181,47 @@ export const WorldMap = forwardRef<SVGSVGElement, WorldMapProps>(
           if (getCountryTooltipContent) {
             return getCountryTooltipContent(timeZone);
           }
-          const { countryCode, countryName, mainCities } = timeZone;
+          const { countryCode, countryName, mainCities, name, rawFormat } =
+            timeZone;
 
           return (
-            <CountryFieldValue
-              countryCode={countryCode as any}
-              countryLabel={`${countryName}, ${mainCities[0]}`}
-            />
+            <Stack
+              sx={{
+                px: 2,
+                py: 1,
+              }}
+            >
+              <CountryFieldValue
+                countryCode={countryCode as any}
+                countryLabel={countryName}
+                ContainerGridProps={{
+                  alignItems: 'center',
+                }}
+                sx={{
+                  fontSize: 24,
+                }}
+              />
+              <FieldValueDisplay
+                label="Main City:"
+                value={mainCities[0]}
+                direction="row"
+                LabelProps={{
+                  sx: {
+                    fontWeight: 'bold',
+                  },
+                }}
+              />
+              <FieldValueDisplay
+                label="Timezone:"
+                value={`${name} (${rawFormat})`}
+                direction="row"
+                LabelProps={{
+                  sx: {
+                    fontWeight: 'bold',
+                  },
+                }}
+              />
+            </Stack>
           );
         }
       })();
@@ -218,10 +254,18 @@ export const WorldMap = forwardRef<SVGSVGElement, WorldMapProps>(
           <Tooltip
             PopperProps={{
               sx: {
-                pointerEvents: 'none',
+                // pointerEvents: 'none',
               },
             }}
             {...TooltipProps}
+            componentsProps={{
+              tooltip: {
+                sx: {
+                  p: 0,
+                  maxWidth: 'none',
+                },
+              },
+            }}
             title={title}
             key={id}
           >

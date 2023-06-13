@@ -83,6 +83,7 @@ export interface FieldValueDisplayProps<
   DescriptionProps?: Partial<FieldLabelProps>;
   FieldValueProps?: Partial<FieldValueProps>;
   enableLoadingState?: boolean;
+  direction?: 'column' | 'row';
 }
 
 export function getFieldValueDisplayUtilityClass(slot: string): string {
@@ -133,6 +134,7 @@ export const BaseFieldValueDisplay = <FieldValue extends ReactNode>(
     helpTip,
     disabled,
     sx,
+    direction = 'column',
     ...rest
   } = props;
 
@@ -193,21 +195,25 @@ export const BaseFieldValueDisplay = <FieldValue extends ReactNode>(
     return label;
   })();
 
-  return (
-    <Box
-      ref={ref}
-      className={clsx(classes.root, className)}
-      {...rest}
-      sx={{
-        ...(components?.MuiFieldValueDisplay?.styleOverrides?.root as any),
-        ...sx,
-      }}
-    >
-      {displayLabel && (
+  const labelNode = (() => {
+    if (displayLabel) {
+      return (
         <FieldLabel
           className={clsx(classes.label, LabelPropsClassName)}
           {...{ enableLoadingState, required, labelSuffix, helpTip, disabled }}
           {...LabelPropsRest}
+          {...(() => {
+            if (direction === 'row') {
+              return {
+                ContainerGridProps: {
+                  sx: {
+                    display: 'inline-flex',
+                    width: 'auto',
+                  },
+                },
+              };
+            }
+          })()}
           sx={{
             ...(components?.MuiFieldValueDisplay?.styleOverrides?.label as any),
             ...LabelPropsSx,
@@ -215,8 +221,13 @@ export const BaseFieldValueDisplay = <FieldValue extends ReactNode>(
         >
           {displayLabel}
         </FieldLabel>
-      )}
-      {description && (
+      );
+    }
+  })();
+
+  const descriptionNode = (() => {
+    if (description) {
+      return (
         <FieldLabel
           className={clsx(classes.description, DescriptionPropsClassName)}
           {...{ enableLoadingState, disabled }}
@@ -229,39 +240,67 @@ export const BaseFieldValueDisplay = <FieldValue extends ReactNode>(
         >
           {description}
         </FieldLabel>
-      )}
-      <FieldValue
-        className={clsx(classes.value, ValuePropsClassName)}
-        {...({ enableLoadingState } as any)}
-        {...FieldValuePropsRest}
-        {...{
-          editable,
-          onCancelEdit,
-          type,
-          validationRules,
-          editField,
-          editMode,
-          editableValue,
-          fieldValueEditor,
-          onFieldValueUpdated,
-        }}
-        onChangeEditMode={(editMode) => {
-          setEditMode(editMode);
-        }}
-        ContainerGridProps={{
-          ...FieldValuePropsContainerGripPropsRest,
-          sx: {
-            mt: 0.5,
-            ...FieldValuePropsContainerGripPropsSx,
-          },
-        }}
-        sx={{
-          ...(components?.MuiFieldValueDisplay?.styleOverrides?.value as any),
-          ...FieldValuePropsSx,
-        }}
-      >
-        {value}
-      </FieldValue>
+      );
+    }
+  })();
+
+  const valueNode = (
+    <FieldValue
+      className={clsx(classes.value, ValuePropsClassName)}
+      {...({ enableLoadingState } as any)}
+      {...FieldValuePropsRest}
+      {...{
+        editable,
+        onCancelEdit,
+        type,
+        validationRules,
+        editField,
+        editMode,
+        editableValue,
+        fieldValueEditor,
+        onFieldValueUpdated,
+      }}
+      onChangeEditMode={(editMode) => {
+        setEditMode(editMode);
+      }}
+      ContainerGridProps={{
+        ...FieldValuePropsContainerGripPropsRest,
+        sx: {
+          ...FieldValuePropsContainerGripPropsSx,
+        },
+      }}
+      sx={{
+        ...(components?.MuiFieldValueDisplay?.styleOverrides?.value as any),
+        ...FieldValuePropsSx,
+      }}
+    >
+      {value}
+    </FieldValue>
+  );
+
+  return (
+    <Box
+      ref={ref}
+      className={clsx(classes.root, className)}
+      {...rest}
+      sx={{
+        ...(components?.MuiFieldValueDisplay?.styleOverrides?.root as any),
+        ...sx,
+        ...(() => {
+          if (direction === 'row') {
+            return {
+              display: 'flex',
+              flexDirection: 'row',
+              gap: 1,
+              flexWrap: 'nowrap',
+            };
+          }
+        })(),
+      }}
+    >
+      {labelNode}
+      {descriptionNode}
+      {valueNode}
     </Box>
   );
 };
