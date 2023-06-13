@@ -6,13 +6,15 @@ import { rawTimeZones } from '@vvo/tzdb';
  * @param offsetInMinutes  offset from UTC in minutes.
  * @returns  user friendly string e.g. "-01:00"
  */
-export function convertOffsetInMinutesToString(
-  offsetInMinutes: number
-): string {
+export const convertOffsetInMinutesToString = (offsetInMinutes: number) => {
   const absValue = Math.abs(offsetInMinutes);
   const hour = Math.floor(absValue / 60);
   const minute = absValue % 60;
   const plusMinus = offsetInMinutes >= 0 ? '+' : '-';
+
+  const convertNumberToStringWithZeroPadding = (num: number) => {
+    return ('0' + num).slice(-2);
+  };
 
   return (
     plusMinus +
@@ -20,21 +22,17 @@ export function convertOffsetInMinutesToString(
     ':' +
     convertNumberToStringWithZeroPadding(minute)
   );
-}
-
-function convertNumberToStringWithZeroPadding(num: number): string {
-  return ('0' + num).slice(-2);
-}
+};
 
 /**
  * Find a time zone data in @vvo/tzdb.
  * @param timeZoneName - Time zone name. Note it could be grouped in "group".
  * @return Time zone data in @vvo/tzdb if found. undefined if not found.
  */
-export function findTimeZone(timeZoneName: string) {
+export const findTimeZone = (timeZoneName: string) => {
   return rawTimeZones.find((timeZone) => {
     return (
       timeZoneName === timeZone.name || timeZone.group.includes(timeZoneName)
     );
   });
-}
+};
