@@ -30,7 +30,11 @@ import {
 
 import { LoadingProvider, useLoadingContext } from '../contexts/LoadingContext';
 import { useMessagingContext } from '../contexts/MessagingContext';
-import { useMutation, useRecord } from '../hooks/Utils';
+import {
+  CacheableDataFinderOptions,
+  useCacheableData,
+  useMutation,
+} from '../hooks/Utils';
 import { CrudMode } from '../models/Utils';
 import ErrorAlert from './ErrorAlert';
 import FixedHeaderContentArea from './FixedHeaderContentArea';
@@ -87,9 +91,10 @@ export interface FormWrapperProps<
   cancelButtonAction?: 'navigate-to-previous-page' | 'none';
   errorMessage?: string;
   successMessage?: string;
-  recordFinder?: () => Promise<RecordRow>;
+  recordFinder?: (options: CacheableDataFinderOptions) => Promise<RecordRow>;
   getEditableRecordInitialValues?: (record: RecordRow) => Values;
   mode?: CrudMode;
+  onSubmitSuccess?: () => void;
 }
 
 export function getFormWrapperUtilityClass(slot: string): string {
@@ -128,6 +133,7 @@ const BaseFormWrapper = <RecordRow, Values extends FormikValues>(
     recordFinder,
     mode = 'create',
     getEditableRecordInitialValues,
+    onSubmitSuccess,
     ...rest
   } = props;
 
@@ -147,6 +153,8 @@ const BaseFormWrapper = <RecordRow, Values extends FormikValues>(
     getEditableRecordInitialValues
   );
   getEditableRecordInitialValuesRef.current = getEditableRecordInitialValues;
+  const onSubmitSuccessRef = useRef(onSubmitSuccess);
+  onSubmitSuccessRef.current = onSubmitSuccess;
 
   const { ...SubmitButtonPropsRest } = SubmitButtonProps;
   const { ...CancelButtonPropsRest } = CancelButtonProps;
@@ -166,11 +174,11 @@ const BaseFormWrapper = <RecordRow, Values extends FormikValues>(
     load: loadRecord,
     loading: loadingRecord,
     errorMessage: loadingRecordErrorMessage,
-    record: loadedRecord,
-  } = useRecord(
-    async () => {
+    data: loadedRecord,
+  } = useCacheableData(
+    async (options) => {
       if (recordFinder && mode === 'edit') {
-        return recordFinder();
+        return recordFinder(options);
       }
     },
     {
@@ -193,8 +201,11 @@ const BaseFormWrapper = <RecordRow, Values extends FormikValues>(
 
   useEffect(() => {
     if (mutated) {
-      successMessage && showSuccessMessage(successMessage);
-      resetMutationState();
+      (async () => {
+        successMessage && showSuccessMessage(successMessage);
+        onSubmitSuccessRef.current && (await onSubmitSuccessRef.current());
+        resetMutationState();
+      })();
     }
   }, [mutated, resetMutationState, showSuccessMessage, successMessage]);
 
@@ -251,7 +262,9 @@ const BaseFormWrapper = <RecordRow, Values extends FormikValues>(
           validationSchema={validationSchema}
           initialValues={editInitialValues}
           onSubmit={async (values, formikHelpers) => {
-            mutate(values, formikHelpers);
+            if (onSubmit) {
+              return mutate(values, formikHelpers);
+            }
           }}
           enableReinitialize
         >
@@ -269,54 +282,52 @@ const BaseFormWrapper = <RecordRow, Values extends FormikValues>(
                     ? children({ isSubmitting, formHasChanges, ...rest })
                     : children}
                 </Box>
-                {!loading && !errorMessage ? (
-                  <Grid container spacing={1} sx={{ py: 2 }}>
-                    {smallScreen ? null : <Grid item xs />}
-                    <Grid item xs={smallScreen}>
-                      <Button
-                        color="inherit"
-                        variant="contained"
-                        onClick={() => {
-                          if (
-                            cancelButtonAction === 'navigate-to-previous-page'
-                          ) {
-                            window.history.back();
-                          }
-                        }}
-                        {...CancelButtonPropsRest}
-                      >
-                        Cancel
-                      </Button>
-                    </Grid>
-                    {(() => {
-                      if (formTools) {
-                        return Children.toArray(formTools).map(
-                          (tool, index) => {
-                            return (
-                              <Grid item key={index} xs={smallScreen}>
-                                {tool}
-                              </Grid>
-                            );
-                          }
-                        );
-                      }
-                    })()}
-                    <Grid item xs={smallScreen}>
-                      <LoadingButton
-                        color="success"
-                        variant="contained"
-                        startIcon={<SaveIcon />}
-                        fullWidth={smallScreen}
-                        type="submit"
-                        loading={isSubmitting}
-                        disabled={isSubmitting || !formHasChanges}
-                        {...SubmitButtonPropsRest}
-                      >
-                        Save Changes
-                      </LoadingButton>
-                    </Grid>
+                <Grid container spacing={1} sx={{ py: 2 }}>
+                  {smallScreen ? null : <Grid item xs />}
+                  <Grid item xs={smallScreen}>
+                    <Button
+                      color="inherit"
+                      variant="text"
+                      onClick={() => {
+                        if (
+                          cancelButtonAction === 'navigate-to-previous-page'
+                        ) {
+                          window.history.back();
+                        }
+                      }}
+                      {...CancelButtonPropsRest}
+                    >
+                      Cancel
+                    </Button>
                   </Grid>
-                ) : null}
+                  {(() => {
+                    if (formTools) {
+                      return Children.toArray(formTools).map((tool, index) => {
+                        return (
+                          <Grid item key={index} xs={smallScreen}>
+                            {tool}
+                          </Grid>
+                        );
+                      });
+                    }
+                  })()}
+                  <Grid item xs={smallScreen}>
+                    <LoadingButton
+                      color="success"
+                      variant="contained"
+                      startIcon={<SaveIcon />}
+                      fullWidth={smallScreen}
+                      type="submit"
+                      loading={isSubmitting || mutating || loading}
+                      disabled={
+                        isSubmitting || mutating || loading || !formHasChanges
+                      }
+                      {...SubmitButtonPropsRest}
+                    >
+                      Save Changes
+                    </LoadingButton>
+                  </Grid>
+                </Grid>
               </>
             );
           }}

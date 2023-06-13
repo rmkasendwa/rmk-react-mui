@@ -27,29 +27,24 @@ export const APIProvider: FC<{
 }> = ({ children, onSessionExpired }) => {
   // Refs
   const onSessionExpiredRef = useRef(onSessionExpired);
-  useEffect(() => {
-    onSessionExpiredRef.current = onSessionExpired;
-  }, [onSessionExpired]);
+  onSessionExpiredRef.current = onSessionExpired;
 
   const [sessionExpired, setSessionExpired] = useState(false);
-  const call = useCallback(
-    async (apiCallback: TAPIFunction) => {
-      return apiCallback().catch((err) => {
-        if (
-          REDIRECTION_ERROR_MESSAGES.some((message) => {
-            return String(err.message)
-              .toLowerCase()
-              .match(String(message).toLowerCase());
-          })
-        ) {
-          setSessionExpired(true);
-        } else {
-          throw err;
-        }
-      });
-    },
-    [setSessionExpired]
-  );
+  const call = useCallback(async (apiCallback: TAPIFunction) => {
+    return apiCallback().catch((err) => {
+      if (
+        REDIRECTION_ERROR_MESSAGES.some((message) => {
+          return String(err.message)
+            .toLowerCase()
+            .match(String(message).toLowerCase());
+        })
+      ) {
+        setSessionExpired(true);
+      } else {
+        throw err;
+      }
+    });
+  }, []);
 
   useEffect(() => {
     if (sessionExpired && onSessionExpiredRef.current) {

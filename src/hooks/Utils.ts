@@ -55,7 +55,7 @@ export const useAPIService = <T>(defaultValue: T, loadOnMount = false) => {
           }
         })();
         taggedAPIRequest && taggedAPIRequestsRef.current.push(taggedAPIRequest);
-        const response = await call(() => (apiFunction as TAPIFunction)())
+        const response = await call(apiFunction)
           .then(async (payload) => {
             const response = await payload;
             if (response != null) {
