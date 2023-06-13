@@ -76,7 +76,8 @@ declare module '@mui/material/styles/components' {
 
 export interface FormWrapperProps<
   RecordRow = any,
-  Values extends FormikValues = any
+  Values extends FormikValues = any,
+  LoadedRecord = RecordRow
 > extends Partial<
       Omit<
         FormikFormProps<Values>,
@@ -92,9 +93,10 @@ export interface FormWrapperProps<
   errorMessage?: string;
   successMessage?: string;
   recordFinder?: (options: CacheableDataFinderOptions) => Promise<RecordRow>;
-  getEditableRecordInitialValues?: (record: RecordRow) => Values;
+  getEditableRecordInitialValues?: (record: LoadedRecord) => Values;
   mode?: CrudMode;
   onSubmitSuccess?: () => void;
+  onLoadRecord?: (record: LoadedRecord) => void;
 }
 
 export function getFormWrapperUtilityClass(slot: string): string {
@@ -134,6 +136,7 @@ const BaseFormWrapper = <RecordRow, Values extends FormikValues>(
     mode = 'create',
     getEditableRecordInitialValues,
     onSubmitSuccess,
+    onLoadRecord,
     ...rest
   } = props;
 
@@ -155,6 +158,8 @@ const BaseFormWrapper = <RecordRow, Values extends FormikValues>(
   getEditableRecordInitialValuesRef.current = getEditableRecordInitialValues;
   const onSubmitSuccessRef = useRef(onSubmitSuccess);
   onSubmitSuccessRef.current = onSubmitSuccess;
+  const onLoadRecordRef = useRef(onLoadRecord);
+  onLoadRecordRef.current = onLoadRecord;
 
   const { ...SubmitButtonPropsRest } = SubmitButtonProps;
   const { ...CancelButtonPropsRest } = CancelButtonProps;
@@ -182,10 +187,16 @@ const BaseFormWrapper = <RecordRow, Values extends FormikValues>(
       }
     },
     {
-      loadOnMount: false,
+      loadOnMount: Boolean(recordFinder),
       autoSync: false,
     }
   );
+
+  useEffect(() => {
+    if (loadedRecord && onLoadRecordRef.current) {
+      onLoadRecordRef.current(loadedRecord);
+    }
+  }, [loadedRecord]);
 
   const {
     mutate,
