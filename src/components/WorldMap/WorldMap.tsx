@@ -4,6 +4,8 @@ import {
   ComponentsVariants,
   SvgIcon,
   SvgIconProps,
+  Tooltip,
+  TooltipProps,
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
   generateUtilityClasses,
@@ -13,10 +15,11 @@ import { RawTimeZone } from '@vvo/tzdb';
 import clsx from 'clsx';
 import { geoPath } from 'd3-geo';
 import * as GeoJSON from 'geojson';
-import React, { forwardRef, useState } from 'react';
+import { Fragment, ReactNode, forwardRef, useMemo, useState } from 'react';
 import * as topojson from 'topojson-client';
 import { Topology } from 'topojson-specification';
 
+import CountryFieldValue from '../CountryFieldValue';
 import timezoneTopoJson from './assets/timezones.json';
 import { findTimeZone } from './Util';
 
@@ -57,24 +60,10 @@ type PolygonFeature = GeoJSON.Feature<
   GeoJSON.GeoJsonProperties
 >;
 
-/**
- * Read world map polygon data.
- * @returns array of polygon data
- */
-const createTimeZonePolygonFeatures = (): PolygonFeature[] => {
-  // Read world map for timezones.
-  // See https://github.com/evansiroky/timezone-boundary-builder
-  //     https://github.com/topojson/topojson
-  //
-  // Somehow TS type definition does not match with the actual data, and I need to resort to
-  // forceful casting.
-  const tzData: Topology = timezoneTopoJson as unknown as Topology;
-  const tzDataFeature = topojson.feature(tzData, tzData.objects.timezones);
-  const features = (tzDataFeature as { features: PolygonFeature[] }).features;
-  return features;
-};
-
-export interface WorldMapProps extends Partial<SvgIconProps> {}
+export interface WorldMapProps extends Partial<SvgIconProps> {
+  getCountryTooltipContent?: (timeZone: RawTimeZone) => ReactNode;
+  TooltipProps?: Partial<TooltipProps>;
+}
 
 export function getWorldMapUtilityClass(slot: string): string {
   return generateUtilityClass('MuiWorldMap', slot);
@@ -92,7 +81,8 @@ const slots = {
 export const WorldMap = forwardRef<SVGSVGElement, WorldMapProps>(
   function WorldMap(inProps, ref) {
     const props = useThemeProps({ props: inProps, name: 'MuiWorldMap' });
-    const { className, sx, ...rest } = props;
+    const { className, sx, getCountryTooltipContent, TooltipProps, ...rest } =
+      props;
 
     const classes = composeClasses(
       slots,
@@ -111,43 +101,63 @@ export const WorldMap = forwardRef<SVGSVGElement, WorldMapProps>(
     >();
 
     const pathGenerator = geoPath();
-    const timeZonePolygonFeatures = React.useMemo(
-      createTimeZonePolygonFeatures,
-      []
-    );
+    const timeZonePolygonFeatures = useMemo(() => {
+      const tzData: Topology = timezoneTopoJson as unknown as Topology;
+      const tzDataFeature = topojson.feature(tzData, tzData.objects.timezones);
+      const features = (tzDataFeature as { features: PolygonFeature[] })
+        .features;
+      return features;
+    }, []);
+
     const tzPaths = timeZonePolygonFeatures.map((d: PolygonFeature) => {
       const id = `${d.properties?.id}`;
       // Time zone corresponding to the polygon.
       const timeZone = findTimeZone(id);
-      let opacity;
-      let stroke;
-      let fill;
-      if (selectedTimeZone && selectedTimeZone === timeZone) {
-        opacity = 1.0;
-        stroke = 'darkgrey';
-        fill = 'darkgrey';
-      } else if (
-        selectedTimeZone &&
-        timeZone &&
-        selectedTimeZone.rawOffsetInMinutes === timeZone.rawOffsetInMinutes
-      ) {
-        opacity = 0.7;
-        stroke = 'grey';
-        fill = 'lightgrey';
-      } else {
-        opacity = 0.4;
-        stroke = 'lightgrey';
-        fill = 'lightgrey';
-      }
+      const { fill, opacity, stroke } = (() => {
+        if (selectedTimeZone && selectedTimeZone === timeZone) {
+          return {
+            opacity: 1.0,
+            stroke: 'darkgrey',
+            fill: 'darkgrey',
+          };
+        } else if (
+          selectedTimeZone &&
+          timeZone &&
+          selectedTimeZone.rawOffsetInMinutes === timeZone.rawOffsetInMinutes
+        ) {
+          return {
+            opacity: 0.7,
+            stroke: 'grey',
+            fill: 'lightgrey',
+          };
+        }
+        return {
+          opacity: 0.4,
+          stroke: 'lightgrey',
+          fill: 'lightgrey',
+        };
+      })();
 
       const generatedPath = pathGenerator(d) || undefined;
-      const title = timeZone
-        ? `${timeZone.countryName} / ${timeZone.mainCities[0]}`
-        : '';
-      return (
+      const title = (() => {
+        if (timeZone) {
+          if (getCountryTooltipContent) {
+            return getCountryTooltipContent(timeZone);
+          }
+          const { countryCode, countryName, mainCities } = timeZone;
+
+          return (
+            <CountryFieldValue
+              countryCode={countryCode as any}
+              countryLabel={`${countryName}, ${mainCities[0]}`}
+            />
+          );
+        }
+      })();
+
+      const pathNode = (
         <path
           id={id}
-          key={id}
           data-testid={id}
           d={generatedPath}
           opacity={opacity}
@@ -158,10 +168,18 @@ export const WorldMap = forwardRef<SVGSVGElement, WorldMapProps>(
             // We have a few "unresolved" areas on map. We ignore clicking on those areas.
             setSelectedTimeZone(findTimeZone((event.target as any).id));
           }}
-        >
-          <title>{title}</title>
-        </path>
+        />
       );
+
+      if (title) {
+        return (
+          <Tooltip {...TooltipProps} title={title} key={id}>
+            {pathNode}
+          </Tooltip>
+        );
+      }
+
+      return <Fragment key={id}>{pathNode}</Fragment>;
     });
 
     return (
