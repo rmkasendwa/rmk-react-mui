@@ -293,6 +293,7 @@ export const BaseFieldValueDisplay = <FieldValue extends ReactNode>(
               flexDirection: 'row',
               gap: 1,
               flexWrap: 'nowrap',
+              alignItems: 'start',
             };
           }
         })(),
