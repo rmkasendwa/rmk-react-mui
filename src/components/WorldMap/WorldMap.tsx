@@ -15,13 +15,21 @@ import { RawTimeZone } from '@vvo/tzdb';
 import clsx from 'clsx';
 import { geoPath } from 'd3-geo';
 import * as GeoJSON from 'geojson';
-import { Fragment, ReactNode, forwardRef, useMemo, useState } from 'react';
+import {
+  Fragment,
+  ReactNode,
+  SVGAttributes,
+  forwardRef,
+  useMemo,
+  useState,
+} from 'react';
 import * as topojson from 'topojson-client';
 import { Topology } from 'topojson-specification';
 
+import { CountryCode } from '../../models/Countries';
 import CountryFieldValue from '../CountryFieldValue';
 import timezoneTopoJson from './assets/timezones.json';
-import { findTimeZone } from './Util';
+import { findTimeZone } from './utils';
 
 export interface WorldMapClasses {
   /** Styles applied to the root element. */
@@ -63,6 +71,9 @@ type PolygonFeature = GeoJSON.Feature<
 export interface WorldMapProps extends Partial<SvgIconProps> {
   getCountryTooltipContent?: (timeZone: RawTimeZone) => ReactNode;
   TooltipProps?: Partial<TooltipProps>;
+  countryPathProps?: {
+    [countryCode in CountryCode]: SVGAttributes<any>;
+  };
 }
 
 export function getWorldMapUtilityClass(slot: string): string {
@@ -81,8 +92,14 @@ const slots = {
 export const WorldMap = forwardRef<SVGSVGElement, WorldMapProps>(
   function WorldMap(inProps, ref) {
     const props = useThemeProps({ props: inProps, name: 'MuiWorldMap' });
-    const { className, sx, getCountryTooltipContent, TooltipProps, ...rest } =
-      props;
+    const {
+      className,
+      sx,
+      getCountryTooltipContent,
+      countryPathProps,
+      TooltipProps,
+      ...rest
+    } = props;
 
     const classes = composeClasses(
       slots,
@@ -97,6 +114,9 @@ export const WorldMap = forwardRef<SVGSVGElement, WorldMapProps>(
     );
 
     const [selectedTimeZone, setSelectedTimeZone] = useState<
+      RawTimeZone | undefined
+    >();
+    const [highlightedTimeZone, setHighlightedTimeZone] = useState<
       RawTimeZone | undefined
     >();
 
@@ -114,22 +134,37 @@ export const WorldMap = forwardRef<SVGSVGElement, WorldMapProps>(
       // Time zone corresponding to the polygon.
       const timeZone = findTimeZone(id);
       const { fill, opacity, stroke } = (() => {
-        if (selectedTimeZone && selectedTimeZone === timeZone) {
-          return {
-            opacity: 1.0,
-            stroke: 'darkgrey',
-            fill: 'darkgrey',
-          };
-        } else if (
-          selectedTimeZone &&
-          timeZone &&
-          selectedTimeZone.rawOffsetInMinutes === timeZone.rawOffsetInMinutes
-        ) {
-          return {
-            opacity: 0.7,
-            stroke: 'grey',
-            fill: 'lightgrey',
-          };
+        if (timeZone) {
+          if (selectedTimeZone === timeZone) {
+            return {
+              opacity: 1.0,
+              stroke: 'darkgrey',
+              fill: 'darkgrey',
+            };
+          } else if (highlightedTimeZone === timeZone) {
+            return {
+              opacity: 0.75,
+              stroke: 'darkgrey',
+              fill: 'darkgrey',
+            };
+          } else if (
+            selectedTimeZone?.rawOffsetInMinutes === timeZone.rawOffsetInMinutes
+          ) {
+            return {
+              opacity: 0.7,
+              stroke: 'grey',
+              fill: 'lightgrey',
+            };
+          } else if (
+            highlightedTimeZone?.rawOffsetInMinutes ===
+            timeZone.rawOffsetInMinutes
+          ) {
+            return {
+              opacity: 0.6,
+              stroke: 'grey',
+              fill: 'lightgrey',
+            };
+          }
         }
         return {
           opacity: 0.4,
@@ -155,25 +190,41 @@ export const WorldMap = forwardRef<SVGSVGElement, WorldMapProps>(
         }
       })();
 
+      const countryPathPropsForCountry = countryPathProps?.[id as CountryCode];
+
       const pathNode = (
         <path
-          id={id}
-          data-testid={id}
-          d={generatedPath}
           opacity={opacity}
           fill={fill}
           strokeWidth={0.5}
           stroke={stroke}
+          {...countryPathPropsForCountry}
+          id={id}
+          data-testid={id}
+          d={generatedPath}
           onClick={(event) => {
             // We have a few "unresolved" areas on map. We ignore clicking on those areas.
             setSelectedTimeZone(findTimeZone((event.target as any).id));
+          }}
+          onMouseEnter={(event) => {
+            // We have a few "unresolved" areas on map. We ignore clicking on those areas.
+            setHighlightedTimeZone(findTimeZone((event.target as any).id));
           }}
         />
       );
 
       if (title) {
         return (
-          <Tooltip {...TooltipProps} title={title} key={id}>
+          <Tooltip
+            PopperProps={{
+              sx: {
+                pointerEvents: 'none',
+              },
+            }}
+            {...TooltipProps}
+            title={title}
+            key={id}
+          >
             {pathNode}
           </Tooltip>
         );
@@ -188,6 +239,14 @@ export const WorldMap = forwardRef<SVGSVGElement, WorldMapProps>(
         {...rest}
         className={clsx(classes.root)}
         viewBox="0 0 800 320"
+        onMouseLeave={() => {
+          setHighlightedTimeZone(undefined);
+        }}
+        onMouseMove={(event) => {
+          if ((event.target as any).tagName.match(/svg/i)) {
+            setHighlightedTimeZone(undefined);
+          }
+        }}
         sx={{
           height: 'auto',
           ...sx,
