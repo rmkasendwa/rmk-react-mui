@@ -80,11 +80,19 @@ export type CountriesProps = Record<
   }
 >;
 
+export type TimeZonesProps = Record<
+  string,
+  SVGAttributes<any> & {
+    tooltipContent?: ReactNode | ((timeZone: RawTimeZone) => ReactNode);
+  }
+>;
+
 export interface WorldMapProps extends Partial<SvgIconProps> {
   getCountryTooltipContent?: (timeZone: RawTimeZone) => ReactNode;
   TooltipProps?: Partial<TooltipProps>;
   BaseCountryPathProps?: SVGAttributes<any>;
   CountriesProps?: CountriesProps;
+  TimeZonesProps?: TimeZonesProps;
 }
 
 export function getWorldMapUtilityClass(slot: string): string {
@@ -109,6 +117,7 @@ export const WorldMap = forwardRef<SVGSVGElement, WorldMapProps>(
       getCountryTooltipContent,
       BaseCountryPathProps,
       CountriesProps,
+      TimeZonesProps,
       TooltipProps,
       ...rest
     } = props;
@@ -147,8 +156,14 @@ export const WorldMap = forwardRef<SVGSVGElement, WorldMapProps>(
       const id = `${d.properties?.id}`;
       // Time zone corresponding to the polygon.
       const timeZone = findTimeZone(id);
-      const { tooltipContent, ...countryPathPropsForCountry } =
-        CountriesProps?.[timeZone?.countryCode as CountryCode] || {};
+      const {
+        tooltipContent: timeZoneTooltipContent,
+        ...timeZonePathPropsForCountry
+      } = TimeZonesProps?.[timeZone?.name as string] || {};
+      const {
+        tooltipContent: countryTooltipContent,
+        ...countryPathPropsForCountry
+      } = CountriesProps?.[timeZone?.countryCode as CountryCode] || {};
 
       const { fill, opacity, stroke } = (() => {
         const darkgreyColor = (palette.mode === 'light' ? lighten : darken)(
@@ -200,6 +215,7 @@ export const WorldMap = forwardRef<SVGSVGElement, WorldMapProps>(
         const { opacity, stroke, fill } = {
           ...BaseCountryPathProps,
           ...countryPathPropsForCountry,
+          ...timeZonePathPropsForCountry,
         };
         return {
           opacity: opacity ?? 0.4,
@@ -212,11 +228,17 @@ export const WorldMap = forwardRef<SVGSVGElement, WorldMapProps>(
 
       const title = (() => {
         if (timeZone) {
-          if (tooltipContent) {
-            if (typeof tooltipContent === 'function') {
-              return tooltipContent(timeZone);
+          if (timeZoneTooltipContent) {
+            if (typeof timeZoneTooltipContent === 'function') {
+              return timeZoneTooltipContent(timeZone);
             }
-            return tooltipContent;
+            return timeZoneTooltipContent;
+          }
+          if (countryTooltipContent) {
+            if (typeof countryTooltipContent === 'function') {
+              return countryTooltipContent(timeZone);
+            }
+            return countryTooltipContent;
           }
           if (getCountryTooltipContent) {
             return getCountryTooltipContent(timeZone);
@@ -272,6 +294,7 @@ export const WorldMap = forwardRef<SVGSVGElement, WorldMapProps>(
           fill={fill}
           {...BaseCountryPathProps}
           {...countryPathPropsForCountry}
+          {...timeZonePathPropsForCountry}
           stroke={stroke}
           opacity={opacity}
           id={id}
