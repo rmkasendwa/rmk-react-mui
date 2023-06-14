@@ -19,14 +19,8 @@ import { RawTimeZone } from '@vvo/tzdb';
 import clsx from 'clsx';
 import { geoPath } from 'd3-geo';
 import * as GeoJSON from 'geojson';
-import {
-  Fragment,
-  ReactNode,
-  SVGAttributes,
-  forwardRef,
-  useMemo,
-  useState,
-} from 'react';
+import { omit } from 'lodash';
+import { ReactNode, SVGAttributes, forwardRef, useMemo, useState } from 'react';
 import * as topojson from 'topojson-client';
 import { Topology } from 'topojson-specification';
 
@@ -156,14 +150,14 @@ export const WorldMap = forwardRef<SVGSVGElement, WorldMapProps>(
       const id = `${d.properties?.id}`;
       // Time zone corresponding to the polygon.
       const timeZone = findTimeZone(id);
-      const {
-        tooltipContent: timeZoneTooltipContent,
-        ...timeZonePathPropsForCountry
-      } = TimeZonesProps?.[timeZone?.name as string] || {};
-      const {
-        tooltipContent: countryTooltipContent,
-        ...countryPathPropsForCountry
-      } = CountriesProps?.[timeZone?.countryCode as CountryCode] || {};
+      const { ...timeZonePathPropsForCountry } = omit(
+        TimeZonesProps?.[timeZone?.name as string] || {},
+        'tooltipContent'
+      );
+      const { ...countryPathPropsForCountry } = omit(
+        CountriesProps?.[timeZone?.countryCode as CountryCode] || {},
+        'tooltipContent'
+      );
 
       const { fill, opacity, stroke } = (() => {
         const darkgreyColor = (palette.mode === 'light' ? lighten : darken)(
@@ -219,77 +213,16 @@ export const WorldMap = forwardRef<SVGSVGElement, WorldMapProps>(
         };
         return {
           opacity: opacity ?? 0.4,
-          stroke: stroke ?? lightgreyColor,
+          stroke: stroke ?? palette.divider,
           fill: fill ?? lightgreyColor,
         };
       })();
 
       const generatedPath = pathGenerator(d) || undefined;
 
-      const title = (() => {
-        if (timeZone) {
-          if (timeZoneTooltipContent) {
-            if (typeof timeZoneTooltipContent === 'function') {
-              return timeZoneTooltipContent(timeZone);
-            }
-            return timeZoneTooltipContent;
-          }
-          if (countryTooltipContent) {
-            if (typeof countryTooltipContent === 'function') {
-              return countryTooltipContent(timeZone);
-            }
-            return countryTooltipContent;
-          }
-          if (getCountryTooltipContent) {
-            return getCountryTooltipContent(timeZone);
-          }
-          const { countryCode, countryName, mainCities, name, rawFormat } =
-            timeZone;
-
-          return (
-            <Stack
-              sx={{
-                px: 2,
-                py: 1,
-              }}
-            >
-              <CountryFieldValue
-                countryCode={countryCode as any}
-                countryLabel={countryName}
-                ContainerGridProps={{
-                  alignItems: 'center',
-                }}
-                sx={{
-                  fontSize: 24,
-                }}
-              />
-              <FieldValueDisplay
-                label="Main City:"
-                value={mainCities[0]}
-                direction="row"
-                LabelProps={{
-                  sx: {
-                    fontWeight: 'bold',
-                  },
-                }}
-              />
-              <FieldValueDisplay
-                label="Timezone:"
-                value={`${name} (${rawFormat})`}
-                direction="row"
-                LabelProps={{
-                  sx: {
-                    fontWeight: 'bold',
-                  },
-                }}
-              />
-            </Stack>
-          );
-        }
-      })();
-
-      const pathNode = (
+      return (
         <path
+          key={id}
           strokeWidth={0.5}
           fill={fill}
           {...BaseCountryPathProps}
@@ -308,36 +241,9 @@ export const WorldMap = forwardRef<SVGSVGElement, WorldMapProps>(
           }}
         />
       );
-
-      if (title) {
-        return (
-          <Tooltip
-            PopperProps={{
-              sx: {
-                // pointerEvents: 'none',
-              },
-            }}
-            {...TooltipProps}
-            componentsProps={{
-              tooltip: {
-                sx: {
-                  p: 0,
-                  maxWidth: 300,
-                },
-              },
-            }}
-            title={title}
-            key={id}
-          >
-            {pathNode}
-          </Tooltip>
-        );
-      }
-
-      return <Fragment key={id}>{pathNode}</Fragment>;
     });
 
-    return (
+    const svgNode = (
       <SvgIcon
         ref={ref}
         {...rest}
@@ -361,6 +267,100 @@ export const WorldMap = forwardRef<SVGSVGElement, WorldMapProps>(
         </g>
       </SvgIcon>
     );
+
+    const title = (() => {
+      if (highlightedTimeZone) {
+        const { tooltipContent: timeZoneTooltipContent } =
+          TimeZonesProps?.[highlightedTimeZone.name as string] || {};
+        const { tooltipContent: countryTooltipContent } =
+          CountriesProps?.[highlightedTimeZone.countryCode as CountryCode] ||
+          {};
+        if (timeZoneTooltipContent) {
+          if (typeof timeZoneTooltipContent === 'function') {
+            return timeZoneTooltipContent(highlightedTimeZone);
+          }
+          return timeZoneTooltipContent;
+        }
+        if (countryTooltipContent) {
+          if (typeof countryTooltipContent === 'function') {
+            return countryTooltipContent(highlightedTimeZone);
+          }
+          return countryTooltipContent;
+        }
+        if (getCountryTooltipContent) {
+          return getCountryTooltipContent(highlightedTimeZone);
+        }
+        const { countryCode, countryName, mainCities, name, rawFormat } =
+          highlightedTimeZone;
+
+        return (
+          <Stack
+            sx={{
+              px: 2,
+              py: 1,
+            }}
+          >
+            <CountryFieldValue
+              countryCode={countryCode as any}
+              countryLabel={countryName}
+              ContainerGridProps={{
+                alignItems: 'center',
+              }}
+              sx={{
+                fontSize: 24,
+              }}
+            />
+            <FieldValueDisplay
+              label="Main City:"
+              value={mainCities[0]}
+              direction="row"
+              LabelProps={{
+                sx: {
+                  fontWeight: 'bold',
+                },
+              }}
+            />
+            <FieldValueDisplay
+              label="Timezone:"
+              value={`${name} (${rawFormat})`}
+              direction="row"
+              LabelProps={{
+                sx: {
+                  fontWeight: 'bold',
+                },
+              }}
+            />
+          </Stack>
+        );
+      }
+    })();
+
+    if (title) {
+      return (
+        <Tooltip
+          PopperProps={{
+            sx: {
+              pointerEvents: 'none',
+            },
+          }}
+          {...TooltipProps}
+          componentsProps={{
+            tooltip: {
+              sx: {
+                p: 0,
+                maxWidth: 400,
+              },
+            },
+          }}
+          title={title}
+          followCursor
+        >
+          {svgNode}
+        </Tooltip>
+      );
+    }
+
+    return svgNode;
   }
 );
 
