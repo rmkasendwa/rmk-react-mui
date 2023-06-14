@@ -1,4 +1,4 @@
-import { rawTimeZones } from '@vvo/tzdb';
+import { RawTimeZone, rawTimeZones } from '@vvo/tzdb';
 
 /**
  * Convert time offset to user friendly string.
@@ -36,3 +36,15 @@ export const findTimeZone = (timeZoneName: string) => {
     );
   });
 };
+
+export const timeZonesGroupedByCountryCode = rawTimeZones.reduce(
+  (accumulator, timeZone) => {
+    const { countryCode } = timeZone;
+    if (!accumulator[countryCode]) {
+      accumulator[countryCode] = [];
+    }
+    accumulator[countryCode].push(timeZone);
+    return accumulator;
+  },
+  {} as { [countryCode: string]: RawTimeZone[] }
+);
