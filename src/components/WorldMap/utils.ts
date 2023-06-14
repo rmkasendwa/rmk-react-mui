@@ -30,10 +30,14 @@ export const convertOffsetInMinutesToString = (offsetInMinutes: number) => {
  * @return Time zone data in @vvo/tzdb if found. undefined if not found.
  */
 export const findTimeZone = (timeZoneName: string) => {
+  const exactTimeZone = rawTimeZones.find((timeZone) => {
+    return timeZoneName === timeZone.name;
+  });
+  if (exactTimeZone) {
+    return exactTimeZone;
+  }
   return rawTimeZones.find((timeZone) => {
-    return (
-      timeZoneName === timeZone.name || timeZone.group.includes(timeZoneName)
-    );
+    return timeZone.group.includes(timeZoneName);
   });
 };
 
