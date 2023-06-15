@@ -422,7 +422,7 @@ export interface RecordsExplorerProps<
   bottomTools?: Tool[];
   getBottomTools?: (
     state: RecordsExplorerChildrenOptions<RecordRow>
-  ) => Tool[] | undefined;
+  ) => (ReactNode | Tool)[] | undefined;
   ListViewProps?: Partial<Omit<ListView<RecordRow>, 'columns'>>;
 }
 
@@ -614,6 +614,8 @@ const BaseRecordsExplorer = <
   getRecordLoadFunctionRef.current = getRecordLoadFunction;
   const dataPresetsRef = useRef(dataPresets);
   dataPresetsRef.current = dataPresets;
+  const ListViewPropsRef = useRef(ListViewProps);
+  ListViewPropsRef.current = ListViewProps;
 
   const viewFunctionRef = useRef((record: RecordRow) => {
     const { id } = record;
@@ -867,8 +869,12 @@ const BaseRecordsExplorer = <
         ({ type }) => type === 'List'
       ) as ListView<RecordRow> | null;
       if (listView) {
-        if (listView.selectedColumnIds) {
-          return listView.selectedColumnIds;
+        const { selectedColumnIds } = {
+          ...listView,
+          ...ListViewPropsRef.current,
+        };
+        if (selectedColumnIds) {
+          return selectedColumnIds;
         }
         return listView.columns.map(({ id }) => String(id) as any);
       }
@@ -1071,9 +1077,12 @@ const BaseRecordsExplorer = <
         ) {
           return selectedDataPresetIdProp;
         }
-        const presetIndex = dataPresets.findIndex(
-          ({ key }) => key === selectedDataPresetIdProp
-        );
+        const presetIndex = dataPresets.findIndex(({ key, title }) => {
+          return (
+            key === selectedDataPresetIdProp ||
+            title === selectedDataPresetIdProp
+          );
+        });
         if (presetIndex >= 0) {
           return presetIndex;
         }
