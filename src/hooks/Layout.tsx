@@ -1,10 +1,11 @@
-import { Grid, GridProps, useMediaQuery, useTheme } from '@mui/material';
+import { Box, Grid, GridProps, useMediaQuery, useTheme } from '@mui/material';
 import { ReactNode } from 'react';
 
+import RenderIfVisible from '../components/RenderIfVisible';
 import { useAuth } from '../contexts/AuthContext';
 import { PermissionCode } from '../models/Users';
 
-export interface GridLayoutColumn {
+export interface GridLayoutColumn extends Partial<GridProps> {
   span: number;
   node: ReactNode;
   permission?: PermissionCode | PermissionCode[];
@@ -12,6 +13,7 @@ export interface GridLayoutColumn {
 
 export interface GridLayoutRow {
   columns: GridLayoutColumn[];
+  rowHeight?: number;
 }
 
 export interface PermissionRegulatedGridLayoutOptions
@@ -28,7 +30,11 @@ export const usePermissionRegulatedGridLayout = ({
   const { loggedInUserHasPermission } = useAuth();
 
   const gridLayoutItems = layoutRows
-    .reduce((accumulator, { columns: baseColumns }) => {
+    .reduce<
+      (GridLayoutColumn & {
+        rowHeight?: number;
+      })[]
+    >((accumulator, { columns: baseColumns, rowHeight }) => {
       const columns = [...baseColumns]
         .filter(({ permission }) => {
           return !permission || loggedInUserHasPermission(permission);
@@ -36,6 +42,7 @@ export const usePermissionRegulatedGridLayout = ({
         .map((column) => {
           return {
             ...column,
+            rowHeight,
           };
         });
 
@@ -58,11 +65,27 @@ export const usePermissionRegulatedGridLayout = ({
       }
 
       return accumulator;
-    }, [] as GridLayoutColumn[])
-    .map(({ node, span }, index) => {
+    }, [])
+    .map(({ node, span, rowHeight, permission, ...rest }, index) => {
+      permission;
       return (
-        <Grid key={index} item md={span} xs={12}>
-          {node}
+        <Grid {...rest} key={index} item md={span} xs={12}>
+          <Box
+            sx={{
+              position: 'relative',
+              height: rowHeight,
+            }}
+          >
+            <RenderIfVisible
+              displayPlaceholder={false}
+              unWrapChildrenIfVisible
+              sx={{
+                height: rowHeight || 350,
+              }}
+            >
+              {node}
+            </RenderIfVisible>
+          </Box>
         </Grid>
       );
     });

@@ -553,11 +553,12 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
           })()}
           {(() => {
             if (isSmallScreenSize) {
-              const smallScreenDisplayableTools = [
+              const allTools = [
                 ...preTitleTools,
                 ...tools,
                 ...postSyncButtonTools,
-              ]
+              ];
+              const smallScreenDisplayableTools = allTools
                 .filter((tool) => {
                   return (
                     tool &&
@@ -596,6 +597,17 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                 );
               return (
                 <>
+                  {allTools
+                    .filter((tool) => {
+                      return tool && isValidElement(tool);
+                    })
+                    .map((tool, index) => {
+                      return (
+                        <Grid item key={index} sx={{ minWidth: 0 }}>
+                          {tool as ReactNode}
+                        </Grid>
+                      );
+                    })}
                   {smallScreenTools.length > 0
                     ? getToolNodes(smallScreenTools, showFullToolWidth).map(
                         (tool, index) => {
