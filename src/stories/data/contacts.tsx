@@ -14,7 +14,7 @@ import EnumValueChip from '../../components/EnumValueChip';
 import FieldValue from '../../components/FieldValue';
 import ProfileGravatar from '../../components/ProfileGravatar';
 import { TableColumn, TableProps } from '../../components/Table';
-import { CountryCode } from '../../interfaces/Countries';
+import { CountryCode } from '../../models/Countries';
 
 export const countryCodes = Object.keys(countries) as CountryCode[];
 

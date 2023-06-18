@@ -296,4 +296,7 @@ export interface TableProps<DataRow extends BaseDataRow = any>
     checkedRowIds: string[],
     allRowsChecked: boolean
   ) => void;
+
+  // Sticky columns
+  startStickyColumnIndex?: number;
 }
