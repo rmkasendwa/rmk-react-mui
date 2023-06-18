@@ -402,9 +402,9 @@ export const useTable = <DataRow extends BaseDataRow>(
       computedColumns
         .slice(0, localStartStickyColumnIndex + 1)
         .forEach((column, index) => {
-          const baseSx = { ...(column.sx || {}) };
-          const baseHeaderSx = { ...(column.headerSx || {}) };
-          const baseBodySx = { ...(column.bodySx || {}) };
+          const baseSx = { ...column.sx };
+          const baseHeaderSx = { ...column.headerSx };
+          const baseBodySx = { ...column.bodySx };
           column.sx = {
             ...baseSx,
             position: 'sticky',
