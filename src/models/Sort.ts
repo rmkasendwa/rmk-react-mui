@@ -6,16 +6,17 @@ export const sortDirections = ['ASC', 'DESC'] as const;
 
 export type SortDirection = (typeof sortDirections)[number];
 
-export interface SortOption<T = any> {
-  id: keyof T;
+export interface SortOption<RecordRow = any> {
+  id: keyof RecordRow;
   label: string;
   type?: PrimitiveDataType;
   sortDirection?: SortDirection;
   sortLabels?: [ReactNode, ReactNode];
-  getSortValue?: (row: T) => string | number | boolean;
+  getSortValue?: (row: RecordRow) => string | number | boolean;
 }
 
-export interface SelectedSortOption<T = any> extends SortOption<T> {
+export interface SelectedSortOption<RecordRow = any>
+  extends SortOption<RecordRow> {
   sortDirection: SortDirection;
 }
 
