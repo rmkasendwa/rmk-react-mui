@@ -1701,24 +1701,6 @@ const BaseRecordsExplorer = <
                     ...column,
                   }));
 
-                  baseTableColumns[0] = {
-                    ...baseTableColumns[0],
-                    sx: {
-                      ...baseTableColumns[0].sx,
-                      position: 'sticky',
-                      left: 0,
-                    },
-                    headerSx: {
-                      ...baseTableColumns[0].headerSx,
-                      zIndex: 5,
-                    },
-                    bodySx: {
-                      ...baseTableColumns[0].bodySx,
-                      zIndex: 1,
-                    },
-                    opaque: true,
-                  };
-
                   const tableData = (() => {
                     if (groupedData) {
                       const groupRows: RecordRow[] = [];
@@ -1913,6 +1895,7 @@ const BaseRecordsExplorer = <
                   })();
 
                   const baseTableProps: typeof viewProps = {
+                    startStickyColumnIndex: 0,
                     ...viewProps,
                     ...ListViewProps,
                     paging: false,
@@ -2116,7 +2099,6 @@ const BaseRecordsExplorer = <
                       scrollableElement={bodyElementRef.current}
                       stickyHeader
                       sx={{
-                        minWidth,
                         [`
                           & .${tableContainerClasses.root}
                         `]: {

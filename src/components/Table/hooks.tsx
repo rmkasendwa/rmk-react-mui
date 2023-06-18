@@ -168,6 +168,7 @@ export const useTable = <DataRow extends BaseDataRow>(
     isGroupedTable = false,
     TableGroupingProps,
     getToolTipWrappedColumnNode,
+    startStickyColumnIndex,
     sx,
     ...rest
   } = props;
@@ -278,12 +279,17 @@ export const useTable = <DataRow extends BaseDataRow>(
   const allColumns = (() => {
     const computedColumns: typeof columnsProp = [];
     const { columns: allColumns } = getComputedTableProps(props);
+    const stickyColumnWidths: number[] = [];
+    let localStartStickyColumnIndex = startStickyColumnIndex;
 
     if (enableCheckboxRowSelectors) {
       const checkboxColumn = allColumns.find(
         ({ id }) => id === CHECKBOX_COLUMN_ID
       );
       if (checkboxColumn) {
+        localStartStickyColumnIndex ?? (localStartStickyColumnIndex = 0);
+        localStartStickyColumnIndex += 1;
+        stickyColumnWidths.push(checkboxColumn.width || 60);
         computedColumns.push({
           ...checkboxColumn,
           label: enableCheckboxAllRowSelector ? (
@@ -345,6 +351,9 @@ export const useTable = <DataRow extends BaseDataRow>(
         ({ id }) => id === ROW_NUMBER_COLUMN_ID
       );
       if (numberColumn) {
+        localStartStickyColumnIndex ?? (localStartStickyColumnIndex = 0);
+        localStartStickyColumnIndex += 1;
+        stickyColumnWidths.push(numberColumn.width || 60);
         computedColumns.push({
           ...numberColumn,
           getColumnValue: (record) => {
@@ -354,6 +363,16 @@ export const useTable = <DataRow extends BaseDataRow>(
           },
         });
       }
+    }
+
+    if (startStickyColumnIndex != null) {
+      stickyColumnWidths.push(
+        ...columnsProp
+          .slice(0, startStickyColumnIndex + 1)
+          .map(({ width, minWidth }) => {
+            return width ?? minWidth ?? minColumnWidth ?? 0;
+          })
+      );
     }
 
     computedColumns.push(...columnsProp);
@@ -377,6 +396,34 @@ export const useTable = <DataRow extends BaseDataRow>(
           },
         });
       }
+    }
+
+    if (localStartStickyColumnIndex != null) {
+      computedColumns
+        .slice(0, localStartStickyColumnIndex + 1)
+        .forEach((column, index) => {
+          const baseSx = { ...(column.sx || {}) };
+          const baseHeaderSx = { ...(column.headerSx || {}) };
+          const baseBodySx = { ...(column.bodySx || {}) };
+          column.sx = {
+            ...baseSx,
+            position: 'sticky',
+            left: stickyColumnWidths
+              .slice(0, index)
+              .reduce((accumulator, width) => {
+                return accumulator + width;
+              }, 0),
+          };
+          column.headerSx = {
+            ...baseHeaderSx,
+            zIndex: 5,
+          };
+          column.bodySx = {
+            ...baseBodySx,
+            zIndex: 1,
+          };
+          column.opaque = true;
+        });
     }
 
     return expandTableColumnWidths(computedColumns, {

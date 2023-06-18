@@ -233,8 +233,6 @@ export const getComputedTableProps = <DataRow extends BaseDataRow>(
       showHeaderText: false,
       opaque: true,
       sx: {
-        position: 'sticky',
-        left: 0,
         zIndex: 1,
       },
       headerSx: {
