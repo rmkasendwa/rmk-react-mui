@@ -1,6 +1,6 @@
 import '@infinite-debugger/rmk-js-extensions/Object';
 
-import { SxProps, Theme, Typography, TypographyProps } from '@mui/material';
+import { SxProps, Theme, Typography } from '@mui/material';
 import { BoxProps } from '@mui/material/Box';
 import { PaginationProps } from '@mui/material/Pagination';
 import { TableProps as MuiBaseTableProps } from '@mui/material/Table';
@@ -151,8 +151,9 @@ export interface TableColumn<
   sortable?: boolean;
   opaque?: boolean;
   propagateClickToParentRowClickEvent?: boolean;
-  columnTypographyProps?: Partial<TypographyProps>;
-  getColumnTypographyProps?: (row: DataRow) => Partial<TypographyProps>;
+  columnTypographyProps?: Partial<FieldValueProps>;
+  getColumnTypographyProps?: (row: DataRow) => Partial<FieldValueProps>;
+  wrapColumnContentInFieldValue?: boolean;
   decimalPlaces?: number;
   textTransform?: boolean;
   showHeaderText?: boolean;

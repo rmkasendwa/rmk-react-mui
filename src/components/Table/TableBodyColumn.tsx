@@ -140,6 +140,7 @@ export const TableBodyColumn = forwardRef<any, TableBodyColumnProps<any>>(
       isGroupHeaderColumn = false,
       opaque,
       getToolTipWrappedColumnNode,
+      wrapColumnContentInFieldValue = true,
     } = props;
 
     const classes = composeClasses(
@@ -335,49 +336,52 @@ export const TableBodyColumn = forwardRef<any, TableBodyColumnProps<any>>(
         >
           {(() => {
             if (formattedColumnValue) {
-              return (
-                <FieldValue
-                  {...{
-                    editable,
-                    editMode,
-                    onFieldValueUpdated,
-                    editField,
-                    validationRules,
-                    noWrap,
-                  }}
-                  {...columnTypographyPropsRest}
-                  editField={(() => {
-                    if (getEditField) {
-                      return getEditField(row, column);
-                    }
-                    return editField;
-                  })()}
-                  editableValue={(() => {
-                    const editableValue = (() => {
-                      if (getEditableColumnValue) {
-                        return getEditableColumnValue(row, column);
+              if (wrapColumnContentInFieldValue) {
+                return (
+                  <FieldValue
+                    {...{
+                      editable,
+                      editMode,
+                      onFieldValueUpdated,
+                      editField,
+                      validationRules,
+                      noWrap,
+                    }}
+                    {...columnTypographyPropsRest}
+                    editField={(() => {
+                      if (getEditField) {
+                        return getEditField(row, column);
                       }
-                      return baseColumnValue;
-                    })();
-                    return editableValue ?? null;
-                  })()}
-                  fieldValueEditor={(() => {
-                    if (fieldValueEditor) {
-                      return (updatedValue) => {
-                        return fieldValueEditor(row, updatedValue, column);
-                      };
-                    }
-                  })()}
-                  onChangeEditMode={(editMode) => setEditMode(editMode)}
-                  type={mapTableColumnTypeToExoticDataType(type)}
-                  showDefaultValue={false}
-                  sx={{
-                    ...columnTypographyPropsSx,
-                  }}
-                >
-                  {formattedColumnValue}
-                </FieldValue>
-              );
+                      return editField;
+                    })()}
+                    editableValue={(() => {
+                      const editableValue = (() => {
+                        if (getEditableColumnValue) {
+                          return getEditableColumnValue(row, column);
+                        }
+                        return baseColumnValue;
+                      })();
+                      return editableValue ?? null;
+                    })()}
+                    fieldValueEditor={(() => {
+                      if (fieldValueEditor) {
+                        return (updatedValue) => {
+                          return fieldValueEditor(row, updatedValue, column);
+                        };
+                      }
+                    })()}
+                    onChangeEditMode={(editMode) => setEditMode(editMode)}
+                    type={mapTableColumnTypeToExoticDataType(type)}
+                    showDefaultValue={false}
+                    sx={{
+                      ...columnTypographyPropsSx,
+                    }}
+                  >
+                    {formattedColumnValue}
+                  </FieldValue>
+                );
+              }
+              return formattedColumnValue;
             }
           })()}
         </Box>
