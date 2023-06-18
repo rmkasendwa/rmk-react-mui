@@ -6,7 +6,7 @@ import { PrimitiveDataType } from '../../models/Utils';
 import { DataDropdownFieldProps } from '../InputFields/DataDropdownField';
 import { DateInputFieldProps } from '../InputFields/DateInputField';
 import { NumberInputFieldProps } from '../InputFields/NumberInputField';
-import { BaseDataRow } from '../Table';
+import { BaseDataRow, TableColumn } from '../Table';
 
 // Search term filter types
 export type FilterBySearchTerm<RecordRow extends BaseDataRow> = (
@@ -158,3 +158,19 @@ export type GroupableField<RecordRow extends BaseDataRow> =
   SortOption<RecordRow> & {
     getGroupLabel?: (row: DataGroup<RecordRow>) => ReactNode;
   };
+
+export type RecordsExplorerRowField<RecordRow extends BaseDataRow = any> =
+  TableColumn<RecordRow> &
+    Pick<SearchableProperty<RecordRow>, 'getFilterValue'> &
+    Pick<SortOption<RecordRow>, 'sortLabels' | 'getSortValue'> &
+    Pick<GroupableField<RecordRow>, 'getGroupLabel'> &
+    Partial<
+      Pick<
+        DataMultiSelectDropdownFilterField<RecordRow>,
+        'getFieldOptionLabel' | 'options' | 'sortOptions'
+      >
+    > & {
+      searchable?: boolean;
+      sortable?: boolean;
+      groupable?: boolean;
+    };
