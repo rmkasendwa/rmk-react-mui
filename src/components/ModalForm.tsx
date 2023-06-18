@@ -18,6 +18,7 @@ import {
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
   generateUtilityClasses,
+  useMediaQuery,
   useTheme,
   useThemeProps,
 } from '@mui/material';
@@ -191,7 +192,8 @@ export const BaseModalForm = <Values extends FormikValues>(
     })()
   );
 
-  const { palette, spacing } = useTheme();
+  const { palette, breakpoints, spacing } = useTheme();
+  const isSmallScreen = useMediaQuery(breakpoints.down('sm'));
 
   const { sx: ActionButtonPropsSx, ...ActionButtonPropsRest } =
     ActionButtonProps;
@@ -524,6 +526,14 @@ export const BaseModalForm = <Values extends FormikValues>(
                 sx={{
                   py: 2,
                   px: 3,
+                  ...(() => {
+                    if (isSmallScreen) {
+                      return {
+                        py: 1,
+                        px: 2,
+                      };
+                    }
+                  })(),
                   flexDirection: 'row-reverse',
                   ...ActionButtonAreaPropsSx,
                 }}

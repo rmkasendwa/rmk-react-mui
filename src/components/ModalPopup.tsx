@@ -16,6 +16,7 @@ import {
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
   generateUtilityClasses,
+  useMediaQuery,
   useTheme,
   useThemeProps,
 } from '@mui/material';
@@ -131,7 +132,7 @@ export const ModalPopup = forwardRef<HTMLDivElement, ModalPopupProps>(
       popupStatsElement,
       errorMessage,
       ...rest
-    } = props;
+    } = omit(props, 'modalElement');
 
     let { modalElement } = props;
 
@@ -147,7 +148,8 @@ export const ModalPopup = forwardRef<HTMLDivElement, ModalPopupProps>(
       })()
     );
 
-    const { palette, components } = useTheme();
+    const { palette, breakpoints, components } = useTheme();
+    const isSmallScreen = useMediaQuery(breakpoints.down('sm'));
 
     const { sx: SearchSyncToolbarPropsSx, ...SearchSyncToolbarPropsRest } =
       SearchSyncToolbarProps;
@@ -283,6 +285,14 @@ export const ModalPopup = forwardRef<HTMLDivElement, ModalPopupProps>(
                 sx={{
                   py: 2,
                   px: 3,
+                  ...(() => {
+                    if (isSmallScreen) {
+                      return {
+                        py: 1,
+                        px: 2,
+                      };
+                    }
+                  })(),
                   flexDirection: 'row-reverse',
                   alignItems: 'center',
                 }}
@@ -353,9 +363,16 @@ export const ModalPopup = forwardRef<HTMLDivElement, ModalPopupProps>(
         }}
         sx={{
           display: 'flex',
-          p: 4,
           justifyContent: 'center',
           alignItems: 'center',
+          p: 3,
+          ...(() => {
+            if (isSmallScreen) {
+              return {
+                p: 2,
+              };
+            }
+          })(),
           ...(components?.MuiModalPopup?.styleOverrides?.root as any),
           ...placementSx,
           ...sx,
