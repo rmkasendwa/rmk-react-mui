@@ -718,13 +718,13 @@ const BaseRecordsExplorer = <
             if (listView) {
               groupableFields.push(
                 ...listView.columns
-                  .filter(({ id, label, type = 'string' }) => {
+                  .filter(({ id, label, type = 'string', groupable }) => {
                     return (
                       typeof label === 'string' &&
                       !groupableFields.find(
                         ({ id: groupableFieldId }) => groupableFieldId === id
                       ) &&
-                      ENUM_TABLE_COLUMN_TYPES.includes(type)
+                      (groupable || ENUM_TABLE_COLUMN_TYPES.includes(type))
                     );
                   })
                   .map(

@@ -30,7 +30,7 @@ export const getColumnWidthStyles = ({
         }
         return inputMinWidth;
       }
-      return 100;
+      return 200;
     })() + extraWidth;
   return {
     width,
