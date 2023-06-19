@@ -252,6 +252,14 @@ export const TableBodyRow = <T extends BaseDataRow>(
     const rowNumberColumn = columns.find(({ id }) => {
       return id === ROW_NUMBER_COLUMN_ID;
     });
+
+    const shouldPropagateClickToParentRowClickEvent = (() => {
+      if (typeof propagateClickToParentRowClickEvent === 'function') {
+        return propagateClickToParentRowClickEvent(row);
+      }
+      return propagateClickToParentRowClickEvent;
+    })();
+
     const column: typeof highestPriorityColumn = {
       ...highestPriorityColumn,
       columnTypographyProps,
@@ -333,7 +341,7 @@ export const TableBodyRow = <T extends BaseDataRow>(
                 if (
                   isClickable &&
                   onClickRow &&
-                  propagateClickToParentRowClickEvent
+                  shouldPropagateClickToParentRowClickEvent
                 ) {
                   onClickRow(row);
                 }
@@ -432,6 +440,14 @@ export const TableBodyRow = <T extends BaseDataRow>(
               defaultCountryCode = rowDefaultCountryCode,
               noWrap = rowNoWrap,
             } = ellipsisMenuToolColumn;
+
+            const shouldPropagateClickToParentRowClickEvent = (() => {
+              if (typeof propagateClickToParentRowClickEvent === 'function') {
+                return propagateClickToParentRowClickEvent(row);
+              }
+              return propagateClickToParentRowClickEvent;
+            })();
+
             return (
               <Grid item>
                 <TableBodyColumn
@@ -458,7 +474,7 @@ export const TableBodyRow = <T extends BaseDataRow>(
                     if (
                       isClickable &&
                       onClickRow &&
-                      propagateClickToParentRowClickEvent
+                      shouldPropagateClickToParentRowClickEvent
                     ) {
                       onClickRow(row);
                     }
@@ -630,6 +646,14 @@ export const TableBodyRow = <T extends BaseDataRow>(
           defaultCountryCode = rowDefaultCountryCode,
           noWrap = rowNoWrap,
         } = column;
+
+        const shouldPropagateClickToParentRowClickEvent = (() => {
+          if (typeof propagateClickToParentRowClickEvent === 'function') {
+            return propagateClickToParentRowClickEvent(row);
+          }
+          return propagateClickToParentRowClickEvent;
+        })();
+
         return (
           <TableBodyColumn
             key={String(id)}
@@ -653,7 +677,7 @@ export const TableBodyRow = <T extends BaseDataRow>(
               if (
                 isClickable &&
                 onClickRow &&
-                propagateClickToParentRowClickEvent
+                shouldPropagateClickToParentRowClickEvent
               ) {
                 onClickRow(row);
               }
