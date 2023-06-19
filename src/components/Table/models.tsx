@@ -150,7 +150,7 @@ export interface TableColumn<
   bodySx?: SxProps<Theme>;
   sortable?: boolean;
   opaque?: boolean;
-  propagateClickToParentRowClickEvent?: boolean;
+  propagateClickToParentRowClickEvent?: boolean | ((row: DataRow) => boolean);
   columnTypographyProps?: Partial<FieldValueProps>;
   getColumnTypographyProps?: (row: DataRow) => Partial<FieldValueProps>;
   wrapColumnContentInFieldValue?: boolean;
