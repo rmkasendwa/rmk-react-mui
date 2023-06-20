@@ -108,7 +108,7 @@ export const KanbanBoardCard = forwardRef<any, KanbanBoardCardProps>(
             ? (event: any) => {
                 if (
                   (event.target as HTMLElement)?.classList.contains(
-                    'kanban-board-card'
+                    classes.root
                   )
                 ) {
                   onCardClick(id, laneId);
