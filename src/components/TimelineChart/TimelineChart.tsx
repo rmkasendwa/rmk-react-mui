@@ -629,7 +629,13 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
                         px: 2,
                       }}
                     >
-                      <Typography variant="body2" noWrap>
+                      <Typography
+                        variant="body2"
+                        noWrap
+                        sx={{
+                          fontWeight: 'bold',
+                        }}
+                      >
                         {year}
                       </Typography>
                     </Box>
@@ -692,24 +698,34 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
                     sx={{
                       width: `${percentage * 100}%`,
                       ml: `${offsetPercentage * 100}%`,
-                      height: 4,
-                      bgcolor: 'limegreen',
-                      borderRadius: '2px',
+                      height: 34,
+                      borderRadius: '4px',
+                      overflow: 'hidden',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      px: 2,
+                      border: `1px solid ${palette.divider}`,
                     }}
-                  >{`${result(row, startDateProperty)} - ${result(
-                    row,
-                    endDateProperty
-                  )}`}</Box>
+                  >
+                    <Typography variant="body2" noWrap>
+                      {result(row, startDateProperty)} -{' '}
+                      {result(row, endDateProperty)}
+                    </Typography>
+                  </Box>
                 );
               }
             }
           },
           width: timelineMonthMinWidth * timelineYears.length * 12,
           wrapColumnContentInFieldValue: false,
-          sx: {
+          headerSx: {
             '&>div': {
               p: 0,
             },
+          },
+          bodySx: {
+            px: 0,
           },
         },
         {
@@ -724,6 +740,11 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
       rows={rows}
       startStickyColumnIndex={0}
       stickyHeader
+      sx={{
+        tr: {
+          verticalAlign: 'middle',
+        },
+      }}
     />
   );
 };
