@@ -21,6 +21,7 @@ import getDaysInMonth from 'date-fns/getDaysInMonth';
 import { result } from 'lodash';
 import {
   ReactElement,
+  ReactNode,
   Ref,
   forwardRef,
   useCallback,
@@ -102,6 +103,8 @@ export interface TimelineChartProps<RecordRow extends BaseDataRow = any>
   expandedRows?: string[];
   allRowsExpanded?: boolean;
   onChangeExpanded?: (expandedRows: string[]) => void;
+  timelineElementLabelProperty: keyof RecordRow;
+  getTimelineElementLabel?: (timelineElement: RecordRow) => ReactNode;
   startDateProperty: keyof RecordRow;
   endDateProperty: keyof RecordRow;
   legacy?: boolean;
@@ -136,6 +139,8 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
     legacy = false,
     startDateProperty,
     endDateProperty,
+    timelineElementLabelProperty,
+    getTimelineElementLabel,
     ...rest
   } = props;
 
@@ -693,6 +698,19 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
                   differenceInDays(startDate, minDate) / totalNumberOfDays;
                 const percentage = numberOfDays / totalNumberOfDays;
 
+                const timelineElementLabel = ((): ReactNode => {
+                  if (getTimelineElementLabel) {
+                    return getTimelineElementLabel(row);
+                  }
+                  if (timelineElementLabelProperty) {
+                    return result(row, timelineElementLabelProperty);
+                  }
+                  return `${formatDate(
+                    startDate,
+                    'MMM dd, yyyy'
+                  )} - ${formatDate(endDate, 'MMM dd, yyyy')}`;
+                })();
+
                 return (
                   <Box
                     sx={{
@@ -709,8 +727,7 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
                     }}
                   >
                     <Typography variant="body2" noWrap>
-                      {result(row, startDateProperty)} -{' '}
-                      {result(row, endDateProperty)}
+                      {timelineElementLabel}
                     </Typography>
                   </Box>
                 );
