@@ -15,6 +15,7 @@ import {
   useThemeProps,
 } from '@mui/material';
 import clsx from 'clsx';
+import differenceInDays from 'date-fns/differenceInDays';
 import formatDate from 'date-fns/format';
 import getDaysInMonth from 'date-fns/getDaysInMonth';
 import { result } from 'lodash';
@@ -150,7 +151,7 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
     })()
   );
 
-  const { minDate, maxDate, timelineYears } = useMemo(() => {
+  const { minDate, maxDate, timelineYears, totalNumberOfDays } = useMemo(() => {
     const allDates = rows
       .flatMap((row) => {
         const dates: Date[] = [];
@@ -204,11 +205,13 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
     for (let year = minDateYear; year <= maxDateYear; year++) {
       timelineYears.push(year);
     }
+    const totalNumberOfDays = differenceInDays(maxDate, minDate);
 
     return {
       minDate,
       maxDate,
       timelineYears,
+      totalNumberOfDays,
     };
   }, [endDateProperty, rows, startDateProperty]);
 
@@ -584,8 +587,6 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
   }
   //#endregion
 
-  console.log({ minDate, maxDate });
-
   return (
     <Table
       columns={[
@@ -666,10 +667,42 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
             </Stack>
           ),
           getColumnValue: (row) => {
-            return `${result(row, startDateProperty)} - ${result(
-              row,
-              endDateProperty
-            )}`;
+            const startDateValue = result(row, startDateProperty);
+
+            if (startDateValue) {
+              const startDate = new Date(startDateValue as any);
+              if (!isNaN(startDate.getTime())) {
+                const endDate = (() => {
+                  const endDateValue = result(row, endDateProperty);
+                  if (endDateValue) {
+                    const endDate = new Date(endDateValue as any);
+                    if (!isNaN(endDate.getTime())) {
+                      return endDate;
+                    }
+                  }
+                  return maxDate;
+                })();
+                const numberOfDays = differenceInDays(endDate, startDate);
+                const offsetPercentage =
+                  differenceInDays(startDate, minDate) / totalNumberOfDays;
+                const percentage = numberOfDays / totalNumberOfDays;
+
+                return (
+                  <Box
+                    sx={{
+                      width: `${percentage * 100}%`,
+                      ml: `${offsetPercentage * 100}%`,
+                      height: 4,
+                      bgcolor: 'limegreen',
+                      borderRadius: '2px',
+                    }}
+                  >{`${result(row, startDateProperty)} - ${result(
+                    row,
+                    endDateProperty
+                  )}`}</Box>
+                );
+              }
+            }
           },
           width: timelineMonthMinWidth * timelineYears.length * 12,
           wrapColumnContentInFieldValue: false,
