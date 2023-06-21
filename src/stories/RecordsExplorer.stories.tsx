@@ -43,6 +43,8 @@ const baseArgs = {
     },
     {
       type: 'Timeline',
+      startDateProperty: 'joinedAt',
+      endDateProperty: 'leftAt',
     },
   ],
   recordLabelPlural: 'Contacts',

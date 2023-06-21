@@ -1,9 +1,10 @@
 import { Box, Typography, alpha, useTheme } from '@mui/material';
-import { ReactNode, useEffect, useMemo, useRef } from 'react';
+import { result } from 'lodash';
+import { ReactNode, useMemo, useRef } from 'react';
 
 import { BaseDataRow } from '../Table';
 import { alignmentSyles } from './data';
-import { BaseTimelineChartProps } from './interfaces';
+import { BaseTimelineChartProps } from './models';
 
 export interface TimelineChartDataLabelRowProps<RecordRow extends BaseDataRow>
   extends BaseTimelineChartProps<RecordRow> {
@@ -23,25 +24,12 @@ export const TimelineChartDataLabelRow = <RecordRow extends BaseDataRow>({
   getRowLabel,
 }: TimelineChartDataLabelRowProps<RecordRow>) => {
   const getTimelinesRef = useRef(getTimelines);
-  const getRowLabelRef = useRef(getRowLabel);
-
-  useEffect(() => {
-    getTimelinesRef.current = getTimelines;
-    getRowLabelRef.current = getRowLabel;
-  }, [getRowLabel, getTimelines]);
+  getTimelinesRef.current = getTimelines;
 
   const { palette } = useTheme();
   const timelineCount = useMemo(() => {
     return (getTimelinesRef.current ? getTimelinesRef.current(row) : []).length;
   }, [row]);
-
-  const label = useMemo(() => {
-    return rowLabelProperty
-      ? row[rowLabelProperty]
-      : getRowLabelRef.current
-      ? getRowLabelRef.current(row)
-      : null;
-  }, [row, rowLabelProperty]);
 
   return (
     <Box
@@ -89,7 +77,16 @@ export const TimelineChartDataLabelRow = <RecordRow extends BaseDataRow>({
         overflow: 'hidden',
       }}
     >
-      <Typography variant="body2">{label as any}</Typography>
+      <Typography variant="body2">
+        {(() => {
+          if (getRowLabel) {
+            return getRowLabel(row);
+          }
+          if (rowLabelProperty) {
+            return result(row, rowLabelProperty);
+          }
+        })()}
+      </Typography>
     </Box>
   );
 };
