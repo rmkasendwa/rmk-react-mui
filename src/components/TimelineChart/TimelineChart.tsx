@@ -21,6 +21,7 @@ import getDaysInMonth from 'date-fns/getDaysInMonth';
 import { result } from 'lodash';
 import {
   ReactElement,
+  ReactNode,
   Ref,
   forwardRef,
   useCallback,
@@ -102,6 +103,8 @@ export interface TimelineChartProps<RecordRow extends BaseDataRow = any>
   expandedRows?: string[];
   allRowsExpanded?: boolean;
   onChangeExpanded?: (expandedRows: string[]) => void;
+  timelineElementLabelProperty: keyof RecordRow;
+  getTimelineElementLabel?: (timelineElement: RecordRow) => ReactNode;
   startDateProperty: keyof RecordRow;
   endDateProperty: keyof RecordRow;
   legacy?: boolean;
@@ -136,6 +139,8 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
     legacy = false,
     startDateProperty,
     endDateProperty,
+    timelineElementLabelProperty,
+    getTimelineElementLabel,
     ...rest
   } = props;
 
@@ -693,26 +698,49 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
                   differenceInDays(startDate, minDate) / totalNumberOfDays;
                 const percentage = numberOfDays / totalNumberOfDays;
 
+                const baseTimelineElementLabel = `${formatDate(
+                  startDate,
+                  'MMM dd, yyyy'
+                )} - ${formatDate(endDate, 'MMM dd, yyyy')}`;
+                const timelineElementLabel = ((): ReactNode => {
+                  if (getTimelineElementLabel) {
+                    return getTimelineElementLabel(row);
+                  }
+                  if (timelineElementLabelProperty) {
+                    return result(row, timelineElementLabelProperty);
+                  }
+                  return baseTimelineElementLabel;
+                })();
+
                 return (
-                  <Box
-                    sx={{
-                      width: `${percentage * 100}%`,
-                      ml: `${offsetPercentage * 100}%`,
-                      height: 34,
-                      borderRadius: '4px',
-                      overflow: 'hidden',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      px: 2,
-                      border: `1px solid ${palette.divider}`,
+                  <Tooltip
+                    title={baseTimelineElementLabel}
+                    followCursor
+                    PopperProps={{
+                      sx: {
+                        pointerEvents: 'none',
+                      },
                     }}
                   >
-                    <Typography variant="body2" noWrap>
-                      {result(row, startDateProperty)} -{' '}
-                      {result(row, endDateProperty)}
-                    </Typography>
-                  </Box>
+                    <Box
+                      sx={{
+                        width: `${percentage * 100}%`,
+                        ml: `${offsetPercentage * 100}%`,
+                        height: 34,
+                        borderRadius: '4px',
+                        overflow: 'hidden',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        px: 2,
+                        border: `1px solid ${palette.divider}`,
+                      }}
+                    >
+                      <Typography variant="body2" noWrap>
+                        {timelineElementLabel}
+                      </Typography>
+                    </Box>
+                  </Tooltip>
                 );
               }
             }
@@ -726,13 +754,23 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
           },
           bodySx: {
             px: 0,
+            borderColor: 'transparent',
           },
         },
         {
           id: 'gutter',
           label: 'Gutter',
-          width: 40,
+          width: 20,
           showHeaderText: false,
+          bodySx: {
+            p: 0,
+            borderColor: 'transparent',
+          },
+          sx: {
+            '&:last-of-type': {
+              borderLeftColor: 'transparent !important',
+            },
+          },
         },
       ]}
       paging={false}
