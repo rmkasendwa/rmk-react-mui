@@ -1,5 +1,6 @@
 import {
   Box,
+  BoxProps,
   ComponentsOverrides,
   ComponentsProps,
   ComponentsVariants,
@@ -7,6 +8,7 @@ import {
   GridProps,
   Stack,
   Tooltip,
+  TooltipProps,
   Typography,
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
@@ -105,6 +107,10 @@ export interface TimelineChartProps<RecordRow extends BaseDataRow = any>
   onChangeExpanded?: (expandedRows: string[]) => void;
   timelineElementLabelProperty: keyof RecordRow;
   getTimelineElementLabel?: (timelineElement: RecordRow) => ReactNode;
+  getTimelineElementTooltipProps?: (
+    timelineElement: RecordRow
+  ) => Partial<TooltipProps>;
+  getTimelineElementStyles?: (timelineElement: RecordRow) => BoxProps['sx'];
   startDateProperty: keyof RecordRow;
   endDateProperty: keyof RecordRow;
   legacy?: boolean;
@@ -141,6 +147,8 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
     endDateProperty,
     timelineElementLabelProperty,
     getTimelineElementLabel,
+    getTimelineElementTooltipProps,
+    getTimelineElementStyles,
     ...rest
   } = props;
 
@@ -628,7 +636,7 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
                       key={year}
                       sx={{
                         width: timelineMonthMinWidth * 12,
-                        height: 40,
+                        height: 24,
                         display: 'flex',
                         alignItems: 'center',
                         px: 2,
@@ -659,7 +667,7 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
                         key={month}
                         sx={{
                           width: timelineMonthMinWidth,
-                          height: 40,
+                          height: 24,
                           display: 'flex',
                           alignItems: 'center',
                           flex: 1,
@@ -702,6 +710,7 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
                   startDate,
                   'MMM dd, yyyy'
                 )} - ${formatDate(endDate, 'MMM dd, yyyy')}`;
+
                 const timelineElementLabel = ((): ReactNode => {
                   if (getTimelineElementLabel) {
                     return getTimelineElementLabel(row);
@@ -712,28 +721,46 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
                   return baseTimelineElementLabel;
                 })();
 
+                const {
+                  PopperProps: TooltipPropsPopperProps = {},
+                  ...TooltipPropsRest
+                } = (() => {
+                  if (getTimelineElementTooltipProps) {
+                    return getTimelineElementTooltipProps(row);
+                  }
+                  return {};
+                })();
+
                 return (
                   <Tooltip
                     title={baseTimelineElementLabel}
                     followCursor
+                    {...TooltipPropsRest}
                     PopperProps={{
+                      ...TooltipPropsPopperProps,
                       sx: {
                         pointerEvents: 'none',
+                        ...TooltipPropsPopperProps.sx,
                       },
                     }}
                   >
                     <Box
                       sx={{
-                        width: `${percentage * 100}%`,
-                        ml: `${offsetPercentage * 100}%`,
-                        height: 34,
-                        borderRadius: '4px',
                         overflow: 'hidden',
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
                         px: 2,
                         border: `1px solid ${palette.divider}`,
+                        ...(() => {
+                          if (getTimelineElementStyles) {
+                            return getTimelineElementStyles(row);
+                          }
+                        })(),
+                        width: `${percentage * 100}%`,
+                        ml: `${offsetPercentage * 100}%`,
+                        height: 34,
+                        borderRadius: '4px',
                       }}
                     >
                       <Typography variant="body2" noWrap>
@@ -753,7 +780,8 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
             },
           },
           bodySx: {
-            px: 0,
+            pl: 0,
+            pr: 0,
             borderColor: 'transparent',
           },
         },
