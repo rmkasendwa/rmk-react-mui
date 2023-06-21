@@ -2251,6 +2251,16 @@ const BaseRecordsExplorer = <
               selectedView,
               'type'
             ) as TimelineView<RecordRow>;
+            if (!viewProps.getRowLabel && !viewProps.rowLabelProperty) {
+              const listView = views.find(
+                ({ type }) => type === 'List'
+              ) as ListView<RecordRow> | null;
+              if (listView && listView.columns.length > 0) {
+                viewProps.rowLabelProperty = listView.columns[0].id;
+                viewProps.getRowLabel = listView.columns[0]
+                  .getColumnValue as any;
+              }
+            }
             return <TimelineChart rows={filteredData} {...viewProps} />;
           }
         }

@@ -27,7 +27,7 @@ import {
 
 import { BaseDataRow } from '../Table';
 import { MONTHS, alignmentSyles } from './data';
-import { BaseTimelineChartProps, Timeline } from './interfaces';
+import { BaseTimelineChartProps, Timeline } from './models';
 
 export interface TimelineChartBodyDataRowClasses {
   /** Styles applied to the root element. */

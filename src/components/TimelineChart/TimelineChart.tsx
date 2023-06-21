@@ -5,6 +5,7 @@ import {
   ComponentsVariants,
   Grid,
   GridProps,
+  Stack,
   Tooltip,
   Typography,
   unstable_composeClasses as composeClasses,
@@ -16,6 +17,7 @@ import {
 import clsx from 'clsx';
 import formatDate from 'date-fns/format';
 import getDaysInMonth from 'date-fns/getDaysInMonth';
+import { result } from 'lodash';
 import {
   ReactElement,
   Ref,
@@ -30,8 +32,8 @@ import { mergeRefs } from 'react-merge-refs';
 
 import { useReactRouterDOMSearchParams } from '../../hooks/ReactRouterDOM';
 import RenderIfVisible from '../RenderIfVisible';
-import { BaseDataRow } from '../Table';
-import { BaseTimelineChartProps } from './interfaces';
+import { BaseDataRow, Table } from '../Table';
+import { BaseTimelineChartProps } from './models';
 import TimelineChartBodyDataRow from './TimelineChartBodyDataRow';
 import TimelineChartDataLabelRow, {
   TimelineChartDataLabelRowProps,
@@ -71,6 +73,23 @@ declare module '@mui/material/styles/components' {
   }
 }
 
+const timelineMonthMinWidth = 120;
+
+const fullMonthLabels = [
+  'January',
+  'Febuary',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+];
+
 export interface TimelineChartProps<RecordRow extends BaseDataRow = any>
   extends BaseTimelineChartProps<RecordRow>,
     Pick<
@@ -82,6 +101,9 @@ export interface TimelineChartProps<RecordRow extends BaseDataRow = any>
   expandedRows?: string[];
   allRowsExpanded?: boolean;
   onChangeExpanded?: (expandedRows: string[]) => void;
+  startDateProperty: keyof RecordRow;
+  endDateProperty: keyof RecordRow;
+  legacy?: boolean;
 }
 
 export function getTimelineChartUtilityClass(slot: string): string {
@@ -110,6 +132,9 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
     onChangeExpanded: onChangeExpandedProp,
     onSelectTimeline,
     getTimelines,
+    legacy = false,
+    startDateProperty,
+    endDateProperty,
     ...rest
   } = props;
 
@@ -125,13 +150,73 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
     })()
   );
 
-  const onChangeExpandedRef = useRef(onChangeExpandedProp);
-  const getTimelinesRef = useRef(getTimelines);
+  const { minDate, maxDate, timelineYears } = useMemo(() => {
+    const allDates = rows
+      .flatMap((row) => {
+        const dates: Date[] = [];
+        const startDateValue = result(row, startDateProperty);
+        if (startDateValue) {
+          if (startDateValue instanceof Date) {
+            dates.push(startDateValue);
+          } else {
+            const parsedStartDateValue = new Date(startDateValue as any);
+            if (!isNaN(parsedStartDateValue.getTime())) {
+              dates.push(parsedStartDateValue);
+            }
+          }
+        }
+        const endDateValue = result(row, endDateProperty);
+        if (endDateValue) {
+          if (endDateValue instanceof Date) {
+            dates.push(endDateValue);
+          } else {
+            const parsedEndDateValue = new Date(endDateValue as any);
+            if (!isNaN(parsedEndDateValue.getTime())) {
+              dates.push(parsedEndDateValue);
+            }
+          }
+        }
+        return dates;
+      })
+      .sort((a, b) => a.getTime() - b.getTime());
 
-  useEffect(() => {
-    onChangeExpandedRef.current = onChangeExpandedProp;
-    getTimelinesRef.current = getTimelines;
-  }, [getTimelines, onChangeExpandedProp]);
+    const { maxDate, minDate } = (() => {
+      if (allDates.length > 0) {
+        const minDate = new Date(allDates[0].getFullYear(), 0, 1);
+        const maxDate = new Date(
+          allDates[allDates.length - 1].getFullYear(),
+          11,
+          31
+        );
+        return { minDate, maxDate };
+      }
+      const thisYear = new Date().getFullYear();
+      return {
+        minDate: new Date(thisYear, 0, 1),
+        maxDate: new Date(thisYear, 11, 31),
+      };
+    })();
+
+    const minDateYear = minDate.getFullYear();
+    const maxDateYear = maxDate.getFullYear();
+    const timelineYears: number[] = [];
+
+    for (let year = minDateYear; year <= maxDateYear; year++) {
+      timelineYears.push(year);
+    }
+
+    return {
+      minDate,
+      maxDate,
+      timelineYears,
+    };
+  }, [endDateProperty, rows, startDateProperty]);
+
+  //#region Legacy
+  const onChangeExpandedRef = useRef(onChangeExpandedProp);
+  onChangeExpandedRef.current = onChangeExpandedProp;
+  const getTimelinesRef = useRef(getTimelines);
+  getTimelinesRef.current = getTimelines;
 
   const { palette } = useTheme();
   const thisYear = useMemo(() => {
@@ -354,144 +439,259 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
     }
   }, [searchParamSelectedYear, setSearchParams, thisYear]);
 
-  return (
-    <Grid
-      {...rest}
-      className={clsx(classes.root)}
-      ref={mergeRefs([
-        (rootElement: HTMLDivElement | null) => {
-          setRootElement(rootElement);
-        },
-        ref,
-      ])}
-      container
-    >
-      {/* Row labels column */}
+  if (legacy) {
+    return (
       <Grid
-        item
-        className="team-assignments-timeline-data-row-container"
-        sx={{
-          width: 256,
-          zIndex: 2,
-          bgcolor: palette.background.paper,
-        }}
+        {...rest}
+        className={clsx(classes.root)}
+        ref={mergeRefs([
+          (rootElement: HTMLDivElement | null) => {
+            setRootElement(rootElement);
+          },
+          ref,
+        ])}
+        container
       >
-        <Box
+        {/* Row labels column */}
+        <Grid
+          item
+          className="team-assignments-timeline-data-row-container"
           sx={{
-            height: 80,
-            borderRight: `1px solid ${palette.divider}`,
-            borderBottom: `1px solid ${palette.divider}`,
+            width: 256,
+            zIndex: 2,
+            bgcolor: palette.background.paper,
           }}
-        />
-        {rows.map((row) => {
-          return (
-            <RenderIfVisible
-              key={row.id}
-              displayPlaceholder={false}
-              unWrapChildrenIfVisible
-              sx={{
-                height: 50,
-              }}
-            >
-              <TimelineChartDataLabelRow
-                {...{
-                  onChangeExpanded,
-                  row,
-                  getTimelines,
-                  rowLabelProperty,
-                  getRowLabel,
-                }}
-                expanded={allRowsExpanded || expandedRows.includes(row.id)}
-              />
-            </RenderIfVisible>
-          );
-        })}
-      </Grid>
-
-      {/* Row Timelines column */}
-      <Grid
-        ref={(timelineWrapperElement: HTMLDivElement | null) => {
-          setTimelineWrapperElement(timelineWrapperElement);
-        }}
-        item
-        xs
-        sx={{
-          minWidth: 0,
-          position: 'relative',
-        }}
-      >
-        <TimelineChartNavigationControls {...{ selectedYear }} />
-        <Box
-          ref={(timelineElement: HTMLDivElement | null) => {
-            setTimelineElement(timelineElement);
-          }}
-          sx={{ minWidth: 800 }}
         >
-          <TimelineChartHeader {...{ selectedYear }} />
           <Box
-            component="section"
-            className="team-assignments-timeline-data-row-container"
             sx={{
-              position: 'relative',
-              mb: 3,
-              '&>div:last-of-type .team-assignments-timeline-column': {
-                borderBottom: `1px solid ${palette.divider}`,
-              },
+              height: 80,
+              borderRight: `1px solid ${palette.divider}`,
+              borderBottom: `1px solid ${palette.divider}`,
             }}
-          >
-            {todaysDatePercentage ? (
-              <Box
+          />
+          {rows.map((row) => {
+            return (
+              <RenderIfVisible
+                key={row.id}
+                displayPlaceholder={false}
+                unWrapChildrenIfVisible
                 sx={{
-                  position: 'absolute',
-                  top: 0,
-                  bottom: 0,
-                  left: `calc(${todaysDatePercentage}% - 1px)`,
-                  border: `1px solid ${palette.primary.main}`,
+                  height: 50,
                 }}
               >
-                <Tooltip title={formatDate(new Date(), 'MMM dd, yyyy')}>
-                  <Typography
-                    variant="body2"
-                    color="primary"
-                    sx={{
-                      position: 'absolute',
-                      top: `calc(100% + 2px)`,
-                      left: '-20px',
-                      fontSize: 12,
-                    }}
-                  >
-                    Today
-                  </Typography>
-                </Tooltip>
-              </Box>
-            ) : null}
-            {rows.map((row) => {
-              return (
-                <RenderIfVisible
-                  key={row.id}
-                  displayPlaceholder={false}
-                  unWrapChildrenIfVisible
+                <TimelineChartDataLabelRow
+                  {...{
+                    onChangeExpanded,
+                    row,
+                    getTimelines,
+                    rowLabelProperty,
+                    getRowLabel,
+                  }}
+                  expanded={allRowsExpanded || expandedRows.includes(row.id)}
+                />
+              </RenderIfVisible>
+            );
+          })}
+        </Grid>
+
+        {/* Row Timelines column */}
+        <Grid
+          ref={(timelineWrapperElement: HTMLDivElement | null) => {
+            setTimelineWrapperElement(timelineWrapperElement);
+          }}
+          item
+          xs
+          sx={{
+            minWidth: 0,
+            position: 'relative',
+          }}
+        >
+          <TimelineChartNavigationControls {...{ selectedYear }} />
+          <Box
+            ref={(timelineElement: HTMLDivElement | null) => {
+              setTimelineElement(timelineElement);
+            }}
+            sx={{ minWidth: 800 }}
+          >
+            <TimelineChartHeader {...{ selectedYear }} />
+            <Box
+              component="section"
+              className="team-assignments-timeline-data-row-container"
+              sx={{
+                position: 'relative',
+                mb: 3,
+                '&>div:last-of-type .team-assignments-timeline-column': {
+                  borderBottom: `1px solid ${palette.divider}`,
+                },
+              }}
+            >
+              {todaysDatePercentage ? (
+                <Box
                   sx={{
-                    height: 50,
+                    position: 'absolute',
+                    top: 0,
+                    bottom: 0,
+                    left: `calc(${todaysDatePercentage}% - 1px)`,
+                    border: `1px solid ${palette.primary.main}`,
                   }}
                 >
-                  <TimelineChartBodyDataRow
-                    {...{
-                      row,
-                      onSelectTimeline,
-                      onChangeExpanded,
-                      selectedYear,
-                      getTimelines,
+                  <Tooltip title={formatDate(new Date(), 'MMM dd, yyyy')}>
+                    <Typography
+                      variant="body2"
+                      color="primary"
+                      sx={{
+                        position: 'absolute',
+                        top: `calc(100% + 2px)`,
+                        left: '-20px',
+                        fontSize: 12,
+                      }}
+                    >
+                      Today
+                    </Typography>
+                  </Tooltip>
+                </Box>
+              ) : null}
+              {rows.map((row) => {
+                return (
+                  <RenderIfVisible
+                    key={row.id}
+                    displayPlaceholder={false}
+                    unWrapChildrenIfVisible
+                    sx={{
+                      height: 50,
                     }}
-                    expanded={allRowsExpanded || expandedRows.includes(row.id)}
-                  />
-                </RenderIfVisible>
-              );
-            })}
+                  >
+                    <TimelineChartBodyDataRow
+                      {...{
+                        row,
+                        onSelectTimeline,
+                        onChangeExpanded,
+                        selectedYear,
+                        getTimelines,
+                      }}
+                      expanded={
+                        allRowsExpanded || expandedRows.includes(row.id)
+                      }
+                    />
+                  </RenderIfVisible>
+                );
+              })}
+            </Box>
           </Box>
-        </Box>
+        </Grid>
       </Grid>
-    </Grid>
+    );
+  }
+  //#endregion
+
+  console.log({ minDate, maxDate });
+
+  return (
+    <Table
+      columns={[
+        {
+          id: 'label',
+          label: 'Label',
+          width: 256,
+          showHeaderText: false,
+          getColumnValue: (row) => {
+            if (getRowLabel) {
+              return getRowLabel(row);
+            }
+            if (rowLabelProperty) {
+              return result(row, rowLabelProperty);
+            }
+          },
+        },
+        {
+          id: 'timeline',
+          label: (
+            <Stack
+              sx={{
+                width: '100%',
+              }}
+            >
+              <Box
+                sx={{
+                  display: 'flex',
+                }}
+              >
+                {timelineYears.map((year) => {
+                  return (
+                    <Box
+                      key={year}
+                      sx={{
+                        width: timelineMonthMinWidth * 12,
+                        height: 40,
+                        display: 'flex',
+                        alignItems: 'center',
+                        px: 2,
+                      }}
+                    >
+                      <Typography variant="body2" noWrap>
+                        {year}
+                      </Typography>
+                    </Box>
+                  );
+                })}
+              </Box>
+              <Box
+                sx={{
+                  display: 'flex',
+                }}
+              >
+                {timelineYears.map(() => {
+                  return fullMonthLabels.map((month) => {
+                    return (
+                      <Box
+                        key={month}
+                        sx={{
+                          width: timelineMonthMinWidth,
+                          height: 40,
+                          display: 'flex',
+                          alignItems: 'center',
+                          flex: 1,
+                          minWidth: 0,
+                          px: 2,
+                        }}
+                      >
+                        <Typography variant="body2" noWrap>
+                          {month}
+                        </Typography>
+                      </Box>
+                    );
+                  });
+                })}
+              </Box>
+            </Stack>
+          ),
+          getColumnValue: (row) => {
+            return `${result(row, startDateProperty)} - ${result(
+              row,
+              endDateProperty
+            )}`;
+          },
+          width: timelineMonthMinWidth * timelineYears.length * 12,
+          wrapColumnContentInFieldValue: false,
+          sx: {
+            '&>div': {
+              p: 0,
+            },
+          },
+        },
+        {
+          id: 'gutter',
+          label: 'Gutter',
+          width: 40,
+          showHeaderText: false,
+        },
+      ]}
+      paging={false}
+      bordersVariant="square"
+      rows={rows}
+      startStickyColumnIndex={0}
+      stickyHeader
+    />
   );
 };
 

@@ -38,9 +38,24 @@ export type Contact = {
   accountBalance: number;
   source: ContactSource;
   countryCode: CountryCode;
+  joinedAt?: string;
+  leftAt?: string;
 };
 
 export const contacts = Array.from({ length: 1000 }).map((_, index) => {
+  const joinedAtDate = new Date();
+  const randomYearOffset = Math.floor(Math.random() * 10);
+  joinedAtDate.setFullYear(joinedAtDate.getFullYear() + 5 - randomYearOffset);
+  joinedAtDate.setMonth(Math.floor(Math.random() * 11));
+  joinedAtDate.setDate(Math.floor(Math.random() * 28));
+
+  const leftAtDate = new Date(joinedAtDate);
+  leftAtDate.setFullYear(
+    leftAtDate.getFullYear() + Math.floor(Math.random() * 3)
+  );
+  leftAtDate.setMonth(Math.floor(Math.random() * 11));
+  leftAtDate.setDate(Math.floor(Math.random() * 28));
+
   return {
     id: String(index),
     name: uniqueNamesGenerator({
@@ -54,6 +69,8 @@ export const contacts = Array.from({ length: 1000 }).map((_, index) => {
     accountBalance: Math.round(Math.random() * 1000_000),
     source: contactSources[Math.floor(Math.random() * contactSources.length)],
     countryCode: countryCodes[Math.floor(Math.random() * countryCodes.length)],
+    joinedAt: joinedAtDate.toISOString(),
+    leftAt: leftAtDate.toISOString(),
   } as Contact;
 });
 
