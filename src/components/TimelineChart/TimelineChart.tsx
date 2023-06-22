@@ -371,6 +371,12 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
         block: 'start',
         inline: 'center',
       });
+      setTimeout(() => {
+        tableElementRef.current?.parentElement?.scrollTo({
+          top: 0,
+          behavior: 'smooth',
+        });
+      }, 1000);
     }
   };
   const scrollToTodayRef = useRef(scrollToToday);
