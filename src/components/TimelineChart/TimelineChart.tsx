@@ -368,6 +368,20 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
     timeScaleWidth: number;
   } => {
     switch (selectedTimeScale) {
+      case '5 year':
+        return {
+          timeScaleRows: [
+            timelineYears.flatMap((year) => {
+              return String(year);
+            }),
+            timelineYears.map(() => {
+              return ['Q1', 'Q2', 'Q3', 'Q4'];
+            }),
+          ],
+          unitTimeScaleWidth: baseTimeScaleWidth * 12,
+          timeScaleWidth:
+            ((baseTimeScaleWidth * timelineYears.length) / 4) * 12,
+        };
       default:
         return {
           timeScaleRows: [
@@ -462,7 +476,7 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
                       (middleTimeScaleRowColumn) => {
                         return (
                           <Box
-                            key={middleTimeScaleRowColumn}
+                            key={index + middleTimeScaleRowColumn}
                             sx={{
                               flex: 1,
                               overflow: 'hidden',
