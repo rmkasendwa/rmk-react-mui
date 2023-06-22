@@ -1,6 +1,10 @@
+import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
+import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import {
   Box,
   BoxProps,
+  Button,
+  ButtonGroup,
   CircularProgress,
   ComponentsOverrides,
   ComponentsProps,
@@ -22,6 +26,7 @@ import differenceInDays from 'date-fns/differenceInDays';
 import formatDate from 'date-fns/format';
 import getDaysInMonth from 'date-fns/getDaysInMonth';
 import isAfter from 'date-fns/isAfter';
+import isBefore from 'date-fns/isBefore';
 import { result } from 'lodash';
 import {
   Fragment,
@@ -41,6 +46,8 @@ import { mergeRefs } from 'react-merge-refs';
 import scrollIntoView from 'scroll-into-view-if-needed';
 
 import { useReactRouterDOMSearchParams } from '../../hooks/ReactRouterDOM';
+import DataDropdownField from '../InputFields/DataDropdownField';
+import DateInputField from '../InputFields/DateInputField';
 import RenderIfVisible from '../RenderIfVisible';
 import { BaseDataRow, Table, TableColumn } from '../Table';
 import { BaseTimelineChartProps } from './models';
@@ -800,30 +807,33 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
             </Box>
           </Stack>
           {(() => {
-            const offsetPercentage =
-              differenceInDays(new Date(), minDate) / totalNumberOfDays;
-            return (
-              <Box
-                ref={(element: HTMLDivElement) => {
-                  if (element) {
-                    scrollIntoView(element, {
-                      scrollMode: 'if-needed',
-                      behavior: 'smooth',
-                      block: 'center',
-                      inline: 'center',
-                    });
-                  }
-                }}
-                sx={{
-                  position: 'absolute',
-                  width: 2,
-                  bgcolor: palette.primary.main,
-                  height: rows.length * 51,
-                  top: '100%',
-                  left: `${offsetPercentage * 100}%`,
-                }}
-              />
-            );
+            const today = new Date();
+            if (isAfter(today, minDate) && isBefore(today, maxDate)) {
+              const offsetPercentage =
+                differenceInDays(today, minDate) / totalNumberOfDays;
+              return (
+                <Box
+                  ref={(element: HTMLDivElement) => {
+                    if (element) {
+                      scrollIntoView(element, {
+                        scrollMode: 'if-needed',
+                        behavior: 'smooth',
+                        block: 'center',
+                        inline: 'center',
+                      });
+                    }
+                  }}
+                  sx={{
+                    position: 'absolute',
+                    width: 2,
+                    bgcolor: palette.primary.main,
+                    height: rows.length * 51,
+                    top: '100%',
+                    left: `${offsetPercentage * 100}%`,
+                  }}
+                />
+              );
+            }
           })()}
         </>
       ),
@@ -880,6 +890,7 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
       width: timelineMonthMinWidth * timelineYears.length * 12,
       wrapColumnContentInFieldValue: false,
       headerSx: {
+        pt: '50px',
         '&>div': {
           p: 0,
         },
@@ -932,19 +943,88 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
   }
 
   return (
-    <Table
-      columns={columns}
-      paging={false}
-      bordersVariant="square"
-      rows={rows}
-      startStickyColumnIndex={0}
-      stickyHeader
-      sx={{
-        tr: {
-          verticalAlign: 'middle',
-        },
-      }}
-    />
+    <>
+      <Box
+        sx={{
+          height: 0,
+          zIndex: 5,
+          position: 'sticky',
+          top: 0,
+          left: 0,
+        }}
+      >
+        <Grid
+          container
+          spacing={1}
+          sx={{
+            px: 3,
+            py: 1,
+            alignItems: 'center',
+            position: 'sticky',
+            right: 0,
+            display: 'inline-flex',
+            justifyContent: 'end',
+          }}
+        >
+          <Grid item xs />
+          <Grid item>
+            <DateInputField
+              placeholder="From"
+              size="small"
+              sx={{
+                width: 150,
+              }}
+            />
+          </Grid>
+          <Grid item>
+            <DateInputField
+              placeholder="To"
+              size="small"
+              sx={{
+                width: 150,
+              }}
+            />
+          </Grid>
+          <Grid item>
+            <DataDropdownField
+              placeholder="Timescale"
+              size="small"
+              sx={{
+                width: 120,
+              }}
+            />
+          </Grid>
+          <Grid item>
+            <Button variant="outlined" color="inherit" size="small">
+              Today
+            </Button>
+          </Grid>
+          <Grid item>
+            <ButtonGroup size="small" color="inherit">
+              <Button>
+                <NavigateBeforeIcon />
+              </Button>
+              <Button>
+                <NavigateNextIcon />
+              </Button>
+            </ButtonGroup>
+          </Grid>
+        </Grid>
+      </Box>
+      <Table
+        columns={columns}
+        paging={false}
+        bordersVariant="square"
+        rows={rows}
+        startStickyColumnIndex={0}
+        stickyHeader
+        sx={{
+          tr: {
+            verticalAlign: 'middle',
+          },
+        }}
+      />
+    </>
   );
 };
 
