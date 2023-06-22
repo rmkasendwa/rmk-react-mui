@@ -38,6 +38,7 @@ import {
   useState,
 } from 'react';
 import { mergeRefs } from 'react-merge-refs';
+import scrollIntoView from 'scroll-into-view-if-needed';
 
 import { useReactRouterDOMSearchParams } from '../../hooks/ReactRouterDOM';
 import RenderIfVisible from '../RenderIfVisible';
@@ -701,95 +702,130 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
     {
       id: 'timeline',
       label: (
-        <Stack
-          sx={{
-            width: '100%',
-          }}
-        >
-          <Box
+        <>
+          <Stack
             sx={{
-              display: 'flex',
+              width: '100%',
             }}
           >
-            {timelineYears.map((year) => {
-              return (
-                <Box
-                  key={year}
-                  sx={{
-                    flex: 1,
-                    overflow: 'hidden',
-                    minWidth: 0,
-                    height: 24,
-                    display: 'flex',
-                    alignItems: 'center',
-                    px: (() => {
-                      if (showRowLabelsColumn) {
-                        return 2;
-                      }
-                      return 3;
-                    })(),
-                  }}
-                >
-                  <Typography
-                    variant="body2"
-                    noWrap
+            <Box
+              sx={{
+                display: 'flex',
+              }}
+            >
+              {timelineYears.map((year) => {
+                return (
+                  <Box
+                    key={year}
                     sx={{
-                      fontWeight: 'bold',
+                      flex: 1,
+                      minWidth: 0,
+                      height: 24,
+                      display: 'flex',
+                      alignItems: 'center',
                     }}
                   >
-                    {year}
-                  </Typography>
-                </Box>
-              );
-            })}
-          </Box>
-          <Box
-            sx={{
-              display: 'flex',
-            }}
-          >
-            {timelineYears.map((year) => {
-              return (
-                <Box
-                  key={year}
-                  sx={{
-                    flex: 1,
-                    overflow: 'hidden',
-                    minWidth: 0,
-                    display: 'flex',
-                    alignItems: 'center',
-                  }}
-                >
-                  {fullMonthLabels.map((month) => {
-                    return (
-                      <Box
-                        key={month}
+                    <Box
+                      sx={{
+                        position: 'sticky',
+                        overflow: 'hidden',
+                        left: showRowLabelsColumn ? 256 : 0,
+                        px: (() => {
+                          if (showRowLabelsColumn) {
+                            return 2;
+                          }
+                          return 3;
+                        })(),
+                      }}
+                    >
+                      <Typography
+                        variant="body2"
+                        noWrap
                         sx={{
-                          flex: 1,
-                          overflow: 'hidden',
-                          minWidth: 0,
-                          height: 24,
-                          display: 'flex',
-                          alignItems: 'center',
-                          px: (() => {
-                            if (showRowLabelsColumn) {
-                              return 2;
-                            }
-                            return 3;
-                          })(),
+                          fontWeight: 'bold',
                         }}
                       >
-                        <Typography variant="body2" noWrap>
-                          {month}
-                        </Typography>
-                      </Box>
-                    );
-                  })}
-                </Box>
-              );
-            })}
-          </Box>
-        </Stack>
+                        {year}
+                      </Typography>
+                    </Box>
+                  </Box>
+                );
+              })}
+            </Box>
+            <Box
+              sx={{
+                display: 'flex',
+              }}
+            >
+              {timelineYears.map((year) => {
+                return (
+                  <Box
+                    key={year}
+                    sx={{
+                      flex: 1,
+                      overflow: 'hidden',
+                      minWidth: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                    }}
+                  >
+                    {fullMonthLabels.map((month) => {
+                      return (
+                        <Box
+                          key={month}
+                          sx={{
+                            flex: 1,
+                            overflow: 'hidden',
+                            minWidth: 0,
+                            height: 24,
+                            display: 'flex',
+                            alignItems: 'center',
+                            px: (() => {
+                              if (showRowLabelsColumn) {
+                                return 2;
+                              }
+                              return 3;
+                            })(),
+                          }}
+                        >
+                          <Typography variant="body2" noWrap>
+                            {month}
+                          </Typography>
+                        </Box>
+                      );
+                    })}
+                  </Box>
+                );
+              })}
+            </Box>
+          </Stack>
+          {(() => {
+            const offsetPercentage =
+              differenceInDays(new Date(), minDate) / totalNumberOfDays;
+            return (
+              <Box
+                ref={(element: HTMLDivElement) => {
+                  if (element) {
+                    scrollIntoView(element, {
+                      scrollMode: 'if-needed',
+                      behavior: 'smooth',
+                      block: 'center',
+                      inline: 'center',
+                    });
+                  }
+                }}
+                sx={{
+                  position: 'absolute',
+                  width: 2,
+                  bgcolor: palette.primary.main,
+                  height: rows.length * 51,
+                  top: '100%',
+                  left: `${offsetPercentage * 100}%`,
+                }}
+              />
+            );
+          })()}
+        </>
       ),
       getColumnValue: (row) => {
         if (getTimelineElements) {
@@ -873,6 +909,9 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
         if (rowLabelProperty) {
           return result(row, rowLabelProperty);
         }
+      },
+      bodySx: {
+        zIndex: 2,
       },
     });
     columns.push({

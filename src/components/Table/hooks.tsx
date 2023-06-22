@@ -415,12 +415,12 @@ export const useTable = <DataRow extends BaseDataRow>(
               }, 0),
           };
           column.headerSx = {
-            ...baseHeaderSx,
             zIndex: 5,
+            ...baseHeaderSx,
           };
           column.bodySx = {
-            ...baseBodySx,
             zIndex: 1,
+            ...baseBodySx,
           };
           column.opaque = true;
         });
