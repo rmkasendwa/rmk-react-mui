@@ -342,46 +342,53 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
             <Box
               sx={{
                 display: 'flex',
+                height: 56,
+                alignItems: 'center',
               }}
             >
-              {timelineYears.map((year) => {
-                return (
-                  <Box
-                    key={year}
-                    sx={{
-                      flex: 1,
-                      minWidth: 0,
-                      height: 24,
-                      display: 'flex',
-                      alignItems: 'center',
-                    }}
-                  >
+              {timelineYears
+                .flatMap((year) => {
+                  return ['Q1', 'Q2', 'Q3', 'Q4'].map((quarter) => {
+                    return `${quarter} ${year}`;
+                  });
+                })
+                .map((quarter) => {
+                  return (
                     <Box
+                      key={quarter}
                       sx={{
-                        position: 'sticky',
-                        overflow: 'hidden',
-                        left: showRowLabelsColumn ? 256 : 0,
-                        px: (() => {
-                          if (showRowLabelsColumn) {
-                            return 2;
-                          }
-                          return 3;
-                        })(),
+                        flex: 1,
+                        minWidth: 0,
+                        display: 'flex',
+                        alignItems: 'center',
                       }}
                     >
-                      <Typography
-                        variant="body2"
-                        noWrap
+                      <Box
                         sx={{
-                          fontWeight: 'bold',
+                          position: 'sticky',
+                          overflow: 'hidden',
+                          left: showRowLabelsColumn ? 256 : 0,
+                          px: (() => {
+                            if (showRowLabelsColumn) {
+                              return 2;
+                            }
+                            return 3;
+                          })(),
                         }}
                       >
-                        {year}
-                      </Typography>
+                        <Typography
+                          variant="body2"
+                          noWrap
+                          sx={{
+                            fontWeight: 500,
+                          }}
+                        >
+                          {quarter}
+                        </Typography>
+                      </Box>
                     </Box>
-                  </Box>
-                );
-              })}
+                  );
+                })}
             </Box>
             <Box
               sx={{
@@ -517,7 +524,6 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
       width: timelineMonthMinWidth * timelineYears.length * 12,
       wrapColumnContentInFieldValue: false,
       headerSx: {
-        pt: '50px',
         '&>div': {
           p: 0,
         },
@@ -578,11 +584,12 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
           position: 'sticky',
           top: 0,
           left: 0,
+          display: 'flex',
         }}
       >
+        <Box sx={{ flex: 1 }} />
         <Grid
           container
-          spacing={1}
           sx={{
             px: 3,
             py: 1,
@@ -590,10 +597,12 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
             position: 'sticky',
             right: 0,
             display: 'inline-flex',
-            justifyContent: 'end',
+            gap: 1,
+            bgcolor: palette.background.paper,
+            height: 56,
+            width: 'auto',
           }}
         >
-          <Grid item xs />
           <Grid item>
             <DateInputField
               placeholder="From"
@@ -650,7 +659,13 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
             </Button>
           </Grid>
           <Grid item>
-            <ButtonGroup size="small" color="inherit">
+            <ButtonGroup
+              size="small"
+              color="inherit"
+              sx={{
+                display: 'flex',
+              }}
+            >
               <Button
                 onClick={() => {
                   tableElementRef.current?.parentElement?.scrollBy({
