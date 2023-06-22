@@ -1,6 +1,7 @@
 import {
   Box,
   BoxProps,
+  CircularProgress,
   ComponentsOverrides,
   ComponentsProps,
   ComponentsVariants,
@@ -20,12 +21,16 @@ import clsx from 'clsx';
 import differenceInDays from 'date-fns/differenceInDays';
 import formatDate from 'date-fns/format';
 import getDaysInMonth from 'date-fns/getDaysInMonth';
+import isAfter from 'date-fns/isAfter';
 import { result } from 'lodash';
 import {
+  Fragment,
   ReactElement,
   ReactNode,
   Ref,
+  Suspense,
   forwardRef,
+  lazy,
   useCallback,
   useEffect,
   useMemo,
@@ -36,12 +41,10 @@ import { mergeRefs } from 'react-merge-refs';
 
 import { useReactRouterDOMSearchParams } from '../../hooks/ReactRouterDOM';
 import RenderIfVisible from '../RenderIfVisible';
-import { BaseDataRow, Table } from '../Table';
+import { BaseDataRow, Table, TableColumn } from '../Table';
 import { BaseTimelineChartProps } from './models';
 import TimelineChartBodyDataRow from './TimelineChartBodyDataRow';
-import TimelineChartDataLabelRow, {
-  TimelineChartDataLabelRowProps,
-} from './TimelineChartDataLabelRow';
+import TimelineChartDataLabelRow from './TimelineChartDataLabelRow';
 import TimelineChartHeader from './TimelineChartHeader';
 import TimelineChartNavigationControls from './TimelineChartNavigationControls';
 
@@ -94,13 +97,18 @@ const fullMonthLabels = [
   'December',
 ];
 
+export interface TimelineElement extends Partial<BoxProps> {
+  startDate?: string | number | Date;
+  endDate?: string | number | Date;
+  label?: ReactNode;
+  TooltipProps?: Partial<TooltipProps>;
+}
+
 export interface TimelineChartProps<RecordRow extends BaseDataRow = any>
   extends BaseTimelineChartProps<RecordRow>,
-    Pick<
-      TimelineChartDataLabelRowProps<RecordRow>,
-      'rowLabelProperty' | 'getRowLabel'
-    >,
     Partial<Pick<GridProps, 'className' | 'sx'>> {
+  rowLabelProperty?: keyof RecordRow;
+  getRowLabel?: (row: RecordRow) => ReactNode;
   rows: RecordRow[];
   expandedRows?: string[];
   allRowsExpanded?: boolean;
@@ -110,9 +118,11 @@ export interface TimelineChartProps<RecordRow extends BaseDataRow = any>
   getTimelineElementTooltipProps?: (
     timelineElement: RecordRow
   ) => Partial<TooltipProps>;
-  getTimelineElementStyles?: (timelineElement: RecordRow) => BoxProps['sx'];
+  getTimelineElementProps?: (timelineElement: RecordRow) => BoxProps;
   startDateProperty: keyof RecordRow;
   endDateProperty: keyof RecordRow;
+  showRowLabelsColumn?: boolean;
+  getTimelineElements?: (row: RecordRow) => Promise<TimelineElement[]>;
   legacy?: boolean;
 }
 
@@ -142,13 +152,15 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
     onChangeExpanded: onChangeExpandedProp,
     onSelectTimeline,
     getTimelines,
-    legacy = false,
     startDateProperty,
     endDateProperty,
     timelineElementLabelProperty,
     getTimelineElementLabel,
     getTimelineElementTooltipProps,
-    getTimelineElementStyles,
+    getTimelineElementProps,
+    getTimelineElements,
+    showRowLabelsColumn = true,
+    legacy = false,
     ...rest
   } = props;
 
@@ -600,79 +612,171 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
   }
   //#endregion
 
-  return (
-    <Table
-      columns={[
-        {
-          id: 'label',
-          label: 'Label',
-          width: 256,
-          showHeaderText: false,
-          getColumnValue: (row) => {
-            if (getRowLabel) {
-              return getRowLabel(row);
+  const getTimelineElementNode = ({
+    startDate: startDateValue,
+    endDate: endDateValue,
+    label,
+    TooltipProps = {},
+    sx,
+    ...rest
+  }: TimelineElement) => {
+    if (startDateValue) {
+      const startDate = new Date(startDateValue as any);
+      if (!isNaN(startDate.getTime())) {
+        const endDate = (() => {
+          if (endDateValue) {
+            const endDate = new Date(endDateValue as any);
+            if (!isNaN(endDate.getTime())) {
+              return endDate;
             }
-            if (rowLabelProperty) {
-              return result(row, rowLabelProperty);
+          }
+          return maxDate;
+        })();
+        if (isAfter(endDate, startDate)) {
+          const numberOfDays = differenceInDays(endDate, startDate);
+          const offsetPercentage =
+            differenceInDays(startDate, minDate) / totalNumberOfDays;
+          const percentage = numberOfDays / totalNumberOfDays;
+
+          const baseTimelineElementLabel = `${formatDate(
+            startDate,
+            'MMM dd, yyyy'
+          )} - ${formatDate(endDate, 'MMM dd, yyyy')}`;
+
+          const timelineElementLabel = ((): ReactNode => {
+            if (label) {
+              return label;
             }
-          },
-        },
-        {
-          id: 'timeline',
-          label: (
-            <Stack
-              sx={{
-                width: '100%',
+            return baseTimelineElementLabel;
+          })();
+
+          const {
+            PopperProps: TooltipPropsPopperProps = {},
+            ...TooltipPropsRest
+          } = TooltipProps;
+
+          return (
+            <Tooltip
+              title={baseTimelineElementLabel}
+              followCursor
+              {...TooltipPropsRest}
+              PopperProps={{
+                ...TooltipPropsPopperProps,
+                sx: {
+                  pointerEvents: 'none',
+                  ...TooltipPropsPopperProps.sx,
+                },
               }}
             >
               <Box
+                {...rest}
                 sx={{
+                  overflow: 'hidden',
+                  cursor: 'pointer',
                   display: 'flex',
+                  alignItems: 'center',
+                  px: 2,
+                  border: `1px solid ${palette.divider}`,
+                  ...sx,
+                  width: `${percentage * 100}%`,
+                  position: 'absolute',
+                  top: 0,
+                  left: `${offsetPercentage * 100}%`,
+                  height: 34,
+                  borderRadius: '4px',
                 }}
               >
-                {timelineYears.map((year) => {
-                  return (
-                    <Box
-                      key={year}
-                      sx={{
-                        width: timelineMonthMinWidth * 12,
-                        height: 24,
-                        display: 'flex',
-                        alignItems: 'center',
-                        px: 2,
-                      }}
-                    >
-                      <Typography
-                        variant="body2"
-                        noWrap
-                        sx={{
-                          fontWeight: 'bold',
-                        }}
-                      >
-                        {year}
-                      </Typography>
-                    </Box>
-                  );
-                })}
+                <Typography variant="body2" noWrap>
+                  {timelineElementLabel}
+                </Typography>
               </Box>
-              <Box
-                sx={{
-                  display: 'flex',
-                }}
-              >
-                {timelineYears.map(() => {
-                  return fullMonthLabels.map((month) => {
+            </Tooltip>
+          );
+        }
+      }
+    }
+  };
+
+  const columns: TableColumn<RecordRow>[] = [
+    {
+      id: 'timeline',
+      label: (
+        <Stack
+          sx={{
+            width: '100%',
+          }}
+        >
+          <Box
+            sx={{
+              display: 'flex',
+            }}
+          >
+            {timelineYears.map((year) => {
+              return (
+                <Box
+                  key={year}
+                  sx={{
+                    flex: 1,
+                    overflow: 'hidden',
+                    minWidth: 0,
+                    height: 24,
+                    display: 'flex',
+                    alignItems: 'center',
+                    px: (() => {
+                      if (showRowLabelsColumn) {
+                        return 2;
+                      }
+                      return 3;
+                    })(),
+                  }}
+                >
+                  <Typography
+                    variant="body2"
+                    noWrap
+                    sx={{
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    {year}
+                  </Typography>
+                </Box>
+              );
+            })}
+          </Box>
+          <Box
+            sx={{
+              display: 'flex',
+            }}
+          >
+            {timelineYears.map((year) => {
+              return (
+                <Box
+                  key={year}
+                  sx={{
+                    flex: 1,
+                    overflow: 'hidden',
+                    minWidth: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                  }}
+                >
+                  {fullMonthLabels.map((month) => {
                     return (
                       <Box
                         key={month}
                         sx={{
-                          width: timelineMonthMinWidth,
+                          flex: 1,
+                          overflow: 'hidden',
+                          minWidth: 0,
                           height: 24,
                           display: 'flex',
                           alignItems: 'center',
-                          flex: 1,
-                          minWidth: 0,
-                          px: 2,
+                          px: (() => {
+                            if (showRowLabelsColumn) {
+                              return 2;
+                            }
+                            return 3;
+                          })(),
                         }}
                       >
                         <Typography variant="body2" noWrap>
@@ -680,127 +784,117 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
                         </Typography>
                       </Box>
                     );
-                  });
-                })}
-              </Box>
-            </Stack>
-          ),
-          getColumnValue: (row) => {
-            const startDateValue = result(row, startDateProperty);
-
-            if (startDateValue) {
-              const startDate = new Date(startDateValue as any);
-              if (!isNaN(startDate.getTime())) {
-                const endDate = (() => {
-                  const endDateValue = result(row, endDateProperty);
-                  if (endDateValue) {
-                    const endDate = new Date(endDateValue as any);
-                    if (!isNaN(endDate.getTime())) {
-                      return endDate;
-                    }
-                  }
-                  return maxDate;
-                })();
-                const numberOfDays = differenceInDays(endDate, startDate);
-                const offsetPercentage =
-                  differenceInDays(startDate, minDate) / totalNumberOfDays;
-                const percentage = numberOfDays / totalNumberOfDays;
-
-                const baseTimelineElementLabel = `${formatDate(
-                  startDate,
-                  'MMM dd, yyyy'
-                )} - ${formatDate(endDate, 'MMM dd, yyyy')}`;
-
-                const timelineElementLabel = ((): ReactNode => {
-                  if (getTimelineElementLabel) {
-                    return getTimelineElementLabel(row);
-                  }
-                  if (timelineElementLabelProperty) {
-                    return result(row, timelineElementLabelProperty);
-                  }
-                  return baseTimelineElementLabel;
-                })();
-
-                const {
-                  PopperProps: TooltipPropsPopperProps = {},
-                  ...TooltipPropsRest
-                } = (() => {
-                  if (getTimelineElementTooltipProps) {
-                    return getTimelineElementTooltipProps(row);
-                  }
-                  return {};
-                })();
-
+                  })}
+                </Box>
+              );
+            })}
+          </Box>
+        </Stack>
+      ),
+      getColumnValue: (row) => {
+        if (getTimelineElements) {
+          const TimelineElements = lazy(async () => {
+            const timelineElements = await getTimelineElements(row);
+            return {
+              default: () => {
                 return (
-                  <Tooltip
-                    title={baseTimelineElementLabel}
-                    followCursor
-                    {...TooltipPropsRest}
-                    PopperProps={{
-                      ...TooltipPropsPopperProps,
-                      sx: {
-                        pointerEvents: 'none',
-                        ...TooltipPropsPopperProps.sx,
-                      },
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        overflow: 'hidden',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        px: 2,
-                        border: `1px solid ${palette.divider}`,
-                        ...(() => {
-                          if (getTimelineElementStyles) {
-                            return getTimelineElementStyles(row);
-                          }
-                        })(),
-                        width: `${percentage * 100}%`,
-                        ml: `${offsetPercentage * 100}%`,
-                        height: 34,
-                        borderRadius: '4px',
-                      }}
-                    >
-                      <Typography variant="body2" noWrap>
-                        {timelineElementLabel}
-                      </Typography>
-                    </Box>
-                  </Tooltip>
+                  <>
+                    {timelineElements.map((timelineElement, index) => {
+                      return (
+                        <Fragment key={index}>
+                          {getTimelineElementNode(timelineElement)}
+                        </Fragment>
+                      );
+                    })}
+                  </>
                 );
-              }
+              },
+            };
+          });
+
+          return (
+            <Suspense fallback={<CircularProgress size={24} color="inherit" />}>
+              <TimelineElements />
+            </Suspense>
+          );
+        }
+        return getTimelineElementNode({
+          startDate: result(row, startDateProperty),
+          endDate: result(row, endDateProperty),
+          label: ((): ReactNode => {
+            if (getTimelineElementLabel) {
+              return getTimelineElementLabel(row);
             }
-          },
-          width: timelineMonthMinWidth * timelineYears.length * 12,
-          wrapColumnContentInFieldValue: false,
-          headerSx: {
-            '&>div': {
-              p: 0,
-            },
-          },
-          bodySx: {
-            pl: 0,
-            pr: 0,
-            borderColor: 'transparent',
-          },
+            if (timelineElementLabelProperty) {
+              return result(row, timelineElementLabelProperty);
+            }
+          })(),
+          TooltipProps: (() => {
+            if (getTimelineElementTooltipProps) {
+              return getTimelineElementTooltipProps(row);
+            }
+          })(),
+          ...(() => {
+            if (getTimelineElementProps) {
+              return getTimelineElementProps(row);
+            }
+          })(),
+        });
+      },
+      width: timelineMonthMinWidth * timelineYears.length * 12,
+      wrapColumnContentInFieldValue: false,
+      headerSx: {
+        '&>div': {
+          p: 0,
         },
-        {
-          id: 'gutter',
-          label: 'Gutter',
-          width: 20,
-          showHeaderText: false,
-          bodySx: {
-            p: 0,
-            borderColor: 'transparent',
-          },
-          sx: {
-            '&:last-of-type': {
-              borderLeftColor: 'transparent !important',
-            },
-          },
+      },
+      bodySx: {
+        pl: 0,
+        pr: 0,
+        py: 1,
+        borderColor: 'transparent',
+        '&>div': {
+          height: 34,
         },
-      ]}
+      },
+    },
+  ];
+
+  if (showRowLabelsColumn) {
+    columns.unshift({
+      id: 'label',
+      label: 'Label',
+      width: 256,
+      showHeaderText: false,
+      getColumnValue: (row) => {
+        if (getRowLabel) {
+          return getRowLabel(row);
+        }
+        if (rowLabelProperty) {
+          return result(row, rowLabelProperty);
+        }
+      },
+    });
+    columns.push({
+      id: 'gutter',
+      label: 'Gutter',
+      width: 20,
+      showHeaderText: false,
+      bodySx: {
+        p: 0,
+        borderColor: 'transparent',
+      },
+      sx: {
+        '&:last-of-type': {
+          borderLeftColor: 'transparent !important',
+        },
+      },
+    });
+  }
+
+  return (
+    <Table
+      columns={columns}
       paging={false}
       bordersVariant="square"
       rows={rows}

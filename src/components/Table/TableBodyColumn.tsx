@@ -323,6 +323,7 @@ export const TableBodyColumn = forwardRef<any, TableBodyColumnProps<any>>(
           sx={{
             display: 'flex',
             flexDirection: 'column',
+            position: 'relative',
             ...(() => {
               if (!enableSmallScreenOptimization || !isSmallScreenSize) {
                 return {
