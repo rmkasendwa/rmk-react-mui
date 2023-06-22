@@ -105,6 +105,17 @@ const fullMonthLabels = [
   'December',
 ];
 
+export const timeScaleOptions = [
+  'Day',
+  'Week',
+  '2 week',
+  'Month',
+  'Quarter',
+  'Year',
+  '5 year',
+] as const;
+export type TimeScaleOption = (typeof timeScaleOptions)[number];
+
 export interface TimelineElement extends Partial<BoxProps> {
   startDate?: string | number | Date;
   endDate?: string | number | Date;
@@ -183,6 +194,8 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
       }
     })()
   );
+
+  const todayIndicatorRef = useRef<HTMLDivElement>(null);
 
   const { minDate, maxDate, timelineYears, totalNumberOfDays } = useMemo(() => {
     const allDates = rows
@@ -813,16 +826,19 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
                 differenceInDays(today, minDate) / totalNumberOfDays;
               return (
                 <Box
-                  ref={(element: HTMLDivElement) => {
-                    if (element) {
-                      scrollIntoView(element, {
-                        scrollMode: 'if-needed',
-                        behavior: 'smooth',
-                        block: 'center',
-                        inline: 'center',
-                      });
-                    }
-                  }}
+                  ref={mergeRefs([
+                    todayIndicatorRef,
+                    (element: HTMLDivElement) => {
+                      if (element) {
+                        scrollIntoView(element, {
+                          scrollMode: 'if-needed',
+                          behavior: 'smooth',
+                          block: 'center',
+                          inline: 'center',
+                        });
+                      }
+                    },
+                  ])}
                   sx={{
                     position: 'absolute',
                     width: 2,
@@ -971,6 +987,7 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
             <DateInputField
               placeholder="From"
               size="small"
+              minDate={minDate.toISOString()}
               sx={{
                 width: 150,
               }}
@@ -980,6 +997,7 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
             <DateInputField
               placeholder="To"
               size="small"
+              maxDate={maxDate.toISOString()}
               sx={{
                 width: 150,
               }}
@@ -989,13 +1007,34 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
             <DataDropdownField
               placeholder="Timescale"
               size="small"
+              options={timeScaleOptions.map((timeScaleOption) => {
+                return {
+                  value: timeScaleOption,
+                  label: timeScaleOption,
+                };
+              })}
+              showClearButton={false}
               sx={{
                 width: 120,
               }}
             />
           </Grid>
           <Grid item>
-            <Button variant="outlined" color="inherit" size="small">
+            <Button
+              variant="outlined"
+              color="inherit"
+              size="small"
+              onClick={() => {
+                if (todayIndicatorRef.current) {
+                  scrollIntoView(todayIndicatorRef.current, {
+                    scrollMode: 'if-needed',
+                    behavior: 'smooth',
+                    block: 'center',
+                    inline: 'center',
+                  });
+                }
+              }}
+            >
               Today
             </Button>
           </Grid>
