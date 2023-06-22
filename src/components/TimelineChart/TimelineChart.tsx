@@ -363,7 +363,10 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
     unitTimeScaleWidth,
     timeScaleWidth,
   } = ((): {
-    timeScaleRows: [string[], string[][]];
+    timeScaleRows: [
+      { id: string; label: string }[],
+      { id: string; label: string }[]
+    ];
     unitTimeScaleWidth: number;
     timeScaleWidth: number;
   } => {
@@ -372,10 +375,18 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
         return {
           timeScaleRows: [
             timelineYears.flatMap((year) => {
-              return String(year);
+              return {
+                id: String(year),
+                label: String(year),
+              };
             }),
-            timelineYears.map(() => {
-              return ['Q1', 'Q2', 'Q3', 'Q4'];
+            timelineYears.flatMap((_, index) => {
+              return ['Q1', 'Q2', 'Q3', 'Q4'].map((quarter) => {
+                return {
+                  id: index + quarter,
+                  label: quarter,
+                };
+              });
             }),
           ],
           unitTimeScaleWidth: baseTimeScaleWidth * 12,
@@ -387,11 +398,20 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
           timeScaleRows: [
             timelineYears.flatMap((year) => {
               return ['Q1', 'Q2', 'Q3', 'Q4'].map((quarter) => {
-                return `${quarter} ${year}`;
+                const label = `${quarter} ${year}`;
+                return {
+                  id: label,
+                  label,
+                };
               });
             }),
-            timelineYears.map(() => {
-              return fullMonthLabels;
+            timelineYears.flatMap((_, index) => {
+              return fullMonthLabels.map((label) => {
+                return {
+                  id: index + label,
+                  label,
+                };
+              });
             }),
           ],
           unitTimeScaleWidth: baseTimeScaleWidth * 12,
@@ -417,10 +437,10 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
                 alignItems: 'center',
               }}
             >
-              {topTimeScaleRow.map((topRowColumn) => {
+              {topTimeScaleRow.map(({ id, label }) => {
                 return (
                   <Box
-                    key={topRowColumn}
+                    key={id}
                     sx={{
                       flex: 1,
                       minWidth: 0,
@@ -432,13 +452,14 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
                       sx={{
                         position: 'sticky',
                         overflow: 'hidden',
-                        left: showRowLabelsColumn ? 256 : 0,
-                        px: (() => {
-                          if (showRowLabelsColumn) {
-                            return 2;
-                          }
-                          return 3;
-                        })(),
+                        left:
+                          (showRowLabelsColumn ? 256 : 0) +
+                          (() => {
+                            if (showRowLabelsColumn) {
+                              return 16;
+                            }
+                            return 24;
+                          })(),
                       }}
                     >
                       <Typography
@@ -448,7 +469,7 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
                           fontWeight: 500,
                         }}
                       >
-                        {topRowColumn}
+                        {label}
                       </Typography>
                     </Box>
                   </Box>
@@ -460,45 +481,22 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
                 display: 'flex',
               }}
             >
-              {middleTimeScaleRow.map((middleTimeScaleRowColumns, index) => {
+              {middleTimeScaleRow.map(({ id, label }) => {
                 return (
                   <Box
-                    key={index}
+                    key={id}
                     sx={{
                       flex: 1,
                       overflow: 'hidden',
                       minWidth: 0,
+                      height: 24,
                       display: 'flex',
                       alignItems: 'center',
                     }}
                   >
-                    {middleTimeScaleRowColumns.map(
-                      (middleTimeScaleRowColumn) => {
-                        return (
-                          <Box
-                            key={index + middleTimeScaleRowColumn}
-                            sx={{
-                              flex: 1,
-                              overflow: 'hidden',
-                              minWidth: 0,
-                              height: 24,
-                              display: 'flex',
-                              alignItems: 'center',
-                              px: (() => {
-                                if (showRowLabelsColumn) {
-                                  return 2;
-                                }
-                                return 3;
-                              })(),
-                            }}
-                          >
-                            <Typography variant="body2" noWrap>
-                              {middleTimeScaleRowColumn}
-                            </Typography>
-                          </Box>
-                        );
-                      }
-                    )}
+                    <Typography variant="body2" noWrap>
+                      {label}
+                    </Typography>
                   </Box>
                 );
               })}
