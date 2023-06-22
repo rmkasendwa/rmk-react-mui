@@ -23,6 +23,7 @@ import {
 import clsx from 'clsx';
 import differenceInDays from 'date-fns/differenceInDays';
 import formatDate from 'date-fns/format';
+import getDaysInMonth from 'date-fns/getDaysInMonth';
 import isAfter from 'date-fns/isAfter';
 import isBefore from 'date-fns/isBefore';
 import { result } from 'lodash';
@@ -79,7 +80,6 @@ declare module '@mui/material/styles/components' {
 }
 
 const baseTimeScaleWidth = 120;
-
 const fullMonthLabels = [
   'January',
   'Febuary',
@@ -93,6 +93,20 @@ const fullMonthLabels = [
   'October',
   'November',
   'December',
+];
+const shortMonthLabels = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
 ];
 
 export const timeScaleOptions = [
@@ -359,11 +373,12 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
   }, []);
 
   const {
-    timeScaleRows: [topTimeScaleRow, middleTimeScaleRow],
+    timeScaleRows: [topTimeScaleRow, middleTimeScaleRow, bottomTimeScaleRow],
     unitTimeScaleWidth,
     timeScaleWidth,
   } = ((): {
     timeScaleRows: [
+      { id: string; label: string }[],
       { id: string; label: string }[],
       { id: string; label: string }[]
     ];
@@ -385,6 +400,14 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
                 return {
                   id: index + quarter,
                   label: quarter,
+                };
+              });
+            }),
+            timelineYears.flatMap((_, index) => {
+              return shortMonthLabels.map((label) => {
+                return {
+                  id: index + label,
+                  label,
                 };
               });
             }),
@@ -411,6 +434,22 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
                   id: index + label,
                   label,
                 };
+              });
+            }),
+            timelineYears.flatMap((year) => {
+              return shortMonthLabels.flatMap((label, index) => {
+                const daysInMonth = getDaysInMonth(new Date(year, index));
+                const unitPeriod = Math.floor(daysInMonth / 2);
+                return Array.from({ length: 2 }).map((_, periodIndex) => {
+                  return {
+                    id: year + label,
+                    label: String(
+                      1 +
+                        Math.floor(Math.random() * 5) +
+                        unitPeriod * periodIndex
+                    ),
+                  };
+                });
               });
             }),
           ],
@@ -495,6 +534,37 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
                     }}
                   >
                     <Typography variant="body2" noWrap>
+                      {label}
+                    </Typography>
+                  </Box>
+                );
+              })}
+            </Box>
+            <Box
+              sx={{
+                display: 'flex',
+              }}
+            >
+              {bottomTimeScaleRow.map(({ id, label }) => {
+                return (
+                  <Box
+                    key={id}
+                    sx={{
+                      flex: 1,
+                      overflow: 'hidden',
+                      minWidth: 0,
+                      height: 24,
+                      display: 'flex',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <Typography
+                      variant="body2"
+                      noWrap
+                      sx={{
+                        fontSize: 12,
+                      }}
+                    >
                       {label}
                     </Typography>
                   </Box>
