@@ -78,7 +78,7 @@ declare module '@mui/material/styles/components' {
   }
 }
 
-const timelineMonthMinWidth = 120;
+const baseTimeScaleWidth = 120;
 
 const fullMonthLabels = [
   'January',
@@ -358,6 +358,34 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
     scrollToTodayRef.current();
   }, []);
 
+  const {
+    timeScaleRows: [topTimeScaleRow, middleTimeScaleRow],
+    unitTimeScaleWidth,
+    timeScaleWidth,
+  } = ((): {
+    timeScaleRows: [string[], string[][]];
+    unitTimeScaleWidth: number;
+    timeScaleWidth: number;
+  } => {
+    switch (selectedTimeScale) {
+      default:
+        return {
+          timeScaleRows: [
+            timelineYears.flatMap((year) => {
+              return ['Q1', 'Q2', 'Q3', 'Q4'].map((quarter) => {
+                return `${quarter} ${year}`;
+              });
+            }),
+            timelineYears.map(() => {
+              return fullMonthLabels;
+            }),
+          ],
+          unitTimeScaleWidth: baseTimeScaleWidth * 12,
+          timeScaleWidth: baseTimeScaleWidth * timelineYears.length * 12,
+        };
+    }
+  })();
+
   const columns: TableColumn<RecordRow>[] = [
     {
       id: 'timeline',
@@ -375,59 +403,53 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
                 alignItems: 'center',
               }}
             >
-              {timelineYears
-                .flatMap((year) => {
-                  return ['Q1', 'Q2', 'Q3', 'Q4'].map((quarter) => {
-                    return `${quarter} ${year}`;
-                  });
-                })
-                .map((quarter) => {
-                  return (
+              {topTimeScaleRow.map((topRowColumn) => {
+                return (
+                  <Box
+                    key={topRowColumn}
+                    sx={{
+                      flex: 1,
+                      minWidth: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                    }}
+                  >
                     <Box
-                      key={quarter}
                       sx={{
-                        flex: 1,
-                        minWidth: 0,
-                        display: 'flex',
-                        alignItems: 'center',
+                        position: 'sticky',
+                        overflow: 'hidden',
+                        left: showRowLabelsColumn ? 256 : 0,
+                        px: (() => {
+                          if (showRowLabelsColumn) {
+                            return 2;
+                          }
+                          return 3;
+                        })(),
                       }}
                     >
-                      <Box
+                      <Typography
+                        variant="body2"
+                        noWrap
                         sx={{
-                          position: 'sticky',
-                          overflow: 'hidden',
-                          left: showRowLabelsColumn ? 256 : 0,
-                          px: (() => {
-                            if (showRowLabelsColumn) {
-                              return 2;
-                            }
-                            return 3;
-                          })(),
+                          fontWeight: 500,
                         }}
                       >
-                        <Typography
-                          variant="body2"
-                          noWrap
-                          sx={{
-                            fontWeight: 500,
-                          }}
-                        >
-                          {quarter}
-                        </Typography>
-                      </Box>
+                        {topRowColumn}
+                      </Typography>
                     </Box>
-                  );
-                })}
+                  </Box>
+                );
+              })}
             </Box>
             <Box
               sx={{
                 display: 'flex',
               }}
             >
-              {timelineYears.map((year) => {
+              {middleTimeScaleRow.map((middleTimeScaleRowColumns, index) => {
                 return (
                   <Box
-                    key={year}
+                    key={index}
                     sx={{
                       flex: 1,
                       overflow: 'hidden',
@@ -436,31 +458,33 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
                       alignItems: 'center',
                     }}
                   >
-                    {fullMonthLabels.map((month) => {
-                      return (
-                        <Box
-                          key={month}
-                          sx={{
-                            flex: 1,
-                            overflow: 'hidden',
-                            minWidth: 0,
-                            height: 24,
-                            display: 'flex',
-                            alignItems: 'center',
-                            px: (() => {
-                              if (showRowLabelsColumn) {
-                                return 2;
-                              }
-                              return 3;
-                            })(),
-                          }}
-                        >
-                          <Typography variant="body2" noWrap>
-                            {month}
-                          </Typography>
-                        </Box>
-                      );
-                    })}
+                    {middleTimeScaleRowColumns.map(
+                      (middleTimeScaleRowColumn) => {
+                        return (
+                          <Box
+                            key={middleTimeScaleRowColumn}
+                            sx={{
+                              flex: 1,
+                              overflow: 'hidden',
+                              minWidth: 0,
+                              height: 24,
+                              display: 'flex',
+                              alignItems: 'center',
+                              px: (() => {
+                                if (showRowLabelsColumn) {
+                                  return 2;
+                                }
+                                return 3;
+                              })(),
+                            }}
+                          >
+                            <Typography variant="body2" noWrap>
+                              {middleTimeScaleRowColumn}
+                            </Typography>
+                          </Box>
+                        );
+                      }
+                    )}
                   </Box>
                 );
               })}
@@ -538,7 +562,7 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
           })(),
         });
       },
-      width: timelineMonthMinWidth * timelineYears.length * 12,
+      width: timeScaleWidth,
       wrapColumnContentInFieldValue: false,
       headerSx: {
         '&>div': {
@@ -670,7 +694,7 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
               <Button
                 onClick={() => {
                   tableElementRef.current?.parentElement?.scrollBy({
-                    left: -(timelineMonthMinWidth * 12),
+                    left: -unitTimeScaleWidth,
                     behavior: 'smooth',
                   });
                 }}
@@ -680,7 +704,7 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
               <Button
                 onClick={() => {
                   tableElementRef.current?.parentElement?.scrollBy({
-                    left: timelineMonthMinWidth * 12,
+                    left: unitTimeScaleWidth,
                     behavior: 'smooth',
                   });
                 }}
