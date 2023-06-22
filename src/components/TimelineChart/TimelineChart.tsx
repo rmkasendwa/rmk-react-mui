@@ -34,14 +34,16 @@ import {
   Suspense,
   forwardRef,
   lazy,
+  useEffect,
   useMemo,
   useRef,
 } from 'react';
 import { mergeRefs } from 'react-merge-refs';
 import scrollIntoView from 'scroll-into-view-if-needed';
+import * as Yup from 'yup';
 
+import { useReactRouterDOMSearchParams } from '../../hooks/ReactRouterDOM';
 import DataDropdownField from '../InputFields/DataDropdownField';
-import DateInputField from '../InputFields/DateInputField';
 import { BaseDataRow, Table, TableColumn, TableProps } from '../Table';
 
 export interface TimelineChartClasses {
@@ -179,6 +181,16 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
   const todayIndicatorRef = useRef<HTMLDivElement>(null);
 
   const { palette } = useTheme();
+
+  const {
+    searchParams: { timeScale: selectedTimeScale = 'Year' },
+    setSearchParams,
+  } = useReactRouterDOMSearchParams({
+    mode: 'json',
+    spec: {
+      timeScale: Yup.mixed<TimeScaleOption>().oneOf([...timeScaleOptions]),
+    },
+  });
 
   const { minDate, maxDate, timelineYears, totalNumberOfDays } = useMemo(() => {
     const allDates = rows
@@ -329,6 +341,23 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
     }
   };
 
+  const scrollToToday = () => {
+    if (todayIndicatorRef.current) {
+      scrollIntoView(todayIndicatorRef.current, {
+        scrollMode: 'if-needed',
+        behavior: 'smooth',
+        block: 'start',
+        inline: 'center',
+      });
+    }
+  };
+  const scrollToTodayRef = useRef(scrollToToday);
+  scrollToTodayRef.current = scrollToToday;
+
+  useEffect(() => {
+    scrollToTodayRef.current();
+  }, []);
+
   const columns: TableColumn<RecordRow>[] = [
     {
       id: 'timeline',
@@ -444,19 +473,7 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
                 differenceInDays(today, minDate) / totalNumberOfDays;
               return (
                 <Box
-                  ref={mergeRefs([
-                    todayIndicatorRef,
-                    (element: HTMLDivElement) => {
-                      if (element) {
-                        scrollIntoView(element, {
-                          scrollMode: 'if-needed',
-                          behavior: 'smooth',
-                          block: 'center',
-                          inline: 'center',
-                        });
-                      }
-                    },
-                  ])}
+                  ref={todayIndicatorRef}
                   sx={{
                     position: 'absolute',
                     width: 2,
@@ -604,35 +621,26 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
           }}
         >
           <Grid item>
-            <DateInputField
-              placeholder="From"
-              size="small"
-              minDate={minDate.toISOString()}
-              sx={{
-                width: 150,
-              }}
-            />
-          </Grid>
-          <Grid item>
-            <DateInputField
-              placeholder="To"
-              size="small"
-              maxDate={maxDate.toISOString()}
-              sx={{
-                width: 150,
-              }}
-            />
-          </Grid>
-          <Grid item>
             <DataDropdownField
               placeholder="Timescale"
               size="small"
+              value={selectedTimeScale}
               options={timeScaleOptions.map((timeScaleOption) => {
                 return {
                   value: timeScaleOption,
                   label: timeScaleOption,
                 };
               })}
+              onChange={(event) => {
+                setSearchParams(
+                  {
+                    timeScale: (event.target.value as any) || null,
+                  },
+                  {
+                    replace: true,
+                  }
+                );
+              }}
               showClearButton={false}
               sx={{
                 width: 120,
@@ -645,14 +653,7 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
               color="inherit"
               size="small"
               onClick={() => {
-                if (todayIndicatorRef.current) {
-                  scrollIntoView(todayIndicatorRef.current, {
-                    scrollMode: 'if-needed',
-                    behavior: 'smooth',
-                    block: 'center',
-                    inline: 'center',
-                  });
-                }
+                scrollToToday();
               }}
             >
               Today
