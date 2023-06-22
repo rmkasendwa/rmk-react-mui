@@ -1,6 +1,10 @@
+import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
+import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import {
   Box,
   BoxProps,
+  Button,
+  ButtonGroup,
   CircularProgress,
   ComponentsOverrides,
   ComponentsProps,
@@ -22,6 +26,7 @@ import differenceInDays from 'date-fns/differenceInDays';
 import formatDate from 'date-fns/format';
 import getDaysInMonth from 'date-fns/getDaysInMonth';
 import isAfter from 'date-fns/isAfter';
+import isBefore from 'date-fns/isBefore';
 import { result } from 'lodash';
 import {
   Fragment,
@@ -38,8 +43,11 @@ import {
   useState,
 } from 'react';
 import { mergeRefs } from 'react-merge-refs';
+import scrollIntoView from 'scroll-into-view-if-needed';
 
 import { useReactRouterDOMSearchParams } from '../../hooks/ReactRouterDOM';
+import DataDropdownField from '../InputFields/DataDropdownField';
+import DateInputField from '../InputFields/DateInputField';
 import RenderIfVisible from '../RenderIfVisible';
 import { BaseDataRow, Table, TableColumn } from '../Table';
 import { BaseTimelineChartProps } from './models';
@@ -701,95 +709,133 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
     {
       id: 'timeline',
       label: (
-        <Stack
-          sx={{
-            width: '100%',
-          }}
-        >
-          <Box
+        <>
+          <Stack
             sx={{
-              display: 'flex',
+              width: '100%',
             }}
           >
-            {timelineYears.map((year) => {
-              return (
-                <Box
-                  key={year}
-                  sx={{
-                    flex: 1,
-                    overflow: 'hidden',
-                    minWidth: 0,
-                    height: 24,
-                    display: 'flex',
-                    alignItems: 'center',
-                    px: (() => {
-                      if (showRowLabelsColumn) {
-                        return 2;
-                      }
-                      return 3;
-                    })(),
-                  }}
-                >
-                  <Typography
-                    variant="body2"
-                    noWrap
+            <Box
+              sx={{
+                display: 'flex',
+              }}
+            >
+              {timelineYears.map((year) => {
+                return (
+                  <Box
+                    key={year}
                     sx={{
-                      fontWeight: 'bold',
+                      flex: 1,
+                      minWidth: 0,
+                      height: 24,
+                      display: 'flex',
+                      alignItems: 'center',
                     }}
                   >
-                    {year}
-                  </Typography>
-                </Box>
-              );
-            })}
-          </Box>
-          <Box
-            sx={{
-              display: 'flex',
-            }}
-          >
-            {timelineYears.map((year) => {
-              return (
-                <Box
-                  key={year}
-                  sx={{
-                    flex: 1,
-                    overflow: 'hidden',
-                    minWidth: 0,
-                    display: 'flex',
-                    alignItems: 'center',
-                  }}
-                >
-                  {fullMonthLabels.map((month) => {
-                    return (
-                      <Box
-                        key={month}
+                    <Box
+                      sx={{
+                        position: 'sticky',
+                        overflow: 'hidden',
+                        left: showRowLabelsColumn ? 256 : 0,
+                        px: (() => {
+                          if (showRowLabelsColumn) {
+                            return 2;
+                          }
+                          return 3;
+                        })(),
+                      }}
+                    >
+                      <Typography
+                        variant="body2"
+                        noWrap
                         sx={{
-                          flex: 1,
-                          overflow: 'hidden',
-                          minWidth: 0,
-                          height: 24,
-                          display: 'flex',
-                          alignItems: 'center',
-                          px: (() => {
-                            if (showRowLabelsColumn) {
-                              return 2;
-                            }
-                            return 3;
-                          })(),
+                          fontWeight: 'bold',
                         }}
                       >
-                        <Typography variant="body2" noWrap>
-                          {month}
-                        </Typography>
-                      </Box>
-                    );
-                  })}
-                </Box>
+                        {year}
+                      </Typography>
+                    </Box>
+                  </Box>
+                );
+              })}
+            </Box>
+            <Box
+              sx={{
+                display: 'flex',
+              }}
+            >
+              {timelineYears.map((year) => {
+                return (
+                  <Box
+                    key={year}
+                    sx={{
+                      flex: 1,
+                      overflow: 'hidden',
+                      minWidth: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                    }}
+                  >
+                    {fullMonthLabels.map((month) => {
+                      return (
+                        <Box
+                          key={month}
+                          sx={{
+                            flex: 1,
+                            overflow: 'hidden',
+                            minWidth: 0,
+                            height: 24,
+                            display: 'flex',
+                            alignItems: 'center',
+                            px: (() => {
+                              if (showRowLabelsColumn) {
+                                return 2;
+                              }
+                              return 3;
+                            })(),
+                          }}
+                        >
+                          <Typography variant="body2" noWrap>
+                            {month}
+                          </Typography>
+                        </Box>
+                      );
+                    })}
+                  </Box>
+                );
+              })}
+            </Box>
+          </Stack>
+          {(() => {
+            const today = new Date();
+            if (isAfter(today, minDate) && isBefore(today, maxDate)) {
+              const offsetPercentage =
+                differenceInDays(today, minDate) / totalNumberOfDays;
+              return (
+                <Box
+                  ref={(element: HTMLDivElement) => {
+                    if (element) {
+                      scrollIntoView(element, {
+                        scrollMode: 'if-needed',
+                        behavior: 'smooth',
+                        block: 'center',
+                        inline: 'center',
+                      });
+                    }
+                  }}
+                  sx={{
+                    position: 'absolute',
+                    width: 2,
+                    bgcolor: palette.primary.main,
+                    height: rows.length * 51,
+                    top: '100%',
+                    left: `${offsetPercentage * 100}%`,
+                  }}
+                />
               );
-            })}
-          </Box>
-        </Stack>
+            }
+          })()}
+        </>
       ),
       getColumnValue: (row) => {
         if (getTimelineElements) {
@@ -844,6 +890,7 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
       width: timelineMonthMinWidth * timelineYears.length * 12,
       wrapColumnContentInFieldValue: false,
       headerSx: {
+        pt: '50px',
         '&>div': {
           p: 0,
         },
@@ -874,6 +921,9 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
           return result(row, rowLabelProperty);
         }
       },
+      bodySx: {
+        zIndex: 2,
+      },
     });
     columns.push({
       id: 'gutter',
@@ -893,19 +943,88 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
   }
 
   return (
-    <Table
-      columns={columns}
-      paging={false}
-      bordersVariant="square"
-      rows={rows}
-      startStickyColumnIndex={0}
-      stickyHeader
-      sx={{
-        tr: {
-          verticalAlign: 'middle',
-        },
-      }}
-    />
+    <>
+      <Box
+        sx={{
+          height: 0,
+          zIndex: 5,
+          position: 'sticky',
+          top: 0,
+          left: 0,
+        }}
+      >
+        <Grid
+          container
+          spacing={1}
+          sx={{
+            px: 3,
+            py: 1,
+            alignItems: 'center',
+            position: 'sticky',
+            right: 0,
+            display: 'inline-flex',
+            justifyContent: 'end',
+          }}
+        >
+          <Grid item xs />
+          <Grid item>
+            <DateInputField
+              placeholder="From"
+              size="small"
+              sx={{
+                width: 150,
+              }}
+            />
+          </Grid>
+          <Grid item>
+            <DateInputField
+              placeholder="To"
+              size="small"
+              sx={{
+                width: 150,
+              }}
+            />
+          </Grid>
+          <Grid item>
+            <DataDropdownField
+              placeholder="Timescale"
+              size="small"
+              sx={{
+                width: 120,
+              }}
+            />
+          </Grid>
+          <Grid item>
+            <Button variant="outlined" color="inherit" size="small">
+              Today
+            </Button>
+          </Grid>
+          <Grid item>
+            <ButtonGroup size="small" color="inherit">
+              <Button>
+                <NavigateBeforeIcon />
+              </Button>
+              <Button>
+                <NavigateNextIcon />
+              </Button>
+            </ButtonGroup>
+          </Grid>
+        </Grid>
+      </Box>
+      <Table
+        columns={columns}
+        paging={false}
+        bordersVariant="square"
+        rows={rows}
+        startStickyColumnIndex={0}
+        stickyHeader
+        sx={{
+          tr: {
+            verticalAlign: 'middle',
+          },
+        }}
+      />
+    </>
   );
 };
 
