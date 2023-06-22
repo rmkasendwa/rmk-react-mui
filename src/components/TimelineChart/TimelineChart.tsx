@@ -26,7 +26,7 @@ import formatDate from 'date-fns/format';
 import getDaysInMonth from 'date-fns/getDaysInMonth';
 import isAfter from 'date-fns/isAfter';
 import isBefore from 'date-fns/isBefore';
-import { result } from 'lodash';
+import { result, uniqueId } from 'lodash';
 import {
   Fragment,
   ReactElement,
@@ -119,6 +119,14 @@ export const timeScaleOptions = [
   '5 year',
 ] as const;
 export type TimeScaleOption = (typeof timeScaleOptions)[number];
+
+const disabledTimeScaleOptions: TimeScaleOption[] = [
+  'Day',
+  'Week',
+  '2 week',
+  'Month',
+  'Quarter',
+];
 
 export interface TimelineElement extends Partial<BoxProps> {
   startDate?: string | number | Date;
@@ -395,18 +403,18 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
                 label: String(year),
               };
             }),
-            timelineYears.flatMap((_, index) => {
+            timelineYears.flatMap(() => {
               return ['Q1', 'Q2', 'Q3', 'Q4'].map((quarter) => {
                 return {
-                  id: index + quarter,
+                  id: uniqueId(),
                   label: quarter,
                 };
               });
             }),
-            timelineYears.flatMap((_, index) => {
+            timelineYears.flatMap(() => {
               return shortMonthLabels.map((label) => {
                 return {
-                  id: index + label,
+                  id: uniqueId(),
                   label,
                 };
               });
@@ -423,26 +431,26 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
               return ['Q1', 'Q2', 'Q3', 'Q4'].map((quarter) => {
                 const label = `${quarter} ${year}`;
                 return {
-                  id: label,
+                  id: uniqueId(),
                   label,
                 };
               });
             }),
-            timelineYears.flatMap((_, index) => {
+            timelineYears.flatMap(() => {
               return fullMonthLabels.map((label) => {
                 return {
-                  id: index + label,
+                  id: uniqueId(),
                   label,
                 };
               });
             }),
             timelineYears.flatMap((year) => {
-              return shortMonthLabels.flatMap((label, index) => {
-                const daysInMonth = getDaysInMonth(new Date(year, index));
+              return Array.from({ length: 12 }).flatMap((_, monthIndex) => {
+                const daysInMonth = getDaysInMonth(new Date(year, monthIndex));
                 const unitPeriod = Math.floor(daysInMonth / 2);
                 return Array.from({ length: 2 }).map((_, periodIndex) => {
                   return {
-                    id: year + label,
+                    id: uniqueId(),
                     label: String(
                       1 +
                         Math.floor(Math.random() * 5) +
@@ -735,6 +743,8 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
                 return {
                   value: timeScaleOption,
                   label: timeScaleOption,
+                  selectable:
+                    !disabledTimeScaleOptions.includes(timeScaleOption),
                 };
               })}
               onChange={(event) => {
