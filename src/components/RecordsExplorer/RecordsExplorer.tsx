@@ -96,7 +96,7 @@ import Table, {
   getTableMinWidth,
   mapTableColumnTypeToPrimitiveDataType,
 } from '../Table';
-import TimelineChart, { TimelineChartProps } from '../TimelineChart';
+import Timeline, { TimelineProps } from '../Timeline';
 import { useFilterTool } from './hooks/FilterTool';
 import { useGroupTool } from './hooks/GroupTool';
 import { useSortTool } from './hooks/SortTool';
@@ -184,7 +184,7 @@ export interface ListView<RecordRow extends BaseDataRow>
 
 export interface TimelineView<RecordRow extends BaseDataRow>
   extends BaseDataView,
-    Omit<TimelineChartProps<RecordRow>, 'rows'> {
+    Omit<TimelineProps<RecordRow>, 'rows'> {
   type: 'Timeline';
 }
 
@@ -2261,7 +2261,7 @@ const BaseRecordsExplorer = <
                   .getColumnValue as any;
               }
             }
-            return <TimelineChart rows={filteredData} {...viewProps} />;
+            return <Timeline rows={filteredData} {...viewProps} />;
           }
         }
       }

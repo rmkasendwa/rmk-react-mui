@@ -47,34 +47,34 @@ import { useReactRouterDOMSearchParams } from '../../hooks/ReactRouterDOM';
 import DataDropdownField from '../InputFields/DataDropdownField';
 import { BaseDataRow, Table, TableColumn, TableProps } from '../Table';
 
-export interface TimelineChartClasses {
+export interface TimelineClasses {
   /** Styles applied to the root element. */
   root: string;
 }
 
-export type TimelineChartClassKey = keyof TimelineChartClasses;
+export type TimelineClassKey = keyof TimelineClasses;
 
 // Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
-    MuiTimelineChart: TimelineChartProps;
+    MuiTimeline: TimelineProps;
   }
 }
 
 // Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
-    MuiTimelineChart: keyof TimelineChartClasses;
+    MuiTimeline: keyof TimelineClasses;
   }
 }
 
 // Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
-    MuiTimelineChart?: {
-      defaultProps?: ComponentsProps['MuiTimelineChart'];
-      styleOverrides?: ComponentsOverrides<Theme>['MuiTimelineChart'];
-      variants?: ComponentsVariants['MuiTimelineChart'];
+    MuiTimeline?: {
+      defaultProps?: ComponentsProps['MuiTimeline'];
+      styleOverrides?: ComponentsOverrides<Theme>['MuiTimeline'];
+      variants?: ComponentsVariants['MuiTimeline'];
     };
   }
 }
@@ -135,7 +135,7 @@ export interface TimelineElement extends Partial<BoxProps> {
   TooltipProps?: Partial<TooltipProps>;
 }
 
-export interface TimelineChartProps<RecordRow extends BaseDataRow = any>
+export interface TimelineProps<RecordRow extends BaseDataRow = any>
   extends Partial<Pick<TableProps, 'className' | 'sx'>> {
   rowLabelProperty?: keyof RecordRow;
   getRowLabel?: (row: RecordRow) => ReactNode;
@@ -143,34 +143,37 @@ export interface TimelineChartProps<RecordRow extends BaseDataRow = any>
   expandedRows?: string[];
   allRowsExpanded?: boolean;
   onChangeExpanded?: (expandedRows: string[]) => void;
-  timelineElementLabelProperty: keyof RecordRow;
+  timelineElementLabelProperty?: keyof RecordRow;
   getTimelineElementLabel?: (timelineElement: RecordRow) => ReactNode;
   getTimelineElementTooltipProps?: (
     timelineElement: RecordRow
   ) => Partial<TooltipProps>;
   getTimelineElementProps?: (timelineElement: RecordRow) => BoxProps;
-  startDateProperty: keyof RecordRow;
-  endDateProperty: keyof RecordRow;
+  startDateProperty?: keyof RecordRow;
+  endDateProperty?: keyof RecordRow;
   showRowLabelsColumn?: boolean;
   getTimelineElements?: (row: RecordRow) => Promise<TimelineElement[]>;
+  id?: string;
 }
 
-export function getTimelineChartUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiTimelineChart', slot);
+export function getTimelineUtilityClass(slot: string): string {
+  return generateUtilityClass('MuiTimeline', slot);
 }
 
-export const timelineChartClasses: TimelineChartClasses =
-  generateUtilityClasses('MuiTimelineChart', ['root']);
+export const timelineClasses: TimelineClasses = generateUtilityClasses(
+  'MuiTimeline',
+  ['root']
+);
 
 const slots = {
   root: ['root'],
 };
 
-export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
-  inProps: TimelineChartProps<RecordRow>,
+export const BaseTimeline = <RecordRow extends BaseDataRow>(
+  inProps: TimelineProps<RecordRow>,
   ref: Ref<HTMLTableElement>
 ) => {
-  const props = useThemeProps({ props: inProps, name: 'MuiTimelineChart' });
+  const props = useThemeProps({ props: inProps, name: 'MuiTimeline' });
   const {
     className,
     rows,
@@ -184,12 +187,13 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
     getTimelineElementProps,
     getTimelineElements,
     showRowLabelsColumn = true,
+    id,
     ...rest
   } = props;
 
   const classes = composeClasses(
     slots,
-    getTimelineChartUtilityClass,
+    getTimelineUtilityClass,
     (() => {
       if (className) {
         return {
@@ -212,13 +216,18 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
     spec: {
       timeScale: Yup.mixed<TimeScaleOption>().oneOf([...timeScaleOptions]),
     },
+    id,
   });
 
   const { minDate, maxDate, timelineYears, totalNumberOfDays } = useMemo(() => {
     const allDates = rows
       .flatMap((row) => {
         const dates: Date[] = [];
-        const startDateValue = result(row, startDateProperty);
+        const startDateValue = (() => {
+          if (startDateProperty) {
+            return result(row, startDateProperty);
+          }
+        })();
         if (startDateValue) {
           if (startDateValue instanceof Date) {
             dates.push(startDateValue);
@@ -229,7 +238,11 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
             }
           }
         }
-        const endDateValue = result(row, endDateProperty);
+        const endDateValue = (() => {
+          if (endDateProperty) {
+            return result(row, endDateProperty);
+          }
+        })();
         if (endDateValue) {
           if (endDateValue instanceof Date) {
             dates.push(endDateValue);
@@ -635,28 +648,30 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
             </Suspense>
           );
         }
-        return getTimelineElementNode({
-          startDate: result(row, startDateProperty),
-          endDate: result(row, endDateProperty),
-          label: ((): ReactNode => {
-            if (getTimelineElementLabel) {
-              return getTimelineElementLabel(row);
-            }
-            if (timelineElementLabelProperty) {
-              return result(row, timelineElementLabelProperty);
-            }
-          })(),
-          TooltipProps: (() => {
-            if (getTimelineElementTooltipProps) {
-              return getTimelineElementTooltipProps(row);
-            }
-          })(),
-          ...(() => {
-            if (getTimelineElementProps) {
-              return getTimelineElementProps(row);
-            }
-          })(),
-        });
+        if (startDateProperty && endDateProperty) {
+          return getTimelineElementNode({
+            startDate: result(row, startDateProperty),
+            endDate: result(row, endDateProperty),
+            label: ((): ReactNode => {
+              if (getTimelineElementLabel) {
+                return getTimelineElementLabel(row);
+              }
+              if (timelineElementLabelProperty) {
+                return result(row, timelineElementLabelProperty);
+              }
+            })(),
+            TooltipProps: (() => {
+              if (getTimelineElementTooltipProps) {
+                return getTimelineElementTooltipProps(row);
+              }
+            })(),
+            ...(() => {
+              if (getTimelineElementProps) {
+                return getTimelineElementProps(row);
+              }
+            })(),
+          });
+        }
       },
       width: timeScaleWidth,
       wrapColumnContentInFieldValue: false,
@@ -823,6 +838,7 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
         rows={rows}
         startStickyColumnIndex={0}
         stickyHeader
+        enableSmallScreenOptimization={false}
         sx={{
           tr: {
             verticalAlign: 'middle',
@@ -833,10 +849,10 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
   );
 };
 
-export const TimelineChart = forwardRef(BaseTimelineChart) as <
+export const Timeline = forwardRef(BaseTimeline) as <
   RecordRow extends BaseDataRow
 >(
-  p: TimelineChartProps<RecordRow> & { ref?: Ref<HTMLDivElement> }
+  p: TimelineProps<RecordRow> & { ref?: Ref<HTMLDivElement> }
 ) => ReactElement;
 
-export default TimelineChart;
+export default Timeline;
