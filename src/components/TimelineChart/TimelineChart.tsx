@@ -10,7 +10,6 @@ import {
   ComponentsProps,
   ComponentsVariants,
   Grid,
-  GridProps,
   Stack,
   Tooltip,
   TooltipProps,
@@ -24,7 +23,6 @@ import {
 import clsx from 'clsx';
 import differenceInDays from 'date-fns/differenceInDays';
 import formatDate from 'date-fns/format';
-import getDaysInMonth from 'date-fns/getDaysInMonth';
 import isAfter from 'date-fns/isAfter';
 import isBefore from 'date-fns/isBefore';
 import { result } from 'lodash';
@@ -36,25 +34,15 @@ import {
   Suspense,
   forwardRef,
   lazy,
-  useCallback,
-  useEffect,
   useMemo,
   useRef,
-  useState,
 } from 'react';
 import { mergeRefs } from 'react-merge-refs';
 import scrollIntoView from 'scroll-into-view-if-needed';
 
-import { useReactRouterDOMSearchParams } from '../../hooks/ReactRouterDOM';
 import DataDropdownField from '../InputFields/DataDropdownField';
 import DateInputField from '../InputFields/DateInputField';
-import RenderIfVisible from '../RenderIfVisible';
-import { BaseDataRow, Table, TableColumn } from '../Table';
-import { BaseTimelineChartProps } from './models';
-import TimelineChartBodyDataRow from './TimelineChartBodyDataRow';
-import TimelineChartDataLabelRow from './TimelineChartDataLabelRow';
-import TimelineChartHeader from './TimelineChartHeader';
-import TimelineChartNavigationControls from './TimelineChartNavigationControls';
+import { BaseDataRow, Table, TableColumn, TableProps } from '../Table';
 
 export interface TimelineChartClasses {
   /** Styles applied to the root element. */
@@ -124,8 +112,7 @@ export interface TimelineElement extends Partial<BoxProps> {
 }
 
 export interface TimelineChartProps<RecordRow extends BaseDataRow = any>
-  extends BaseTimelineChartProps<RecordRow>,
-    Partial<Pick<GridProps, 'className' | 'sx'>> {
+  extends Partial<Pick<TableProps, 'className' | 'sx'>> {
   rowLabelProperty?: keyof RecordRow;
   getRowLabel?: (row: RecordRow) => ReactNode;
   rows: RecordRow[];
@@ -142,7 +129,6 @@ export interface TimelineChartProps<RecordRow extends BaseDataRow = any>
   endDateProperty: keyof RecordRow;
   showRowLabelsColumn?: boolean;
   getTimelineElements?: (row: RecordRow) => Promise<TimelineElement[]>;
-  legacy?: boolean;
 }
 
 export function getTimelineChartUtilityClass(slot: string): string {
@@ -166,11 +152,6 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
     rows,
     rowLabelProperty,
     getRowLabel,
-    expandedRows: expandedRowsProp = [],
-    allRowsExpanded: allRowsExpandedProp = false,
-    onChangeExpanded: onChangeExpandedProp,
-    onSelectTimeline,
-    getTimelines,
     startDateProperty,
     endDateProperty,
     timelineElementLabelProperty,
@@ -179,7 +160,6 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
     getTimelineElementProps,
     getTimelineElements,
     showRowLabelsColumn = true,
-    legacy = false,
     ...rest
   } = props;
 
@@ -197,6 +177,8 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
 
   const tableElementRef = useRef<HTMLTableElement>(null);
   const todayIndicatorRef = useRef<HTMLDivElement>(null);
+
+  const { palette } = useTheme();
 
   const { minDate, maxDate, timelineYears, totalNumberOfDays } = useMemo(() => {
     const allDates = rows
@@ -261,378 +243,6 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
       totalNumberOfDays,
     };
   }, [endDateProperty, rows, startDateProperty]);
-
-  //#region Legacy
-  const onChangeExpandedRef = useRef(onChangeExpandedProp);
-  onChangeExpandedRef.current = onChangeExpandedProp;
-  const getTimelinesRef = useRef(getTimelines);
-  getTimelinesRef.current = getTimelines;
-
-  const { palette } = useTheme();
-  const thisYear = useMemo(() => {
-    return new Date().getFullYear();
-  }, []);
-  const [selectedYear, setSelectedYear] = useState(thisYear);
-  const [timelineWrapperElement, setTimelineWrapperElement] =
-    useState<HTMLDivElement | null>(null);
-  const [rootElement, setRootElement] = useState<HTMLDivElement | null>(null);
-  const [timelineElement, setTimelineElement] = useState<HTMLDivElement | null>(
-    null
-  );
-  const [expandedRows, setExpandedRows] = useState<string[]>([]);
-  const [allRowsExpanded, setAllRowsExpanded] = useState(allRowsExpandedProp);
-
-  useEffect(() => {
-    setExpandedRows((prevExpandedRows) => {
-      if (prevExpandedRows.join(';') !== expandedRowsProp.join(';')) {
-        return expandedRowsProp;
-      }
-      return prevExpandedRows;
-    });
-  }, [expandedRowsProp]);
-
-  useEffect(() => {
-    setAllRowsExpanded(allRowsExpandedProp);
-  }, [allRowsExpandedProp]);
-
-  const onChangeExpanded = useCallback((id: string) => {
-    setExpandedRows((prevExpandedRows) => {
-      if (prevExpandedRows.includes(id)) {
-        prevExpandedRows.splice(prevExpandedRows.indexOf(id), 1);
-      } else {
-        prevExpandedRows.push(id);
-      }
-      return [...prevExpandedRows];
-    });
-  }, []);
-
-  useEffect(() => {
-    onChangeExpandedRef.current && onChangeExpandedRef.current(expandedRows);
-  }, [expandedRows]);
-
-  const { searchParams, setSearchParams } = useReactRouterDOMSearchParams();
-  const searchParamSelectedYear = searchParams.get('timeline:year') as
-    | string
-    | null;
-
-  // Today's cursor
-  const { todaysDatePercentage } = useMemo(() => {
-    const todaysDatePercentage = (() => {
-      if (selectedYear === thisYear) {
-        const date = new Date();
-        return (
-          (date.getMonth() * (1 / 12) +
-            ((date.getDate() - 1) / (getDaysInMonth(date) - 1)) * (1 / 12)) *
-          100
-        );
-      }
-    })();
-    return { todaysDatePercentage };
-  }, [selectedYear, thisYear]);
-
-  useEffect(() => {
-    if (timelineWrapperElement && timelineElement) {
-      let scaleFactor = 1;
-      const mouseWheelEventCallback = (event: any) => {
-        if (event.ctrlKey) {
-          event.preventDefault();
-          const { offsetWidth: wrapperElementWidth } = timelineWrapperElement;
-          const { wheelDelta } = event;
-          let width = timelineElement.offsetWidth + wheelDelta;
-          width > wrapperElementWidth || (width = wrapperElementWidth);
-
-          timelineElement.style.width = `${width}px`;
-          scaleFactor = width / wrapperElementWidth;
-        }
-      };
-      const windowResizeEventCallback = () => {
-        const { offsetWidth: wrapperElementWidth } = timelineWrapperElement;
-        timelineElement.style.width = `${wrapperElementWidth * scaleFactor}px`;
-      };
-
-      timelineWrapperElement.addEventListener(
-        'mousewheel',
-        mouseWheelEventCallback
-      );
-      window.addEventListener('resize', windowResizeEventCallback);
-      return () => {
-        timelineWrapperElement.removeEventListener(
-          'mousewheel',
-          mouseWheelEventCallback
-        );
-        window.removeEventListener('resize', windowResizeEventCallback);
-      };
-    }
-  }, [timelineElement, timelineWrapperElement]);
-
-  useEffect(() => {
-    if (timelineWrapperElement && timelineElement) {
-      let timelineElementWidthDiff = 0;
-      let initialTranslateX = 0;
-      let initialX = 0;
-      const mousemoveEventCallback = (event: MouseEvent) => {
-        const dX = event.clientX - initialX;
-        const translateX = dX - initialTranslateX;
-        if (translateX >= timelineElementWidthDiff && translateX <= 0) {
-          timelineElement.style.transform = `translateX(${translateX}px)`;
-        }
-        return false;
-      };
-      const mousedownEventCallback = (event: MouseEvent) => {
-        if (event.button === 0) {
-          timelineElementWidthDiff =
-            timelineWrapperElement.offsetWidth - timelineElement.offsetWidth;
-          initialTranslateX = (() => {
-            const currentTranslateX = timelineElement.style.transform
-              ? parseFloat(
-                  /^translateX\((.+)\)/g.exec(
-                    timelineElement.style.transform
-                  )?.[1] || ''
-                )
-              : 0;
-            return !isNaN(currentTranslateX) ? currentTranslateX : 0;
-          })();
-          initialX = event.clientX;
-          document.body.style.cursor = 'move';
-          timelineElement.style.transformOrigin = `${
-            event.offsetX + initialTranslateX
-          }px 0`;
-          timelineElement.style.pointerEvents = 'none';
-          window.addEventListener('mousemove', mousemoveEventCallback);
-        }
-      };
-      const mouseupEventCallback = () => {
-        document.body.style.cursor = '';
-        timelineElement.style.pointerEvents = '';
-        window.removeEventListener('mousemove', mousemoveEventCallback);
-      };
-      timelineWrapperElement.addEventListener(
-        'mousedown',
-        mousedownEventCallback
-      );
-      window.addEventListener('mouseup', mouseupEventCallback);
-      return () => {
-        document.body.style.cursor = '';
-        timelineElement.style.pointerEvents = '';
-        timelineWrapperElement.removeEventListener(
-          'mousedown',
-          mousedownEventCallback
-        );
-        window.removeEventListener('mousemove', mousemoveEventCallback);
-      };
-    }
-  }, [timelineElement, timelineWrapperElement]);
-
-  useEffect(() => {
-    if (rootElement) {
-      const mouseOverEventCallback = (event: MouseEvent) => {
-        const elementAtMousePosition = document.elementFromPoint(
-          event.clientX,
-          event.clientY
-        );
-        const closestDataRow = elementAtMousePosition?.closest(
-          '.team-assignments-timeline-data-row'
-        );
-        if (closestDataRow) {
-          if (!closestDataRow.classList.contains('hover')) {
-            const closestDataRowIndex = [
-              ...(closestDataRow.parentElement?.querySelectorAll(
-                '.team-assignments-timeline-data-row'
-              ) || []),
-            ].indexOf(closestDataRow);
-
-            rootElement
-              .querySelectorAll('.team-assignments-timeline-data-row')
-              .forEach((element) => element.classList.remove('hover'));
-
-            rootElement
-              .querySelectorAll('.team-assignments-timeline-data-row-container')
-              .forEach((containerElement) => {
-                containerElement
-                  .querySelectorAll('.team-assignments-timeline-data-row')
-                  [closestDataRowIndex]?.classList.add('hover');
-              });
-          }
-        } else {
-          rootElement
-            .querySelectorAll('.team-assignments-timeline-data-row.hover')
-            .forEach((element) => element.classList.remove('hover'));
-        }
-      };
-      const mouseLeaveEventCallback = () => {
-        rootElement
-          .querySelectorAll('.team-assignments-timeline-data-row.hover')
-          .forEach((element) => element.classList.remove('hover'));
-      };
-      rootElement.addEventListener('mouseover', mouseOverEventCallback);
-      rootElement.addEventListener('mouseleave', mouseLeaveEventCallback);
-      return () => {
-        rootElement.removeEventListener('mouseover', mouseOverEventCallback);
-        rootElement.addEventListener('mouseleave', mouseLeaveEventCallback);
-      };
-    }
-  }, [rootElement]);
-
-  useEffect(() => {
-    if (searchParamSelectedYear && searchParamSelectedYear.match(/^\d+$/g)) {
-      const selectedYear = parseInt(searchParamSelectedYear);
-      setSelectedYear(selectedYear);
-    } else {
-      setSearchParams(
-        {
-          'timeline:year': String(thisYear),
-        },
-        {
-          replace: true,
-        }
-      );
-    }
-  }, [searchParamSelectedYear, setSearchParams, thisYear]);
-
-  if (legacy) {
-    return (
-      <Grid
-        {...rest}
-        className={clsx(classes.root)}
-        ref={mergeRefs([
-          (rootElement: HTMLDivElement | null) => {
-            setRootElement(rootElement);
-          },
-          ref,
-        ])}
-        container
-      >
-        {/* Row labels column */}
-        <Grid
-          item
-          className="team-assignments-timeline-data-row-container"
-          sx={{
-            width: 256,
-            zIndex: 2,
-            bgcolor: palette.background.paper,
-          }}
-        >
-          <Box
-            sx={{
-              height: 80,
-              borderRight: `1px solid ${palette.divider}`,
-              borderBottom: `1px solid ${palette.divider}`,
-            }}
-          />
-          {rows.map((row) => {
-            return (
-              <RenderIfVisible
-                key={row.id}
-                displayPlaceholder={false}
-                unWrapChildrenIfVisible
-                sx={{
-                  height: 50,
-                }}
-              >
-                <TimelineChartDataLabelRow
-                  {...{
-                    onChangeExpanded,
-                    row,
-                    getTimelines,
-                    rowLabelProperty,
-                    getRowLabel,
-                  }}
-                  expanded={allRowsExpanded || expandedRows.includes(row.id)}
-                />
-              </RenderIfVisible>
-            );
-          })}
-        </Grid>
-
-        {/* Row Timelines column */}
-        <Grid
-          ref={(timelineWrapperElement: HTMLDivElement | null) => {
-            setTimelineWrapperElement(timelineWrapperElement);
-          }}
-          item
-          xs
-          sx={{
-            minWidth: 0,
-            position: 'relative',
-          }}
-        >
-          <TimelineChartNavigationControls {...{ selectedYear }} />
-          <Box
-            ref={(timelineElement: HTMLDivElement | null) => {
-              setTimelineElement(timelineElement);
-            }}
-            sx={{ minWidth: 800 }}
-          >
-            <TimelineChartHeader {...{ selectedYear }} />
-            <Box
-              component="section"
-              className="team-assignments-timeline-data-row-container"
-              sx={{
-                position: 'relative',
-                mb: 3,
-                '&>div:last-of-type .team-assignments-timeline-column': {
-                  borderBottom: `1px solid ${palette.divider}`,
-                },
-              }}
-            >
-              {todaysDatePercentage ? (
-                <Box
-                  sx={{
-                    position: 'absolute',
-                    top: 0,
-                    bottom: 0,
-                    left: `calc(${todaysDatePercentage}% - 1px)`,
-                    border: `1px solid ${palette.primary.main}`,
-                  }}
-                >
-                  <Tooltip title={formatDate(new Date(), 'MMM dd, yyyy')}>
-                    <Typography
-                      variant="body2"
-                      color="primary"
-                      sx={{
-                        position: 'absolute',
-                        top: `calc(100% + 2px)`,
-                        left: '-20px',
-                        fontSize: 12,
-                      }}
-                    >
-                      Today
-                    </Typography>
-                  </Tooltip>
-                </Box>
-              ) : null}
-              {rows.map((row) => {
-                return (
-                  <RenderIfVisible
-                    key={row.id}
-                    displayPlaceholder={false}
-                    unWrapChildrenIfVisible
-                    sx={{
-                      height: 50,
-                    }}
-                  >
-                    <TimelineChartBodyDataRow
-                      {...{
-                        row,
-                        onSelectTimeline,
-                        onChangeExpanded,
-                        selectedYear,
-                        getTimelines,
-                      }}
-                      expanded={
-                        allRowsExpanded || expandedRows.includes(row.id)
-                      }
-                    />
-                  </RenderIfVisible>
-                );
-              })}
-            </Box>
-          </Box>
-        </Grid>
-      </Grid>
-    );
-  }
-  //#endregion
 
   const getTimelineElementNode = ({
     startDate: startDateValue,
@@ -1066,7 +676,9 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
         </Grid>
       </Box>
       <Table
-        ref={tableElementRef}
+        ref={mergeRefs([tableElementRef, ref])}
+        className={clsx(className, classes.root)}
+        {...rest}
         columns={columns}
         paging={false}
         bordersVariant="square"
