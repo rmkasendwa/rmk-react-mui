@@ -45,6 +45,14 @@ const baseArgs = {
       type: 'Timeline',
       startDateProperty: 'joinedAt',
       endDateProperty: 'leftAt',
+      getTimelineElements: async ({ joinedAt, leftAt }) => {
+        return [
+          {
+            startDate: joinedAt,
+            endDate: leftAt,
+          },
+        ];
+      },
     },
   ],
   recordLabelPlural: 'Contacts',
