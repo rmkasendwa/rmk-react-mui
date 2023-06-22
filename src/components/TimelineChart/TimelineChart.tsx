@@ -195,6 +195,7 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
     })()
   );
 
+  const tableElementRef = useRef<HTMLTableElement>(null);
   const todayIndicatorRef = useRef<HTMLDivElement>(null);
 
   const { minDate, maxDate, timelineYears, totalNumberOfDays } = useMemo(() => {
@@ -1040,10 +1041,24 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
           </Grid>
           <Grid item>
             <ButtonGroup size="small" color="inherit">
-              <Button>
+              <Button
+                onClick={() => {
+                  tableElementRef.current?.parentElement?.scrollBy({
+                    left: -(timelineMonthMinWidth * 12),
+                    behavior: 'smooth',
+                  });
+                }}
+              >
                 <NavigateBeforeIcon />
               </Button>
-              <Button>
+              <Button
+                onClick={() => {
+                  tableElementRef.current?.parentElement?.scrollBy({
+                    left: timelineMonthMinWidth * 12,
+                    behavior: 'smooth',
+                  });
+                }}
+              >
                 <NavigateNextIcon />
               </Button>
             </ButtonGroup>
@@ -1051,6 +1066,7 @@ export const BaseTimelineChart = <RecordRow extends BaseDataRow>(
         </Grid>
       </Box>
       <Table
+        ref={tableElementRef}
         columns={columns}
         paging={false}
         bordersVariant="square"
