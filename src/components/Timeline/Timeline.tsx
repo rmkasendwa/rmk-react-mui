@@ -660,16 +660,18 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           });
         }
       },
-      width: timeScaleWidth,
+      width: timeScaleWidth + 48,
       wrapColumnContentInFieldValue: false,
       headerSx: {
         '&>div': {
-          p: 0,
+          py: 0,
+          pl: `24px`,
+          pr: `24px`,
         },
       },
       bodySx: {
-        pl: 0,
-        pr: 0,
+        pl: `24px`,
+        pr: `24px`,
         py: 1,
         borderColor: 'transparent',
         '&>div': {
