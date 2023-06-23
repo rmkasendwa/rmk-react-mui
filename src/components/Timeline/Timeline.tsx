@@ -5,7 +5,6 @@ import {
   BoxProps,
   Button,
   ButtonGroup,
-  CircularProgress,
   ComponentsOverrides,
   ComponentsProps,
   ComponentsVariants,
@@ -32,9 +31,7 @@ import {
   ReactElement,
   ReactNode,
   Ref,
-  Suspense,
   forwardRef,
-  lazy,
   useEffect,
   useMemo,
   useRef,
@@ -152,7 +149,7 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
   startDateProperty?: keyof RecordRow;
   endDateProperty?: keyof RecordRow;
   showRowLabelsColumn?: boolean;
-  getTimelineElements?: (row: RecordRow) => Promise<TimelineElement[]>;
+  getTimelineElements?: (row: RecordRow) => TimelineElement[];
   id?: string;
 }
 
@@ -365,7 +362,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                   borderRadius: '4px',
                 }}
               >
-                <Typography variant="body2" noWrap>
+                <Typography component="div" variant="body2" noWrap>
                   {timelineElementLabel}
                 </Typography>
               </Box>
@@ -623,29 +620,17 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       ),
       getColumnValue: (row) => {
         if (getTimelineElements) {
-          const TimelineElements = lazy(async () => {
-            const timelineElements = await getTimelineElements(row);
-            return {
-              default: () => {
-                return (
-                  <>
-                    {timelineElements.map((timelineElement, index) => {
-                      return (
-                        <Fragment key={index}>
-                          {getTimelineElementNode(timelineElement)}
-                        </Fragment>
-                      );
-                    })}
-                  </>
-                );
-              },
-            };
-          });
-
+          const timelineElements = getTimelineElements(row);
           return (
-            <Suspense fallback={<CircularProgress size={24} color="inherit" />}>
-              <TimelineElements />
-            </Suspense>
+            <>
+              {timelineElements.map((timelineElement, index) => {
+                return (
+                  <Fragment key={index}>
+                    {getTimelineElementNode(timelineElement)}
+                  </Fragment>
+                );
+              })}
+            </>
           );
         }
         if (startDateProperty && endDateProperty) {
