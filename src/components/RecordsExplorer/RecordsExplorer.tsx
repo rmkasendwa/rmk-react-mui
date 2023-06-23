@@ -2261,7 +2261,7 @@ const BaseRecordsExplorer = <
                   .getColumnValue as any;
               }
             }
-            return <Timeline rows={filteredData} {...viewProps} />;
+            return <Timeline rows={filteredData} {...viewProps} {...{ id }} />;
           }
         }
       }
