@@ -16,6 +16,7 @@ import {
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
   generateUtilityClasses,
+  useMediaQuery,
   useTheme,
   useThemeProps,
 } from '@mui/material';
@@ -203,7 +204,12 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   const tableElementRef = useRef<HTMLTableElement>(null);
   const todayIndicatorRef = useRef<HTMLDivElement>(null);
 
-  const { palette } = useTheme();
+  const { palette, breakpoints } = useTheme();
+  const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
+
+  const shouldShowRowLabelsColumn = (() => {
+    return !isSmallScreenSize && showRowLabelsColumn;
+  })();
 
   const {
     searchParams: { timeScale: selectedTimeScale = 'Year' },
@@ -519,9 +525,9 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                       position: 'sticky',
                       overflow: 'hidden',
                       left:
-                        (showRowLabelsColumn ? 256 : 0) +
+                        (shouldShowRowLabelsColumn ? 256 : 0) +
                         (() => {
-                          if (showRowLabelsColumn) {
+                          if (shouldShowRowLabelsColumn) {
                             return 16;
                           }
                           return 24;
@@ -681,7 +687,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     },
   ];
 
-  if (showRowLabelsColumn) {
+  if (shouldShowRowLabelsColumn) {
     columns.unshift({
       id: 'label',
       label: 'Label',

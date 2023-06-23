@@ -92,8 +92,6 @@ import Table, {
   BaseDataRow,
   TableColumnType,
   TableProps,
-  getComputedTableProps,
-  getTableMinWidth,
   mapTableColumnTypeToPrimitiveDataType,
 } from '../Table';
 import Timeline, { TimelineProps } from '../Timeline';
@@ -1783,7 +1781,6 @@ const BaseRecordsExplorer = <
               'minWidth'
             ) as ListView<RecordRow>;
             const {
-              minColumnWidth = 200,
               enableColumnDisplayToggle = true,
               enableSmallScreenOptimization = enableSmallScreenOptimizationProp,
               enableCheckboxAllRowSelector = enableCheckboxAllRowSelectorProp,
@@ -1796,25 +1793,6 @@ const BaseRecordsExplorer = <
               return selectedColumnIds.includes(String(id) as any);
             });
 
-            const { columns: allDisplayingColumns } = getComputedTableProps({
-              ...viewProps,
-              columns: displayingColumns,
-            });
-
-            let {
-              minWidth = getTableMinWidth(
-                allDisplayingColumns.map((column) => {
-                  const { minWidth } = column;
-                  return {
-                    ...column,
-                    minWidth: minWidth ?? minColumnWidth,
-                  };
-                }),
-                {
-                  enableColumnDisplayToggle,
-                }
-              ),
-            } = selectedView;
             return (
               <Box
                 sx={{
@@ -1998,14 +1976,6 @@ const BaseRecordsExplorer = <
                       };
                       flattenGroupHierachy(groupedData);
 
-                      const extraWidth = 24 * selectedGroupParams.length;
-                      minWidth += extraWidth;
-
-                      baseTableColumns[0] = {
-                        ...baseTableColumns[0],
-                        extraWidth,
-                      };
-
                       const firstDisplayingColumn = baseTableColumns.find(
                         ({ id }) => {
                           return id === displayingColumns[0].id;
@@ -2032,11 +2002,6 @@ const BaseRecordsExplorer = <
                     showRowNumber,
                     bordersVariant: 'square',
                     selectedColumnIds,
-                    ColumnDisplayToggleProps: {
-                      sx: {
-                        minWidth,
-                      },
-                    },
                     ...(() => {
                       if (isEditable || isDeletable || getRecordTools) {
                         return {
