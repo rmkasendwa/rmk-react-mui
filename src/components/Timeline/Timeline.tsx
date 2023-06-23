@@ -693,6 +693,11 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           return result(row, rowLabelProperty);
         }
       },
+      headerSx: {
+        // bgcolor: 'transparent !important',
+        borderRight: 'none !important',
+        zIndex: 1,
+      },
       bodySx: {
         zIndex: 2,
       },
@@ -730,13 +735,14 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         <Grid
           container
           sx={{
-            px: 3,
+            pr: 3,
+            pl: 1,
             py: 1,
             alignItems: 'center',
             position: 'sticky',
             right: 0,
             display: 'inline-flex',
-            gap: 1,
+            gap: 2,
             bgcolor: palette.background.paper,
             height: 56,
             width: 'auto',
@@ -800,8 +806,8 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                 }}
                 sx={{
                   px: 1,
-                  minWidth: 'auto',
-                  width: 36,
+                  minWidth: 'auto !important',
+                  width: 32,
                 }}
               >
                 <NavigateBeforeIcon />
@@ -815,8 +821,8 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                 }}
                 sx={{
                   px: 1,
-                  minWidth: 'auto',
-                  width: 36,
+                  minWidth: 'auto !important',
+                  width: 32,
                 }}
               >
                 <NavigateNextIcon />
@@ -836,6 +842,12 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         startStickyColumnIndex={0}
         stickyHeader
         enableSmallScreenOptimization={false}
+        HeaderRowProps={{
+          sx: {
+            position: 'relative',
+            zIndex: 3,
+          },
+        }}
         SecondaryHeaderRowProps={{
           sx: {
             position: 'relative',
