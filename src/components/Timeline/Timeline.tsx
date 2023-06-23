@@ -352,6 +352,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                   display: 'flex',
                   alignItems: 'center',
                   px: 2,
+                  bgcolor: palette.background.paper,
                   border: `1px solid ${palette.divider}`,
                   ...sx,
                   width: `${percentage * 100}%`,
@@ -393,8 +394,10 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   scrollToTodayRef.current = scrollToToday;
 
   useEffect(() => {
-    scrollToTodayRef.current();
-  }, []);
+    if (selectedTimeScale) {
+      scrollToTodayRef.current();
+    }
+  }, [selectedTimeScale]);
 
   const {
     timeScaleRows: [topTimeScaleRow, middleTimeScaleRow, bottomTimeScaleRow],
@@ -487,137 +490,136 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     {
       id: 'timeline',
       label: (
-        <>
-          <Stack
+        <Stack
+          sx={{
+            width: '100%',
+            bgcolor: palette.background.paper,
+          }}
+        >
+          <Box
             sx={{
-              width: '100%',
+              display: 'flex',
+              height: 56,
+              alignItems: 'center',
             }}
           >
-            <Box
-              sx={{
-                display: 'flex',
-                height: 56,
-                alignItems: 'center',
-              }}
-            >
-              {topTimeScaleRow.map(({ id, label }) => {
-                return (
+            {topTimeScaleRow.map(({ id, label }) => {
+              return (
+                <Box
+                  key={id}
+                  sx={{
+                    flex: 1,
+                    minWidth: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                  }}
+                >
                   <Box
-                    key={id}
                     sx={{
-                      flex: 1,
-                      minWidth: 0,
-                      display: 'flex',
-                      alignItems: 'center',
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        position: 'sticky',
-                        overflow: 'hidden',
-                        left:
-                          (showRowLabelsColumn ? 256 : 0) +
-                          (() => {
-                            if (showRowLabelsColumn) {
-                              return 16;
-                            }
-                            return 24;
-                          })(),
-                      }}
-                    >
-                      <Typography
-                        variant="body2"
-                        noWrap
-                        sx={{
-                          fontWeight: 500,
-                        }}
-                      >
-                        {label}
-                      </Typography>
-                    </Box>
-                  </Box>
-                );
-              })}
-            </Box>
-            <Box
-              sx={{
-                display: 'flex',
-              }}
-            >
-              {middleTimeScaleRow.map(({ id, label }) => {
-                return (
-                  <Box
-                    key={id}
-                    sx={{
-                      flex: 1,
+                      position: 'sticky',
                       overflow: 'hidden',
-                      minWidth: 0,
-                      height: 24,
-                      display: 'flex',
-                      alignItems: 'center',
-                    }}
-                  >
-                    <Typography variant="body2" noWrap>
-                      {label}
-                    </Typography>
-                  </Box>
-                );
-              })}
-            </Box>
-            <Box
-              sx={{
-                display: 'flex',
-              }}
-            >
-              {bottomTimeScaleRow.map(({ id, label }) => {
-                return (
-                  <Box
-                    key={id}
-                    sx={{
-                      flex: 1,
-                      overflow: 'hidden',
-                      minWidth: 0,
-                      height: 24,
-                      display: 'flex',
-                      alignItems: 'center',
+                      left:
+                        (showRowLabelsColumn ? 256 : 0) +
+                        (() => {
+                          if (showRowLabelsColumn) {
+                            return 16;
+                          }
+                          return 24;
+                        })(),
                     }}
                   >
                     <Typography
                       variant="body2"
                       noWrap
                       sx={{
-                        fontSize: 12,
+                        fontWeight: 500,
                       }}
                     >
                       {label}
                     </Typography>
                   </Box>
-                );
-              })}
-            </Box>
-          </Stack>
-          {(() => {
-            const today = new Date();
-            if (isAfter(today, minDate) && isBefore(today, maxDate)) {
-              const offsetPercentage =
-                differenceInDays(today, minDate) / totalNumberOfDays;
+                </Box>
+              );
+            })}
+          </Box>
+          <Box
+            sx={{
+              display: 'flex',
+            }}
+          >
+            {middleTimeScaleRow.map(({ id, label }) => {
               return (
                 <Box
-                  ref={todayIndicatorRef}
+                  key={id}
                   sx={{
-                    position: 'absolute',
-                    width: 2,
-                    bgcolor: palette.primary.main,
-                    height: rows.length * 51,
-                    top: '100%',
-                    left: `${offsetPercentage * 100}%`,
+                    flex: 1,
+                    overflow: 'hidden',
+                    minWidth: 0,
+                    height: 24,
+                    display: 'flex',
+                    alignItems: 'center',
                   }}
-                />
+                >
+                  <Typography variant="body2" noWrap>
+                    {label}
+                  </Typography>
+                </Box>
               );
-            }
-          })()}
-        </>
+            })}
+          </Box>
+          <Box
+            sx={{
+              display: 'flex',
+            }}
+          >
+            {bottomTimeScaleRow.map(({ id, label }) => {
+              return (
+                <Box
+                  key={id}
+                  sx={{
+                    flex: 1,
+                    overflow: 'hidden',
+                    minWidth: 0,
+                    height: 24,
+                    display: 'flex',
+                    alignItems: 'center',
+                  }}
+                >
+                  <Typography
+                    variant="body2"
+                    noWrap
+                    sx={{
+                      fontSize: 12,
+                    }}
+                  >
+                    {label}
+                  </Typography>
+                </Box>
+              );
+            })}
+          </Box>
+        </Stack>
       ),
+      secondaryHeaderRowContent: (() => {
+        const today = new Date();
+        if (isAfter(today, minDate) && isBefore(today, maxDate)) {
+          const offsetPercentage =
+            differenceInDays(today, minDate) / totalNumberOfDays;
+          return (
+            <Box
+              ref={todayIndicatorRef}
+              sx={{
+                position: 'absolute',
+                width: 2,
+                bgcolor: palette.primary.main,
+                height: rows.length * 51,
+                top: '100%',
+                left: `${offsetPercentage * 100}%`,
+              }}
+            />
+          );
+        }
+      })(),
       getColumnValue: (row) => {
         if (getTimelineElements) {
           const timelineElements = getTimelineElements(row);
@@ -796,6 +798,11 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                     behavior: 'smooth',
                   });
                 }}
+                sx={{
+                  px: 1,
+                  minWidth: 'auto',
+                  width: 36,
+                }}
               >
                 <NavigateBeforeIcon />
               </Button>
@@ -805,6 +812,11 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                     left: unitTimeScaleWidth,
                     behavior: 'smooth',
                   });
+                }}
+                sx={{
+                  px: 1,
+                  minWidth: 'auto',
+                  width: 36,
                 }}
               >
                 <NavigateNextIcon />
@@ -824,6 +836,12 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         startStickyColumnIndex={0}
         stickyHeader
         enableSmallScreenOptimization={false}
+        SecondaryHeaderRowProps={{
+          sx: {
+            position: 'relative',
+            zIndex: -1,
+          },
+        }}
         sx={{
           tr: {
             verticalAlign: 'middle',

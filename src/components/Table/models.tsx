@@ -127,6 +127,7 @@ export interface TableColumn<
         | 'validationRules'
       >
     > {
+  secondaryHeaderRowContent?: ReactNode;
   id: keyof DataRow;
   type?: ColumnType;
   align?: 'left' | 'center' | 'right';
@@ -257,6 +258,7 @@ export interface TableProps<DataRow extends BaseDataRow = any>
   showHeaderRow?: boolean;
   showDataRows?: boolean;
   HeaderRowProps?: Partial<MuiTableRowProps>;
+  SecondaryHeaderRowProps?: Partial<MuiTableRowProps>;
   currencyCode?: string;
   paginationType?: 'default' | 'classic';
   PaginationProps?: PaginationProps;

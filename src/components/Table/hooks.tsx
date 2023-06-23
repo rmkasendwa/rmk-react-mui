@@ -130,6 +130,7 @@ export const useTable = <DataRow extends BaseDataRow>(
     showHeaderRow = true,
     showDataRows = true,
     HeaderRowProps = {},
+    SecondaryHeaderRowProps = {},
     decimalPlaces,
     textTransform,
     paginationType = 'default',
@@ -213,7 +214,9 @@ export const useTable = <DataRow extends BaseDataRow>(
   const { palette, breakpoints } = useTheme();
   const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
 
-  const { sx: headerRowPropsSx, ...restHeaderRowProps } = HeaderRowProps;
+  const { sx: HeaderRowPropsSx, ...HeaderRowPropsRest } = HeaderRowProps;
+  const { sx: SecondaryHeaderRowPropsSx, ...SecondaryHeaderRowPropsRest } =
+    SecondaryHeaderRowProps;
   const [pageIndex, setPageIndex] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(rowsPerPageProp);
   const [sortBy, setSortBy] = useState<SortOptions<DataRow>>([]);
@@ -767,257 +770,309 @@ export const useTable = <DataRow extends BaseDataRow>(
   const tableHeaderRow = (() => {
     if (showHeaderRow && !optimizeForSmallScreen) {
       return (
-        <TableRow {...restHeaderRowProps} sx={{ ...headerRowPropsSx }}>
-          {displayingColumns.map((column, index) => {
-            const {
-              id,
-              style,
-              minWidth,
-              sortable: columnSortable = sortable,
-              headerSx,
-              className,
-              type,
-              sx,
-              getColumnValue,
-              showHeaderText = true,
-              wrapColumnContentInFieldValue = true,
-            } = column;
-            const isLastColumn = index === displayingColumns.length - 1;
-            let label = column.label;
-            column.headerTextSuffix &&
-              (label = (
-                <>
-                  {label} {column.headerTextSuffix}
-                </>
-              ));
-            return (
-              <TableCell
-                key={String(id)}
-                className={clsx(
-                  className,
-                  stickyHeader && tableBodyColumnClasses.opaque
-                )}
-                {...{ style }}
-                sx={{
-                  fontWeight: 'bold',
-                  p: 0,
-                  ...getColumnWidthStyles({
-                    ...column,
-                    minWidth: minWidth ?? minColumnWidth,
-                  }),
-                  position: stickyHeader ? 'sticky' : 'relative',
-                  bgcolor: 'transparent',
-                  ...sx,
-                  ...(headerSx as any),
-                }}
-              >
-                <Box
+        <>
+          <TableRow {...HeaderRowPropsRest} sx={{ ...HeaderRowPropsSx }}>
+            {displayingColumns.map((column, index) => {
+              const {
+                id,
+                style,
+                minWidth,
+                sortable: columnSortable = sortable,
+                headerSx,
+                className,
+                type,
+                sx,
+                getColumnValue,
+                showHeaderText = true,
+                wrapColumnContentInFieldValue = true,
+              } = column;
+              const isLastColumn = index === displayingColumns.length - 1;
+              let label = column.label;
+              column.headerTextSuffix &&
+                (label = (
+                  <>
+                    {label} {column.headerTextSuffix}
+                  </>
+                ));
+              return (
+                <TableCell
+                  key={String(id)}
+                  className={clsx(
+                    className,
+                    stickyHeader && tableBodyColumnClasses.opaque
+                  )}
+                  {...{ style }}
                   sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    pl: (() => {
-                      if (isGroupedTable) {
-                        return 1;
-                      }
-                      if (index <= 0) {
-                        return 3;
-                      }
-                      return 1.5;
-                    })(),
-                    pr: columnSortable
-                      ? 3
-                      : index < displayingColumns.length - 1
-                      ? 1.5
-                      : 3,
-                    py: 1.5,
-                    ...(() => {
-                      if (enableColumnDisplayToggle && isLastColumn) {
-                        return {
-                          pr: 0,
-                        };
-                      }
-                    })(),
-                    ...(() => {
-                      if (!showHeaderText || !label) {
-                        return {
-                          position: 'absolute',
-                          top: 0,
-                          right: 0,
-                          bottom: 0,
-                          left: 0,
-                        };
-                      }
-                    })(),
+                    fontWeight: 'bold',
+                    p: 0,
+                    ...getColumnWidthStyles({
+                      ...column,
+                      minWidth: minWidth ?? minColumnWidth,
+                    }),
+                    position: stickyHeader ? 'sticky' : 'relative',
+                    bgcolor: 'transparent',
+                    ...sx,
+                    ...(headerSx as any),
                   }}
                 >
-                  {(() => {
-                    if (isGroupedTable && index === 0) {
-                      return (
-                        <TableGroupCollapseTool
-                          groupCollapsed={
-                            TableGroupingProps?.allGroupsCollapsed || false
-                          }
-                          onChangeGroupCollapsed={
-                            TableGroupingProps?.onChangeAllGroupsCollapsed
-                          }
-                        />
-                      );
-                    }
-                  })()}
-                  {(() => {
-                    if (showHeaderText && label) {
-                      return (
-                        <>
-                          {(() => {
-                            if (wrapColumnContentInFieldValue) {
-                              return (
-                                <Typography
-                                  component="div"
-                                  variant="body2"
-                                  sx={{ fontWeight: 'bold' }}
-                                  noWrap
-                                >
-                                  {label}
-                                </Typography>
-                              );
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      pl: (() => {
+                        if (isGroupedTable) {
+                          return 1;
+                        }
+                        if (index <= 0) {
+                          return 3;
+                        }
+                        return 1.5;
+                      })(),
+                      pr: columnSortable
+                        ? 3
+                        : index < displayingColumns.length - 1
+                        ? 1.5
+                        : 3,
+                      py: 1.5,
+                      ...(() => {
+                        if (enableColumnDisplayToggle && isLastColumn) {
+                          return {
+                            pr: 0,
+                          };
+                        }
+                      })(),
+                      ...(() => {
+                        if (!showHeaderText || !label) {
+                          return {
+                            position: 'absolute',
+                            top: 0,
+                            right: 0,
+                            bottom: 0,
+                            left: 0,
+                          };
+                        }
+                      })(),
+                    }}
+                  >
+                    {(() => {
+                      if (isGroupedTable && index === 0) {
+                        return (
+                          <TableGroupCollapseTool
+                            groupCollapsed={
+                              TableGroupingProps?.allGroupsCollapsed || false
                             }
-                            return label;
-                          })()}
-                          {(() => {
-                            if (
-                              columnSortable &&
-                              (!enableColumnDisplayToggle || !isLastColumn)
-                            ) {
-                              const sortDirection = (() => {
-                                if (sortBy[0] && sortBy[0].id === id) {
-                                  return sortBy[0].sortDirection || 'ASC';
-                                }
-                              })();
-                              return (
-                                <Stack
-                                  sx={{
-                                    position: 'absolute',
-                                    top: 0,
-                                    right: 0,
-                                    height: '100%',
-                                    fontSize: 10,
-                                    lineHeight: 1,
-                                    color: alpha(palette.text.primary, 0.1),
-                                  }}
-                                >
-                                  {(
-                                    ['ASC', 'DESC'] as [
-                                      SortDirection,
-                                      SortDirection
-                                    ]
-                                  ).map((baseSortDirection) => {
-                                    return (
-                                      <Box
-                                        key={baseSortDirection}
-                                        onClick={() => {
-                                          const sortOptions: typeof sortBy = [
-                                            {
-                                              id,
-                                              sortDirection: baseSortDirection,
-                                              type: mapTableColumnTypeToPrimitiveDataType(
-                                                type
-                                              ),
-                                              getSortValue: (row) => {
-                                                const columnValue = (() => {
-                                                  if (getColumnValue) {
-                                                    return getColumnValue(
-                                                      row,
-                                                      column
-                                                    );
-                                                  }
-                                                  return row[id];
-                                                })();
-                                                const acceptableTypes = [
-                                                  'number',
-                                                  'string',
-                                                  'boolean',
-                                                ];
-                                                if (
-                                                  acceptableTypes.includes(
-                                                    typeof columnValue
-                                                  )
-                                                ) {
-                                                  return columnValue as
-                                                    | number
-                                                    | string
-                                                    | boolean;
-                                                }
-                                                if (
-                                                  acceptableTypes.includes(
-                                                    typeof row[id]
-                                                  )
-                                                ) {
-                                                  return row[id] as
-                                                    | number
-                                                    | string
-                                                    | boolean;
-                                                }
-                                                return '';
-                                              },
-                                            },
-                                          ];
-                                          setSortBy(sortOptions);
-                                          onChangeSortBy &&
-                                            onChangeSortBy(sortOptions);
-                                        }}
-                                        sx={{
-                                          flex: 1,
-                                          display: 'flex',
-                                          px: 0.8,
-                                          alignItems:
-                                            baseSortDirection === 'ASC'
-                                              ? 'end'
-                                              : 'start',
-                                          cursor: 'pointer',
-                                          ...(() => {
-                                            if (
-                                              sortDirection ===
-                                              baseSortDirection
-                                            ) {
-                                              return {
-                                                color: palette.text.primary,
-                                              };
-                                            }
-                                            return {
-                                              '&:hover': {
-                                                color: alpha(
-                                                  palette.text.primary,
-                                                  0.3
+                            onChangeGroupCollapsed={
+                              TableGroupingProps?.onChangeAllGroupsCollapsed
+                            }
+                          />
+                        );
+                      }
+                    })()}
+                    {(() => {
+                      if (showHeaderText && label) {
+                        return (
+                          <>
+                            {(() => {
+                              if (wrapColumnContentInFieldValue) {
+                                return (
+                                  <Typography
+                                    component="div"
+                                    variant="body2"
+                                    sx={{ fontWeight: 'bold' }}
+                                    noWrap
+                                  >
+                                    {label}
+                                  </Typography>
+                                );
+                              }
+                              return label;
+                            })()}
+                            {(() => {
+                              if (
+                                columnSortable &&
+                                (!enableColumnDisplayToggle || !isLastColumn)
+                              ) {
+                                const sortDirection = (() => {
+                                  if (sortBy[0] && sortBy[0].id === id) {
+                                    return sortBy[0].sortDirection || 'ASC';
+                                  }
+                                })();
+                                return (
+                                  <Stack
+                                    sx={{
+                                      position: 'absolute',
+                                      top: 0,
+                                      right: 0,
+                                      height: '100%',
+                                      fontSize: 10,
+                                      lineHeight: 1,
+                                      color: alpha(palette.text.primary, 0.1),
+                                    }}
+                                  >
+                                    {(
+                                      ['ASC', 'DESC'] as [
+                                        SortDirection,
+                                        SortDirection
+                                      ]
+                                    ).map((baseSortDirection) => {
+                                      return (
+                                        <Box
+                                          key={baseSortDirection}
+                                          onClick={() => {
+                                            const sortOptions: typeof sortBy = [
+                                              {
+                                                id,
+                                                sortDirection:
+                                                  baseSortDirection,
+                                                type: mapTableColumnTypeToPrimitiveDataType(
+                                                  type
                                                 ),
+                                                getSortValue: (row) => {
+                                                  const columnValue = (() => {
+                                                    if (getColumnValue) {
+                                                      return getColumnValue(
+                                                        row,
+                                                        column
+                                                      );
+                                                    }
+                                                    return row[id];
+                                                  })();
+                                                  const acceptableTypes = [
+                                                    'number',
+                                                    'string',
+                                                    'boolean',
+                                                  ];
+                                                  if (
+                                                    acceptableTypes.includes(
+                                                      typeof columnValue
+                                                    )
+                                                  ) {
+                                                    return columnValue as
+                                                      | number
+                                                      | string
+                                                      | boolean;
+                                                  }
+                                                  if (
+                                                    acceptableTypes.includes(
+                                                      typeof row[id]
+                                                    )
+                                                  ) {
+                                                    return row[id] as
+                                                      | number
+                                                      | string
+                                                      | boolean;
+                                                  }
+                                                  return '';
+                                                },
                                               },
-                                            };
-                                          })(),
-                                        }}
-                                      >
-                                        <span>
-                                          {baseSortDirection === 'ASC' ? (
-                                            <>&#9650;</>
-                                          ) : (
-                                            <>&#9660;</>
-                                          )}
-                                        </span>
-                                      </Box>
-                                    );
-                                  })}
-                                </Stack>
-                              );
-                            }
-                          })()}
-                        </>
-                      );
-                    }
-                  })()}
-                  <Box component="span" sx={{ flex: 1 }} />
-                </Box>
-              </TableCell>
-            );
-          })}
-        </TableRow>
+                                            ];
+                                            setSortBy(sortOptions);
+                                            onChangeSortBy &&
+                                              onChangeSortBy(sortOptions);
+                                          }}
+                                          sx={{
+                                            flex: 1,
+                                            display: 'flex',
+                                            px: 0.8,
+                                            alignItems:
+                                              baseSortDirection === 'ASC'
+                                                ? 'end'
+                                                : 'start',
+                                            cursor: 'pointer',
+                                            ...(() => {
+                                              if (
+                                                sortDirection ===
+                                                baseSortDirection
+                                              ) {
+                                                return {
+                                                  color: palette.text.primary,
+                                                };
+                                              }
+                                              return {
+                                                '&:hover': {
+                                                  color: alpha(
+                                                    palette.text.primary,
+                                                    0.3
+                                                  ),
+                                                },
+                                              };
+                                            })(),
+                                          }}
+                                        >
+                                          <span>
+                                            {baseSortDirection === 'ASC' ? (
+                                              <>&#9650;</>
+                                            ) : (
+                                              <>&#9660;</>
+                                            )}
+                                          </span>
+                                        </Box>
+                                      );
+                                    })}
+                                  </Stack>
+                                );
+                              }
+                            })()}
+                          </>
+                        );
+                      }
+                    })()}
+                    <Box component="span" sx={{ flex: 1 }} />
+                  </Box>
+                </TableCell>
+              );
+            })}
+          </TableRow>
+          {(() => {
+            if (
+              displayingColumns.some(
+                ({ secondaryHeaderRowContent }) =>
+                  secondaryHeaderRowContent != null
+              )
+            ) {
+              return (
+                <TableRow
+                  {...SecondaryHeaderRowPropsRest}
+                  sx={{ ...SecondaryHeaderRowPropsSx }}
+                >
+                  {displayingColumns.map((column) => {
+                    const {
+                      id,
+                      style,
+                      minWidth,
+                      className,
+                      sx,
+                      secondaryHeaderRowContent,
+                    } = column;
+                    return (
+                      <TableCell
+                        key={String(id)}
+                        className={clsx(
+                          className,
+                          stickyHeader && tableBodyColumnClasses.opaque
+                        )}
+                        {...{ style }}
+                        sx={{
+                          fontWeight: 'bold',
+                          p: 0,
+                          ...getColumnWidthStyles({
+                            ...column,
+                            minWidth: minWidth ?? minColumnWidth,
+                          }),
+                          position: stickyHeader ? 'sticky' : 'relative',
+                          bgcolor: 'transparent',
+                          ...sx,
+                        }}
+                      >
+                        {secondaryHeaderRowContent}
+                      </TableCell>
+                    );
+                  })}
+                </TableRow>
+              );
+            }
+          })()}
+        </>
       );
     }
   })();

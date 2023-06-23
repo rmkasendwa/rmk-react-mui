@@ -45,7 +45,7 @@ const baseArgs = {
       type: 'Timeline',
       startDateProperty: 'joinedAt',
       endDateProperty: 'leftAt',
-      getTimelineElements: async ({ joinedAt, leftAt }) => {
+      getTimelineElements: ({ joinedAt, leftAt }) => {
         return [
           {
             startDate: joinedAt,
