@@ -2358,7 +2358,14 @@ const BaseRecordsExplorer = <
             }
           })()}
           searchTerm={searchParamSearchTerm || controlledSearchTerm || ''}
-          load={loadProp ?? load}
+          load={(() => {
+            if (loadProp) {
+              return loadProp;
+            }
+            if (recordsFinder) {
+              return load;
+            }
+          })()}
           loading={loadingProp ?? loading}
           errorMessage={errorMessageProp ?? errorMessage}
           tools={[
