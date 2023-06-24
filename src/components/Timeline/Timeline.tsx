@@ -16,6 +16,7 @@ import {
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
   generateUtilityClasses,
+  outlinedInputClasses,
   useMediaQuery,
   useTheme,
   useThemeProps,
@@ -43,7 +44,9 @@ import scrollIntoView from 'scroll-into-view-if-needed';
 import * as Yup from 'yup';
 
 import { useReactRouterDOMSearchParams } from '../../hooks/ReactRouterDOM';
-import DataDropdownField from '../InputFields/DataDropdownField';
+import DataDropdownField, {
+  dataDropdownFieldClasses,
+} from '../InputFields/DataDropdownField';
 import { BaseDataRow, Table, TableColumn, TableProps } from '../Table';
 
 export interface TimelineClasses {
@@ -767,85 +770,134 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           }}
         >
           <Grid item>
-            <DataDropdownField
-              placeholder="Timescale"
-              size="small"
-              value={selectedTimeScale}
-              options={timeScaleOptions.map((timeScaleOption) => {
-                return {
-                  value: timeScaleOption,
-                  label: timeScaleOption,
-                  selectable:
-                    !disabledTimeScaleOptions.includes(timeScaleOption),
-                };
-              })}
-              onChange={(event) => {
-                setSearchParams(
-                  {
-                    timeScale: (event.target.value as any) || null,
-                  },
-                  {
-                    replace: true,
-                  }
-                );
-              }}
-              showClearButton={false}
+            <Stack
+              direction="row"
               sx={{
-                width: 120,
-              }}
-            />
-          </Grid>
-          <Grid item>
-            <Button
-              variant="outlined"
-              color="inherit"
-              size="small"
-              onClick={() => {
-                scrollToToday();
+                gap: 0.5,
+                alignItems: 'center',
               }}
             >
-              Today
-            </Button>
+              <Typography variant="body2">Timescale:</Typography>
+              <Button
+                color="inherit"
+                variant="contained"
+                size="small"
+                disableRipple
+                sx={{
+                  minWidth: 0,
+                  p: 0,
+                }}
+              >
+                <DataDropdownField
+                  placeholder="Timescale"
+                  size="small"
+                  value={selectedTimeScale}
+                  options={timeScaleOptions.map((timeScaleOption) => {
+                    return {
+                      value: timeScaleOption,
+                      label: timeScaleOption,
+                      selectable:
+                        !disabledTimeScaleOptions.includes(timeScaleOption),
+                    };
+                  })}
+                  onChange={(event) => {
+                    setSearchParams(
+                      {
+                        timeScale: (event.target.value as any) || null,
+                      },
+                      {
+                        replace: true,
+                      }
+                    );
+                  }}
+                  showClearButton={false}
+                  InputProps={{
+                    sx: {
+                      height: 32,
+                      pr: 0.5,
+                      [`.${outlinedInputClasses.notchedOutline}`]: {
+                        border: 'none',
+                      },
+                    },
+                  }}
+                  WrapperProps={{
+                    sx: {
+                      [`.${dataDropdownFieldClasses.selectedOptionsWrapper}`]: {
+                        top: 3,
+                        width: 'calc(100% - 22px) !important',
+                      },
+                    },
+                  }}
+                  sx={{
+                    width: 90,
+                  }}
+                />
+              </Button>
+            </Stack>
           </Grid>
           <Grid item>
-            <ButtonGroup
-              size="small"
-              color="inherit"
+            <Stack
+              direction="row"
               sx={{
-                display: 'flex',
+                gap: 0.5,
+                alignItems: 'center',
               }}
             >
+              <Typography variant="body2">Jump to:</Typography>
               <Button
+                variant="contained"
+                color="inherit"
+                size="small"
                 onClick={() => {
-                  tableElementRef.current?.parentElement?.scrollBy({
-                    left: -unitTimeScaleWidth,
-                    behavior: 'smooth',
-                  });
+                  scrollToToday();
                 }}
                 sx={{
-                  px: 1,
-                  minWidth: 'auto !important',
-                  width: 32,
+                  height: 32,
                 }}
               >
-                <NavigateBeforeIcon />
+                Today
               </Button>
-              <Button
-                onClick={() => {
-                  tableElementRef.current?.parentElement?.scrollBy({
-                    left: unitTimeScaleWidth,
-                    behavior: 'smooth',
-                  });
-                }}
+              <ButtonGroup
+                size="small"
+                variant="contained"
+                color="inherit"
+                disableElevation
                 sx={{
-                  px: 1,
-                  minWidth: 'auto !important',
-                  width: 32,
+                  display: 'flex',
                 }}
               >
-                <NavigateNextIcon />
-              </Button>
-            </ButtonGroup>
+                <Button
+                  onClick={() => {
+                    tableElementRef.current?.parentElement?.scrollBy({
+                      left: -unitTimeScaleWidth,
+                      behavior: 'smooth',
+                    });
+                  }}
+                  sx={{
+                    px: 1,
+                    minWidth: 'auto !important',
+                    width: 32,
+                  }}
+                >
+                  <NavigateBeforeIcon />
+                </Button>
+                <Button
+                  onClick={() => {
+                    tableElementRef.current?.parentElement?.scrollBy({
+                      left: unitTimeScaleWidth,
+                      behavior: 'smooth',
+                    });
+                  }}
+                  sx={{
+                    px: 1,
+                    minWidth: 'auto !important',
+                    width: 32,
+                  }}
+                >
+                  <NavigateNextIcon />
+                </Button>
+              </ButtonGroup>
+            </Stack>
           </Grid>
         </Grid>
       </Box>
