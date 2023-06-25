@@ -779,6 +779,7 @@ export const useTable = <DataRow extends BaseDataRow>(
                 minWidth,
                 sortable: columnSortable = sortable,
                 headerSx,
+                primaryHeaderSx,
                 className,
                 type,
                 sx,
@@ -812,7 +813,8 @@ export const useTable = <DataRow extends BaseDataRow>(
                     position: stickyHeader ? 'sticky' : 'relative',
                     bgcolor: 'transparent',
                     ...sx,
-                    ...(headerSx as any),
+                    ...headerSx,
+                    ...(primaryHeaderSx as any),
                   }}
                 >
                   <Box
@@ -1035,15 +1037,18 @@ export const useTable = <DataRow extends BaseDataRow>(
                   {...SecondaryHeaderRowPropsRest}
                   sx={{ ...SecondaryHeaderRowPropsSx }}
                 >
-                  {displayingColumns.map((column) => {
+                  {displayingColumns.map((column, index) => {
                     const {
                       id,
                       style,
                       minWidth,
                       className,
                       sx,
+                      headerSx,
+                      secondaryHeaderSx,
                       secondaryHeaderRowContent,
                     } = column;
+                    const isLastColumn = index === displayingColumns.length - 1;
                     return (
                       <TableCell
                         key={String(id)}
@@ -1062,9 +1067,37 @@ export const useTable = <DataRow extends BaseDataRow>(
                           position: stickyHeader ? 'sticky' : 'relative',
                           bgcolor: 'transparent',
                           ...sx,
+                          ...headerSx,
+                          ...(secondaryHeaderSx as any),
                         }}
                       >
-                        {secondaryHeaderRowContent}
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            position: 'relative',
+                            pl: (() => {
+                              if (isGroupedTable) {
+                                return 1;
+                              }
+                              if (index <= 0) {
+                                return 3;
+                              }
+                              return 1.5;
+                            })(),
+                            pr: index < displayingColumns.length - 1 ? 1.5 : 3,
+                            py: 1.5,
+                            ...(() => {
+                              if (enableColumnDisplayToggle && isLastColumn) {
+                                return {
+                                  pr: 0,
+                                };
+                              }
+                            })(),
+                          }}
+                        >
+                          {secondaryHeaderRowContent}
+                        </Box>
                       </TableCell>
                     );
                   })}

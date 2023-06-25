@@ -1,6 +1,6 @@
 import '@infinite-debugger/rmk-js-extensions/Object';
 
-import { SxProps, Theme, Typography } from '@mui/material';
+import { Typography } from '@mui/material';
 import { BoxProps } from '@mui/material/Box';
 import { PaginationProps } from '@mui/material/Pagination';
 import { TableProps as MuiBaseTableProps } from '@mui/material/Table';
@@ -147,8 +147,10 @@ export interface TableColumn<
   getEditField?: GetEditField<DataRow, ColumnType>;
   fieldValueEditor?: FieldValueEditor<DataRow, ColumnType>;
   onClickColumn?: OnClickColumn<DataRow, ColumnType>;
-  headerSx?: SxProps<Theme>;
-  bodySx?: SxProps<Theme>;
+  headerSx?: TableCellProps['sx'];
+  primaryHeaderSx?: TableCellProps['sx'];
+  secondaryHeaderSx?: TableCellProps['sx'];
+  bodySx?: TableCellProps['sx'];
   sortable?: boolean;
   opaque?: boolean;
   propagateClickToParentRowClickEvent?: boolean | ((row: DataRow) => boolean);
