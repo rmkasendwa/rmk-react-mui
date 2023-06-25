@@ -291,7 +291,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     for (let year = minDateYear; year <= maxDateYear; year++) {
       timelineYears.push(year);
     }
-    const totalNumberOfDays = differenceInDays(maxDate, minDate);
+    const totalNumberOfDays = differenceInDays(maxDate, minDate) + 1;
 
     return {
       minDate,
@@ -729,16 +729,23 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
             differenceInDays(today, minDate) / totalNumberOfDays;
           return (
             <Box
-              ref={todayIndicatorRef}
               sx={{
-                position: 'absolute',
-                width: 2,
-                bgcolor: palette.primary.main,
-                height: rows.length * 51,
-                top: '100%',
-                left: `${offsetPercentage * 100}%`,
+                position: 'relative',
+                width: '100%',
               }}
-            />
+            >
+              <Box
+                ref={todayIndicatorRef}
+                sx={{
+                  position: 'absolute',
+                  width: 2,
+                  bgcolor: palette.primary.main,
+                  height: rows.length * 51,
+                  top: '100%',
+                  left: `${offsetPercentage * 100}%`,
+                }}
+              />
+            </Box>
           );
         }
       })(),
@@ -820,6 +827,11 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       headerSx: {
         borderRight: 'none !important',
         zIndex: 1,
+        '&>div': {
+          py: 0,
+          pl: `${baseSpacingUnits}px`,
+          pr: `${baseSpacingUnits}px`,
+        },
       },
       bodySx: {
         zIndex: 2,
@@ -830,6 +842,13 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       label: 'Gutter',
       width: 20,
       showHeaderText: false,
+      headerSx: {
+        '&>div': {
+          py: 0,
+          pl: `${baseSpacingUnits}px`,
+          pr: `${baseSpacingUnits}px`,
+        },
+      },
       bodySx: {
         p: 0,
         borderColor: 'transparent',
