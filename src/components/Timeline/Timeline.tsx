@@ -48,6 +48,7 @@ import DataDropdownField, {
   dataDropdownFieldClasses,
 } from '../InputFields/DataDropdownField';
 import { BaseDataRow, Table, TableColumn, TableProps } from '../Table';
+import TimeScaleMeter, { timeScaleMeterClasses } from './TimeScaleMeter';
 
 export interface TimelineClasses {
   /** Styles applied to the root element. */
@@ -311,178 +312,175 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     };
   }, [endDateProperty, maxDateProp, minDateProp, rows, startDateProperty]);
 
-  const {
-    timeScaleRows: [topTimeScaleRow, middleTimeScaleRow, bottomTimeScaleRow],
-    unitTimeScaleWidth,
-    timeScaleWidth,
-  } = useMemo((): TimeScaleConfiguration => {
-    const getDailyTickTimeScale = ({
-      dayWidth,
-      unitTimeScale,
-      dayOfWeekFormat,
-    }: {
-      dayWidth: number;
-      unitTimeScale: number;
-      dayOfWeekFormat: string;
-    }): TimeScaleConfiguration => {
-      return {
-        timeScaleRows: [
-          timelineYears.flatMap((year) => {
-            return fullMonthLabels.map((monthLabel) => {
-              return {
-                id: uniqueId(),
-                label: `${monthLabel} ${year}`,
-              };
-            });
-          }),
-          timelineYears.flatMap((year) => {
-            return fullMonthLabels.flatMap((_, index) => {
-              const unitTickDate = new Date(year, index, 1);
-              const daysInMonth = getDaysInMonth(unitTickDate);
-              return Array.from({ length: daysInMonth }).map((_, index) => {
-                const tickDate = addDays(unitTickDate, index);
-                return {
-                  id: uniqueId(),
-                  label: formatDate(tickDate, dayOfWeekFormat),
-                };
-              });
-            });
-          }),
-          timelineYears.flatMap((year) => {
-            return fullMonthLabels.flatMap((_, index) => {
-              const unitTickDate = new Date(year, index, 1);
-              const daysInMonth = getDaysInMonth(unitTickDate);
-              return Array.from({ length: daysInMonth }).map((_, index) => {
-                const tickDate = addDays(unitTickDate, index);
-                return {
-                  id: uniqueId(),
-                  label: formatDate(tickDate, 'd'),
-                };
-              });
-            });
-          }),
-        ],
-        unitTimeScaleWidth: dayWidth * unitTimeScale,
-        timeScaleWidth: totalNumberOfDays * dayWidth,
-      };
-    };
-
-    const getMonthlyTickTimeScale = ({
-      monthSplit,
-      unitTimeScaleWidth,
-    }: {
-      monthSplit: number;
-      unitTimeScaleWidth: number;
-    }): TimeScaleConfiguration => {
-      const totalTimeScaleRegions = timelineYears.length * 12 * monthSplit;
-      return {
-        timeScaleRows: [
-          timelineYears.flatMap((year) => {
-            return quarterLabels.map((quarter) => {
-              const label = `${quarter} ${year}`;
-              return {
-                id: uniqueId(),
-                label,
-              };
-            });
-          }),
-          timelineYears.flatMap(() => {
-            return fullMonthLabels.map((label) => {
-              return {
-                id: uniqueId(),
-                label,
-              };
-            });
-          }),
-          timelineYears.flatMap((_, yearIndex) => {
-            return Array.from({ length: 12 }).flatMap((_, monthIndex) => {
-              return Array.from({ length: monthSplit }).map(
-                (_, periodIndex) => {
-                  const unitTickDate = addDays(
-                    minDate,
-                    Math.round(
-                      totalNumberOfDays *
-                        (((yearIndex * 12 + monthIndex) * monthSplit +
-                          periodIndex) /
-                          totalTimeScaleRegions)
-                    )
-                  );
-                  return {
-                    id: uniqueId(),
-                    label: unitTickDate.getDate(),
-                  };
-                }
-              );
-            });
-          }),
-        ],
-        unitTimeScaleWidth,
-        timeScaleWidth: unitTimeScaleWidth * timelineYears.length,
-      };
-    };
-
-    switch (selectedTimeScale) {
-      case 'Week':
-        return getDailyTickTimeScale({
-          dayOfWeekFormat: 'EEEE',
-          dayWidth: 200,
-          unitTimeScale: 7,
-        });
-      case '2 week':
-        return getDailyTickTimeScale({
-          dayOfWeekFormat: 'EEE',
-          dayWidth: 100,
-          unitTimeScale: 15,
-        });
-      case 'Month':
-        return getDailyTickTimeScale({
-          dayOfWeekFormat: 'EEEEE',
-          dayWidth: 60,
-          unitTimeScale: 30,
-        });
-      case 'Quarter':
-        return getMonthlyTickTimeScale({
-          monthSplit: 4,
-          unitTimeScaleWidth: baseTimeScaleWidth * 4 * 12,
-        });
-      case '5 year':
-        const unitTimeScaleWidth = baseTimeScaleWidth * 12;
+  const { timeScaleRows, unitTimeScaleWidth, timeScaleWidth } =
+    useMemo((): TimeScaleConfiguration => {
+      const getDailyTickTimeScale = ({
+        dayWidth,
+        unitTimeScale,
+        dayOfWeekFormat,
+      }: {
+        dayWidth: number;
+        unitTimeScale: number;
+        dayOfWeekFormat: string;
+      }): TimeScaleConfiguration => {
         return {
           timeScaleRows: [
             timelineYears.flatMap((year) => {
-              return {
-                id: uniqueId(),
-                label: String(year),
-              };
-            }),
-            timelineYears.flatMap(() => {
-              return quarterLabels.map((quarter) => {
+              return fullMonthLabels.map((monthLabel) => {
                 return {
                   id: uniqueId(),
-                  label: quarter,
+                  label: `${monthLabel} ${year}`,
                 };
               });
             }),
-            timelineYears.flatMap(() => {
-              return shortMonthLabels.map((label) => {
+            timelineYears.flatMap((year) => {
+              return fullMonthLabels.flatMap((_, index) => {
+                const unitTickDate = new Date(year, index, 1);
+                const daysInMonth = getDaysInMonth(unitTickDate);
+                return Array.from({ length: daysInMonth }).map((_, index) => {
+                  const tickDate = addDays(unitTickDate, index);
+                  return {
+                    id: uniqueId(),
+                    label: formatDate(tickDate, dayOfWeekFormat),
+                  };
+                });
+              });
+            }),
+            timelineYears.flatMap((year) => {
+              return fullMonthLabels.flatMap((_, index) => {
+                const unitTickDate = new Date(year, index, 1);
+                const daysInMonth = getDaysInMonth(unitTickDate);
+                return Array.from({ length: daysInMonth }).map((_, index) => {
+                  const tickDate = addDays(unitTickDate, index);
+                  return {
+                    id: uniqueId(),
+                    label: formatDate(tickDate, 'd'),
+                  };
+                });
+              });
+            }),
+          ],
+          unitTimeScaleWidth: dayWidth * unitTimeScale,
+          timeScaleWidth: totalNumberOfDays * dayWidth,
+        };
+      };
+
+      const getMonthlyTickTimeScale = ({
+        monthSplit,
+        unitTimeScaleWidth,
+      }: {
+        monthSplit: number;
+        unitTimeScaleWidth: number;
+      }): TimeScaleConfiguration => {
+        const totalTimeScaleRegions = timelineYears.length * 12 * monthSplit;
+        return {
+          timeScaleRows: [
+            timelineYears.flatMap((year) => {
+              return quarterLabels.map((quarter) => {
+                const label = `${quarter} ${year}`;
                 return {
                   id: uniqueId(),
                   label,
                 };
               });
             }),
+            timelineYears.flatMap(() => {
+              return fullMonthLabels.map((label) => {
+                return {
+                  id: uniqueId(),
+                  label,
+                };
+              });
+            }),
+            timelineYears.flatMap((_, yearIndex) => {
+              return Array.from({ length: 12 }).flatMap((_, monthIndex) => {
+                return Array.from({ length: monthSplit }).map(
+                  (_, periodIndex) => {
+                    const unitTickDate = addDays(
+                      minDate,
+                      Math.round(
+                        totalNumberOfDays *
+                          (((yearIndex * 12 + monthIndex) * monthSplit +
+                            periodIndex) /
+                            totalTimeScaleRegions)
+                      )
+                    );
+                    return {
+                      id: uniqueId(),
+                      label: unitTickDate.getDate(),
+                    };
+                  }
+                );
+              });
+            }),
           ],
           unitTimeScaleWidth,
-          timeScaleWidth: (unitTimeScaleWidth * timelineYears.length) / 4,
+          timeScaleWidth: unitTimeScaleWidth * timelineYears.length,
         };
-      case 'Year':
-      default:
-        return getMonthlyTickTimeScale({
-          monthSplit: 3,
-          unitTimeScaleWidth: baseTimeScaleWidth * 12,
-        });
-    }
-  }, [minDate, selectedTimeScale, timelineYears, totalNumberOfDays]);
+      };
+
+      switch (selectedTimeScale) {
+        case 'Week':
+          return getDailyTickTimeScale({
+            dayOfWeekFormat: 'EEEE',
+            dayWidth: 200,
+            unitTimeScale: 7,
+          });
+        case '2 week':
+          return getDailyTickTimeScale({
+            dayOfWeekFormat: 'EEE',
+            dayWidth: 100,
+            unitTimeScale: 15,
+          });
+        case 'Month':
+          return getDailyTickTimeScale({
+            dayOfWeekFormat: 'EEEEE',
+            dayWidth: 60,
+            unitTimeScale: 30,
+          });
+        case 'Quarter':
+          return getMonthlyTickTimeScale({
+            monthSplit: 4,
+            unitTimeScaleWidth: baseTimeScaleWidth * 4 * 12,
+          });
+        case '5 year':
+          const unitTimeScaleWidth = baseTimeScaleWidth * 12;
+          return {
+            timeScaleRows: [
+              timelineYears.flatMap((year) => {
+                return {
+                  id: uniqueId(),
+                  label: String(year),
+                };
+              }),
+              timelineYears.flatMap(() => {
+                return quarterLabels.map((quarter) => {
+                  return {
+                    id: uniqueId(),
+                    label: quarter,
+                  };
+                });
+              }),
+              timelineYears.flatMap(() => {
+                return shortMonthLabels.map((label) => {
+                  return {
+                    id: uniqueId(),
+                    label,
+                  };
+                });
+              }),
+            ],
+            unitTimeScaleWidth,
+            timeScaleWidth: (unitTimeScaleWidth * timelineYears.length) / 4,
+          };
+        case 'Year':
+        default:
+          return getMonthlyTickTimeScale({
+            monthSplit: 3,
+            unitTimeScaleWidth: baseTimeScaleWidth * 12,
+          });
+      }
+    }, [minDate, selectedTimeScale, timelineYears, totalNumberOfDays]);
 
   const getTimelineElementNode = ({
     startDate: startDateValue,
@@ -599,122 +597,21 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     {
       id: 'timeline',
       label: (
-        <Stack
+        <TimeScaleMeter
+          timeScaleRows={timeScaleRows}
           sx={{
-            width: '100%',
-            bgcolor: palette.background.paper,
+            [`.${timeScaleMeterClasses.timeScaleLevel1Tick}`]: {
+              left:
+                (shouldShowRowLabelsColumn ? 256 : 0) +
+                (() => {
+                  if (shouldShowRowLabelsColumn) {
+                    return 16;
+                  }
+                  return baseSpacingUnits;
+                })(),
+            },
           }}
-        >
-          <Box
-            sx={{
-              display: 'flex',
-              height: 56,
-              alignItems: 'center',
-            }}
-          >
-            {topTimeScaleRow.map(({ id, label }) => {
-              return (
-                <Box
-                  key={id}
-                  sx={{
-                    flex: 1,
-                    minWidth: 0,
-                    display: 'flex',
-                    alignItems: 'center',
-                  }}
-                >
-                  <Box
-                    sx={{
-                      position: 'sticky',
-                      overflow: 'hidden',
-                      left:
-                        (shouldShowRowLabelsColumn ? 256 : 0) +
-                        (() => {
-                          if (shouldShowRowLabelsColumn) {
-                            return 16;
-                          }
-                          return baseSpacingUnits;
-                        })(),
-                    }}
-                  >
-                    <Typography
-                      variant="body2"
-                      noWrap
-                      sx={{
-                        fontWeight: 500,
-                      }}
-                    >
-                      {label}
-                    </Typography>
-                  </Box>
-                </Box>
-              );
-            })}
-          </Box>
-          <Box
-            sx={{
-              display: 'flex',
-            }}
-          >
-            {middleTimeScaleRow.map(({ id, label }) => {
-              return (
-                <Box
-                  key={id}
-                  sx={{
-                    flex: 1,
-                    overflow: 'hidden',
-                    minWidth: 0,
-                    height: 24,
-                    display: 'flex',
-                    alignItems: 'center',
-                  }}
-                >
-                  <Typography
-                    variant="body2"
-                    noWrap
-                    sx={{
-                      fontSize: 11,
-                      fontWeight: 700,
-                    }}
-                  >
-                    {label}
-                  </Typography>
-                </Box>
-              );
-            })}
-          </Box>
-          <Box
-            sx={{
-              display: 'flex',
-            }}
-          >
-            {bottomTimeScaleRow.map(({ id, label }) => {
-              return (
-                <Box
-                  key={id}
-                  sx={{
-                    flex: 1,
-                    overflow: 'hidden',
-                    minWidth: 0,
-                    height: 24,
-                    display: 'flex',
-                    alignItems: 'center',
-                  }}
-                >
-                  <Typography
-                    variant="body2"
-                    noWrap
-                    sx={{
-                      fontSize: 12,
-                    }}
-                  >
-                    {label}
-                  </Typography>
-                </Box>
-              );
-            })}
-          </Box>
-        </Stack>
+        />
       ),
       secondaryHeaderRowContent: (() => {
         const today = new Date();
@@ -945,6 +842,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                       },
                     },
                   }}
+                  enableLoadingState={false}
                   sx={{
                     width: 90,
                   }}
