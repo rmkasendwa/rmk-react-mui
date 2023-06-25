@@ -25,6 +25,7 @@ import clsx from 'clsx';
 import addDays from 'date-fns/addDays';
 import addHours from 'date-fns/addHours';
 import differenceInDays from 'date-fns/differenceInDays';
+import differenceInHours from 'date-fns/differenceInHours';
 import formatDate from 'date-fns/format';
 import getDaysInMonth from 'date-fns/getDaysInMonth';
 import isAfter from 'date-fns/isAfter';
@@ -237,7 +238,13 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     id,
   });
 
-  const { minDate, maxDate, timelineYears, totalNumberOfDays } = useMemo(() => {
+  const {
+    minDate,
+    maxDate,
+    timelineYears,
+    totalNumberOfDays,
+    totalNumberOfHours,
+  } = useMemo(() => {
     const allDates = rows
       .flatMap((row) => {
         const dates: Date[] = [];
@@ -278,19 +285,19 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     const { maxDate, minDate } = (() => {
       if (allDates.length > 0) {
         const baseMinDate = minDateProp ? new Date(minDateProp) : allDates[0];
-        const minDate = new Date(baseMinDate.getFullYear(), 0, 1);
+        const minDate = new Date(baseMinDate.getFullYear(), 0, 1, 0, 0);
 
         const baseMaxDate = maxDateProp
           ? new Date(maxDateProp)
           : allDates[allDates.length - 1];
-        const maxDate = new Date(baseMaxDate.getFullYear(), 11, 31);
+        const maxDate = new Date(baseMaxDate.getFullYear(), 11, 31, 23, 59);
 
         return { minDate, maxDate };
       }
       const thisYear = new Date().getFullYear();
       return {
-        minDate: new Date(thisYear, 0, 1),
-        maxDate: new Date(thisYear, 11, 31),
+        minDate: new Date(thisYear, 0, 1, 0, 0),
+        maxDate: new Date(thisYear, 11, 31, 23, 59),
       };
     })();
 
@@ -302,12 +309,14 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       timelineYears.push(year);
     }
     const totalNumberOfDays = differenceInDays(maxDate, minDate) + 1;
+    const totalNumberOfHours = differenceInHours(maxDate, minDate) + 1;
 
     return {
       minDate,
       maxDate,
       timelineYears,
       totalNumberOfDays,
+      totalNumberOfHours,
     };
   }, [endDateProperty, maxDateProp, minDateProp, rows, startDateProperty]);
 
@@ -470,7 +479,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
               }),
             ],
             unitTimeScaleWidth: 24 * hourWidth,
-            timeScaleWidth: totalNumberOfDays * 24 * hourWidth,
+            timeScaleWidth: totalNumberOfHours * hourWidth,
           };
         case 'Week':
           return getDailyTickTimeScale({
@@ -531,7 +540,13 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
             timeScaleWidth: (unitTimeScaleWidth * timelineYears.length) / 4,
           };
       }
-    }, [minDate, selectedTimeScale, timelineYears, totalNumberOfDays]);
+    }, [
+      minDate,
+      selectedTimeScale,
+      timelineYears,
+      totalNumberOfDays,
+      totalNumberOfHours,
+    ]);
 
   const getTimelineElementNode = ({
     startDate: startDateValue,
@@ -554,10 +569,10 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           return maxDate;
         })();
         if (isAfter(endDate, startDate)) {
-          const numberOfDays = differenceInDays(endDate, startDate);
+          const numberOfHours = differenceInHours(endDate, startDate);
           const offsetPercentage =
-            differenceInDays(startDate, minDate) / totalNumberOfDays;
-          const percentage = numberOfDays / totalNumberOfDays;
+            differenceInHours(startDate, minDate) / totalNumberOfHours;
+          const percentage = numberOfHours / totalNumberOfHours;
 
           const baseTimelineElementLabel = `${formatDate(
             startDate,
@@ -670,7 +685,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         const today = new Date();
         if (isAfter(today, minDate) && isBefore(today, maxDate)) {
           const offsetPercentage =
-            differenceInDays(today, minDate) / totalNumberOfDays;
+            differenceInHours(today, minDate) / totalNumberOfHours;
           return (
             <Box
               sx={{
