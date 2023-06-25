@@ -23,6 +23,7 @@ import {
 } from '@mui/material';
 import clsx from 'clsx';
 import addDays from 'date-fns/addDays';
+import addHours from 'date-fns/addHours';
 import differenceInDays from 'date-fns/differenceInDays';
 import formatDate from 'date-fns/format';
 import getDaysInMonth from 'date-fns/getDaysInMonth';
@@ -122,8 +123,6 @@ export const timeScaleOptions = [
   '5 year',
 ] as const;
 export type TimeScaleOption = (typeof timeScaleOptions)[number];
-
-const disabledTimeScaleOptions: TimeScaleOption[] = ['Day'];
 
 const quarterLabels = ['Q1', 'Q2', 'Q3', 'Q4'] as const;
 
@@ -420,6 +419,59 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       };
 
       switch (selectedTimeScale) {
+        case 'Day':
+          const hourWidth = 64;
+          return {
+            timeScaleRows: [
+              timelineYears.flatMap((year) => {
+                return fullMonthLabels.flatMap((_, monthIndex) => {
+                  return Array.from({
+                    length: getDaysInMonth(new Date(year, monthIndex, 1)),
+                  }).map((_, dayIndex) => {
+                    return {
+                      id: uniqueId(),
+                      label: formatDate(
+                        new Date(year, monthIndex, dayIndex + 1),
+                        'MMMM d, yyyy'
+                      ),
+                    };
+                  });
+                });
+              }),
+              timelineYears.flatMap((year) => {
+                return fullMonthLabels.flatMap((_, monthIndex) => {
+                  return Array.from({
+                    length: getDaysInMonth(new Date(year, monthIndex, 1)),
+                  }).map((_, dayIndex) => {
+                    return {
+                      id: uniqueId(),
+                      label: formatDate(
+                        new Date(year, monthIndex, dayIndex + 1),
+                        'EEEE'
+                      ),
+                    };
+                  });
+                });
+              }),
+              timelineYears.flatMap((year) => {
+                return fullMonthLabels.flatMap((_, monthIndex) => {
+                  return Array.from({
+                    length: getDaysInMonth(new Date(year, monthIndex, 1)),
+                  }).flatMap((_, dayIndex) => {
+                    const tickDate = new Date(year, monthIndex, dayIndex + 1);
+                    return Array.from({ length: 24 }).map((_, hourIndex) => {
+                      return {
+                        id: uniqueId(),
+                        label: formatDate(addHours(tickDate, hourIndex), 'h a'),
+                      };
+                    });
+                  });
+                });
+              }),
+            ],
+            unitTimeScaleWidth: 24 * hourWidth,
+            timeScaleWidth: totalNumberOfDays * 24 * hourWidth,
+          };
         case 'Week':
           return getDailyTickTimeScale({
             dayOfWeekFormat: 'EEEE',
@@ -442,6 +494,11 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           return getMonthlyTickTimeScale({
             monthSplit: 4,
             unitTimeScaleWidth: baseTimeScaleWidth * 4 * 12,
+          });
+        case 'Year':
+          return getMonthlyTickTimeScale({
+            monthSplit: 3,
+            unitTimeScaleWidth: baseTimeScaleWidth * 12,
           });
         case '5 year':
           const unitTimeScaleWidth = baseTimeScaleWidth * 12;
@@ -473,12 +530,6 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
             unitTimeScaleWidth,
             timeScaleWidth: (unitTimeScaleWidth * timelineYears.length) / 4,
           };
-        case 'Year':
-        default:
-          return getMonthlyTickTimeScale({
-            monthSplit: 3,
-            unitTimeScaleWidth: baseTimeScaleWidth * 12,
-          });
       }
     }, [minDate, selectedTimeScale, timelineYears, totalNumberOfDays]);
 
@@ -812,8 +863,6 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                     return {
                       value: timeScaleOption,
                       label: timeScaleOption,
-                      selectable:
-                        !disabledTimeScaleOptions.includes(timeScaleOption),
                     };
                   })}
                   onChange={(event) => {
