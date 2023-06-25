@@ -126,6 +126,16 @@ const disabledTimeScaleOptions: TimeScaleOption[] = ['Day'];
 
 const quarterLabels = ['Q1', 'Q2', 'Q3', 'Q4'] as const;
 
+export type TimeScaleConfiguration = {
+  timeScaleRows: [
+    { id: string; label: ReactNode }[],
+    { id: string; label: ReactNode }[],
+    { id: string; label: ReactNode }[]
+  ];
+  unitTimeScaleWidth: number;
+  timeScaleWidth: number;
+};
+
 export interface TimelineElement extends Partial<BoxProps> {
   startDate?: string | number | Date;
   endDate?: string | number | Date;
@@ -205,7 +215,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     })()
   );
 
-  const tableElementRef = useRef<HTMLTableElement>(null);
+  const timelineContainerElementRef = useRef<HTMLTableElement>(null);
   const todayIndicatorRef = useRef<HTMLDivElement>(null);
 
   const { palette, breakpoints } = useTheme();
@@ -305,142 +315,77 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     timeScaleRows: [topTimeScaleRow, middleTimeScaleRow, bottomTimeScaleRow],
     unitTimeScaleWidth,
     timeScaleWidth,
-  } = useMemo((): {
-    timeScaleRows: [
-      { id: string; label: ReactNode }[],
-      { id: string; label: ReactNode }[],
-      { id: string; label: ReactNode }[]
-    ];
-    unitTimeScaleWidth: number;
-    timeScaleWidth: number;
-  } => {
+  } = useMemo((): TimeScaleConfiguration => {
+    const getDailyTickTimeScale = ({
+      dayWidth,
+      unitTimeScale,
+      dayOfWeekFormat,
+    }: {
+      dayWidth: number;
+      unitTimeScale: number;
+      dayOfWeekFormat: string;
+    }): TimeScaleConfiguration => {
+      return {
+        timeScaleRows: [
+          timelineYears.flatMap((year) => {
+            return fullMonthLabels.map((monthLabel) => {
+              return {
+                id: uniqueId(),
+                label: `${monthLabel} ${year}`,
+              };
+            });
+          }),
+          timelineYears.flatMap((year) => {
+            return fullMonthLabels.flatMap((_, index) => {
+              const unitTickDate = new Date(year, index, 1);
+              const daysInMonth = getDaysInMonth(unitTickDate);
+              return Array.from({ length: daysInMonth }).map((_, index) => {
+                const tickDate = addDays(unitTickDate, index);
+                return {
+                  id: uniqueId(),
+                  label: formatDate(tickDate, dayOfWeekFormat),
+                };
+              });
+            });
+          }),
+          timelineYears.flatMap((year) => {
+            return fullMonthLabels.flatMap((_, index) => {
+              const unitTickDate = new Date(year, index, 1);
+              const daysInMonth = getDaysInMonth(unitTickDate);
+              return Array.from({ length: daysInMonth }).map((_, index) => {
+                const tickDate = addDays(unitTickDate, index);
+                return {
+                  id: uniqueId(),
+                  label: formatDate(tickDate, 'd'),
+                };
+              });
+            });
+          }),
+        ],
+        unitTimeScaleWidth: dayWidth * unitTimeScale,
+        timeScaleWidth: totalNumberOfDays * dayWidth,
+      };
+    };
+
     switch (selectedTimeScale) {
-      case 'Week': {
-        return {
-          timeScaleRows: [
-            timelineYears.flatMap((year) => {
-              return fullMonthLabels.map((monthLabel) => {
-                return {
-                  id: uniqueId(),
-                  label: `${monthLabel} ${year}`,
-                };
-              });
-            }),
-            timelineYears.flatMap((year) => {
-              return fullMonthLabels.flatMap((_, index) => {
-                const unitTickDate = new Date(year, index, 1);
-                const daysInMonth = getDaysInMonth(unitTickDate);
-                return Array.from({ length: daysInMonth }).map((_, index) => {
-                  const tickDate = addDays(unitTickDate, index);
-                  return {
-                    id: uniqueId(),
-                    label: formatDate(tickDate, 'EEEE'),
-                  };
-                });
-              });
-            }),
-            timelineYears.flatMap((year) => {
-              return fullMonthLabels.flatMap((_, index) => {
-                const unitTickDate = new Date(year, index, 1);
-                const daysInMonth = getDaysInMonth(unitTickDate);
-                return Array.from({ length: daysInMonth }).map((_, index) => {
-                  const tickDate = addDays(unitTickDate, index);
-                  return {
-                    id: uniqueId(),
-                    label: formatDate(tickDate, 'd'),
-                  };
-                });
-              });
-            }),
-          ],
-          unitTimeScaleWidth: 200 * 7,
-          timeScaleWidth: totalNumberOfDays * 200,
-        };
-      }
-      case '2 week': {
-        return {
-          timeScaleRows: [
-            timelineYears.flatMap((year) => {
-              return fullMonthLabels.map((monthLabel) => {
-                return {
-                  id: uniqueId(),
-                  label: `${monthLabel} ${year}`,
-                };
-              });
-            }),
-            timelineYears.flatMap((year) => {
-              return fullMonthLabels.flatMap((_, index) => {
-                const unitTickDate = new Date(year, index, 1);
-                const daysInMonth = getDaysInMonth(unitTickDate);
-                return Array.from({ length: daysInMonth }).map((_, index) => {
-                  const tickDate = addDays(unitTickDate, index);
-                  return {
-                    id: uniqueId(),
-                    label: formatDate(tickDate, 'EEE'),
-                  };
-                });
-              });
-            }),
-            timelineYears.flatMap((year) => {
-              return fullMonthLabels.flatMap((_, index) => {
-                const unitTickDate = new Date(year, index, 1);
-                const daysInMonth = getDaysInMonth(unitTickDate);
-                return Array.from({ length: daysInMonth }).map((_, index) => {
-                  const tickDate = addDays(unitTickDate, index);
-                  return {
-                    id: uniqueId(),
-                    label: formatDate(tickDate, 'd'),
-                  };
-                });
-              });
-            }),
-          ],
-          unitTimeScaleWidth: 100 * 15,
-          timeScaleWidth: totalNumberOfDays * 100,
-        };
-      }
-      case 'Month': {
-        return {
-          timeScaleRows: [
-            timelineYears.flatMap((year) => {
-              return fullMonthLabels.map((monthLabel) => {
-                return {
-                  id: uniqueId(),
-                  label: `${monthLabel} ${year}`,
-                };
-              });
-            }),
-            timelineYears.flatMap((year) => {
-              return fullMonthLabels.flatMap((_, index) => {
-                const unitTickDate = new Date(year, index, 1);
-                const daysInMonth = getDaysInMonth(unitTickDate);
-                return Array.from({ length: daysInMonth }).map((_, index) => {
-                  const tickDate = addDays(unitTickDate, index);
-                  return {
-                    id: uniqueId(),
-                    label: formatDate(tickDate, 'EEEEE'),
-                  };
-                });
-              });
-            }),
-            timelineYears.flatMap((year) => {
-              return fullMonthLabels.flatMap((_, index) => {
-                const unitTickDate = new Date(year, index, 1);
-                const daysInMonth = getDaysInMonth(unitTickDate);
-                return Array.from({ length: daysInMonth }).map((_, index) => {
-                  const tickDate = addDays(unitTickDate, index);
-                  return {
-                    id: uniqueId(),
-                    label: formatDate(tickDate, 'd'),
-                  };
-                });
-              });
-            }),
-          ],
-          unitTimeScaleWidth: 60 * 30,
-          timeScaleWidth: totalNumberOfDays * 60,
-        };
-      }
+      case 'Week':
+        return getDailyTickTimeScale({
+          dayOfWeekFormat: 'EEEE',
+          dayWidth: 200,
+          unitTimeScale: 7,
+        });
+      case '2 week':
+        return getDailyTickTimeScale({
+          dayOfWeekFormat: 'EEE',
+          dayWidth: 100,
+          unitTimeScale: 15,
+        });
+      case 'Month':
+        return getDailyTickTimeScale({
+          dayOfWeekFormat: 'EEEEE',
+          dayWidth: 60,
+          unitTimeScale: 30,
+        });
       case 'Quarter': {
         const monthSplit = 4;
         const totalTimeScaleRegions = timelineYears.length * 12 * monthSplit;
@@ -669,7 +614,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         inline: 'center',
       });
       setTimeout(() => {
-        tableElementRef.current?.parentElement?.scrollTo({
+        timelineContainerElementRef.current?.parentElement?.scrollTo({
           top: 0,
           behavior: 'smooth',
         });
@@ -1077,10 +1022,12 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
               >
                 <Button
                   onClick={() => {
-                    tableElementRef.current?.parentElement?.scrollBy({
-                      left: -unitTimeScaleWidth,
-                      behavior: 'smooth',
-                    });
+                    timelineContainerElementRef.current?.parentElement?.scrollBy(
+                      {
+                        left: -unitTimeScaleWidth,
+                        behavior: 'smooth',
+                      }
+                    );
                   }}
                   sx={{
                     px: 1,
@@ -1092,10 +1039,12 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                 </Button>
                 <Button
                   onClick={() => {
-                    tableElementRef.current?.parentElement?.scrollBy({
-                      left: unitTimeScaleWidth,
-                      behavior: 'smooth',
-                    });
+                    timelineContainerElementRef.current?.parentElement?.scrollBy(
+                      {
+                        left: unitTimeScaleWidth,
+                        behavior: 'smooth',
+                      }
+                    );
                   }}
                   sx={{
                     px: 1,
@@ -1111,7 +1060,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         </Grid>
       </Box>
       <Table
-        ref={mergeRefs([tableElementRef, ref])}
+        ref={mergeRefs([timelineContainerElementRef, ref])}
         className={clsx(className, classes.root)}
         {...rest}
         columns={columns}
