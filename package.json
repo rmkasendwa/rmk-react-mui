@@ -120,6 +120,7 @@
     "countries-list": "^2.6.1",
     "d3": "^7.8.5",
     "d3-geo": "^3.1.0",
+    "date-fns": "^2.30.0",
     "draft-convert": "^2.1.13",
     "draft-js": "^0.11.7",
     "eslint": "^8.26.0",
