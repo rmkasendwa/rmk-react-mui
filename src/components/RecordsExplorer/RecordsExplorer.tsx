@@ -2362,7 +2362,7 @@ const BaseRecordsExplorer = <
             if (loadProp) {
               return loadProp;
             }
-            if (recordsFinder) {
+            if (recordsFinder || dataPresets) {
               return load;
             }
           })()}
