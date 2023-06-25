@@ -598,7 +598,9 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       id: 'timeline',
       label: (
         <TimeScaleMeter
-          timeScaleRows={timeScaleRows}
+          {...{ timeScaleRows, timeScaleWidth }}
+          scrollingElement={timelineContainerElementRef.current?.parentElement}
+          leftOffset={(shouldShowRowLabelsColumn ? 256 : 0) + baseSpacingUnits}
           sx={{
             [`.${timeScaleMeterClasses.timeScaleLevel1Tick}`]: {
               left:
