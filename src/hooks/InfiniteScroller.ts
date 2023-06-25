@@ -21,6 +21,7 @@ export interface UseLoadOnScrollToBottomOptions {
   onSelectDataElement?: (dataElementIndex: number) => void;
   onClose?: () => void;
   enableKeyboardNavigationWrapping?: boolean;
+  orientation?: 'vertical' | 'horizontal';
 }
 
 /**
@@ -42,6 +43,7 @@ export const useLoadOnScrollToBottom = ({
   onChangeFocusedDataElement,
   enableKeyboardNavigationWrapping = false,
   keyboardFocusElement: keyboardFocusElementProp,
+  orientation = 'vertical',
 }: UseLoadOnScrollToBottomOptions) => {
   // Refs
   const isInitialMountRef = useRef(true);
@@ -191,21 +193,49 @@ export const useLoadOnScrollToBottom = ({
       const scrollEventCallback = () => {
         const scrollTop = Math.abs(element.scrollTop);
         const scrollLeft = Math.abs(element.scrollLeft);
-        const hasScrolledToBottom = (() => {
-          if (invertScrollDirection) {
-            return scrollTop < bottomThreshold;
-          }
-          return (
-            Math.abs(scrollTop + element.offsetHeight - element.scrollHeight) <
-            bottomThreshold
-          );
-        })();
-        if (
-          element.scrollHeight > element.offsetHeight &&
-          hasScrolledToBottom &&
-          loadRef.current
-        ) {
-          loadRef.current();
+        switch (orientation) {
+          case 'vertical':
+            {
+              const hasScrolledToBottom = (() => {
+                if (invertScrollDirection) {
+                  return scrollTop < bottomThreshold;
+                }
+                return (
+                  Math.abs(
+                    scrollTop + element.offsetHeight - element.scrollHeight
+                  ) < bottomThreshold
+                );
+              })();
+              if (
+                element.scrollHeight > element.offsetHeight &&
+                hasScrolledToBottom &&
+                loadRef.current
+              ) {
+                loadRef.current();
+              }
+            }
+            break;
+          case 'horizontal':
+            {
+              const hasScrolledToBottom = (() => {
+                if (invertScrollDirection) {
+                  return scrollLeft < bottomThreshold;
+                }
+                return (
+                  Math.abs(
+                    scrollLeft + element.offsetWidth - element.scrollWidth
+                  ) < bottomThreshold
+                );
+              })();
+              if (
+                element.scrollWidth > element.offsetWidth &&
+                hasScrolledToBottom &&
+                loadRef.current
+              ) {
+                loadRef.current();
+              }
+            }
+            break;
         }
         onChangeScrollLengthRef.current &&
           onChangeScrollLengthRef.current({
@@ -228,6 +258,7 @@ export const useLoadOnScrollToBottom = ({
     dataElementLength,
     element,
     invertScrollDirection,
+    orientation,
     shouldLoadOnScroll,
   ]);
 
