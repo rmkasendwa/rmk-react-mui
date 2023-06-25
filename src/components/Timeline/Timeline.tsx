@@ -122,7 +122,7 @@ export const timeScaleOptions = [
 ] as const;
 export type TimeScaleOption = (typeof timeScaleOptions)[number];
 
-const disabledTimeScaleOptions: TimeScaleOption[] = ['Day', 'Week', '2 week'];
+const disabledTimeScaleOptions: TimeScaleOption[] = ['Day'];
 
 const quarterLabels = ['Q1', 'Q2', 'Q3', 'Q4'] as const;
 
@@ -315,6 +315,90 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     timeScaleWidth: number;
   } => {
     switch (selectedTimeScale) {
+      case 'Week': {
+        return {
+          timeScaleRows: [
+            timelineYears.flatMap((year) => {
+              return fullMonthLabels.map((monthLabel) => {
+                return {
+                  id: uniqueId(),
+                  label: `${monthLabel} ${year}`,
+                };
+              });
+            }),
+            timelineYears.flatMap((year) => {
+              return fullMonthLabels.flatMap((_, index) => {
+                const unitTickDate = new Date(year, index, 1);
+                const daysInMonth = getDaysInMonth(unitTickDate);
+                return Array.from({ length: daysInMonth }).map((_, index) => {
+                  const tickDate = addDays(unitTickDate, index);
+                  return {
+                    id: uniqueId(),
+                    label: formatDate(tickDate, 'EEEE'),
+                  };
+                });
+              });
+            }),
+            timelineYears.flatMap((year) => {
+              return fullMonthLabels.flatMap((_, index) => {
+                const unitTickDate = new Date(year, index, 1);
+                const daysInMonth = getDaysInMonth(unitTickDate);
+                return Array.from({ length: daysInMonth }).map((_, index) => {
+                  const tickDate = addDays(unitTickDate, index);
+                  return {
+                    id: uniqueId(),
+                    label: formatDate(tickDate, 'd'),
+                  };
+                });
+              });
+            }),
+          ],
+          unitTimeScaleWidth: 200 * 7,
+          timeScaleWidth: totalNumberOfDays * 200,
+        };
+      }
+      case '2 week': {
+        return {
+          timeScaleRows: [
+            timelineYears.flatMap((year) => {
+              return fullMonthLabels.map((monthLabel) => {
+                return {
+                  id: uniqueId(),
+                  label: `${monthLabel} ${year}`,
+                };
+              });
+            }),
+            timelineYears.flatMap((year) => {
+              return fullMonthLabels.flatMap((_, index) => {
+                const unitTickDate = new Date(year, index, 1);
+                const daysInMonth = getDaysInMonth(unitTickDate);
+                return Array.from({ length: daysInMonth }).map((_, index) => {
+                  const tickDate = addDays(unitTickDate, index);
+                  return {
+                    id: uniqueId(),
+                    label: formatDate(tickDate, 'EEE'),
+                  };
+                });
+              });
+            }),
+            timelineYears.flatMap((year) => {
+              return fullMonthLabels.flatMap((_, index) => {
+                const unitTickDate = new Date(year, index, 1);
+                const daysInMonth = getDaysInMonth(unitTickDate);
+                return Array.from({ length: daysInMonth }).map((_, index) => {
+                  const tickDate = addDays(unitTickDate, index);
+                  return {
+                    id: uniqueId(),
+                    label: formatDate(tickDate, 'd'),
+                  };
+                });
+              });
+            }),
+          ],
+          unitTimeScaleWidth: 100 * 15,
+          timeScaleWidth: totalNumberOfDays * 100,
+        };
+      }
       case 'Month': {
         return {
           timeScaleRows: [
