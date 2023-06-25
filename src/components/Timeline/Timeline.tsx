@@ -25,7 +25,6 @@ import clsx from 'clsx';
 import addDays from 'date-fns/addDays';
 import differenceInDays from 'date-fns/differenceInDays';
 import formatDate from 'date-fns/format';
-import getDaysInMonth from 'date-fns/getDaysInMonth';
 import isAfter from 'date-fns/isAfter';
 import isBefore from 'date-fns/isBefore';
 import { result, uniqueId } from 'lodash';
@@ -127,8 +126,9 @@ const disabledTimeScaleOptions: TimeScaleOption[] = [
   'Week',
   '2 week',
   'Month',
-  'Quarter',
 ];
+
+const quarterLabels = ['Q1', 'Q2', 'Q3', 'Q4'] as const;
 
 export interface TimelineElement extends Partial<BoxProps> {
   startDate?: string | number | Date;
@@ -319,42 +319,14 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     timeScaleWidth: number;
   } => {
     switch (selectedTimeScale) {
-      case '5 year':
+      case 'Quarter': {
+        const monthSplit = 4;
+        const totalTimeScaleRegions = timelineYears.length * 12 * monthSplit;
+        const unitTimeScaleWidth = baseTimeScaleWidth * 4 * 12;
         return {
           timeScaleRows: [
             timelineYears.flatMap((year) => {
-              return {
-                id: String(year),
-                label: String(year),
-              };
-            }),
-            timelineYears.flatMap(() => {
-              return ['Q1', 'Q2', 'Q3', 'Q4'].map((quarter) => {
-                return {
-                  id: uniqueId(),
-                  label: quarter,
-                };
-              });
-            }),
-            timelineYears.flatMap(() => {
-              return shortMonthLabels.map((label) => {
-                return {
-                  id: uniqueId(),
-                  label,
-                };
-              });
-            }),
-          ],
-          unitTimeScaleWidth: baseTimeScaleWidth * 12,
-          timeScaleWidth:
-            ((baseTimeScaleWidth * timelineYears.length) / 4) * 12,
-        };
-      case 'Year':
-      default:
-        return {
-          timeScaleRows: [
-            timelineYears.flatMap((year) => {
-              return ['Q1', 'Q2', 'Q3', 'Q4'].map((quarter) => {
+              return quarterLabels.map((quarter) => {
                 const label = `${quarter} ${year}`;
                 return {
                   id: uniqueId(),
@@ -370,30 +342,115 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                 };
               });
             }),
-            timelineYears.flatMap((year) => {
+            timelineYears.flatMap((_, yearIndex) => {
               return Array.from({ length: 12 }).flatMap((_, monthIndex) => {
-                const firstDayOfMonth = new Date(year, monthIndex);
-                const daysInMonth = getDaysInMonth(firstDayOfMonth);
-                const unitPeriod = Math.floor(daysInMonth / 2);
-                return Array.from({ length: 2 }).map((_, periodIndex) => {
-                  const unitTickDate = new Date(firstDayOfMonth);
-                  unitTickDate.setDate(1 + unitPeriod * periodIndex);
-                  return {
-                    id: uniqueId(),
-                    label: addDays(
-                      unitTickDate,
-                      Math.floor(Math.random() * 4) - 2
-                    ).getDate(),
-                  };
-                });
+                return Array.from({ length: monthSplit }).map(
+                  (_, periodIndex) => {
+                    const unitTickDate = addDays(
+                      minDate,
+                      Math.round(
+                        totalNumberOfDays *
+                          (((yearIndex * 12 + monthIndex) * monthSplit +
+                            periodIndex) /
+                            totalTimeScaleRegions)
+                      )
+                    );
+                    return {
+                      id: uniqueId(),
+                      label: unitTickDate.getDate(),
+                    };
+                  }
+                );
               });
             }),
           ],
-          unitTimeScaleWidth: baseTimeScaleWidth * 12,
-          timeScaleWidth: baseTimeScaleWidth * timelineYears.length * 12,
+          unitTimeScaleWidth,
+          timeScaleWidth: unitTimeScaleWidth * timelineYears.length,
         };
+      }
+      case '5 year': {
+        const unitTimeScaleWidth = baseTimeScaleWidth * 12;
+        return {
+          timeScaleRows: [
+            timelineYears.flatMap((year) => {
+              return {
+                id: String(year),
+                label: String(year),
+              };
+            }),
+            timelineYears.flatMap(() => {
+              return quarterLabels.map((quarter) => {
+                return {
+                  id: uniqueId(),
+                  label: quarter,
+                };
+              });
+            }),
+            timelineYears.flatMap(() => {
+              return shortMonthLabels.map((label) => {
+                return {
+                  id: uniqueId(),
+                  label,
+                };
+              });
+            }),
+          ],
+          unitTimeScaleWidth,
+          timeScaleWidth: (unitTimeScaleWidth * timelineYears.length) / 4,
+        };
+      }
+      case 'Year':
+      default: {
+        const monthSplit = 3;
+        const totalTimeScaleRegions = timelineYears.length * 12 * monthSplit;
+        const unitTimeScaleWidth = baseTimeScaleWidth * 12;
+        return {
+          timeScaleRows: [
+            timelineYears.flatMap((year) => {
+              return quarterLabels.map((quarter) => {
+                const label = `${quarter} ${year}`;
+                return {
+                  id: uniqueId(),
+                  label,
+                };
+              });
+            }),
+            timelineYears.flatMap(() => {
+              return fullMonthLabels.map((label) => {
+                return {
+                  id: uniqueId(),
+                  label,
+                };
+              });
+            }),
+            timelineYears.flatMap((_, yearIndex) => {
+              return Array.from({ length: 12 }).flatMap((_, monthIndex) => {
+                return Array.from({ length: monthSplit }).map(
+                  (_, periodIndex) => {
+                    const unitTickDate = addDays(
+                      minDate,
+                      Math.round(
+                        totalNumberOfDays *
+                          (((yearIndex * 12 + monthIndex) * monthSplit +
+                            periodIndex) /
+                            totalTimeScaleRegions)
+                      )
+                    );
+                    return {
+                      id: uniqueId(),
+                      label: unitTickDate.getDate(),
+                    };
+                  }
+                );
+              });
+            }),
+          ],
+          unitTimeScaleWidth,
+          timeScaleWidth: unitTimeScaleWidth * timelineYears.length,
+        };
+      }
     }
-  }, [selectedTimeScale, timelineYears]);
+  }, [minDate, selectedTimeScale, timelineYears, totalNumberOfDays]);
 
   const getTimelineElementNode = ({
     startDate: startDateValue,
@@ -580,7 +637,14 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                     alignItems: 'center',
                   }}
                 >
-                  <Typography variant="body2" noWrap>
+                  <Typography
+                    variant="body2"
+                    noWrap
+                    sx={{
+                      fontSize: 10,
+                      fontWeight: 700,
+                    }}
+                  >
                     {label}
                   </Typography>
                 </Box>
@@ -716,7 +780,6 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         }
       },
       headerSx: {
-        // bgcolor: 'transparent !important',
         borderRight: 'none !important',
         zIndex: 1,
       },
