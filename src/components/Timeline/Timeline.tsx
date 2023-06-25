@@ -214,6 +214,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
 
   const { palette, breakpoints } = useTheme();
   const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
+  const baseSpacingUnits = isSmallScreenSize ? 16 : 24;
 
   const shouldShowRowLabelsColumn = (() => {
     return !isSmallScreenSize && showRowLabelsColumn;
@@ -543,7 +544,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                           if (shouldShowRowLabelsColumn) {
                             return 16;
                           }
-                          return 24;
+                          return baseSpacingUnits;
                         })(),
                     }}
                   >
@@ -679,18 +680,18 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           });
         }
       },
-      width: timeScaleWidth + 48,
+      width: timeScaleWidth + baseSpacingUnits * 2,
       wrapColumnContentInFieldValue: false,
       headerSx: {
         '&>div': {
           py: 0,
-          pl: `24px`,
-          pr: `24px`,
+          pl: `${baseSpacingUnits}px`,
+          pr: `${baseSpacingUnits}px`,
         },
       },
       bodySx: {
-        pl: `24px`,
-        pr: `24px`,
+        pl: `${baseSpacingUnits}px`,
+        pr: `${baseSpacingUnits}px`,
         py: 1,
         borderColor: 'transparent',
         '&>div': {
@@ -756,14 +757,14 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         <Grid
           container
           sx={{
-            pr: 3,
+            pr: `${baseSpacingUnits}px`,
             pl: 1,
             py: 1,
             alignItems: 'center',
             position: 'sticky',
             right: 0,
             display: 'inline-flex',
-            gap: 2,
+            gap: isSmallScreenSize ? 0.5 : 2,
             bgcolor: palette.background.paper,
             height: 56,
             width: 'auto',
@@ -777,7 +778,9 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                 alignItems: 'center',
               }}
             >
-              <Typography variant="body2">Timescale:</Typography>
+              {!isSmallScreenSize ? (
+                <Typography variant="body2">Timescale:</Typography>
+              ) : null}
               <Button
                 color="inherit"
                 variant="contained"
@@ -843,7 +846,9 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                 alignItems: 'center',
               }}
             >
-              <Typography variant="body2">Jump to:</Typography>
+              {!isSmallScreenSize ? (
+                <Typography variant="body2">Jump to:</Typography>
+              ) : null}
               <Button
                 variant="contained"
                 color="inherit"
@@ -909,7 +914,13 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         paging={false}
         bordersVariant="square"
         rows={rows}
-        startStickyColumnIndex={0}
+        {...(() => {
+          if (!isSmallScreenSize) {
+            return {
+              startStickyColumnIndex: 0,
+            };
+          }
+        })()}
         stickyHeader
         enableSmallScreenOptimization={false}
         HeaderRowProps={{
