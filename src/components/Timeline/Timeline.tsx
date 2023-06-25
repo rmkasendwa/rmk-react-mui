@@ -25,6 +25,7 @@ import clsx from 'clsx';
 import addDays from 'date-fns/addDays';
 import differenceInDays from 'date-fns/differenceInDays';
 import formatDate from 'date-fns/format';
+import getDaysInMonth from 'date-fns/getDaysInMonth';
 import isAfter from 'date-fns/isAfter';
 import isBefore from 'date-fns/isBefore';
 import { result, uniqueId } from 'lodash';
@@ -121,12 +122,7 @@ export const timeScaleOptions = [
 ] as const;
 export type TimeScaleOption = (typeof timeScaleOptions)[number];
 
-const disabledTimeScaleOptions: TimeScaleOption[] = [
-  'Day',
-  'Week',
-  '2 week',
-  'Month',
-];
+const disabledTimeScaleOptions: TimeScaleOption[] = ['Day', 'Week', '2 week'];
 
 const quarterLabels = ['Q1', 'Q2', 'Q3', 'Q4'] as const;
 
@@ -319,6 +315,48 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     timeScaleWidth: number;
   } => {
     switch (selectedTimeScale) {
+      case 'Month': {
+        return {
+          timeScaleRows: [
+            timelineYears.flatMap((year) => {
+              return fullMonthLabels.map((monthLabel) => {
+                return {
+                  id: uniqueId(),
+                  label: `${monthLabel} ${year}`,
+                };
+              });
+            }),
+            timelineYears.flatMap((year) => {
+              return fullMonthLabels.flatMap((_, index) => {
+                const unitTickDate = new Date(year, index, 1);
+                const daysInMonth = getDaysInMonth(unitTickDate);
+                return Array.from({ length: daysInMonth }).map((_, index) => {
+                  const tickDate = addDays(unitTickDate, index);
+                  return {
+                    id: uniqueId(),
+                    label: formatDate(tickDate, 'EEEEE'),
+                  };
+                });
+              });
+            }),
+            timelineYears.flatMap((year) => {
+              return fullMonthLabels.flatMap((_, index) => {
+                const unitTickDate = new Date(year, index, 1);
+                const daysInMonth = getDaysInMonth(unitTickDate);
+                return Array.from({ length: daysInMonth }).map((_, index) => {
+                  const tickDate = addDays(unitTickDate, index);
+                  return {
+                    id: uniqueId(),
+                    label: formatDate(tickDate, 'd'),
+                  };
+                });
+              });
+            }),
+          ],
+          unitTimeScaleWidth: 60 * 30,
+          timeScaleWidth: totalNumberOfDays * 60,
+        };
+      }
       case 'Quarter': {
         const monthSplit = 4;
         const totalTimeScaleRegions = timelineYears.length * 12 * monthSplit;
@@ -641,7 +679,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                     variant="body2"
                     noWrap
                     sx={{
-                      fontSize: 10,
+                      fontSize: 11,
                       fontWeight: 700,
                     }}
                   >
