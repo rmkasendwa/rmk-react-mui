@@ -636,6 +636,8 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
 
   const scrollToToday = () => {
     if (todayIndicatorRef.current) {
+      const initialScrollTop =
+        timelineContainerElementRef.current?.parentElement?.scrollTop;
       scrollIntoView(todayIndicatorRef.current, {
         scrollMode: 'if-needed',
         behavior: 'smooth',
@@ -643,10 +645,12 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         inline: 'center',
       });
       setTimeout(() => {
-        timelineContainerElementRef.current?.parentElement?.scrollTo({
-          top: 0,
-          behavior: 'smooth',
-        });
+        if (initialScrollTop != null) {
+          timelineContainerElementRef.current?.parentElement?.scrollTo({
+            top: initialScrollTop,
+            behavior: 'smooth',
+          });
+        }
       }, 1000);
     }
   };
