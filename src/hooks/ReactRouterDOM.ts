@@ -4,7 +4,7 @@ import { diff } from '@infinite-debugger/rmk-utils/data';
 import { addSearchParams } from '@infinite-debugger/rmk-utils/paths';
 import hashIt from 'hash-it';
 import { pick } from 'lodash';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import * as Yup from 'yup';
 import { ObjectShape, OptionalObjectSchema, TypeOfShape } from 'yup/lib/object';
@@ -39,6 +39,7 @@ export function useReactRouterDOMSearchParams<
   spec: ValidationSpec;
   id?: string;
   paramStorage?: ParamStorage;
+  clearSearchStateOnUnmount?: boolean;
 }): {
   searchParams: Partial<SearchParamsObject>;
   setSearchParams: SetSearchParams<
@@ -78,11 +79,13 @@ export function useReactRouterDOMSearchParams<
   spec,
   id,
   paramStorage = 'url',
+  clearSearchStateOnUnmount = false,
 }: {
   mode?: 'string' | 'json';
   spec?: ValidationSpec;
   id?: string;
   paramStorage?: ParamStorage;
+  clearSearchStateOnUnmount?: boolean;
 } = {}) {
   const hashedId = (() => {
     if (id) {
@@ -227,6 +230,26 @@ export function useReactRouterDOMSearchParams<
     [getSearchParams]
   );
 
+  useEffect(() => {
+    if (
+      mode === 'json' &&
+      paramStorage === 'url' &&
+      spec &&
+      clearSearchStateOnUnmount
+    ) {
+      return () => {
+        setSearchParams(
+          Object.fromEntries(
+            Object.keys(spec).map((key) => {
+              return [key, null];
+            })
+          ),
+          { replace: true }
+        );
+      };
+    }
+  }, [clearSearchStateOnUnmount, mode, paramStorage, setSearchParams, spec]);
+
   return {
     ...(() => {
       switch (mode) {
@@ -287,8 +310,6 @@ export function useReactRouterDOMSearchParams<
                         );
                       }
                     }
-                  } else {
-                    (accumulator as any)[key] = allSearchParams[key];
                   }
                   return accumulator;
                 },

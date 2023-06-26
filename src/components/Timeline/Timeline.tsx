@@ -165,6 +165,10 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
   id?: string;
   minDate?: string | number | Date;
   maxDate?: string | number | Date;
+  selectedTimeScale?: TimeScaleOption;
+  clearSearchStateOnUnmount?: boolean;
+  getDefaultViewResetFunction?: (resetToDefaultView: () => void) => void;
+  onChangeSearchParams?: (changedSearchParamKeys: string[]) => void;
 }
 
 export function getTimelineUtilityClass(slot: string): string {
@@ -201,6 +205,10 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     id,
     minDate: minDateProp,
     maxDate: maxDateProp,
+    selectedTimeScale: selectedTimeScaleProp,
+    clearSearchStateOnUnmount = false,
+    getDefaultViewResetFunction,
+    onChangeSearchParams,
     ...rest
   } = props;
 
@@ -216,8 +224,13 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     })()
   );
 
+  const isInitialMountRef = useRef(true);
   const timelineContainerElementRef = useRef<HTMLTableElement>(null);
   const todayIndicatorRef = useRef<HTMLDivElement>(null);
+  const getDefaultViewResetFunctionRef = useRef(getDefaultViewResetFunction);
+  getDefaultViewResetFunctionRef.current = getDefaultViewResetFunction;
+  const onChangeSearchParamsRef = useRef(onChangeSearchParams);
+  onChangeSearchParamsRef.current = onChangeSearchParams;
 
   const { palette, breakpoints } = useTheme();
   const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
@@ -227,16 +240,23 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     return !isSmallScreenSize && showRowLabelsColumn;
   })();
 
-  const {
-    searchParams: { timeScale: selectedTimeScale = 'Year' },
-    setSearchParams,
-  } = useReactRouterDOMSearchParams({
+  const { searchParams, setSearchParams } = useReactRouterDOMSearchParams({
     mode: 'json',
     spec: {
       timeScale: Yup.mixed<TimeScaleOption>().oneOf([...timeScaleOptions]),
     },
     id,
+    clearSearchStateOnUnmount,
   });
+
+  const stringifiedSearchParamKeys = JSON.stringify(Object.keys(searchParams));
+  useEffect(() => {
+    if (onChangeSearchParamsRef.current) {
+      onChangeSearchParamsRef.current(JSON.parse(stringifiedSearchParamKeys));
+    }
+  }, [stringifiedSearchParamKeys]);
+
+  const { timeScale: searchParamsSelectedTimeScale } = searchParams;
 
   const {
     minDate,
@@ -319,6 +339,13 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       totalNumberOfHours,
     };
   }, [endDateProperty, maxDateProp, minDateProp, rows, startDateProperty]);
+
+  const selectedTimeScale = useMemo(() => {
+    if (searchParamsSelectedTimeScale) {
+      return searchParamsSelectedTimeScale;
+    }
+    return selectedTimeScaleProp || 'Year';
+  }, [searchParamsSelectedTimeScale, selectedTimeScaleProp]);
 
   const { timeScaleRows, unitTimeScaleWidth, timeScaleWidth } =
     useMemo((): TimeScaleConfiguration => {
@@ -548,6 +575,23 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       totalNumberOfHours,
     ]);
 
+  const resetToDefaultView = useRef(() => {
+    setSearchParams(
+      {
+        timeScale: null,
+      },
+      {
+        replace: true,
+      }
+    );
+  });
+
+  useEffect(() => {
+    if (getDefaultViewResetFunctionRef.current) {
+      getDefaultViewResetFunctionRef.current(resetToDefaultView.current);
+    }
+  }, []);
+
   const getTimelineElementNode = ({
     startDate: startDateValue,
     endDate: endDateValue,
@@ -662,6 +706,13 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       scrollToTodayRef.current();
     }
   }, [selectedTimeScale]);
+
+  useEffect(() => {
+    isInitialMountRef.current = false;
+    return () => {
+      isInitialMountRef.current = true;
+    };
+  }, []);
 
   const columns: TableColumn<RecordRow>[] = [
     {

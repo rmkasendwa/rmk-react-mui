@@ -155,19 +155,6 @@ declare module '@mui/material/styles/components' {
 
 const ENUM_TABLE_COLUMN_TYPES: TableColumnType[] = ['enum'];
 
-const modifiedStateKeyTypes = [
-  'view',
-  'groupBy',
-  'sortBy',
-  'filterBy',
-  'selectedColumns',
-  'search',
-  'expandedGroups',
-  'selectedDataPreset',
-] as const;
-
-type ModifiedStatKey = (typeof modifiedStateKeyTypes)[number];
-
 export interface BaseDataView {
   type: ViewOptionType;
   minWidth?: number;
@@ -425,6 +412,7 @@ export interface RecordsExplorerProps<
     state: RecordsExplorerChildrenOptions<RecordRow>
   ) => (ReactNode | Tool)[] | undefined;
   ListViewProps?: Partial<Omit<ListView<RecordRow>, 'columns'>>;
+  clearSearchStateOnUnmount?: boolean;
 }
 
 export function getRecordsExplorerUtilityClass(slot: string): string {
@@ -539,6 +527,7 @@ const BaseRecordsExplorer = <
     getBottomTools,
     ListViewProps,
     fields,
+    clearSearchStateOnUnmount = false,
     ...rest
   } = omit(
     props,
@@ -620,6 +609,8 @@ const BaseRecordsExplorer = <
   dataPresetsRef.current = dataPresets;
   const ListViewPropsRef = useRef(ListViewProps);
   ListViewPropsRef.current = ListViewProps;
+
+  const resetTimelineToDefaultViewRef = useRef<() => void>();
 
   const viewFunctionRef = useRef((record: RecordRow) => {
     const { id } = record;
@@ -1044,11 +1035,7 @@ const BaseRecordsExplorer = <
         }).default(undefined),
         search: Yup.string(),
         selectedColumns: Yup.array().of(Yup.string().required()),
-        modifiedKeys: Yup.array().of(
-          Yup.mixed<ModifiedStatKey>()
-            .oneOf([...modifiedStateKeyTypes])
-            .required()
-        ),
+        modifiedKeys: Yup.array().of(Yup.string().required()),
         createNewRecord: Yup.boolean(),
         selectedRecord: Yup.string(),
         editRecord: Yup.boolean(),
@@ -1056,6 +1043,7 @@ const BaseRecordsExplorer = <
       },
       id,
       paramStorage: stateStorage,
+      clearSearchStateOnUnmount,
     });
 
   const {
@@ -1073,6 +1061,43 @@ const BaseRecordsExplorer = <
     editRecord,
     selectedDataPreset: searchParamSelectedDataPreset,
   } = searchParams;
+
+  const updateChangedSearchParamKeys = (
+    extraSearchParamKeys: string[] = []
+  ) => {
+    const changedSearchParamKeys = [
+      ...new Set([
+        ...(modifiedStateKeys || []),
+        ...Object.keys(searchParams).filter((key) => {
+          return key !== 'modifiedKeys';
+        }),
+        ...extraSearchParamKeys,
+      ]),
+    ];
+    if (
+      JSON.stringify(changedSearchParamKeys) !==
+      JSON.stringify(modifiedStateKeys)
+    ) {
+      setSearchParams(
+        {
+          modifiedKeys:
+            changedSearchParamKeys.length > 0 ? changedSearchParamKeys : null,
+        },
+        {
+          replace: true,
+        }
+      );
+    }
+  };
+  const updateChangedSearchParamKeysRef = useRef(updateChangedSearchParamKeys);
+  updateChangedSearchParamKeysRef.current = updateChangedSearchParamKeys;
+
+  const stringifiedSearchParams = JSON.stringify(searchParams);
+  useEffect(() => {
+    if (stringifiedSearchParams) {
+      updateChangedSearchParamKeysRef.current();
+    }
+  }, [stringifiedSearchParams]);
 
   const createNewRecord = Boolean(
     searchParamCreateNewRecord || (pathToAddNew && pathname === pathToAddNew)
@@ -1559,9 +1584,6 @@ const BaseRecordsExplorer = <
       setSearchParams(
         {
           view,
-          modifiedKeys: [
-            ...new Set([...(modifiedStateKeys || []), 'view']),
-          ] as typeof modifiedStateKeys,
         },
         {
           replace: true,
@@ -1583,9 +1605,6 @@ const BaseRecordsExplorer = <
               sortDirection,
             };
           }),
-          modifiedKeys: [
-            ...new Set([...(modifiedStateKeys || []), 'groupBy']),
-          ] as typeof modifiedStateKeys,
         },
         {
           replace: true,
@@ -1606,9 +1625,6 @@ const BaseRecordsExplorer = <
               sortDirection,
             };
           }),
-          modifiedKeys: [
-            ...new Set([...(modifiedStateKeys || []), 'sortBy']),
-          ] as typeof modifiedStateKeys,
         },
         {
           replace: true,
@@ -1625,9 +1641,6 @@ const BaseRecordsExplorer = <
       setSearchParams(
         {
           filterBy: conditionGroup as any,
-          modifiedKeys: [
-            ...new Set([...(modifiedStateKeys || []), 'filterBy']),
-          ] as typeof modifiedStateKeys,
         },
         { replace: true }
       );
@@ -1652,6 +1665,9 @@ const BaseRecordsExplorer = <
         replace: true,
       }
     );
+    if (viewType === 'Timeline' && resetTimelineToDefaultViewRef.current) {
+      resetTimelineToDefaultViewRef.current();
+    }
   };
 
   const {
@@ -1916,12 +1932,6 @@ const BaseRecordsExplorer = <
                                         })(),
                                         expandedGroupsInverted:
                                           nextExpandedGroupsInverted,
-                                        modifiedKeys: [
-                                          ...new Set([
-                                            ...(modifiedStateKeys || []),
-                                            'expandedGroups',
-                                          ]),
-                                        ] as typeof modifiedStateKeys,
                                       },
                                       {
                                         replace: true,
@@ -2113,12 +2123,6 @@ const BaseRecordsExplorer = <
                                   sortDirection: sortDirection || 'ASC',
                                 } as SelectedSortOption<RecordRow>;
                               }),
-                            modifiedKeys: [
-                              ...new Set([
-                                ...(modifiedStateKeys || []),
-                                'sortBy',
-                              ]),
-                            ] as typeof modifiedStateKeys,
                           },
                           {
                             replace: true,
@@ -2135,12 +2139,6 @@ const BaseRecordsExplorer = <
                                 return String(selectedColumnId);
                               }
                             ),
-                            modifiedKeys: [
-                              ...new Set([
-                                ...(modifiedStateKeys || []),
-                                'selectedColumns',
-                              ]),
-                            ] as typeof modifiedStateKeys,
                           },
                           {
                             replace: true,
@@ -2171,12 +2169,6 @@ const BaseRecordsExplorer = <
                                       ? 'None'
                                       : 'All',
                                     expandedGroupsInverted: null,
-                                    modifiedKeys: [
-                                      ...new Set([
-                                        ...(modifiedStateKeys || []),
-                                        'expandedGroups',
-                                      ]),
-                                    ] as typeof modifiedStateKeys,
                                   },
                                   {
                                     replace: true,
@@ -2226,7 +2218,22 @@ const BaseRecordsExplorer = <
                   .getColumnValue as any;
               }
             }
-            return <Timeline rows={filteredData} {...viewProps} {...{ id }} />;
+            return (
+              <Timeline
+                {...viewProps}
+                {...{ id, clearSearchStateOnUnmount }}
+                rows={filteredData}
+                getDefaultViewResetFunction={(resetTimelineToDefaultView) => {
+                  resetTimelineToDefaultViewRef.current =
+                    resetTimelineToDefaultView;
+                }}
+                onChangeSearchParams={(changedSearchParamKeys) => {
+                  updateChangedSearchParamKeysRef.current(
+                    changedSearchParamKeys
+                  );
+                }}
+              />
+            );
           }
         }
       }
@@ -2282,12 +2289,6 @@ const BaseRecordsExplorer = <
                   }
                   return null;
                 })(),
-                modifiedKeys: [
-                  ...new Set([
-                    ...(modifiedStateKeys || []),
-                    'selectedDataPreset',
-                  ]),
-                ] as typeof modifiedStateKeys,
               },
               {
                 replace: true,
@@ -2469,9 +2470,6 @@ const BaseRecordsExplorer = <
                       return null;
                     }
                   })(),
-                  modifiedKeys: [
-                    ...new Set([...(modifiedStateKeys || []), 'search']),
-                  ] as typeof modifiedStateKeys,
                 },
                 {
                   replace: true,
