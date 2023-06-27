@@ -172,6 +172,7 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
   clearSearchStateOnUnmount?: boolean;
   getDefaultViewResetFunction?: (resetToDefaultView: () => void) => void;
   onChangeSearchParams?: (changedSearchParamKeys: string[]) => void;
+  rowLabelsColumnWidth?: number;
 }
 
 export function getTimelineUtilityClass(slot: string): string {
@@ -212,6 +213,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     clearSearchStateOnUnmount = false,
     getDefaultViewResetFunction,
     onChangeSearchParams,
+    rowLabelsColumnWidth = 256,
     ...rest
   } = props;
 
@@ -373,10 +375,10 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       return 'Day';
     })();
 
-    const centerOfGravity = addDays(
-      minDate,
-      Math.floor(timelineDifferenceInDays / 2)
-    );
+    const centerOfGravity =
+      allDates.length > 0
+        ? addDays(minDate, Math.floor(timelineDifferenceInDays / 2))
+        : new Date();
 
     return {
       minDate,
@@ -828,11 +830,14 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         <TimeScaleMeter
           {...{ timeScaleRows, timeScaleWidth }}
           scrollingElement={timelineContainerElementRef.current?.parentElement}
-          leftOffset={(shouldShowRowLabelsColumn ? 256 : 0) + baseSpacingUnits}
+          leftOffset={
+            (shouldShowRowLabelsColumn ? rowLabelsColumnWidth : 0) +
+            baseSpacingUnits
+          }
           sx={{
             [`.${timeScaleMeterClasses.timeScaleLevel1Tick}`]: {
               left:
-                (shouldShowRowLabelsColumn ? 256 : 0) +
+                (shouldShowRowLabelsColumn ? rowLabelsColumnWidth : 0) +
                 (() => {
                   if (shouldShowRowLabelsColumn) {
                     return 16;
@@ -937,7 +942,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     columns.unshift({
       id: 'label',
       label: 'Label',
-      width: 256,
+      width: rowLabelsColumnWidth,
       showHeaderText: false,
       getColumnValue: (row) => {
         if (getRowLabel) {
