@@ -42,7 +42,6 @@ import {
   useRef,
 } from 'react';
 import { mergeRefs } from 'react-merge-refs';
-import scrollIntoView from 'scroll-into-view-if-needed';
 import * as Yup from 'yup';
 
 import { useReactRouterDOMSearchParams } from '../../hooks/ReactRouterDOM';
@@ -685,25 +684,29 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     }
   };
 
-  const scrollToToday = () => {
-    if (todayIndicatorRef.current) {
-      const initialScrollTop =
-        timelineContainerElementRef.current?.parentElement?.scrollTop;
-      scrollIntoView(todayIndicatorRef.current, {
-        scrollMode: 'if-needed',
+  const scrollToDate = (today: Date) => {
+    if (
+      timelineContainerElementRef.current?.parentElement &&
+      isAfter(today, minDate) &&
+      isBefore(today, maxDate)
+    ) {
+      const offsetPercentage =
+        (differenceInHours(new Date(), minDate) + 24) / totalNumberOfHours;
+      const { parentElement } = timelineContainerElementRef.current;
+      const { scrollWidth, offsetWidth } = parentElement;
+      parentElement.scrollTo({
+        left:
+          Math.round(scrollWidth * offsetPercentage) -
+          Math.round(offsetWidth / 2),
         behavior: 'smooth',
-        block: 'start',
-        inline: 'center',
       });
-      setTimeout(() => {
-        if (initialScrollTop != null) {
-          timelineContainerElementRef.current?.parentElement?.scrollTo({
-            top: initialScrollTop,
-            behavior: 'smooth',
-          });
-        }
-      }, 1000);
     }
+  };
+  const scrollToDateRef = useRef(scrollToDate);
+  scrollToDateRef.current = scrollToDate;
+
+  const scrollToToday = () => {
+    scrollToDate(new Date());
   };
   const scrollToTodayRef = useRef(scrollToToday);
   scrollToTodayRef.current = scrollToToday;
