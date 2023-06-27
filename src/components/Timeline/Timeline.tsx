@@ -329,7 +329,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       timelineYears.push(year);
     }
     const totalNumberOfDays = differenceInDays(maxDate, minDate) + 1;
-    const totalNumberOfHours = differenceInHours(maxDate, minDate) + 1;
+    const totalNumberOfHours = differenceInHours(maxDate, minDate) + 24;
 
     return {
       minDate,
@@ -613,9 +613,9 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           return maxDate;
         })();
         if (isAfter(endDate, startDate)) {
-          const numberOfHours = differenceInHours(endDate, startDate);
+          const numberOfHours = differenceInHours(endDate, startDate) + 24;
           const offsetPercentage =
-            differenceInHours(startDate, minDate) / totalNumberOfHours;
+            (differenceInHours(startDate, minDate) + 24) / totalNumberOfHours;
           const percentage = numberOfHours / totalNumberOfHours;
 
           const baseTimelineElementLabel = `${formatDate(
@@ -667,7 +667,14 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                   borderRadius: '4px',
                 }}
               >
-                <Typography component="div" variant="body2" noWrap>
+                <Typography
+                  component="div"
+                  variant="body2"
+                  noWrap
+                  sx={{
+                    width: '100%',
+                  }}
+                >
                   {timelineElementLabel}
                 </Typography>
               </Box>

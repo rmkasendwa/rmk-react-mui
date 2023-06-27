@@ -234,9 +234,10 @@ export function useReactRouterDOMSearchParams<
     if (
       mode === 'json' &&
       paramStorage === 'url' &&
-      spec &&
+      specRef.current &&
       clearSearchStateOnUnmount
     ) {
+      const spec = specRef.current;
       return () => {
         setSearchParams(
           Object.fromEntries(
@@ -248,7 +249,7 @@ export function useReactRouterDOMSearchParams<
         );
       };
     }
-  }, [clearSearchStateOnUnmount, mode, paramStorage, setSearchParams, spec]);
+  }, [clearSearchStateOnUnmount, mode, paramStorage, setSearchParams]);
 
   return {
     ...(() => {
