@@ -336,15 +336,17 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       };
     })();
 
-    const minDateYear = minDate.getFullYear();
-    const maxDateYear = maxDate.getFullYear();
+    const minDateYear = minCalendarDate.getFullYear();
+    const maxDateYear = maxCalendarDate.getFullYear();
     const timelineYears: number[] = [];
 
     for (let year = minDateYear; year <= maxDateYear; year++) {
       timelineYears.push(year);
     }
-    const totalNumberOfDays = differenceInDays(maxDate, minDate) + 1;
-    const totalNumberOfHours = differenceInHours(maxDate, minDate) + 1;
+    const totalNumberOfDays =
+      differenceInDays(maxCalendarDate, minCalendarDate) + 1;
+    const totalNumberOfHours =
+      differenceInHours(maxCalendarDate, minCalendarDate) + 1;
 
     const timelineDifferenceInDays = differenceInDays(maxDate, minDate);
 
