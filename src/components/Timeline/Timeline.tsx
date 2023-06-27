@@ -823,7 +823,6 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         pl: `${baseSpacingUnits}px`,
         pr: `${baseSpacingUnits}px`,
         py: 1,
-        borderColor: 'transparent',
         '&>div': {
           height: 34,
         },
@@ -872,12 +871,6 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       },
       bodySx: {
         p: 0,
-        borderColor: 'transparent',
-      },
-      sx: {
-        '&:last-of-type': {
-          borderLeftColor: 'transparent !important',
-        },
       },
     });
   }
