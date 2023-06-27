@@ -261,11 +261,13 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   const { timeScale: searchParamsSelectedTimeScale } = searchParams;
 
   const {
+    minCalendarDate,
+    maxCalendarDate,
     minDate,
-    maxDate,
     timelineYears,
     totalNumberOfDays,
     totalNumberOfHours,
+    timelineDifferenceInDays,
   } = useMemo(() => {
     const allDates = rows
       .flatMap((row) => {
@@ -304,22 +306,31 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       })
       .sort((a, b) => a.getTime() - b.getTime());
 
-    const { maxDate, minDate } = (() => {
+    const { maxDate, minDate, maxCalendarDate, minCalendarDate } = (() => {
       if (allDates.length > 0) {
-        const baseMinDate = minDateProp ? new Date(minDateProp) : allDates[0];
-        const minDate = new Date(baseMinDate.getFullYear(), 0, 1, 0, 0);
+        const minDate = minDateProp ? new Date(minDateProp) : allDates[0];
+        const minCalendarDate = new Date(minDate.getFullYear(), 0, 1, 0, 0);
 
-        const baseMaxDate = maxDateProp
+        const maxDate = maxDateProp
           ? new Date(maxDateProp)
           : allDates[allDates.length - 1];
-        const maxDate = new Date(baseMaxDate.getFullYear(), 11, 31, 23, 59);
+        const maxCalendarDate = new Date(maxDate.getFullYear(), 11, 31, 23, 59);
 
-        return { minDate, maxDate };
+        return {
+          minDate,
+          maxDate,
+          minCalendarDate,
+          maxCalendarDate,
+        };
       }
       const thisYear = new Date().getFullYear();
+      const minDate = new Date(thisYear, 0, 1, 0, 0);
+      const maxDate = new Date(thisYear, 11, 31, 23, 59);
       return {
-        minDate: new Date(thisYear, 0, 1, 0, 0),
-        maxDate: new Date(thisYear, 11, 31, 23, 59),
+        minDate,
+        maxDate,
+        minCalendarDate: minDate,
+        maxCalendarDate: maxDate,
       };
     })();
 
@@ -331,14 +342,19 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       timelineYears.push(year);
     }
     const totalNumberOfDays = differenceInDays(maxDate, minDate) + 1;
-    const totalNumberOfHours = differenceInHours(maxDate, minDate) + 24;
+    const totalNumberOfHours = differenceInHours(maxDate, minDate) + 1;
+
+    const timelineDifferenceInDays = differenceInDays(maxDate, minDate);
 
     return {
       minDate,
       maxDate,
+      minCalendarDate,
+      maxCalendarDate,
       timelineYears,
       totalNumberOfDays,
       totalNumberOfHours,
+      timelineDifferenceInDays,
     };
   }, [endDateProperty, maxDateProp, minDateProp, rows, startDateProperty]);
 
@@ -350,7 +366,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   } = usePopupTool({
     bodyContent: (
       <DatePicker
-        {...{ minDate, maxDate }}
+        {...{ minDate: minCalendarDate, maxDate: maxCalendarDate }}
         onChange={(selectedDate) => {
           if (selectedDate) {
             scrollToDate(selectedDate);
@@ -363,12 +379,37 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     wrapBodyContentInCard: false,
   });
 
-  const selectedTimeScale = useMemo(() => {
+  const selectedTimeScale = useMemo((): TimeScaleOption => {
     if (searchParamsSelectedTimeScale) {
       return searchParamsSelectedTimeScale;
     }
-    return selectedTimeScaleProp || 'Year';
-  }, [searchParamsSelectedTimeScale, selectedTimeScaleProp]);
+    if (selectedTimeScaleProp) {
+      return selectedTimeScaleProp;
+    }
+    if (timelineDifferenceInDays > 365) {
+      return '5 year';
+    }
+    if (timelineDifferenceInDays > 90) {
+      return 'Year';
+    }
+    if (timelineDifferenceInDays > 30) {
+      return 'Quarter';
+    }
+    if (timelineDifferenceInDays > 14) {
+      return 'Month';
+    }
+    if (timelineDifferenceInDays > 7) {
+      return '2 week';
+    }
+    if (timelineDifferenceInDays > 1) {
+      return 'Week';
+    }
+    return 'Day';
+  }, [
+    searchParamsSelectedTimeScale,
+    selectedTimeScaleProp,
+    timelineDifferenceInDays,
+  ]);
 
   const { timeScaleRows, unitTimeScaleWidth, timeScaleWidth } =
     useMemo((): TimeScaleConfiguration => {
@@ -455,7 +496,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                 return Array.from({ length: monthSplit }).map(
                   (_, periodIndex) => {
                     const unitTickDate = addDays(
-                      minDate,
+                      minCalendarDate,
                       Math.round(
                         totalNumberOfDays *
                           (((yearIndex * 12 + monthIndex) * monthSplit +
@@ -591,7 +632,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           };
       }
     }, [
-      minDate,
+      minCalendarDate,
       selectedTimeScale,
       timelineYears,
       totalNumberOfDays,
@@ -633,12 +674,12 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
               return endDate;
             }
           }
-          return maxDate;
+          return maxCalendarDate;
         })();
         if (isAfter(endDate, startDate)) {
           const numberOfHours = differenceInHours(endDate, startDate);
           const offsetPercentage =
-            differenceInHours(startDate, minDate) / totalNumberOfHours;
+            differenceInHours(startDate, minCalendarDate) / totalNumberOfHours;
           const percentage = numberOfHours / totalNumberOfHours;
 
           const baseTimelineElementLabel = `${formatDate(
@@ -711,11 +752,11 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   const scrollToDate = (date: Date) => {
     if (
       timelineContainerElementRef.current?.parentElement &&
-      isAfter(date, minDate) &&
-      isBefore(date, maxDate)
+      isAfter(date, minCalendarDate) &&
+      isBefore(date, maxCalendarDate)
     ) {
       const offsetPercentage =
-        differenceInHours(date, minDate) / totalNumberOfHours;
+        differenceInHours(date, minCalendarDate) / totalNumberOfHours;
       const { parentElement } = timelineContainerElementRef.current;
       const { scrollWidth, offsetWidth } = parentElement;
       parentElement.scrollTo({
@@ -736,10 +777,10 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   scrollToTodayRef.current = scrollToToday;
 
   useEffect(() => {
-    if (selectedTimeScale) {
-      scrollToTodayRef.current();
-    }
-  }, [selectedTimeScale]);
+    scrollToDateRef.current(
+      addDays(minDate, Math.floor(timelineDifferenceInDays / 2))
+    );
+  }, [minDate, timelineDifferenceInDays]);
 
   useEffect(() => {
     isInitialMountRef.current = false;
@@ -772,9 +813,12 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       ),
       secondaryHeaderRowContent: (() => {
         const today = new Date();
-        if (isAfter(today, minDate) && isBefore(today, maxDate)) {
+        if (
+          isAfter(today, minCalendarDate) &&
+          isBefore(today, maxCalendarDate)
+        ) {
           const offsetPercentage =
-            differenceInHours(today, minDate) / totalNumberOfHours;
+            differenceInHours(today, minCalendarDate) / totalNumberOfHours;
           return (
             <Box
               sx={{
