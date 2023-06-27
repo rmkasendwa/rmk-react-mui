@@ -10,6 +10,7 @@ import {
   generateUtilityClass,
   generateUtilityClasses,
   gridClasses,
+  useMediaQuery,
   useTheme,
   useThemeProps,
 } from '@mui/material';
@@ -125,7 +126,8 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(function Card(
   } = CardBodyProps;
   const { loading: contextLoading, errorMessage: contextErrorMessage } =
     useLoadingContext();
-  const { spacing } = useTheme();
+  const { spacing, breakpoints } = useTheme();
+  const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
 
   const searchSyncToolBar = (
     <SearchSyncToolbar
@@ -242,7 +244,12 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(function Card(
         {...CardBodyPropsRest}
         className={clsx(classes.section, CardBodyPropsClassName)}
         component="section"
-        sx={{ pt: 2, px: 3, pb: 3, ...CardBodyPropsSx }}
+        sx={{
+          pt: isSmallScreenSize ? 1 : 2,
+          px: isSmallScreenSize ? 2 : 3,
+          pb: isSmallScreenSize ? 2 : 3,
+          ...CardBodyPropsSx,
+        }}
       >
         {children}
       </Box>
