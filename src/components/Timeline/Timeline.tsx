@@ -227,6 +227,8 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   );
 
   const isInitialMountRef = useRef(true);
+  const currentDateAtCenterRef = useRef<Date | null>(null);
+  const lastDateAtCenterRef = useRef<Date | null>(null);
   const timelineContainerElementRef = useRef<HTMLTableElement>(null);
   const todayIndicatorRef = useRef<HTMLDivElement>(null);
   const getDefaultViewResetFunctionRef = useRef(getDefaultViewResetFunction);
@@ -656,6 +658,20 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     }
   }, []);
 
+  useEffect(() => {
+    if (timelineContainerElementRef.current?.parentElement) {
+      const { parentElement } = timelineContainerElementRef.current;
+      parentElement.addEventListener('scroll', () => {
+        const { scrollLeft, offsetWidth, scrollWidth } = parentElement;
+        currentDateAtCenterRef.current = addHours(
+          minCalendarDate,
+          totalNumberOfHours *
+            ((scrollLeft + Math.round(offsetWidth / 2)) / scrollWidth)
+        );
+      });
+    }
+  }, [minCalendarDate, totalNumberOfHours]);
+
   const getTimelineElementNode = ({
     startDate: startDateValue,
     endDate: endDateValue,
@@ -781,6 +797,13 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       addDays(minDate, Math.floor(timelineDifferenceInDays / 2))
     );
   }, [minDate, timelineDifferenceInDays]);
+
+  useEffect(() => {
+    if (selectedTimeScale && lastDateAtCenterRef.current) {
+      scrollToDateRef.current(lastDateAtCenterRef.current);
+      lastDateAtCenterRef.current = null;
+    }
+  }, [selectedTimeScale]);
 
   useEffect(() => {
     isInitialMountRef.current = false;
@@ -1007,6 +1030,8 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                     };
                   })}
                   onChange={(event) => {
+                    lastDateAtCenterRef.current =
+                      currentDateAtCenterRef.current;
                     setSearchParams(
                       {
                         timeScale: (event.target.value as any) || null,
