@@ -49,6 +49,8 @@ import SearchSyncToolbar from './SearchSyncToolbar';
 export interface ModalFormClasses {
   /** Styles applied to the root element. */
   root: string;
+  cardRoot: string;
+  cardBody: string;
 }
 
 export type ModalFormClassKey = keyof ModalFormClasses;
@@ -126,11 +128,13 @@ export function getModalFormUtilityClass(slot: string): string {
 
 export const modalFormClasses: ModalFormClasses = generateUtilityClasses(
   'MuiModalForm',
-  ['root']
+  ['root', 'cardRoot', 'cardBody']
 );
 
 const slots = {
   root: ['root'],
+  cardRoot: ['cardRoot'],
+  cardBody: ['cardBody'],
 };
 
 export const BaseModalForm = <Values extends FormikValues>(
@@ -298,6 +302,7 @@ export const BaseModalForm = <Values extends FormikValues>(
     <Card
       {...(placementCardPropsRest as any)}
       {...CardPropsRest}
+      className={clsx(classes.root, CardPropsRest.className)}
       sx={{
         display: 'flex',
         flexDirection: 'column',
@@ -476,6 +481,10 @@ export const BaseModalForm = <Values extends FormikValues>(
                   return (
                     <Box
                       {...CardBodyPropsRest}
+                      className={clsx(
+                        classes.cardBody,
+                        CardBodyPropsRest.className
+                      )}
                       sx={{
                         overflowY: 'auto',
                         py: 2,
