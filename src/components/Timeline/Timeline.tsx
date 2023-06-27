@@ -1,3 +1,4 @@
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import {
@@ -45,6 +46,8 @@ import { mergeRefs } from 'react-merge-refs';
 import * as Yup from 'yup';
 
 import { useReactRouterDOMSearchParams } from '../../hooks/ReactRouterDOM';
+import { usePopupTool } from '../../hooks/Tools/PopupTool';
+import DatePicker from '../DatePicker';
 import DataDropdownField, {
   dataDropdownFieldClasses,
 } from '../InputFields/DataDropdownField';
@@ -339,6 +342,27 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     };
   }, [endDateProperty, maxDateProp, minDateProp, rows, startDateProperty]);
 
+  const {
+    icon: jumpToDateIcon,
+    popupElement: jumpToDatePopupElement,
+    onClick: jumpToDateOnClick,
+    ref: jumpToDateAnchorRef,
+  } = usePopupTool({
+    bodyContent: (
+      <DatePicker
+        {...{ minDate, maxDate }}
+        onChange={(selectedDate) => {
+          if (selectedDate) {
+            scrollToDate(selectedDate);
+          }
+        }}
+      />
+    ),
+    label: 'Jump to date',
+    icon: <CalendarTodayIcon />,
+    wrapBodyContentInCard: false,
+  });
+
   const selectedTimeScale = useMemo(() => {
     if (searchParamsSelectedTimeScale) {
       return searchParamsSelectedTimeScale;
@@ -612,9 +636,9 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           return maxDate;
         })();
         if (isAfter(endDate, startDate)) {
-          const numberOfHours = differenceInHours(endDate, startDate) + 24;
+          const numberOfHours = differenceInHours(endDate, startDate);
           const offsetPercentage =
-            (differenceInHours(startDate, minDate) + 24) / totalNumberOfHours;
+            differenceInHours(startDate, minDate) / totalNumberOfHours;
           const percentage = numberOfHours / totalNumberOfHours;
 
           const baseTimelineElementLabel = `${formatDate(
@@ -684,14 +708,14 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     }
   };
 
-  const scrollToDate = (today: Date) => {
+  const scrollToDate = (date: Date) => {
     if (
       timelineContainerElementRef.current?.parentElement &&
-      isAfter(today, minDate) &&
-      isBefore(today, maxDate)
+      isAfter(date, minDate) &&
+      isBefore(date, maxDate)
     ) {
       const offsetPercentage =
-        (differenceInHours(new Date(), minDate) + 24) / totalNumberOfHours;
+        differenceInHours(date, minDate) / totalNumberOfHours;
       const { parentElement } = timelineContainerElementRef.current;
       const { scrollWidth, offsetWidth } = parentElement;
       parentElement.scrollTo({
@@ -998,6 +1022,21 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
               >
                 Today
               </Button>
+              <Button
+                ref={jumpToDateAnchorRef}
+                variant="contained"
+                color="inherit"
+                size="small"
+                onClick={jumpToDateOnClick}
+                sx={{
+                  px: 1,
+                  minWidth: 'auto !important',
+                  width: 32,
+                }}
+              >
+                {jumpToDateIcon}
+              </Button>
+              {jumpToDatePopupElement}
               <ButtonGroup
                 size="small"
                 variant="contained"
