@@ -1,4 +1,5 @@
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import HighlightAltIcon from '@mui/icons-material/HighlightAlt';
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import {
@@ -265,11 +266,11 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   const {
     minCalendarDate,
     maxCalendarDate,
-    minDate,
     timelineYears,
     totalNumberOfDays,
     totalNumberOfHours,
-    timelineDifferenceInDays,
+    optimalTimeScale,
+    centerOfGravity,
   } = useMemo(() => {
     const allDates = rows
       .flatMap((row) => {
@@ -350,6 +351,33 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
 
     const timelineDifferenceInDays = differenceInDays(maxDate, minDate);
 
+    const optimalTimeScale = ((): TimeScaleOption => {
+      if (timelineDifferenceInDays > 365) {
+        return '5 year';
+      }
+      if (timelineDifferenceInDays > 90) {
+        return 'Year';
+      }
+      if (timelineDifferenceInDays > 30) {
+        return 'Quarter';
+      }
+      if (timelineDifferenceInDays > 14) {
+        return 'Month';
+      }
+      if (timelineDifferenceInDays > 7) {
+        return '2 week';
+      }
+      if (timelineDifferenceInDays > 1) {
+        return 'Week';
+      }
+      return 'Day';
+    })();
+
+    const centerOfGravity = addDays(
+      minDate,
+      Math.floor(timelineDifferenceInDays / 2)
+    );
+
     return {
       minDate,
       maxDate,
@@ -359,6 +387,8 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       totalNumberOfDays,
       totalNumberOfHours,
       timelineDifferenceInDays,
+      optimalTimeScale,
+      centerOfGravity,
     };
   }, [endDateProperty, maxDateProp, minDateProp, rows, startDateProperty]);
 
@@ -371,6 +401,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     bodyContent: (
       <DatePicker
         {...{ minDate: minCalendarDate, maxDate: maxCalendarDate }}
+        selected={currentDateAtCenterRef.current}
         onChange={(selectedDate) => {
           if (selectedDate) {
             scrollToDate(selectedDate);
@@ -390,30 +421,8 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     if (selectedTimeScaleProp) {
       return selectedTimeScaleProp;
     }
-    if (timelineDifferenceInDays > 365) {
-      return '5 year';
-    }
-    if (timelineDifferenceInDays > 90) {
-      return 'Year';
-    }
-    if (timelineDifferenceInDays > 30) {
-      return 'Quarter';
-    }
-    if (timelineDifferenceInDays > 14) {
-      return 'Month';
-    }
-    if (timelineDifferenceInDays > 7) {
-      return '2 week';
-    }
-    if (timelineDifferenceInDays > 1) {
-      return 'Week';
-    }
-    return 'Day';
-  }, [
-    searchParamsSelectedTimeScale,
-    selectedTimeScaleProp,
-    timelineDifferenceInDays,
-  ]);
+    return optimalTimeScale;
+  }, [optimalTimeScale, searchParamsSelectedTimeScale, selectedTimeScaleProp]);
 
   const { timeScaleRows, unitTimeScaleWidth, timeScaleWidth } =
     useMemo((): TimeScaleConfiguration => {
@@ -795,10 +804,8 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   scrollToTodayRef.current = scrollToToday;
 
   useEffect(() => {
-    scrollToDateRef.current(
-      addDays(minDate, Math.floor(timelineDifferenceInDays / 2))
-    );
-  }, [minDate, timelineDifferenceInDays]);
+    scrollToDateRef.current(centerOfGravity);
+  }, [centerOfGravity]);
 
   useEffect(() => {
     if (selectedTimeScale && lastDateAtCenterRef.current) {
@@ -1093,21 +1100,50 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
               >
                 Today
               </Button>
-              <Button
-                ref={jumpToDateAnchorRef}
-                variant="contained"
-                color="inherit"
-                size="small"
-                onClick={jumpToDateOnClick}
-                sx={{
-                  px: 1,
-                  minWidth: 'auto !important',
-                  width: 32,
-                }}
-              >
-                {jumpToDateIcon}
-              </Button>
+              <Tooltip title="Jump to date">
+                <Button
+                  ref={jumpToDateAnchorRef}
+                  variant="contained"
+                  color="inherit"
+                  size="small"
+                  onClick={jumpToDateOnClick}
+                  sx={{
+                    px: 1,
+                    minWidth: 'auto !important',
+                    width: 32,
+                  }}
+                >
+                  {jumpToDateIcon}
+                </Button>
+              </Tooltip>
               {jumpToDatePopupElement}
+              {selectedTimeScale !== optimalTimeScale ? (
+                <Tooltip title="Jump to optimal timescale">
+                  <Button
+                    variant="contained"
+                    color="inherit"
+                    size="small"
+                    onClick={() => {
+                      lastDateAtCenterRef.current = centerOfGravity;
+                      setSearchParams(
+                        {
+                          timeScale: optimalTimeScale,
+                        },
+                        {
+                          replace: true,
+                        }
+                      );
+                    }}
+                    sx={{
+                      px: 1,
+                      minWidth: 'auto !important',
+                      width: 32,
+                    }}
+                  >
+                    <HighlightAltIcon />
+                  </Button>
+                </Tooltip>
+              ) : null}
               <ButtonGroup
                 size="small"
                 variant="contained"
