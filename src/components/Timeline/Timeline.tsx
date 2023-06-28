@@ -983,17 +983,12 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     columns.push({
       id: 'gutter',
       label: 'Gutter',
-      width: 20,
+      width: 40,
       showHeaderText: false,
       headerSx: {
         '&>div': {
-          py: 0,
-          pl: `${baseSpacingUnits}px`,
-          pr: `${baseSpacingUnits}px`,
+          p: 0,
         },
-      },
-      bodySx: {
-        p: 0,
       },
     });
   }
