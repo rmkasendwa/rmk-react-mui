@@ -361,6 +361,9 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     const timelineDifferenceInDays = differenceInDays(maxDate, minDate);
 
     const optimalTimeScale = ((): TimeScaleOption => {
+      if (allDates.length <= 1) {
+        return 'Year';
+      }
       if (timelineDifferenceInDays > 365) {
         return '5 year';
       }
@@ -405,7 +408,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     icon: jumpToDateIcon,
     popupElement: jumpToDatePopupElement,
     onClick: jumpToDateOnClick,
-    closePopup: jumpToDateClosePopup,
+    extraToolProps: { closePopup: jumpToDateClosePopup },
     ref: jumpToDateAnchorRef,
   } = usePopupTool({
     bodyContent: (

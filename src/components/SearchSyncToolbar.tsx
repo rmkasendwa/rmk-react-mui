@@ -76,6 +76,7 @@ export interface BaseToolOptions {
   alwaysShowOn?: 'Large Screen' | 'Small Screen' | 'All Screens';
   component?: any;
   getToolElement?: (element: ReactNode) => ReactNode;
+  extraToolProps?: any;
 }
 
 export interface ButtonTool
@@ -127,7 +128,8 @@ export const getToolNodes = (
               case 'icon-button': {
                 const { label, icon, title, popupElement, ...rest } = omit(
                   tool,
-                  'type'
+                  'type',
+                  'extraToolProps'
                 );
                 return (
                   <>
@@ -148,7 +150,8 @@ export const getToolNodes = (
               case 'button': {
                 const { label, icon, title, sx, popupElement, ...rest } = omit(
                   tool,
-                  'type'
+                  'type',
+                  'extraToolProps'
                 );
                 const buttonElement = (() => {
                   if (!showFullToolWidth) {
