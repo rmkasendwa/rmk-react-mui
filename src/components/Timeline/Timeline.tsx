@@ -1,3 +1,4 @@
+import { createDateWithoutTimezoneOffset } from '@infinite-debugger/rmk-utils/dates';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import HighlightAltIcon from '@mui/icons-material/HighlightAlt';
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
@@ -286,7 +287,9 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           if (startDateValue instanceof Date) {
             dates.push(startDateValue);
           } else {
-            const parsedStartDateValue = new Date(startDateValue as any);
+            const parsedStartDateValue = createDateWithoutTimezoneOffset(
+              startDateValue as any
+            );
             if (!isNaN(parsedStartDateValue.getTime())) {
               dates.push(parsedStartDateValue);
             }
@@ -301,7 +304,9 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           if (endDateValue instanceof Date) {
             dates.push(endDateValue);
           } else {
-            const parsedEndDateValue = new Date(endDateValue as any);
+            const parsedEndDateValue = createDateWithoutTimezoneOffset(
+              endDateValue as any
+            );
             if (!isNaN(parsedEndDateValue.getTime())) {
               dates.push(parsedEndDateValue);
             }
@@ -313,11 +318,13 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
 
     const { maxDate, minDate, maxCalendarDate, minCalendarDate } = (() => {
       if (allDates.length > 0) {
-        const minDate = minDateProp ? new Date(minDateProp) : allDates[0];
+        const minDate = minDateProp
+          ? createDateWithoutTimezoneOffset(minDateProp)
+          : allDates[0];
         const minCalendarDate = new Date(minDate.getFullYear(), 0, 1, 0, 0);
 
         const maxDate = maxDateProp
-          ? new Date(maxDateProp)
+          ? createDateWithoutTimezoneOffset(maxDateProp)
           : allDates[allDates.length - 1];
         const maxCalendarDate = new Date(maxDate.getFullYear(), 11, 31, 23, 59);
 
@@ -398,6 +405,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     icon: jumpToDateIcon,
     popupElement: jumpToDatePopupElement,
     onClick: jumpToDateOnClick,
+    closePopup: jumpToDateClosePopup,
     ref: jumpToDateAnchorRef,
   } = usePopupTool({
     bodyContent: (
@@ -406,8 +414,10 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         selected={currentDateAtCenterRef.current}
         onChange={(selectedDate) => {
           if (selectedDate) {
+            selectedDate.setHours(0, 0, 0, 0);
             scrollToDate(selectedDate);
           }
+          jumpToDateClosePopup();
         }}
       />
     ),
@@ -694,11 +704,13 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     ...rest
   }: TimelineElement) => {
     if (startDateValue) {
-      const startDate = new Date(startDateValue as any);
+      const startDate = createDateWithoutTimezoneOffset(startDateValue as any);
       if (!isNaN(startDate.getTime())) {
         const endDate = (() => {
           if (endDateValue) {
-            const endDate = new Date(endDateValue as any);
+            const endDate = createDateWithoutTimezoneOffset(
+              endDateValue as any
+            );
             if (!isNaN(endDate.getTime())) {
               return endDate;
             }

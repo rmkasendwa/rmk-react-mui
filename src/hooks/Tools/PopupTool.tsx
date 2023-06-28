@@ -34,7 +34,9 @@ export const usePopupTool = ({
   footerContent,
   wrapBodyContentInCard = true,
   ...rest
-}: PopupToolOptions): ButtonTool => {
+}: PopupToolOptions): ButtonTool & {
+  closePopup: () => void;
+} => {
   const { sx: BodyContentPropsSx, ...BodyContentPropsRest } = BodyContentProps;
   const anchorRef = useRef<HTMLButtonElement | null>(null);
 
@@ -165,5 +167,8 @@ export const usePopupTool = ({
         </Popper>
       );
     })(),
+    closePopup: () => {
+      setOpen(false);
+    },
   };
 };
