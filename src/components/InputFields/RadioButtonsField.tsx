@@ -150,6 +150,9 @@ export const RadioButtonsField = forwardRef<
                   {...RadioPropsRest}
                   sx={{
                     p: 0.8,
+                    [`&.Mui-disabled`]: {
+                      color: 'text.disabled',
+                    },
                     ...RadioPropsSx,
                   }}
                 />
