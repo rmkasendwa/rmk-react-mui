@@ -250,12 +250,10 @@ export const useViewOptionsTool = <ViewType extends string = string>({
               anchorEl={anchorRef.current}
               transition
               placement="bottom-start"
-              ref={(element) => {
-                if (element) {
-                  element.style.zIndex = '1400';
-                }
-              }}
               tabIndex={-1}
+              sx={{
+                zIndex: 9999,
+              }}
             >
               {({ TransitionProps }) => {
                 return (

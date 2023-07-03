@@ -308,10 +308,8 @@ export const PhoneNumberInputField = forwardRef<
               anchorEl={anchorRef.current}
               transition
               placement="bottom-start"
-              ref={(element) => {
-                if (element) {
-                  element.style.zIndex = '1400';
-                }
+              sx={{
+                zIndex: 9999,
               }}
             >
               {({ TransitionProps }) => {
