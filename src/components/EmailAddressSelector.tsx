@@ -539,7 +539,7 @@ export const EmailAddressSelector = forwardRef<
                 transition
                 placement="bottom-start"
                 sx={{
-                  zIndex: 1400,
+                  zIndex: 9999,
                 }}
               >
                 {({ TransitionProps }) => {
