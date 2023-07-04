@@ -358,6 +358,7 @@ export interface RecordsExplorerProps<
   recordDetailsFinder?: (selectedRecordId: string) => Promise<RecordRow>;
   getEditableRecordInitialValues?: (record: RecordRow) => any;
   recordCreator?: (values: InitialValues) => any;
+  onCreateNewRecord?: (createdRecord: RecordRow) => void;
   recordEditor?: (record: RecordRow, values: InitialValues) => any;
   recordDeletor?: (record: RecordRow) => any;
   initialValues?: InitialValues;
@@ -481,6 +482,7 @@ const BaseRecordsExplorer = <
     showRowNumber: showRowNumberProp,
     id,
     recordCreator,
+    onCreateNewRecord,
     editorForm,
     validationSchema,
     initialValues,
@@ -1674,6 +1676,7 @@ const BaseRecordsExplorer = <
     create,
     creating,
     created,
+    createdRecord,
     errorMessage: createErrorMessage,
     reset: resetCreation,
   } = useCreate(recordCreator!);
@@ -2590,6 +2593,7 @@ const BaseRecordsExplorer = <
                         );
                         autoSync && setTimeout(() => load(), 1000);
                       }
+                      onCreateNewRecord && onCreateNewRecord(createdRecord);
                       if (defaultPath) {
                         navigate(defaultPath);
                       } else {
