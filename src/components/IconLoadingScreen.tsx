@@ -11,7 +11,6 @@ import {
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
   generateUtilityClasses,
-  useTheme,
   useThemeProps,
 } from '@mui/material';
 import clsx from 'clsx';
@@ -134,8 +133,6 @@ export const IconLoadingScreen = forwardRef<any, IconLoadingScreenProps>(
 
     addNewButtonLabel || (addNewButtonLabel = `Add New ${recordLabelSingular}`);
 
-    const { spacing } = useTheme();
-
     return (
       <Box
         ref={ref}
@@ -212,15 +209,11 @@ export const IconLoadingScreen = forwardRef<any, IconLoadingScreenProps>(
                   >
                     {noRecordsStatement}
                   </Typography>
-                  <Typography align="center" variant="body2">
-                    Specify the {lowercaseRecordLabelSingular} details.
-                  </Typography>
                   <Button
                     variant="contained"
                     component={Link}
                     to={pathToAddNew}
                     size="small"
-                    sx={{ mt: `${spacing(2)} !important` }}
                   >
                     {addNewButtonLabel}
                   </Button>
