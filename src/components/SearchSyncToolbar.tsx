@@ -11,6 +11,7 @@ import {
   IconButton,
   IconButtonProps,
   Tooltip,
+  Typography,
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
   generateUtilityClasses,
@@ -107,9 +108,11 @@ export interface ElementTool extends BaseToolOptions {
 
 export type Tool = ButtonTool | IconButtonTool | ElementTool;
 
+const MAX_BUTTON_WIDTH = 150;
+
 export const getToolNodes = (
   tools: (ReactNode | Tool)[],
-  showFullToolWidth = 0
+  collapsedWidthToolIndex = 0
 ): ReactNode[] => {
   return tools
     .filter((baseTool) => baseTool)
@@ -154,7 +157,7 @@ export const getToolNodes = (
                   'extraToolProps'
                 );
                 const buttonElement = (() => {
-                  if (index >= tools.length - showFullToolWidth) {
+                  if (index >= tools.length - collapsedWidthToolIndex) {
                     return (
                       <>
                         <Tooltip
@@ -170,6 +173,7 @@ export const getToolNodes = (
                             sx={{
                               ...sx,
                               minWidth: 'auto',
+                              maxWidth: MAX_BUTTON_WIDTH,
                               px: 1,
                               '&>svg': {
                                 fontSize: 20,
@@ -188,9 +192,27 @@ export const getToolNodes = (
                   }
                   return (
                     <>
-                      <Button startIcon={icon} {...rest} {...{ sx }}>
-                        {label}
-                      </Button>
+                      <Tooltip
+                        title={label}
+                        PopperProps={{
+                          sx: {
+                            pointerEvents: 'none',
+                          },
+                        }}
+                      >
+                        <Button
+                          startIcon={icon}
+                          {...rest}
+                          sx={{
+                            maxWidth: MAX_BUTTON_WIDTH,
+                            ...sx,
+                          }}
+                        >
+                          <Typography component="div" variant="inherit" noWrap>
+                            {label}
+                          </Typography>
+                        </Button>
+                      </Tooltip>
                       {popupElement}
                     </>
                   );
@@ -311,15 +333,15 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
     // Refs
     const isInitialMountRef = useRef(true);
     const anchorElementRef = useRef<HTMLDivElement | null>(null);
-    const toolsRef = useRef(tools);
-    toolsRef.current = tools;
 
     const { sx: titlePropsSx, ...titlePropsRest } = TitleProps;
 
     const { breakpoints } = useTheme();
     const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
 
-    const [showFullToolWidth, setShowFullToolWidth] = useState(0);
+    const [collapsedWidthToolIndex, setCollapsedWidthToolIndex] = useState(
+      tools.length
+    );
     const [searchFieldOpen, setSearchFieldOpen] = useState(
       Boolean(searchTerm && searchTerm.length > 0)
     );
@@ -328,25 +350,28 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
       if (anchorElementRef.current) {
         const anchorElement = anchorElementRef.current;
         const windowResizeEventCallback = () => {
-          setShowFullToolWidth(() => {
-            const toolsWidth = (() => {
-              let width = anchorElement.offsetWidth;
-              if (hasSearchTool && title) {
-                width -= 500;
-              } else {
-                width -= 300;
+          setCollapsedWidthToolIndex((prevCollapsedWidthToolIndex) => {
+            if (tools?.length != null) {
+              const toolsWidth = (() => {
+                let width = anchorElement.offsetWidth;
+                if (hasSearchTool && title) {
+                  width -= 500;
+                } else {
+                  width -= 300;
+                }
+                return width;
+              })();
+              for (let i = 0; i < tools.length; i++) {
+                if (
+                  (toolsWidth - i * 40) / (tools.length - i) >=
+                  MAX_BUTTON_WIDTH
+                ) {
+                  return i;
+                }
               }
-              return width;
-            })();
-            for (let i = 0; i < toolsRef.current.length; i++) {
-              if (
-                (toolsWidth - i * 40) / (toolsRef.current.length - i) >=
-                100
-              ) {
-                return i;
-              }
+              return tools.length;
             }
-            return toolsRef.current.length;
+            return prevCollapsedWidthToolIndex;
           });
         };
         window.addEventListener('resize', windowResizeEventCallback);
@@ -355,7 +380,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
           window.removeEventListener('resize', windowResizeEventCallback);
         };
       }
-    }, [hasSearchTool, title]);
+    }, [hasSearchTool, title, tools.length]);
 
     useEffect(() => {
       isInitialMountRef.current = false;
@@ -394,7 +419,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
             height: 50,
             alignItems: 'center',
             ...(() => {
-              if (showFullToolWidth) {
+              if (collapsedWidthToolIndex < tools.length) {
                 return {
                   columnGap: 1,
                 };
@@ -404,7 +429,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
         >
           {(() => {
             if (preTitleTools.length > 0 && !isSmallScreenSize) {
-              return getToolNodes(preTitleTools, showFullToolWidth).map(
+              return getToolNodes(preTitleTools, collapsedWidthToolIndex).map(
                 (tool, index) => {
                   return (
                     <Grid item key={index} sx={{ minWidth: 0 }}>
@@ -567,7 +592,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
           })()}
           {(() => {
             if (!isSmallScreenSize) {
-              return getToolNodes(tools, showFullToolWidth).map(
+              return getToolNodes(tools, collapsedWidthToolIndex).map(
                 (tool, index) => {
                   return (
                     <Grid item key={index} sx={{ minWidth: 0 }}>
@@ -636,15 +661,16 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                       );
                     })}
                   {smallScreenTools.length > 0
-                    ? getToolNodes(smallScreenTools, showFullToolWidth).map(
-                        (tool, index) => {
-                          return (
-                            <Grid item key={index} sx={{ minWidth: 0 }}>
-                              {tool}
-                            </Grid>
-                          );
-                        }
-                      )
+                    ? getToolNodes(
+                        smallScreenTools,
+                        collapsedWidthToolIndex
+                      ).map((tool, index) => {
+                        return (
+                          <Grid item key={index} sx={{ minWidth: 0 }}>
+                            {tool}
+                          </Grid>
+                        );
+                      })
                     : null}
                   {syncButtonElement ? (
                     <Grid item>{syncButtonElement}</Grid>
@@ -678,15 +704,16 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
           })()}
           {(() => {
             if (postSyncButtonTools.length > 0 && !isSmallScreenSize) {
-              return getToolNodes(postSyncButtonTools, showFullToolWidth).map(
-                (tool, index) => {
-                  return (
-                    <Grid item key={index} sx={{ minWidth: 0 }}>
-                      {tool}
-                    </Grid>
-                  );
-                }
-              );
+              return getToolNodes(
+                postSyncButtonTools,
+                collapsedWidthToolIndex
+              ).map((tool, index) => {
+                return (
+                  <Grid item key={index} sx={{ minWidth: 0 }}>
+                    {tool}
+                  </Grid>
+                );
+              });
             }
           })()}
         </Grid>
