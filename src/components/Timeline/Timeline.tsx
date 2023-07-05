@@ -36,6 +36,7 @@ import formatDate from 'date-fns/format';
 import getDaysInMonth from 'date-fns/getDaysInMonth';
 import isAfter from 'date-fns/isAfter';
 import isBefore from 'date-fns/isBefore';
+import isSameDay from 'date-fns/isSameDay';
 import { result, uniqueId } from 'lodash';
 import {
   Fragment,
@@ -46,6 +47,7 @@ import {
   useEffect,
   useMemo,
   useRef,
+  useState,
 } from 'react';
 import { mergeRefs } from 'react-merge-refs';
 import * as Yup from 'yup';
@@ -247,6 +249,9 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
   const baseSpacingUnits = isSmallScreenSize ? 16 : 24;
 
+  const [isTimelineAtCenterOfGravity, setIsTimelineAtCenterOfGravity] =
+    useState(true);
+
   const shouldShowRowLabelsColumn = (() => {
     return !isSmallScreenSize && showRowLabelsColumn;
   })();
@@ -275,8 +280,10 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     timelineYears,
     totalNumberOfDays,
     totalNumberOfHours,
-    optimalTimeScale,
     centerOfGravity,
+    allDates,
+    timelineDifferenceInDays,
+    timelineDifferenceInHours,
   } = useMemo(() => {
     const allDates = rows
       .flatMap((row) => {
@@ -362,31 +369,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       differenceInHours(maxCalendarDate, minCalendarDate) + 1;
 
     const timelineDifferenceInDays = differenceInDays(maxDate, minDate);
-
-    const optimalTimeScale = ((): TimeScaleOption => {
-      if (allDates.length <= 1) {
-        return 'Year';
-      }
-      if (timelineDifferenceInDays > 365) {
-        return '5 year';
-      }
-      if (timelineDifferenceInDays > 90) {
-        return 'Year';
-      }
-      if (timelineDifferenceInDays > 30) {
-        return 'Quarter';
-      }
-      if (timelineDifferenceInDays > 14) {
-        return 'Month';
-      }
-      if (timelineDifferenceInDays > 7) {
-        return '2 week';
-      }
-      if (timelineDifferenceInDays > 1) {
-        return 'Week';
-      }
-      return 'Day';
-    })();
+    const timelineDifferenceInHours = differenceInHours(maxDate, minDate);
 
     const centerOfGravity =
       allDates.length > 0
@@ -402,10 +385,53 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       totalNumberOfDays,
       totalNumberOfHours,
       timelineDifferenceInDays,
-      optimalTimeScale,
+      timelineDifferenceInHours,
       centerOfGravity,
+      allDates,
     };
   }, [endDateProperty, maxDateProp, minDateProp, rows, startDateProperty]);
+
+  const optimalTimeScale = ((): TimeScaleOption => {
+    if (allDates.length <= 1) {
+      return 'Year';
+    }
+    const timelineViewPortWidth =
+      (timelineContainerElementRef.current?.parentElement?.offsetWidth ||
+        window.innerWidth) -
+      (shouldShowRowLabelsColumn ? rowLabelsColumnWidth : 0);
+
+    if (
+      timelineDifferenceInHours <= 24 &&
+      timelineDifferenceInHours * 64 <= timelineViewPortWidth
+    ) {
+      return 'Day';
+    }
+    if (
+      timelineDifferenceInDays <= 7 &&
+      timelineDifferenceInDays * 200 <= timelineViewPortWidth
+    ) {
+      return 'Week';
+    }
+    if (
+      timelineDifferenceInDays <= 14 &&
+      timelineDifferenceInDays * 100 <= timelineViewPortWidth
+    ) {
+      return '2 week';
+    }
+    if (
+      timelineDifferenceInDays <= 30 &&
+      timelineDifferenceInDays * 60 <= timelineViewPortWidth
+    ) {
+      return 'Month';
+    }
+    if (timelineDifferenceInDays <= 90) {
+      return 'Quarter';
+    }
+    if (timelineDifferenceInDays <= 365) {
+      return 'Year';
+    }
+    return '5 year';
+  })();
 
   const {
     icon: jumpToDateIcon,
@@ -432,7 +458,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     wrapBodyContentInCard: false,
   });
 
-  const selectedTimeScale = useMemo((): TimeScaleOption => {
+  const selectedTimeScale = ((): TimeScaleOption => {
     if (searchParamsSelectedTimeScale) {
       return searchParamsSelectedTimeScale;
     }
@@ -440,7 +466,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       return selectedTimeScaleProp;
     }
     return optimalTimeScale;
-  }, [optimalTimeScale, searchParamsSelectedTimeScale, selectedTimeScaleProp]);
+  })();
 
   const { timeScaleRows, unitTimeScaleWidth, timeScaleWidth } =
     useMemo((): TimeScaleConfiguration => {
@@ -698,13 +724,16 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
             ((scrollLeft - baseSpacingUnits + Math.round(offsetWidth / 2)) /
               scrollWidth)
         );
+        setIsTimelineAtCenterOfGravity(
+          isSameDay(currentDateAtCenterRef.current!, centerOfGravity)
+        );
       };
       parentElement.addEventListener('scroll', scrollEventCallback);
       return () => {
         return parentElement.removeEventListener('scroll', scrollEventCallback);
       };
     }
-  }, [baseSpacingUnits, minCalendarDate, totalNumberOfHours]);
+  }, [baseSpacingUnits, centerOfGravity, minCalendarDate, totalNumberOfHours]);
 
   const getTimelineElementNode = ({
     startDate: startDateValue,
@@ -1147,7 +1176,8 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                 </Button>
               </Tooltip>
               {jumpToDatePopupElement}
-              {selectedTimeScale !== optimalTimeScale ? (
+              {selectedTimeScale !== optimalTimeScale ||
+              !isTimelineAtCenterOfGravity ? (
                 <Tooltip title="Jump to optimal timescale">
                   <Button
                     variant="contained"
@@ -1155,14 +1185,18 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                     size="small"
                     onClick={() => {
                       lastDateAtCenterRef.current = centerOfGravity;
-                      setSearchParams(
-                        {
-                          timeScale: optimalTimeScale,
-                        },
-                        {
-                          replace: true,
-                        }
-                      );
+                      if (selectedTimeScale !== optimalTimeScale) {
+                        setSearchParams(
+                          {
+                            timeScale: optimalTimeScale,
+                          },
+                          {
+                            replace: true,
+                          }
+                        );
+                      } else {
+                        scrollToDate(centerOfGravity);
+                      }
                     }}
                     sx={{
                       px: 1,
