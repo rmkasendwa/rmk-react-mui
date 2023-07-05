@@ -1,4 +1,7 @@
-import { createDateWithoutTimezoneOffset } from '@infinite-debugger/rmk-utils/dates';
+import {
+  createDateWithoutTimezoneOffset,
+  dateStringHasTimeComponent,
+} from '@infinite-debugger/rmk-utils/dates';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import HighlightAltIcon from '@mui/icons-material/HighlightAlt';
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
@@ -687,16 +690,21 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   useEffect(() => {
     if (timelineContainerElementRef.current?.parentElement) {
       const { parentElement } = timelineContainerElementRef.current;
-      parentElement.addEventListener('scroll', () => {
+      const scrollEventCallback = () => {
         const { scrollLeft, offsetWidth, scrollWidth } = parentElement;
         currentDateAtCenterRef.current = addHours(
           minCalendarDate,
           totalNumberOfHours *
-            ((scrollLeft + Math.round(offsetWidth / 2)) / scrollWidth)
+            ((scrollLeft - baseSpacingUnits + Math.round(offsetWidth / 2)) /
+              scrollWidth)
         );
-      });
+      };
+      parentElement.addEventListener('scroll', scrollEventCallback);
+      return () => {
+        return parentElement.removeEventListener('scroll', scrollEventCallback);
+      };
     }
-  }, [minCalendarDate, totalNumberOfHours]);
+  }, [baseSpacingUnits, minCalendarDate, totalNumberOfHours]);
 
   const getTimelineElementNode = ({
     startDate: startDateValue,
@@ -715,6 +723,12 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
               endDateValue as any
             );
             if (!isNaN(endDate.getTime())) {
+              if (
+                typeof endDateValue === 'string' &&
+                !dateStringHasTimeComponent(endDateValue)
+              ) {
+                endDate.setHours(23, 59, 59, 999);
+              }
               return endDate;
             }
           }
@@ -805,7 +819,8 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       const { scrollWidth, offsetWidth } = parentElement;
       parentElement.scrollTo({
         left:
-          Math.round(scrollWidth * offsetPercentage) -
+          Math.round(scrollWidth * offsetPercentage) +
+          baseSpacingUnits -
           Math.round(offsetWidth / 2),
         behavior: 'smooth',
       });
