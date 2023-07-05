@@ -109,11 +109,11 @@ export type Tool = ButtonTool | IconButtonTool | ElementTool;
 
 export const getToolNodes = (
   tools: (ReactNode | Tool)[],
-  showFullToolWidth: boolean
+  showFullToolWidth = 0
 ): ReactNode[] => {
   return tools
     .filter((baseTool) => baseTool)
-    .map((baseTool) => {
+    .map((baseTool, index) => {
       if (isValidElement(baseTool)) {
         return baseTool;
       } else {
@@ -154,7 +154,7 @@ export const getToolNodes = (
                   'extraToolProps'
                 );
                 const buttonElement = (() => {
-                  if (!showFullToolWidth) {
+                  if (index >= tools.length - showFullToolWidth) {
                     return (
                       <>
                         <Tooltip
@@ -311,13 +311,15 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
     // Refs
     const isInitialMountRef = useRef(true);
     const anchorElementRef = useRef<HTMLDivElement | null>(null);
+    const toolsRef = useRef(tools);
+    toolsRef.current = tools;
 
     const { sx: titlePropsSx, ...titlePropsRest } = TitleProps;
 
     const { breakpoints } = useTheme();
     const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
 
-    const [showFullToolWidth, setShowFullToolWidth] = useState(false);
+    const [showFullToolWidth, setShowFullToolWidth] = useState(0);
     const [searchFieldOpen, setSearchFieldOpen] = useState(
       Boolean(searchTerm && searchTerm.length > 0)
     );
@@ -327,10 +329,24 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
         const anchorElement = anchorElementRef.current;
         const windowResizeEventCallback = () => {
           setShowFullToolWidth(() => {
-            if (hasSearchTool && title) {
-              return anchorElement.offsetWidth > 960;
+            const toolsWidth = (() => {
+              let width = anchorElement.offsetWidth;
+              if (hasSearchTool && title) {
+                width -= 500;
+              } else {
+                width -= 300;
+              }
+              return width;
+            })();
+            for (let i = 0; i < toolsRef.current.length; i++) {
+              if (
+                (toolsWidth - i * 40) / (toolsRef.current.length - i) >=
+                100
+              ) {
+                return i;
+              }
             }
-            return anchorElement.offsetWidth > 800;
+            return toolsRef.current.length;
           });
         };
         window.addEventListener('resize', windowResizeEventCallback);
@@ -466,7 +482,15 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                             ? 1
                             : 'none',
                         maxWidth: 300,
-                        minWidth: 0,
+                        minWidth: (() => {
+                          if (
+                            searchFieldOpen ||
+                            (searchFieldOpenProp && !isSmallScreenSize)
+                          ) {
+                            return 240;
+                          }
+                          return 0;
+                        })(),
                         ...(() => {
                           if (!isSmallScreenSize) {
                             return {

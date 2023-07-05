@@ -356,6 +356,7 @@ export interface RecordsExplorerProps<
   recordsFinder?: RecordsFinder<RecordRow>;
   getRecordLoadFunction?: (loadFunction: () => void) => void;
   recordDetailsFinder?: (selectedRecordId: string) => Promise<RecordRow>;
+  getRecordDetailsLoadFunction?: (loadFunction: () => void) => void;
   getEditableRecordInitialValues?: (record: RecordRow) => any;
   recordCreator?: (values: InitialValues) => any;
   onCreateNewRecord?: (createdRecord: RecordRow) => void;
@@ -520,6 +521,7 @@ const BaseRecordsExplorer = <
     stateStorage,
     getViewFunction,
     getRecordLoadFunction,
+    getRecordDetailsLoadFunction,
     refreshInterval,
     PaginatedRecordsOptions,
     dataPresets,
@@ -605,8 +607,13 @@ const BaseRecordsExplorer = <
   getEditableRecordInitialValuesRef.current = getEditableRecordInitialValues;
   const getViewFunctionRef = useRef(getViewFunction);
   getViewFunctionRef.current = getViewFunction;
+
   const getRecordLoadFunctionRef = useRef(getRecordLoadFunction);
   getRecordLoadFunctionRef.current = getRecordLoadFunction;
+
+  const getRecordDetailsLoadFunctionRef = useRef(getRecordDetailsLoadFunction);
+  getRecordDetailsLoadFunctionRef.current = getRecordDetailsLoadFunction;
+
   const dataPresetsRef = useRef(dataPresets);
   dataPresetsRef.current = dataPresets;
   const ListViewPropsRef = useRef(ListViewProps);
@@ -1319,9 +1326,7 @@ const BaseRecordsExplorer = <
   }, [load, selectedDataPresetIndex]);
 
   useEffect(() => {
-    if (getRecordLoadFunctionRef.current) {
-      getRecordLoadFunctionRef.current(load);
-    }
+    getRecordLoadFunctionRef.current?.(load);
   }, [load]);
 
   const data = (() => {
@@ -1699,6 +1704,10 @@ const BaseRecordsExplorer = <
       loadOnMount: false,
     }
   );
+
+  useEffect(() => {
+    getRecordDetailsLoadFunctionRef.current?.(loadRecordDetails);
+  }, [loadRecordDetails]);
 
   const selectedRecord = (() => {
     if (loadedSelectedRecord) {
