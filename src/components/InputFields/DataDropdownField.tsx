@@ -239,8 +239,13 @@ const BaseDataDropdownField = <Entity,>(
   const asyncOptionPagesMapRef = useRef<Map<number, DropdownOption[]>>();
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
+
   const optionsRef = useRef(options);
   optionsRef.current = options;
+
+  const defaultOptionsRef = useRef(defaultOptions);
+  defaultOptionsRef.current = defaultOptions;
+
   const selectedOptionRef = useRef(selectedOption);
   selectedOptionRef.current = selectedOption;
   const getSelectedOptionsRef = useRef(getSelectedOptions);
@@ -317,6 +322,7 @@ const BaseDataDropdownField = <Entity,>(
     load: loadAsyncSelectedOptions,
     loading: loadingAsyncSelectedOptions,
     errorMessage: asyncSelectedOptionsErrorMessage,
+    reset: resetAsyncSelectedOptionsState,
   } = useCacheableData(
     async ({ getRequestController }) => {
       const asyncSelectedOptions = await (async () => {
@@ -340,9 +346,11 @@ const BaseDataDropdownField = <Entity,>(
             const options = Array.isArray(dropdownOptionsResponse)
               ? dropdownOptionsResponse
               : dropdownOptionsResponse.records;
-            return options.filter(({ value }) => {
-              return selectedValue.includes(String(value));
-            });
+            return [...(defaultOptions || []), ...options].filter(
+              ({ value }) => {
+                return selectedValue.includes(String(value));
+              }
+            );
           };
           const dropdownOptionsResponse = await getDropdownOptions({
             getStaleWhileRevalidate: (dropdownOptionsResponse) => {
@@ -421,7 +429,7 @@ const BaseDataDropdownField = <Entity,>(
   }, [optionsProp, sortOptions]);
 
   useEffect(() => {
-    if (!loadingAsyncSelectedOptions) {
+    if (!loadingAsyncSelectedOptions && !asyncSelectedOptionsErrorMessage) {
       setSelectedOptions((prevSelectedOptions) => {
         const value = (() => {
           if (stringifiedValue != null) {
@@ -452,9 +460,10 @@ const BaseDataDropdownField = <Entity,>(
 
         const nextSelectedOptions = selectedValue
           .map((value) => {
-            return optionsRef.current.find(
-              ({ value: optionValue }) => value === optionValue
-            )!;
+            return [
+              ...(defaultOptionsRef.current || []),
+              ...optionsRef.current,
+            ].find(({ value: optionValue }) => value === optionValue)!;
           })
           .filter((option) => option);
 
@@ -483,12 +492,19 @@ const BaseDataDropdownField = <Entity,>(
       });
     }
   }, [
+    asyncSelectedOptionsErrorMessage,
     canLoadAsyncSelectedOptions,
     loadAsyncSelectedOptions,
     loadingAsyncSelectedOptions,
     selectedOption?.value,
     stringifiedValue,
   ]);
+
+  useEffect(() => {
+    if (stringifiedValue) {
+      resetAsyncSelectedOptionsState();
+    }
+  }, [resetAsyncSelectedOptionsState, stringifiedValue]);
 
   const selectedOptionsElement = (() => {
     const optionsToDisplay = (() => {
