@@ -184,6 +184,39 @@ WithAsyncOptions.args = {
   },
 } as DataDropdownFieldProps;
 
+export const WithDefaultOptions = Template.bind({});
+WithDefaultOptions.args = {
+  label: 'Dropdown With Async Options',
+  required: true,
+  defaultOptions: [
+    {
+      label: 'Default',
+      value: 'default',
+    },
+  ],
+  value: 'default',
+  getDropdownOptions: async () => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(
+          [
+            'One',
+            'Two',
+            'Three',
+            'Four',
+            'Five',
+            'Six',
+            'Seven',
+            'Eight',
+            'Nine',
+            'Ten',
+          ].map((value) => ({ label: value, value }))
+        );
+      }, 1000);
+    });
+  },
+} as DataDropdownFieldProps;
+
 const externallyPaginatedDataset = Array.from({ length: 1000 }).map(
   (_, index) => {
     const value = `${index + 1}. ${lorem.generateWords(4)}`;
