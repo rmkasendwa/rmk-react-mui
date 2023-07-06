@@ -26,6 +26,7 @@ import { omit } from 'lodash';
 import {
   Fragment,
   ReactElement,
+  ReactNode,
   Ref,
   forwardRef,
   useEffect,
@@ -93,6 +94,7 @@ export interface PaginatedDropdownOptionListProps<Entity = any>
     >,
     Pick<InfiniteScrollBoxProps, 'keyboardFocusElement'> {
   options?: DropdownOption<Entity>[];
+  defaultOptions?: DropdownOption<Entity>[];
   selectedOptions?: DropdownOption<Entity>[];
   sortOptions?: boolean;
   minWidth?: number;
@@ -118,13 +120,14 @@ export interface PaginatedDropdownOptionListProps<Entity = any>
     PaginatedResponseData<DropdownOption<Entity>> | DropdownOption<Entity>[]
   >;
   onLoadOptions?: (options: DropdownOption<Entity>[]) => void;
-  callGetDropdownOptions?: 'always' | 'whenNoOptions';
   externallyPaginated?: boolean;
   limit?: number;
   asyncOptionPagesMap?: Map<number, DropdownOption<Entity>[]>;
   onChangeAsyncOptionPagesMap?: (
     asyncOptionPagesMap: Map<number, DropdownOption<Entity>[]>
   ) => void;
+  revalidationKey?: string;
+  noOptionsText?: ReactNode;
 }
 
 export function getPaginatedDropdownOptionListUtilityClass(
@@ -155,6 +158,7 @@ const BasePaginatedDropdownOptionList = <Entity,>(
     optionHeight: optionHeightProp,
     paging = true,
     options: optionsProp,
+    defaultOptions,
     onLoadOptions,
     multiple,
     onClose,
@@ -171,9 +175,10 @@ const BasePaginatedDropdownOptionList = <Entity,>(
     asyncOptionPagesMap,
     onChangeAsyncOptionPagesMap,
     sortOptions = false,
-    callGetDropdownOptions = 'whenNoOptions',
     keyboardFocusElement,
     showNoOptionsFoundMessage = true,
+    revalidationKey,
+    noOptionsText = 'No options found',
     sx,
     ...rest
   } = omit(props, 'limit', 'minWidth');
@@ -294,6 +299,7 @@ const BasePaginatedDropdownOptionList = <Entity,>(
         }
       })(),
       canLoadNextPage: externallyPaginated,
+      revalidationKey,
     }
   );
   const loadAsyncOptionsRef = useRef(loadAsyncOptions);
@@ -316,11 +322,11 @@ const BasePaginatedDropdownOptionList = <Entity,>(
       ((getDropdownOptionsRef.current &&
         !isAsyncOptionsLoaded &&
         (!optionsRef.current || optionsRef.current.length <= 0)) ||
-        callGetDropdownOptions === 'always')
+        revalidationKey)
     ) {
       loadAsyncOptionsRef.current();
     }
-  }, [isAsyncOptionsLoaded, searchTerm, callGetDropdownOptions]);
+  }, [isAsyncOptionsLoaded, revalidationKey, searchTerm]);
 
   useEffect(() => {
     if (
@@ -333,17 +339,20 @@ const BasePaginatedDropdownOptionList = <Entity,>(
     }
   }, [asyncOptions, isAsyncOptionsLoaded]);
 
-  const options = ((): typeof asyncOptions => {
-    if (getDropdownOptionsRef.current && asyncOptions.length > 0) {
-      return asyncOptions;
-    }
-    if (optionsProp && optionsProp.length > 0) {
-      return optionsProp;
-    }
-    return [];
-  })().sort(
-    sortOptions && !externallyPaginated ? sortOptionsRef.current : () => 0
-  );
+  const options = [
+    ...(defaultOptions || []),
+    ...((): typeof asyncOptions => {
+      if (getDropdownOptionsRef.current && asyncOptions.length > 0) {
+        return asyncOptions;
+      }
+      if (optionsProp && optionsProp.length > 0) {
+        return optionsProp;
+      }
+      return [];
+    })().sort(
+      sortOptions && !externallyPaginated ? sortOptionsRef.current : () => 0
+    ),
+  ];
 
   const minOptionWidth = (() => {
     return options.reduce((accumulator, { label, searchableLabel }) => {
@@ -603,7 +612,7 @@ const BasePaginatedDropdownOptionList = <Entity,>(
                 }}
               >
                 <Typography variant="body2" color={palette.error.main}>
-                  No options found
+                  {noOptionsText}
                 </Typography>
               </Box>,
             ];

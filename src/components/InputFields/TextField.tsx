@@ -350,6 +350,24 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
         <FieldValueDisplay
           {...FieldValueDisplayPropsRest}
           {...{ label, required, disabled }}
+          LabelProps={{
+            ...FieldValueDisplayPropsRest.LabelProps,
+            ...(() => {
+              if (!variant || variant === 'outlined' || variant === 'filled') {
+                return {
+                  ContainerGridProps: {
+                    ...FieldValueDisplayPropsRest.LabelProps
+                      ?.ContainerGridProps,
+                    sx: {
+                      ...FieldValueDisplayPropsRest.LabelProps
+                        ?.ContainerGridProps?.sx,
+                      mb: 0.5,
+                    },
+                  },
+                };
+              }
+            })(),
+          }}
           value={textField}
           enableLoadingState={false}
         />

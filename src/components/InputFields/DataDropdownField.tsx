@@ -99,11 +99,13 @@ export interface DataDropdownFieldProps<Entity = any>
         | 'onSelectOption'
         | 'searchable'
         | 'getDropdownOptions'
-        | 'callGetDropdownOptions'
+        | 'revalidationKey'
+        | 'noOptionsText'
         | 'externallyPaginated'
         | 'limit'
         | 'sortOptions'
         | 'options'
+        | 'defaultOptions'
         | 'onChangeSelectedOptions'
         | 'multiple'
       >
@@ -154,6 +156,7 @@ const BaseDataDropdownField = <Entity,>(
     id,
     value,
     options: optionsProp,
+    defaultOptions,
     sortOptions,
     onChange,
     onFocus,
@@ -172,7 +175,8 @@ const BaseDataDropdownField = <Entity,>(
     showClearButton = true,
     searchable = true,
     getDropdownOptions,
-    callGetDropdownOptions,
+    revalidationKey,
+    noOptionsText,
     onSelectOption,
     variant: variantProp,
     label,
@@ -270,7 +274,7 @@ const BaseDataDropdownField = <Entity,>(
 
       const selectedOptions = selectedValue
         .map((value) => {
-          return optionsRef.current.find(
+          return [...(defaultOptions || []), ...options].find(
             ({ value: optionValue }) => value === optionValue
           )!;
         })
@@ -1024,9 +1028,11 @@ const BaseDataDropdownField = <Entity,>(
               onSelectOption,
               searchTerm,
               options,
+              defaultOptions,
               selectedOptions,
               getDropdownOptions,
-              callGetDropdownOptions,
+              revalidationKey,
+              noOptionsText,
               externallyPaginated,
               limit,
               sortOptions,
@@ -1045,6 +1051,7 @@ const BaseDataDropdownField = <Entity,>(
               setOpen(false);
             }}
             onChangeSelectedOptions={(options) => {
+              setSearchTerm('');
               setSelectedOptions(options);
               triggerChangeEvent(options);
               searchFieldRef.current?.blur();
