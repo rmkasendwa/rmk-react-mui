@@ -127,6 +127,7 @@ export interface DataDropdownFieldProps<Entity = any>
   variant?: 'standard' | 'filled' | 'outlined' | 'text';
   showDropdownIcon?: boolean;
   showRichTextValue?: boolean;
+  selectedOptionRevalidationKey?: string;
 }
 
 export function getDataDropdownFieldUtilityClass(slot: string): string {
@@ -192,6 +193,7 @@ const BaseDataDropdownField = <Entity,>(
     onChangeSelectedOptions: onChangeSelectedOptionsProp,
     onChangeSelectedOption,
     multiple: multipleProp,
+    selectedOptionRevalidationKey,
     ...rest
   } = props;
 
@@ -430,6 +432,7 @@ const BaseDataDropdownField = <Entity,>(
 
   useEffect(() => {
     if (!loadingAsyncSelectedOptions && !asyncSelectedOptionsErrorMessage) {
+      selectedOptionRevalidationKey;
       setSelectedOptions((prevSelectedOptions) => {
         const value = (() => {
           if (stringifiedValue != null) {
@@ -497,6 +500,7 @@ const BaseDataDropdownField = <Entity,>(
     loadAsyncSelectedOptions,
     loadingAsyncSelectedOptions,
     selectedOption?.value,
+    selectedOptionRevalidationKey,
     stringifiedValue,
   ]);
 
