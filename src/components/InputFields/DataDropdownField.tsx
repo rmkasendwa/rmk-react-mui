@@ -564,7 +564,7 @@ const BaseDataDropdownField = <Entity,>(
                 })(),
               }}
             >
-              {optionsToDisplay[0]?.label}
+              {getDropdownOptionLabel(optionsToDisplay[0])}
             </Typography>
           )}
         </>

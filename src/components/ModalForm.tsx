@@ -394,7 +394,10 @@ export const BaseModalForm = <Values extends FormikValues>(
                     <Button
                       variant="contained"
                       color="error"
-                      onClick={() => onClose()}
+                      onClick={() => {
+                        onClose();
+                        rest.resetForm();
+                      }}
                     >
                       Close
                     </Button>
@@ -406,6 +409,7 @@ export const BaseModalForm = <Values extends FormikValues>(
                         color="primary"
                         onClick={() => {
                           onClose({ saveDraft: true });
+                          rest.resetForm();
                         }}
                       >
                         Save as draft
@@ -502,6 +506,7 @@ export const BaseModalForm = <Values extends FormikValues>(
                               severity="success"
                               onClose={() => {
                                 onClose({ force: true });
+                                rest.resetForm();
                               }}
                             >
                               {successMessage}
