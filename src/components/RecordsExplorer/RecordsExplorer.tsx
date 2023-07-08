@@ -28,6 +28,7 @@ import {
 import { BoxProps } from '@mui/material/Box';
 import clsx from 'clsx';
 import { FormikValues } from 'formik';
+import hashIt from 'hash-it';
 import { omit, result } from 'lodash';
 import { singular } from 'pluralize';
 import {
@@ -1076,11 +1077,14 @@ const BaseRecordsExplorer = <
   ) => {
     const changedSearchParamKeys = [
       ...new Set([
-        ...(modifiedStateKeys || []),
-        ...Object.keys(searchParams).filter((key) => {
-          return key !== 'modifiedKeys';
+        ...[
+          ...Object.keys(searchParams).filter((key) => {
+            return key !== 'modifiedKeys';
+          }),
+          ...extraSearchParamKeys,
+        ].map((key) => {
+          return hashIt(key).toString(36).slice(0, 3);
         }),
-        ...extraSearchParamKeys,
       ]),
     ];
     if (
@@ -1101,7 +1105,11 @@ const BaseRecordsExplorer = <
   const updateChangedSearchParamKeysRef = useRef(updateChangedSearchParamKeys);
   updateChangedSearchParamKeysRef.current = updateChangedSearchParamKeys;
 
-  const stringifiedSearchParams = JSON.stringify(searchParams);
+  const stringifiedSearchParams = JSON.stringify(
+    Object.keys(searchParams).filter((key) => {
+      return key !== 'modifiedKeys';
+    })
+  );
   useEffect(() => {
     if (stringifiedSearchParams) {
       updateChangedSearchParamKeysRef.current();
@@ -1134,7 +1142,6 @@ const BaseRecordsExplorer = <
     return (() => {
       if (
         groupByProp &&
-        !modifiedStateKeys?.includes('groupBy') &&
         (!searchParamGroupBy || searchParamGroupBy.length <= 0)
       ) {
         return groupByProp;
@@ -1156,7 +1163,7 @@ const BaseRecordsExplorer = <
           sortDirection: groupByParam.sortDirection || 'ASC',
         };
       });
-  }, [groupByProp, groupableFields, modifiedStateKeys, searchParamGroupBy]);
+  }, [groupByProp, groupableFields, searchParamGroupBy]);
 
   const selectedSortParams = useMemo(() => {
     const sortByParams = sortableFields.reduce((accumulator, sortByParam) => {
@@ -1590,7 +1597,7 @@ const BaseRecordsExplorer = <
     onChangeViewType: (view) => {
       setSearchParams(
         {
-          view,
+          view: view !== viewProp ? view : null,
         },
         {
           replace: true,
@@ -1606,12 +1613,15 @@ const BaseRecordsExplorer = <
     onChangeSelectedGroupParams: (groupParams) => {
       setSearchParams(
         {
-          groupBy: groupParams.map(({ id, sortDirection }) => {
-            return {
-              id,
-              sortDirection,
-            };
-          }),
+          groupBy:
+            groupParams.length > 0
+              ? groupParams.map(({ id, sortDirection }) => {
+                  return {
+                    id,
+                    sortDirection,
+                  };
+                })
+              : null,
         },
         {
           replace: true,
@@ -1626,12 +1636,15 @@ const BaseRecordsExplorer = <
     onChangeSelectedSortParams: (sortParams) => {
       setSearchParams(
         {
-          sortBy: sortParams.map(({ id, sortDirection }) => {
-            return {
-              id,
-              sortDirection,
-            };
-          }),
+          sortBy:
+            sortParams.length > 0
+              ? sortParams.map(({ id, sortDirection }) => {
+                  return {
+                    id,
+                    sortDirection,
+                  };
+                })
+              : null,
         },
         {
           replace: true,

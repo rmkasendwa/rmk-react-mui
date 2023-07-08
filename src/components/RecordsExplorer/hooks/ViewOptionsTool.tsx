@@ -184,8 +184,8 @@ export const useViewOptionsTool = <ViewType extends string = string>({
           }
           onClose={handleClose}
           selectedOptions={selectedOptions}
-          onSelectOption={({ value }) => {
-            onChangeViewType && onChangeViewType(value as any);
+          onChangeSelectedOptions={(selectableOptions) => {
+            onChangeViewType?.(selectableOptions[0].value as any);
           }}
           searchable={options.length > 5}
           {...{
