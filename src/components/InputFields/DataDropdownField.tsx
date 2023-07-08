@@ -323,6 +323,7 @@ const BaseDataDropdownField = <Entity,>(
   const {
     load: loadAsyncSelectedOptions,
     loading: loadingAsyncSelectedOptions,
+    loaded: loadedAsyncSelectedOptions,
     errorMessage: asyncSelectedOptionsErrorMessage,
     reset: resetAsyncSelectedOptionsState,
   } = useCacheableData(
@@ -505,10 +506,14 @@ const BaseDataDropdownField = <Entity,>(
   ]);
 
   useEffect(() => {
-    if (stringifiedValue) {
+    if (stringifiedValue && loadedAsyncSelectedOptions) {
       resetAsyncSelectedOptionsState();
     }
-  }, [resetAsyncSelectedOptionsState, stringifiedValue]);
+  }, [
+    loadedAsyncSelectedOptions,
+    resetAsyncSelectedOptionsState,
+    stringifiedValue,
+  ]);
 
   const selectedOptionsElement = (() => {
     const optionsToDisplay = (() => {
