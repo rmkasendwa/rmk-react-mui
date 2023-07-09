@@ -319,11 +319,11 @@ const BasePaginatedDropdownOptionList = <Entity,>(
   useEffect(() => {
     if (
       isInitialMountRef.current &&
-      ((getDropdownOptionsRef.current &&
-        !isAsyncOptionsLoaded &&
-        (!optionsRef.current || optionsRef.current.length <= 0)) ||
-        revalidationKey)
+      getDropdownOptionsRef.current &&
+      !isAsyncOptionsLoaded &&
+      (!optionsRef.current || optionsRef.current.length <= 0)
     ) {
+      revalidationKey;
       loadAsyncOptionsRef.current();
     }
   }, [isAsyncOptionsLoaded, revalidationKey, searchTerm]);
