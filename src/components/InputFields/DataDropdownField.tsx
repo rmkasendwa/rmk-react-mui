@@ -670,7 +670,7 @@ const BaseDataDropdownField = <Entity,>(
   }
 
   if (
-    (value && selectedOptions.length <= 0 && loadingAsyncSelectedOptions) ||
+    (value && loadingAsyncSelectedOptions) ||
     asyncSelectedOptionsErrorMessage
   ) {
     return (
@@ -1055,7 +1055,7 @@ const BaseDataDropdownField = <Entity,>(
                   >
                     {selectedOptionsElement}
                     {(() => {
-                      if (searchable) {
+                      if (searchable && rest.multiline) {
                         return (
                           <Box
                             ref={searchFieldContainerRef}

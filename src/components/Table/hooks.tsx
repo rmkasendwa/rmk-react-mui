@@ -401,7 +401,7 @@ export const useTable = <DataRow extends BaseDataRow>(
       }
     }
 
-    if (localStartStickyColumnIndex != null) {
+    if (localStartStickyColumnIndex != null && !isSmallScreenSize) {
       computedColumns
         .slice(0, localStartStickyColumnIndex + 1)
         .forEach((column, index) => {
