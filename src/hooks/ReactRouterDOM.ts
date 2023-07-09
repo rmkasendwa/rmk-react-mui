@@ -40,6 +40,7 @@ export function useReactRouterDOMSearchParams<
   id?: string;
   paramStorage?: ParamStorage;
   clearSearchStateOnUnmount?: boolean;
+  ignoreUnspecifiedParams?: boolean;
 }): {
   searchParams: Partial<SearchParamsObject>;
   setSearchParams: SetSearchParams<
@@ -80,12 +81,14 @@ export function useReactRouterDOMSearchParams<
   id,
   paramStorage = 'url',
   clearSearchStateOnUnmount = false,
+  ignoreUnspecifiedParams = false,
 }: {
   mode?: 'string' | 'json';
   spec?: ValidationSpec;
   id?: string;
   paramStorage?: ParamStorage;
   clearSearchStateOnUnmount?: boolean;
+  ignoreUnspecifiedParams?: boolean;
 } = {}) {
   const hashedId = (() => {
     if (id) {
@@ -130,55 +133,65 @@ export function useReactRouterDOMSearchParams<
       })();
 
       const combinedSearchParams = {
-        ...existingSearchParams,
+        ...(() => {
+          if (mode !== 'json' || !ignoreUnspecifiedParams) {
+            return existingSearchParams;
+          }
+        })(),
         ...(() => {
           const keys = Object.keys(searchParams);
           switch (mode) {
             case 'string':
-              return keys.reduce((accumulator, key) => {
-                if (
-                  typeof searchParams[key] === 'string' ||
-                  searchParams[key] === null
-                ) {
-                  accumulator[key] = searchParams[key];
-                }
-                return accumulator;
-              }, {} as Record<string, string | null>);
+              return keys.reduce<Record<string, string | null>>(
+                (accumulator, key) => {
+                  if (
+                    typeof searchParams[key] === 'string' ||
+                    searchParams[key] === null
+                  ) {
+                    accumulator[key] = searchParams[key];
+                  }
+                  return accumulator;
+                },
+                {}
+              );
             case 'json':
-              return keys.reduce((accumulator, key) => {
-                const searchParamKey = (() => {
-                  if (hashedId) {
-                    return `${key}:${hashedId}`;
-                  }
-                  return key;
-                })();
-                if (searchParams[key] == null) {
-                  accumulator[searchParamKey] = searchParams[key];
-                } else {
-                  try {
-                    if (
-                      Yup.object({
-                        [key]: specRef.current![key],
-                      }).validateSync(pick(searchParams, key))
-                    ) {
-                      accumulator[searchParamKey] = JSON.stringify(
-                        searchParams[key]
-                      );
+              return keys.reduce<Record<string, string | null>>(
+                (accumulator, key) => {
+                  const searchParamKey = (() => {
+                    if (hashedId) {
+                      return `${key}:${hashedId}`;
                     }
-                  } catch (err: any) {
-                    if (err.name === 'ValidationError') {
-                      console.error(
-                        `useReactRouterDOMSearchParams: search param getter `,
-                        err,
-                        {
+                    return key;
+                  })();
+                  if (searchParams[key] == null) {
+                    accumulator[searchParamKey] = searchParams[key];
+                  } else {
+                    try {
+                      if (
+                        Yup.object({
+                          [key]: specRef.current![key],
+                        }).validateSync(pick(searchParams, key))
+                      ) {
+                        accumulator[searchParamKey] = JSON.stringify(
+                          searchParams[key]
+                        );
+                      }
+                    } catch (err: any) {
+                      if (err.name === 'ValidationError') {
+                        console.error(
+                          `useReactRouterDOMSearchParams: search param getter `,
                           err,
-                        }
-                      );
+                          {
+                            err,
+                          }
+                        );
+                      }
                     }
                   }
-                }
-                return accumulator;
-              }, {} as Record<string, string | null>);
+                  return accumulator;
+                },
+                {}
+              );
           }
         })(),
       };
@@ -198,7 +211,7 @@ export function useReactRouterDOMSearchParams<
           }, {} as Record<string, string>),
       };
     },
-    [hashedId, mode, paramStorage]
+    [hashedId, ignoreUnspecifiedParams, mode, paramStorage]
   );
 
   const setSearchParams = useCallback<SetSearchParams>(
