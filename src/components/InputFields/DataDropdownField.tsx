@@ -10,6 +10,7 @@ import {
   Stack,
   Tooltip,
   Typography,
+  alpha,
   chipClasses,
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
@@ -225,7 +226,7 @@ const BaseDataDropdownField = <Entity,>(
 
   const multiple = multipleProp || SelectProps?.multiple;
 
-  const { breakpoints } = useTheme();
+  const { palette, breakpoints } = useTheme();
 
   const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
 
@@ -238,6 +239,7 @@ const BaseDataDropdownField = <Entity,>(
   // Refs
   const anchorRef = useRef<HTMLInputElement>(null);
   const searchFieldRef = useRef<HTMLInputElement>(null);
+  const searchFieldContainerRef = useRef<HTMLInputElement>(null);
   const asyncOptionPagesMapRef = useRef<Map<number, DropdownOption[]>>();
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
@@ -328,15 +330,27 @@ const BaseDataDropdownField = <Entity,>(
     reset: resetAsyncSelectedOptionsState,
   } = useCacheableData(
     async ({ getRequestController }) => {
+      const selectedValue = value
+        ? [...(Array.isArray(value) ? value : [value])]
+        : [];
       const asyncSelectedOptions = await (async () => {
-        const selectedValue = value
-          ? [...(Array.isArray(value) ? value : [value])]
-          : [];
         if (getSelectedOptions && selectedValue.length > 0) {
           return getSelectedOptions(selectedValue, {
             getRequestController,
             getStaleWhileRevalidate: (asyncSelectedOptions) => {
-              setSelectedOptions(asyncSelectedOptions);
+              setSelectedOptions(
+                asyncSelectedOptions.sort(
+                  (
+                    { value: aValue }: DropdownOption,
+                    { value: bValue }: DropdownOption
+                  ) => {
+                    return (
+                      selectedValue.indexOf(String(aValue)) -
+                      selectedValue.indexOf(String(bValue))
+                    );
+                  }
+                )
+              );
             },
           });
         }
@@ -358,7 +372,17 @@ const BaseDataDropdownField = <Entity,>(
           const dropdownOptionsResponse = await getDropdownOptions({
             getStaleWhileRevalidate: (dropdownOptionsResponse) => {
               setSelectedOptions(
-                processOptionsResponse(dropdownOptionsResponse)
+                processOptionsResponse(dropdownOptionsResponse).sort(
+                  (
+                    { value: aValue }: DropdownOption,
+                    { value: bValue }: DropdownOption
+                  ) => {
+                    return (
+                      selectedValue.indexOf(String(aValue)) -
+                      selectedValue.indexOf(String(bValue))
+                    );
+                  }
+                )
               );
             },
           });
@@ -366,7 +390,19 @@ const BaseDataDropdownField = <Entity,>(
         }
         return [];
       })();
-      setSelectedOptions(asyncSelectedOptions);
+      setSelectedOptions(
+        asyncSelectedOptions.sort(
+          (
+            { value: aValue }: DropdownOption,
+            { value: bValue }: DropdownOption
+          ) => {
+            return (
+              selectedValue.indexOf(String(aValue)) -
+              selectedValue.indexOf(String(bValue))
+            );
+          }
+        )
+      );
       return asyncSelectedOptions;
     },
     {
@@ -515,6 +551,14 @@ const BaseDataDropdownField = <Entity,>(
     stringifiedValue,
   ]);
 
+  const multilineSearchMode = rest.multiline && selectedOptions.length > 0;
+
+  useEffect(() => {
+    if (multilineSearchMode && focused) {
+      searchFieldRef.current?.focus();
+    }
+  }, [focused, multilineSearchMode]);
+
   const selectedOptionsElement = (() => {
     const optionsToDisplay = (() => {
       if (selectedOptions.length > 0) {
@@ -525,7 +569,11 @@ const BaseDataDropdownField = <Entity,>(
       }
       return [];
     })();
-    if (showRichTextValue && !focused && optionsToDisplay.length > 0) {
+    if (
+      showRichTextValue &&
+      (!focused || multilineSearchMode) &&
+      optionsToDisplay.length > 0
+    ) {
       return (
         <>
           {multiple ? (
@@ -551,6 +599,7 @@ const BaseDataDropdownField = <Entity,>(
                   }}
                   size="small"
                   sx={{
+                    bgcolor: alpha(palette.divider, 0.08),
                     ...SelectedOptionPillPropsSx,
                     [`.${chipClasses.deleteIcon}`]: {
                       pointerEvents: 'all',
@@ -621,7 +670,7 @@ const BaseDataDropdownField = <Entity,>(
   }
 
   if (
-    (value && selectedOptions.length <= 0 && loadingAsyncSelectedOptions) ||
+    (value && loadingAsyncSelectedOptions) ||
     asyncSelectedOptionsErrorMessage
   ) {
     return (
@@ -773,26 +822,30 @@ const BaseDataDropdownField = <Entity,>(
           <TextField
             ref={ref}
             onFocus={(event) => {
-              event.preventDefault();
-              if (!isSmallScreenSize) {
-                setOpen(true);
+              if (!multilineSearchMode) {
+                event.preventDefault();
+                if (!isSmallScreenSize) {
+                  setOpen(true);
+                }
+                setFocused(true);
+                onFocus && onFocus(event);
               }
-              setFocused(true);
-              onFocus && onFocus(event);
             }}
             onBlur={() => {
-              setFocused(false);
-              if (onBlur) {
-                const event: any = new Event('blur', { bubbles: true });
-                Object.defineProperty(event, 'target', {
-                  writable: false,
-                  value: {
-                    name,
-                    id,
-                    value: selectedOptionValue,
-                  },
-                });
-                onBlur(event);
+              if (!multilineSearchMode) {
+                setFocused(false);
+                if (onBlur) {
+                  const event: any = new Event('blur', { bubbles: true });
+                  Object.defineProperty(event, 'target', {
+                    writable: false,
+                    value: {
+                      name,
+                      id,
+                      value: selectedOptionValue,
+                    },
+                  });
+                  onBlur(event);
+                }
               }
             }}
             onChange={(event) => {
@@ -814,6 +867,9 @@ const BaseDataDropdownField = <Entity,>(
               readOnly: !searchable || isSmallScreenSize,
               onClick: () => {
                 if (!disabled) {
+                  if (rest.multiline) {
+                    searchFieldRef.current?.focus();
+                  }
                   setOpen(true);
                 }
               },
@@ -827,12 +883,46 @@ const BaseDataDropdownField = <Entity,>(
                   }
                 })(),
                 ...InputPropsSx,
+                ...(() => {
+                  if (
+                    searchable &&
+                    showRichTextValue &&
+                    !focused &&
+                    (selectedOptionDisplayString.length > 0 ||
+                      placeholderOption)
+                  ) {
+                    return {
+                      [`&>.${inputBaseClasses.input}`]: {
+                        color: 'transparent',
+                        WebkitTextFillColor: 'transparent',
+                      },
+                    };
+                  }
+                })(),
+                ...(() => {
+                  if (multilineSearchMode) {
+                    return {
+                      [`&>.${inputBaseClasses.input}`]: {
+                        visibility: 'hidden',
+                      },
+                    };
+                  }
+                })(),
               },
             }}
             inputProps={{
-              ref: searchFieldRef,
+              ...(() => {
+                if (!multilineSearchMode) {
+                  return {
+                    ref: searchFieldRef,
+                  };
+                }
+              })(),
             }}
             value={(() => {
+              if (multilineSearchMode) {
+                return selectedOptionDisplayString;
+              }
               if (
                 !isSmallScreenSize &&
                 searchable &&
@@ -964,6 +1054,66 @@ const BaseDataDropdownField = <Entity,>(
                     }}
                   >
                     {selectedOptionsElement}
+                    {(() => {
+                      if (searchable && rest.multiline) {
+                        return (
+                          <Box
+                            ref={searchFieldContainerRef}
+                            sx={{
+                              flex: 1,
+                              minWidth: 100,
+                              maxWidth: 300,
+                              pointerEvents: 'auto',
+                            }}
+                          >
+                            <TextField
+                              variant="standard"
+                              fullWidth
+                              onFocus={(event) => {
+                                event.preventDefault();
+                                if (!isSmallScreenSize) {
+                                  setOpen(true);
+                                }
+                                setFocused(true);
+                                onFocus && onFocus(event);
+                              }}
+                              onBlur={() => {
+                                setFocused(false);
+                                if (onBlur) {
+                                  const event: any = new Event('blur', {
+                                    bubbles: true,
+                                  });
+                                  Object.defineProperty(event, 'target', {
+                                    writable: false,
+                                    value: {
+                                      name,
+                                      id,
+                                      value: selectedOptionValue,
+                                    },
+                                  });
+                                  onBlur(event);
+                                }
+                              }}
+                              value={searchTerm}
+                              onChange={(event) => {
+                                setSearchTerm(event.target.value);
+                                onChangeSearchTerm?.(event.target.value);
+                              }}
+                              inputProps={{
+                                ref: searchFieldRef,
+                              }}
+                              InputProps={{
+                                sx: {
+                                  '&:before': {
+                                    borderBottomColor: 'transparent',
+                                  },
+                                },
+                              }}
+                            />
+                          </Box>
+                        );
+                      }
+                    })()}
                   </Box>
                 );
               }
@@ -973,21 +1123,6 @@ const BaseDataDropdownField = <Entity,>(
               sx: {
                 width: '100%',
                 ...WrapperPropsSx,
-                [`& .${inputBaseClasses.input}`]: (() => {
-                  if (
-                    searchable &&
-                    showRichTextValue &&
-                    !focused &&
-                    (selectedOptionDisplayString.length > 0 ||
-                      placeholderOption)
-                  ) {
-                    return {
-                      color: 'transparent',
-                      WebkitTextFillColor: 'transparent',
-                    };
-                  }
-                  return {};
-                })(),
                 [`&>.${classes.selectedOptionsWrapper}`]: {
                   width: 'calc(100% - 40px)',
                 },
@@ -1079,7 +1214,11 @@ const BaseDataDropdownField = <Entity,>(
               setSearchTerm('');
               setSelectedOptions(options);
               triggerChangeEvent(options);
-              searchFieldRef.current?.blur();
+              if (rest.multiline) {
+                searchFieldRef.current?.focus();
+              } else {
+                searchFieldRef.current?.blur();
+              }
             }}
             asyncOptionPagesMap={asyncOptionPagesMapRef.current}
             onChangeAsyncOptionPagesMap={(asyncOptionPagesMap) => {
@@ -1133,9 +1272,25 @@ const BaseDataDropdownField = <Entity,>(
                   <Box>
                     <ClickAwayListener
                       onClickAway={(event) => {
-                        if (anchorRef.current) {
+                        if (
+                          anchorRef.current ||
+                          searchFieldContainerRef.current
+                        ) {
                           setOpen(
-                            isDescendant(anchorRef.current, event.target as any)
+                            Boolean(
+                              anchorRef.current &&
+                                isDescendant(
+                                  anchorRef.current,
+                                  event.target as any
+                                )
+                            ) ||
+                              Boolean(
+                                searchFieldContainerRef.current &&
+                                  isDescendant(
+                                    searchFieldContainerRef.current,
+                                    event.target as any
+                                  )
+                              )
                           );
                         }
                       }}
