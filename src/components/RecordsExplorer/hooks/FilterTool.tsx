@@ -446,13 +446,6 @@ export const useFilterTool = <RecordRow extends BaseDataRow>({
                                     value={condition.value as any}
                                     optionVariant="check"
                                     sortOptions
-                                    SelectedOptionPillProps={{
-                                      sx: {
-                                        bgcolor: 'transparent',
-                                        px: 0,
-                                        mr: 1,
-                                      },
-                                    }}
                                     {...fieldProps}
                                     {...omit(
                                       rest,
