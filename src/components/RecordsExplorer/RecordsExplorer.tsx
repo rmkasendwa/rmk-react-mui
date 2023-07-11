@@ -1072,6 +1072,13 @@ const BaseRecordsExplorer = <
     selectedDataPreset: searchParamSelectedDataPreset,
   } = searchParams;
 
+  const unTrackableSearchParams = [
+    'modifiedKeys',
+    'createNewRecord',
+    'selectedRecord',
+    'editRecord',
+  ];
+
   const updateChangedSearchParamKeys = (
     extraSearchParamKeys: string[] = []
   ) => {
@@ -1079,7 +1086,7 @@ const BaseRecordsExplorer = <
       ...new Set([
         ...[
           ...Object.keys(searchParams).filter((key) => {
-            return key !== 'modifiedKeys';
+            return !unTrackableSearchParams.includes(key);
           }),
           ...extraSearchParamKeys,
         ].map((key) => {
@@ -1107,7 +1114,7 @@ const BaseRecordsExplorer = <
 
   const stringifiedSearchParams = JSON.stringify(
     Object.keys(searchParams).filter((key) => {
-      return key !== 'modifiedKeys';
+      return !unTrackableSearchParams.includes(key);
     })
   );
   useEffect(() => {
