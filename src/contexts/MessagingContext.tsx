@@ -1,4 +1,4 @@
-import { Alert } from '@mui/material';
+import { Alert, AlertProps } from '@mui/material';
 import Snackbar from '@mui/material/Snackbar';
 import {
   FC,
@@ -20,11 +20,15 @@ export const MessagingContext = createContext<IMessagingContext>({
 
 export interface IMessagingProviderProps {
   children: ReactNode;
+  SuccessMessageAlertProps?: Partial<AlertProps>;
 }
 
 export const MessagingProvider: FC<IMessagingProviderProps> = ({
   children,
+  SuccessMessageAlertProps = {},
 }) => {
+  const { sx: SuccessMessageAlertPropsSx, ...SuccessMessageAlertPropsRest } =
+    SuccessMessageAlertProps;
   const [message, setMessage] = useState<ReactNode>('');
 
   const showSuccessMessage = useCallback((message: ReactNode) => {
@@ -48,10 +52,11 @@ export const MessagingProvider: FC<IMessagingProviderProps> = ({
         onClose={handleClose}
       >
         <Alert
-          onClose={handleClose}
           severity="success"
           variant="filled"
-          sx={{ width: '100%' }}
+          {...SuccessMessageAlertPropsRest}
+          onClose={handleClose}
+          sx={{ width: '100%', ...SuccessMessageAlertPropsSx }}
         >
           {message}
         </Alert>

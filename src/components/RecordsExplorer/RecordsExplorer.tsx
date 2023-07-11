@@ -416,6 +416,7 @@ export interface RecordsExplorerProps<
   ) => (ReactNode | Tool)[] | undefined;
   ListViewProps?: Partial<Omit<ListView<RecordRow>, 'columns'>>;
   clearSearchStateOnUnmount?: boolean;
+  showSuccessMessageOnCreateRecord?: boolean;
 }
 
 export function getRecordsExplorerUtilityClass(slot: string): string {
@@ -533,6 +534,7 @@ const BaseRecordsExplorer = <
     ListViewProps,
     fields,
     clearSearchStateOnUnmount = false,
+    showSuccessMessageOnCreateRecord = true,
     ...rest
   } = omit(
     props,
@@ -2616,10 +2618,12 @@ const BaseRecordsExplorer = <
                     onClose={() => {
                       resetCreation();
                       if (created) {
-                        showSuccessMessage(
-                          recordCreateSuccessMessage ||
-                            `The new ${lowercaseRecordLabelSingular} was created successfully`
-                        );
+                        if (showSuccessMessageOnCreateRecord) {
+                          showSuccessMessage(
+                            recordCreateSuccessMessage ||
+                              `The new ${lowercaseRecordLabelSingular} was created successfully`
+                          );
+                        }
                         autoSync && setTimeout(() => load(), 1000);
                       }
                       onCreateNewRecord && onCreateNewRecord(createdRecord);
