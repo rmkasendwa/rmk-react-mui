@@ -415,6 +415,7 @@ export interface RecordsExplorerProps<
     state: RecordsExplorerChildrenOptions<RecordRow>
   ) => (ReactNode | Tool)[] | undefined;
   ListViewProps?: Partial<Omit<ListView<RecordRow>, 'columns'>>;
+  TimelineViewProps?: Partial<Omit<TimelineProps<RecordRow>, 'columns'>>;
   clearSearchStateOnUnmount?: boolean;
   showSuccessMessageOnCreateRecord?: boolean;
 }
@@ -532,6 +533,7 @@ const BaseRecordsExplorer = <
     bottomTools: bottomToolsProp,
     getBottomTools,
     ListViewProps,
+    TimelineViewProps,
     fields,
     clearSearchStateOnUnmount = false,
     showSuccessMessageOnCreateRecord = true,
@@ -2255,6 +2257,7 @@ const BaseRecordsExplorer = <
             return (
               <Timeline
                 {...viewProps}
+                {...TimelineViewProps}
                 {...{ id, clearSearchStateOnUnmount }}
                 rows={filteredData}
                 getDefaultViewResetFunction={(resetTimelineToDefaultView) => {
