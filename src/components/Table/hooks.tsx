@@ -189,8 +189,8 @@ export const useTable = <DataRow extends BaseDataRow>(
   );
 
   const {
-    sx: tableBodyRowPlaceholderPropsSx,
-    ...tableBodyRowPlaceholderPropsRest
+    sx: TableBodyRowPlaceholderPropsSx,
+    ...TableBodyRowPlaceholderPropsRest
   } = TableBodyRowPlaceholderProps;
   const {
     sx: PaginatedTableWrapperPropsSx,
@@ -1126,13 +1126,13 @@ export const useTable = <DataRow extends BaseDataRow>(
             id: compositeId,
             element: (
               <RenderIfVisible
-                {...tableBodyRowPlaceholderPropsRest}
+                {...TableBodyRowPlaceholderPropsRest}
                 key={compositeId}
                 displayPlaceholder={false}
                 unWrapChildrenIfVisible
                 sx={{
                   height: 89,
-                  ...tableBodyRowPlaceholderPropsSx,
+                  ...TableBodyRowPlaceholderPropsSx,
                 }}
               >
                 {index > 0 ? <Divider /> : null}
@@ -1176,14 +1176,14 @@ export const useTable = <DataRow extends BaseDataRow>(
           id: compositeId,
           element: (
             <RenderIfVisible
-              {...tableBodyRowPlaceholderPropsRest}
+              {...TableBodyRowPlaceholderPropsRest}
               key={compositeId}
               component="tr"
               displayPlaceholder={false}
               unWrapChildrenIfVisible
               sx={{
                 height: 41,
-                ...tableBodyRowPlaceholderPropsSx,
+                ...TableBodyRowPlaceholderPropsSx,
               }}
             >
               <TableBodyRow

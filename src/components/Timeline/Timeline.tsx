@@ -37,7 +37,7 @@ import getDaysInMonth from 'date-fns/getDaysInMonth';
 import isAfter from 'date-fns/isAfter';
 import isBefore from 'date-fns/isBefore';
 import isSameDay from 'date-fns/isSameDay';
-import { result, uniqueId } from 'lodash';
+import { omit, result, uniqueId } from 'lodash';
 import {
   Fragment,
   ReactElement,
@@ -154,7 +154,9 @@ export interface TimelineElement extends Partial<BoxProps> {
 }
 
 export interface TimelineProps<RecordRow extends BaseDataRow = any>
-  extends Partial<Pick<TableProps, 'className' | 'sx'>> {
+  extends Partial<
+    Pick<TableProps, 'className' | 'sx' | 'parentBackgroundColor'>
+  > {
   rowLabelProperty?: keyof RecordRow;
   getRowLabel?: (row: RecordRow) => ReactNode;
   rows: RecordRow[];
@@ -221,7 +223,9 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     onChangeSearchParams,
     rowLabelsColumnWidth = 256,
     ...rest
-  } = props;
+  } = omit(props, 'parentBackgroundColor');
+
+  let { parentBackgroundColor } = props;
 
   const classes = composeClasses(
     slots,
@@ -248,6 +252,8 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   const { palette, breakpoints } = useTheme();
   const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
   const baseSpacingUnits = isSmallScreenSize ? 16 : 24;
+
+  parentBackgroundColor || (parentBackgroundColor = palette.background.paper);
 
   const [isTimelineAtCenterOfGravity, setIsTimelineAtCenterOfGravity] =
     useState(true);
@@ -790,6 +796,8 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
             <Tooltip
               title={baseTimelineElementLabel}
               followCursor
+              enterDelay={1000}
+              enterNextDelay={500}
               {...TooltipPropsRest}
               PopperProps={{
                 ...TooltipPropsPopperProps,
@@ -1061,7 +1069,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
             right: 0,
             display: 'inline-flex',
             gap: isSmallScreenSize ? 0.5 : 2,
-            bgcolor: palette.background.paper,
+            bgcolor: parentBackgroundColor,
             height: 56,
             width: 'auto',
           }}
@@ -1260,6 +1268,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         ref={mergeRefs([timelineContainerElementRef, ref])}
         className={clsx(className, classes.root)}
         {...rest}
+        parentBackgroundColor={parentBackgroundColor}
         columns={columns}
         paging={false}
         bordersVariant="square"
@@ -1283,6 +1292,11 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           sx: {
             position: 'relative',
             zIndex: -1,
+          },
+        }}
+        TableBodyRowPlaceholderProps={{
+          sx: {
+            height: 51,
           },
         }}
         sx={{

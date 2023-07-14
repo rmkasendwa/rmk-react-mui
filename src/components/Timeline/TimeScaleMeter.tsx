@@ -8,7 +8,6 @@ import {
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
   generateUtilityClasses,
-  useTheme,
   useThemeProps,
 } from '@mui/material';
 import Box from '@mui/material/Box';
@@ -104,7 +103,6 @@ export const TimeScaleMeter = forwardRef<HTMLDivElement, TimeScaleMeterProps>(
       })()
     );
 
-    const { palette } = useTheme();
     const [timeScaleLevel1, timeScaleLevel2, timeScaleLevel3] = timeScaleRows;
     const {
       timeScaleLevel1TickWidth,
@@ -196,7 +194,6 @@ export const TimeScaleMeter = forwardRef<HTMLDivElement, TimeScaleMeterProps>(
         className={clsx(classes.root)}
         sx={{
           width: '100%',
-          bgcolor: palette.background.paper,
           ...sx,
         }}
       >
