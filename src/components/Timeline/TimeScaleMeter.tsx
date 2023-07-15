@@ -54,6 +54,7 @@ declare module '@mui/material/styles/components' {
 export interface TimeScaleRow extends Partial<BoxProps> {
   id: string;
   label: ReactNode;
+  showLabel?: boolean;
 }
 
 export interface TimeScaleMeterProps extends Partial<StackProps> {
@@ -246,9 +247,9 @@ export const TimeScaleMeter = forwardRef<HTMLDivElement, TimeScaleMeterProps>(
                           >
                             <Typography
                               variant="body2"
-                              noWrap
                               sx={{
                                 fontWeight: 500,
+                                whiteSpace: 'nowrap',
                               }}
                             >
                               {label}
@@ -275,47 +276,51 @@ export const TimeScaleMeter = forwardRef<HTMLDivElement, TimeScaleMeterProps>(
               alignItems: 'center',
             }}
           />
-          {displayableTimeScaleLevel2.map(({ id, label, sx, ...rest }) => {
-            return (
-              <Box
-                {...rest}
-                key={id}
-                sx={{
-                  ...sx,
-                  width: timeScaleLevel2TickWidth,
-                  minWidth: 0,
-                  height: 24,
-                  display: 'flex',
-                  alignItems: 'center',
-                  ...(() => {
-                    if (variant === 'default') {
-                      return {
-                        overflow: 'hidden',
-                      };
-                    }
-                  })(),
-                }}
-              >
-                <Typography
-                  variant="body2"
-                  noWrap
+          {displayableTimeScaleLevel2.map(
+            ({ id, label, showLabel = true, sx, ...rest }) => {
+              return (
+                <Box
+                  {...rest}
+                  key={id}
                   sx={{
-                    fontSize: 11,
-                    fontWeight: 700,
+                    ...sx,
+                    width: timeScaleLevel2TickWidth,
+                    minWidth: 0,
+                    height: 24,
+                    display: 'flex',
+                    alignItems: 'center',
                     ...(() => {
-                      if (variant === 'compact') {
+                      if (variant === 'default') {
                         return {
-                          transform: 'translateX(-50%)',
+                          overflow: 'hidden',
                         };
                       }
                     })(),
                   }}
                 >
-                  {label}
-                </Typography>
-              </Box>
-            );
-          })}
+                  {showLabel ? (
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontSize: 11,
+                        fontWeight: 700,
+                        whiteSpace: 'nowrap',
+                        ...(() => {
+                          if (variant === 'compact') {
+                            return {
+                              transform: 'translateX(-50%)',
+                            };
+                          }
+                        })(),
+                      }}
+                    >
+                      {label}
+                    </Typography>
+                  ) : null}
+                </Box>
+              );
+            }
+          )}
         </Box>
         <Box
           sx={{
@@ -360,9 +365,9 @@ export const TimeScaleMeter = forwardRef<HTMLDivElement, TimeScaleMeterProps>(
                     return (
                       <Typography
                         variant="body2"
-                        noWrap
                         sx={{
                           fontSize: 12,
+                          whiteSpace: 'nowrap',
                         }}
                       >
                         {label}

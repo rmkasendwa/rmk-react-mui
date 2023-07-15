@@ -532,30 +532,83 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                 };
               });
             }),
-            timelineYears.flatMap((year) => {
-              return fullMonthLabels.flatMap((_, index) => {
-                const unitTickDate = new Date(year, index, 1);
-                const daysInMonth = getDaysInMonth(unitTickDate);
-                return Array.from({ length: daysInMonth }).map((_, index) => {
-                  const tickDate = addDays(unitTickDate, index);
-                  return {
-                    id: uniqueId(),
-                    label: formatDate(tickDate, dayOfWeekFormat),
-                  };
+            (() => {
+              if (TimeScaleMeterPropsVariant === 'compact') {
+                return timelineYears.flatMap((year) => {
+                  return fullMonthLabels.flatMap((_, index) => {
+                    const unitTickDate = new Date(year, index, 1);
+                    const daysInMonth = getDaysInMonth(unitTickDate);
+                    return Array.from({ length: daysInMonth }).map(
+                      (_, dayOfMonthIndex) => {
+                        const tickDate = addDays(unitTickDate, dayOfMonthIndex);
+                        const dayOfWeekIndex = tickDate.getDay();
+                        return {
+                          id: uniqueId(),
+                          label: formatDate(
+                            tickDate,
+                            dayOfMonthIndex === 0 ? 'MMM d, yyyy' : 'EEE, MMM d'
+                          ),
+                          showLabel:
+                            dayOfMonthIndex === 0 ||
+                            (dayOfWeekIndex === 1 &&
+                              dayOfMonthIndex >= 2 &&
+                              daysInMonth - dayOfMonthIndex >= 2),
+                        } as TimeScaleRow;
+                      }
+                    );
+                  });
+                });
+              }
+              return timelineYears.flatMap((year) => {
+                return fullMonthLabels.flatMap((_, index) => {
+                  const unitTickDate = new Date(year, index, 1);
+                  const daysInMonth = getDaysInMonth(unitTickDate);
+                  return Array.from({ length: daysInMonth }).map((_, index) => {
+                    const tickDate = addDays(unitTickDate, index);
+                    return {
+                      id: uniqueId(),
+                      label: formatDate(tickDate, dayOfWeekFormat),
+                    };
+                  });
                 });
               });
-            }),
+            })(),
             timelineYears.flatMap((year) => {
               return fullMonthLabels.flatMap((_, index) => {
                 const unitTickDate = new Date(year, index, 1);
                 const daysInMonth = getDaysInMonth(unitTickDate);
-                return Array.from({ length: daysInMonth }).map((_, index) => {
-                  const tickDate = addDays(unitTickDate, index);
-                  return {
-                    id: uniqueId(),
-                    label: formatDate(tickDate, 'd'),
-                  };
-                });
+                return Array.from({ length: daysInMonth }).map(
+                  (_, dayOfMonthIndex) => {
+                    const tickDate = addDays(unitTickDate, dayOfMonthIndex);
+                    const dayOfWeekIndex = tickDate.getDay();
+                    return {
+                      id: uniqueId(),
+                      label: formatDate(tickDate, 'd'),
+                      ...(() => {
+                        if (TimeScaleMeterPropsVariant === 'compact') {
+                          return {
+                            sx: {
+                              ...(() => {
+                                if (dayOfWeekIndex === 1) {
+                                  return {
+                                    borderLeftColor: '#f00',
+                                  };
+                                }
+                              })(),
+                              ...(() => {
+                                if (dayOfMonthIndex === 0) {
+                                  return {
+                                    borderLeftColor: palette.text.primary,
+                                  };
+                                }
+                              })(),
+                            },
+                          };
+                        }
+                      })(),
+                    };
+                  }
+                );
               });
             }),
           ],
