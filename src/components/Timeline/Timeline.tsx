@@ -172,15 +172,19 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
   startDateProperty?: keyof RecordRow;
   endDateProperty?: keyof RecordRow;
   showRowLabelsColumn?: boolean;
+  rowLabelsColumnHeader?: ReactNode;
   getTimelineElements?: (row: RecordRow) => TimelineElement[];
   id?: string;
   minDate?: string | number | Date;
   maxDate?: string | number | Date;
+  getTimelineDates?: (rows: RecordRow[]) => (string | number | Date)[];
   selectedTimeScale?: TimeScaleOption;
   clearSearchStateOnUnmount?: boolean;
   getDefaultViewResetFunction?: (resetToDefaultView: () => void) => void;
   onChangeSearchParams?: (changedSearchParamKeys: string[]) => void;
   rowLabelsColumnWidth?: number;
+  showToolBar?: boolean;
+  supportedTimeScales?: TimeScaleOption[];
 }
 
 export function getTimelineUtilityClass(slot: string): string {
@@ -214,6 +218,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     getTimelineElementProps,
     getTimelineElements,
     showRowLabelsColumn = true,
+    rowLabelsColumnHeader,
     id,
     minDate: minDateProp,
     maxDate: maxDateProp,
@@ -222,6 +227,9 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     getDefaultViewResetFunction,
     onChangeSearchParams,
     rowLabelsColumnWidth = 256,
+    getTimelineDates,
+    showToolBar = true,
+    supportedTimeScales = timeScaleOptions,
     ...rest
   } = omit(props, 'parentBackgroundColor');
 
@@ -244,10 +252,15 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   const lastDateAtCenterRef = useRef<Date | null>(null);
   const timelineContainerElementRef = useRef<HTMLTableElement>(null);
   const todayIndicatorRef = useRef<HTMLDivElement>(null);
+
   const getDefaultViewResetFunctionRef = useRef(getDefaultViewResetFunction);
   getDefaultViewResetFunctionRef.current = getDefaultViewResetFunction;
+
   const onChangeSearchParamsRef = useRef(onChangeSearchParams);
   onChangeSearchParamsRef.current = onChangeSearchParams;
+
+  const getTimelineDatesRef = useRef(getTimelineDates);
+  getTimelineDatesRef.current = getTimelineDates;
 
   const { palette, breakpoints } = useTheme();
   const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
@@ -265,7 +278,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   const { searchParams, setSearchParams } = useReactRouterDOMSearchParams({
     mode: 'json',
     spec: {
-      timeScale: Yup.mixed<TimeScaleOption>().oneOf([...timeScaleOptions]),
+      timeScale: Yup.mixed<TimeScaleOption>().oneOf([...supportedTimeScales]),
     },
     id,
     clearSearchStateOnUnmount,
@@ -291,8 +304,14 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     timelineDifferenceInDays,
     timelineDifferenceInHours,
   } = useMemo(() => {
-    const allDates = rows
-      .flatMap((row) => {
+    const allDates = (() => {
+      if (getTimelineDatesRef.current) {
+        const dates = getTimelineDatesRef.current(rows);
+        return dates.map((date) => {
+          return createDateWithoutTimezoneOffset(date);
+        });
+      }
+      return rows.flatMap((row) => {
         const dates: Date[] = [];
         const startDateValue = (() => {
           if (startDateProperty) {
@@ -329,8 +348,8 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           }
         }
         return dates;
-      })
-      .sort((a, b) => a.getTime() - b.getTime());
+      });
+    })().sort((a, b) => a.getTime() - b.getTime());
 
     const { maxDate, minDate, maxCalendarDate, minCalendarDate } = (() => {
       if (allDates.length > 0) {
@@ -822,7 +841,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                   position: 'absolute',
                   top: 0,
                   left: `${offsetPercentage * 100}%`,
-                  height: 34,
+                  height: 42,
                   borderRadius: '4px',
                 }}
               >
@@ -997,9 +1016,9 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       bodySx: {
         pl: `${baseSpacingUnits}px`,
         pr: `${baseSpacingUnits}px`,
-        py: 1,
+        py: 0.5,
         '&>div': {
-          height: 34,
+          height: 42,
         },
       },
     },
@@ -1008,9 +1027,9 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   if (shouldShowRowLabelsColumn) {
     columns.unshift({
       id: 'label',
-      label: 'Label',
+      label: rowLabelsColumnHeader,
       width: rowLabelsColumnWidth,
-      showHeaderText: false,
+      showHeaderText: Boolean(rowLabelsColumnHeader),
       getColumnValue: (row) => {
         if (getRowLabel) {
           return getRowLabel(row);
@@ -1020,8 +1039,22 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         }
       },
       headerSx: {
+        ...(() => {
+          if (!rowLabelsColumnHeader) {
+            return {
+              borderRight: 'none !important',
+              zIndex: 1,
+              '&>div': {
+                py: 0,
+                pl: `${baseSpacingUnits}px`,
+                pr: `${baseSpacingUnits}px`,
+              },
+            };
+          }
+        })(),
+      },
+      secondaryHeaderSx: {
         borderRight: 'none !important',
-        zIndex: 1,
         '&>div': {
           py: 0,
           pl: `${baseSpacingUnits}px`,
@@ -1047,164 +1080,194 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
 
   return (
     <>
-      <Box
-        sx={{
-          height: 0,
-          zIndex: 5,
-          position: 'sticky',
-          top: 0,
-          left: 0,
-          display: 'flex',
-        }}
-      >
-        <Box sx={{ flex: 1 }} />
-        <Grid
-          container
+      {showToolBar ? (
+        <Box
           sx={{
-            pr: `${baseSpacingUnits}px`,
-            pl: 1,
-            py: 1,
-            alignItems: 'center',
+            height: 0,
+            zIndex: 5,
             position: 'sticky',
-            right: 0,
-            display: 'inline-flex',
-            gap: isSmallScreenSize ? 0.5 : 2,
-            bgcolor: parentBackgroundColor,
-            height: 56,
-            width: 'auto',
+            top: 0,
+            left: 0,
+            display: 'flex',
           }}
         >
-          <Grid item>
-            <Stack
-              direction="row"
-              sx={{
-                gap: 0.5,
-                alignItems: 'center',
-              }}
-            >
-              {!isSmallScreenSize ? (
-                <Typography variant="body2">Timescale:</Typography>
-              ) : null}
-              <Button
-                color="inherit"
-                variant="contained"
-                size="small"
-                disableRipple
+          <Box sx={{ flex: 1 }} />
+          <Grid
+            container
+            sx={{
+              pr: `${baseSpacingUnits}px`,
+              pl: 1,
+              py: 1,
+              alignItems: 'center',
+              position: 'sticky',
+              right: 0,
+              display: 'inline-flex',
+              gap: isSmallScreenSize ? 0.5 : 2,
+              bgcolor: parentBackgroundColor,
+              height: 56,
+              width: 'auto',
+            }}
+          >
+            <Grid item>
+              <Stack
+                direction="row"
                 sx={{
-                  minWidth: 0,
-                  p: 0,
+                  gap: 0.5,
+                  alignItems: 'center',
                 }}
               >
-                <DataDropdownField
-                  placeholder="Timescale"
-                  size="small"
-                  value={selectedTimeScale}
-                  options={timeScaleOptions.map((timeScaleOption) => {
-                    return {
-                      value: timeScaleOption,
-                      label: timeScaleOption,
-                    };
-                  })}
-                  onChange={(event) => {
-                    lastDateAtCenterRef.current =
-                      currentDateAtCenterRef.current;
-                    setSearchParams(
-                      {
-                        timeScale: (event.target.value as any) || null,
-                      },
-                      {
-                        replace: true,
-                      }
-                    );
-                  }}
-                  showClearButton={false}
-                  InputProps={{
-                    sx: {
-                      height: 32,
-                      pr: 0.5,
-                      [`.${outlinedInputClasses.notchedOutline}`]: {
-                        border: 'none',
-                      },
-                    },
-                  }}
-                  WrapperProps={{
-                    sx: {
-                      [`.${dataDropdownFieldClasses.selectedOptionsWrapper}`]: {
-                        top: 3,
-                        width: 'calc(100% - 22px) !important',
-                      },
-                    },
-                  }}
-                  enableLoadingState={false}
-                  sx={{
-                    width: 90,
-                  }}
-                />
-              </Button>
-            </Stack>
-          </Grid>
-          <Grid item>
-            <Stack
-              direction="row"
-              sx={{
-                gap: 0.5,
-                alignItems: 'center',
-              }}
-            >
-              {!isSmallScreenSize ? (
-                <Typography variant="body2">Jump to:</Typography>
-              ) : null}
-              <Button
-                variant="contained"
-                color="inherit"
-                size="small"
-                onClick={() => {
-                  scrollToToday();
-                }}
-                sx={{
-                  height: 32,
-                }}
-              >
-                Today
-              </Button>
-              <Tooltip title="Jump to date">
+                {!isSmallScreenSize ? (
+                  <Typography variant="body2">Timescale:</Typography>
+                ) : null}
                 <Button
-                  ref={jumpToDateAnchorRef}
+                  color="inherit"
+                  variant="contained"
+                  size="small"
+                  disableRipple
+                  sx={{
+                    minWidth: 0,
+                    p: 0,
+                  }}
+                >
+                  <DataDropdownField
+                    placeholder="Timescale"
+                    size="small"
+                    value={selectedTimeScale}
+                    options={supportedTimeScales.map((timeScaleOption) => {
+                      return {
+                        value: timeScaleOption,
+                        label: timeScaleOption,
+                      };
+                    })}
+                    onChange={(event) => {
+                      lastDateAtCenterRef.current =
+                        currentDateAtCenterRef.current;
+                      setSearchParams(
+                        {
+                          timeScale: (event.target.value as any) || null,
+                        },
+                        {
+                          replace: true,
+                        }
+                      );
+                    }}
+                    showClearButton={false}
+                    InputProps={{
+                      sx: {
+                        height: 32,
+                        pr: 0.5,
+                        [`.${outlinedInputClasses.notchedOutline}`]: {
+                          border: 'none',
+                        },
+                      },
+                    }}
+                    WrapperProps={{
+                      sx: {
+                        [`.${dataDropdownFieldClasses.selectedOptionsWrapper}`]:
+                          {
+                            top: 3,
+                            width: 'calc(100% - 22px) !important',
+                          },
+                      },
+                    }}
+                    enableLoadingState={false}
+                    sx={{
+                      width: 90,
+                    }}
+                  />
+                </Button>
+              </Stack>
+            </Grid>
+            <Grid item>
+              <Stack
+                direction="row"
+                sx={{
+                  gap: 0.5,
+                  alignItems: 'center',
+                }}
+              >
+                {!isSmallScreenSize ? (
+                  <Typography variant="body2">Jump to:</Typography>
+                ) : null}
+                <Button
                   variant="contained"
                   color="inherit"
                   size="small"
-                  onClick={jumpToDateOnClick}
+                  onClick={() => {
+                    scrollToToday();
+                  }}
                   sx={{
-                    px: 1,
-                    minWidth: 'auto !important',
-                    width: 32,
+                    height: 32,
                   }}
                 >
-                  {jumpToDateIcon}
+                  Today
                 </Button>
-              </Tooltip>
-              {jumpToDatePopupElement}
-              {selectedTimeScale !== optimalTimeScale ||
-              !isTimelineAtCenterOfGravity ? (
-                <Tooltip title="Jump to optimal timescale">
+                <Tooltip title="Jump to date">
                   <Button
+                    ref={jumpToDateAnchorRef}
                     variant="contained"
                     color="inherit"
                     size="small"
+                    onClick={jumpToDateOnClick}
+                    sx={{
+                      px: 1,
+                      minWidth: 'auto !important',
+                      width: 32,
+                    }}
+                  >
+                    {jumpToDateIcon}
+                  </Button>
+                </Tooltip>
+                {jumpToDatePopupElement}
+                {selectedTimeScale !== optimalTimeScale ||
+                !isTimelineAtCenterOfGravity ? (
+                  <Tooltip title="Jump to optimal timescale">
+                    <Button
+                      variant="contained"
+                      color="inherit"
+                      size="small"
+                      onClick={() => {
+                        lastDateAtCenterRef.current = centerOfGravity;
+                        if (selectedTimeScale !== optimalTimeScale) {
+                          setSearchParams(
+                            {
+                              timeScale: optimalTimeScale,
+                            },
+                            {
+                              replace: true,
+                            }
+                          );
+                        } else {
+                          scrollToDate(centerOfGravity);
+                        }
+                      }}
+                      sx={{
+                        px: 1,
+                        minWidth: 'auto !important',
+                        width: 32,
+                      }}
+                    >
+                      <HighlightAltIcon />
+                    </Button>
+                  </Tooltip>
+                ) : null}
+                <ButtonGroup
+                  size="small"
+                  variant="contained"
+                  color="inherit"
+                  disableElevation
+                  sx={{
+                    display: 'flex',
+                  }}
+                >
+                  <Button
                     onClick={() => {
-                      lastDateAtCenterRef.current = centerOfGravity;
-                      if (selectedTimeScale !== optimalTimeScale) {
-                        setSearchParams(
-                          {
-                            timeScale: optimalTimeScale,
-                          },
-                          {
-                            replace: true,
-                          }
-                        );
-                      } else {
-                        scrollToDate(centerOfGravity);
-                      }
+                      timelineContainerElementRef.current?.parentElement?.scrollBy(
+                        {
+                          left: -unitTimeScaleWidth,
+                          behavior: 'smooth',
+                        }
+                      );
                     }}
                     sx={{
                       px: 1,
@@ -1212,58 +1275,31 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                       width: 32,
                     }}
                   >
-                    <HighlightAltIcon />
+                    <NavigateBeforeIcon />
                   </Button>
-                </Tooltip>
-              ) : null}
-              <ButtonGroup
-                size="small"
-                variant="contained"
-                color="inherit"
-                disableElevation
-                sx={{
-                  display: 'flex',
-                }}
-              >
-                <Button
-                  onClick={() => {
-                    timelineContainerElementRef.current?.parentElement?.scrollBy(
-                      {
-                        left: -unitTimeScaleWidth,
-                        behavior: 'smooth',
-                      }
-                    );
-                  }}
-                  sx={{
-                    px: 1,
-                    minWidth: 'auto !important',
-                    width: 32,
-                  }}
-                >
-                  <NavigateBeforeIcon />
-                </Button>
-                <Button
-                  onClick={() => {
-                    timelineContainerElementRef.current?.parentElement?.scrollBy(
-                      {
-                        left: unitTimeScaleWidth,
-                        behavior: 'smooth',
-                      }
-                    );
-                  }}
-                  sx={{
-                    px: 1,
-                    minWidth: 'auto !important',
-                    width: 32,
-                  }}
-                >
-                  <NavigateNextIcon />
-                </Button>
-              </ButtonGroup>
-            </Stack>
+                  <Button
+                    onClick={() => {
+                      timelineContainerElementRef.current?.parentElement?.scrollBy(
+                        {
+                          left: unitTimeScaleWidth,
+                          behavior: 'smooth',
+                        }
+                      );
+                    }}
+                    sx={{
+                      px: 1,
+                      minWidth: 'auto !important',
+                      width: 32,
+                    }}
+                  >
+                    <NavigateNextIcon />
+                  </Button>
+                </ButtonGroup>
+              </Stack>
+            </Grid>
           </Grid>
-        </Grid>
-      </Box>
+        </Box>
+      ) : null}
       <Table
         ref={mergeRefs([timelineContainerElementRef, ref])}
         className={clsx(className, classes.root)}
