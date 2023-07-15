@@ -5,12 +5,10 @@ import {
 import {
   Box,
   BoxProps,
-  Button,
   ComponentsOverrides,
   ComponentsProps,
   ComponentsVariants,
   Grid,
-  Stack,
   Tooltip,
   TooltipProps,
   Typography,
@@ -18,7 +16,6 @@ import {
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
   generateUtilityClasses,
-  outlinedInputClasses,
   useMediaQuery,
   useTheme,
   useThemeProps,
@@ -49,11 +46,15 @@ import { mergeRefs } from 'react-merge-refs';
 import * as Yup from 'yup';
 
 import { useReactRouterDOMSearchParams } from '../../hooks/ReactRouterDOM';
-import DataDropdownField, {
-  dataDropdownFieldClasses,
-} from '../InputFields/DataDropdownField';
 import { BaseDataRow, Table, TableColumn, TableProps } from '../Table';
-import { useScrollTimelineTools } from './hooks';
+import { useScrollTimelineTools, useTimeScaleTool } from './hooks';
+import {
+  TimeScaleOption,
+  fullMonthLabels,
+  quarterLabels,
+  shortMonthLabels,
+  timeScaleOptions,
+} from './models';
 import TimeScaleMeter, {
   TimeScaleMeterProps,
   TimeScaleRow,
@@ -93,47 +94,6 @@ declare module '@mui/material/styles/components' {
 }
 
 const baseTimeScaleWidth = 120;
-const fullMonthLabels = [
-  'January',
-  'Febuary',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
-];
-const shortMonthLabels = [
-  'Jan',
-  'Feb',
-  'Mar',
-  'Apr',
-  'May',
-  'Jun',
-  'Jul',
-  'Aug',
-  'Sep',
-  'Oct',
-  'Nov',
-  'Dec',
-];
-
-export const timeScaleOptions = [
-  'Day',
-  'Week',
-  '2 week',
-  'Month',
-  'Quarter',
-  'Year',
-  '5 year',
-] as const;
-export type TimeScaleOption = (typeof timeScaleOptions)[number];
-
-const quarterLabels = ['Q1', 'Q2', 'Q3', 'Q4'] as const;
 
 export type TimeScaleConfiguration = {
   timeScaleRows: [TimeScaleRow[], TimeScaleRow[], TimeScaleRow[]];
@@ -234,7 +194,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     rowLabelsColumnWidth = 256,
     getTimelineDates,
     showToolBar = true,
-    supportedTimeScales = timeScaleOptions,
+    supportedTimeScales = [...timeScaleOptions],
     TimeScaleMeterProps = {},
     ...rest
   } = omit(props, 'parentBackgroundColor');
@@ -1005,6 +965,22 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     };
   }, []);
 
+  const { element: timeScaleToolElement } = useTimeScaleTool({
+    selectedTimeScale,
+    supportedTimeScales,
+    onSelectTimeScale: (timeScale) => {
+      lastDateAtCenterRef.current = currentDateAtCenterRef.current;
+      setSearchParams(
+        {
+          timeScale,
+        },
+        {
+          replace: true,
+        }
+      );
+    },
+  });
+
   const { element: scrollTimelineToolsElement } = useScrollTimelineTools({
     JumpToDateToolProps: {
       minDate: minCalendarDate,
@@ -1235,7 +1211,6 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
               pr: `${baseSpacingUnits}px`,
               pl: 1,
               py: 1,
-              alignItems: 'center',
               position: 'sticky',
               right: 0,
               display: 'inline-flex',
@@ -1245,76 +1220,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
               width: 'auto',
             }}
           >
-            <Grid item>
-              <Stack
-                direction="row"
-                sx={{
-                  gap: 0.5,
-                  alignItems: 'center',
-                }}
-              >
-                {!isSmallScreenSize ? (
-                  <Typography variant="body2">Timescale:</Typography>
-                ) : null}
-                <Button
-                  color="inherit"
-                  variant="contained"
-                  size="small"
-                  disableRipple
-                  sx={{
-                    minWidth: 0,
-                    p: 0,
-                  }}
-                >
-                  <DataDropdownField
-                    placeholder="Timescale"
-                    size="small"
-                    value={selectedTimeScale}
-                    options={supportedTimeScales.map((timeScaleOption) => {
-                      return {
-                        value: timeScaleOption,
-                        label: timeScaleOption,
-                      };
-                    })}
-                    onChange={(event) => {
-                      lastDateAtCenterRef.current =
-                        currentDateAtCenterRef.current;
-                      setSearchParams(
-                        {
-                          timeScale: (event.target.value as any) || null,
-                        },
-                        {
-                          replace: true,
-                        }
-                      );
-                    }}
-                    showClearButton={false}
-                    InputProps={{
-                      sx: {
-                        height: 32,
-                        pr: 0.5,
-                        [`.${outlinedInputClasses.notchedOutline}`]: {
-                          border: 'none',
-                        },
-                      },
-                    }}
-                    WrapperProps={{
-                      sx: {
-                        [`.${dataDropdownFieldClasses.selectedOptionsWrapper}`]:
-                          {
-                            top: 3,
-                            width: 'calc(100% - 22px) !important',
-                          },
-                      },
-                    }}
-                    enableLoadingState={false}
-                    sx={{
-                      width: 90,
-                    }}
-                  />
-                </Button>
-              </Stack>
-            </Grid>
+            <Grid item>{timeScaleToolElement}</Grid>
             <Grid item>{scrollTimelineToolsElement}</Grid>
           </Grid>
         </Box>
