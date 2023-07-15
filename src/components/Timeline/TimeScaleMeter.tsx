@@ -8,9 +8,10 @@ import {
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
   generateUtilityClasses,
+  useTheme,
   useThemeProps,
 } from '@mui/material';
-import Box from '@mui/material/Box';
+import Box, { BoxProps } from '@mui/material/Box';
 import clsx from 'clsx';
 import { ReactNode, forwardRef, useMemo, useState } from 'react';
 
@@ -50,15 +51,17 @@ declare module '@mui/material/styles/components' {
   }
 }
 
+export interface TimeScaleRow extends Partial<BoxProps> {
+  id: string;
+  label: ReactNode;
+}
+
 export interface TimeScaleMeterProps extends Partial<StackProps> {
-  timeScaleRows: [
-    { id: string; label: ReactNode }[],
-    { id: string; label: ReactNode }[],
-    { id: string; label: ReactNode }[]
-  ];
+  timeScaleRows: [TimeScaleRow[], TimeScaleRow[], TimeScaleRow[]];
   timeScaleWidth: number;
   scrollingElement?: HTMLElement | null;
   leftOffset?: number;
+  variant?: 'default' | 'compact';
 }
 
 export function getTimeScaleMeterUtilityClass(slot: string): string {
@@ -87,6 +90,7 @@ export const TimeScaleMeter = forwardRef<HTMLDivElement, TimeScaleMeterProps>(
       timeScaleWidth,
       scrollingElement,
       leftOffset = 0,
+      variant = 'default',
       sx,
       ...rest
     } = props;
@@ -102,6 +106,8 @@ export const TimeScaleMeter = forwardRef<HTMLDivElement, TimeScaleMeterProps>(
         }
       })()
     );
+
+    const { palette } = useTheme();
 
     const [timeScaleLevel1, timeScaleLevel2, timeScaleLevel3] = timeScaleRows;
     const {
@@ -197,54 +203,65 @@ export const TimeScaleMeter = forwardRef<HTMLDivElement, TimeScaleMeterProps>(
           ...sx,
         }}
       >
-        <Box
-          sx={{
-            display: 'flex',
-            height: 56,
-            alignItems: 'center',
-          }}
-        >
-          <Box
-            sx={{
-              width: timeScaleLevel1TickWidth * timeScaleLevel1Offset,
-              minWidth: 0,
-              display: 'flex',
-              alignItems: 'center',
-            }}
-          />
-          {displayableTimeScaleLevel1.map(({ id, label }) => {
-            return (
-              <Box
-                key={id}
-                className={clsx(classes.timeScaleLevel1)}
-                sx={{
-                  width: timeScaleLevel1TickWidth,
-                  minWidth: 0,
-                  display: 'flex',
-                  alignItems: 'center',
-                }}
-              >
+        {(() => {
+          switch (variant) {
+            case 'default':
+              return (
                 <Box
-                  className={clsx(classes.timeScaleLevel1Tick)}
                   sx={{
-                    position: 'sticky',
-                    overflow: 'hidden',
+                    display: 'flex',
+                    height: 56,
+                    alignItems: 'center',
                   }}
                 >
-                  <Typography
-                    variant="body2"
-                    noWrap
+                  <Box
                     sx={{
-                      fontWeight: 500,
+                      width: timeScaleLevel1TickWidth * timeScaleLevel1Offset,
+                      minWidth: 0,
+                      display: 'flex',
+                      alignItems: 'center',
                     }}
-                  >
-                    {label}
-                  </Typography>
+                  />
+                  {displayableTimeScaleLevel1.map(
+                    ({ id, label, sx, ...rest }) => {
+                      return (
+                        <Box
+                          {...rest}
+                          key={id}
+                          className={clsx(classes.timeScaleLevel1)}
+                          sx={{
+                            ...sx,
+                            width: timeScaleLevel1TickWidth,
+                            minWidth: 0,
+                            display: 'flex',
+                            alignItems: 'center',
+                          }}
+                        >
+                          <Box
+                            className={clsx(classes.timeScaleLevel1Tick)}
+                            sx={{
+                              position: 'sticky',
+                              overflow: 'hidden',
+                            }}
+                          >
+                            <Typography
+                              variant="body2"
+                              noWrap
+                              sx={{
+                                fontWeight: 500,
+                              }}
+                            >
+                              {label}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      );
+                    }
+                  )}
                 </Box>
-              </Box>
-            );
-          })}
-        </Box>
+              );
+          }
+        })()}
         <Box
           sx={{
             display: 'flex',
@@ -258,17 +275,25 @@ export const TimeScaleMeter = forwardRef<HTMLDivElement, TimeScaleMeterProps>(
               alignItems: 'center',
             }}
           />
-          {displayableTimeScaleLevel2.map(({ id, label }) => {
+          {displayableTimeScaleLevel2.map(({ id, label, sx, ...rest }) => {
             return (
               <Box
+                {...rest}
                 key={id}
                 sx={{
+                  ...sx,
                   width: timeScaleLevel2TickWidth,
                   minWidth: 0,
-                  overflow: 'hidden',
                   height: 24,
                   display: 'flex',
                   alignItems: 'center',
+                  ...(() => {
+                    if (variant === 'default') {
+                      return {
+                        overflow: 'hidden',
+                      };
+                    }
+                  })(),
                 }}
               >
                 <Typography
@@ -277,6 +302,13 @@ export const TimeScaleMeter = forwardRef<HTMLDivElement, TimeScaleMeterProps>(
                   sx={{
                     fontSize: 11,
                     fontWeight: 700,
+                    ...(() => {
+                      if (variant === 'compact') {
+                        return {
+                          transform: 'translateX(-50%)',
+                        };
+                      }
+                    })(),
                   }}
                 >
                   {label}
@@ -298,28 +330,46 @@ export const TimeScaleMeter = forwardRef<HTMLDivElement, TimeScaleMeterProps>(
               alignItems: 'center',
             }}
           />
-          {displayableTimeScaleLevel3.map(({ id, label }) => {
+          {displayableTimeScaleLevel3.map(({ id, label, sx, ...rest }) => {
             return (
               <Box
+                {...rest}
                 key={id}
                 sx={{
+                  ...(() => {
+                    if (variant === 'compact') {
+                      return {
+                        borderLeft: `1px solid ${palette.divider}`,
+                        height: 11,
+                      };
+                    }
+                    return {
+                      height: 24,
+                    };
+                  })(),
+                  ...sx,
                   width: timeScaleLevel3TickWidth,
                   minWidth: 0,
-                  height: 24,
                   overflow: 'hidden',
                   display: 'flex',
                   alignItems: 'center',
                 }}
               >
-                <Typography
-                  variant="body2"
-                  noWrap
-                  sx={{
-                    fontSize: 12,
-                  }}
-                >
-                  {label}
-                </Typography>
+                {(() => {
+                  if (variant === 'default') {
+                    return (
+                      <Typography
+                        variant="body2"
+                        noWrap
+                        sx={{
+                          fontSize: 12,
+                        }}
+                      >
+                        {label}
+                      </Typography>
+                    );
+                  }
+                })()}
               </Box>
             );
           })}
