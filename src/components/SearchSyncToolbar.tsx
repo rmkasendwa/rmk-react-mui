@@ -8,6 +8,8 @@ import {
   ComponentsOverrides,
   ComponentsProps,
   ComponentsVariants,
+  Divider,
+  DividerProps,
   IconButton,
   IconButtonProps,
   Tooltip,
@@ -104,9 +106,14 @@ export interface IconButtonTool
 
 export interface ElementTool extends BaseToolOptions {
   element?: ReactNode;
+  collapsedElement?: ReactNode;
 }
 
-export type Tool = ButtonTool | IconButtonTool | ElementTool;
+export interface DividerTool extends Partial<DividerProps>, BaseToolOptions {
+  type: 'divider';
+}
+
+export type Tool = ButtonTool | IconButtonTool | ElementTool | DividerTool;
 
 const MAX_BUTTON_WIDTH = 150;
 
@@ -124,6 +131,9 @@ export const getToolNodes = (
         const { getToolElement } = tool;
         const toolElement = (() => {
           if ('element' in tool) {
+            if (index >= tools.length - collapsedWidthToolIndex) {
+              return tool.collapsedElement;
+            }
             return tool.element;
           }
           if ('type' in tool) {
@@ -222,6 +232,14 @@ export const getToolNodes = (
                 }
                 return buttonElement;
               }
+              case 'divider': {
+                return (
+                  <Divider
+                    {...omit(tool, 'type', 'extraToolProps')}
+                    orientation="horizontal"
+                  />
+                );
+              }
             }
           }
         })();
@@ -230,6 +248,9 @@ export const getToolNodes = (
         }
         return toolElement;
       }
+    })
+    .filter((tool) => {
+      return tool != null;
     });
 };
 
