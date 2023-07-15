@@ -586,14 +586,22 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
             (() => {
               if (TimeScaleMeterPropsVariant === 'compact') {
                 return timelineYears.flatMap((year) => {
-                  return fullMonthLabels.map((label, monthLabelIndex) => {
+                  return fullMonthLabels.map((label, monthIndex) => {
                     return {
                       id: uniqueId(),
                       label: (() => {
                         if (
                           selectedTimeScale === 'Quarter' ||
-                          monthLabelIndex === 0
+                          monthIndex === 0
                         ) {
+                          if (
+                            selectedTimeScale === 'Quarter' &&
+                            monthIndex % 3 === 0
+                          ) {
+                            return `Q${
+                              Math.floor(monthIndex / 3) + 1
+                            } ${label.slice(0, 3)} ${year}`;
+                          }
                           return `${label.slice(0, 3)} ${year}`;
                         }
                         return label.slice(0, 3);
@@ -602,8 +610,9 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                         color: alpha(palette.text.primary, 0.3),
                         ...(() => {
                           if (
-                            selectedTimeScale === 'Quarter' ||
-                            monthLabelIndex === 0
+                            (selectedTimeScale === 'Quarter' &&
+                              monthIndex % 3 === 0) ||
+                            monthIndex === 0
                           ) {
                             return {
                               color: palette.text.primary,
@@ -643,7 +652,8 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                       sx: {
                         ...(() => {
                           if (
-                            selectedTimeScale === 'Quarter' ||
+                            (selectedTimeScale === 'Quarter' &&
+                              monthIndex % 3 === 0) ||
                             (monthIndex === 0 && periodIndex === 0)
                           ) {
                             return {
@@ -743,9 +753,8 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         case 'Year':
           return getMonthlyTickTimeScale({
             monthSplit: (() => {
-              switch (TimeScaleMeterPropsVariant) {
-                case 'compact':
-                  return 2;
+              if (TimeScaleMeterPropsVariant === 'compact') {
+                return 2;
               }
               return 3;
             })(),
