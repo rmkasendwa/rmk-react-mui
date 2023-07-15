@@ -19,6 +19,7 @@ import {
   Tooltip,
   TooltipProps,
   Typography,
+  alpha,
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
   generateUtilityClasses,
@@ -59,7 +60,11 @@ import DataDropdownField, {
   dataDropdownFieldClasses,
 } from '../InputFields/DataDropdownField';
 import { BaseDataRow, Table, TableColumn, TableProps } from '../Table';
-import TimeScaleMeter, { timeScaleMeterClasses } from './TimeScaleMeter';
+import TimeScaleMeter, {
+  TimeScaleMeterProps,
+  TimeScaleRow,
+  timeScaleMeterClasses,
+} from './TimeScaleMeter';
 
 export interface TimelineClasses {
   /** Styles applied to the root element. */
@@ -137,11 +142,7 @@ export type TimeScaleOption = (typeof timeScaleOptions)[number];
 const quarterLabels = ['Q1', 'Q2', 'Q3', 'Q4'] as const;
 
 export type TimeScaleConfiguration = {
-  timeScaleRows: [
-    { id: string; label: ReactNode }[],
-    { id: string; label: ReactNode }[],
-    { id: string; label: ReactNode }[]
-  ];
+  timeScaleRows: [TimeScaleRow[], TimeScaleRow[], TimeScaleRow[]];
   unitTimeScaleWidth: number;
   timeScaleWidth: number;
 };
@@ -185,6 +186,16 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
   rowLabelsColumnWidth?: number;
   showToolBar?: boolean;
   supportedTimeScales?: TimeScaleOption[];
+  TimeScaleMeterProps?: Partial<
+    Omit<
+      TimeScaleMeterProps,
+      | 'timeScaleRows'
+      | 'timeScaleWidth'
+      | 'scrollingElement'
+      | 'leftOffset'
+      | 'ref'
+    >
+  >;
 }
 
 export function getTimelineUtilityClass(slot: string): string {
@@ -230,6 +241,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     getTimelineDates,
     showToolBar = true,
     supportedTimeScales = timeScaleOptions,
+    TimeScaleMeterProps = {},
     ...rest
   } = omit(props, 'parentBackgroundColor');
 
@@ -246,6 +258,12 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       }
     })()
   );
+
+  const {
+    variant: TimeScaleMeterPropsVariant = 'default',
+    sx: TimeScaleMeterPropsSx,
+    ...TimeScaleMeterPropsRest
+  } = TimeScaleMeterProps;
 
   const isInitialMountRef = useRef(true);
   const currentDateAtCenterRef = useRef<Date | null>(null);
@@ -565,14 +583,47 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                 };
               });
             }),
-            timelineYears.flatMap(() => {
-              return fullMonthLabels.map((label) => {
-                return {
-                  id: uniqueId(),
-                  label,
-                };
+            (() => {
+              if (TimeScaleMeterPropsVariant === 'compact') {
+                return timelineYears.flatMap((year) => {
+                  return fullMonthLabels.map((label, monthLabelIndex) => {
+                    return {
+                      id: uniqueId(),
+                      label: (() => {
+                        if (
+                          selectedTimeScale === 'Quarter' ||
+                          monthLabelIndex === 0
+                        ) {
+                          return `${label.slice(0, 3)} ${year}`;
+                        }
+                        return label.slice(0, 3);
+                      })(),
+                      sx: {
+                        color: alpha(palette.text.primary, 0.3),
+                        ...(() => {
+                          if (
+                            selectedTimeScale === 'Quarter' ||
+                            monthLabelIndex === 0
+                          ) {
+                            return {
+                              color: palette.text.primary,
+                            };
+                          }
+                        })(),
+                      },
+                    } as TimeScaleRow;
+                  });
+                });
+              }
+              return timelineYears.flatMap(() => {
+                return fullMonthLabels.map((label) => {
+                  return {
+                    id: uniqueId(),
+                    label,
+                  };
+                });
               });
-            }),
+            })(),
             timelineYears.flatMap((_, yearIndex) => {
               return Array.from({ length: 12 }).flatMap((_, monthIndex) => {
                 return Array.from({ length: monthSplit }).map(
@@ -589,6 +640,18 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                     return {
                       id: uniqueId(),
                       label: unitTickDate.getDate(),
+                      sx: {
+                        ...(() => {
+                          if (
+                            selectedTimeScale === 'Quarter' ||
+                            (monthIndex === 0 && periodIndex === 0)
+                          ) {
+                            return {
+                              borderLeftColor: palette.text.primary,
+                            };
+                          }
+                        })(),
+                      },
                     };
                   }
                 );
@@ -679,7 +742,13 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           });
         case 'Year':
           return getMonthlyTickTimeScale({
-            monthSplit: 3,
+            monthSplit: (() => {
+              switch (TimeScaleMeterPropsVariant) {
+                case 'compact':
+                  return 2;
+              }
+              return 3;
+            })(),
             unitTimeScaleWidth: baseTimeScaleWidth * 12,
           });
         case '5 year':
@@ -714,7 +783,9 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           };
       }
     }, [
+      TimeScaleMeterPropsVariant,
       minCalendarDate,
+      palette.text.primary,
       selectedTimeScale,
       timelineYears,
       totalNumberOfDays,
@@ -914,13 +985,16 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       id: 'timeline',
       label: (
         <TimeScaleMeter
+          {...TimeScaleMeterPropsRest}
           {...{ timeScaleRows, timeScaleWidth }}
           scrollingElement={timelineContainerElementRef.current?.parentElement}
           leftOffset={
             (shouldShowRowLabelsColumn ? rowLabelsColumnWidth : 0) +
             baseSpacingUnits
           }
+          variant={TimeScaleMeterPropsVariant}
           sx={{
+            ...TimeScaleMeterPropsSx,
             [`.${timeScaleMeterClasses.timeScaleLevel1Tick}`]: {
               left:
                 (shouldShowRowLabelsColumn ? rowLabelsColumnWidth : 0) +
