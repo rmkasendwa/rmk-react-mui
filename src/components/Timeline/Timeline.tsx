@@ -2,15 +2,10 @@ import {
   createDateWithoutTimezoneOffset,
   dateStringHasTimeComponent,
 } from '@infinite-debugger/rmk-utils/dates';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import HighlightAltIcon from '@mui/icons-material/HighlightAlt';
-import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
-import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import {
   Box,
   BoxProps,
   Button,
-  ButtonGroup,
   ComponentsOverrides,
   ComponentsProps,
   ComponentsVariants,
@@ -54,12 +49,11 @@ import { mergeRefs } from 'react-merge-refs';
 import * as Yup from 'yup';
 
 import { useReactRouterDOMSearchParams } from '../../hooks/ReactRouterDOM';
-import { usePopupTool } from '../../hooks/Tools/PopupTool';
-import DatePicker from '../DatePicker';
 import DataDropdownField, {
   dataDropdownFieldClasses,
 } from '../InputFields/DataDropdownField';
 import { BaseDataRow, Table, TableColumn, TableProps } from '../Table';
+import { useScrollTimelineTools } from './hooks';
 import TimeScaleMeter, {
   TimeScaleMeterProps,
   TimeScaleRow,
@@ -476,30 +470,27 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     return '5 year';
   })();
 
-  const {
-    icon: jumpToDateIcon,
-    popupElement: jumpToDatePopupElement,
-    onClick: jumpToDateOnClick,
-    extraToolProps: { closePopup: jumpToDateClosePopup },
-    ref: jumpToDateAnchorRef,
-  } = usePopupTool({
-    bodyContent: (
-      <DatePicker
-        {...{ minDate: minCalendarDate, maxDate: maxCalendarDate }}
-        selected={currentDateAtCenterRef.current}
-        onChange={(selectedDate) => {
-          if (selectedDate) {
-            selectedDate.setHours(0, 0, 0, 0);
-            scrollToDate(selectedDate);
-          }
-          jumpToDateClosePopup();
-        }}
-      />
-    ),
-    label: 'Jump to date',
-    icon: <CalendarTodayIcon />,
-    wrapBodyContentInCard: false,
-  });
+  const scrollToDate = (date: Date) => {
+    if (
+      timelineContainerElementRef.current?.parentElement &&
+      isAfter(date, minCalendarDate) &&
+      isBefore(date, maxCalendarDate)
+    ) {
+      const offsetPercentage =
+        differenceInHours(date, minCalendarDate) / totalNumberOfHours;
+      const { parentElement } = timelineContainerElementRef.current;
+      const { scrollWidth, offsetWidth } = parentElement;
+      parentElement.scrollTo({
+        left:
+          Math.round(scrollWidth * offsetPercentage) +
+          baseSpacingUnits -
+          Math.round(offsetWidth / 2),
+        behavior: 'smooth',
+      });
+    }
+  };
+  const scrollToDateRef = useRef(scrollToDate);
+  scrollToDateRef.current = scrollToDate;
 
   const selectedTimeScale = ((): TimeScaleOption => {
     if (searchParamsSelectedTimeScale) {
@@ -996,34 +987,6 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     }
   };
 
-  const scrollToDate = (date: Date) => {
-    if (
-      timelineContainerElementRef.current?.parentElement &&
-      isAfter(date, minCalendarDate) &&
-      isBefore(date, maxCalendarDate)
-    ) {
-      const offsetPercentage =
-        differenceInHours(date, minCalendarDate) / totalNumberOfHours;
-      const { parentElement } = timelineContainerElementRef.current;
-      const { scrollWidth, offsetWidth } = parentElement;
-      parentElement.scrollTo({
-        left:
-          Math.round(scrollWidth * offsetPercentage) +
-          baseSpacingUnits -
-          Math.round(offsetWidth / 2),
-        behavior: 'smooth',
-      });
-    }
-  };
-  const scrollToDateRef = useRef(scrollToDate);
-  scrollToDateRef.current = scrollToDate;
-
-  const scrollToToday = () => {
-    scrollToDate(new Date());
-  };
-  const scrollToTodayRef = useRef(scrollToToday);
-  scrollToTodayRef.current = scrollToToday;
-
   useEffect(() => {
     scrollToDateRef.current(centerOfGravity);
   }, [centerOfGravity]);
@@ -1041,6 +1004,44 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       isInitialMountRef.current = true;
     };
   }, []);
+
+  const { element: scrollTimelineToolsElement } = useScrollTimelineTools({
+    JumpToDateToolProps: {
+      minDate: minCalendarDate,
+      maxDate: maxCalendarDate,
+      selectedDate: currentDateAtCenterRef.current,
+    },
+    scrollToDate,
+    showJumpToOptimalTimeScaleTool:
+      selectedTimeScale !== optimalTimeScale || !isTimelineAtCenterOfGravity,
+    jumpToOptimalTimeScale: () => {
+      lastDateAtCenterRef.current = centerOfGravity;
+      if (selectedTimeScale !== optimalTimeScale) {
+        setSearchParams(
+          {
+            timeScale: optimalTimeScale,
+          },
+          {
+            replace: true,
+          }
+        );
+      } else {
+        scrollToDate(centerOfGravity);
+      }
+    },
+    jumpToPreviousUnitTimeScale: () => {
+      timelineContainerElementRef.current?.parentElement?.scrollBy({
+        left: -unitTimeScaleWidth,
+        behavior: 'smooth',
+      });
+    },
+    jumpToNextUnitTimeScale: () => {
+      timelineContainerElementRef.current?.parentElement?.scrollBy({
+        left: unitTimeScaleWidth,
+        behavior: 'smooth',
+      });
+    },
+  });
 
   const columns: TableColumn<RecordRow>[] = [
     {
@@ -1314,125 +1315,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                 </Button>
               </Stack>
             </Grid>
-            <Grid item>
-              <Stack
-                direction="row"
-                sx={{
-                  gap: 0.5,
-                  alignItems: 'center',
-                }}
-              >
-                {!isSmallScreenSize ? (
-                  <Typography variant="body2">Jump to:</Typography>
-                ) : null}
-                <Button
-                  variant="contained"
-                  color="inherit"
-                  size="small"
-                  onClick={() => {
-                    scrollToToday();
-                  }}
-                  sx={{
-                    height: 32,
-                  }}
-                >
-                  Today
-                </Button>
-                <Tooltip title="Jump to date">
-                  <Button
-                    ref={jumpToDateAnchorRef}
-                    variant="contained"
-                    color="inherit"
-                    size="small"
-                    onClick={jumpToDateOnClick}
-                    sx={{
-                      px: 1,
-                      minWidth: 'auto !important',
-                      width: 32,
-                    }}
-                  >
-                    {jumpToDateIcon}
-                  </Button>
-                </Tooltip>
-                {jumpToDatePopupElement}
-                {selectedTimeScale !== optimalTimeScale ||
-                !isTimelineAtCenterOfGravity ? (
-                  <Tooltip title="Jump to optimal timescale">
-                    <Button
-                      variant="contained"
-                      color="inherit"
-                      size="small"
-                      onClick={() => {
-                        lastDateAtCenterRef.current = centerOfGravity;
-                        if (selectedTimeScale !== optimalTimeScale) {
-                          setSearchParams(
-                            {
-                              timeScale: optimalTimeScale,
-                            },
-                            {
-                              replace: true,
-                            }
-                          );
-                        } else {
-                          scrollToDate(centerOfGravity);
-                        }
-                      }}
-                      sx={{
-                        px: 1,
-                        minWidth: 'auto !important',
-                        width: 32,
-                      }}
-                    >
-                      <HighlightAltIcon />
-                    </Button>
-                  </Tooltip>
-                ) : null}
-                <ButtonGroup
-                  size="small"
-                  variant="contained"
-                  color="inherit"
-                  disableElevation
-                  sx={{
-                    display: 'flex',
-                  }}
-                >
-                  <Button
-                    onClick={() => {
-                      timelineContainerElementRef.current?.parentElement?.scrollBy(
-                        {
-                          left: -unitTimeScaleWidth,
-                          behavior: 'smooth',
-                        }
-                      );
-                    }}
-                    sx={{
-                      px: 1,
-                      minWidth: 'auto !important',
-                      width: 32,
-                    }}
-                  >
-                    <NavigateBeforeIcon />
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      timelineContainerElementRef.current?.parentElement?.scrollBy(
-                        {
-                          left: unitTimeScaleWidth,
-                          behavior: 'smooth',
-                        }
-                      );
-                    }}
-                    sx={{
-                      px: 1,
-                      minWidth: 'auto !important',
-                      width: 32,
-                    }}
-                  >
-                    <NavigateNextIcon />
-                  </Button>
-                </ButtonGroup>
-              </Stack>
-            </Grid>
+            <Grid item>{scrollTimelineToolsElement}</Grid>
           </Grid>
         </Box>
       ) : null}
