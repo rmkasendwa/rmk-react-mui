@@ -170,6 +170,9 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
     maxDate: Date;
   }) => void;
   onChangeCurrentDateAtCenter?: (currentDateAtCenter: Date) => void;
+  onChangeShowJumpToOptimalTimeScaleTool: (
+    showJumpToOptimalTimeScaleTool: boolean
+  ) => void;
   getScrollToDateFunction?: (scrollToDate: ScrollToDateFunction) => void;
   getSelectTimeScaleFunction?: (
     selectTimeScale: SelectTimeScaleCallbackFunction
@@ -238,6 +241,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     TimeScaleToolProps,
     onChangeTimelineDateBounds,
     onChangeCurrentDateAtCenter,
+    onChangeShowJumpToOptimalTimeScaleTool,
     ...rest
   } = omit(props, 'parentBackgroundColor');
 
@@ -278,6 +282,12 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
 
   const onChangeTimelineDateBoundsRef = useRef(onChangeTimelineDateBounds);
   onChangeTimelineDateBoundsRef.current = onChangeTimelineDateBounds;
+
+  const onChangeShowJumpToOptimalTimeScaleToolRef = useRef(
+    onChangeShowJumpToOptimalTimeScaleTool
+  );
+  onChangeShowJumpToOptimalTimeScaleToolRef.current =
+    onChangeShowJumpToOptimalTimeScaleTool;
 
   const onChangeCurrentDateAtCenterRef = useRef(onChangeCurrentDateAtCenter);
   onChangeCurrentDateAtCenterRef.current = onChangeCurrentDateAtCenter;
@@ -1130,6 +1140,8 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     getJumpToNextUnitTimeScaleFunctionRef.current?.(jumpToNextUnitTimeScale);
   }, [jumpToNextUnitTimeScale]);
 
+  const showJumpToOptimalTimeScaleTool =
+    selectedTimeScale !== optimalTimeScale || !isTimelineAtCenterOfGravity;
   const { element: scrollTimelineToolsElement } = useScrollTimelineTools({
     JumpToDateToolProps: {
       minDate: minCalendarDate,
@@ -1137,12 +1149,17 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       selectedDate: currentDateAtCenterRef.current,
     },
     scrollToDate,
-    showJumpToOptimalTimeScaleTool:
-      selectedTimeScale !== optimalTimeScale || !isTimelineAtCenterOfGravity,
+    showJumpToOptimalTimeScaleTool,
     jumpToOptimalTimeScale,
     jumpToPreviousUnitTimeScale,
     jumpToNextUnitTimeScale,
   });
+
+  useEffect(() => {
+    onChangeShowJumpToOptimalTimeScaleToolRef.current?.(
+      showJumpToOptimalTimeScaleTool
+    );
+  }, [showJumpToOptimalTimeScaleTool]);
   //#endregion
 
   const columns: TableColumn<RecordRow>[] = [

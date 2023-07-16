@@ -1843,6 +1843,8 @@ const BaseRecordsExplorer = <
       }
     | undefined
   >();
+  const [showJumpToOptimalTimeScaleTool, setShowJumpToOptimalTimeScaleTool] =
+    useState(false);
 
   const timeScaleTool = useTimeScaleTool({
     ...timelineView?.TimeScaleToolProps,
@@ -1860,6 +1862,7 @@ const BaseRecordsExplorer = <
       maxDate: timelineDateBounds?.maxDate,
       selectedDate: currentDateAtCenterRef.current,
     },
+    showJumpToOptimalTimeScaleTool,
   });
   //#endregion
 
@@ -2323,6 +2326,13 @@ const BaseRecordsExplorer = <
                 }}
                 onChangeCurrentDateAtCenter={(currentDateAtCenter) => {
                   currentDateAtCenterRef.current = currentDateAtCenter;
+                }}
+                onChangeShowJumpToOptimalTimeScaleTool={(
+                  showJumpToOptimalTimeScaleTool
+                ) => {
+                  setShowJumpToOptimalTimeScaleTool(
+                    showJumpToOptimalTimeScaleTool
+                  );
                 }}
                 getScrollToDateFunction={(scrollToDate) => {
                   scrollToDateRef.current = scrollToDate;

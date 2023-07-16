@@ -93,6 +93,11 @@ export const DatePicker = forwardRef<HTMLDivElement, DatePickerProps>(
         className={clsx(classes.root)}
         sx={{
           ...sx,
+          [`&>div`]: {
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          },
           [`
           .react-datepicker,
           .react-datepicker__header,
