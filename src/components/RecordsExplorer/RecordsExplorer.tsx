@@ -101,6 +101,7 @@ import Timeline, {
   SelectTimeScaleCallbackFunction,
   TimeScaleOption,
   TimelineProps,
+  timelineSearchParamValidationSpec,
   useScrollTimelineTools,
   useTimeScaleTool,
 } from '../Timeline';
@@ -1021,6 +1022,7 @@ const BaseRecordsExplorer = <
     useReactRouterDOMSearchParams({
       mode: 'json',
       spec: {
+        ...timelineSearchParamValidationSpec,
         view: Yup.string(),
         groupBy: Yup.array().of(
           Yup.object({
@@ -1090,19 +1092,16 @@ const BaseRecordsExplorer = <
     'editRecord',
   ];
 
-  const updateChangedSearchParamKeys = (
-    extraSearchParamKeys: string[] = []
-  ) => {
+  const updateChangedSearchParamKeys = () => {
     const changedSearchParamKeys = [
       ...new Set([
-        ...[
-          ...Object.keys(searchParams).filter((key) => {
+        ...Object.keys(searchParams)
+          .filter((key) => {
             return !unTrackableSearchParams.includes(key);
+          })
+          .map((key) => {
+            return hashIt(key).toString(36).slice(0, 3);
           }),
-          ...extraSearchParamKeys,
-        ].map((key) => {
-          return hashIt(key).toString(36).slice(0, 3);
-        }),
       ]),
     ];
     if (
@@ -2302,11 +2301,6 @@ const BaseRecordsExplorer = <
                 getDefaultViewResetFunction={(resetTimelineToDefaultView) => {
                   resetTimelineToDefaultViewRef.current =
                     resetTimelineToDefaultView;
-                }}
-                onChangeSearchParams={(changedSearchParamKeys) => {
-                  updateChangedSearchParamKeysRef.current(
-                    changedSearchParamKeys
-                  );
                 }}
                 onChangeSelectedTimeScale={(selectedTimeScale) => {
                   setSelectedTimeScale(selectedTimeScale);
