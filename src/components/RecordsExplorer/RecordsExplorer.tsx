@@ -1823,6 +1823,7 @@ const BaseRecordsExplorer = <
   const { showSuccessMessage } = useMessagingContext();
 
   //#region Timeline view tools
+  const currentDateAtCenterRef = useRef<Date | null>(null);
   const selectTimeScaleRef = useRef<SelectTimeScaleCallbackFunction>();
   const scrollToDateRef = useRef<ScrollToDateFunction>();
   const jumpToOptimalTimeScaleRef = useRef<() => void>();
@@ -1835,6 +1836,13 @@ const BaseRecordsExplorer = <
 
   const [selectedTimeScale, setSelectedTimeScale] =
     useState<TimeScaleOption>('Year');
+  const [timelineDateBounds, setTimelineDateBounds] = useState<
+    | {
+        minDate: Date;
+        maxDate: Date;
+      }
+    | undefined
+  >();
 
   const timeScaleTool = useTimeScaleTool({
     ...timelineView?.TimeScaleToolProps,
@@ -1847,6 +1855,11 @@ const BaseRecordsExplorer = <
     jumpToOptimalTimeScale: jumpToOptimalTimeScaleRef.current,
     jumpToPreviousUnitTimeScale: jumpToPreviousUnitTimeScaleRef.current,
     jumpToNextUnitTimeScale: jumpToNextUnitTimeScaleRef.current,
+    JumpToDateToolProps: {
+      minDate: timelineDateBounds?.minDate,
+      maxDate: timelineDateBounds?.maxDate,
+      selectedDate: currentDateAtCenterRef.current,
+    },
   });
   //#endregion
 
@@ -2304,6 +2317,12 @@ const BaseRecordsExplorer = <
                 }}
                 onChangeSelectedTimeScale={(selectedTimeScale) => {
                   setSelectedTimeScale(selectedTimeScale);
+                }}
+                onChangeTimelineDateBounds={(dateBounds) => {
+                  setTimelineDateBounds(dateBounds);
+                }}
+                onChangeCurrentDateAtCenter={(currentDateAtCenter) => {
+                  currentDateAtCenterRef.current = currentDateAtCenter;
                 }}
                 getScrollToDateFunction={(scrollToDate) => {
                   scrollToDateRef.current = scrollToDate;
