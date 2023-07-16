@@ -165,6 +165,11 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
   >;
   TimeScaleToolProps?: Partial<TimeScaleToolProps>;
   onChangeSelectedTimeScale?: (selectedTimeScale: TimeScaleOption) => void;
+  onChangeTimelineDateBounds?: (dateBounds: {
+    minDate: Date;
+    maxDate: Date;
+  }) => void;
+  onChangeCurrentDateAtCenter?: (currentDateAtCenter: Date) => void;
   getScrollToDateFunction?: (scrollToDate: ScrollToDateFunction) => void;
   getSelectTimeScaleFunction?: (
     selectTimeScale: SelectTimeScaleCallbackFunction
@@ -231,6 +236,8 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     getSelectTimeScaleFunction,
     todayMarkerVariant = 'default',
     TimeScaleToolProps,
+    onChangeTimelineDateBounds,
+    onChangeCurrentDateAtCenter,
     ...rest
   } = omit(props, 'parentBackgroundColor');
 
@@ -268,6 +275,12 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
 
   const onChangeSelectedTimeScaleRef = useRef(onChangeSelectedTimeScale);
   onChangeSelectedTimeScaleRef.current = onChangeSelectedTimeScale;
+
+  const onChangeTimelineDateBoundsRef = useRef(onChangeTimelineDateBounds);
+  onChangeTimelineDateBoundsRef.current = onChangeTimelineDateBounds;
+
+  const onChangeCurrentDateAtCenterRef = useRef(onChangeCurrentDateAtCenter);
+  onChangeCurrentDateAtCenterRef.current = onChangeCurrentDateAtCenter;
 
   const getScrollToDateFunctionRef = useRef(getScrollToDateFunction);
   getScrollToDateFunctionRef.current = getScrollToDateFunction;
@@ -440,6 +453,13 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       allDates,
     };
   }, [endDateProperty, maxDateProp, minDateProp, rows, startDateProperty]);
+
+  useEffect(() => {
+    onChangeTimelineDateBoundsRef.current?.({
+      minDate: minCalendarDate,
+      maxDate: maxCalendarDate,
+    });
+  }, [maxCalendarDate, minCalendarDate]);
 
   const optimalTimeScale = ((): TimeScaleOption => {
     if (allDates.length <= 1) {
@@ -891,14 +911,16 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       const { parentElement } = timelineContainerElementRef.current;
       const scrollEventCallback = () => {
         const { scrollLeft, offsetWidth, scrollWidth } = parentElement;
-        currentDateAtCenterRef.current = addHours(
+        const dateAtCenter = addHours(
           minCalendarDate,
           totalNumberOfHours *
             ((scrollLeft - baseSpacingUnits + Math.round(offsetWidth / 2)) /
               scrollWidth)
         );
+        currentDateAtCenterRef.current = dateAtCenter;
+        onChangeCurrentDateAtCenterRef.current?.(dateAtCenter);
         setIsTimelineAtCenterOfGravity(
-          isSameDay(currentDateAtCenterRef.current!, centerOfGravity)
+          isSameDay(dateAtCenter, centerOfGravity)
         );
       };
       parentElement.addEventListener('scroll', scrollEventCallback);
