@@ -9,6 +9,16 @@ export const timeScaleOptions = [
 ] as const;
 export type TimeScaleOption = (typeof timeScaleOptions)[number];
 
+export const timeScaleOptionShortLabelMap: Record<TimeScaleOption, string> = {
+  Day: 'D',
+  Week: 'W',
+  '2 week': '2W',
+  Month: 'M',
+  Quarter: 'Q',
+  Year: 'Y',
+  '5 year': '5Y',
+};
+
 export const fullMonthLabels = [
   'January',
   'Febuary',

@@ -9,10 +9,15 @@ import {
 import { ReactNode } from 'react';
 
 import DataDropdownField, {
+  DataDropdownFieldProps,
   dataDropdownFieldClasses,
 } from '../../InputFields/DataDropdownField';
 import { ElementTool } from '../../SearchSyncToolbar';
-import { TimeScaleOption, timeScaleOptions } from '../models';
+import {
+  TimeScaleOption,
+  timeScaleOptionShortLabelMap,
+  timeScaleOptions,
+} from '../models';
 
 export type SelectTimeScaleCallbackFunction = (
   timeScale: TimeScaleOption | null
@@ -33,6 +38,34 @@ export const useTimeScaleTool = ({
 }: TimeScaleToolProps) => {
   const { breakpoints } = useTheme();
   const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
+
+  const dataDropdownProps: DataDropdownFieldProps = {
+    placeholder: label as string,
+    size: 'small',
+    value: selectedTimeScale,
+    onChange: (event) => {
+      onSelectTimeScale?.((event.target.value as any) || null);
+    },
+    showClearButton: false,
+    InputProps: {
+      sx: {
+        height: 32,
+        pr: 0.5,
+        [`.${outlinedInputClasses.notchedOutline}`]: {
+          border: 'none',
+        },
+      },
+    },
+    WrapperProps: {
+      sx: {
+        [`.${dataDropdownFieldClasses.selectedOptionsWrapper}`]: {
+          top: 3,
+          width: 'calc(100% - 22px) !important',
+        },
+      },
+    },
+    enableLoadingState: false,
+  };
 
   return {
     element: (
@@ -57,43 +90,46 @@ export const useTimeScaleTool = ({
           }}
         >
           <DataDropdownField
-            placeholder="Timescale"
-            size="small"
-            value={selectedTimeScale}
+            {...dataDropdownProps}
             options={supportedTimeScales.map((timeScaleOption) => {
               return {
                 value: timeScaleOption,
                 label: timeScaleOption,
               };
             })}
-            onChange={(event) => {
-              onSelectTimeScale?.((event.target.value as any) || null);
-            }}
-            showClearButton={false}
-            InputProps={{
-              sx: {
-                height: 32,
-                pr: 0.5,
-                [`.${outlinedInputClasses.notchedOutline}`]: {
-                  border: 'none',
-                },
-              },
-            }}
-            WrapperProps={{
-              sx: {
-                [`.${dataDropdownFieldClasses.selectedOptionsWrapper}`]: {
-                  top: 3,
-                  width: 'calc(100% - 22px) !important',
-                },
-              },
-            }}
-            enableLoadingState={false}
             sx={{
               width: 90,
             }}
           />
         </Button>
       </Stack>
+    ),
+    collapsedElement: (
+      <Button
+        color="inherit"
+        variant="contained"
+        size="small"
+        disableRipple
+        sx={{
+          minWidth: 0,
+          p: 0,
+        }}
+      >
+        <DataDropdownField
+          {...dataDropdownProps}
+          options={supportedTimeScales.map((timeScaleOption) => {
+            return {
+              value: timeScaleOption,
+              label: timeScaleOption,
+              selectedOptionLabel:
+                timeScaleOptionShortLabelMap[timeScaleOption],
+            };
+          })}
+          sx={{
+            width: 60,
+          }}
+        />
+      </Button>
     ),
   } as ElementTool;
 };

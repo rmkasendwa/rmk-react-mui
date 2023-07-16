@@ -577,37 +577,39 @@ const BaseDataDropdownField = <Entity,>(
       return (
         <>
           {multiple ? (
-            optionsToDisplay.map(({ label, icon, value }) => {
-              return (
-                <Chip
-                  key={value}
-                  {...SelectedOptionPillPropsRest}
-                  label={getDropdownOptionLabel({
-                    label,
-                    icon,
-                  })}
-                  onDelete={() => {
-                    setSelectedOptions((prevSelectedOptions) => {
-                      const nextSelectedOptions = prevSelectedOptions.filter(
-                        ({ value: optionValue }) => {
-                          return optionValue !== value;
-                        }
-                      );
-                      triggerChangeEvent(nextSelectedOptions);
-                      return nextSelectedOptions;
-                    });
-                  }}
-                  size="small"
-                  sx={{
-                    bgcolor: alpha(palette.divider, 0.08),
-                    ...SelectedOptionPillPropsSx,
-                    [`.${chipClasses.deleteIcon}`]: {
-                      pointerEvents: 'all',
-                    },
-                  }}
-                />
-              );
-            })
+            optionsToDisplay.map(
+              ({ selectedOptionLabel, label, icon, value }) => {
+                return (
+                  <Chip
+                    key={value}
+                    {...SelectedOptionPillPropsRest}
+                    label={getDropdownOptionLabel({
+                      label: selectedOptionLabel || label,
+                      icon,
+                    })}
+                    onDelete={() => {
+                      setSelectedOptions((prevSelectedOptions) => {
+                        const nextSelectedOptions = prevSelectedOptions.filter(
+                          ({ value: optionValue }) => {
+                            return optionValue !== value;
+                          }
+                        );
+                        triggerChangeEvent(nextSelectedOptions);
+                        return nextSelectedOptions;
+                      });
+                    }}
+                    size="small"
+                    sx={{
+                      bgcolor: alpha(palette.divider, 0.08),
+                      ...SelectedOptionPillPropsSx,
+                      [`.${chipClasses.deleteIcon}`]: {
+                        pointerEvents: 'all',
+                      },
+                    }}
+                  />
+                );
+              }
+            )
           ) : (
             <Typography
               component="div"
@@ -622,7 +624,12 @@ const BaseDataDropdownField = <Entity,>(
                 })(),
               }}
             >
-              {getDropdownOptionLabel(optionsToDisplay[0])}
+              {getDropdownOptionLabel({
+                label:
+                  optionsToDisplay[0].selectedOptionLabel ||
+                  optionsToDisplay[0].label,
+                icon: optionsToDisplay[0].icon,
+              })}
             </Typography>
           )}
         </>
