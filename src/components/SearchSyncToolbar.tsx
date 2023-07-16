@@ -434,13 +434,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
           sx={{
             height: 50,
             alignItems: 'center',
-            ...(() => {
-              if (collapsedWidthToolIndex < tools.length) {
-                return {
-                  columnGap: 1,
-                };
-              }
-            })(),
+            columnGap: collapsedWidthToolIndex < tools.length ? 1 : 0.5,
           }}
         >
           {(() => {

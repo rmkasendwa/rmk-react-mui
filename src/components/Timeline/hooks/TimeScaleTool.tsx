@@ -1,6 +1,7 @@
 import {
   Button,
   Stack,
+  Tooltip,
   Typography,
   outlinedInputClasses,
   useMediaQuery,
@@ -105,31 +106,33 @@ export const useTimeScaleTool = ({
       </Stack>
     ),
     collapsedElement: (
-      <Button
-        color="inherit"
-        variant="contained"
-        size="small"
-        disableRipple
-        sx={{
-          minWidth: 0,
-          p: 0,
-        }}
-      >
-        <DataDropdownField
-          {...dataDropdownProps}
-          options={supportedTimeScales.map((timeScaleOption) => {
-            return {
-              value: timeScaleOption,
-              label: timeScaleOption,
-              selectedOptionLabel:
-                timeScaleOptionShortLabelMap[timeScaleOption],
-            };
-          })}
+      <Tooltip title={label}>
+        <Button
+          color="inherit"
+          variant="contained"
+          size="small"
+          disableRipple
           sx={{
-            width: 60,
+            minWidth: 0,
+            p: 0,
           }}
-        />
-      </Button>
+        >
+          <DataDropdownField
+            {...dataDropdownProps}
+            options={supportedTimeScales.map((timeScaleOption) => {
+              return {
+                value: timeScaleOption,
+                label: timeScaleOption,
+                selectedOptionLabel:
+                  timeScaleOptionShortLabelMap[timeScaleOption],
+              };
+            })}
+            sx={{
+              width: 60,
+            }}
+          />
+        </Button>
+      </Tooltip>
     ),
   } as ElementTool;
 };

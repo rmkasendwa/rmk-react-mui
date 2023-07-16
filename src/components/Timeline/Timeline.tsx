@@ -50,6 +50,7 @@ import { useReactRouterDOMSearchParams } from '../../hooks/ReactRouterDOM';
 import { BaseDataRow, Table, TableColumn, TableProps } from '../Table';
 import {
   SelectTimeScaleCallbackFunction,
+  TimeScaleToolProps,
   useScrollTimelineTools,
   useTimeScaleTool,
 } from './hooks';
@@ -158,6 +159,7 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
       | 'ref'
     >
   >;
+  TimeScaleToolProps?: Partial<TimeScaleToolProps>;
   onChangeSelectedTimeScale?: (selectedTimeScale: TimeScaleOption) => void;
   getScrollToDateFunction?: (scrollToDate: ScrollToDateFunction) => void;
   getSelectTimeScaleFunction?: (
@@ -225,6 +227,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     getScrollToDateFunction,
     getSelectTimeScaleFunction,
     todayMarkerVariant = 'default',
+    TimeScaleToolProps,
     ...rest
   } = omit(props, 'parentBackgroundColor');
 
@@ -1053,6 +1056,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   }, [onSelectTimeScale]);
 
   const { element: timeScaleToolElement } = useTimeScaleTool({
+    ...TimeScaleToolProps,
     selectedTimeScale,
     supportedTimeScales,
     onSelectTimeScale,
