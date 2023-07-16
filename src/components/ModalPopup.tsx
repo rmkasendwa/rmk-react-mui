@@ -373,6 +373,7 @@ export const ModalPopup = forwardRef<HTMLDivElement, ModalPopupProps>(
               };
             }
           })(),
+          zIndex: 9999,
           ...(components?.MuiModalPopup?.styleOverrides?.root as any),
           ...placementSx,
           ...sx,
