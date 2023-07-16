@@ -37,6 +37,7 @@ import {
   ReactNode,
   Ref,
   forwardRef,
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -47,7 +48,11 @@ import * as Yup from 'yup';
 
 import { useReactRouterDOMSearchParams } from '../../hooks/ReactRouterDOM';
 import { BaseDataRow, Table, TableColumn, TableProps } from '../Table';
-import { useScrollTimelineTools, useTimeScaleTool } from './hooks';
+import {
+  SelectTimeScaleCallbackFunction,
+  useScrollTimelineTools,
+  useTimeScaleTool,
+} from './hooks';
 import {
   TimeScaleOption,
   fullMonthLabels,
@@ -94,6 +99,8 @@ declare module '@mui/material/styles/components' {
 }
 
 const baseTimeScaleWidth = 120;
+
+export type ScrollToDateFunction = (date: Date) => void;
 
 export type TimeScaleConfiguration = {
   timeScaleRows: [TimeScaleRow[], TimeScaleRow[], TimeScaleRow[]];
@@ -150,6 +157,19 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
       | 'ref'
     >
   >;
+  getScrollToDateFunction?: (scrollToDate: ScrollToDateFunction) => void;
+  getSelectTimeScaleFunction?: (
+    selectTimeScale: SelectTimeScaleCallbackFunction
+  ) => void;
+  getJumpToOptimalTimeScaleFunction?: (
+    jumpToOptimalTimeScale: () => void
+  ) => void;
+  getJumpToPreviousUnitTimeScaleFunction?: (
+    jumpToPreviousUnitTimeScale: () => void
+  ) => void;
+  getJumpToNextUnitTimeScaleFunction?: (
+    jumpToPreviousUnitTimeScale: () => void
+  ) => void;
 }
 
 export function getTimelineUtilityClass(slot: string): string {
@@ -196,6 +216,11 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     showToolBar = true,
     supportedTimeScales = [...timeScaleOptions],
     TimeScaleMeterProps = {},
+    getJumpToNextUnitTimeScaleFunction,
+    getJumpToOptimalTimeScaleFunction,
+    getJumpToPreviousUnitTimeScaleFunction,
+    getScrollToDateFunction,
+    getSelectTimeScaleFunction,
     ...rest
   } = omit(props, 'parentBackgroundColor');
 
@@ -233,6 +258,30 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
 
   const getTimelineDatesRef = useRef(getTimelineDates);
   getTimelineDatesRef.current = getTimelineDates;
+
+  const getScrollToDateFunctionRef = useRef(getScrollToDateFunction);
+  getScrollToDateFunctionRef.current = getScrollToDateFunction;
+
+  const getSelectTimeScaleFunctionRef = useRef(getSelectTimeScaleFunction);
+  getSelectTimeScaleFunctionRef.current = getSelectTimeScaleFunction;
+
+  const getJumpToOptimalTimeScaleFunctionRef = useRef(
+    getJumpToOptimalTimeScaleFunction
+  );
+  getJumpToOptimalTimeScaleFunctionRef.current =
+    getJumpToOptimalTimeScaleFunction;
+
+  const getJumpToPreviousUnitTimeScaleFunctionRef = useRef(
+    getJumpToPreviousUnitTimeScaleFunction
+  );
+  getJumpToPreviousUnitTimeScaleFunctionRef.current =
+    getJumpToPreviousUnitTimeScaleFunction;
+
+  const getJumpToNextUnitTimeScaleFunctionRef = useRef(
+    getJumpToNextUnitTimeScaleFunction
+  );
+  getJumpToNextUnitTimeScaleFunctionRef.current =
+    getJumpToNextUnitTimeScaleFunction;
 
   const { palette, breakpoints } = useTheme();
   const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
@@ -430,27 +479,34 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     return '5 year';
   })();
 
-  const scrollToDate = (date: Date) => {
-    if (
-      timelineContainerElementRef.current?.parentElement &&
-      isAfter(date, minCalendarDate) &&
-      isBefore(date, maxCalendarDate)
-    ) {
-      const offsetPercentage =
-        differenceInHours(date, minCalendarDate) / totalNumberOfHours;
-      const { parentElement } = timelineContainerElementRef.current;
-      const { scrollWidth, offsetWidth } = parentElement;
-      parentElement.scrollTo({
-        left:
-          Math.round(scrollWidth * offsetPercentage) +
-          baseSpacingUnits -
-          Math.round(offsetWidth / 2),
-        behavior: 'smooth',
-      });
-    }
-  };
+  const scrollToDate: ScrollToDateFunction = useCallback(
+    (date) => {
+      if (
+        timelineContainerElementRef.current?.parentElement &&
+        isAfter(date, minCalendarDate) &&
+        isBefore(date, maxCalendarDate)
+      ) {
+        const offsetPercentage =
+          differenceInHours(date, minCalendarDate) / totalNumberOfHours;
+        const { parentElement } = timelineContainerElementRef.current;
+        const { scrollWidth, offsetWidth } = parentElement;
+        parentElement.scrollTo({
+          left:
+            Math.round(scrollWidth * offsetPercentage) +
+            baseSpacingUnits -
+            Math.round(offsetWidth / 2),
+          behavior: 'smooth',
+        });
+      }
+    },
+    [baseSpacingUnits, maxCalendarDate, minCalendarDate, totalNumberOfHours]
+  );
   const scrollToDateRef = useRef(scrollToDate);
   scrollToDateRef.current = scrollToDate;
+
+  useEffect(() => {
+    getScrollToDateFunctionRef.current?.(scrollToDate);
+  }, [scrollToDate]);
 
   const selectedTimeScale = ((): TimeScaleOption => {
     if (searchParamsSelectedTimeScale) {
@@ -965,10 +1021,9 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     };
   }, []);
 
-  const { element: timeScaleToolElement } = useTimeScaleTool({
-    selectedTimeScale,
-    supportedTimeScales,
-    onSelectTimeScale: (timeScale) => {
+  //#region TimeScale Tool
+  const onSelectTimeScale: SelectTimeScaleCallbackFunction = useCallback(
+    (timeScale) => {
       lastDateAtCenterRef.current = currentDateAtCenterRef.current;
       setSearchParams(
         {
@@ -979,7 +1034,70 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         }
       );
     },
+    [setSearchParams]
+  );
+
+  useEffect(() => {
+    getSelectTimeScaleFunctionRef.current?.(onSelectTimeScale);
+  }, [onSelectTimeScale]);
+
+  const { element: timeScaleToolElement } = useTimeScaleTool({
+    selectedTimeScale,
+    supportedTimeScales,
+    onSelectTimeScale,
   });
+  //#endregion
+
+  //#region Scroll Timeline Tools
+  const jumpToOptimalTimeScale = useCallback(() => {
+    lastDateAtCenterRef.current = centerOfGravity;
+    if (selectedTimeScale !== optimalTimeScale) {
+      setSearchParams(
+        {
+          timeScale: optimalTimeScale,
+        },
+        {
+          replace: true,
+        }
+      );
+    } else {
+      scrollToDate(centerOfGravity);
+    }
+  }, [
+    centerOfGravity,
+    optimalTimeScale,
+    scrollToDate,
+    selectedTimeScale,
+    setSearchParams,
+  ]);
+
+  useEffect(() => {
+    getJumpToOptimalTimeScaleFunctionRef.current?.(jumpToOptimalTimeScale);
+  }, [jumpToOptimalTimeScale]);
+
+  const jumpToPreviousUnitTimeScale = useCallback(() => {
+    timelineContainerElementRef.current?.parentElement?.scrollBy({
+      left: -unitTimeScaleWidth,
+      behavior: 'smooth',
+    });
+  }, [unitTimeScaleWidth]);
+
+  useEffect(() => {
+    getJumpToPreviousUnitTimeScaleFunctionRef.current?.(
+      jumpToPreviousUnitTimeScale
+    );
+  }, [jumpToPreviousUnitTimeScale]);
+
+  const jumpToNextUnitTimeScale = useCallback(() => {
+    timelineContainerElementRef.current?.parentElement?.scrollBy({
+      left: unitTimeScaleWidth,
+      behavior: 'smooth',
+    });
+  }, [unitTimeScaleWidth]);
+
+  useEffect(() => {
+    getJumpToNextUnitTimeScaleFunctionRef.current?.(jumpToNextUnitTimeScale);
+  }, [jumpToNextUnitTimeScale]);
 
   const { element: scrollTimelineToolsElement } = useScrollTimelineTools({
     JumpToDateToolProps: {
@@ -990,34 +1108,11 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     scrollToDate,
     showJumpToOptimalTimeScaleTool:
       selectedTimeScale !== optimalTimeScale || !isTimelineAtCenterOfGravity,
-    jumpToOptimalTimeScale: () => {
-      lastDateAtCenterRef.current = centerOfGravity;
-      if (selectedTimeScale !== optimalTimeScale) {
-        setSearchParams(
-          {
-            timeScale: optimalTimeScale,
-          },
-          {
-            replace: true,
-          }
-        );
-      } else {
-        scrollToDate(centerOfGravity);
-      }
-    },
-    jumpToPreviousUnitTimeScale: () => {
-      timelineContainerElementRef.current?.parentElement?.scrollBy({
-        left: -unitTimeScaleWidth,
-        behavior: 'smooth',
-      });
-    },
-    jumpToNextUnitTimeScale: () => {
-      timelineContainerElementRef.current?.parentElement?.scrollBy({
-        left: unitTimeScaleWidth,
-        behavior: 'smooth',
-      });
-    },
+    jumpToOptimalTimeScale,
+    jumpToPreviousUnitTimeScale,
+    jumpToNextUnitTimeScale,
   });
+  //#endregion
 
   const columns: TableColumn<RecordRow>[] = [
     {
