@@ -1,6 +1,7 @@
 import HighlightAltIcon from '@mui/icons-material/HighlightAlt';
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
+import TodayIcon from '@mui/icons-material/Today';
 import {
   Button,
   ButtonGroup,
@@ -55,6 +56,111 @@ export const useScrollTimelineTools = ({
     },
   });
 
+  const todayToolElement = (
+    <Button
+      variant="contained"
+      color="inherit"
+      size="small"
+      onClick={() => {
+        scrollToDate?.(new Date());
+      }}
+      sx={{
+        height: 32,
+      }}
+    >
+      Today
+    </Button>
+  );
+  const collapsedTodayToolElement = (
+    <Tooltip title="Jump to today">
+      <Button
+        ref={jumpToDateAnchorRef}
+        variant="contained"
+        color="inherit"
+        size="small"
+        onClick={() => {
+          scrollToDate?.(new Date());
+        }}
+        sx={{
+          px: 1,
+          minWidth: 'auto !important',
+          width: 32,
+        }}
+      >
+        <TodayIcon />
+      </Button>
+    </Tooltip>
+  );
+  const jumpToDateToolElement = (
+    <Tooltip title="Jump to date">
+      <Button
+        ref={jumpToDateAnchorRef}
+        variant="contained"
+        color="inherit"
+        size="small"
+        onClick={jumpToDateOnClick}
+        sx={{
+          px: 1,
+          minWidth: 'auto !important',
+          width: 32,
+        }}
+      >
+        {jumpToDateIcon}
+      </Button>
+    </Tooltip>
+  );
+  const jumpToOptimalTimeScaleToolElement = (
+    <Tooltip title="Jump to optimal timescale">
+      <Button
+        variant="contained"
+        color="inherit"
+        size="small"
+        onClick={jumpToOptimalTimeScale}
+        sx={{
+          px: 1,
+          minWidth: 'auto !important',
+          width: 32,
+        }}
+      >
+        <HighlightAltIcon />
+      </Button>
+    </Tooltip>
+  );
+  const jumpToUnitTimeScaleToolsElement = (
+    <ButtonGroup
+      size="small"
+      variant="contained"
+      color="inherit"
+      disableElevation
+      sx={{
+        display: 'flex',
+      }}
+    >
+      <Button
+        onClick={jumpToPreviousUnitTimeScale}
+        disabled={!canJumpToPreviousUnitTimeScale}
+        sx={{
+          px: 1,
+          minWidth: 'auto !important',
+          width: 32,
+        }}
+      >
+        <NavigateBeforeIcon />
+      </Button>
+      <Button
+        onClick={jumpToNextUnitTimeScale}
+        disabled={!canJumpToNextUnitTimeScale}
+        sx={{
+          px: 1,
+          minWidth: 'auto !important',
+          width: 32,
+        }}
+      >
+        <NavigateNextIcon />
+      </Button>
+    </ButtonGroup>
+  );
+
   return {
     element: (
       <Stack
@@ -67,85 +173,30 @@ export const useScrollTimelineTools = ({
         {!isSmallScreenSize ? (
           <Typography variant="body2">Jump to:</Typography>
         ) : null}
-        <Button
-          variant="contained"
-          color="inherit"
-          size="small"
-          onClick={() => {
-            scrollToDate?.(new Date());
-          }}
-          sx={{
-            height: 32,
-          }}
-        >
-          Today
-        </Button>
-        <Tooltip title="Jump to date">
-          <Button
-            ref={jumpToDateAnchorRef}
-            variant="contained"
-            color="inherit"
-            size="small"
-            onClick={jumpToDateOnClick}
-            sx={{
-              px: 1,
-              minWidth: 'auto !important',
-              width: 32,
-            }}
-          >
-            {jumpToDateIcon}
-          </Button>
-        </Tooltip>
+        {todayToolElement}
+        {jumpToDateToolElement}
         {jumpToDatePopupElement}
-        {showJumpToOptimalTimeScaleTool && jumpToOptimalTimeScale ? (
-          <Tooltip title="Jump to optimal timescale">
-            <Button
-              variant="contained"
-              color="inherit"
-              size="small"
-              onClick={jumpToOptimalTimeScale}
-              sx={{
-                px: 1,
-                minWidth: 'auto !important',
-                width: 32,
-              }}
-            >
-              <HighlightAltIcon />
-            </Button>
-          </Tooltip>
-        ) : null}
-        <ButtonGroup
-          size="small"
-          variant="contained"
-          color="inherit"
-          disableElevation
-          sx={{
-            display: 'flex',
-          }}
-        >
-          <Button
-            onClick={jumpToPreviousUnitTimeScale}
-            disabled={!canJumpToPreviousUnitTimeScale}
-            sx={{
-              px: 1,
-              minWidth: 'auto !important',
-              width: 32,
-            }}
-          >
-            <NavigateBeforeIcon />
-          </Button>
-          <Button
-            onClick={jumpToNextUnitTimeScale}
-            disabled={!canJumpToNextUnitTimeScale}
-            sx={{
-              px: 1,
-              minWidth: 'auto !important',
-              width: 32,
-            }}
-          >
-            <NavigateNextIcon />
-          </Button>
-        </ButtonGroup>
+        {showJumpToOptimalTimeScaleTool && jumpToOptimalTimeScale
+          ? jumpToOptimalTimeScaleToolElement
+          : null}
+        {jumpToUnitTimeScaleToolsElement}
+      </Stack>
+    ),
+    collapsedElement: (
+      <Stack
+        direction="row"
+        sx={{
+          gap: 0.5,
+          alignItems: 'center',
+        }}
+      >
+        {collapsedTodayToolElement}
+        {jumpToDateToolElement}
+        {jumpToDatePopupElement}
+        {showJumpToOptimalTimeScaleTool && jumpToOptimalTimeScale
+          ? jumpToOptimalTimeScaleToolElement
+          : null}
+        {jumpToUnitTimeScaleToolsElement}
       </Stack>
     ),
   } as ElementTool;

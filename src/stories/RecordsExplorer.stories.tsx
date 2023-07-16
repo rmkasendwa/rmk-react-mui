@@ -54,6 +54,9 @@ const baseArgs = {
         ];
       },
       mergeTools: true,
+      TimeScaleToolProps: {
+        label: 'Zoom',
+      },
     },
   ],
   recordLabelPlural: 'Contacts',

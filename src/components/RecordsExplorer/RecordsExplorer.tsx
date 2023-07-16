@@ -1838,6 +1838,7 @@ const BaseRecordsExplorer = <
     useState<TimeScaleOption>('Year');
 
   const timeScaleTool = useTimeScaleTool({
+    ...timelineView?.TimeScaleToolProps,
     selectedTimeScale,
     onSelectTimeScale: selectTimeScaleRef.current,
     supportedTimeScales: timelineView?.supportedTimeScales,
