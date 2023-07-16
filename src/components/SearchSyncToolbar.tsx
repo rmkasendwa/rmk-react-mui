@@ -236,7 +236,10 @@ export const getToolNodes = (
                 return (
                   <Divider
                     {...omit(tool, 'type', 'extraToolProps')}
-                    orientation="horizontal"
+                    orientation="vertical"
+                    sx={{
+                      height: 30,
+                    }}
                   />
                 );
               }
@@ -422,15 +425,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
         {...rest}
         className={clsx(classes.root)}
         sx={{
-          ...(() => {
-            if (isSmallScreenSize) {
-              return {
-                pl: 2,
-                pr: 1,
-              };
-            }
-            return { pl: 3, pr: 2 };
-          })(),
+          px: isSmallScreenSize ? 2 : 3,
           ...sx,
         }}
       >
