@@ -109,6 +109,7 @@ export interface DropdownOption<Entity = any>
   extends Partial<Pick<ButtonProps, 'onClick' | 'sx'>> {
   value: DropdownOptionValue;
   label: ReactNode;
+  selectedOptionLabel?: ReactNode;
   description?: ReactNode;
   icon?: ReactNode;
   fieldValueLabel?: string;
