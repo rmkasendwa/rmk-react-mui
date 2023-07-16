@@ -45,6 +45,7 @@ import {
 } from 'react';
 import { mergeRefs } from 'react-merge-refs';
 import * as Yup from 'yup';
+import { ObjectShape } from 'yup/lib/object';
 
 import { useReactRouterDOMSearchParams } from '../../hooks/ReactRouterDOM';
 import { BaseDataRow, Table, TableColumn, TableProps } from '../Table';
@@ -101,6 +102,10 @@ declare module '@mui/material/styles/components' {
 
 const baseTimeScaleWidth = 120;
 
+export const timelineSearchParamValidationSpec: ObjectShape = {
+  timeScale: Yup.mixed<TimeScaleOption>().oneOf([...timeScaleOptions]),
+};
+
 export type ScrollToDateFunction = (date: Date) => void;
 
 export type TimeScaleConfiguration = {
@@ -144,7 +149,6 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
   selectedTimeScale?: TimeScaleOption;
   clearSearchStateOnUnmount?: boolean;
   getDefaultViewResetFunction?: (resetToDefaultView: () => void) => void;
-  onChangeSearchParams?: (changedSearchParamKeys: string[]) => void;
   rowLabelsColumnWidth?: number;
   showToolBar?: boolean;
   supportedTimeScales?: TimeScaleOption[];
@@ -214,7 +218,6 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     selectedTimeScale: selectedTimeScaleProp,
     clearSearchStateOnUnmount = false,
     getDefaultViewResetFunction,
-    onChangeSearchParams,
     rowLabelsColumnWidth = 256,
     getTimelineDates,
     showToolBar = true,
@@ -259,9 +262,6 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
 
   const getDefaultViewResetFunctionRef = useRef(getDefaultViewResetFunction);
   getDefaultViewResetFunctionRef.current = getDefaultViewResetFunction;
-
-  const onChangeSearchParamsRef = useRef(onChangeSearchParams);
-  onChangeSearchParamsRef.current = onChangeSearchParams;
 
   const getTimelineDatesRef = useRef(getTimelineDates);
   getTimelineDatesRef.current = getTimelineDates;
@@ -309,18 +309,12 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   const { searchParams, setSearchParams } = useReactRouterDOMSearchParams({
     mode: 'json',
     spec: {
+      ...timelineSearchParamValidationSpec,
       timeScale: Yup.mixed<TimeScaleOption>().oneOf([...supportedTimeScales]),
     },
     id,
     clearSearchStateOnUnmount,
   });
-
-  const stringifiedSearchParamKeys = JSON.stringify(Object.keys(searchParams));
-  useEffect(() => {
-    if (onChangeSearchParamsRef.current) {
-      onChangeSearchParamsRef.current(JSON.parse(stringifiedSearchParamKeys));
-    }
-  }, [stringifiedSearchParamKeys]);
 
   const { timeScale: searchParamsSelectedTimeScale } = searchParams;
 
