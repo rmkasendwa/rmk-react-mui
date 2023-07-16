@@ -147,6 +147,7 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
   rowLabelsColumnWidth?: number;
   showToolBar?: boolean;
   supportedTimeScales?: TimeScaleOption[];
+  todayMarkerVariant?: 'default' | 'foregroundFullSpan';
   TimeScaleMeterProps?: Partial<
     Omit<
       TimeScaleMeterProps,
@@ -221,6 +222,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     getJumpToPreviousUnitTimeScaleFunction,
     getScrollToDateFunction,
     getSelectTimeScaleFunction,
+    todayMarkerVariant = 'default',
     ...rest
   } = omit(props, 'parentBackgroundColor');
 
@@ -1164,7 +1166,12 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                   width: 2,
                   bgcolor: palette.primary.main,
                   height: rows.length * 51,
-                  top: '100%',
+                  top: (() => {
+                    if (todayMarkerVariant === 'foregroundFullSpan') {
+                      return `calc(100% - 400px)`;
+                    }
+                    return '100%';
+                  })(),
                   left: `${offsetPercentage * 100}%`,
                 }}
               />
@@ -1248,6 +1255,13 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       },
       headerSx: {
         ...(() => {
+          if (todayMarkerVariant === 'foregroundFullSpan') {
+            return {
+              zIndex: 3,
+            };
+          }
+        })(),
+        ...(() => {
           if (!rowLabelsColumnHeader) {
             return {
               borderRight: 'none !important',
@@ -1271,6 +1285,13 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       },
       bodySx: {
         zIndex: 2,
+        ...(() => {
+          if (todayMarkerVariant === 'foregroundFullSpan') {
+            return {
+              zIndex: 3,
+            };
+          }
+        })(),
       },
     });
     columns.push({
@@ -1348,6 +1369,13 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           sx: {
             position: 'relative',
             zIndex: -1,
+            ...(() => {
+              if (todayMarkerVariant === 'foregroundFullSpan') {
+                return {
+                  zIndex: 3,
+                };
+              }
+            })(),
           },
         }}
         TableBodyRowPlaceholderProps={{
