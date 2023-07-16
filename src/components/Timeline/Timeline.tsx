@@ -158,6 +158,7 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
       | 'ref'
     >
   >;
+  onChangeSelectedTimeScale?: (selectedTimeScale: TimeScaleOption) => void;
   getScrollToDateFunction?: (scrollToDate: ScrollToDateFunction) => void;
   getSelectTimeScaleFunction?: (
     selectTimeScale: SelectTimeScaleCallbackFunction
@@ -169,7 +170,7 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
     jumpToPreviousUnitTimeScale: () => void
   ) => void;
   getJumpToNextUnitTimeScaleFunction?: (
-    jumpToPreviousUnitTimeScale: () => void
+    jumpToNextUnitTimeScale: () => void
   ) => void;
 }
 
@@ -217,6 +218,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     showToolBar = true,
     supportedTimeScales = [...timeScaleOptions],
     TimeScaleMeterProps = {},
+    onChangeSelectedTimeScale,
     getJumpToNextUnitTimeScaleFunction,
     getJumpToOptimalTimeScaleFunction,
     getJumpToPreviousUnitTimeScaleFunction,
@@ -260,6 +262,9 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
 
   const getTimelineDatesRef = useRef(getTimelineDates);
   getTimelineDatesRef.current = getTimelineDates;
+
+  const onChangeSelectedTimeScaleRef = useRef(onChangeSelectedTimeScale);
+  onChangeSelectedTimeScaleRef.current = onChangeSelectedTimeScale;
 
   const getScrollToDateFunctionRef = useRef(getScrollToDateFunction);
   getScrollToDateFunctionRef.current = getScrollToDateFunction;
@@ -519,6 +524,10 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     }
     return optimalTimeScale;
   })();
+
+  useEffect(() => {
+    onChangeSelectedTimeScaleRef.current?.(selectedTimeScale);
+  }, [selectedTimeScale]);
 
   const { timeScaleRows, unitTimeScaleWidth, timeScaleWidth } =
     useMemo((): TimeScaleConfiguration => {
@@ -1363,6 +1372,9 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           sx: {
             position: 'relative',
             zIndex: 3,
+            th: {
+              borderBottom: 'none',
+            },
           },
         }}
         SecondaryHeaderRowProps={{

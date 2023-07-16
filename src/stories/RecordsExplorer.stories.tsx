@@ -53,6 +53,7 @@ const baseArgs = {
           },
         ];
       },
+      mergeTools: true,
     },
   ],
   recordLabelPlural: 'Contacts',

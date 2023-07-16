@@ -39,6 +39,7 @@ import {
   useEffect,
   useMemo,
   useRef,
+  useState,
 } from 'react';
 import { Link as RouterLink, useLocation, useNavigate } from 'react-router-dom';
 import * as Yup from 'yup';
@@ -95,7 +96,14 @@ import Table, {
   TableProps,
   mapTableColumnTypeToPrimitiveDataType,
 } from '../Table';
-import Timeline, { TimelineProps } from '../Timeline';
+import Timeline, {
+  ScrollToDateFunction,
+  SelectTimeScaleCallbackFunction,
+  TimeScaleOption,
+  TimelineProps,
+  useScrollTimelineTools,
+  useTimeScaleTool,
+} from '../Timeline';
 import { useFilterTool } from './hooks/FilterTool';
 import { useGroupTool } from './hooks/GroupTool';
 import { useSortTool } from './hooks/SortTool';
@@ -159,6 +167,7 @@ const ENUM_TABLE_COLUMN_TYPES: TableColumnType[] = ['enum'];
 export interface BaseDataView {
   type: ViewOptionType;
   minWidth?: number;
+  mergeTools?: boolean;
 }
 
 export interface ListView<RecordRow extends BaseDataRow>
@@ -389,9 +398,6 @@ export interface RecordsExplorerProps<
 
   getRecordTools?: (record: RecordRow) => DropdownOption[];
   extraActionsColumnWidth?: number;
-
-  SearchSyncToolbarProps?: Partial<SearchSyncToolbarProps>;
-
   ModalFormProps?: Partial<ModalFormProps>;
   CreateModalFormProps?: Partial<ModalFormProps>;
   ViewModalFormProps?: Partial<ModalFormProps>;
@@ -674,7 +680,7 @@ const BaseRecordsExplorer = <
     }
   })();
 
-  // Resolving data operation fields
+  //#region Resolving data operation fields
   const { filterFields, sortableFields, groupableFields, searchableFields } =
     useMemo(() => {
       //#region Resolving groupable fields
@@ -991,6 +997,7 @@ const BaseRecordsExplorer = <
         searchableFields,
       };
     }, []);
+  //#endregion
 
   const baseSelectedColumnIds = useMemo(() => {
     if (viewsRef.current) {
@@ -1131,7 +1138,7 @@ const BaseRecordsExplorer = <
     searchParamCreateNewRecord || (pathToAddNew && pathname === pathToAddNew)
   );
 
-  const viewType = (() => {
+  const selectedViewType = (() => {
     if (searchParamView) {
       return searchParamView as View;
     }
@@ -1604,7 +1611,7 @@ const BaseRecordsExplorer = <
       }
     })(),
     ...ViewOptionsButtonProps,
-    viewType,
+    viewType: selectedViewType,
     onChangeViewType: (view) => {
       setSearchParams(
         {
@@ -1696,7 +1703,10 @@ const BaseRecordsExplorer = <
         replace: true,
       }
     );
-    if (viewType === 'Timeline' && resetTimelineToDefaultViewRef.current) {
+    if (
+      selectedViewType === 'Timeline' &&
+      resetTimelineToDefaultViewRef.current
+    ) {
       resetTimelineToDefaultViewRef.current();
     }
   };
@@ -1813,6 +1823,33 @@ const BaseRecordsExplorer = <
 
   const { showSuccessMessage } = useMessagingContext();
 
+  //#region Timeline view tools
+  const selectTimeScaleRef = useRef<SelectTimeScaleCallbackFunction>();
+  const scrollToDateRef = useRef<ScrollToDateFunction>();
+  const jumpToOptimalTimeScaleRef = useRef<() => void>();
+  const jumpToPreviousUnitTimeScaleRef = useRef<() => void>();
+  const jumpToNextUnitTimeScaleRef = useRef<() => void>();
+
+  const timelineView = views?.find(({ type }) => type === 'Timeline') as
+    | TimelineView<RecordRow>
+    | undefined;
+
+  const [selectedTimeScale, setSelectedTimeScale] =
+    useState<TimeScaleOption>('Year');
+
+  const timeScaleTool = useTimeScaleTool({
+    selectedTimeScale,
+    onSelectTimeScale: selectTimeScaleRef.current,
+    supportedTimeScales: timelineView?.supportedTimeScales,
+  });
+  const scrollTimelineTools = useScrollTimelineTools({
+    scrollToDate: scrollToDateRef.current,
+    jumpToOptimalTimeScale: jumpToOptimalTimeScaleRef.current,
+    jumpToPreviousUnitTimeScale: jumpToPreviousUnitTimeScaleRef.current,
+    jumpToNextUnitTimeScale: jumpToNextUnitTimeScaleRef.current,
+  });
+  //#endregion
+
   useEffect(() => {
     isInitialMountRef.current = false;
     return () => {
@@ -1822,7 +1859,7 @@ const BaseRecordsExplorer = <
 
   const viewElement = (() => {
     if (views) {
-      const selectedView = views.find(({ type }) => type === viewType);
+      const selectedView = views.find(({ type }) => type === selectedViewType);
       if (selectedView) {
         const { type } = selectedView;
         switch (type) {
@@ -1830,7 +1867,8 @@ const BaseRecordsExplorer = <
             const { ...viewProps } = omit(
               selectedView,
               'type',
-              'minWidth'
+              'minWidth',
+              'mergeTools'
             ) as ListView<RecordRow>;
             const {
               enableColumnDisplayToggle = true,
@@ -2240,7 +2278,7 @@ const BaseRecordsExplorer = <
               </Box>
             );
           case 'Timeline': {
-            const { ...viewProps } = omit(
+            const { mergeTools, ...viewProps } = omit(
               selectedView,
               'type'
             ) as TimelineView<RecordRow>;
@@ -2269,6 +2307,30 @@ const BaseRecordsExplorer = <
                     changedSearchParamKeys
                   );
                 }}
+                onChangeSelectedTimeScale={(selectedTimeScale) => {
+                  setSelectedTimeScale(selectedTimeScale);
+                }}
+                getScrollToDateFunction={(scrollToDate) => {
+                  scrollToDateRef.current = scrollToDate;
+                }}
+                getSelectTimeScaleFunction={(selectTimeScale) => {
+                  selectTimeScaleRef.current = selectTimeScale;
+                }}
+                getJumpToOptimalTimeScaleFunction={(jumpToOptimalTimeScale) => {
+                  jumpToOptimalTimeScaleRef.current = jumpToOptimalTimeScale;
+                }}
+                getJumpToPreviousUnitTimeScaleFunction={(
+                  jumpToPreviousUnitTimeScale
+                ) => {
+                  jumpToPreviousUnitTimeScaleRef.current =
+                    jumpToPreviousUnitTimeScale;
+                }}
+                getJumpToNextUnitTimeScaleFunction={(
+                  jumpToNextUnitTimeScale
+                ) => {
+                  jumpToNextUnitTimeScaleRef.current = jumpToNextUnitTimeScale;
+                }}
+                showToolBar={!mergeTools}
               />
             );
           }
@@ -2278,7 +2340,7 @@ const BaseRecordsExplorer = <
   })() as ReactNode | undefined;
 
   const state: RecordsExplorerChildrenOptions<RecordRow> = {
-    selectedView: viewType,
+    selectedView: selectedViewType,
     data: filteredData,
     headerHeight: headerElementRef.current?.offsetHeight,
     filterFields,
@@ -2347,6 +2409,101 @@ const BaseRecordsExplorer = <
 
   const isSearchable = Boolean(isSearchableProp && searchableFields);
 
+  //#region Tools
+  const tools: (ReactNode | Tool)[] = [];
+  if (
+    pathToAddNewRecord &&
+    (!hideAddNewButtonOnNoFilteredData || filteredData.length > 0) &&
+    (!permissionToAddNew || loggedInUserHasPermission(permissionToAddNew))
+  ) {
+    if (isSmallScreenSize) {
+      if (!fillContentArea) {
+        tools.push({
+          icon: <AddIcon />,
+          type: 'icon-button',
+          label: addNewButtonLabel,
+          alwaysShowOn: 'All Screens',
+          ...(() => {
+            return {
+              component: RouterLink,
+              to: pathToAddNewRecord,
+            };
+          })(),
+          sx: {
+            '&,&:hover': {
+              bgcolor: palette.primary.main,
+              color: palette.getContrastText(palette.primary.main),
+            },
+          },
+        });
+      }
+    } else {
+      tools.push({
+        icon: <AddIcon />,
+        type: 'button',
+        label: addNewButtonLabel,
+        size: 'small',
+        variant: 'contained',
+        ...(() => {
+          return {
+            component: RouterLink,
+            to: pathToAddNewRecord,
+          };
+        })(),
+      });
+    }
+  }
+  if (showViewOptionsTool && (ViewOptionsButtonProps || views)) {
+    tools.push(viewOptionsTool);
+  }
+
+  if (
+    (() => {
+      if (typeof showGroupTool === 'function') {
+        return showGroupTool(state);
+      }
+      return showGroupTool;
+    })() &&
+    groupableFields.length > 0
+  ) {
+    tools.push(groupTool);
+  }
+
+  if (showSortTool && sortableFields.length > 0) {
+    tools.push(sortTool);
+  }
+
+  if (showFilterTool && filterFields.length > 0) {
+    tools.push(filterTool);
+  }
+
+  if (modifiedStateKeys && modifiedStateKeys.length > 0) {
+    tools.push({
+      label: 'Reset to default view',
+      icon: <LockResetIcon />,
+      onClick: () => {
+        resetToDefaultView();
+      },
+      type: 'icon-button',
+      alwaysShowOn: 'All Screens',
+    });
+  }
+
+  if (toolsProp) {
+    tools.push(...toolsProp);
+  }
+
+  if (selectedViewType === 'Timeline' && timelineView?.mergeTools) {
+    tools.push(
+      {
+        type: 'divider',
+      },
+      timeScaleTool,
+      scrollTimelineTools
+    );
+  }
+  //#endregion
+
   const explorerElement = (
     <Paper
       ref={ref}
@@ -2406,96 +2563,7 @@ const BaseRecordsExplorer = <
           })()}
           loading={loadingProp ?? loading}
           errorMessage={errorMessageProp ?? errorMessage}
-          tools={[
-            ...(() => {
-              const tools: (ReactNode | Tool)[] = [];
-              if (
-                pathToAddNewRecord &&
-                (!hideAddNewButtonOnNoFilteredData ||
-                  filteredData.length > 0) &&
-                (!permissionToAddNew ||
-                  loggedInUserHasPermission(permissionToAddNew))
-              ) {
-                if (isSmallScreenSize) {
-                  if (!fillContentArea) {
-                    tools.push({
-                      icon: <AddIcon />,
-                      type: 'icon-button',
-                      label: addNewButtonLabel,
-                      alwaysShowOn: 'All Screens',
-                      ...(() => {
-                        return {
-                          component: RouterLink,
-                          to: pathToAddNewRecord,
-                        };
-                      })(),
-                      sx: {
-                        '&,&:hover': {
-                          bgcolor: palette.primary.main,
-                          color: palette.getContrastText(palette.primary.main),
-                        },
-                      },
-                    });
-                  }
-                } else {
-                  tools.push({
-                    icon: <AddIcon />,
-                    type: 'button',
-                    label: addNewButtonLabel,
-                    size: 'small',
-                    variant: 'contained',
-                    ...(() => {
-                      return {
-                        component: RouterLink,
-                        to: pathToAddNewRecord,
-                      };
-                    })(),
-                  });
-                }
-              }
-              if (showViewOptionsTool && (ViewOptionsButtonProps || views)) {
-                tools.push(viewOptionsTool);
-              }
-
-              if (
-                (() => {
-                  if (typeof showGroupTool === 'function') {
-                    return showGroupTool(state);
-                  }
-                  return showGroupTool;
-                })() &&
-                groupableFields.length > 0
-              ) {
-                tools.push(groupTool);
-              }
-
-              if (showSortTool && sortableFields.length > 0) {
-                tools.push(sortTool);
-              }
-
-              if (showFilterTool && filterFields.length > 0) {
-                tools.push(filterTool);
-              }
-
-              if (modifiedStateKeys && modifiedStateKeys.length > 0) {
-                tools.push({
-                  label: 'Reset to default view',
-                  icon: <LockResetIcon />,
-                  onClick: () => {
-                    resetToDefaultView();
-                  },
-                  type: 'icon-button',
-                  alwaysShowOn: 'All Screens',
-                });
-              }
-
-              if (toolsProp) {
-                tools.push(...toolsProp);
-              }
-
-              return tools;
-            })(),
-          ]}
+          tools={tools}
           onChangeSearchTerm={(searchTerm: string) => {
             if (isSearchable) {
               setSearchParams(
