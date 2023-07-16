@@ -14,10 +14,14 @@ import DataDropdownField, {
 import { ElementTool } from '../../SearchSyncToolbar';
 import { TimeScaleOption, timeScaleOptions } from '../models';
 
+export type SelectTimeScaleCallbackFunction = (
+  timeScale: TimeScaleOption | null
+) => void;
+
 export interface TimeScaleToolProps {
   selectedTimeScale: TimeScaleOption;
   supportedTimeScales?: TimeScaleOption[];
-  onSelectTimeScale?: (timeScale: TimeScaleOption | null) => void;
+  onSelectTimeScale?: SelectTimeScaleCallbackFunction;
   label?: ReactNode;
 }
 
