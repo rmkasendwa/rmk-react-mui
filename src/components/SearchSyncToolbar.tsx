@@ -623,17 +623,23 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
               const smallScreenDisplayableTools = allTools
                 .filter((tool) => {
                   return (
-                    tool &&
-                    !isValidElement(tool) &&
-                    typeof tool === 'object' &&
-                    !('element' in tool)
+                    tool && !isValidElement(tool) && typeof tool === 'object'
                   );
                 })
                 .map((tool) => {
-                  return tool as ButtonTool | IconButtonTool;
+                  return tool as
+                    | ButtonTool
+                    | IconButtonTool
+                    | DividerTool
+                    | ElementTool;
                 });
               const [smallScreenTools, ellipsisTools] =
-                smallScreenDisplayableTools.reduce(
+                smallScreenDisplayableTools.reduce<
+                  [
+                    typeof smallScreenDisplayableTools,
+                    typeof smallScreenDisplayableTools
+                  ]
+                >(
                   (accumulator, tool) => {
                     const [smallScreenTools, ellipsisTools] = accumulator;
                     if (
@@ -644,6 +650,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                           'Small Screen',
                         ] as (typeof tool.alwaysShowOn)[]
                       ).includes(tool.alwaysShowOn) &&
+                      'type' in tool &&
                       tool.type === 'icon-button'
                     ) {
                       smallScreenTools.push(tool);
@@ -652,10 +659,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                     }
                     return accumulator;
                   },
-                  [[], []] as [
-                    typeof smallScreenDisplayableTools,
-                    typeof smallScreenDisplayableTools
-                  ]
+                  [[], []]
                 );
               return (
                 <>
@@ -688,8 +692,17 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                   {ellipsisTools.length > 0 ? (
                     <Grid item>
                       <EllipsisMenuIconButton
-                        options={ellipsisTools.map(
-                          ({ label, icon, ref, onClick }, index) => {
+                        options={ellipsisTools.map((tool, index) => {
+                          if ('type' in tool) {
+                            if (tool.type === 'divider') {
+                              return {
+                                label: <Divider />,
+                                value: index,
+                                selectable: false,
+                                isDropdownOption: false,
+                              };
+                            }
+                            const { label, icon, ref, onClick } = tool;
                             return {
                               ref: ref as any,
                               label,
@@ -698,10 +711,36 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                               onClick: onClick as any,
                             };
                           }
-                        )}
+                          const { element } = tool;
+                          return {
+                            label: (
+                              <Box
+                                sx={{
+                                  px: 2,
+                                  py: 1,
+                                }}
+                              >
+                                {element}
+                              </Box>
+                            ),
+                            value: index,
+                            isDropdownOption: false,
+                          };
+                        })}
+                        PaginatedDropdownOptionListProps={{
+                          paging: false,
+                        }}
                       />
-                      {ellipsisTools.map(({ popupElement }, index) => {
-                        return <Fragment key={index}>{popupElement}</Fragment>;
+                      {ellipsisTools.map((tool, index) => {
+                        return (
+                          <Fragment key={index}>
+                            {(() => {
+                              if ('popupElement' in tool) {
+                                return tool.popupElement;
+                              }
+                            })()}
+                          </Fragment>
+                        );
                       })}
                     </Grid>
                   ) : null}
