@@ -16,6 +16,7 @@ import {
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
   generateUtilityClasses,
+  tableBodyClasses,
   useMediaQuery,
   useTheme,
   useThemeProps,
@@ -1211,7 +1212,12 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                   position: 'absolute',
                   width: 2,
                   bgcolor: palette.primary.main,
-                  height: rows.length * 51,
+                  height: (() => {
+                    if (todayMarkerVariant === 'foregroundFullSpan') {
+                      return rows.length * 51 + 400;
+                    }
+                    return rows.length * 51;
+                  })(),
                   top: (() => {
                     if (todayMarkerVariant === 'foregroundFullSpan') {
                       return `calc(100% - 400px)`;
@@ -1409,6 +1415,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           sx: {
             position: 'relative',
             zIndex: 3,
+            verticalAlign: 'bottom',
             th: {
               borderBottom: 'none',
             },
@@ -1433,7 +1440,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           },
         }}
         sx={{
-          tr: {
+          [`.${tableBodyClasses.root} tr`]: {
             verticalAlign: 'middle',
           },
         }}
