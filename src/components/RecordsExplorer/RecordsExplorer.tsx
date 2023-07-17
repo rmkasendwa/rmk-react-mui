@@ -173,14 +173,14 @@ export interface BaseDataView {
 
 export interface ListView<RecordRow extends BaseDataRow>
   extends BaseDataView,
-    Omit<TableProps<RecordRow>, 'rows' | 'columns' | 'minWidth'> {
+    Partial<Omit<TableProps<RecordRow>, 'rows' | 'columns' | 'minWidth'>> {
   type: 'List';
   columns: RecordsExplorerRowField<RecordRow>[];
 }
 
 export interface TimelineView<RecordRow extends BaseDataRow>
   extends BaseDataView,
-    Omit<TimelineProps<RecordRow>, 'rows'> {
+    Partial<Omit<TimelineProps<RecordRow>, 'rows'>> {
   type: 'Timeline';
 }
 
@@ -1092,15 +1092,20 @@ const BaseRecordsExplorer = <
     'editRecord',
   ];
 
+  const getHashedSearchParamKey = (key: string) => {
+    return hashIt(key).toString(36).slice(0, 3);
+  };
+
   const updateChangedSearchParamKeys = () => {
     const changedSearchParamKeys = [
       ...new Set([
+        ...(modifiedStateKeys || []),
         ...Object.keys(searchParams)
           .filter((key) => {
             return !unTrackableSearchParams.includes(key);
           })
           .map((key) => {
-            return hashIt(key).toString(36).slice(0, 3);
+            return getHashedSearchParamKey(key);
           }),
       ]),
     ];
@@ -1141,7 +1146,10 @@ const BaseRecordsExplorer = <
     if (searchParamView) {
       return searchParamView as View;
     }
-    if (viewProp && !modifiedStateKeys?.includes('view')) {
+    if (
+      viewProp &&
+      !modifiedStateKeys?.includes(getHashedSearchParamKey('view'))
+    ) {
       return viewProp;
     }
     return 'List' as View;
@@ -1191,7 +1199,7 @@ const BaseRecordsExplorer = <
     return (() => {
       if (
         sortByPropRef.current &&
-        !modifiedStateKeys?.includes('sortBy') &&
+        !modifiedStateKeys?.includes(getHashedSearchParamKey('sortBy')) &&
         (!searchParamSortBy || searchParamSortBy.length <= 0)
       ) {
         return sortByPropRef.current;
@@ -1222,7 +1230,10 @@ const BaseRecordsExplorer = <
         conjunction: searchParamFilterBy.conjunction || 'and',
       } as ConditionGroup<RecordRow>;
     }
-    if (filterByPropRef.current && !modifiedStateKeys?.includes('filterBy')) {
+    if (
+      filterByPropRef.current &&
+      !modifiedStateKeys?.includes(getHashedSearchParamKey('filterBy'))
+    ) {
       return {
         ...filterByPropRef.current,
         conjunction: filterByPropRef.current.conjunction || 'and',
@@ -1290,7 +1301,10 @@ const BaseRecordsExplorer = <
     if (searchParamSearchTerm) {
       return searchParamSearchTerm;
     }
-    if (searchTermProp && !modifiedStateKeys?.includes('search')) {
+    if (
+      searchTermProp &&
+      !modifiedStateKeys?.includes(getHashedSearchParamKey('search'))
+    ) {
       return searchTermProp;
     }
   })();

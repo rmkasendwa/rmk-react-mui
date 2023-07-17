@@ -170,7 +170,7 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
     maxDate: Date;
   }) => void;
   onChangeCurrentDateAtCenter?: (currentDateAtCenter: Date) => void;
-  onChangeShowJumpToOptimalTimeScaleTool: (
+  onChangeShowJumpToOptimalTimeScaleTool?: (
     showJumpToOptimalTimeScaleTool: boolean
   ) => void;
   getScrollToDateFunction?: (scrollToDate: ScrollToDateFunction) => void;
