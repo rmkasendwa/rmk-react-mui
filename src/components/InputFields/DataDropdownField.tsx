@@ -244,6 +244,9 @@ const BaseDataDropdownField = <Entity,>(
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
 
+  const optionsPropRef = useRef(optionsProp);
+  optionsPropRef.current = optionsProp;
+
   const optionsRef = useRef(options);
   optionsRef.current = options;
 
@@ -558,6 +561,12 @@ const BaseDataDropdownField = <Entity,>(
       searchFieldRef.current?.focus();
     }
   }, [focused, multilineSearchMode]);
+
+  useEffect(() => {
+    if (revalidationKey) {
+      setOptions(optionsPropRef.current || []);
+    }
+  }, [revalidationKey]);
 
   const selectedOptionsElement = (() => {
     const optionsToDisplay = (() => {

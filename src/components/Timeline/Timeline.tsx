@@ -1027,6 +1027,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                 ...TooltipPropsPopperProps,
                 sx: {
                   pointerEvents: 'none',
+                  zIndex: 9999,
                   ...TooltipPropsPopperProps.sx,
                 },
               }}
