@@ -422,7 +422,7 @@ export interface RecordsExplorerProps<
     state: RecordsExplorerChildrenOptions<RecordRow>
   ) => (ReactNode | Tool)[] | undefined;
   ListViewProps?: Partial<Omit<ListView<RecordRow>, 'columns'>>;
-  TimelineViewProps?: Partial<Omit<TimelineProps<RecordRow>, 'columns'>>;
+  TimelineViewProps?: Partial<Omit<TimelineView<RecordRow>, 'columns'>>;
   clearSearchStateOnUnmount?: boolean;
   showSuccessMessageOnCreateRecord?: boolean;
 }
@@ -1862,9 +1862,12 @@ const BaseRecordsExplorer = <
 
   const timeScaleTool = useTimeScaleTool({
     ...timelineView?.TimeScaleToolProps,
+    ...TimelineViewProps?.TimeScaleToolProps,
     selectedTimeScale,
     onSelectTimeScale: selectTimeScaleRef.current,
-    supportedTimeScales: timelineView?.supportedTimeScales,
+    supportedTimeScales:
+      timelineView?.supportedTimeScales ||
+      TimelineViewProps?.supportedTimeScales,
   });
   const scrollTimelineTools = useScrollTimelineTools({
     scrollToDate: scrollToDateRef.current,
@@ -2309,7 +2312,7 @@ const BaseRecordsExplorer = <
             );
           case 'Timeline': {
             const { mergeTools, ...viewProps } = omit(
-              selectedView,
+              { ...selectedView, ...TimelineViewProps },
               'type'
             ) as TimelineView<RecordRow>;
             if (!viewProps.getRowLabel && !viewProps.rowLabelProperty) {
@@ -2325,7 +2328,6 @@ const BaseRecordsExplorer = <
             return (
               <Timeline
                 {...viewProps}
-                {...TimelineViewProps}
                 {...{ id, clearSearchStateOnUnmount }}
                 rows={filteredData}
                 getDefaultViewResetFunction={(resetTimelineToDefaultView) => {
@@ -2515,29 +2517,42 @@ const BaseRecordsExplorer = <
     tools.push(filterTool);
   }
 
-  if (modifiedStateKeys && modifiedStateKeys.length > 0) {
-    tools.push({
-      label: 'Reset to default view',
-      icon: <LockResetIcon />,
-      onClick: () => {
-        resetToDefaultView();
-      },
-      type: 'icon-button',
-      alwaysShowOn: 'All Screens',
-    });
-  }
-
-  if (toolsProp) {
-    tools.push(...toolsProp);
-  }
-
-  if (selectedViewType === 'Timeline' && timelineView?.mergeTools) {
+  if (
+    selectedViewType === 'Timeline' &&
+    (timelineView?.mergeTools || TimelineViewProps?.mergeTools)
+  ) {
     tools.push(
       {
         type: 'divider',
       },
       timeScaleTool,
       scrollTimelineTools
+    );
+  }
+
+  if (toolsProp) {
+    tools.push(
+      {
+        type: 'divider',
+      },
+      ...toolsProp
+    );
+  }
+
+  if (modifiedStateKeys && modifiedStateKeys.length > 0) {
+    tools.push(
+      {
+        type: 'divider',
+      },
+      {
+        label: 'Reset to default view',
+        icon: <LockResetIcon />,
+        onClick: () => {
+          resetToDefaultView();
+        },
+        type: 'icon-button',
+        alwaysShowOn: 'All Screens',
+      }
     );
   }
   //#endregion
