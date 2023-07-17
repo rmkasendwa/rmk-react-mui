@@ -187,6 +187,7 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
   getJumpToNextUnitTimeScaleFunction?: (
     jumpToNextUnitTimeScale: () => void
   ) => void;
+  defaultTimelineCenter?: 'centerOfDataSet' | 'now';
 }
 
 export function getTimelineUtilityClass(slot: string): string {
@@ -243,6 +244,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     onChangeTimelineDateBounds,
     onChangeCurrentDateAtCenter,
     onChangeShowJumpToOptimalTimeScaleTool,
+    defaultTimelineCenter,
     ...rest
   } = omit(props, 'parentBackgroundColor');
 
@@ -316,6 +318,9 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   );
   getJumpToNextUnitTimeScaleFunctionRef.current =
     getJumpToNextUnitTimeScaleFunction;
+
+  const supportedTimeScalesRef = useRef(supportedTimeScales);
+  supportedTimeScalesRef.current = supportedTimeScales;
 
   const { palette, breakpoints } = useTheme();
   const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
@@ -472,7 +477,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     });
   }, [maxCalendarDate, minCalendarDate]);
 
-  const optimalTimeScale = ((): TimeScaleOption => {
+  const idealOptimalTimeScale = ((): TimeScaleOption => {
     if (allDates.length <= 1) {
       return 'Year';
     }
@@ -512,6 +517,25 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       return 'Year';
     }
     return '5 year';
+  })();
+
+  const optimalTimeScale = (() => {
+    if (!supportedTimeScalesRef.current.includes(idealOptimalTimeScale)) {
+      if (
+        timeScaleOptions.indexOf(idealOptimalTimeScale) >
+        timeScaleOptions.indexOf(
+          supportedTimeScalesRef.current[
+            supportedTimeScalesRef.current.length - 1
+          ]
+        )
+      ) {
+        return supportedTimeScalesRef.current[
+          supportedTimeScalesRef.current.length - 1
+        ];
+      }
+      return supportedTimeScalesRef.current[0];
+    }
+    return idealOptimalTimeScale;
   })();
 
   const scrollToDate: ScrollToDateFunction = useCallback(
@@ -1045,8 +1069,16 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   };
 
   useEffect(() => {
-    scrollToDateRef.current(centerOfGravity);
-  }, [centerOfGravity]);
+    switch (defaultTimelineCenter) {
+      case 'now':
+        scrollToDateRef.current(new Date());
+        break;
+      case 'centerOfDataSet':
+      default:
+        scrollToDateRef.current(centerOfGravity);
+        break;
+    }
+  }, [centerOfGravity, defaultTimelineCenter]);
 
   useEffect(() => {
     if (selectedTimeScale && lastDateAtCenterRef.current) {
