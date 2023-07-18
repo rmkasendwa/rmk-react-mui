@@ -292,9 +292,9 @@ export interface RecordsExplorerProps<
    */
   recordLabelSingular?: string;
   /**
-   * Extra props to be assigned to the ViewOptionsButton component.
+   * Extra props to be assigned to the ViewOptionsTool component.
    */
-  ViewOptionsButtonProps?: Partial<ViewOptionsToolOptions>;
+  ViewOptionsToolProps?: Partial<ViewOptionsToolOptions>;
   /**
    * Extra props to be assigned to the Header component.
    */
@@ -469,7 +469,7 @@ const BaseRecordsExplorer = <
     BodyProps = {},
     IconLoadingScreenProps = {},
     data: dataProp,
-    ViewOptionsButtonProps,
+    ViewOptionsToolProps,
     filterFields: filterFieldsProp,
     sortableFields: sortableFieldsProp,
     sortBy: sortByProp,
@@ -1623,7 +1623,7 @@ const BaseRecordsExplorer = <
         return views.map(({ type }) => type);
       }
     })(),
-    ...ViewOptionsButtonProps,
+    ...ViewOptionsToolProps,
     viewType: selectedViewType,
     onChangeViewType: (view) => {
       setSearchParams(
@@ -2493,7 +2493,7 @@ const BaseRecordsExplorer = <
       });
     }
   }
-  if (showViewOptionsTool && (ViewOptionsButtonProps || views)) {
+  if (showViewOptionsTool && (ViewOptionsToolProps || views)) {
     tools.push(viewOptionsTool);
   }
 

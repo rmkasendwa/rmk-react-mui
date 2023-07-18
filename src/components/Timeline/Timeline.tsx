@@ -188,6 +188,7 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
     jumpToNextUnitTimeScale: () => void
   ) => void;
   defaultTimelineCenter?: 'centerOfDataSet' | 'now';
+  TodayIndicatorProps?: Partial<BoxProps>;
 }
 
 export function getTimelineUtilityClass(slot: string): string {
@@ -245,6 +246,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     onChangeCurrentDateAtCenter,
     onChangeShowJumpToOptimalTimeScaleTool,
     defaultTimelineCenter,
+    TodayIndicatorProps = {},
     ...rest
   } = omit(props, 'parentBackgroundColor');
 
@@ -267,6 +269,9 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     sx: TimeScaleMeterPropsSx,
     ...TimeScaleMeterPropsRest
   } = TimeScaleMeterProps;
+
+  const { sx: TodayIndicatorPropsSx, ...TodayIndicatorPropsRest } =
+    TodayIndicatorProps;
 
   const isInitialMountRef = useRef(true);
   const currentDateAtCenterRef = useRef<Date | null>(null);
@@ -776,7 +781,8 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                         ...(() => {
                           if (
                             (selectedTimeScale === 'Quarter' &&
-                              monthIndex % 3 === 0) ||
+                              monthIndex % 3 === 0 &&
+                              periodIndex === 0) ||
                             (monthIndex === 0 && periodIndex === 0)
                           ) {
                             return {
@@ -1042,13 +1048,16 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                   px: 2,
                   bgcolor: palette.background.paper,
                   border: `1px solid ${palette.divider}`,
+                  borderRadius: '4px',
+                  height: 42,
+                  '&:hover': {
+                    zIndex: 1,
+                  },
                   ...sx,
                   width: `${percentage * 100}%`,
                   position: 'absolute',
                   top: 0,
                   left: `${offsetPercentage * 100}%`,
-                  height: 42,
-                  borderRadius: '4px',
                 }}
               >
                 <Typography
@@ -1241,8 +1250,8 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
             >
               <Box
                 ref={todayIndicatorRef}
+                {...TodayIndicatorPropsRest}
                 sx={{
-                  position: 'absolute',
                   width: 2,
                   bgcolor: palette.primary.main,
                   height: (() => {
@@ -1257,6 +1266,8 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                     }
                     return '100%';
                   })(),
+                  ...TodayIndicatorPropsSx,
+                  position: 'absolute',
                   left: `${offsetPercentage * 100}%`,
                 }}
               />
@@ -1269,13 +1280,25 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           const timelineElements = getTimelineElements(row);
           return (
             <>
-              {timelineElements.map((timelineElement, index) => {
-                return (
-                  <Fragment key={index}>
-                    {getTimelineElementNode(timelineElement)}
-                  </Fragment>
-                );
-              })}
+              {timelineElements
+                .sort(
+                  ({ startDate: aStartDate }, { startDate: bStartDate }) => {
+                    if (aStartDate && bStartDate) {
+                      return (
+                        createDateWithoutTimezoneOffset(aStartDate).getTime() -
+                        createDateWithoutTimezoneOffset(bStartDate).getTime()
+                      );
+                    }
+                    return 0;
+                  }
+                )
+                .map((timelineElement, index) => {
+                  return (
+                    <Fragment key={index}>
+                      {getTimelineElementNode(timelineElement)}
+                    </Fragment>
+                  );
+                })}
             </>
           );
         }

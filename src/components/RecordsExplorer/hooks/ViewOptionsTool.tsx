@@ -1,10 +1,10 @@
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import GridViewIcon from '@mui/icons-material/GridView';
 import ListIcon from '@mui/icons-material/List';
-import ViewTimelineIcon from '@mui/icons-material/ViewTimeline';
 import {
   Box,
   Button,
+  ButtonProps,
   ClickAwayListener,
   Grid,
   Grow,
@@ -12,12 +12,12 @@ import {
   Stack,
   Tooltip,
   Typography,
-  alpha,
   useMediaQuery,
   useTheme,
 } from '@mui/material';
 import { ReactNode, useMemo, useRef, useState } from 'react';
 
+import TimelineIcon from '../../Icons/TimelineIcon';
 import ModalPopup from '../../ModalPopup';
 import PaginatedDropdownOptionList, {
   DropdownOption,
@@ -38,7 +38,7 @@ export interface ViewOption<ViewType extends string = string> {
 }
 
 const defaultViewOptions: ViewOption[] = [
-  { label: 'Timeline', icon: <ViewTimelineIcon /> },
+  { label: 'Timeline', icon: <TimelineIcon /> },
   { label: 'Grid', icon: <GridViewIcon /> },
   { label: 'List', icon: <ListIcon /> },
 ];
@@ -51,6 +51,7 @@ export interface ViewOptionsToolOptions<ViewType extends string = string> {
   viewType?: ViewOptionType<ViewType>;
   viewOptionTypes?: ViewOptionType<ViewType>[];
   expandedIfHasLessOptions?: boolean;
+  SelectedViewOptionButtonProps?: Partial<ButtonProps>;
 }
 
 export const useViewOptionsTool = <ViewType extends string = string>({
@@ -59,9 +60,15 @@ export const useViewOptionsTool = <ViewType extends string = string>({
   viewOptionTypes = DEFAULT_VIEW_OPTIONS_TYPES as any,
   expandedIfHasLessOptions = false,
   viewOptions = defaultViewOptions as any,
+  SelectedViewOptionButtonProps = {},
   ...rest
 }: ViewOptionsToolOptions<ViewType>) => {
-  const { palette, breakpoints } = useTheme();
+  const {
+    sx: SelectedViewOptionButtonPropsSx,
+    ...SelectedViewOptionButtonPropsRest
+  } = SelectedViewOptionButtonProps;
+
+  const { breakpoints } = useTheme();
   const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
 
   // Refs
@@ -146,28 +153,65 @@ export const useViewOptionsTool = <ViewType extends string = string>({
                   >
                     <Button
                       color="inherit"
-                      variant="contained"
+                      variant={
+                        viewType === viewTypeDisplay ? 'contained' : 'text'
+                      }
+                      {...(() => {
+                        if (viewType === viewTypeDisplay) {
+                          return SelectedViewOptionButtonPropsRest;
+                        }
+                      })()}
                       onClick={() => {
                         onChangeViewType && onChangeViewType(value as any);
                       }}
                       sx={{
-                        '&,&:hover': {
-                          ...(() => {
-                            if (viewType === viewTypeDisplay) {
-                              return {
-                                color: palette.background.paper,
-                                bgcolor: alpha(palette.text.primary, 0.5),
-                              };
-                            }
-                            return {
-                              color: palette.text.primary,
-                              bgcolor: `transparent`,
-                            };
-                          })(),
-                        },
+                        ...(() => {
+                          if (viewType === viewTypeDisplay) {
+                            return SelectedViewOptionButtonPropsSx;
+                          }
+                        })(),
                       }}
                     >
                       {label}
+                    </Button>
+                  </Tooltip>
+                );
+              })}
+            </Stack>
+          ),
+          collapsedElement: (
+            <Stack direction="row">
+              {options.map(({ icon, value }) => {
+                const viewTypeDisplay = value as string;
+                return (
+                  <Tooltip
+                    key={viewTypeDisplay}
+                    title={`View as ${viewTypeDisplay}`}
+                  >
+                    <Button
+                      color="inherit"
+                      variant={
+                        viewType === viewTypeDisplay ? 'contained' : 'text'
+                      }
+                      {...(() => {
+                        if (viewType === viewTypeDisplay) {
+                          return SelectedViewOptionButtonPropsRest;
+                        }
+                      })()}
+                      onClick={() => {
+                        onChangeViewType && onChangeViewType(value as any);
+                      }}
+                      sx={{
+                        minWidth: 'auto !important',
+                        width: 32,
+                        ...(() => {
+                          if (viewType === viewTypeDisplay) {
+                            return SelectedViewOptionButtonPropsSx;
+                          }
+                        })(),
+                      }}
+                    >
+                      {icon}
                     </Button>
                   </Tooltip>
                 );
