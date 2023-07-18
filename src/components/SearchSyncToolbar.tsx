@@ -143,7 +143,7 @@ export const getToolNodes = (
           if ('type' in tool) {
             switch (tool.type) {
               case 'icon-button': {
-                const { label, icon, title, popupElement, ...rest } = omit(
+                const { label, icon, title, popupElement, sx, ...rest } = omit(
                   tool,
                   'type',
                   'extraToolProps'
@@ -158,7 +158,15 @@ export const getToolNodes = (
                         },
                       }}
                     >
-                      <IconButton {...rest}>{icon}</IconButton>
+                      <IconButton
+                        {...rest}
+                        sx={{
+                          ...sx,
+                          p: 0.5,
+                        }}
+                      >
+                        {icon}
+                      </IconButton>
                     </Tooltip>
                     {popupElement}
                   </>
@@ -422,12 +430,12 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                   case 'button':
                     return {
                       elementMaxWidth: MAX_BUTTON_WIDTH,
-                      collapsedElementWidth: 40,
+                      collapsedElementWidth: 32,
                     };
                   case 'icon-button':
                     return {
-                      elementMaxWidth: 40,
-                      collapsedElementWidth: 40,
+                      elementMaxWidth: 32,
+                      collapsedElementWidth: 32,
                     };
                   case 'divider':
                     return {
@@ -445,7 +453,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
             }
             return {
               elementMaxWidth: MAX_ELEMENT_TOOL_WIDTH,
-              collapsedElementWidth: 40,
+              collapsedElementWidth: 32,
             };
           });
 
@@ -697,7 +705,12 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                         })()
                       ) : (
                         <Tooltip title="Search">
-                          <IconButton onClick={() => setSearchFieldOpen(true)}>
+                          <IconButton
+                            onClick={() => setSearchFieldOpen(true)}
+                            sx={{
+                              p: 0.5,
+                            }}
+                          >
                             <SearchIcon color="inherit" />
                           </IconButton>
                         </Tooltip>

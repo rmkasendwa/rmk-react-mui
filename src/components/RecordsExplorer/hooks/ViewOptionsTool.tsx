@@ -150,6 +150,11 @@ export const useViewOptionsTool = <ViewType extends string = string>({
                   <Tooltip
                     key={viewTypeDisplay}
                     title={`View as ${viewTypeDisplay}`}
+                    PopperProps={{
+                      sx: {
+                        pointerEvents: 'none',
+                      },
+                    }}
                   >
                     <Button
                       color="inherit"
@@ -188,6 +193,11 @@ export const useViewOptionsTool = <ViewType extends string = string>({
                   <Tooltip
                     key={viewTypeDisplay}
                     title={`View as ${viewTypeDisplay}`}
+                    PopperProps={{
+                      sx: {
+                        pointerEvents: 'none',
+                      },
+                    }}
                   >
                     <Button
                       color="inherit"
