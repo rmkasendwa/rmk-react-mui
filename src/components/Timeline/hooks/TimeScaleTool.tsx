@@ -14,11 +14,7 @@ import DataDropdownField, {
   dataDropdownFieldClasses,
 } from '../../InputFields/DataDropdownField';
 import { ElementTool } from '../../SearchSyncToolbar';
-import {
-  TimeScaleOption,
-  timeScaleOptionShortLabelMap,
-  timeScaleOptions,
-} from '../models';
+import { TimeScaleOption, timeScaleOptions } from '../models';
 
 export type SelectTimeScaleCallbackFunction = (
   timeScale: TimeScaleOption | null
@@ -67,6 +63,31 @@ export const useTimeScaleTool = ({
     },
     enableLoadingState: false,
   };
+  const buttonElement = (
+    <Button
+      color="inherit"
+      variant="contained"
+      size="small"
+      disableRipple
+      sx={{
+        minWidth: 0,
+        p: 0,
+      }}
+    >
+      <DataDropdownField
+        {...dataDropdownProps}
+        options={supportedTimeScales.map((timeScaleOption) => {
+          return {
+            value: timeScaleOption,
+            label: timeScaleOption,
+          };
+        })}
+        sx={{
+          width: 90,
+        }}
+      />
+    </Button>
+  );
 
   return {
     element: (
@@ -80,61 +101,11 @@ export const useTimeScaleTool = ({
         {!isSmallScreenSize ? (
           <Typography variant="body2">{label}:</Typography>
         ) : null}
-        <Button
-          color="inherit"
-          variant="contained"
-          size="small"
-          disableRipple
-          sx={{
-            minWidth: 0,
-            p: 0,
-          }}
-        >
-          <DataDropdownField
-            {...dataDropdownProps}
-            options={supportedTimeScales.map((timeScaleOption) => {
-              return {
-                value: timeScaleOption,
-                label: timeScaleOption,
-              };
-            })}
-            sx={{
-              width: 90,
-            }}
-          />
-        </Button>
+        {buttonElement}
       </Stack>
     ),
     elementMaxWidth: 150,
-    collapsedElement: (
-      <Tooltip title={label}>
-        <Button
-          color="inherit"
-          variant="contained"
-          size="small"
-          disableRipple
-          sx={{
-            minWidth: 0,
-            p: 0,
-          }}
-        >
-          <DataDropdownField
-            {...dataDropdownProps}
-            options={supportedTimeScales.map((timeScaleOption) => {
-              return {
-                value: timeScaleOption,
-                label: timeScaleOption,
-                selectedOptionLabel:
-                  timeScaleOptionShortLabelMap[timeScaleOption],
-              };
-            })}
-            sx={{
-              width: 60,
-            }}
-          />
-        </Button>
-      </Tooltip>
-    ),
-    collapsedElementMaxWidth: 60,
+    collapsedElement: <Tooltip title={label}>{buttonElement}</Tooltip>,
+    collapsedElementMaxWidth: 90,
   } as ElementTool;
 };
