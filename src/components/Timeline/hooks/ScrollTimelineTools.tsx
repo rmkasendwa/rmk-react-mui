@@ -36,7 +36,7 @@ export const useScrollTimelineTools = ({
   jumpToPreviousUnitTimeScale,
   canJumpToNextUnitTimeScale = true,
   jumpToNextUnitTimeScale,
-  showNavigationTools = false,
+  showNavigationTools = true,
 }: ScrollTimelineToolsProps = {}) => {
   const { breakpoints } = useTheme();
   const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
