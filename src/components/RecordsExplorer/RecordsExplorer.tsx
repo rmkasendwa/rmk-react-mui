@@ -205,6 +205,28 @@ export interface RecordsExplorerChildrenOptions<RecordRow extends BaseDataRow> {
   selectedDataPreset?: RecordsExplorerDataPreset<RecordRow>;
 }
 
+export type RecordsExplorerTools = Partial<
+  Record<
+    | 'ADD_NEW'
+    | 'VIEW_OPTIONS'
+    | 'GROUP'
+    | 'SORT'
+    | 'FILTER'
+    | 'RESET_TO_DEFAULT_VIEW'
+    | 'TIMELINE_TIME_SCALE'
+    | 'TIMELINE_SCROLL',
+    Tool | ReactNode
+  >
+>;
+
+export type RecordsExplorerToolsPreprocessorFunction<
+  RecordRow extends BaseDataRow
+> = (
+  options: {
+    tools: RecordsExplorerTools;
+  } & RecordsExplorerChildrenOptions<RecordRow>
+) => (Tool | ReactNode)[];
+
 export interface RecordsExplorerFunctionChildren<State> {
   (state: State): ReactNode;
 }
@@ -425,6 +447,7 @@ export interface RecordsExplorerProps<
   TimelineViewProps?: Partial<Omit<TimelineView<RecordRow>, 'columns'>>;
   clearSearchStateOnUnmount?: boolean;
   showSuccessMessageOnCreateRecord?: boolean;
+  preprocessTools?: RecordsExplorerToolsPreprocessorFunction<RecordRow>;
 }
 
 export function getRecordsExplorerUtilityClass(slot: string): string {
@@ -544,6 +567,7 @@ const BaseRecordsExplorer = <
     fields,
     clearSearchStateOnUnmount = false,
     showSuccessMessageOnCreateRecord = true,
+    preprocessTools,
     ...rest
   } = omit(
     props,
@@ -1617,86 +1641,16 @@ const BaseRecordsExplorer = <
     return null;
   }, [filteredData, selectedGroupParams]);
 
-  const viewOptionsTool = useViewOptionsTool({
-    viewOptionTypes: (() => {
-      if (views) {
-        return views.map(({ type }) => type);
-      }
-    })(),
-    ...ViewOptionsToolProps,
-    viewType: selectedViewType,
-    onChangeViewType: (view) => {
-      setSearchParams(
-        {
-          view: view !== viewProp ? view : null,
-        },
-        {
-          replace: true,
-        }
-      );
-    },
-  });
-
-  const groupTool = useGroupTool({
-    groupableFields,
-    getGroupableData,
-    selectedGroupParams,
-    onChangeSelectedGroupParams: (groupParams) => {
-      setSearchParams(
-        {
-          groupBy:
-            groupParams.length > 0
-              ? groupParams.map(({ id, sortDirection }) => {
-                  return {
-                    id,
-                    sortDirection,
-                  };
-                })
-              : null,
-        },
-        {
-          replace: true,
-        }
-      );
-    },
-  });
-
-  const sortTool = useSortTool({
-    sortableFields,
-    selectedSortParams,
-    onChangeSelectedSortParams: (sortParams) => {
-      setSearchParams(
-        {
-          sortBy:
-            sortParams.length > 0
-              ? sortParams.map(({ id, sortDirection }) => {
-                  return {
-                    id,
-                    sortDirection,
-                  };
-                })
-              : null,
-        },
-        {
-          replace: true,
-        }
-      );
-    },
-  });
-
-  const filterTool = useFilterTool({
-    data,
-    filterFields,
-    selectedConditionGroup,
-    onChangeSelectedConditionGroup: (conditionGroup) => {
-      setSearchParams(
-        {
-          filterBy: conditionGroup as any,
-        },
-        { replace: true }
-      );
-    },
-  });
+  const pathToAddNewRecord = (() => {
+    if (pathToAddNew) {
+      return pathToAddNew;
+    }
+    if (recordCreator) {
+      return addSearchParamsToPath(pathname, {
+        createNewRecord: true,
+      });
+    }
+  })();
 
   const resetToDefaultView = () => {
     setSearchParams(
@@ -1819,17 +1773,6 @@ const BaseRecordsExplorer = <
     console.log({ record });
     // TODO: Implement Delete function
   });
-
-  const pathToAddNewRecord = (() => {
-    if (pathToAddNew) {
-      return pathToAddNew;
-    }
-    if (recordCreator) {
-      return addSearchParamsToPath(pathname, {
-        createNewRecord: true,
-      });
-    }
-  })();
 
   const isEditable = Boolean(recordEditor || pathToEdit || getPathToEdit);
   const isDeletable = Boolean(recordDeletor);
@@ -2450,7 +2393,113 @@ const BaseRecordsExplorer = <
   const isSearchable = Boolean(isSearchableProp && searchableFields);
 
   //#region Tools
-  const tools: (ReactNode | Tool)[] = [];
+  const viewOptionsTool = useViewOptionsTool({
+    viewOptionTypes: (() => {
+      if (views) {
+        return views.map(({ type }) => type);
+      }
+    })(),
+    ...ViewOptionsToolProps,
+    viewType: selectedViewType,
+    onChangeViewType: (view) => {
+      setSearchParams(
+        {
+          view: view !== viewProp ? view : null,
+        },
+        {
+          replace: true,
+        }
+      );
+    },
+  });
+
+  const groupTool = useGroupTool({
+    groupableFields,
+    getGroupableData,
+    selectedGroupParams,
+    onChangeSelectedGroupParams: (groupParams) => {
+      setSearchParams(
+        {
+          groupBy:
+            groupParams.length > 0
+              ? groupParams.map(({ id, sortDirection }) => {
+                  return {
+                    id,
+                    sortDirection,
+                  };
+                })
+              : null,
+        },
+        {
+          replace: true,
+        }
+      );
+    },
+  });
+
+  const sortTool = useSortTool({
+    sortableFields,
+    selectedSortParams,
+    onChangeSelectedSortParams: (sortParams) => {
+      setSearchParams(
+        {
+          sortBy:
+            sortParams.length > 0
+              ? sortParams.map(({ id, sortDirection }) => {
+                  return {
+                    id,
+                    sortDirection,
+                  };
+                })
+              : null,
+        },
+        {
+          replace: true,
+        }
+      );
+    },
+  });
+
+  const filterTool = useFilterTool({
+    data,
+    filterFields,
+    selectedConditionGroup,
+    onChangeSelectedConditionGroup: (conditionGroup) => {
+      setSearchParams(
+        {
+          filterBy: conditionGroup as any,
+        },
+        { replace: true }
+      );
+    },
+  });
+
+  const toolsLookup: RecordsExplorerTools = {};
+
+  if (showViewOptionsTool && (ViewOptionsToolProps || views)) {
+    toolsLookup['VIEW_OPTIONS'] = viewOptionsTool;
+  }
+
+  if (
+    (() => {
+      if (typeof showGroupTool === 'function') {
+        return showGroupTool(state);
+      }
+      return showGroupTool;
+    })() &&
+    groupableFields.length > 0
+  ) {
+    toolsLookup['GROUP'] = groupTool;
+  }
+
+  if (showSortTool && sortableFields.length > 0) {
+    toolsLookup['SORT'] = sortTool;
+  }
+
+  if (showFilterTool && filterFields.length > 0) {
+    toolsLookup['FILTER'] = filterTool;
+  }
+
   if (
     pathToAddNewRecord &&
     (!hideAddNewButtonOnNoFilteredData || filteredData.length > 0) &&
@@ -2458,7 +2507,7 @@ const BaseRecordsExplorer = <
   ) {
     if (isSmallScreenSize) {
       if (!fillContentArea) {
-        tools.push({
+        toolsLookup['ADD_NEW'] = {
           icon: <AddIcon />,
           type: 'icon-button',
           label: addNewButtonLabel,
@@ -2475,10 +2524,10 @@ const BaseRecordsExplorer = <
               color: palette.getContrastText(palette.primary.main),
             },
           },
-        });
+        };
       }
     } else {
-      tools.push({
+      toolsLookup['ADD_NEW'] = {
         icon: <AddIcon />,
         type: 'button',
         label: addNewButtonLabel,
@@ -2490,71 +2539,88 @@ const BaseRecordsExplorer = <
             to: pathToAddNewRecord,
           };
         })(),
-      });
+      };
     }
   }
-  if (showViewOptionsTool && (ViewOptionsToolProps || views)) {
-    tools.push(viewOptionsTool);
-  }
 
-  if (
-    (() => {
-      if (typeof showGroupTool === 'function') {
-        return showGroupTool(state);
-      }
-      return showGroupTool;
-    })() &&
-    groupableFields.length > 0
-  ) {
-    tools.push(groupTool);
-  }
-
-  if (showSortTool && sortableFields.length > 0) {
-    tools.push(sortTool);
-  }
-
-  if (showFilterTool && filterFields.length > 0) {
-    tools.push(filterTool);
+  if (modifiedStateKeys && modifiedStateKeys.length > 0) {
+    toolsLookup['RESET_TO_DEFAULT_VIEW'] = {
+      label: 'Reset to default view',
+      icon: <LockResetIcon />,
+      onClick: () => {
+        resetToDefaultView();
+      },
+      type: 'icon-button',
+      alwaysShowOn: 'All Screens',
+    };
   }
 
   if (
     selectedViewType === 'Timeline' &&
     (timelineView?.mergeTools || TimelineViewProps?.mergeTools)
   ) {
-    tools.push(
-      {
-        type: 'divider',
-      },
-      timeScaleTool,
-      scrollTimelineTools
-    );
+    toolsLookup['TIMELINE_TIME_SCALE'] = timeScaleTool;
+    toolsLookup['TIMELINE_SCROLL'] = scrollTimelineTools;
   }
 
-  if (toolsProp) {
-    tools.push(
-      {
-        type: 'divider',
-      },
-      ...toolsProp
-    );
-  }
+  const tools = (() => {
+    if (preprocessTools) {
+      return preprocessTools({ ...state, tools: toolsLookup });
+    }
 
-  if (modifiedStateKeys && modifiedStateKeys.length > 0) {
-    tools.push(
-      {
-        type: 'divider',
-      },
-      {
-        label: 'Reset to default view',
-        icon: <LockResetIcon />,
-        onClick: () => {
-          resetToDefaultView();
+    const tools: (ReactNode | Tool)[] = [];
+    if (toolsLookup['ADD_NEW']) {
+      tools.push(toolsLookup['ADD_NEW']);
+    }
+    if (toolsLookup['VIEW_OPTIONS']) {
+      tools.push(toolsLookup['VIEW_OPTIONS']);
+    }
+    if (toolsLookup['GROUP']) {
+      tools.push(toolsLookup['GROUP']);
+    }
+    if (toolsLookup['SORT']) {
+      tools.push(toolsLookup['SORT']);
+    }
+    if (toolsLookup['FILTER']) {
+      tools.push(toolsLookup['FILTER']);
+    }
+    if (toolsLookup['TIMELINE_TIME_SCALE'] || toolsLookup['TIMELINE_SCROLL']) {
+      tools.push(
+        {
+          type: 'divider',
         },
-        type: 'icon-button',
-        alwaysShowOn: 'All Screens',
-      }
-    );
-  }
+        toolsLookup['TIMELINE_TIME_SCALE'],
+        toolsLookup['TIMELINE_SCROLL']
+      );
+    }
+
+    if (toolsProp) {
+      tools.push(
+        {
+          type: 'divider',
+        },
+        ...toolsProp
+      );
+    }
+
+    if (modifiedStateKeys && modifiedStateKeys.length > 0) {
+      tools.push(
+        {
+          type: 'divider',
+        },
+        {
+          label: 'Reset to default view',
+          icon: <LockResetIcon />,
+          onClick: () => {
+            resetToDefaultView();
+          },
+          type: 'icon-button',
+          alwaysShowOn: 'All Screens',
+        }
+      );
+    }
+    return tools;
+  })();
   //#endregion
 
   const explorerElement = (
