@@ -105,6 +105,7 @@ export const useTimeScaleTool = ({
         </Button>
       </Stack>
     ),
+    elementMaxWidth: 150,
     collapsedElement: (
       <Tooltip title={label}>
         <Button
@@ -134,5 +135,6 @@ export const useTimeScaleTool = ({
         </Button>
       </Tooltip>
     ),
+    collapsedElementMaxWidth: 60,
   } as ElementTool;
 };
