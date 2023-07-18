@@ -24,17 +24,19 @@ export interface ScrollTimelineToolsProps {
   jumpToPreviousUnitTimeScale?: () => void;
   canJumpToNextUnitTimeScale?: boolean;
   jumpToNextUnitTimeScale?: () => void;
+  showNavigationTools?: boolean;
 }
 
 export const useScrollTimelineTools = ({
   JumpToDateToolProps,
   scrollToDate,
-  showJumpToOptimalTimeScaleTool,
+  showJumpToOptimalTimeScaleTool = false,
   jumpToOptimalTimeScale,
   canJumpToPreviousUnitTimeScale = true,
   jumpToPreviousUnitTimeScale,
   canJumpToNextUnitTimeScale = true,
   jumpToNextUnitTimeScale,
+  showNavigationTools = false,
 }: ScrollTimelineToolsProps = {}) => {
   const { breakpoints } = useTheme();
   const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
@@ -161,6 +163,19 @@ export const useScrollTimelineTools = ({
     </ButtonGroup>
   );
 
+  let elementMaxWidth = 164;
+  let collapsedElementMaxWidth = 70;
+
+  if (showJumpToOptimalTimeScaleTool) {
+    elementMaxWidth += 36;
+    collapsedElementMaxWidth += 36;
+  }
+
+  if (showNavigationTools) {
+    elementMaxWidth += 70;
+    collapsedElementMaxWidth += 70;
+  }
+
   return {
     element: (
       <Stack
@@ -179,10 +194,10 @@ export const useScrollTimelineTools = ({
         {showJumpToOptimalTimeScaleTool && jumpToOptimalTimeScale
           ? jumpToOptimalTimeScaleToolElement
           : null}
-        {jumpToUnitTimeScaleToolsElement}
+        {showNavigationTools ? jumpToUnitTimeScaleToolsElement : null}
       </Stack>
     ),
-    elementMaxWidth: 300,
+    elementMaxWidth,
     collapsedElement: (
       <Stack
         direction="row"
@@ -197,9 +212,9 @@ export const useScrollTimelineTools = ({
         {showJumpToOptimalTimeScaleTool && jumpToOptimalTimeScale
           ? jumpToOptimalTimeScaleToolElement
           : null}
-        {jumpToUnitTimeScaleToolsElement}
+        {showNavigationTools ? jumpToUnitTimeScaleToolsElement : null}
       </Stack>
     ),
-    collapsedElementMaxWidth: 180,
+    collapsedElementMaxWidth,
   } as ElementTool;
 };

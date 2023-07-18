@@ -1120,11 +1120,11 @@ const BaseRecordsExplorer = <
     return hashIt(key).toString(36).slice(0, 3);
   };
 
-  const updateChangedSearchParamKeys = () => {
+  const updateChangedSearchParamKeys = (...args: string[]) => {
     const changedSearchParamKeys = [
       ...new Set([
         ...(modifiedStateKeys || []),
-        ...Object.keys(searchParams)
+        ...[...Object.keys(searchParams), ...args]
           .filter((key) => {
             return !unTrackableSearchParams.includes(key);
           })
@@ -1987,6 +1987,9 @@ const BaseRecordsExplorer = <
                                         replace: true,
                                       }
                                     );
+                                    updateChangedSearchParamKeys(
+                                      getHashedSearchParamKey('expandedGroups')
+                                    );
                                   },
                                 },
                               } as RecordRow);
@@ -2178,6 +2181,9 @@ const BaseRecordsExplorer = <
                             replace: true,
                           }
                         );
+                        updateChangedSearchParamKeys(
+                          getHashedSearchParamKey('sortBy')
+                        );
                       }
                     },
                     onChangeSelectedColumnIds: (localSelectedColumnIds) => {
@@ -2193,6 +2199,9 @@ const BaseRecordsExplorer = <
                           {
                             replace: true,
                           }
+                        );
+                        updateChangedSearchParamKeys(
+                          getHashedSearchParamKey('selectedColumns')
                         );
                       }
                     },
@@ -2224,6 +2233,9 @@ const BaseRecordsExplorer = <
                                     replace: true,
                                   }
                                 );
+                                updateChangedSearchParamKeys(
+                                  getHashedSearchParamKey('expandedGroups')
+                                );
                               },
                             },
                           };
@@ -2254,7 +2266,7 @@ const BaseRecordsExplorer = <
               </Box>
             );
           case 'Timeline': {
-            const { mergeTools, ...viewProps } = omit(
+            const { mergeTools, onClickRow, ...viewProps } = omit(
               { ...selectedView, ...TimelineViewProps },
               'type'
             ) as TimelineView<RecordRow>;
@@ -2314,6 +2326,14 @@ const BaseRecordsExplorer = <
                   jumpToNextUnitTimeScaleRef.current = jumpToNextUnitTimeScale;
                 }}
                 showToolBar={!mergeTools}
+                onClickRow={
+                  onClickRow ??
+                  (() => {
+                    if (editorForm || getPathToView) {
+                      return viewFunctionRef.current;
+                    }
+                  })()
+                }
               />
             );
           }
@@ -2376,6 +2396,9 @@ const BaseRecordsExplorer = <
                 replace: true,
               }
             );
+            updateChangedSearchParamKeys(
+              getHashedSearchParamKey('selectedDataPreset')
+            );
           }}
           showClearButton={false}
           searchable={dataPresets.length > 10}
@@ -2410,6 +2433,7 @@ const BaseRecordsExplorer = <
           replace: true,
         }
       );
+      updateChangedSearchParamKeys(getHashedSearchParamKey('view'));
     },
   });
 
@@ -2434,6 +2458,7 @@ const BaseRecordsExplorer = <
           replace: true,
         }
       );
+      updateChangedSearchParamKeys(getHashedSearchParamKey('groupBy'));
     },
   });
 
@@ -2457,6 +2482,7 @@ const BaseRecordsExplorer = <
           replace: true,
         }
       );
+      updateChangedSearchParamKeys(getHashedSearchParamKey('sortBy'));
     },
   });
 
@@ -2471,6 +2497,7 @@ const BaseRecordsExplorer = <
         },
         { replace: true }
       );
+      updateChangedSearchParamKeys(getHashedSearchParamKey('filterBy'));
     },
   });
 
@@ -2699,6 +2726,7 @@ const BaseRecordsExplorer = <
                   replace: true,
                 }
               );
+              updateChangedSearchParamKeys(getHashedSearchParamKey('search'));
             }
             onChangeSearchTerm && onChangeSearchTerm(searchTerm);
           }}

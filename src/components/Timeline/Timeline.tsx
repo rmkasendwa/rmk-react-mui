@@ -51,6 +51,7 @@ import { ObjectShape } from 'yup/lib/object';
 import { useReactRouterDOMSearchParams } from '../../hooks/ReactRouterDOM';
 import { BaseDataRow, Table, TableColumn, TableProps } from '../Table';
 import {
+  ScrollTimelineToolsProps,
   SelectTimeScaleCallbackFunction,
   TimeScaleToolProps,
   useScrollTimelineTools,
@@ -124,7 +125,10 @@ export interface TimelineElement extends Partial<BoxProps> {
 
 export interface TimelineProps<RecordRow extends BaseDataRow = any>
   extends Partial<
-    Pick<TableProps, 'className' | 'sx' | 'parentBackgroundColor'>
+    Pick<
+      TableProps,
+      'className' | 'sx' | 'parentBackgroundColor' | 'onClickRow'
+    >
   > {
   rowLabelProperty?: keyof RecordRow;
   getRowLabel?: (row: RecordRow) => ReactNode;
@@ -165,6 +169,7 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
     >
   >;
   TimeScaleToolProps?: Partial<TimeScaleToolProps>;
+  ScrollTimelineToolsProps?: Partial<ScrollTimelineToolsProps>;
   onChangeSelectedTimeScale?: (selectedTimeScale: TimeScaleOption) => void;
   onChangeTimelineDateBounds?: (dateBounds: {
     minDate: Date;
@@ -234,6 +239,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     showToolBar = true,
     supportedTimeScales = [...timeScaleOptions],
     TimeScaleMeterProps = {},
+    ScrollTimelineToolsProps = {},
     onChangeSelectedTimeScale,
     getJumpToNextUnitTimeScaleFunction,
     getJumpToOptimalTimeScaleFunction,
@@ -1186,13 +1192,16 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   const showJumpToOptimalTimeScaleTool =
     selectedTimeScale !== optimalTimeScale || !isTimelineAtCenterOfGravity;
   const { element: scrollTimelineToolsElement } = useScrollTimelineTools({
+    ...ScrollTimelineToolsProps,
     JumpToDateToolProps: {
       minDate: minCalendarDate,
       maxDate: maxCalendarDate,
       selectedDate: currentDateAtCenterRef.current,
     },
     scrollToDate,
-    showJumpToOptimalTimeScaleTool,
+    showJumpToOptimalTimeScaleTool:
+      ScrollTimelineToolsProps.showJumpToOptimalTimeScaleTool ??
+      showJumpToOptimalTimeScaleTool,
     jumpToOptimalTimeScale,
     jumpToPreviousUnitTimeScale,
     jumpToNextUnitTimeScale,
