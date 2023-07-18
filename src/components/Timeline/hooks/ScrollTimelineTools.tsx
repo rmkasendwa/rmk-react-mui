@@ -182,6 +182,7 @@ export const useScrollTimelineTools = ({
         {jumpToUnitTimeScaleToolsElement}
       </Stack>
     ),
+    elementMaxWidth: 300,
     collapsedElement: (
       <Stack
         direction="row"
@@ -199,5 +200,6 @@ export const useScrollTimelineTools = ({
         {jumpToUnitTimeScaleToolsElement}
       </Stack>
     ),
+    collapsedElementMaxWidth: 180,
   } as ElementTool;
 };

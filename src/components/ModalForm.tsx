@@ -445,6 +445,7 @@ export const BaseModalForm = <Values extends FormikValues>(
                       postSyncButtonTools: [
                         {
                           type: 'icon-button',
+                          label: 'Close',
                           icon: <CloseIcon />,
                           onClick: () => onClose(),
                         },
