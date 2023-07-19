@@ -240,7 +240,18 @@ export const getToolNodes = (
                   );
                 })();
                 if (title) {
-                  return <Tooltip {...{ title }}>{buttonElement}</Tooltip>;
+                  return (
+                    <Tooltip
+                      {...{ title }}
+                      PopperProps={{
+                        sx: {
+                          pointerEvents: 'none',
+                        },
+                      }}
+                    >
+                      {buttonElement}
+                    </Tooltip>
+                  );
                 }
                 return buttonElement;
               }
@@ -694,7 +705,14 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                               }}
                             >
                               {searchFieldPlaceholder ? (
-                                <Tooltip title={searchFieldPlaceholder}>
+                                <Tooltip
+                                  title={searchFieldPlaceholder}
+                                  PopperProps={{
+                                    sx: {
+                                      pointerEvents: 'none',
+                                    },
+                                  }}
+                                >
                                   {textField}
                                 </Tooltip>
                               ) : (
@@ -704,7 +722,14 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                           );
                         })()
                       ) : (
-                        <Tooltip title="Search">
+                        <Tooltip
+                          title="Search"
+                          PopperProps={{
+                            sx: {
+                              pointerEvents: 'none',
+                            },
+                          }}
+                        >
                           <IconButton
                             onClick={() => setSearchFieldOpen(true)}
                             sx={{
