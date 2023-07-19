@@ -169,6 +169,7 @@ export interface BaseDataView {
   type: ViewOptionType;
   minWidth?: number;
   mergeTools?: boolean;
+  renderView?: boolean;
 }
 
 export interface ListView<RecordRow extends BaseDataRow>
@@ -189,9 +190,10 @@ export type DataView<RecordRow extends BaseDataRow> =
   | TimelineView<RecordRow>;
 
 export interface RecordsExplorerChildrenOptions<RecordRow extends BaseDataRow> {
-  selectedView: ViewOptionType;
   data: RecordRow[];
   groupedData?: NestedDataGroup<RecordRow>[];
+  selectedView: ViewOptionType;
+  selectedViewProps?: DataView<RecordRow>;
   headerHeight?: number;
   filterFields?: DataFilterField<RecordRow>[];
   filterBy?: Omit<ConditionGroup<RecordRow>, 'conjunction'> &
@@ -621,8 +623,15 @@ const BaseRecordsExplorer = <
   const { ...CreateModalFormPropsRest } = CreateModalFormProps;
   const { ...ViewModalFormPropsRest } = ViewModalFormProps;
 
-  // Refs
+  //#region Refs
   const isInitialMountRef = useRef(true);
+  useEffect(() => {
+    isInitialMountRef.current = false;
+    return () => {
+      isInitialMountRef.current = true;
+    };
+  }, []);
+
   const headerElementRef = useRef<HTMLDivElement | null>(null);
   const bodyElementRef = useRef<HTMLDivElement | null>(null);
   const filterBySearchTermRef = useRef(filterBySearchTerm);
@@ -684,10 +693,10 @@ const BaseRecordsExplorer = <
     })();
     navigate(pathToViewRecord);
   });
-
   useEffect(() => {
     getViewFunctionRef.current?.(viewFunctionRef.current);
   }, []);
+  //#endregion
 
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -1846,12 +1855,7 @@ const BaseRecordsExplorer = <
   });
   //#endregion
 
-  useEffect(() => {
-    isInitialMountRef.current = false;
-    return () => {
-      isInitialMountRef.current = true;
-    };
-  }, []);
+  const selectedView = views?.find(({ type }) => type === selectedViewType);
 
   //#region State
   const state: RecordsExplorerChildrenOptions<RecordRow> = {
@@ -1869,16 +1873,17 @@ const BaseRecordsExplorer = <
     errorMessage,
     searchParamSelectedDataPreset,
     selectedDataPreset,
+    selectedViewProps: selectedView,
   };
   //#endregion
 
+  //#region View Element
   const viewElement = (() => {
-    if (views && renderViews) {
-      const selectedView = views.find(({ type }) => type === selectedViewType);
-      if (selectedView) {
-        const { type } = selectedView;
+    if (selectedView && renderViews) {
+      const { type, renderView = true } = selectedView;
+      if (renderView) {
         switch (type) {
-          case 'List':
+          case 'List': {
             const { ...viewProps } = omit(
               selectedView,
               'type',
@@ -2278,13 +2283,13 @@ const BaseRecordsExplorer = <
                       stickyHeader
                       sx={{
                         [`
-                          & .${tableContainerClasses.root}
-                        `]: {
+                        & .${tableContainerClasses.root}
+                      `]: {
                           overflow: 'visible',
                         },
                         [`
-                          & .${tableHeadClasses.root}
-                        `]: {
+                        & .${tableHeadClasses.root}
+                      `]: {
                           bgcolor: palette.background.paper,
                           zIndex: 5,
                           '& th': {
@@ -2298,15 +2303,16 @@ const BaseRecordsExplorer = <
                 })()}
               </Box>
             );
+          }
           case 'Timeline': {
             const { mergeTools, onClickRow, ...viewProps } = omit(
               { ...selectedView, ...TimelineViewProps },
               'type'
             ) as TimelineView<RecordRow>;
             if (!viewProps.getRowLabel && !viewProps.rowLabelProperty) {
-              const listView = views.find(
-                ({ type }) => type === 'List'
-              ) as ListView<RecordRow> | null;
+              const listView = views?.find(({ type }) => type === 'List') as
+                | ListView<RecordRow>
+                | undefined;
               if (listView && listView.columns.length > 0) {
                 viewProps.rowLabelProperty = listView.columns[0].id;
                 viewProps.getRowLabel = listView.columns[0]
@@ -2371,6 +2377,7 @@ const BaseRecordsExplorer = <
     }
     return children;
   })() as ReactNode | undefined;
+  //#endregion
 
   const title = (() => {
     if (!recordsFinder && dataPresets && dataPresets.length > 0) {
