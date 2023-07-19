@@ -1813,8 +1813,6 @@ const BaseRecordsExplorer = <
       }
     | undefined
   >();
-  const [showJumpToOptimalTimeScaleTool, setShowJumpToOptimalTimeScaleTool] =
-    useState(false);
 
   const timeScaleTool = useTimeScaleTool({
     ...timelineView?.TimeScaleToolProps,
@@ -1837,11 +1835,6 @@ const BaseRecordsExplorer = <
       maxDate: timelineDateBounds?.maxDate,
       selectedDate: currentDateAtCenterRef.current,
     },
-    showJumpToOptimalTimeScaleTool:
-      timelineView?.ScrollTimelineToolsProps?.showJumpToOptimalTimeScaleTool ??
-      TimelineViewProps?.ScrollTimelineToolsProps
-        ?.showJumpToOptimalTimeScaleTool ??
-      showJumpToOptimalTimeScaleTool,
   });
   //#endregion
 
@@ -2007,7 +2000,7 @@ const BaseRecordsExplorer = <
                                       }
                                     );
                                     updateChangedSearchParamKeys(
-                                      getHashedSearchParamKey('expandedGroups')
+                                      'expandedGroups'
                                     );
                                   },
                                 },
@@ -2200,9 +2193,7 @@ const BaseRecordsExplorer = <
                             replace: true,
                           }
                         );
-                        updateChangedSearchParamKeys(
-                          getHashedSearchParamKey('sortBy')
-                        );
+                        updateChangedSearchParamKeys('sortBy');
                       }
                     },
                     onChangeSelectedColumnIds: (localSelectedColumnIds) => {
@@ -2219,9 +2210,7 @@ const BaseRecordsExplorer = <
                             replace: true,
                           }
                         );
-                        updateChangedSearchParamKeys(
-                          getHashedSearchParamKey('selectedColumns')
-                        );
+                        updateChangedSearchParamKeys('selectedColumns');
                       }
                     },
                   };
@@ -2252,9 +2241,7 @@ const BaseRecordsExplorer = <
                                     replace: true,
                                   }
                                 );
-                                updateChangedSearchParamKeys(
-                                  getHashedSearchParamKey('expandedGroups')
-                                );
+                                updateChangedSearchParamKeys('expandedGroups');
                               },
                             },
                           };
@@ -2316,13 +2303,6 @@ const BaseRecordsExplorer = <
                 }}
                 onChangeCurrentDateAtCenter={(currentDateAtCenter) => {
                   currentDateAtCenterRef.current = currentDateAtCenter;
-                }}
-                onChangeShowJumpToOptimalTimeScaleTool={(
-                  showJumpToOptimalTimeScaleTool
-                ) => {
-                  setShowJumpToOptimalTimeScaleTool(
-                    showJumpToOptimalTimeScaleTool
-                  );
                 }}
                 getScrollToDateFunction={(scrollToDate) => {
                   scrollToDateRef.current = scrollToDate;
@@ -2415,9 +2395,7 @@ const BaseRecordsExplorer = <
                 replace: true,
               }
             );
-            updateChangedSearchParamKeys(
-              getHashedSearchParamKey('selectedDataPreset')
-            );
+            updateChangedSearchParamKeys('selectedDataPreset');
           }}
           showClearButton={false}
           searchable={dataPresets.length > 10}
@@ -2452,7 +2430,7 @@ const BaseRecordsExplorer = <
           replace: true,
         }
       );
-      updateChangedSearchParamKeys(getHashedSearchParamKey('view'));
+      updateChangedSearchParamKeys('view');
     },
   });
 
@@ -2477,7 +2455,7 @@ const BaseRecordsExplorer = <
           replace: true,
         }
       );
-      updateChangedSearchParamKeys(getHashedSearchParamKey('groupBy'));
+      updateChangedSearchParamKeys('groupBy');
     },
   });
 
@@ -2501,7 +2479,7 @@ const BaseRecordsExplorer = <
           replace: true,
         }
       );
-      updateChangedSearchParamKeys(getHashedSearchParamKey('sortBy'));
+      updateChangedSearchParamKeys('sortBy');
     },
   });
 
@@ -2516,7 +2494,7 @@ const BaseRecordsExplorer = <
         },
         { replace: true }
       );
-      updateChangedSearchParamKeys(getHashedSearchParamKey('filterBy'));
+      updateChangedSearchParamKeys('filterBy');
     },
   });
 
@@ -2962,7 +2940,7 @@ const BaseRecordsExplorer = <
                   replace: true,
                 }
               );
-              updateChangedSearchParamKeys(getHashedSearchParamKey('search'));
+              updateChangedSearchParamKeys('search');
             }
             onChangeSearchTerm && onChangeSearchTerm(searchTerm);
           }}

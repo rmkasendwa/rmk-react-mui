@@ -30,7 +30,6 @@ import formatDate from 'date-fns/format';
 import getDaysInMonth from 'date-fns/getDaysInMonth';
 import isAfter from 'date-fns/isAfter';
 import isBefore from 'date-fns/isBefore';
-import isSameDay from 'date-fns/isSameDay';
 import { omit, result, uniqueId } from 'lodash';
 import {
   Fragment,
@@ -42,7 +41,6 @@ import {
   useEffect,
   useMemo,
   useRef,
-  useState,
 } from 'react';
 import { mergeRefs } from 'react-merge-refs';
 import * as Yup from 'yup';
@@ -176,9 +174,6 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
     maxDate: Date;
   }) => void;
   onChangeCurrentDateAtCenter?: (currentDateAtCenter: Date) => void;
-  onChangeShowJumpToOptimalTimeScaleTool?: (
-    showJumpToOptimalTimeScaleTool: boolean
-  ) => void;
   getScrollToDateFunction?: (scrollToDate: ScrollToDateFunction) => void;
   getSelectTimeScaleFunction?: (
     selectTimeScale: SelectTimeScaleCallbackFunction
@@ -250,7 +245,6 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     TimeScaleToolProps,
     onChangeTimelineDateBounds,
     onChangeCurrentDateAtCenter,
-    onChangeShowJumpToOptimalTimeScaleTool,
     defaultTimelineCenter,
     TodayIndicatorProps = {},
     ...rest
@@ -297,12 +291,6 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   const onChangeTimelineDateBoundsRef = useRef(onChangeTimelineDateBounds);
   onChangeTimelineDateBoundsRef.current = onChangeTimelineDateBounds;
 
-  const onChangeShowJumpToOptimalTimeScaleToolRef = useRef(
-    onChangeShowJumpToOptimalTimeScaleTool
-  );
-  onChangeShowJumpToOptimalTimeScaleToolRef.current =
-    onChangeShowJumpToOptimalTimeScaleTool;
-
   const onChangeCurrentDateAtCenterRef = useRef(onChangeCurrentDateAtCenter);
   onChangeCurrentDateAtCenterRef.current = onChangeCurrentDateAtCenter;
 
@@ -338,9 +326,6 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   const baseSpacingUnits = isSmallScreenSize ? 16 : 24;
 
   parentBackgroundColor || (parentBackgroundColor = palette.background.paper);
-
-  const [isTimelineAtCenterOfGravity, setIsTimelineAtCenterOfGravity] =
-    useState(true);
 
   const shouldShowRowLabelsColumn = (() => {
     return !isSmallScreenSize && showRowLabelsColumn;
@@ -966,9 +951,6 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         );
         currentDateAtCenterRef.current = dateAtCenter;
         onChangeCurrentDateAtCenterRef.current?.(dateAtCenter);
-        setIsTimelineAtCenterOfGravity(
-          isSameDay(dateAtCenter, centerOfGravity)
-        );
       };
       parentElement.addEventListener('scroll', scrollEventCallback);
       return () => {
@@ -1189,8 +1171,6 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     getJumpToNextUnitTimeScaleFunctionRef.current?.(jumpToNextUnitTimeScale);
   }, [jumpToNextUnitTimeScale]);
 
-  const showJumpToOptimalTimeScaleTool =
-    selectedTimeScale !== optimalTimeScale || !isTimelineAtCenterOfGravity;
   const { element: scrollTimelineToolsElement } = useScrollTimelineTools({
     ...ScrollTimelineToolsProps,
     JumpToDateToolProps: {
@@ -1199,19 +1179,10 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       selectedDate: currentDateAtCenterRef.current,
     },
     scrollToDate,
-    showJumpToOptimalTimeScaleTool:
-      ScrollTimelineToolsProps.showJumpToOptimalTimeScaleTool ??
-      showJumpToOptimalTimeScaleTool,
     jumpToOptimalTimeScale,
     jumpToPreviousUnitTimeScale,
     jumpToNextUnitTimeScale,
   });
-
-  useEffect(() => {
-    onChangeShowJumpToOptimalTimeScaleToolRef.current?.(
-      showJumpToOptimalTimeScaleTool
-    );
-  }, [showJumpToOptimalTimeScaleTool]);
   //#endregion
 
   const columns: TableColumn<RecordRow>[] = [

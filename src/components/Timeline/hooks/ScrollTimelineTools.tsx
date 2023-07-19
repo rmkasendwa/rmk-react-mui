@@ -30,7 +30,7 @@ export interface ScrollTimelineToolsProps {
 export const useScrollTimelineTools = ({
   JumpToDateToolProps,
   scrollToDate,
-  showJumpToOptimalTimeScaleTool = false,
+  showJumpToOptimalTimeScaleTool = true,
   jumpToOptimalTimeScale,
   canJumpToPreviousUnitTimeScale = true,
   jumpToPreviousUnitTimeScale,
