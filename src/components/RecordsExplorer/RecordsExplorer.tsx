@@ -191,6 +191,7 @@ export type DataView<RecordRow extends BaseDataRow> =
 export interface RecordsExplorerChildrenOptions<RecordRow extends BaseDataRow> {
   selectedView: ViewOptionType;
   data: RecordRow[];
+  groupedData?: NestedDataGroup<RecordRow>[];
   headerHeight?: number;
   filterFields?: DataFilterField<RecordRow>[];
   filterBy?: Omit<ConditionGroup<RecordRow>, 'conjunction'> &
@@ -297,6 +298,7 @@ export interface RecordsExplorerProps<
    * The raw data to be processed for displaying.
    */
   data?: RecordRow[];
+  groupedData?: NestedDataGroup<RecordRow>[];
   /**
    * The label to be used when reporting display stats for multiple records.
    *
@@ -449,6 +451,7 @@ export interface RecordsExplorerProps<
   showSuccessMessageOnCreateRecord?: boolean;
   preprocessTools?: RecordsExplorerToolsPreprocessorFunction<RecordRow>;
   renderExplorerElement?: boolean;
+  renderViews?: boolean;
 }
 
 export function getRecordsExplorerUtilityClass(slot: string): string {
@@ -493,6 +496,7 @@ const BaseRecordsExplorer = <
     BodyProps = {},
     IconLoadingScreenProps = {},
     data: dataProp,
+    groupedData: groupedDataProp,
     ViewOptionsToolProps,
     filterFields: filterFieldsProp,
     sortableFields: sortableFieldsProp,
@@ -571,6 +575,7 @@ const BaseRecordsExplorer = <
     showSuccessMessageOnCreateRecord = true,
     preprocessTools,
     renderExplorerElement = true,
+    renderViews = true,
     ...rest
   } = omit(
     props,
@@ -1580,71 +1585,74 @@ const BaseRecordsExplorer = <
   //#endregion
 
   // Grouping data
-  const groupedData = useMemo(() => {
-    if (selectedGroupParams.length > 0) {
-      const groupParams = [...selectedGroupParams];
+  const groupedData =
+    useMemo(() => {
+      if (selectedGroupParams.length > 0) {
+        const groupParams = [...selectedGroupParams];
 
-      const groupData = (
-        inputGroupableData: typeof filteredData,
-        nestIndex = 0
-      ): NestedDataGroup<RecordRow>[] | DataGroup<RecordRow>[] => {
-        const currentGroupParams = groupParams[nestIndex];
-        const { id, getSortValue, getGroupLabel } = currentGroupParams;
-        const groupableData = getGroupableDataRef.current
-          ? getGroupableDataRef.current(inputGroupableData, currentGroupParams)
-          : inputGroupableData;
+        const groupData = (
+          inputGroupableData: typeof filteredData,
+          nestIndex = 0
+        ): NestedDataGroup<RecordRow>[] | DataGroup<RecordRow>[] => {
+          const currentGroupParams = groupParams[nestIndex];
+          const { id, getSortValue, getGroupLabel } = currentGroupParams;
+          const groupableData = getGroupableDataRef.current
+            ? getGroupableDataRef.current(
+                inputGroupableData,
+                currentGroupParams
+              )
+            : inputGroupableData;
 
-        const groupedData = groupableData
-          .reduce((accumulator, row: any) => {
-            const fieldValue = (() => {
-              if (getSortValue) {
-                return getSortValue(row);
+          const groupedData = groupableData
+            .reduce((accumulator, row: any) => {
+              const fieldValue = (() => {
+                if (getSortValue) {
+                  return getSortValue(row);
+                }
+                return result(row, id);
+              })();
+              let existingGroup = accumulator.find(({ groupName }) => {
+                return (
+                  (fieldValue == null && groupName === '') ||
+                  (fieldValue != null && groupName === String(fieldValue))
+                );
+              })!;
+              if (!existingGroup) {
+                existingGroup = {
+                  ...row,
+                  groupName: fieldValue != null ? String(fieldValue) : '',
+                };
+                accumulator.push(existingGroup);
               }
-              return result(row, id);
-            })();
-            let existingGroup = accumulator.find(({ groupName }) => {
-              return (
-                (fieldValue == null && groupName === '') ||
-                (fieldValue != null && groupName === String(fieldValue))
-              );
-            })!;
-            if (!existingGroup) {
-              existingGroup = {
-                ...row,
-                groupName: fieldValue != null ? String(fieldValue) : '',
+              existingGroup.children ?? (existingGroup.children = []);
+              existingGroup.children.push(row);
+              return accumulator;
+            }, [] as DataGroup<RecordRow>[])
+            .map((group) => {
+              return {
+                ...group,
+                label: getGroupLabel ? getGroupLabel(group) : group.groupName,
+                childrenCount: group.children.length,
               };
-              accumulator.push(existingGroup);
-            }
-            existingGroup.children ?? (existingGroup.children = []);
-            existingGroup.children.push(row);
-            return accumulator;
-          }, [] as DataGroup<RecordRow>[])
-          .map((group) => {
-            return {
-              ...group,
-              label: getGroupLabel ? getGroupLabel(group) : group.groupName,
-              childrenCount: group.children.length,
-            };
-          })
-          .sort((a, b) => {
-            return sort(a, b, [currentGroupParams as any]);
-          });
+            })
+            .sort((a, b) => {
+              return sort(a, b, [currentGroupParams as any]);
+            });
 
-        if (nestIndex < groupParams.length - 1) {
-          return groupedData.map(({ children, ...restDataGroup }) => {
-            return {
-              ...restDataGroup,
-              children: groupData(children, nestIndex + 1),
-            } as NestedDataGroup<RecordRow>;
-          });
-        }
+          if (nestIndex < groupParams.length - 1) {
+            return groupedData.map(({ children, ...restDataGroup }) => {
+              return {
+                ...restDataGroup,
+                children: groupData(children, nestIndex + 1),
+              } as NestedDataGroup<RecordRow>;
+            });
+          }
 
-        return groupedData;
-      };
-      return groupData(filteredData);
-    }
-    return null;
-  }, [filteredData, selectedGroupParams]);
+          return groupedData;
+        };
+        return groupData(filteredData);
+      }
+    }, [filteredData, selectedGroupParams]) || groupedDataProp;
 
   const pathToAddNewRecord = (() => {
     if (pathToAddNew) {
@@ -1845,8 +1853,27 @@ const BaseRecordsExplorer = <
     };
   }, []);
 
+  //#region State
+  const state: RecordsExplorerChildrenOptions<RecordRow> = {
+    selectedView: selectedViewType,
+    data: filteredData,
+    groupedData,
+    headerHeight: headerElementRef.current?.offsetHeight,
+    filterFields,
+    filterBy: selectedConditionGroup,
+    sortableFields,
+    sortBy: selectedSortParams,
+    groupableFields,
+    groupBy: selectedGroupParams,
+    loading,
+    errorMessage,
+    searchParamSelectedDataPreset,
+    selectedDataPreset,
+  };
+  //#endregion
+
   const viewElement = (() => {
-    if (views) {
+    if (views && renderViews) {
       const selectedView = views.find(({ type }) => type === selectedViewType);
       if (selectedView) {
         const { type } = selectedView;
@@ -2339,23 +2366,11 @@ const BaseRecordsExplorer = <
         }
       }
     }
+    if (typeof children === 'function') {
+      return children(state);
+    }
+    return children;
   })() as ReactNode | undefined;
-
-  const state: RecordsExplorerChildrenOptions<RecordRow> = {
-    selectedView: selectedViewType,
-    data: filteredData,
-    headerHeight: headerElementRef.current?.offsetHeight,
-    filterFields,
-    filterBy: selectedConditionGroup,
-    sortableFields,
-    sortBy: selectedSortParams,
-    groupableFields,
-    groupBy: selectedGroupParams,
-    loading,
-    errorMessage,
-    searchParamSelectedDataPreset,
-    selectedDataPreset,
-  };
 
   const title = (() => {
     if (!recordsFinder && dataPresets && dataPresets.length > 0) {
@@ -2647,6 +2662,7 @@ const BaseRecordsExplorer = <
   })();
   //#endregion
 
+  //#region Popup Elements
   const popupElements = (() => {
     if (
       (selectedRecordId || (validationSchema && initialValues)) &&
@@ -2859,11 +2875,13 @@ const BaseRecordsExplorer = <
       );
     }
   })();
+  //#endregion
 
   if (!renderExplorerElement) {
     return <>{popupElements}</>;
   }
 
+  //#region Explorer Element
   const explorerElement = (
     <Paper
       ref={ref}
@@ -2986,24 +3004,8 @@ const BaseRecordsExplorer = <
               />
             );
           }
-          return (
-            <>
-              {(() => {
-                if (viewElement) {
-                  return viewElement;
-                }
-              })()}
-              {(() => {
-                if (typeof children === 'function') {
-                  return children(state);
-                }
-                return children;
-              })()}
-            </>
-          );
+          return viewElement;
         })()}
-
-        {/* Popups */}
         {popupElements}
       </Box>
       {(() => {
@@ -3078,6 +3080,7 @@ const BaseRecordsExplorer = <
       ) : null}
     </Paper>
   );
+  //#endregion
 
   if (fillContentArea) {
     return (

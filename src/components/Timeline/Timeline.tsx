@@ -1307,18 +1307,18 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           });
         }
       },
-      width: timeScaleWidth + baseSpacingUnits * 2,
+      width: timeScaleWidth + baseSpacingUnits,
       wrapColumnContentInFieldValue: false,
       headerSx: {
         '&>div': {
           py: 0,
           pl: `${baseSpacingUnits}px`,
-          pr: `${baseSpacingUnits}px`,
+          pr: 0,
         },
       },
       bodySx: {
         pl: `${baseSpacingUnits}px`,
-        pr: `${baseSpacingUnits}px`,
+        pr: 0,
         py: 0.5,
         '&>div': {
           height: 42,
@@ -1357,7 +1357,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
               '&>div': {
                 py: 0,
                 pl: `${baseSpacingUnits}px`,
-                pr: `${baseSpacingUnits}px`,
+                pr: 0,
               },
             };
           }
@@ -1368,7 +1368,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         '&>div': {
           py: 0,
           pl: `${baseSpacingUnits}px`,
-          pr: `${baseSpacingUnits}px`,
+          pr: 0,
         },
       },
       bodySx: {
@@ -1385,11 +1385,16 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     columns.push({
       id: 'gutter',
       label: 'Gutter',
-      width: 40,
+      width: 0,
       showHeaderText: false,
       headerSx: {
         '&>div': {
           p: 0,
+        },
+      },
+      sx: {
+        '&:last-of-type': {
+          borderLeft: 'none !important',
         },
       },
     });
