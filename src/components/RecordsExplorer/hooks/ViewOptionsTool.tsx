@@ -99,16 +99,8 @@ export const useViewOptionsTool = <ViewType extends string = string>({
       })
       .map(({ label, icon }) => {
         return {
-          label: (
-            <Grid container spacing={1} sx={{ alignItems: 'center' }}>
-              <Grid item sx={{ display: 'flex' }}>
-                {icon}
-              </Grid>
-              <Grid item xs>
-                <Typography variant="body2">{label}</Typography>
-              </Grid>
-            </Grid>
-          ),
+          icon,
+          label,
           value: label,
         } as DropdownOption;
       });
@@ -144,7 +136,7 @@ export const useViewOptionsTool = <ViewType extends string = string>({
         return {
           element: (
             <Stack direction="row">
-              {options.map(({ label, value }) => {
+              {options.map(({ icon, label, value }) => {
                 const viewTypeDisplay = value as string;
                 return (
                   <Tooltip
@@ -177,7 +169,14 @@ export const useViewOptionsTool = <ViewType extends string = string>({
                         })(),
                       }}
                     >
-                      {label}
+                      <Grid container spacing={1} sx={{ alignItems: 'center' }}>
+                        <Grid item sx={{ display: 'flex' }}>
+                          {icon}
+                        </Grid>
+                        <Grid item xs>
+                          <Typography variant="body2">{label}</Typography>
+                        </Grid>
+                      </Grid>
                     </Button>
                   </Tooltip>
                 );
