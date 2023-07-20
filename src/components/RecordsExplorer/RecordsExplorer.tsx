@@ -3050,6 +3050,7 @@ const BaseRecordsExplorer = <
             }
             return {
               overflowX: 'auto',
+              overflowY: 'hidden',
             };
           })(),
         }}

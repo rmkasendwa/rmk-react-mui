@@ -324,10 +324,16 @@ export type CacheableDataFinderOptions = {
 export type CacheableDataFinder<Data> = (
   options: CacheableDataFinderOptions
 ) => Promise<Data>;
-export interface CacheableDataOptions extends QueryOptions {}
+export interface CacheableDataOptions<Data> extends QueryOptions {
+  defaultValue?: Data;
+}
 export const useCacheableData = <Data>(
   recordFinder?: CacheableDataFinder<Data>,
-  { loadOnMount = true, revalidationKey }: CacheableDataOptions = {}
+  {
+    defaultValue,
+    loadOnMount = true,
+    revalidationKey,
+  }: CacheableDataOptions<Data> = {}
 ) => {
   // Refs
   const isInitialMountRef = useRef(true);
@@ -344,7 +350,7 @@ export const useCacheableData = <Data>(
     record,
     setRecord,
     ...rest
-  } = useAPIService<Data | null>(null, loadOnMount);
+  } = useAPIService(defaultValue, loadOnMount);
 
   const load = useCallback(() => {
     return baseLoad(async () => {
