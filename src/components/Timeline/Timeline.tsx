@@ -1242,7 +1242,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                   })(),
                   top: (() => {
                     if (todayMarkerVariant === 'foregroundFullSpan') {
-                      return `calc(100% - 400px)`;
+                      return `calc(100% - 405px)`;
                     }
                     return '100%';
                   })(),
