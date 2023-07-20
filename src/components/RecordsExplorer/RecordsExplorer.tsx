@@ -189,10 +189,16 @@ export type DataView<RecordRow extends BaseDataRow> =
   | ListView<RecordRow>
   | TimelineView<RecordRow>;
 
-export interface RecordsExplorerChildrenOptions<RecordRow extends BaseDataRow> {
+export interface RecordsExplorerChildrenOptions<
+  RecordRow extends BaseDataRow,
+  View extends ViewOptionType = ViewOptionType,
+  InitialValues extends FormikValues = FormikValues
+> extends Partial<
+    Omit<RecordsExplorerProps<RecordRow, View, InitialValues>, 'children'>
+  > {
   data: RecordRow[];
   groupedData?: NestedDataGroup<RecordRow>[];
-  selectedView: ViewOptionType;
+  selectedView: View;
   selectedViewProps?: DataView<RecordRow>;
   headerHeight?: number;
   filterFields?: DataFilterField<RecordRow>[];
@@ -223,11 +229,16 @@ export type RecordsExplorerTools = Partial<
 >;
 
 export type RecordsExplorerToolsPreprocessorFunction<
-  RecordRow extends BaseDataRow
+  RecordRow extends BaseDataRow,
+  View extends ViewOptionType = ViewOptionType,
+  InitialValues extends FormikValues = FormikValues
 > = (
   options: {
     tools: RecordsExplorerTools;
-  } & RecordsExplorerChildrenOptions<RecordRow>
+  } & Omit<
+    RecordsExplorerChildrenOptions<RecordRow, View, InitialValues>,
+    'tools'
+  >
 ) => (Tool | ReactNode)[];
 
 export interface RecordsExplorerFunctionChildren<State> {
@@ -281,15 +292,17 @@ export interface RecordsExplorerProps<
       'revalidationKey' | 'autoSync' | 'refreshInterval'
     > {
   getTitle?: RecordsExplorerFunctionChildren<
-    RecordsExplorerChildrenOptions<RecordRow>
+    RecordsExplorerChildrenOptions<RecordRow, View, InitialValues>
   >;
   getWrappedTitle?: RecordsExplorerFunctionChildren<
-    RecordsExplorerChildrenOptions<RecordRow> & {
+    RecordsExplorerChildrenOptions<RecordRow, View, InitialValues> & {
       title: ReactNode;
     }
   >;
   children?:
-    | RecordsExplorerFunctionChildren<RecordsExplorerChildrenOptions<RecordRow>>
+    | RecordsExplorerFunctionChildren<
+        RecordsExplorerChildrenOptions<RecordRow, View, InitialValues>
+      >
     | ReactNode;
   load?: () => void;
   errorMessage?: string;
@@ -383,7 +396,9 @@ export interface RecordsExplorerProps<
   ) => RecordRow[];
   showPaginationStats?:
     | boolean
-    | ((state: RecordsExplorerChildrenOptions<RecordRow>) => boolean);
+    | ((
+        state: RecordsExplorerChildrenOptions<RecordRow, View, InitialValues>
+      ) => boolean);
 
   // Form
   editorForm?:
@@ -435,9 +450,12 @@ export interface RecordsExplorerProps<
   showViewOptionsTool?: boolean;
   showGroupTool?:
     | boolean
-    | ((state: RecordsExplorerChildrenOptions<RecordRow>) => boolean);
+    | ((
+        state: RecordsExplorerChildrenOptions<RecordRow, View, InitialValues>
+      ) => boolean);
   showSortTool?: boolean;
   showFilterTool?: boolean;
+  showResetTool?: boolean;
   stateStorage?: ParamStorage;
   PaginatedRecordsOptions?: Partial<PaginatedRecordsOptions<RecordRow>>;
   dataPresets?: RecordsExplorerDataPreset<RecordRow>[];
@@ -445,15 +463,20 @@ export interface RecordsExplorerProps<
   tools?: Tool[];
   bottomTools?: Tool[];
   getBottomTools?: (
-    state: RecordsExplorerChildrenOptions<RecordRow>
+    state: RecordsExplorerChildrenOptions<RecordRow, View, InitialValues>
   ) => (ReactNode | Tool)[] | undefined;
   ListViewProps?: Partial<Omit<ListView<RecordRow>, 'columns'>>;
   TimelineViewProps?: Partial<Omit<TimelineView<RecordRow>, 'columns'>>;
   clearSearchStateOnUnmount?: boolean;
   showSuccessMessageOnCreateRecord?: boolean;
-  preprocessTools?: RecordsExplorerToolsPreprocessorFunction<RecordRow>;
+  preprocessTools?: RecordsExplorerToolsPreprocessorFunction<
+    RecordRow,
+    View,
+    InitialValues
+  >;
   renderExplorerElement?: boolean;
   renderViews?: boolean;
+  enableViewSelectedRecordModalPopup?: boolean;
 }
 
 export function getRecordsExplorerUtilityClass(slot: string): string {
@@ -558,6 +581,7 @@ const BaseRecordsExplorer = <
     showGroupTool = true,
     showSortTool = true,
     showFilterTool = true,
+    showResetTool = true,
     stateStorage,
     getCreateFunction,
     getViewFunction,
@@ -578,6 +602,7 @@ const BaseRecordsExplorer = <
     preprocessTools,
     renderExplorerElement = true,
     renderViews = true,
+    enableViewSelectedRecordModalPopup = true,
     ...rest
   } = omit(
     props,
@@ -1858,23 +1883,25 @@ const BaseRecordsExplorer = <
   const selectedView = views?.find(({ type }) => type === selectedViewType);
 
   //#region State
-  const state: RecordsExplorerChildrenOptions<RecordRow> = {
-    selectedView: selectedViewType,
-    data: filteredData,
-    groupedData,
-    headerHeight: headerElementRef.current?.offsetHeight,
-    filterFields,
-    filterBy: selectedConditionGroup,
-    sortableFields,
-    sortBy: selectedSortParams,
-    groupableFields,
-    groupBy: selectedGroupParams,
-    loading,
-    errorMessage,
-    searchParamSelectedDataPreset,
-    selectedDataPreset,
-    selectedViewProps: selectedView,
-  };
+  const state: RecordsExplorerChildrenOptions<RecordRow, View, InitialValues> =
+    {
+      ...props,
+      selectedView: selectedViewType,
+      data: filteredData,
+      groupedData,
+      headerHeight: headerElementRef.current?.offsetHeight,
+      filterFields,
+      filterBy: selectedConditionGroup,
+      sortableFields,
+      sortBy: selectedSortParams,
+      groupableFields,
+      groupBy: selectedGroupParams,
+      loading,
+      errorMessage,
+      searchParamSelectedDataPreset,
+      selectedDataPreset,
+      selectedViewProps: selectedView,
+    };
   //#endregion
 
   //#region View Element
@@ -2589,7 +2616,7 @@ const BaseRecordsExplorer = <
     }
   }
 
-  if (modifiedStateKeys && modifiedStateKeys.length > 0) {
+  if (showResetTool && modifiedStateKeys && modifiedStateKeys.length > 0) {
     toolsLookup['RESET_TO_DEFAULT_VIEW'] = {
       label: 'Reset to default view',
       icon: <LockResetIcon />,
@@ -2754,129 +2781,131 @@ const BaseRecordsExplorer = <
 
           {/* Edit Form */}
           {(() => {
-            const loadingState = {
-              loading: loadingRecordDetails || loadingProp || loading,
-              errorMessage: loadingRecordDetailsErrorMessage,
-              load: loadRecordDetails,
-              locked: !editRecord,
-            };
-            return (
-              <LoadingProvider value={loadingState}>
-                <ModalForm
-                  showEditButton={Boolean(recordEditor)}
-                  title={
-                    <Grid
-                      container
-                      sx={{
-                        alignItems: 'center',
-                        gap: 1,
-                      }}
-                    >
-                      <Grid item>
-                        {(() => {
-                          if (editRecord) {
-                            return `Edit ${recordLabelSingular}`;
-                          }
-                          if (getViewTitle && selectedRecord) {
-                            return getViewTitle(selectedRecord);
-                          }
-                          return recordLabelSingular;
-                        })()}
+            if (enableViewSelectedRecordModalPopup) {
+              const loadingState = {
+                loading: loadingRecordDetails || loadingProp || loading,
+                errorMessage: loadingRecordDetailsErrorMessage,
+                load: loadRecordDetails,
+                locked: !editRecord,
+              };
+              return (
+                <LoadingProvider value={loadingState}>
+                  <ModalForm
+                    showEditButton={Boolean(recordEditor)}
+                    title={
+                      <Grid
+                        container
+                        sx={{
+                          alignItems: 'center',
+                          gap: 1,
+                        }}
+                      >
+                        <Grid item>
+                          {(() => {
+                            if (editRecord) {
+                              return `Edit ${recordLabelSingular}`;
+                            }
+                            if (getViewTitle && selectedRecord) {
+                              return getViewTitle(selectedRecord);
+                            }
+                            return recordLabelSingular;
+                          })()}
+                        </Grid>
+                        {descriptionElement}
                       </Grid>
-                      {descriptionElement}
-                    </Grid>
-                  }
-                  submitButtonText={`Update ${recordLabelSingular}`}
-                  {...ViewModalFormPropsRest}
-                  {...modalFormProps}
-                  editableFields={editableFields}
-                  validationSchema={editValidationSchema || validationSchema}
-                  initialValues={editInitialValues || {}}
-                  open={Boolean(selectedRecordId)}
-                  errorMessage={updateErrorMessage}
-                  loading={updating}
-                  onSubmit={async (values) => {
-                    if (recordEditor && selectedRecord) {
-                      await update(selectedRecord, values);
                     }
-                  }}
-                  onClose={() => {
-                    if (updated) {
-                      onEditRecord && onEditRecord();
-                      autoSync && renderExplorerElement && load();
-                      showSuccessMessage(
-                        recordEditSuccessMessage ||
-                          `The ${lowercaseRecordLabelSingular} was updated successfully`
-                      );
-                    }
-                    resetUpdate();
-                    resetSelectedRecordState();
-                    if (defaultPath) {
-                      navigate(defaultPath);
-                    } else {
-                      setSearchParams({
-                        selectedRecord: null,
-                        editRecord: null,
-                      });
-                    }
-                  }}
-                  submitted={updated}
-                  editMode={Boolean(editRecord)}
-                  SearchSyncToolbarProps={{
-                    ...modalFormProps.SearchSyncToolbarProps,
-                    load: loadRecordDetails,
-                    loading: loadingRecordDetails,
-                    errorMessage: loadingRecordDetailsErrorMessage,
-                    hasSyncTool: Boolean(recordDetailsFinder),
-                  }}
-                  onClickEdit={() => {
-                    const pathToEditRecord = (() => {
-                      if (pathToEdit) {
-                        return pathToEdit;
+                    submitButtonText={`Update ${recordLabelSingular}`}
+                    {...ViewModalFormPropsRest}
+                    {...modalFormProps}
+                    editableFields={editableFields}
+                    validationSchema={editValidationSchema || validationSchema}
+                    initialValues={editInitialValues || {}}
+                    open={Boolean(selectedRecordId)}
+                    errorMessage={updateErrorMessage}
+                    loading={updating}
+                    onSubmit={async (values) => {
+                      if (recordEditor && selectedRecord) {
+                        await update(selectedRecord, values);
                       }
-                      if (getPathToEdit && selectedRecord) {
-                        return getPathToEdit(selectedRecord);
+                    }}
+                    onClose={() => {
+                      if (updated) {
+                        onEditRecord && onEditRecord();
+                        autoSync && renderExplorerElement && load();
+                        showSuccessMessage(
+                          recordEditSuccessMessage ||
+                            `The ${lowercaseRecordLabelSingular} was updated successfully`
+                        );
                       }
-                      return addSearchParamsToPath(pathname, {
-                        editRecord: true,
-                      });
-                    })();
-                    navigate(pathToEditRecord);
-                  }}
-                  viewModeTools={[
-                    ...(() => {
-                      if (isDeletable && selectedRecord) {
-                        return [
-                          <Button
-                            key="delete"
-                            variant="contained"
-                            color="error"
-                            onClick={() => {
-                              deleteFunctionRef.current(selectedRecord);
-                            }}
-                          >
-                            Delete
-                          </Button>,
-                        ];
+                      resetUpdate();
+                      resetSelectedRecordState();
+                      if (defaultPath) {
+                        navigate(defaultPath);
+                      } else {
+                        setSearchParams({
+                          selectedRecord: null,
+                          editRecord: null,
+                        });
                       }
-                      return [];
-                    })(),
-                  ]}
-                >
-                  {({ ...rest }) => {
-                    if (typeof editorForm === 'function') {
-                      return editorForm({
-                        mode: editRecord ? 'edit' : 'view',
-                        selectedRecord,
-                        loadingState,
-                        ...rest,
-                      });
-                    }
-                    return editorForm;
-                  }}
-                </ModalForm>
-              </LoadingProvider>
-            );
+                    }}
+                    submitted={updated}
+                    editMode={Boolean(editRecord)}
+                    SearchSyncToolbarProps={{
+                      ...modalFormProps.SearchSyncToolbarProps,
+                      load: loadRecordDetails,
+                      loading: loadingRecordDetails,
+                      errorMessage: loadingRecordDetailsErrorMessage,
+                      hasSyncTool: Boolean(recordDetailsFinder),
+                    }}
+                    onClickEdit={() => {
+                      const pathToEditRecord = (() => {
+                        if (pathToEdit) {
+                          return pathToEdit;
+                        }
+                        if (getPathToEdit && selectedRecord) {
+                          return getPathToEdit(selectedRecord);
+                        }
+                        return addSearchParamsToPath(pathname, {
+                          editRecord: true,
+                        });
+                      })();
+                      navigate(pathToEditRecord);
+                    }}
+                    viewModeTools={[
+                      ...(() => {
+                        if (isDeletable && selectedRecord) {
+                          return [
+                            <Button
+                              key="delete"
+                              variant="contained"
+                              color="error"
+                              onClick={() => {
+                                deleteFunctionRef.current(selectedRecord);
+                              }}
+                            >
+                              Delete
+                            </Button>,
+                          ];
+                        }
+                        return [];
+                      })(),
+                    ]}
+                  >
+                    {({ ...rest }) => {
+                      if (typeof editorForm === 'function') {
+                        return editorForm({
+                          mode: editRecord ? 'edit' : 'view',
+                          selectedRecord,
+                          loadingState,
+                          ...rest,
+                        });
+                      }
+                      return editorForm;
+                    }}
+                  </ModalForm>
+                </LoadingProvider>
+              );
+            }
           })()}
         </>
       );
