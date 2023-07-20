@@ -147,6 +147,7 @@ export interface TableColumn<
   getEditField?: GetEditField<DataRow, ColumnType>;
   fieldValueEditor?: FieldValueEditor<DataRow, ColumnType>;
   onClickColumn?: OnClickColumn<DataRow, ColumnType>;
+  headerClassName?: string;
   headerSx?: TableCellProps['sx'];
   primaryHeaderSx?: TableCellProps['sx'];
   secondaryHeaderSx?: TableCellProps['sx'];

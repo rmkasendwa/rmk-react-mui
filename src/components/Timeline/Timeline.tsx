@@ -71,6 +71,7 @@ import TimeScaleMeter, {
 export interface TimelineClasses {
   /** Styles applied to the root element. */
   root: string;
+  timelineContainer: string;
 }
 
 export type TimelineClassKey = keyof TimelineClasses;
@@ -197,11 +198,12 @@ export function getTimelineUtilityClass(slot: string): string {
 
 export const timelineClasses: TimelineClasses = generateUtilityClasses(
   'MuiTimeline',
-  ['root']
+  ['root', 'timelineContainer']
 );
 
 const slots = {
   root: ['root'],
+  timelineContainer: ['timelineContainer'],
 };
 
 export const BaseTimeline = <RecordRow extends BaseDataRow>(
@@ -536,25 +538,44 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
 
   const scrollToDate: ScrollToDateFunction = useCallback(
     (date) => {
+      const parentElement = timelineContainerElementRef.current?.parentElement;
+      const timelineElementContainer =
+        timelineContainerElementRef.current?.parentElement?.querySelector(
+          `.${classes.timelineContainer}`
+        ) as HTMLElement;
       if (
-        timelineContainerElementRef.current?.parentElement &&
+        parentElement &&
+        timelineElementContainer &&
         isAfter(date, minCalendarDate) &&
         isBefore(date, maxCalendarDate)
       ) {
         const offsetPercentage =
           differenceInHours(date, minCalendarDate) / totalNumberOfHours;
-        const { parentElement } = timelineContainerElementRef.current;
-        const { scrollWidth, offsetWidth } = parentElement;
+        const { offsetWidth: parentElementOffsetWidth } = parentElement;
+        const { offsetWidth } = timelineElementContainer;
+
         parentElement.scrollTo({
           left:
-            Math.round(scrollWidth * offsetPercentage) +
+            Math.round((offsetWidth - baseSpacingUnits) * offsetPercentage) +
             baseSpacingUnits -
-            Math.round(offsetWidth / 2),
+            Math.round(
+              (parentElementOffsetWidth -
+                (shouldShowRowLabelsColumn ? rowLabelsColumnWidth : 0)) /
+                2
+            ),
           behavior: 'smooth',
         });
       }
     },
-    [baseSpacingUnits, maxCalendarDate, minCalendarDate, totalNumberOfHours]
+    [
+      baseSpacingUnits,
+      classes.timelineContainer,
+      maxCalendarDate,
+      minCalendarDate,
+      rowLabelsColumnWidth,
+      shouldShowRowLabelsColumn,
+      totalNumberOfHours,
+    ]
   );
   const scrollToDateRef = useRef(scrollToDate);
   scrollToDateRef.current = scrollToDate;
@@ -939,15 +960,27 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   }, []);
 
   useEffect(() => {
-    if (timelineContainerElementRef.current?.parentElement) {
-      const { parentElement } = timelineContainerElementRef.current;
+    const parentElement = timelineContainerElementRef.current?.parentElement;
+    const timelineElementContainer =
+      timelineContainerElementRef.current?.parentElement?.querySelector(
+        `.${classes.timelineContainer}`
+      ) as HTMLElement;
+    if (parentElement && timelineElementContainer) {
       const scrollEventCallback = () => {
-        const { scrollLeft, offsetWidth, scrollWidth } = parentElement;
+        const { scrollLeft, offsetWidth: parentElementOffsetWidth } =
+          parentElement;
+        const { offsetWidth } = timelineElementContainer;
         const dateAtCenter = addHours(
           minCalendarDate,
           totalNumberOfHours *
-            ((scrollLeft - baseSpacingUnits + Math.round(offsetWidth / 2)) /
-              scrollWidth)
+            ((scrollLeft -
+              baseSpacingUnits +
+              Math.round(
+                (parentElementOffsetWidth -
+                  (shouldShowRowLabelsColumn ? rowLabelsColumnWidth : 0)) /
+                  2
+              )) /
+              (offsetWidth - baseSpacingUnits))
         );
         currentDateAtCenterRef.current = dateAtCenter;
         onChangeCurrentDateAtCenterRef.current?.(dateAtCenter);
@@ -957,7 +990,14 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         return parentElement.removeEventListener('scroll', scrollEventCallback);
       };
     }
-  }, [baseSpacingUnits, centerOfGravity, minCalendarDate, totalNumberOfHours]);
+  }, [
+    baseSpacingUnits,
+    classes.timelineContainer,
+    minCalendarDate,
+    rowLabelsColumnWidth,
+    shouldShowRowLabelsColumn,
+    totalNumberOfHours,
+  ]);
 
   const getTimelineElementNode = ({
     startDate: startDateValue,
@@ -1034,7 +1074,8 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                   display: 'flex',
                   alignItems: 'center',
                   px: 2,
-                  bgcolor: palette.background.paper,
+                  bgcolor: palette.primary.main,
+                  color: palette.getContrastText(palette.primary.main),
                   border: `1px solid ${palette.divider}`,
                   borderRadius: '4px',
                   height: 42,
@@ -1309,6 +1350,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       },
       width: timeScaleWidth + baseSpacingUnits,
       wrapColumnContentInFieldValue: false,
+      headerClassName: classes.timelineContainer,
       headerSx: {
         '&>div': {
           py: 0,

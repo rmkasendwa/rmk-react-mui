@@ -779,6 +779,7 @@ export const useTable = <DataRow extends BaseDataRow>(
                 minWidth,
                 sortable: columnSortable = sortable,
                 headerSx,
+                headerClassName,
                 primaryHeaderSx,
                 className,
                 type,
@@ -800,7 +801,8 @@ export const useTable = <DataRow extends BaseDataRow>(
                   key={String(id)}
                   className={clsx(
                     className,
-                    stickyHeader && tableBodyColumnClasses.opaque
+                    stickyHeader && tableBodyColumnClasses.opaque,
+                    headerClassName
                   )}
                   {...{ style }}
                   sx={{
