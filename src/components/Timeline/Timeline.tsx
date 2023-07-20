@@ -126,7 +126,11 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
   extends Partial<
     Pick<
       TableProps,
-      'className' | 'sx' | 'parentBackgroundColor' | 'onClickRow'
+      | 'className'
+      | 'sx'
+      | 'parentBackgroundColor'
+      | 'onClickRow'
+      | 'forEachRowProps'
     >
   > {
   rowLabelProperty?: keyof RecordRow;
@@ -190,6 +194,10 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
   ) => void;
   defaultTimelineCenter?: 'centerOfDataSet' | 'now';
   TodayIndicatorProps?: Partial<BoxProps>;
+  staticRows?: (BaseDataRow & {
+    timelineElements: TimelineElement[];
+    label?: ReactNode;
+  })[];
 }
 
 export function getTimelineUtilityClass(slot: string): string {
@@ -249,6 +257,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     onChangeCurrentDateAtCenter,
     defaultTimelineCenter,
     TodayIndicatorProps = {},
+    staticRows,
     ...rest
   } = omit(props, 'parentBackgroundColor');
 
@@ -1228,7 +1237,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
 
   const columns: TableColumn<RecordRow>[] = [
     {
-      id: 'timeline',
+      id: 'timelineElements',
       label: (
         <TimeScaleMeter
           {...TimeScaleMeterPropsRest}
@@ -1297,8 +1306,15 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         }
       })(),
       getColumnValue: (row) => {
-        if (getTimelineElements) {
-          const timelineElements = getTimelineElements(row);
+        const timelineElements = (() => {
+          if (row.isTimelineStaticRow) {
+            return row.timelineElements as TimelineElement[];
+          }
+          if (getTimelineElements) {
+            return getTimelineElements(row);
+          }
+        })();
+        if (timelineElements) {
           return (
             <>
               {timelineElements
@@ -1376,6 +1392,9 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       width: rowLabelsColumnWidth,
       showHeaderText: Boolean(rowLabelsColumnHeader),
       getColumnValue: (row) => {
+        if (row.isTimelineStaticRow) {
+          return result(row, 'label');
+        }
         if (getRowLabel) {
           return getRowLabel(row);
         }
@@ -1522,6 +1541,16 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
             height: 51,
           },
         }}
+        staticRows={(() => {
+          if (staticRows) {
+            return staticRows.map((staticRow) => {
+              return {
+                ...staticRow,
+                isTimelineStaticRow: true,
+              } as any;
+            });
+          }
+        })()}
         sx={{
           [`.${tableBodyClasses.root} tr`]: {
             verticalAlign: 'middle',

@@ -304,4 +304,5 @@ export interface TableProps<DataRow extends BaseDataRow = any>
 
   // Sticky columns
   startStickyColumnIndex?: number;
+  staticRows?: DataRow[];
 }

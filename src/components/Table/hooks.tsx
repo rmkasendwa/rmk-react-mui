@@ -170,6 +170,7 @@ export const useTable = <DataRow extends BaseDataRow>(
     TableGroupingProps,
     getToolTipWrappedColumnNode,
     startStickyColumnIndex,
+    staticRows,
     sx,
     ...rest
   } = props;
@@ -545,23 +546,26 @@ export const useTable = <DataRow extends BaseDataRow>(
     }
   );
 
-  const pageRows: typeof rows = (() => {
-    const sortedRows = (() => {
-      if (handleSortOperations && sortBy.length > 0) {
-        return rows.sort((a, b) => {
-          return sort(a, b, sortBy);
-        });
-      }
-      return rows;
-    })();
+  const pageRows: typeof rows = [
+    ...(staticRows || []),
+    ...(() => {
+      const sortedRows = (() => {
+        if (handleSortOperations && sortBy.length > 0) {
+          return rows.sort((a, b) => {
+            return sort(a, b, sortBy);
+          });
+        }
+        return rows;
+      })();
 
-    return totalRowCount || !paging
-      ? sortedRows
-      : sortedRows.slice(
-          pageIndex * rowsPerPage,
-          pageIndex * rowsPerPage + rowsPerPage
-        );
-  })();
+      return totalRowCount || !paging
+        ? sortedRows
+        : sortedRows.slice(
+            pageIndex * rowsPerPage,
+            pageIndex * rowsPerPage + rowsPerPage
+          );
+    })(),
+  ];
 
   useEffect(() => {
     setPageIndex(pageIndexProp);
