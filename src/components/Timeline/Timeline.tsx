@@ -73,6 +73,7 @@ export interface TimelineClasses {
   root: string;
   timelineContainer: string;
   rowLabelColumn: string;
+  todayMarker: string;
 }
 
 export type TimelineClassKey = keyof TimelineClasses;
@@ -207,13 +208,14 @@ export function getTimelineUtilityClass(slot: string): string {
 
 export const timelineClasses: TimelineClasses = generateUtilityClasses(
   'MuiTimeline',
-  ['root', 'timelineContainer', 'rowLabelColumn']
+  ['root', 'timelineContainer', 'rowLabelColumn', 'todayMarker']
 );
 
 const slots = {
   root: ['root'],
   timelineContainer: ['timelineContainer'],
   rowLabelColumn: ['rowLabelColumn'],
+  todayMarker: ['todayMarker'],
 };
 
 export const BaseTimeline = <RecordRow extends BaseDataRow>(
@@ -606,6 +608,43 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     return optimalTimeScale;
   })();
 
+  const updateTodayMarkerHeight = (
+    timelineContainerElement: HTMLDivElement
+  ) => {
+    const todayMarkerElement = timelineContainerElement.querySelector(
+      `.${classes.todayMarker}`
+    ) as HTMLElement;
+    if (todayMarkerElement) {
+      const rootContainerHeight = timelineContainerElement.offsetHeight;
+      const timelineContainerHeight = (
+        timelineContainerElement.querySelector(
+          `.${classes.timelineContainer}`
+        ) as HTMLElement
+      )?.offsetHeight;
+      const height = (() => {
+        if (todayMarkerVariant === 'foregroundFullSpan') {
+          return rootContainerHeight;
+        }
+        if (rootContainerHeight != null && timelineContainerHeight != null) {
+          return rootContainerHeight - timelineContainerHeight;
+        }
+      })();
+      todayMarkerElement.style.height = height ? `${height}px` : '';
+
+      const top = (() => {
+        if (
+          todayMarkerVariant === 'foregroundFullSpan' &&
+          timelineContainerHeight != null
+        ) {
+          return -timelineContainerHeight;
+        }
+      })();
+      todayMarkerElement.style.top = top ? `${top}px` : '';
+    }
+  };
+  const updateTodayMarkerHeightRef = useRef(updateTodayMarkerHeight);
+  updateTodayMarkerHeightRef.current = updateTodayMarkerHeight;
+
   useEffect(() => {
     onChangeSelectedTimeScaleRef.current?.(selectedTimeScale);
   }, [selectedTimeScale]);
@@ -996,6 +1035,11 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         );
         currentDateAtCenterRef.current = dateAtCenter;
         onChangeCurrentDateAtCenterRef.current?.(dateAtCenter);
+        if (timelineContainerElementRef.current) {
+          updateTodayMarkerHeightRef.current(
+            timelineContainerElementRef.current
+          );
+        }
       };
       parentElement.addEventListener('scroll', scrollEventCallback);
       return () => {
@@ -1284,21 +1328,14 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
               <Box
                 ref={todayIndicatorRef}
                 {...TodayIndicatorPropsRest}
+                className={clsx(
+                  classes.todayMarker,
+                  TodayIndicatorPropsRest.className
+                )}
                 sx={{
                   width: 2,
                   bgcolor: palette.primary.main,
-                  height: (() => {
-                    if (todayMarkerVariant === 'foregroundFullSpan') {
-                      return rows.length * 51 + 400;
-                    }
-                    return rows.length * 51;
-                  })(),
-                  top: (() => {
-                    if (todayMarkerVariant === 'foregroundFullSpan') {
-                      return `calc(100% - 405px)`;
-                    }
-                    return '100%';
-                  })(),
+                  top: 0,
                   ...TodayIndicatorPropsSx,
                   position: 'absolute',
                   left: `${offsetPercentage * 100}%`,
@@ -1500,7 +1537,15 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         </Box>
       ) : null}
       <Table
-        ref={mergeRefs([timelineContainerElementRef, ref])}
+        ref={mergeRefs([
+          timelineContainerElementRef,
+          (timelineContainerElement: HTMLDivElement | null) => {
+            if (timelineContainerElement) {
+              updateTodayMarkerHeight(timelineContainerElement);
+            }
+          },
+          ref,
+        ])}
         className={clsx(className, classes.root)}
         {...rest}
         parentBackgroundColor={parentBackgroundColor}
