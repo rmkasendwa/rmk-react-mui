@@ -2676,20 +2676,12 @@ const BaseRecordsExplorer = <
       );
     }
 
-    if (modifiedStateKeys && modifiedStateKeys.length > 0) {
+    if (toolsLookup['RESET_TO_DEFAULT_VIEW']) {
       tools.push(
         {
           type: 'divider',
         },
-        {
-          label: 'Reset to default view',
-          icon: <LockResetIcon />,
-          onClick: () => {
-            resetToDefaultView();
-          },
-          type: 'icon-button',
-          alwaysShowOn: 'All Screens',
-        }
+        toolsLookup['RESET_TO_DEFAULT_VIEW']
       );
     }
     return tools;
