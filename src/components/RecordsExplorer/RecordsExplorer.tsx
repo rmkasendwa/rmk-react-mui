@@ -477,6 +477,7 @@ export interface RecordsExplorerProps<
   renderExplorerElement?: boolean;
   renderViews?: boolean;
   enableViewSelectedRecordModalPopup?: boolean;
+  resetToDefaultView?: () => void;
 }
 
 export function getRecordsExplorerUtilityClass(slot: string): string {
@@ -603,6 +604,7 @@ const BaseRecordsExplorer = <
     renderExplorerElement = true,
     renderViews = true,
     enableViewSelectedRecordModalPopup = true,
+    resetToDefaultView: resetToDefaultViewProp,
     ...rest
   } = omit(
     props,
@@ -700,8 +702,6 @@ const BaseRecordsExplorer = <
   dataPresetsRef.current = dataPresets;
   const ListViewPropsRef = useRef(ListViewProps);
   ListViewPropsRef.current = ListViewProps;
-
-  const resetTimelineToDefaultViewRef = useRef<() => void>();
 
   const viewFunctionRef = useRef((record: RecordRow) => {
     const { id } = record;
@@ -1725,12 +1725,10 @@ const BaseRecordsExplorer = <
         replace: true,
       }
     );
-    if (
-      selectedViewType === 'Timeline' &&
-      resetTimelineToDefaultViewRef.current
-    ) {
-      resetTimelineToDefaultViewRef.current();
+    if (selectedViewType === 'Timeline') {
+      resetTimelineToDefaultViewRef.current?.();
     }
+    resetToDefaultViewProp?.();
   };
 
   const {
@@ -1841,6 +1839,7 @@ const BaseRecordsExplorer = <
   const jumpToOptimalTimeScaleRef = useRef<() => void>();
   const jumpToPreviousUnitTimeScaleRef = useRef<() => void>();
   const jumpToNextUnitTimeScaleRef = useRef<() => void>();
+  const resetTimelineToDefaultViewRef = useRef<() => void>();
 
   const timelineView = views?.find(({ type }) => type === 'Timeline') as
     | TimelineView<RecordRow>
@@ -1880,7 +1879,56 @@ const BaseRecordsExplorer = <
   });
   //#endregion
 
-  const selectedView = views?.find(({ type }) => type === selectedViewType);
+  const selectedViewProps = (() => {
+    const baseSelectedViewProps = views?.find(
+      ({ type }) => type === selectedViewType
+    );
+    if (baseSelectedViewProps) {
+      const selectedViewProps = { ...baseSelectedViewProps };
+      switch (selectedViewProps.type) {
+        case 'List': {
+          const {
+            enableColumnDisplayToggle = true,
+            enableSmallScreenOptimization = enableSmallScreenOptimizationProp,
+            enableCheckboxAllRowSelector = enableCheckboxAllRowSelectorProp,
+            enableCheckboxRowSelectors = enableCheckboxRowSelectorsProp,
+            showRowNumber = showRowNumberProp,
+          } = { ...selectedViewProps, ...ListViewProps };
+
+          return {
+            ...selectedViewProps,
+            ...ListViewProps,
+            enableColumnDisplayToggle,
+            enableSmallScreenOptimization,
+            enableCheckboxAllRowSelector,
+            enableCheckboxRowSelectors,
+            showRowNumber,
+          };
+        }
+        case 'Timeline': {
+          const { ...viewProps } = omit(
+            { ...selectedViewProps, ...TimelineViewProps },
+            'type'
+          ) as TimelineView<RecordRow>;
+          if (!viewProps.getRowLabel && !viewProps.rowLabelProperty) {
+            const listView = views?.find(({ type }) => type === 'List') as
+              | ListView<RecordRow>
+              | undefined;
+            if (listView && listView.columns.length > 0) {
+              viewProps.rowLabelProperty = listView.columns[0].id;
+              viewProps.getRowLabel = listView.columns[0].getColumnValue as any;
+            }
+          }
+          return {
+            ...selectedViewProps,
+            ...TimelineViewProps,
+            ...viewProps,
+          };
+        }
+      }
+    }
+    return baseSelectedViewProps;
+  })();
 
   //#region State
   const state: RecordsExplorerChildrenOptions<RecordRow, View, InitialValues> =
@@ -1900,35 +1948,37 @@ const BaseRecordsExplorer = <
       errorMessage,
       searchParamSelectedDataPreset,
       selectedDataPreset,
-      selectedViewProps: selectedView,
+      selectedViewProps: selectedViewProps,
     };
   //#endregion
 
   //#region View Element
   const viewElement = (() => {
-    if (selectedView && renderViews) {
-      const { type, renderView = true } = selectedView;
+    if (selectedViewProps && renderViews) {
+      const { type, renderView = true } = selectedViewProps;
       if (renderView) {
         switch (type) {
           case 'List': {
             const { ...viewProps } = omit(
-              selectedView,
+              selectedViewProps,
               'type',
               'minWidth',
               'mergeTools'
             ) as ListView<RecordRow>;
             const {
-              enableColumnDisplayToggle = true,
-              enableSmallScreenOptimization = enableSmallScreenOptimizationProp,
-              enableCheckboxAllRowSelector = enableCheckboxAllRowSelectorProp,
-              enableCheckboxRowSelectors = enableCheckboxRowSelectorsProp,
-              showRowNumber = showRowNumberProp,
+              enableColumnDisplayToggle,
+              enableSmallScreenOptimization,
+              enableCheckboxAllRowSelector,
+              enableCheckboxRowSelectors,
+              showRowNumber,
               getEllipsisMenuToolProps,
               onClickRow,
-            } = { ...selectedView, ...ListViewProps };
-            const displayingColumns = selectedView.columns.filter(({ id }) => {
-              return selectedColumnIds.includes(String(id) as any);
-            });
+            } = selectedViewProps;
+            const displayingColumns = selectedViewProps.columns.filter(
+              ({ id }) => {
+                return selectedColumnIds.includes(String(id) as any);
+              }
+            );
 
             return (
               <Box
@@ -2333,19 +2383,9 @@ const BaseRecordsExplorer = <
           }
           case 'Timeline': {
             const { mergeTools, onClickRow, ...viewProps } = omit(
-              { ...selectedView, ...TimelineViewProps },
+              { ...selectedViewProps, ...TimelineViewProps },
               'type'
             ) as TimelineView<RecordRow>;
-            if (!viewProps.getRowLabel && !viewProps.rowLabelProperty) {
-              const listView = views?.find(({ type }) => type === 'List') as
-                | ListView<RecordRow>
-                | undefined;
-              if (listView && listView.columns.length > 0) {
-                viewProps.rowLabelProperty = listView.columns[0].id;
-                viewProps.getRowLabel = listView.columns[0]
-                  .getColumnValue as any;
-              }
-            }
             return (
               <Timeline
                 {...viewProps}
