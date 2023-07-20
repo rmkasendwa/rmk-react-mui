@@ -72,6 +72,7 @@ export interface TimelineClasses {
   /** Styles applied to the root element. */
   root: string;
   timelineContainer: string;
+  rowLabelColumn: string;
 }
 
 export type TimelineClassKey = keyof TimelineClasses;
@@ -206,12 +207,13 @@ export function getTimelineUtilityClass(slot: string): string {
 
 export const timelineClasses: TimelineClasses = generateUtilityClasses(
   'MuiTimeline',
-  ['root', 'timelineContainer']
+  ['root', 'timelineContainer', 'rowLabelColumn']
 );
 
 const slots = {
   root: ['root'],
   timelineContainer: ['timelineContainer'],
+  rowLabelColumn: ['rowLabelColumn'],
 };
 
 export const BaseTimeline = <RecordRow extends BaseDataRow>(
@@ -258,6 +260,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     defaultTimelineCenter,
     TodayIndicatorProps = {},
     staticRows,
+    sx,
     ...rest
   } = omit(props, 'parentBackgroundColor');
 
@@ -1402,6 +1405,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           return result(row, rowLabelProperty);
         }
       },
+      headerClassName: classes.rowLabelColumn,
       headerSx: {
         ...(() => {
           if (todayMarkerVariant === 'foregroundFullSpan') {
@@ -1501,9 +1505,9 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         {...rest}
         parentBackgroundColor={parentBackgroundColor}
         columns={columns}
+        rows={rows}
         paging={false}
         bordersVariant="square"
-        rows={rows}
         {...(() => {
           if (!isSmallScreenSize) {
             return {
@@ -1518,15 +1522,15 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
             position: 'relative',
             zIndex: 3,
             verticalAlign: 'bottom',
-            th: {
-              borderBottom: 'none',
-            },
           },
         }}
         SecondaryHeaderRowProps={{
           sx: {
             position: 'relative',
             zIndex: -1,
+            th: {
+              borderBottom: 'none',
+            },
             ...(() => {
               if (todayMarkerVariant === 'foregroundFullSpan') {
                 return {
@@ -1552,6 +1556,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           }
         })()}
         sx={{
+          ...sx,
           [`.${tableBodyClasses.root} tr`]: {
             verticalAlign: 'middle',
           },
