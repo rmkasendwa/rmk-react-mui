@@ -539,7 +539,16 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
 
     const syncButtonElement = (() => {
       if (hasSyncTool && load) {
-        return <ReloadIconButton {...{ load, loading, errorMessage }} />;
+        return (
+          <ReloadIconButton
+            {...{ load, loading, errorMessage }}
+            IconButtonProps={{
+              sx: {
+                p: 0.5,
+              },
+            }}
+          />
+        );
       }
     })();
 

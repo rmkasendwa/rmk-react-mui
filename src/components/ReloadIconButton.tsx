@@ -12,7 +12,7 @@ import {
 import Box, { BoxProps } from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
 import Grid from '@mui/material/Grid';
-import IconButton from '@mui/material/IconButton';
+import IconButton, { IconButtonProps } from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import clsx from 'clsx';
 import { forwardRef } from 'react';
@@ -54,6 +54,7 @@ export interface ReloadIconButtonProps
   loading?: boolean;
   errorMessage?: string;
   load?: () => void;
+  IconButtonProps?: Partial<Omit<IconButtonProps, 'onClick'>>;
 }
 
 export function getReloadIconButtonUtilityClass(slot: string): string {
@@ -72,7 +73,14 @@ export const ReloadIconButton = forwardRef<
   ReloadIconButtonProps
 >(function ReloadIconButton(inProps, ref) {
   const props = useThemeProps({ props: inProps, name: 'MuiReloadIconButton' });
-  const { className, loading = false, load, errorMessage, ...rest } = props;
+  const {
+    className,
+    loading = false,
+    load,
+    errorMessage,
+    IconButtonProps = {},
+    ...rest
+  } = props;
 
   const classes = composeClasses(
     slots,
@@ -86,15 +94,19 @@ export const ReloadIconButton = forwardRef<
     })()
   );
 
+  const { sx: IconButtonPropsSx, ...IconButtonPropsRest } = IconButtonProps;
+
   return (
     <Box ref={ref} {...rest} className={clsx(classes.root)}>
       {(() => {
         if (loading) {
           return (
             <IconButton
+              {...IconButtonPropsRest}
               disabled
               sx={{
                 color: 'inherit !important',
+                ...IconButtonPropsSx,
               }}
             >
               <CircularProgress size={24} color="inherit" />
@@ -104,9 +116,11 @@ export const ReloadIconButton = forwardRef<
         const refreshButton = (
           <Tooltip title="Refresh">
             <IconButton
+              {...IconButtonPropsRest}
               onClick={() => load && load()}
               sx={{
                 color: 'inherit !important',
+                ...IconButtonPropsSx,
               }}
             >
               <RefreshIcon color="inherit" sx={{ display: 'block' }} />

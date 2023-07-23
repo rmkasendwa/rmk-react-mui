@@ -109,7 +109,10 @@ export const timelineSearchParamValidationSpec: ObjectShape = {
   timeScale: Yup.mixed<TimeScaleOption>().oneOf([...timeScaleOptions]),
 };
 
-export type ScrollToDateFunction = (date: Date) => void;
+export type ScrollToDateFunction = (
+  date: Date,
+  scrollBehaviour?: ScrollBehavior
+) => void;
 
 export type TimeScaleConfiguration = {
   timeScaleRows: [TimeScaleRow[], TimeScaleRow[], TimeScaleRow[]];
@@ -551,7 +554,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   })();
 
   const scrollToDate: ScrollToDateFunction = useCallback(
-    (date) => {
+    (date, scrollBehaviour: ScrollBehavior = 'smooth') => {
       const parentElement = timelineContainerElementRef.current?.parentElement;
       const timelineElementContainer =
         timelineContainerElementRef.current?.parentElement?.querySelector(
@@ -577,7 +580,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                 (shouldShowRowLabelsColumn ? rowLabelsColumnWidth : 0)) /
                 2
             ),
-          behavior: 'smooth',
+          behavior: scrollBehaviour,
         });
       }
     },
@@ -1166,18 +1169,18 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   useEffect(() => {
     switch (defaultTimelineCenter) {
       case 'now':
-        scrollToDateRef.current(new Date());
+        scrollToDateRef.current(new Date(), 'auto');
         break;
       case 'centerOfDataSet':
       default:
-        scrollToDateRef.current(centerOfGravity);
+        scrollToDateRef.current(centerOfGravity, 'auto');
         break;
     }
   }, [centerOfGravity, defaultTimelineCenter]);
 
   useEffect(() => {
     if (selectedTimeScale && lastDateAtCenterRef.current) {
-      scrollToDateRef.current(lastDateAtCenterRef.current);
+      scrollToDateRef.current(lastDateAtCenterRef.current, 'auto');
       lastDateAtCenterRef.current = null;
     }
   }, [selectedTimeScale]);
