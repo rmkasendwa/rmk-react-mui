@@ -638,7 +638,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     return optimalTimeScale;
   })();
 
-  const updateTodayMarkerHeight = (
+  const caliberateDateCursorElements = (
     timelineContainerElement: HTMLDivElement
   ) => {
     const todayMarkerElement = timelineContainerElement.querySelector(
@@ -683,12 +683,11 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       )?.offsetHeight;
       if (timelineContainerHeight) {
         dateAtCursorMarkerElement.style.height = `${timelineContainerHeight}px`;
-        dateAtCursorMarkerElement.style.top = `${-timelineContainerHeight}px`;
       }
     }
   };
-  const updateTodayMarkerHeightRef = useRef(updateTodayMarkerHeight);
-  updateTodayMarkerHeightRef.current = updateTodayMarkerHeight;
+  const caliberateDateCursorElementsRef = useRef(caliberateDateCursorElements);
+  caliberateDateCursorElementsRef.current = caliberateDateCursorElements;
 
   useEffect(() => {
     onChangeSelectedTimeScaleRef.current?.(selectedTimeScale);
@@ -1081,7 +1080,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         currentDateAtCenterRef.current = dateAtCenter;
         onChangeCurrentDateAtCenterRef.current?.(dateAtCenter);
         if (timelineContainerElement) {
-          updateTodayMarkerHeightRef.current(timelineContainerElement);
+          caliberateDateCursorElementsRef.current(timelineContainerElement);
         }
       };
       parentElement.addEventListener('scroll', scrollEventCallback);
@@ -1398,29 +1397,62 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     {
       id: 'timelineElements',
       label: (
-        <TimeScaleMeter
-          {...TimeScaleMeterPropsRest}
-          {...{ timeScaleRows, timeScaleWidth }}
-          scrollingElement={scrollingAncenstorElement}
-          leftOffset={
-            (shouldShowRowLabelsColumn ? rowLabelsColumnWidth : 0) +
-            baseSpacingUnits
-          }
-          variant={TimeScaleMeterPropsVariant}
+        <Box
           sx={{
-            ...TimeScaleMeterPropsSx,
-            [`.${timeScaleMeterClasses.timeScaleLevel1Tick}`]: {
-              left:
-                (shouldShowRowLabelsColumn ? rowLabelsColumnWidth : 0) +
-                (() => {
-                  if (shouldShowRowLabelsColumn) {
-                    return 16;
-                  }
-                  return baseSpacingUnits;
-                })(),
-            },
+            position: 'relative',
+            width: '100%',
           }}
-        />
+        >
+          <TimeScaleMeter
+            {...TimeScaleMeterPropsRest}
+            {...{ timeScaleRows, timeScaleWidth }}
+            scrollingElement={scrollingAncenstorElement}
+            leftOffset={
+              (shouldShowRowLabelsColumn ? rowLabelsColumnWidth : 0) +
+              baseSpacingUnits
+            }
+            variant={TimeScaleMeterPropsVariant}
+            sx={{
+              ...TimeScaleMeterPropsSx,
+              [`.${timeScaleMeterClasses.timeScaleLevel1Tick}`]: {
+                left:
+                  (shouldShowRowLabelsColumn ? rowLabelsColumnWidth : 0) +
+                  (() => {
+                    if (shouldShowRowLabelsColumn) {
+                      return 16;
+                    }
+                    return baseSpacingUnits;
+                  })(),
+              },
+            }}
+          />
+          <Box
+            className={clsx(classes.dateAtCursorMarker)}
+            sx={{
+              width: 2,
+              bgcolor: palette.text.primary,
+              top: 0,
+              position: 'absolute',
+            }}
+          >
+            <Typography
+              variant="body2"
+              component="div"
+              className={clsx(classes.dateAtCursorMarkerLabel)}
+              noWrap
+              sx={{
+                py: 0.5,
+                px: 1,
+                bgcolor: palette.text.primary,
+                color: palette.background.paper,
+                position: 'absolute',
+                top: 0,
+                left: '100%',
+                borderBottomRightRadius: '8px',
+              }}
+            ></Typography>
+          </Box>
+        </Box>
       ),
       secondaryHeaderRowContent: (() => {
         const today = new Date();
@@ -1437,32 +1469,6 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                 width: '100%',
               }}
             >
-              <Box
-                className={clsx(classes.dateAtCursorMarker)}
-                sx={{
-                  width: 2,
-                  bgcolor: palette.text.primary,
-                  top: 0,
-                  position: 'absolute',
-                }}
-              >
-                <Typography
-                  variant="body2"
-                  component="div"
-                  className={clsx(classes.dateAtCursorMarkerLabel)}
-                  noWrap
-                  sx={{
-                    py: 0.5,
-                    px: 1,
-                    bgcolor: palette.text.primary,
-                    color: palette.background.paper,
-                    position: 'absolute',
-                    top: 0,
-                    left: '100%',
-                    borderBottomRightRadius: '8px',
-                  }}
-                ></Typography>
-              </Box>
               <Box
                 ref={todayIndicatorRef}
                 {...TodayIndicatorPropsRest}
@@ -1678,7 +1684,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         ref={mergeRefs([
           (rootElement: HTMLTableElement | null) => {
             if (rootElement) {
-              updateTodayMarkerHeight(rootElement);
+              caliberateDateCursorElements(rootElement);
               setTimelineContainerElement(rootElement);
             }
           },
@@ -1703,14 +1709,14 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         HeaderRowProps={{
           sx: {
             position: 'relative',
-            zIndex: 0,
+            zIndex: 3,
             verticalAlign: 'bottom',
           },
         }}
         SecondaryHeaderRowProps={{
           sx: {
             position: 'relative',
-            zIndex: 0,
+            zIndex: -1,
             th: {
               borderBottom: 'none',
             },
