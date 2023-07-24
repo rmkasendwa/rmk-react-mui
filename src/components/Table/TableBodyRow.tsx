@@ -145,11 +145,17 @@ export const TableBodyRow = <T extends BaseDataRow>(
     };
   })();
 
-  const { sx: rowPropsSx, ...rowPropsRest } = rowProps;
+  const {
+    sx: rowPropsSx,
+    isClickable: rowPropsIsClickable = true,
+    ...rowPropsRest
+  } = rowProps;
 
   const isGroupHeader =
     row.GroupingProps && 'isGroupHeader' in row.GroupingProps;
-  const isClickable = Boolean(onClickRow && !isGroupHeader);
+  const isClickable = Boolean(
+    rowPropsIsClickable && onClickRow && !isGroupHeader
+  );
 
   if (enableSmallScreenOptimization && isSmallScreenSize) {
     const columns = (() => {

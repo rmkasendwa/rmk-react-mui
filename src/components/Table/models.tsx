@@ -178,9 +178,13 @@ export interface ForEachDerivedColumnConfiguration<T> {
   currentEntity: T;
 }
 
-export type GetRowProps<T = any> = (
-  currentEntity: T
-) => Partial<MuiTableRowProps> | undefined;
+export type GetRowProps<T = any> = (currentEntity: T) =>
+  | Partial<
+      MuiTableRowProps & {
+        isClickable?: boolean;
+      }
+    >
+  | undefined;
 
 export interface TableRowProps<DataRow extends BaseDataRow = any>
   extends Pick<
