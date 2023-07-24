@@ -3,7 +3,6 @@ import MapIcon from '@mui/icons-material/Map';
 import { Box, Grid, Typography } from '@mui/material';
 import { Meta, StoryFn } from '@storybook/react';
 import { countries } from 'countries-list';
-import addMonths from 'date-fns/addMonths';
 import React from 'react';
 
 import CountryFieldValue from '../components/CountryFieldValue';
@@ -55,35 +54,41 @@ const baseArgs = {
         ];
       },
       mergeTools: true,
-      staticRows: [
-        {
-          id: 'static-row-1',
-          label: 'Static Timeline',
-          timelineElements: [
-            {
-              startDate: new Date(),
-              endDate: addMonths(new Date(), 3),
-              sx: {
-                height: 24,
-              },
-            },
-          ],
-        },
-      ],
-      forEachRowProps: (row) => {
-        if (row.isTimelineStaticRow) {
-          return {
-            sx: {
-              '&>td': {
-                py: 0.2,
-                '&>div': {
-                  height: 24,
-                },
-              },
-            },
-          };
-        }
-      },
+      // staticRows: [
+      //   {
+      //     id: 'static-row-1',
+      //     label: 'Static Timeline',
+      //     timelineElements: [
+      //       {
+      //         startDate: new Date(),
+      //         endDate: addMonths(new Date(), 3),
+      //         sx: {
+      //           height: 24,
+      //         },
+      //       },
+      //     ],
+      //   },
+      // ],
+      // TimeScaleMeterProps: {
+      //   variant: 'compact',
+      // },
+      // todayMarkerVariant: 'foregroundFullSpan',
+      // rowLabelsColumnHeader: 'Row Labels Header',
+      // defaultTimelineCenter: 'now',
+      // forEachRowProps: (row) => {
+      //   if (row.isTimelineStaticRow) {
+      //     return {
+      //       sx: {
+      //         '&>td': {
+      //           py: 0.2,
+      //           '&>div': {
+      //             height: 24,
+      //           },
+      //         },
+      //       },
+      //     };
+      //   }
+      // },
     },
   ],
   recordLabelPlural: 'Contacts',

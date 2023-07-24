@@ -12,6 +12,7 @@ import {
   Tooltip,
   TooltipProps,
   Typography,
+  TypographyProps,
   alpha,
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
@@ -208,6 +209,8 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
   })[];
   scrollingAncenstorElement?: HTMLElement | null;
   dateFormat?: string;
+  DateAtCursorMarkerProps?: Partial<BoxProps>;
+  DateAtCursorMarkerLabelProps?: Partial<Omit<TypographyProps, 'ref'>>;
 }
 
 export function getTimelineUtilityClass(slot: string): string {
@@ -280,6 +283,8 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     TodayIndicatorProps = {},
     staticRows,
     dateFormat = 'MMM dd, yyyy hh:mm aa',
+    DateAtCursorMarkerLabelProps = {},
+    DateAtCursorMarkerProps = {},
     sx,
     ...rest
   } = omit(props, 'parentBackgroundColor', 'scrollingAncenstorElement');
@@ -306,6 +311,13 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
 
   const { sx: TodayIndicatorPropsSx, ...TodayIndicatorPropsRest } =
     TodayIndicatorProps;
+
+  const { sx: DateAtCursorMarkerPropsSx, ...DateAtCursorMarkerPropsRest } =
+    DateAtCursorMarkerProps;
+  const {
+    sx: DateAtCursorMarkerLabelPropsSx,
+    ...DateAtCursorMarkerLabelPropsRest
+  } = DateAtCursorMarkerLabelProps;
 
   const isInitialMountRef = useRef(true);
   useEffect(() => {
@@ -646,11 +658,10 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     ) as HTMLElement;
     if (todayMarkerElement) {
       const rootContainerHeight = timelineContainerElement.offsetHeight;
-      const timelineContainerHeight = (
-        timelineContainerElement.querySelector(
-          `.${classes.timelineMeterContainer}`
-        ) as HTMLElement
-      )?.offsetHeight;
+      const timelineMeterContainer = timelineContainerElement.querySelector(
+        `.${classes.timelineMeterContainer}`
+      ) as HTMLElement;
+      const timelineContainerHeight = timelineMeterContainer?.offsetHeight;
       const height = (() => {
         if (todayMarkerVariant === 'foregroundFullSpan') {
           return rootContainerHeight;
@@ -666,7 +677,11 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           todayMarkerVariant === 'foregroundFullSpan' &&
           timelineContainerHeight != null
         ) {
-          return -timelineContainerHeight;
+          return (
+            -timelineContainerHeight +
+            ((timelineMeterContainer.firstChild as HTMLElement).offsetHeight ||
+              0)
+          );
         }
       })();
       todayMarkerElement.style.top = top ? `${top}px` : '';
@@ -1426,18 +1441,49 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
               },
             }}
           />
+          {(() => {
+            const today = new Date();
+            if (
+              isAfter(today, minCalendarDate) &&
+              isBefore(today, maxCalendarDate)
+            ) {
+              const offsetPercentage =
+                differenceInHours(today, minCalendarDate) / totalNumberOfHours;
+              return (
+                <Box
+                  ref={todayIndicatorRef}
+                  {...TodayIndicatorPropsRest}
+                  className={clsx(
+                    classes.todayMarker,
+                    TodayIndicatorPropsRest.className
+                  )}
+                  sx={{
+                    width: 2,
+                    bgcolor: palette.primary.main,
+                    top: '100%',
+                    ...TodayIndicatorPropsSx,
+                    position: 'absolute',
+                    left: `${offsetPercentage * 100}%`,
+                  }}
+                />
+              );
+            }
+          })()}
           <Box
             className={clsx(classes.dateAtCursorMarker)}
+            {...DateAtCursorMarkerPropsRest}
             sx={{
               width: 2,
               bgcolor: palette.text.primary,
-              top: 0,
+              ...DateAtCursorMarkerPropsSx,
+              bottom: 0,
               position: 'absolute',
             }}
           >
             <Typography
               variant="body2"
               component="div"
+              {...DateAtCursorMarkerLabelPropsRest}
               className={clsx(classes.dateAtCursorMarkerLabel)}
               noWrap
               sx={{
@@ -1445,50 +1491,17 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                 px: 1,
                 bgcolor: palette.text.primary,
                 color: palette.background.paper,
-                position: 'absolute',
+                borderBottomRightRadius: '8px',
+                fontSize: 12,
                 top: 0,
                 left: '100%',
-                borderBottomRightRadius: '8px',
+                ...DateAtCursorMarkerLabelPropsSx,
+                position: 'absolute',
               }}
             ></Typography>
           </Box>
         </Box>
       ),
-      secondaryHeaderRowContent: (() => {
-        const today = new Date();
-        if (
-          isAfter(today, minCalendarDate) &&
-          isBefore(today, maxCalendarDate)
-        ) {
-          const offsetPercentage =
-            differenceInHours(today, minCalendarDate) / totalNumberOfHours;
-          return (
-            <Box
-              sx={{
-                position: 'relative',
-                width: '100%',
-              }}
-            >
-              <Box
-                ref={todayIndicatorRef}
-                {...TodayIndicatorPropsRest}
-                className={clsx(
-                  classes.todayMarker,
-                  TodayIndicatorPropsRest.className
-                )}
-                sx={{
-                  width: 2,
-                  bgcolor: palette.primary.main,
-                  top: 0,
-                  ...TodayIndicatorPropsSx,
-                  position: 'absolute',
-                  left: `${offsetPercentage * 100}%`,
-                }}
-              />
-            </Box>
-          );
-        }
-      })(),
       getColumnValue: (row) => {
         const timelineElements = (() => {
           if (row.isTimelineStaticRow) {
@@ -1609,14 +1622,6 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           }
         })(),
       },
-      secondaryHeaderSx: {
-        borderRight: 'none !important',
-        '&>div': {
-          py: 0,
-          pl: `${baseSpacingUnits}px`,
-          pr: 0,
-        },
-      },
       bodySx: {
         zIndex: 2,
         ...(() => {
@@ -1711,22 +1716,6 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
             position: 'relative',
             zIndex: 3,
             verticalAlign: 'bottom',
-          },
-        }}
-        SecondaryHeaderRowProps={{
-          sx: {
-            position: 'relative',
-            zIndex: -1,
-            th: {
-              borderBottom: 'none',
-            },
-            ...(() => {
-              if (todayMarkerVariant === 'foregroundFullSpan') {
-                return {
-                  zIndex: 3,
-                };
-              }
-            })(),
           },
         }}
         TableBodyRowPlaceholderProps={{
