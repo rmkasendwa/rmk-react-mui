@@ -182,6 +182,7 @@ export type GetRowProps<T = any> = (currentEntity: T) =>
   | Partial<
       MuiTableRowProps & {
         isClickable?: boolean;
+        opaque?: boolean;
       }
     >
   | undefined;
