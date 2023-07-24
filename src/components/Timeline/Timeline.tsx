@@ -41,6 +41,7 @@ import {
   useEffect,
   useMemo,
   useRef,
+  useState,
 } from 'react';
 import { mergeRefs } from 'react-merge-refs';
 import * as Yup from 'yup';
@@ -74,6 +75,8 @@ export interface TimelineClasses {
   timelineContainer: string;
   rowLabelColumn: string;
   todayMarker: string;
+  dateAtCursorMarker: string;
+  dateAtCursorMarkerLabel: string;
 }
 
 export type TimelineClassKey = keyof TimelineClasses;
@@ -203,6 +206,7 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
     timelineElements: TimelineElement[];
     label?: ReactNode;
   })[];
+  scrollingAncenstorElement?: HTMLElement | null;
 }
 
 export function getTimelineUtilityClass(slot: string): string {
@@ -211,7 +215,14 @@ export function getTimelineUtilityClass(slot: string): string {
 
 export const timelineClasses: TimelineClasses = generateUtilityClasses(
   'MuiTimeline',
-  ['root', 'timelineContainer', 'rowLabelColumn', 'todayMarker']
+  [
+    'root',
+    'timelineContainer',
+    'rowLabelColumn',
+    'todayMarker',
+    'dateAtCursorMarker',
+    'dateAtCursorMarkerLabel',
+  ]
 );
 
 const slots = {
@@ -219,6 +230,8 @@ const slots = {
   timelineContainer: ['timelineContainer'],
   rowLabelColumn: ['rowLabelColumn'],
   todayMarker: ['todayMarker'],
+  dateAtCursorMarker: ['dateAtCursorMarker'],
+  dateAtCursorMarkerLabel: ['dateAtCursorMarkerLabel'],
 };
 
 export const BaseTimeline = <RecordRow extends BaseDataRow>(
@@ -267,9 +280,9 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     staticRows,
     sx,
     ...rest
-  } = omit(props, 'parentBackgroundColor');
+  } = omit(props, 'parentBackgroundColor', 'scrollingAncenstorElement');
 
-  let { parentBackgroundColor } = props;
+  let { parentBackgroundColor, scrollingAncenstorElement } = props;
 
   const classes = composeClasses(
     slots,
@@ -293,9 +306,21 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     TodayIndicatorProps;
 
   const isInitialMountRef = useRef(true);
+  useEffect(() => {
+    isInitialMountRef.current = false;
+    return () => {
+      isInitialMountRef.current = true;
+    };
+  }, []);
+
   const currentDateAtCenterRef = useRef<Date | null>(null);
   const lastDateAtCenterRef = useRef<Date | null>(null);
-  const timelineContainerElementRef = useRef<HTMLTableElement>(null);
+  const [timelineContainerElement, setTimelineContainerElement] =
+    useState<HTMLTableElement | null>(null);
+  if (!scrollingAncenstorElement && timelineContainerElement) {
+    scrollingAncenstorElement = timelineContainerElement?.parentElement;
+  }
+
   const todayIndicatorRef = useRef<HTMLDivElement>(null);
 
   const getDefaultViewResetFunctionRef = useRef(getDefaultViewResetFunction);
@@ -497,8 +522,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       return 'Year';
     }
     const timelineViewPortWidth =
-      (timelineContainerElementRef.current?.parentElement?.offsetWidth ||
-        window.innerWidth) -
+      (scrollingAncenstorElement?.offsetWidth || window.innerWidth) -
       (shouldShowRowLabelsColumn ? rowLabelsColumnWidth : 0);
 
     if (
@@ -555,28 +579,27 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
 
   const scrollToDate: ScrollToDateFunction = useCallback(
     (date, scrollBehaviour: ScrollBehavior = 'smooth') => {
-      const parentElement = timelineContainerElementRef.current?.parentElement;
-      const timelineElementContainer =
-        timelineContainerElementRef.current?.parentElement?.querySelector(
-          `.${classes.timelineContainer}`
-        ) as HTMLElement;
+      const timelineElementContainer = scrollingAncenstorElement?.querySelector(
+        `.${classes.timelineContainer}`
+      ) as HTMLElement;
       if (
-        parentElement &&
+        scrollingAncenstorElement &&
         timelineElementContainer &&
         isAfter(date, minCalendarDate) &&
         isBefore(date, maxCalendarDate)
       ) {
         const offsetPercentage =
           differenceInHours(date, minCalendarDate) / totalNumberOfHours;
-        const { offsetWidth: parentElementOffsetWidth } = parentElement;
+        const { offsetWidth: scrollingAncenstorElementOffsetWidth } =
+          scrollingAncenstorElement;
         const { offsetWidth } = timelineElementContainer;
 
-        parentElement.scrollTo({
+        scrollingAncenstorElement.scrollTo({
           left:
             Math.round((offsetWidth - baseSpacingUnits) * offsetPercentage) +
             baseSpacingUnits -
             Math.round(
-              (parentElementOffsetWidth -
+              (scrollingAncenstorElementOffsetWidth -
                 (shouldShowRowLabelsColumn ? rowLabelsColumnWidth : 0)) /
                 2
             ),
@@ -590,6 +613,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       maxCalendarDate,
       minCalendarDate,
       rowLabelsColumnWidth,
+      scrollingAncenstorElement,
       shouldShowRowLabelsColumn,
       totalNumberOfHours,
     ]
@@ -643,6 +667,21 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         }
       })();
       todayMarkerElement.style.top = top ? `${top}px` : '';
+    }
+
+    const dateAtCursorMarkerElement = timelineContainerElement.querySelector(
+      `.${classes.dateAtCursorMarker}`
+    ) as HTMLElement;
+    if (dateAtCursorMarkerElement) {
+      const timelineContainerHeight = (
+        timelineContainerElement.querySelector(
+          `.${classes.timelineContainer}`
+        ) as HTMLElement
+      )?.offsetHeight;
+      if (timelineContainerHeight) {
+        dateAtCursorMarkerElement.style.height = `${timelineContainerHeight}px`;
+        dateAtCursorMarkerElement.style.top = `${-timelineContainerHeight}px`;
+      }
     }
   };
   const updateTodayMarkerHeightRef = useRef(updateTodayMarkerHeight);
@@ -1014,11 +1053,10 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   }, []);
 
   useEffect(() => {
-    const parentElement = timelineContainerElementRef.current?.parentElement;
-    const timelineElementContainer =
-      timelineContainerElementRef.current?.parentElement?.querySelector(
-        `.${classes.timelineContainer}`
-      ) as HTMLElement;
+    const parentElement = scrollingAncenstorElement;
+    const timelineElementContainer = scrollingAncenstorElement?.querySelector(
+      `.${classes.timelineContainer}`
+    ) as HTMLElement;
     if (parentElement && timelineElementContainer) {
       const scrollEventCallback = () => {
         const { scrollLeft, offsetWidth: parentElementOffsetWidth } =
@@ -1038,10 +1076,8 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         );
         currentDateAtCenterRef.current = dateAtCenter;
         onChangeCurrentDateAtCenterRef.current?.(dateAtCenter);
-        if (timelineContainerElementRef.current) {
-          updateTodayMarkerHeightRef.current(
-            timelineContainerElementRef.current
-          );
+        if (timelineContainerElement) {
+          updateTodayMarkerHeightRef.current(timelineContainerElement);
         }
       };
       parentElement.addEventListener('scroll', scrollEventCallback);
@@ -1054,7 +1090,9 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     classes.timelineContainer,
     minCalendarDate,
     rowLabelsColumnWidth,
+    scrollingAncenstorElement,
     shouldShowRowLabelsColumn,
+    timelineContainerElement,
     totalNumberOfHours,
   ]);
 
@@ -1167,30 +1205,88 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   };
 
   useEffect(() => {
-    switch (defaultTimelineCenter) {
-      case 'now':
-        scrollToDateRef.current(new Date(), 'auto');
-        break;
-      case 'centerOfDataSet':
-      default:
-        scrollToDateRef.current(centerOfGravity, 'auto');
-        break;
+    if (scrollingAncenstorElement) {
+      switch (defaultTimelineCenter) {
+        case 'now':
+          scrollToDateRef.current(new Date(), 'auto');
+          break;
+        case 'centerOfDataSet':
+        default:
+          scrollToDateRef.current(centerOfGravity, 'auto');
+          break;
+      }
     }
-  }, [centerOfGravity, defaultTimelineCenter]);
+  }, [centerOfGravity, defaultTimelineCenter, scrollingAncenstorElement]);
 
   useEffect(() => {
-    if (selectedTimeScale && lastDateAtCenterRef.current) {
+    if (
+      selectedTimeScale &&
+      lastDateAtCenterRef.current &&
+      scrollingAncenstorElement
+    ) {
       scrollToDateRef.current(lastDateAtCenterRef.current, 'auto');
       lastDateAtCenterRef.current = null;
     }
-  }, [selectedTimeScale]);
+  }, [scrollingAncenstorElement, selectedTimeScale]);
 
   useEffect(() => {
-    isInitialMountRef.current = false;
-    return () => {
-      isInitialMountRef.current = true;
-    };
-  }, []);
+    const dateAtCursorMarkerElement = timelineContainerElement?.querySelector(
+      `.${classes.dateAtCursorMarker}`
+    ) as HTMLElement;
+    const dateAtCursorMarkerLabelElement =
+      dateAtCursorMarkerElement?.querySelector(
+        `.${classes.dateAtCursorMarkerLabel}`
+      ) as HTMLElement;
+    if (
+      scrollingAncenstorElement &&
+      timelineContainerElement &&
+      dateAtCursorMarkerElement &&
+      dateAtCursorMarkerLabelElement
+    ) {
+      const mouseMoveEventCallback = (event: MouseEvent) => {
+        const { offsetWidth } = timelineContainerElement;
+        const { left } = scrollingAncenstorElement!.getBoundingClientRect();
+        const { clientX } = event;
+        const localX = clientX - left;
+        const timelineX =
+          localX -
+          (shouldShowRowLabelsColumn ? rowLabelsColumnWidth : 0) -
+          baseSpacingUnits +
+          scrollingAncenstorElement!.scrollLeft;
+        if (timelineX >= 0) {
+          const percentageAtMousePosition =
+            timelineX / (offsetWidth - baseSpacingUnits);
+          const dateAtMousePosition = addHours(
+            minCalendarDate,
+            totalNumberOfHours * percentageAtMousePosition
+          );
+          dateAtCursorMarkerElement.style.left = `${timelineX}px`;
+          dateAtCursorMarkerLabelElement.innerText =
+            dateAtMousePosition.toISOString();
+        }
+      };
+      scrollingAncenstorElement.addEventListener(
+        'mousemove',
+        mouseMoveEventCallback
+      );
+      return () => {
+        return scrollingAncenstorElement?.removeEventListener(
+          'mousemove',
+          mouseMoveEventCallback
+        );
+      };
+    }
+  }, [
+    baseSpacingUnits,
+    classes.dateAtCursorMarker,
+    classes.dateAtCursorMarkerLabel,
+    minCalendarDate,
+    rowLabelsColumnWidth,
+    scrollingAncenstorElement,
+    shouldShowRowLabelsColumn,
+    timelineContainerElement,
+    totalNumberOfHours,
+  ]);
 
   //#region TimeScale Tool
   const onSelectTimeScale: SelectTimeScaleCallbackFunction = useCallback(
@@ -1248,11 +1344,11 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   }, [jumpToOptimalTimeScale]);
 
   const jumpToPreviousUnitTimeScale = useCallback(() => {
-    timelineContainerElementRef.current?.parentElement?.scrollBy({
+    scrollingAncenstorElement?.scrollBy({
       left: -unitTimeScaleWidth,
       behavior: 'smooth',
     });
-  }, [unitTimeScaleWidth]);
+  }, [scrollingAncenstorElement, unitTimeScaleWidth]);
 
   useEffect(() => {
     getJumpToPreviousUnitTimeScaleFunctionRef.current?.(
@@ -1261,11 +1357,11 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   }, [jumpToPreviousUnitTimeScale]);
 
   const jumpToNextUnitTimeScale = useCallback(() => {
-    timelineContainerElementRef.current?.parentElement?.scrollBy({
+    scrollingAncenstorElement?.scrollBy({
       left: unitTimeScaleWidth,
       behavior: 'smooth',
     });
-  }, [unitTimeScaleWidth]);
+  }, [scrollingAncenstorElement, unitTimeScaleWidth]);
 
   useEffect(() => {
     getJumpToNextUnitTimeScaleFunctionRef.current?.(jumpToNextUnitTimeScale);
@@ -1292,7 +1388,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         <TimeScaleMeter
           {...TimeScaleMeterPropsRest}
           {...{ timeScaleRows, timeScaleWidth }}
-          scrollingElement={timelineContainerElementRef.current?.parentElement}
+          scrollingElement={scrollingAncenstorElement}
           leftOffset={
             (shouldShowRowLabelsColumn ? rowLabelsColumnWidth : 0) +
             baseSpacingUnits
@@ -1328,6 +1424,32 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                 width: '100%',
               }}
             >
+              <Box
+                className={clsx(classes.dateAtCursorMarker)}
+                sx={{
+                  width: 2,
+                  bgcolor: palette.text.primary,
+                  top: 0,
+                  position: 'absolute',
+                }}
+              >
+                <Typography
+                  variant="body2"
+                  component="div"
+                  className={clsx(classes.dateAtCursorMarkerLabel)}
+                  noWrap
+                  sx={{
+                    py: 0.5,
+                    px: 1,
+                    bgcolor: palette.text.primary,
+                    color: palette.background.paper,
+                    position: 'absolute',
+                    top: 0,
+                    left: '100%',
+                    borderBottomRightRadius: '4px',
+                  }}
+                ></Typography>
+              </Box>
               <Box
                 ref={todayIndicatorRef}
                 {...TodayIndicatorPropsRest}
@@ -1541,10 +1663,10 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       ) : null}
       <Table
         ref={mergeRefs([
-          timelineContainerElementRef,
-          (timelineContainerElement: HTMLDivElement | null) => {
+          (timelineContainerElement: HTMLTableElement | null) => {
             if (timelineContainerElement) {
               updateTodayMarkerHeight(timelineContainerElement);
+              setTimelineContainerElement(timelineContainerElement);
             }
           },
           ref,
@@ -1568,14 +1690,14 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         HeaderRowProps={{
           sx: {
             position: 'relative',
-            zIndex: 3,
+            zIndex: 0,
             verticalAlign: 'bottom',
           },
         }}
         SecondaryHeaderRowProps={{
           sx: {
             position: 'relative',
-            zIndex: -1,
+            zIndex: 0,
             th: {
               borderBottom: 'none',
             },
@@ -1607,6 +1729,12 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           ...sx,
           [`.${tableBodyClasses.root} tr`]: {
             verticalAlign: 'middle',
+          },
+          [`.${classes.dateAtCursorMarker}`]: {
+            display: 'none',
+          },
+          [`&:hover .${classes.dateAtCursorMarker}`]: {
+            display: 'block',
           },
         }}
       />

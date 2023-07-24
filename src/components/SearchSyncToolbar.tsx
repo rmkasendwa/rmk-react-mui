@@ -504,6 +504,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
               searchFieldAndTitleSpaceWidth
             ) {
               setCollapsedWidthToolIndex(i);
+              setCollapseAllToolsIntoEllipsis(false);
               return;
             }
           }
