@@ -72,7 +72,7 @@ import TimeScaleMeter, {
 export interface TimelineClasses {
   /** Styles applied to the root element. */
   root: string;
-  timelineContainer: string;
+  timelineMeterContainer: string;
   rowLabelColumn: string;
   todayMarker: string;
   dateAtCursorMarker: string;
@@ -207,6 +207,7 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
     label?: ReactNode;
   })[];
   scrollingAncenstorElement?: HTMLElement | null;
+  dateFormat?: string;
 }
 
 export function getTimelineUtilityClass(slot: string): string {
@@ -217,7 +218,7 @@ export const timelineClasses: TimelineClasses = generateUtilityClasses(
   'MuiTimeline',
   [
     'root',
-    'timelineContainer',
+    'timelineMeterContainer',
     'rowLabelColumn',
     'todayMarker',
     'dateAtCursorMarker',
@@ -227,7 +228,7 @@ export const timelineClasses: TimelineClasses = generateUtilityClasses(
 
 const slots = {
   root: ['root'],
-  timelineContainer: ['timelineContainer'],
+  timelineMeterContainer: ['timelineMeterContainer'],
   rowLabelColumn: ['rowLabelColumn'],
   todayMarker: ['todayMarker'],
   dateAtCursorMarker: ['dateAtCursorMarker'],
@@ -278,6 +279,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     defaultTimelineCenter,
     TodayIndicatorProps = {},
     staticRows,
+    dateFormat = 'MMM dd, yyyy hh:mm aa',
     sx,
     ...rest
   } = omit(props, 'parentBackgroundColor', 'scrollingAncenstorElement');
@@ -579,12 +581,13 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
 
   const scrollToDate: ScrollToDateFunction = useCallback(
     (date, scrollBehaviour: ScrollBehavior = 'smooth') => {
-      const timelineElementContainer = scrollingAncenstorElement?.querySelector(
-        `.${classes.timelineContainer}`
-      ) as HTMLElement;
+      const timelineMeterContainerContainer =
+        scrollingAncenstorElement?.querySelector(
+          `.${classes.timelineMeterContainer}`
+        ) as HTMLElement;
       if (
         scrollingAncenstorElement &&
-        timelineElementContainer &&
+        timelineMeterContainerContainer &&
         isAfter(date, minCalendarDate) &&
         isBefore(date, maxCalendarDate)
       ) {
@@ -592,7 +595,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           differenceInHours(date, minCalendarDate) / totalNumberOfHours;
         const { offsetWidth: scrollingAncenstorElementOffsetWidth } =
           scrollingAncenstorElement;
-        const { offsetWidth } = timelineElementContainer;
+        const { offsetWidth } = timelineMeterContainerContainer;
 
         scrollingAncenstorElement.scrollTo({
           left:
@@ -609,7 +612,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     },
     [
       baseSpacingUnits,
-      classes.timelineContainer,
+      classes.timelineMeterContainer,
       maxCalendarDate,
       minCalendarDate,
       rowLabelsColumnWidth,
@@ -645,7 +648,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       const rootContainerHeight = timelineContainerElement.offsetHeight;
       const timelineContainerHeight = (
         timelineContainerElement.querySelector(
-          `.${classes.timelineContainer}`
+          `.${classes.timelineMeterContainer}`
         ) as HTMLElement
       )?.offsetHeight;
       const height = (() => {
@@ -675,7 +678,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     if (dateAtCursorMarkerElement) {
       const timelineContainerHeight = (
         timelineContainerElement.querySelector(
-          `.${classes.timelineContainer}`
+          `.${classes.timelineMeterContainer}`
         ) as HTMLElement
       )?.offsetHeight;
       if (timelineContainerHeight) {
@@ -1054,14 +1057,15 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
 
   useEffect(() => {
     const parentElement = scrollingAncenstorElement;
-    const timelineElementContainer = scrollingAncenstorElement?.querySelector(
-      `.${classes.timelineContainer}`
-    ) as HTMLElement;
-    if (parentElement && timelineElementContainer) {
+    const timelineMeterContainerContainer =
+      scrollingAncenstorElement?.querySelector(
+        `.${classes.timelineMeterContainer}`
+      ) as HTMLElement;
+    if (parentElement && timelineMeterContainerContainer) {
       const scrollEventCallback = () => {
         const { scrollLeft, offsetWidth: parentElementOffsetWidth } =
           parentElement;
-        const { offsetWidth } = timelineElementContainer;
+        const { offsetWidth } = timelineMeterContainerContainer;
         const dateAtCenter = addHours(
           minCalendarDate,
           totalNumberOfHours *
@@ -1087,7 +1091,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     }
   }, [
     baseSpacingUnits,
-    classes.timelineContainer,
+    classes.timelineMeterContainer,
     minCalendarDate,
     rowLabelsColumnWidth,
     scrollingAncenstorElement,
@@ -1230,6 +1234,10 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   }, [scrollingAncenstorElement, selectedTimeScale]);
 
   useEffect(() => {
+    const timelineMeterContainerElement =
+      timelineContainerElement?.querySelector(
+        `.${classes.timelineMeterContainer}`
+      ) as HTMLElement;
     const dateAtCursorMarkerElement = timelineContainerElement?.querySelector(
       `.${classes.dateAtCursorMarker}`
     ) as HTMLElement;
@@ -1238,13 +1246,14 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         `.${classes.dateAtCursorMarkerLabel}`
       ) as HTMLElement;
     if (
+      timelineMeterContainerElement &&
       scrollingAncenstorElement &&
       timelineContainerElement &&
       dateAtCursorMarkerElement &&
       dateAtCursorMarkerLabelElement
     ) {
       const mouseMoveEventCallback = (event: MouseEvent) => {
-        const { offsetWidth } = timelineContainerElement;
+        const { offsetWidth } = timelineMeterContainerElement;
         const { left } = scrollingAncenstorElement!.getBoundingClientRect();
         const { clientX } = event;
         const localX = clientX - left;
@@ -1261,8 +1270,10 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
             totalNumberOfHours * percentageAtMousePosition
           );
           dateAtCursorMarkerElement.style.left = `${timelineX}px`;
-          dateAtCursorMarkerLabelElement.innerText =
-            dateAtMousePosition.toISOString();
+          dateAtCursorMarkerLabelElement.innerText = formatDate(
+            dateAtMousePosition,
+            dateFormat
+          );
         }
       };
       scrollingAncenstorElement.addEventListener(
@@ -1280,6 +1291,8 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     baseSpacingUnits,
     classes.dateAtCursorMarker,
     classes.dateAtCursorMarkerLabel,
+    classes.timelineMeterContainer,
+    dateFormat,
     minCalendarDate,
     rowLabelsColumnWidth,
     scrollingAncenstorElement,
@@ -1446,7 +1459,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                     position: 'absolute',
                     top: 0,
                     left: '100%',
-                    borderBottomRightRadius: '4px',
+                    borderBottomRightRadius: '8px',
                   }}
                 ></Typography>
               </Box>
@@ -1531,7 +1544,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       },
       width: timeScaleWidth + baseSpacingUnits,
       wrapColumnContentInFieldValue: false,
-      headerClassName: classes.timelineContainer,
+      headerClassName: classes.timelineMeterContainer,
       headerSx: {
         '&>div': {
           py: 0,
@@ -1663,10 +1676,10 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       ) : null}
       <Table
         ref={mergeRefs([
-          (timelineContainerElement: HTMLTableElement | null) => {
-            if (timelineContainerElement) {
-              updateTodayMarkerHeight(timelineContainerElement);
-              setTimelineContainerElement(timelineContainerElement);
+          (rootElement: HTMLTableElement | null) => {
+            if (rootElement) {
+              updateTodayMarkerHeight(rootElement);
+              setTimelineContainerElement(rootElement);
             }
           },
           ref,
