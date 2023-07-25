@@ -282,6 +282,7 @@ export interface RecordsExplorerProps<
         | 'enableCheckboxAllRowSelector'
         | 'enableCheckboxRowSelectors'
         | 'showRowNumber'
+        | 'onChangeMinWidth'
       >
     >,
     Partial<
@@ -605,6 +606,7 @@ const BaseRecordsExplorer = <
     renderViews = true,
     enableViewSelectedRecordModalPopup = true,
     resetToDefaultView: resetToDefaultViewProp,
+    onChangeMinWidth,
     ...rest
   } = omit(
     props,
@@ -1896,6 +1898,7 @@ const BaseRecordsExplorer = <
           } = { ...selectedViewProps, ...ListViewProps };
 
           return {
+            onChangeMinWidth,
             ...selectedViewProps,
             ...ListViewProps,
             enableColumnDisplayToggle,
@@ -1920,6 +1923,7 @@ const BaseRecordsExplorer = <
             }
           }
           return {
+            onChangeMinWidth,
             ...selectedViewProps,
             ...TimelineViewProps,
             ...viewProps,
@@ -1948,7 +1952,7 @@ const BaseRecordsExplorer = <
       errorMessage,
       searchParamSelectedDataPreset,
       selectedDataPreset,
-      selectedViewProps: selectedViewProps,
+      selectedViewProps,
     };
   //#endregion
 
@@ -1963,7 +1967,8 @@ const BaseRecordsExplorer = <
               selectedViewProps,
               'type',
               'minWidth',
-              'mergeTools'
+              'mergeTools',
+              'renderView'
             ) as ListView<RecordRow>;
             const {
               enableColumnDisplayToggle,
@@ -2384,7 +2389,8 @@ const BaseRecordsExplorer = <
           case 'Timeline': {
             const { mergeTools, onClickRow, ...viewProps } = omit(
               { ...selectedViewProps, ...TimelineViewProps },
-              'type'
+              'type',
+              'renderView'
             ) as TimelineView<RecordRow>;
             return (
               <Timeline

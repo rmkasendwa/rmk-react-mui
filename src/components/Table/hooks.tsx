@@ -171,6 +171,7 @@ export const useTable = <DataRow extends BaseDataRow>(
     getToolTipWrappedColumnNode,
     startStickyColumnIndex,
     staticRows,
+    onChangeMinWidth,
     sx,
     ...rest
   } = props;
@@ -202,15 +203,16 @@ export const useTable = <DataRow extends BaseDataRow>(
   lowercaseLabelPlural || (lowercaseLabelPlural = labelPlural.toLowerCase());
   emptyRowsLabel || (emptyRowsLabel = `No ${lowercaseLabelPlural} found`);
 
-  // Refs
+  //#region Refs
   const columnsRef = useRef(columnsProp);
+  columnsRef.current = columnsProp;
   const onChangeSelectedColumnIdsRef = useRef(onChangeSelectedColumnIds);
+  onChangeSelectedColumnIdsRef.current = onChangeSelectedColumnIds;
   const onChangeCheckedRowIdsRef = useRef(onChangeCheckedRowIdsProp);
-  useEffect(() => {
-    columnsRef.current = columnsProp;
-    onChangeSelectedColumnIdsRef.current = onChangeSelectedColumnIds;
-    onChangeCheckedRowIdsRef.current = onChangeCheckedRowIdsProp;
-  }, [columnsProp, onChangeCheckedRowIdsProp, onChangeSelectedColumnIds]);
+  onChangeCheckedRowIdsRef.current = onChangeCheckedRowIdsProp;
+  const onChangeMinWidthRef = useRef(onChangeMinWidth);
+  onChangeMinWidthRef.current = onChangeMinWidth;
+  //#endregion
 
   const { palette, breakpoints } = useTheme();
   const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
@@ -545,6 +547,9 @@ export const useTable = <DataRow extends BaseDataRow>(
       enableColumnDisplayToggle,
     }
   );
+  useEffect(() => {
+    onChangeMinWidthRef.current?.(minWidth);
+  }, [minWidth]);
 
   const pageRows: typeof rows = [
     ...(staticRows || []),
