@@ -112,6 +112,7 @@ export const TableBodyRow = <T extends BaseDataRow>(
     noWrap: rowNoWrap,
     enableSmallScreenOptimization = false,
     getToolTipWrappedColumnNode,
+    opaque,
     ...rest
   } = props;
 
@@ -148,6 +149,7 @@ export const TableBodyRow = <T extends BaseDataRow>(
   const {
     sx: rowPropsSx,
     isClickable: rowPropsIsClickable = true,
+    opaque: rowPropsOpaque,
     ...rowPropsRest
   } = rowProps;
 
@@ -342,6 +344,9 @@ export const TableBodyRow = <T extends BaseDataRow>(
                 enableSmallScreenOptimization,
                 getToolTipWrappedColumnNode,
               }}
+              {...{
+                opaque: opaque ?? rowPropsOpaque,
+              }}
               {...column}
               onClick={() => {
                 if (
@@ -419,6 +424,9 @@ export const TableBodyRow = <T extends BaseDataRow>(
                                 sx,
                                 enableSmallScreenOptimization,
                               }}
+                              {...{
+                                opaque: opaque ?? rowPropsOpaque,
+                              }}
                               {...column}
                             />
                           </Grid>
@@ -473,6 +481,9 @@ export const TableBodyRow = <T extends BaseDataRow>(
                     sx,
                     enableSmallScreenOptimization,
                     getToolTipWrappedColumnNode,
+                  }}
+                  {...{
+                    opaque: opaque ?? rowPropsOpaque,
                   }}
                   {...ellipsisMenuToolColumn}
                   column={ellipsisMenuToolColumn}
@@ -617,7 +628,12 @@ export const TableBodyRow = <T extends BaseDataRow>(
     <TableRow
       {...rowPropsRest}
       {...rest}
-      className={clsx(classes.root, isGroupHeader && classes.groupHeaderColumn)}
+      className={clsx(
+        classes.root,
+        className,
+        rowPropsRest?.className,
+        isGroupHeader && classes.groupHeaderColumn
+      )}
       hover
       sx={{
         verticalAlign: 'top',
@@ -677,6 +693,9 @@ export const TableBodyRow = <T extends BaseDataRow>(
               defaultCountryCode,
               noWrap,
               getToolTipWrappedColumnNode,
+            }}
+            {...{
+              opaque: opaque ?? rowPropsOpaque,
             }}
             {...column}
             onClick={() => {
