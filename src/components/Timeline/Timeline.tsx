@@ -140,6 +140,7 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
       | 'parentBackgroundColor'
       | 'onClickRow'
       | 'forEachRowProps'
+      | 'onChangeMinWidth'
     >
   > {
   rowLabelProperty?: keyof RecordRow;
