@@ -582,9 +582,7 @@ const BasePaginatedDropdownOptionList = <Entity,>(
                       title={description}
                       key={value}
                       placement="left"
-                      sx={{
-                        pointerEvents: 'none',
-                      }}
+                      disableInteractive
                     >
                       {dropdownOptionElement}
                     </Tooltip>

@@ -338,11 +338,7 @@ export const WorldMap = forwardRef<SVGSVGElement, WorldMapProps>(
     if (title) {
       return (
         <Tooltip
-          PopperProps={{
-            sx: {
-              pointerEvents: 'none',
-            },
-          }}
+          disableInteractive
           {...TooltipProps}
           componentsProps={{
             tooltip: {

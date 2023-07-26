@@ -482,14 +482,7 @@ export const useFilterTool = <RecordRow extends BaseDataRow>({
                             width: 40,
                           }}
                         >
-                          <Tooltip
-                            title="Remove condition"
-                            PopperProps={{
-                              sx: {
-                                pointerEvents: 'none',
-                              },
-                            }}
-                          >
+                          <Tooltip title="Remove condition" disableInteractive>
                             <IconButton
                               onClick={() => {
                                 const selectedFilterParamIndex =

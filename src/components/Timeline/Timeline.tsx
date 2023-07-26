@@ -1172,11 +1172,11 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
               followCursor
               enterDelay={1000}
               enterNextDelay={500}
+              disableInteractive
               {...TooltipPropsRest}
               PopperProps={{
                 ...TooltipPropsPopperProps,
                 sx: {
-                  pointerEvents: 'none',
                   zIndex: 9999,
                   ...TooltipPropsPopperProps.sx,
                 },
@@ -1465,6 +1465,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                     ...TodayIndicatorPropsSx,
                     position: 'absolute',
                     left: `${offsetPercentage * 100}%`,
+                    pointerEvents: 'none',
                   }}
                 />
               );
