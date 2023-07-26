@@ -24,7 +24,7 @@ export const getColumnWidthStyles = ({
 }: TableColumn) => {
   const minWidth =
     (() => {
-      if (inputMinWidth) {
+      if (inputMinWidth != null) {
         if (width && width < inputMinWidth) {
           return width;
         }
@@ -35,7 +35,7 @@ export const getColumnWidthStyles = ({
   return {
     width,
     minWidth,
-    maxWidth: width || (!minWidth || minWidth < 200 ? 200 : minWidth),
+    maxWidth: width || (minWidth == null || minWidth < 200 ? 200 : minWidth),
   };
 };
 

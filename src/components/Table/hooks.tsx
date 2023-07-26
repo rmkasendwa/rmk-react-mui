@@ -172,6 +172,7 @@ export const useTable = <DataRow extends BaseDataRow>(
     startStickyColumnIndex,
     staticRows,
     onChangeMinWidth,
+    lazyRows = true,
     sx,
     ...rest
   } = props;
@@ -1133,70 +1134,9 @@ export const useTable = <DataRow extends BaseDataRow>(
             }
             return row.id;
           })();
-          accumulator.push({
-            id: compositeId,
-            element: (
-              <RenderIfVisible
-                {...TableBodyRowPlaceholderPropsRest}
-                key={compositeId}
-                displayPlaceholder={false}
-                unWrapChildrenIfVisible
-                sx={{
-                  height: 89,
-                  ...TableBodyRowPlaceholderPropsSx,
-                }}
-              >
-                {index > 0 ? <Divider /> : null}
-                <TableBodyRow
-                  {...{
-                    columnTypographyProps,
-                    decimalPlaces,
-                    defaultColumnValue,
-                    defaultCountryCode,
-                    defaultDateFormat,
-                    defaultDateTimeFormat,
-                    editable,
-                    minColumnWidth,
-                    noWrap,
-                    onClickRow,
-                    row,
-                    textTransform,
-                    enableSmallScreenOptimization,
-                    getToolTipWrappedColumnNode,
-                  }}
-                  columns={displayingColumns}
-                  getRowProps={forEachRowProps}
-                  className={clsx(rowNumber % 2 === 0 ? 'even' : 'odd')}
-                />
-              </RenderIfVisible>
-            ),
-          });
-          return accumulator;
-        }, [] as { id: string; element: ReactNode }[]);
-      }
-      return pageRows.reduce((accumulator, row, index) => {
-        const rowNumber = rowStartIndex + 1 + index;
-        const { GroupingProps } = row;
-        const compositeId = (() => {
-          if (GroupingProps && 'isGroupHeader' in GroupingProps) {
-            return GroupingProps.groupId;
-          }
-          return row.id;
-        })();
-        accumulator.push({
-          id: compositeId,
-          element: (
-            <RenderIfVisible
-              {...TableBodyRowPlaceholderPropsRest}
-              key={compositeId}
-              component="tr"
-              displayPlaceholder={false}
-              unWrapChildrenIfVisible
-              sx={{
-                height: 41,
-                ...TableBodyRowPlaceholderPropsSx,
-              }}
-            >
+          const rowElement = (
+            <>
+              {index > 0 ? <Divider /> : null}
               <TableBodyRow
                 {...{
                   columnTypographyProps,
@@ -1211,13 +1151,86 @@ export const useTable = <DataRow extends BaseDataRow>(
                   onClickRow,
                   row,
                   textTransform,
+                  enableSmallScreenOptimization,
                   getToolTipWrappedColumnNode,
                 }}
                 columns={displayingColumns}
                 getRowProps={forEachRowProps}
                 className={clsx(rowNumber % 2 === 0 ? 'even' : 'odd')}
               />
+            </>
+          );
+          accumulator.push({
+            id: compositeId,
+            element: lazyRows ? (
+              <RenderIfVisible
+                {...TableBodyRowPlaceholderPropsRest}
+                key={compositeId}
+                displayPlaceholder={false}
+                unWrapChildrenIfVisible
+                sx={{
+                  height: 89,
+                  ...TableBodyRowPlaceholderPropsSx,
+                }}
+              >
+                {rowElement}
+              </RenderIfVisible>
+            ) : (
+              rowElement
+            ),
+          });
+          return accumulator;
+        }, [] as { id: string; element: ReactNode }[]);
+      }
+      return pageRows.reduce((accumulator, row, index) => {
+        const rowNumber = rowStartIndex + 1 + index;
+        const { GroupingProps } = row;
+        const compositeId = (() => {
+          if (GroupingProps && 'isGroupHeader' in GroupingProps) {
+            return GroupingProps.groupId;
+          }
+          return row.id;
+        })();
+        const rowElement = (
+          <TableBodyRow
+            {...{
+              columnTypographyProps,
+              decimalPlaces,
+              defaultColumnValue,
+              defaultCountryCode,
+              defaultDateFormat,
+              defaultDateTimeFormat,
+              editable,
+              minColumnWidth,
+              noWrap,
+              onClickRow,
+              row,
+              textTransform,
+              getToolTipWrappedColumnNode,
+            }}
+            columns={displayingColumns}
+            getRowProps={forEachRowProps}
+            className={clsx(rowNumber % 2 === 0 ? 'even' : 'odd')}
+          />
+        );
+        accumulator.push({
+          id: compositeId,
+          element: lazyRows ? (
+            <RenderIfVisible
+              {...TableBodyRowPlaceholderPropsRest}
+              key={compositeId}
+              component="tr"
+              displayPlaceholder={false}
+              unWrapChildrenIfVisible
+              sx={{
+                height: 41,
+                ...TableBodyRowPlaceholderPropsSx,
+              }}
+            >
+              {rowElement}
             </RenderIfVisible>
+          ) : (
+            rowElement
           ),
         });
         return accumulator;
