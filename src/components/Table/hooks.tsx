@@ -1264,14 +1264,7 @@ export const useTable = <DataRow extends BaseDataRow>(
               right: 0,
             }}
           >
-            <Tooltip
-              title="Edit columns"
-              PopperProps={{
-                sx: {
-                  pointerEvents: 'none',
-                },
-              }}
-            >
+            <Tooltip title="Edit columns" disableInteractive>
               <TableColumnToggleIconButton
                 {...{ selectedColumnIds }}
                 columns={selectableColumns}

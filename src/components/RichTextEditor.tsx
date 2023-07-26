@@ -697,14 +697,7 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
                                 threshold={1}
                                 initialVisible
                               >
-                                <Tooltip
-                                  title={label}
-                                  PopperProps={{
-                                    sx: {
-                                      pointerEvents: 'none',
-                                    },
-                                  }}
-                                >
+                                <Tooltip title={label} disableInteractive>
                                   <Box
                                     sx={{
                                       width: SQUARE_TOOL_DIMENSION,
@@ -793,11 +786,7 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
                         {toolGroupDivider}
                         <Tooltip
                           title="More formatting options"
-                          PopperProps={{
-                            sx: {
-                              pointerEvents: 'none',
-                            },
-                          }}
+                          disableInteractive
                         >
                           <EllipsisMenuIconButton
                             color="inherit"

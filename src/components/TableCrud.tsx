@@ -654,11 +654,7 @@ const BaseTableCrud = <
                                             <Grid item>
                                               <Tooltip
                                                 title="Edit"
-                                                PopperProps={{
-                                                  sx: {
-                                                    pointerEvents: 'none',
-                                                  },
-                                                }}
+                                                disableInteractive
                                               >
                                                 <IconButton
                                                   onClick={() => {
@@ -678,11 +674,7 @@ const BaseTableCrud = <
                                         <Grid item>
                                           <Tooltip
                                             title="Delete"
-                                            PopperProps={{
-                                              sx: {
-                                                pointerEvents: 'none',
-                                              },
-                                            }}
+                                            disableInteractive
                                           >
                                             <IconButton
                                               onClick={() => {

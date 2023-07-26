@@ -150,14 +150,7 @@ export const getToolNodes = (
                 );
                 return (
                   <>
-                    <Tooltip
-                      title={title || label}
-                      PopperProps={{
-                        sx: {
-                          pointerEvents: 'none',
-                        },
-                      }}
-                    >
+                    <Tooltip title={title || label} disableInteractive>
                       <IconButton
                         {...rest}
                         sx={{
@@ -182,14 +175,7 @@ export const getToolNodes = (
                   if (index >= tools.length - collapsedWidthToolIndex) {
                     return (
                       <>
-                        <Tooltip
-                          title={title || label}
-                          PopperProps={{
-                            sx: {
-                              pointerEvents: 'none',
-                            },
-                          }}
-                        >
+                        <Tooltip title={title || label} disableInteractive>
                           <Button
                             {...rest}
                             sx={{
@@ -214,14 +200,7 @@ export const getToolNodes = (
                   }
                   return (
                     <>
-                      <Tooltip
-                        title={label}
-                        PopperProps={{
-                          sx: {
-                            pointerEvents: 'none',
-                          },
-                        }}
-                      >
+                      <Tooltip title={label} disableInteractive>
                         <Button
                           startIcon={icon}
                           {...rest}
@@ -241,14 +220,7 @@ export const getToolNodes = (
                 })();
                 if (title) {
                   return (
-                    <Tooltip
-                      {...{ title }}
-                      PopperProps={{
-                        sx: {
-                          pointerEvents: 'none',
-                        },
-                      }}
-                    >
+                    <Tooltip {...{ title }} disableInteractive>
                       {buttonElement}
                     </Tooltip>
                   );
@@ -717,11 +689,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                               {searchFieldPlaceholder ? (
                                 <Tooltip
                                   title={searchFieldPlaceholder}
-                                  PopperProps={{
-                                    sx: {
-                                      pointerEvents: 'none',
-                                    },
-                                  }}
+                                  disableInteractive
                                 >
                                   {textField}
                                 </Tooltip>
@@ -732,14 +700,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                           );
                         })()
                       ) : (
-                        <Tooltip
-                          title="Search"
-                          PopperProps={{
-                            sx: {
-                              pointerEvents: 'none',
-                            },
-                          }}
-                        >
+                        <Tooltip title="Search" disableInteractive>
                           <IconButton
                             onClick={() => setSearchFieldOpen(true)}
                             sx={{
