@@ -420,6 +420,7 @@ export interface RecordsExplorerProps<
   defaultPath?: string;
   getTableDataReloadFunction?: (reloadFunction: () => void) => void;
   getCreateFunction?: (createFunction: () => void) => void;
+  getPathToAddNewRecord?: (pathToAddNewRecord: string) => void;
   getViewFunction?: (viewFunction: (record: RecordRow) => void) => void;
   getEditFunction?: (editFunction: (record: RecordRow) => void) => void;
   getDeleteFunction?: (editFunction: (record: RecordRow) => void) => void;
@@ -586,6 +587,7 @@ const BaseRecordsExplorer = <
     showResetTool = true,
     stateStorage,
     getCreateFunction,
+    getPathToAddNewRecord,
     getViewFunction,
     getRecordLoadFunction,
     getRecordDetailsLoadFunction,
@@ -690,6 +692,9 @@ const BaseRecordsExplorer = <
 
   const getCreateFunctionRef = useRef(getCreateFunction);
   getCreateFunctionRef.current = getCreateFunction;
+
+  const getPathToAddNewRecordRef = useRef(getPathToAddNewRecord);
+  getPathToAddNewRecordRef.current = getPathToAddNewRecord;
 
   const getViewFunctionRef = useRef(getViewFunction);
   getViewFunctionRef.current = getViewFunction;
@@ -1708,6 +1713,11 @@ const BaseRecordsExplorer = <
       }
     });
   }, [navigate, pathToAddNewRecord]);
+
+  useEffect(() => {
+    pathToAddNewRecord &&
+      getPathToAddNewRecordRef.current?.(pathToAddNewRecord);
+  }, [pathToAddNewRecord]);
 
   const resetToDefaultView = () => {
     setSearchParams(

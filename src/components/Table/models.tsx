@@ -311,4 +311,6 @@ export interface TableProps<DataRow extends BaseDataRow = any>
   startStickyColumnIndex?: number;
   staticRows?: DataRow[];
   onChangeMinWidth?: (minWidth: number) => void;
+
+  lazyRows?: boolean;
 }

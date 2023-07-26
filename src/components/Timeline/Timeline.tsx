@@ -1638,7 +1638,6 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     columns.push({
       id: 'gutter',
       label: 'Gutter',
-      width: 0,
       showHeaderText: false,
       headerSx: {
         '&>div': {
@@ -1747,6 +1746,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
             display: 'block',
           },
         }}
+        minColumnWidth={0}
       />
     </>
   );
