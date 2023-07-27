@@ -30,7 +30,15 @@ import { alpha, darken, lighten } from '@mui/system/colorManipulator';
 import { SxProps } from '@mui/system/styleFunctionSx';
 import clsx from 'clsx';
 import { omit } from 'lodash';
-import { ReactNode, Ref, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  Fragment,
+  ReactNode,
+  Ref,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 import { SortDirection, SortOptions } from '../../models/Sort';
 import { sort } from '../../utils/Sort';
@@ -1176,7 +1184,7 @@ export const useTable = <DataRow extends BaseDataRow>(
                 {rowElement}
               </RenderIfVisible>
             ) : (
-              rowElement
+              <Fragment key={compositeId}>{rowElement}</Fragment>
             ),
           });
           return accumulator;
@@ -1230,7 +1238,7 @@ export const useTable = <DataRow extends BaseDataRow>(
               {rowElement}
             </RenderIfVisible>
           ) : (
-            rowElement
+            <Fragment key={compositeId}>{rowElement}</Fragment>
           ),
         });
         return accumulator;
