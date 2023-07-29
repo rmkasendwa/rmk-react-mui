@@ -52,11 +52,12 @@ import {
   useReactRouterDOMSearchParams,
 } from '../../hooks/ReactRouterDOM';
 import {
+  CacheableDataFinderOptions,
   PaginatedRecordsFinderOptions,
   PaginatedRecordsOptions,
+  useCacheableData,
   useCreate,
   usePaginatedRecords,
-  useRecord,
   useUpdate,
 } from '../../hooks/Utils';
 import {
@@ -408,7 +409,10 @@ export interface RecordsExplorerProps<
   description?: ReactNode;
   recordsFinder?: RecordsFinder<RecordRow>;
   getRecordLoadFunction?: (loadFunction: () => void) => void;
-  recordDetailsFinder?: (selectedRecordId: string) => Promise<RecordRow>;
+  recordDetailsFinder?: (
+    selectedRecordId: string,
+    cacheableDataFinderOptions: CacheableDataFinderOptions
+  ) => Promise<RecordRow>;
   getRecordDetailsLoadFunction?: (loadFunction: () => void) => void;
   getEditableRecordInitialValues?: (record: RecordRow) => any;
   recordCreator?: (values: InitialValues) => any;
@@ -1756,18 +1760,19 @@ const BaseRecordsExplorer = <
     load: loadRecordDetails,
     loading: loadingRecordDetails,
     errorMessage: loadingRecordDetailsErrorMessage,
-    record: loadedSelectedRecord,
+    data: loadedSelectedRecord,
     reset: resetSelectedRecordState,
-  } = useRecord(
-    async () => {
-      if (recordDetailsFinder) {
-        if (selectedRecordId) {
-          return recordDetailsFinder(selectedRecordId);
-        }
+  } = useCacheableData(
+    async ({ getRequestController, getStaleWhileRevalidate }) => {
+      if (recordDetailsFinder && selectedRecordId) {
+        return recordDetailsFinder(selectedRecordId, {
+          getRequestController,
+          getStaleWhileRevalidate,
+        });
       }
     },
     {
-      loadOnMount: false,
+      revalidationKey: selectedRecordId,
     }
   );
 
