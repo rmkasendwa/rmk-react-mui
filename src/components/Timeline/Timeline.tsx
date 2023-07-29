@@ -9,8 +9,6 @@ import {
   ComponentsProps,
   ComponentsVariants,
   Grid,
-  Tooltip,
-  TooltipProps,
   Typography,
   TypographyProps,
   alpha,
@@ -50,6 +48,7 @@ import { ObjectShape } from 'yup/lib/object';
 
 import { useReactRouterDOMSearchParams } from '../../hooks/ReactRouterDOM';
 import { BaseDataRow, Table, TableColumn, TableProps } from '../Table';
+import Tooltip, { TooltipProps } from '../Tooltip';
 import {
   ScrollTimelineToolsProps,
   SelectTimeScaleCallbackFunction,
@@ -1169,7 +1168,6 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           return (
             <Tooltip
               title={baseTimelineElementLabel}
-              followCursor
               enterDelay={1000}
               enterNextDelay={500}
               disableInteractive

@@ -335,13 +335,21 @@ export const useCacheableData = <Data>(
     revalidationKey,
   }: CacheableDataOptions<Data> = {}
 ) => {
-  // Refs
+  //#region Refs
   const isInitialMountRef = useRef(true);
+  useEffect(() => {
+    isInitialMountRef.current = false;
+    return () => {
+      isInitialMountRef.current = true;
+    };
+  }, []);
+
   const recordFinderRef = useRef(recordFinder);
   recordFinderRef.current = recordFinder;
 
   const pendingDataRequestControllerRef =
     useRef<RecordFinderRequestController | null>(null);
+  //#endregion
 
   const {
     load: baseLoad,
@@ -389,13 +397,6 @@ export const useCacheableData = <Data>(
       load();
     }
   }, [load, revalidationKey]);
-
-  useEffect(() => {
-    isInitialMountRef.current = false;
-    return () => {
-      isInitialMountRef.current = true;
-    };
-  }, []);
 
   return {
     load,
