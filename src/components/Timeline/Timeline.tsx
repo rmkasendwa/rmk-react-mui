@@ -44,7 +44,6 @@ import {
 } from 'react';
 import { mergeRefs } from 'react-merge-refs';
 import * as Yup from 'yup';
-import { ObjectShape } from 'yup/lib/object';
 
 import { useReactRouterDOMSearchParams } from '../../hooks/ReactRouterDOM';
 import { BaseDataRow, Table, TableColumn, TableProps } from '../Table';
@@ -57,15 +56,19 @@ import {
   useTimeScaleTool,
 } from './hooks';
 import {
+  ScrollToDateFunction,
+  TimeScaleConfiguration,
   TimeScaleOption,
+  TimeScaleRow,
+  baseTimeScaleWidth,
   fullMonthLabels,
   quarterLabels,
   shortMonthLabels,
   timeScaleOptions,
+  timelineSearchParamValidationSpec,
 } from './models';
 import TimeScaleMeter, {
   TimeScaleMeterProps,
-  TimeScaleRow,
   timeScaleMeterClasses,
 } from './TimeScaleMeter';
 
@@ -105,23 +108,6 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
-
-const baseTimeScaleWidth = 120;
-
-export const timelineSearchParamValidationSpec: ObjectShape = {
-  timeScale: Yup.mixed<TimeScaleOption>().oneOf([...timeScaleOptions]),
-};
-
-export type ScrollToDateFunction = (
-  date: Date,
-  scrollBehaviour?: ScrollBehavior
-) => void;
-
-export type TimeScaleConfiguration = {
-  timeScaleRows: [TimeScaleRow[], TimeScaleRow[], TimeScaleRow[]];
-  unitTimeScaleWidth: number;
-  timeScaleWidth: number;
-};
 
 export interface TimelineElement extends Partial<BoxProps> {
   startDate?: string | number | Date;

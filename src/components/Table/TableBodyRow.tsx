@@ -72,6 +72,7 @@ export interface TableBodyRowProps<DataRow extends BaseDataRow = any>
   extends Partial<Omit<MuiTableRowProps, 'defaultValue'>>,
     TableRowProps<DataRow> {
   enableSmallScreenOptimization?: boolean;
+  applyCellWidthParameters?: boolean;
 }
 
 export function getTableBodyRowUtilityClass(slot: string): string {
@@ -113,6 +114,7 @@ export const TableBodyRow = <T extends BaseDataRow>(
     enableSmallScreenOptimization = false,
     getToolTipWrappedColumnNode,
     opaque,
+    applyCellWidthParameters = true,
     ...rest
   } = props;
 
@@ -712,10 +714,14 @@ export const TableBodyRow = <T extends BaseDataRow>(
                 index,
                 columnCount: columns.length,
               }),
-              ...getColumnWidthStyles({
-                ...column,
-                minWidth: minWidth ?? minColumnWidth,
-              }),
+              ...(() => {
+                if (applyCellWidthParameters) {
+                  return getColumnWidthStyles({
+                    ...column,
+                    minWidth: minWidth ?? minColumnWidth,
+                  });
+                }
+              })(),
               ...sx,
             }}
           />

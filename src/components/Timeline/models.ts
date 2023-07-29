@@ -1,3 +1,8 @@
+import { BoxProps } from '@mui/material';
+import { ReactNode } from 'react';
+import * as Yup from 'yup';
+import { ObjectShape } from 'yup/lib/object';
+
 export const timeScaleOptions = [
   'Day',
   'Week',
@@ -49,3 +54,26 @@ export const shortMonthLabels = [
 ];
 
 export const quarterLabels = ['Q1', 'Q2', 'Q3', 'Q4'] as const;
+
+export const baseTimeScaleWidth = 120;
+
+export interface TimeScaleRow extends Partial<BoxProps> {
+  id: string;
+  label: ReactNode;
+  showLabel?: boolean;
+}
+
+export const timelineSearchParamValidationSpec: ObjectShape = {
+  timeScale: Yup.mixed<TimeScaleOption>().oneOf([...timeScaleOptions]),
+};
+
+export type ScrollToDateFunction = (
+  date: Date,
+  scrollBehaviour?: ScrollBehavior
+) => void;
+
+export type TimeScaleConfiguration = {
+  timeScaleRows: [TimeScaleRow[], TimeScaleRow[], TimeScaleRow[]];
+  unitTimeScaleWidth: number;
+  timeScaleWidth: number;
+};

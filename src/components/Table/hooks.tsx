@@ -1165,6 +1165,7 @@ export const useTable = <DataRow extends BaseDataRow>(
                 columns={displayingColumns}
                 getRowProps={forEachRowProps}
                 className={clsx(rowNumber % 2 === 0 ? 'even' : 'odd')}
+                applyCellWidthParameters={!showHeaderRow}
               />
             </>
           );
@@ -1219,6 +1220,7 @@ export const useTable = <DataRow extends BaseDataRow>(
             columns={displayingColumns}
             getRowProps={forEachRowProps}
             className={clsx(rowNumber % 2 === 0 ? 'even' : 'odd')}
+            applyCellWidthParameters={!showHeaderRow}
           />
         );
         accumulator.push({
