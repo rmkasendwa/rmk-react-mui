@@ -11,11 +11,12 @@ import {
   useTheme,
   useThemeProps,
 } from '@mui/material';
-import Box, { BoxProps } from '@mui/material/Box';
+import Box from '@mui/material/Box';
 import clsx from 'clsx';
-import { ReactNode, forwardRef, useMemo, useState } from 'react';
+import { forwardRef, useMemo, useState } from 'react';
 
 import { useLoadOnScrollToBottom } from '../../hooks/InfiniteScroller';
+import { TimeScaleRow } from './models';
 
 export interface TimeScaleMeterClasses {
   /** Styles applied to the root element. */
@@ -49,12 +50,6 @@ declare module '@mui/material/styles/components' {
       variants?: ComponentsVariants['MuiTimeScaleMeter'];
     };
   }
-}
-
-export interface TimeScaleRow extends Partial<BoxProps> {
-  id: string;
-  label: ReactNode;
-  showLabel?: boolean;
 }
 
 export interface TimeScaleMeterProps extends Partial<StackProps> {
