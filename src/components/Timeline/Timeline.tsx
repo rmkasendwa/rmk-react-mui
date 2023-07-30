@@ -116,6 +116,10 @@ export interface TimelineElement extends Partial<BoxProps> {
   TooltipProps?: Partial<TooltipProps>;
 }
 
+/**
+ * Interface for the Timeline component props.
+ * @template RecordRow - The type of each row in the timeline (extends BaseDataRow by default).
+ */
 export interface TimelineProps<RecordRow extends BaseDataRow = any>
   extends Partial<
     Pick<
@@ -128,34 +132,87 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
       | 'onChangeMinWidth'
     >
   > {
+  /** The property from each row to be used as the label in the timeline. */
   rowLabelProperty?: keyof RecordRow;
+
+  /** A function to get the label for each row in the timeline. */
   getRowLabel?: (row: RecordRow) => ReactNode;
+
+  /** An array of rows to be displayed in the timeline. */
   rows: RecordRow[];
+
+  /** An array of row IDs for the rows that are expanded in the timeline. */
   expandedRows?: string[];
+
+  /** A boolean indicating whether all rows should be expanded in the timeline. */
   allRowsExpanded?: boolean;
+
+  /** A function to be called when the expanded rows in the timeline change. */
   onChangeExpanded?: (expandedRows: string[]) => void;
+
+  /** The property from each row to be used as the label for each timeline element. */
   timelineElementLabelProperty?: keyof RecordRow;
+
+  /** A function to get the label for each timeline element. */
   getTimelineElementLabel?: (timelineElement: RecordRow) => ReactNode;
+
+  /** A function to get custom tooltip props for each timeline element. */
   getTimelineElementTooltipProps?: (
     timelineElement: RecordRow
   ) => Partial<TooltipProps>;
+
+  /** A function to get custom props for each timeline element. */
   getTimelineElementProps?: (timelineElement: RecordRow) => BoxProps;
+
+  /** The property from each row to be used as the start date for each timeline element. */
   startDateProperty?: keyof RecordRow;
+
+  /** The property from each row to be used as the end date for each timeline element. */
   endDateProperty?: keyof RecordRow;
+
+  /** A boolean indicating whether to show the row labels column in the timeline. */
   showRowLabelsColumn?: boolean;
+
+  /** The header content for the row labels column. */
   rowLabelsColumnHeader?: ReactNode;
+
+  /** A function to get an array of timeline elements for each row. */
   getTimelineElements?: (row: RecordRow) => TimelineElement[];
+
+  /** An optional ID for the timeline component. */
   id?: string;
+
+  /** The minimum date allowed in the timeline. */
   minDate?: string | number | Date;
+
+  /** The maximum date allowed in the timeline. */
   maxDate?: string | number | Date;
+
+  /** A function to get an array of timeline dates from the rows. */
   getTimelineDates?: (rows: RecordRow[]) => (string | number | Date)[];
+
+  /** The selected time scale option for the timeline. */
   selectedTimeScale?: TimeScaleOption;
+
+  /** A boolean indicating whether to clear the search state when the component unmounts. */
   clearSearchStateOnUnmount?: boolean;
+
+  /** A function to get the default view reset function. */
   getDefaultViewResetFunction?: (resetToDefaultView: () => void) => void;
+
+  /** The width of the row labels column. */
   rowLabelsColumnWidth?: number;
+
+  /** A boolean indicating whether to show the toolbar in the timeline. */
   showToolBar?: boolean;
+
+  /** An array of supported time scale options. */
   supportedTimeScales?: TimeScaleOption[];
+
+  /** The variant for the "Today" marker in the timeline. */
   todayMarkerVariant?: 'default' | 'foregroundFullSpan';
+
+  /** Custom props for the TimeScaleMeter component. */
   TimeScaleMeterProps?: Partial<
     Omit<
       TimeScaleMeterProps,
@@ -166,36 +223,70 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
       | 'ref'
     >
   >;
+
+  /** Custom props for the TimeScaleTool component. */
   TimeScaleToolProps?: Partial<TimeScaleToolProps>;
+
+  /** Custom props for the ScrollTimelineTools component. */
   ScrollTimelineToolsProps?: Partial<ScrollTimelineToolsProps>;
+
+  /** A function to be called when the selected time scale option changes. */
   onChangeSelectedTimeScale?: (selectedTimeScale: TimeScaleOption) => void;
+
+  /** A function to be called when the timeline date bounds change. */
   onChangeTimelineDateBounds?: (dateBounds: {
     minDate: Date;
     maxDate: Date;
   }) => void;
+
+  /** A function to be called when the current date at the center of the timeline changes. */
   onChangeCurrentDateAtCenter?: (currentDateAtCenter: Date) => void;
+
+  /** A function to get the scroll-to-date function for the timeline. */
   getScrollToDateFunction?: (scrollToDate: ScrollToDateFunction) => void;
+
+  /** A function to get the select-time-scale function for the timeline. */
   getSelectTimeScaleFunction?: (
     selectTimeScale: SelectTimeScaleCallbackFunction
   ) => void;
+
+  /** A function to get the jump-to-optimal-time-scale function for the timeline. */
   getJumpToOptimalTimeScaleFunction?: (
     jumpToOptimalTimeScale: () => void
   ) => void;
+
+  /** A function to get the jump-to-previous-unit-time-scale function for the timeline. */
   getJumpToPreviousUnitTimeScaleFunction?: (
     jumpToPreviousUnitTimeScale: () => void
   ) => void;
+
+  /** A function to get the jump-to-next-unit-time-scale function for the timeline. */
   getJumpToNextUnitTimeScaleFunction?: (
     jumpToNextUnitTimeScale: () => void
   ) => void;
+
+  /** The default center for the timeline: either the center of the data set or the current date ("now"). */
   defaultTimelineCenter?: 'centerOfDataSet' | 'now';
+
+  /** Custom props for the TodayIndicator component. */
   TodayIndicatorProps?: Partial<BoxProps>;
+
+  /** An array of static rows with additional data, like timeline elements and label. */
   staticRows?: (BaseDataRow & {
     timelineElements: TimelineElement[];
     label?: ReactNode;
   })[];
+
+  /** The HTMLElement or null that is the ancestor of the scrolling element. */
   scrollingAncenstorElement?: HTMLElement | null;
+
+  /** The date format to be used in the timeline. */
   dateFormat?: string;
+
+  /** Custom props for the DateAtCursorMarker component. */
   DateAtCursorMarkerProps?: Partial<BoxProps>;
+
+  /** Custom props for the DateAtCursorMarkerLabel component. */
   DateAtCursorMarkerLabelProps?: Partial<Omit<TypographyProps, 'ref'>>;
 }
 
@@ -397,32 +488,40 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     scrollableElement: scrollingAncenstorElement,
   });
 
+  /**
+   * Memoized calculation of various timeline-related values and properties.
+   */
   const {
-    minCalendarDate,
-    maxCalendarDate,
-    timelineYears,
-    totalNumberOfDays,
-    totalNumberOfHours,
-    centerOfGravity,
-    allDates,
-    timelineDifferenceInDays,
-    timelineDifferenceInHours,
+    minCalendarDate, // The minimum date in the calendar (without time) based on the timeline data.
+    maxCalendarDate, // The maximum date in the calendar (without time) based on the timeline data.
+    timelineYears, // An array of years represented in the timeline data.
+    totalNumberOfDays, // The total number of days covered by the timeline.
+    totalNumberOfHours, // The total number of hours covered by the timeline.
+    centerOfGravity, // The calculated center of gravity date based on the timeline data.
+    allDates, // An array containing all the dates extracted from the timeline data.
+    timelineDifferenceInDays, // The difference in days between the maximum and minimum dates in the timeline data.
+    timelineDifferenceInHours, // The difference in hours between the maximum and minimum dates in the timeline data.
   } = useMemo(() => {
+    // A function to get all dates from the timeline data using the getTimelineDatesRef.current function.
     const allDates = (() => {
       if (getTimelineDatesRef.current) {
         const dates = getTimelineDatesRef.current(rows);
+        // Converting each date to the format without timezone offset.
         return dates.map((date) => {
           return createDateWithoutTimezoneOffset(date);
         });
       }
+      // If getTimelineDatesRef.current is not provided, manually extract dates from the rows.
       return rows.flatMap((row) => {
         const dates: Date[] = [];
         const startDateValue = (() => {
+          // Extracting the start date from each row based on the startDateProperty.
           if (startDateProperty) {
             return result(row, startDateProperty);
           }
         })();
         if (startDateValue) {
+          // Handling different date formats for the start date and adding to the dates array.
           if (startDateValue instanceof Date) {
             dates.push(startDateValue);
           } else {
@@ -435,11 +534,13 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           }
         }
         const endDateValue = (() => {
+          // Extracting the end date from each row based on the endDateProperty.
           if (endDateProperty) {
             return result(row, endDateProperty);
           }
         })();
         if (endDateValue) {
+          // Handling different date formats for the end date and adding to the dates array.
           if (endDateValue instanceof Date) {
             dates.push(endDateValue);
           } else {
@@ -455,6 +556,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       });
     })().sort((a, b) => a.getTime() - b.getTime());
 
+    // Calculate the minimum and maximum dates and calendar dates based on the extracted dates.
     const { maxDate, minDate, maxCalendarDate, minCalendarDate } = (() => {
       if (allDates.length > 0) {
         const minDate = minDateProp
@@ -474,6 +576,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           maxCalendarDate,
         };
       }
+      // If no dates are extracted, set the minimum and maximum dates to the current year.
       const thisYear = new Date().getFullYear();
       const minDate = new Date(thisYear, 0, 1, 0, 0);
       const maxDate = new Date(thisYear, 11, 31, 23, 59);
@@ -485,26 +588,31 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       };
     })();
 
+    // Calculate the years represented in the timeline data and add them to the timelineYears array.
     const minDateYear = minCalendarDate.getFullYear();
     const maxDateYear = maxCalendarDate.getFullYear();
     const timelineYears: number[] = [];
-
     for (let year = minDateYear; year <= maxDateYear; year++) {
       timelineYears.push(year);
     }
+
+    // Calculate totalNumberOfDays and totalNumberOfHours covered by the timeline.
     const totalNumberOfDays =
       differenceInDays(maxCalendarDate, minCalendarDate) + 1;
     const totalNumberOfHours =
       differenceInHours(maxCalendarDate, minCalendarDate) + 1;
 
+    // Calculate timelineDifferenceInDays and timelineDifferenceInHours.
     const timelineDifferenceInDays = differenceInDays(maxDate, minDate);
     const timelineDifferenceInHours = differenceInHours(maxDate, minDate);
 
+    // Calculate centerOfGravity based on the extracted dates.
     const centerOfGravity =
       allDates.length > 0
         ? addDays(minDate, Math.floor(timelineDifferenceInDays / 2))
         : new Date();
 
+    // Return all the calculated values as an object.
     return {
       minDate,
       maxDate,
@@ -527,14 +635,21 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     });
   }, [maxCalendarDate, minCalendarDate]);
 
+  /**
+   * Calculates the ideal optimal time scale for the timeline based on the timeline's data and viewport width.
+   */
   const idealOptimalTimeScale = ((): TimeScaleOption => {
+    // If there is only one date, the optimal time scale is set to 'Year'.
     if (allDates.length <= 1) {
       return 'Year';
     }
+
+    // Calculate the width of the timeline viewport.
     const timelineViewPortWidth =
       (scrollingAncenstorElement?.offsetWidth || window.innerWidth) -
       (shouldShowRowLabelsColumn ? rowLabelsColumnWidth : 0);
 
+    // Determine the ideal optimal time scale based on the timeline's data and viewport width.
     if (
       timelineDifferenceInHours <= 24 &&
       timelineDifferenceInHours * 64 <= timelineViewPortWidth
@@ -565,46 +680,61 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     if (timelineDifferenceInDays <= 365) {
       return 'Year';
     }
-    return '5 year';
+    return '5 year'; // If none of the conditions match, the ideal optimal time scale is set to '5 year'.
   })();
 
+  /**
+   * Calculates the final optimal time scale for the timeline based on the ideal optimal time scale and supported time scales.
+   */
   const optimalTimeScale = (() => {
+    // If the ideal optimal time scale is not supported, choose the nearest supported time scale.
     if (!supportedTimeScalesRef.current.includes(idealOptimalTimeScale)) {
-      if (
-        timeScaleOptions.indexOf(idealOptimalTimeScale) >
-        timeScaleOptions.indexOf(
-          supportedTimeScalesRef.current[
-            supportedTimeScalesRef.current.length - 1
-          ]
-        )
-      ) {
-        return supportedTimeScalesRef.current[
+      const lastSupportedTimeScale =
+        supportedTimeScalesRef.current[
           supportedTimeScalesRef.current.length - 1
         ];
+      if (
+        timeScaleOptions.indexOf(idealOptimalTimeScale) >
+        timeScaleOptions.indexOf(lastSupportedTimeScale)
+      ) {
+        return lastSupportedTimeScale;
       }
       return supportedTimeScalesRef.current[0];
     }
-    return idealOptimalTimeScale;
+    return idealOptimalTimeScale; // If the ideal optimal time scale is supported, use it as the final optimal time scale.
   })();
 
+  /**
+   * Function to scroll the timeline to a specific date.
+   *
+   * @param date - The date to which the timeline should be scrolled.
+   * @param scrollBehaviour - Optional. The scroll behavior to be used, defaults to 'smooth'.
+   */
   const scrollToDate: ScrollToDateFunction = useCallback(
     (date, scrollBehaviour: ScrollBehavior = 'smooth') => {
+      // Get the container element for the timeline meter container
       const timelineMeterContainerContainer =
         scrollingAncenstorElement?.querySelector(
           `.${classes.timelineMeterContainer}`
         ) as HTMLElement;
+
+      // Check if the necessary elements are available and the date is within the valid range
       if (
         scrollingAncenstorElement &&
         timelineMeterContainerContainer &&
         isAfter(date, minCalendarDate) &&
         isBefore(date, maxCalendarDate)
       ) {
+        // Calculate the percentage offset of the date within the timeline
         const offsetPercentage =
           differenceInHours(date, minCalendarDate) / totalNumberOfHours;
+
+        // Get the width of the scrolling ancestor element and the timeline meter container
         const { offsetWidth: scrollingAncenstorElementOffsetWidth } =
           scrollingAncenstorElement;
         const { offsetWidth } = timelineMeterContainerContainer;
 
+        // Scroll to the appropriate position within the timeline
         scrollingAncenstorElement.scrollTo({
           left:
             Math.round((offsetWidth - baseSpacingUnits) * offsetPercentage) +
@@ -618,6 +748,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         });
       }
     },
+    // Dependencies for the callback function
     [
       baseSpacingUnits,
       classes.timelineMeterContainer,
@@ -646,6 +777,11 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     return optimalTimeScale;
   })();
 
+  /**
+   * A function to adjust the visual elements related to the date cursor.
+   *
+   * @param timelineContainerElement - The timeline container element to calibrate the date cursor elements.
+   */
   const caliberateDateCursorElements = (
     timelineContainerElement: HTMLDivElement
   ) => {
