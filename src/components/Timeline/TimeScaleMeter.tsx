@@ -149,6 +149,7 @@ export const TimeScaleMeter = forwardRef<HTMLDivElement, TimeScaleMeterProps>(
           ),
         });
       },
+      revalidationKey: `${timeScaleLevel1TickWidth}-${timeScaleLevel2TickWidth}-${timeScaleLevel3TickWidth}`,
     });
 
     const [timeScaleLevel1Limit, timeScaleLevel2Limit, timeScaleLevel3Limit] =
