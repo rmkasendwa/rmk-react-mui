@@ -46,7 +46,7 @@ import { mergeRefs } from 'react-merge-refs';
 import * as Yup from 'yup';
 
 import { useReactRouterDOMSearchParams } from '../../hooks/ReactRouterDOM';
-import { useDragToScroll } from '../../hooks/Scrolling';
+import { DragToScrollProps, useDragToScroll } from '../../hooks/Scrolling';
 import { BaseDataRow, Table, TableColumn, TableProps } from '../Table';
 import Tooltip, { TooltipProps } from '../Tooltip';
 import {
@@ -288,6 +288,9 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
 
   /** Custom props for the DateAtCursorMarkerLabel component. */
   DateAtCursorMarkerLabelProps?: Partial<Omit<TypographyProps, 'ref'>>;
+
+  /** Custom props for the useDragToScroll hook. */
+  DragToScrollProps?: Partial<Pick<DragToScrollProps, 'enableDragToScroll'>>;
 }
 
 export function getTimelineUtilityClass(slot: string): string {
@@ -362,6 +365,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     dateFormat = 'MMM dd, yyyy hh:mm aa',
     DateAtCursorMarkerLabelProps = {},
     DateAtCursorMarkerProps = {},
+    DragToScrollProps = {},
     sx,
     ...rest
   } = omit(props, 'parentBackgroundColor', 'scrollingAncenstorElement');
@@ -386,16 +390,15 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     sx: TimeScaleMeterPropsSx,
     ...TimeScaleMeterPropsRest
   } = TimeScaleMeterProps;
-
   const { sx: TodayIndicatorPropsSx, ...TodayIndicatorPropsRest } =
     TodayIndicatorProps;
-
   const { sx: DateAtCursorMarkerPropsSx, ...DateAtCursorMarkerPropsRest } =
     DateAtCursorMarkerProps;
   const {
     sx: DateAtCursorMarkerLabelPropsSx,
     ...DateAtCursorMarkerLabelPropsRest
   } = DateAtCursorMarkerLabelProps;
+  const { ...DragToScrollPropsRest } = DragToScrollProps;
   //#endregion
 
   //#region Refs
@@ -415,7 +418,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     scrollingAncenstorElement = timelineContainerElement?.parentElement;
   }
 
-  const todayIndicatorRef = useRef<HTMLDivElement>(null);
+  const todayMarkerRef = useRef<HTMLDivElement>(null);
 
   const getDefaultViewResetFunctionRef = useRef(getDefaultViewResetFunction);
   getDefaultViewResetFunctionRef.current = getDefaultViewResetFunction;
@@ -486,6 +489,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   useDragToScroll({
     targetElement: timelineContainerElement,
     scrollableElement: scrollingAncenstorElement,
+    ...DragToScrollPropsRest,
   });
 
   /**
@@ -785,15 +789,25 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   const caliberateDateCursorElements = (
     timelineContainerElement: HTMLDivElement
   ) => {
+    // Get the today marker element from the timeline container
     const todayMarkerElement = timelineContainerElement.querySelector(
       `.${classes.todayMarker}`
     ) as HTMLElement;
+
+    // If the today marker element is present, perform calibration
     if (todayMarkerElement) {
+      // Get the height of the root container of the timeline
       const rootContainerHeight = timelineContainerElement.offsetHeight;
+
+      // Get the timeline meter container element from the timeline container
       const timelineMeterContainer = timelineContainerElement.querySelector(
         `.${classes.timelineMeterContainer}`
       ) as HTMLElement;
+
+      // Get the height of the timeline meter container
       const timelineContainerHeight = timelineMeterContainer?.offsetHeight;
+
+      // Calculate the height and set it to the today marker element based on the todayMarkerVariant
       const height = (() => {
         if (todayMarkerVariant === 'foregroundFullSpan') {
           return rootContainerHeight;
@@ -804,6 +818,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       })();
       todayMarkerElement.style.height = height ? `${height}px` : '';
 
+      // Calculate the top position and set it to the today marker element based on the todayMarkerVariant
       const top = (() => {
         if (
           todayMarkerVariant === 'foregroundFullSpan' &&
@@ -819,15 +834,21 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       todayMarkerElement.style.top = top ? `${top}px` : '';
     }
 
+    // Get the date at cursor marker element from the timeline container
     const dateAtCursorMarkerElement = timelineContainerElement.querySelector(
       `.${classes.dateAtCursorMarker}`
     ) as HTMLElement;
+
+    // If the date at cursor marker element is present, perform calibration
     if (dateAtCursorMarkerElement) {
+      // Get the height of the timeline meter container
       const timelineContainerHeight = (
         timelineContainerElement.querySelector(
           `.${classes.timelineMeterContainer}`
         ) as HTMLElement
       )?.offsetHeight;
+
+      // Set the height of the date at cursor marker element to match the timeline meter container height
       if (timelineContainerHeight) {
         dateAtCursorMarkerElement.style.height = `${timelineContainerHeight}px`;
       }
@@ -1255,29 +1276,41 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     }
   }, []);
 
+  /**
+   * useEffect hook to add a scroll event listener to the scrolling ancestor element.
+   * This hook calculates and updates the date at the start and center of the timeline,
+   * and updates the current date at the center reference accordingly.
+   */
   useEffect(() => {
     const parentElement = scrollingAncenstorElement;
     const timelineMeterContainer = scrollingAncenstorElement?.querySelector(
       `.${classes.timelineMeterContainer}`
     ) as HTMLElement;
+
+    // Check if the required elements are present before attaching the scroll event listener.
     if (parentElement && timelineMeterContainer) {
       const scrollEventCallback = () => {
         const { scrollLeft, offsetWidth: parentElementOffsetWidth } =
           parentElement;
         const { offsetWidth } = timelineMeterContainer;
+
+        // Calculate the date at the start of the timeline based on the current scroll position.
         const dateAtStart = addHours(
           minCalendarDate,
           totalNumberOfHours *
             ((scrollLeft - baseSpacingUnits) / (offsetWidth - baseSpacingUnits))
         );
-        if (todayIndicatorRef.current) {
+
+        // Hide or show the "today" markder based on whether it is before or after the date at the beginning of the timeline viewport.
+        if (todayMarkerRef.current) {
           if (isBefore(new Date(), dateAtStart)) {
-            todayIndicatorRef.current.style.display = 'none';
+            todayMarkerRef.current.style.display = 'none';
           } else {
-            todayIndicatorRef.current.style.display = '';
+            todayMarkerRef.current.style.display = '';
           }
         }
 
+        // Calculate the date at the center of the timeline based on the current scroll position.
         const dateAtCenter = addHours(
           minCalendarDate,
           totalNumberOfHours *
@@ -1290,13 +1323,23 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
               )) /
               (offsetWidth - baseSpacingUnits))
         );
+
+        // Update the mutable ref with the current date at the center.
         currentDateAtCenterRef.current = dateAtCenter;
+
+        // Call the provided callback function to notify about the updated date at the center.
         onChangeCurrentDateAtCenterRef.current?.(dateAtCenter);
+
+        // Calibrate date cursor elements in the timeline container if available.
         if (timelineContainerElement) {
           caliberateDateCursorElementsRef.current(timelineContainerElement);
         }
       };
+
+      // Attach the scroll event listener to the parentElement.
       parentElement.addEventListener('scroll', scrollEventCallback);
+
+      // Remove the scroll event listener when the component is unmounted.
       return () => {
         return parentElement.removeEventListener('scroll', scrollEventCallback);
       };
@@ -1312,6 +1355,11 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     totalNumberOfHours,
   ]);
 
+  /**
+   * Generates a timeline element node based on the provided start and end dates, label, and other props.
+   * @param TimelineElement - Object containing the properties for the timeline element.
+   * @returns ReactNode - The generated timeline element node.
+   */
   const getTimelineElementNode = ({
     startDate: startDateValue,
     endDate: endDateValue,
@@ -1322,13 +1370,18 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   }: TimelineElement) => {
     if (startDateValue) {
       const startDate = createDateWithoutTimezoneOffset(startDateValue as any);
+
+      // Check if the provided start date is a valid date.
       if (!isNaN(startDate.getTime())) {
         const endDate = (() => {
           if (endDateValue) {
             const endDate = createDateWithoutTimezoneOffset(
               endDateValue as any
             );
+
+            // Check if the provided end date is a valid date.
             if (!isNaN(endDate.getTime())) {
+              // If the end date is provided as a string without a time component, set the time to 23:59:59.999.
               if (
                 typeof endDateValue === 'string' &&
                 !dateStringHasTimeComponent(endDateValue)
@@ -1338,20 +1391,25 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
               return endDate;
             }
           }
+          // If no valid end date is provided, use the maximum calendar date as the end date.
           return maxCalendarDate;
         })();
+
+        // Check if the end date is after the start date.
         if (isAfter(endDate, startDate)) {
           const numberOfHours = differenceInHours(endDate, startDate);
           const offsetPercentage =
             differenceInHours(startDate, minCalendarDate) / totalNumberOfHours;
           const percentage = numberOfHours / totalNumberOfHours;
 
+          // Create the base label for the timeline element using the start and end dates.
           const baseTimelineElementLabel = `${formatDate(
             startDate,
             'MMM dd, yyyy'
           )} - ${formatDate(endDate, 'MMM dd, yyyy')}`;
 
-          const timelineElementLabel = ((): ReactNode => {
+          // Determine the final timeline element label to be displayed.
+          const timelineElementLabel = (() => {
             if (label) {
               return label;
             }
@@ -1364,6 +1422,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           } = TooltipProps;
 
           return (
+            // Render the timeline element wrapped with a tooltip.
             <Tooltip
               title={baseTimelineElementLabel}
               enterDelay={1000}
@@ -1649,7 +1708,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                 differenceInHours(today, minCalendarDate) / totalNumberOfHours;
               return (
                 <Box
-                  ref={todayIndicatorRef}
+                  ref={todayMarkerRef}
                   {...TodayIndicatorPropsRest}
                   className={clsx(
                     classes.todayMarker,
