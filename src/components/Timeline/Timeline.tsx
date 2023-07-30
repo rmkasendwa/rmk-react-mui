@@ -46,6 +46,7 @@ import { mergeRefs } from 'react-merge-refs';
 import * as Yup from 'yup';
 
 import { useReactRouterDOMSearchParams } from '../../hooks/ReactRouterDOM';
+import { useDragToScroll } from '../../hooks/Scrolling';
 import { BaseDataRow, Table, TableColumn, TableProps } from '../Table';
 import Tooltip, { TooltipProps } from '../Tooltip';
 import {
@@ -288,6 +289,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     })()
   );
 
+  //#region Sub component props
   const {
     variant: TimeScaleMeterPropsVariant = 'default',
     sx: TimeScaleMeterPropsSx,
@@ -303,7 +305,9 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     sx: DateAtCursorMarkerLabelPropsSx,
     ...DateAtCursorMarkerLabelPropsRest
   } = DateAtCursorMarkerLabelProps;
+  //#endregion
 
+  //#region Refs
   const isInitialMountRef = useRef(true);
   useEffect(() => {
     isInitialMountRef.current = false;
@@ -363,6 +367,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
 
   const supportedTimeScalesRef = useRef(supportedTimeScales);
   supportedTimeScalesRef.current = supportedTimeScales;
+  //#endregion
 
   const { palette, breakpoints } = useTheme();
   const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
@@ -374,7 +379,10 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     return !isSmallScreenSize && showRowLabelsColumn;
   })();
 
-  const { searchParams, setSearchParams } = useReactRouterDOMSearchParams({
+  const {
+    searchParams: { timeScale: searchParamsSelectedTimeScale },
+    setSearchParams,
+  } = useReactRouterDOMSearchParams({
     mode: 'json',
     spec: {
       ...timelineSearchParamValidationSpec,
@@ -384,7 +392,10 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     clearSearchStateOnUnmount,
   });
 
-  const { timeScale: searchParamsSelectedTimeScale } = searchParams;
+  useDragToScroll({
+    targetElement: timelineContainerElement,
+    scrollableElement: scrollingAncenstorElement,
+  });
 
   const {
     minCalendarDate,
