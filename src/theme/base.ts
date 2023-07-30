@@ -1,4 +1,5 @@
-import { Palette, alpha, createTheme, darken } from '@mui/material';
+import { loadingButtonClasses } from '@mui/lab';
+import { Palette, alpha, createTheme } from '@mui/material';
 import { grey } from '@mui/material/colors';
 
 // Mood Colors
@@ -14,9 +15,18 @@ export const getBaseTheme = (palette: Palette): any => {
     ...baseTheme,
     components: {
       MuiButton: {
+        defaultProps: {
+          size: 'small',
+        },
         styleOverrides: {
           root: {
             textTransform: 'none',
+            '&.Mui-disabled': {
+              color: alpha(palette.text.primary, 0.26),
+            },
+            [`.${loadingButtonClasses.loadingIndicator}`]: {
+              color: palette.text.disabled,
+            },
           },
           contained: {
             boxShadow: 'none',
@@ -24,10 +34,14 @@ export const getBaseTheme = (palette: Palette): any => {
               boxShadow: 'none',
             },
           },
+          sizeMedium: {
+            [baseTheme.breakpoints.down('sm')]: {
+              height: 32,
+            },
+          },
           containedInherit: {
-            backgroundColor: darken(palette.background.paper, 0.1),
-            '&:hover': {
-              backgroundColor: darken(palette.background.paper, 0.18),
+            '&,&:hover': {
+              backgroundColor: palette.divider,
               boxShadow: 'none',
             },
           },
@@ -52,6 +66,24 @@ export const getBaseTheme = (palette: Palette): any => {
       MuiTooltip: {
         defaultProps: {
           arrow: true,
+          PopperProps: {
+            sx: {
+              zIndex: 9999,
+            },
+          },
+          componentsProps: {
+            tooltip: {
+              sx: {
+                bgcolor: palette.text.primary,
+                color: palette.background.paper,
+              },
+            },
+            arrow: {
+              sx: {
+                color: palette.text.primary,
+              },
+            },
+          },
         },
       },
       MuiTab: {
@@ -188,6 +220,73 @@ export const getBaseTheme = (palette: Palette): any => {
           message: {
             fontSize: 12,
             lineHeight: '20px',
+          },
+        },
+      },
+      MuiAvatar: {
+        styleOverrides: {
+          root: {
+            width: 32,
+            height: 32,
+          },
+        },
+      },
+      MuiTableCell: {
+        styleOverrides: {
+          root: {
+            borderBottom: `1px solid ${alpha(palette.text.primary, 0.1)}`,
+          },
+        },
+      },
+      MuiAppBar: {
+        styleOverrides: {
+          root: {
+            backgroundColor: alpha(palette.background.paper, 0.7),
+            backdropFilter: `blur(20px)`,
+            color: palette.text.primary,
+          },
+        },
+      },
+      MuiSelect: {
+        styleOverrides: {
+          icon: {
+            color: palette.text.secondary,
+          },
+        },
+      },
+      MuiFieldValueDisplay: {
+        styleOverrides: {
+          label: {
+            fontWeight: 'normal',
+            opacity: 0.75,
+          },
+        },
+      },
+      MuiFormWrapper: {
+        defaultProps: {
+          SubmitButtonProps: {
+            color: 'primary',
+          },
+        },
+      },
+      MuiPermissionGuard: {
+        defaultProps: {
+          showFallbackComponent: false,
+        },
+      },
+      MuiDropdownOption: {
+        defaultProps: {
+          sx: {
+            fontWeight: 'normal',
+          },
+        },
+      },
+      MuiChip: {
+        defaultProps: {
+          sx: {
+            [`&.MuiChip-filled.MuiChip-colorDefault`]: {
+              bgcolor: alpha(palette.divider, 0.08),
+            },
           },
         },
       },

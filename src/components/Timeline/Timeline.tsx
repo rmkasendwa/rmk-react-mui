@@ -13,8 +13,10 @@ import {
   TypographyProps,
   alpha,
   unstable_composeClasses as composeClasses,
+  darken,
   generateUtilityClass,
   generateUtilityClasses,
+  lighten,
   tableBodyClasses,
   useMediaQuery,
   useTheme,
@@ -1727,37 +1729,45 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
               );
             }
           })()}
-          <Box
-            className={clsx(classes.dateAtCursorMarker)}
-            {...DateAtCursorMarkerPropsRest}
-            sx={{
-              width: 2,
-              bgcolor: palette.text.primary,
-              ...DateAtCursorMarkerPropsSx,
-              bottom: 0,
-              position: 'absolute',
-            }}
-          >
-            <Typography
-              variant="body2"
-              component="div"
-              {...DateAtCursorMarkerLabelPropsRest}
-              className={clsx(classes.dateAtCursorMarkerLabel)}
-              noWrap
-              sx={{
-                py: 0.5,
-                px: 1,
-                bgcolor: palette.text.primary,
-                color: palette.background.paper,
-                borderBottomRightRadius: '4px',
-                fontSize: 12,
-                top: 0,
-                left: '100%',
-                ...DateAtCursorMarkerLabelPropsSx,
-                position: 'absolute',
-              }}
-            ></Typography>
-          </Box>
+          {(() => {
+            const bgcolor = (palette.mode === 'light' ? lighten : darken)(
+              palette.text.primary,
+              0.5
+            );
+            return (
+              <Box
+                className={clsx(classes.dateAtCursorMarker)}
+                {...DateAtCursorMarkerPropsRest}
+                sx={{
+                  width: '1px',
+                  bgcolor,
+                  ...DateAtCursorMarkerPropsSx,
+                  bottom: 0,
+                  position: 'absolute',
+                }}
+              >
+                <Typography
+                  variant="body2"
+                  component="div"
+                  {...DateAtCursorMarkerLabelPropsRest}
+                  className={clsx(classes.dateAtCursorMarkerLabel)}
+                  noWrap
+                  sx={{
+                    py: 0.5,
+                    px: 1,
+                    bgcolor,
+                    color: palette.background.paper,
+                    borderBottomRightRadius: '4px',
+                    fontSize: 12,
+                    top: 0,
+                    left: '100%',
+                    ...DateAtCursorMarkerLabelPropsSx,
+                    position: 'absolute',
+                  }}
+                ></Typography>
+              </Box>
+            );
+          })()}
         </Box>
       ),
       getColumnValue: (row) => {
