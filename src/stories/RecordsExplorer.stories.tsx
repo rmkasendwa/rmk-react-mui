@@ -39,6 +39,9 @@ const baseArgs = {
     {
       type: 'List',
       columns: tableColumns,
+      onClickRow: (contact) => {
+        console.log({ contact });
+      },
       ...contactTableProps,
     },
     {
@@ -52,6 +55,9 @@ const baseArgs = {
             endDate: leftAt,
           },
         ];
+      },
+      onClickRow: (contact) => {
+        console.log({ contact });
       },
       mergeTools: true,
       // staticRows: [

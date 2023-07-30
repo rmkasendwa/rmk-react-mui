@@ -617,9 +617,7 @@ export const TableBodyRow = <T extends BaseDataRow>(
               noWrap,
               getToolTipWrappedColumnNode,
             }}
-            {...{
-              opaque: opaque ?? rowPropsOpaque,
-            }}
+            opaque={opaque ?? rowPropsOpaque}
             {...column}
             onClick={() => {
               if (
