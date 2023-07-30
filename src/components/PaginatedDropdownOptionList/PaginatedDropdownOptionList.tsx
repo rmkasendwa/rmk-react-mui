@@ -8,7 +8,6 @@ import {
   ComponentsVariants,
   Divider,
   Grid,
-  Tooltip,
   alpha,
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
@@ -47,6 +46,7 @@ import InfiniteScrollBox, {
   InfiniteScrollBoxProps,
 } from '../InfiniteScrollBox';
 import SearchField, { SearchFieldProps } from '../SearchField';
+import Tooltip from '../Tooltip';
 import DropdownOption, { DropdownOptionVariant } from './DropdownOption';
 
 export interface DropdownOption<Entity = any>

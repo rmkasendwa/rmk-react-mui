@@ -6,13 +6,13 @@ import {
   Button,
   ButtonGroup,
   Stack,
-  Tooltip,
   Typography,
   useMediaQuery,
   useTheme,
 } from '@mui/material';
 
 import { ElementTool } from '../../SearchSyncToolbar';
+import Tooltip from '../../Tooltip';
 import { JumpToDateToolProps, useJumpToDateTool } from './JumpToDateTool';
 
 export interface ScrollTimelineToolsProps {

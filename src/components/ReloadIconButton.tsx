@@ -13,9 +13,10 @@ import Box, { BoxProps } from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
 import Grid from '@mui/material/Grid';
 import IconButton, { IconButtonProps } from '@mui/material/IconButton';
-import Tooltip from '@mui/material/Tooltip';
 import clsx from 'clsx';
 import { forwardRef } from 'react';
+
+import Tooltip from './Tooltip';
 
 export interface ReloadIconButtonClasses {
   /** Styles applied to the root element. */

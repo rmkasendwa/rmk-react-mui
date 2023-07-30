@@ -13,7 +13,6 @@ import {
   Grid,
   IconButton,
   Slide,
-  Tooltip,
   Typography,
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
@@ -66,6 +65,7 @@ import SearchSyncToolbar, {
   Tool,
 } from './SearchSyncToolbar';
 import Table, { BaseDataRow, TableProps } from './Table';
+import Tooltip from './Tooltip';
 
 export interface TableCrudClasses {
   /** Styles applied to the root element. */

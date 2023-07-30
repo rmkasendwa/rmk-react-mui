@@ -12,7 +12,6 @@ import {
   DividerProps,
   IconButton,
   IconButtonProps,
-  Tooltip,
   Typography,
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
@@ -43,6 +42,7 @@ import EllipsisMenuIconButton from './EllipsisMenuIconButton';
 import LoadingTypography, { LoadingTypographyProps } from './LoadingTypography';
 import ReloadIconButton, { ReloadIconButtonProps } from './ReloadIconButton';
 import SearchField, { SearchFieldProps } from './SearchField';
+import Tooltip from './Tooltip';
 
 export interface SearchSyncToolbarClasses {
   /** Styles applied to the root element. */

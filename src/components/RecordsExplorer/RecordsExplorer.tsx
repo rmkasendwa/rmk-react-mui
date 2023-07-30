@@ -15,7 +15,6 @@ import {
   Grid,
   Paper,
   PaperProps,
-  Tooltip,
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
   generateUtilityClasses,
@@ -106,6 +105,7 @@ import Timeline, {
   useScrollTimelineTools,
   useTimeScaleTool,
 } from '../Timeline';
+import Tooltip from '../Tooltip';
 import { useFilterTool } from './hooks/FilterTool';
 import { useGroupTool } from './hooks/GroupTool';
 import { useSortTool } from './hooks/SortTool';

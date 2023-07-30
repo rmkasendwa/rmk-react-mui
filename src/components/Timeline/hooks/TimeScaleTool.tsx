@@ -1,7 +1,6 @@
 import {
   Button,
   Stack,
-  Tooltip,
   Typography,
   outlinedInputClasses,
   useMediaQuery,
@@ -14,6 +13,7 @@ import DataDropdownField, {
   dataDropdownFieldClasses,
 } from '../../InputFields/DataDropdownField';
 import { ElementTool } from '../../SearchSyncToolbar';
+import Tooltip from '../../Tooltip';
 import { TimeScaleOption, timeScaleOptions } from '../models';
 
 export type SelectTimeScaleCallbackFunction = (

@@ -69,6 +69,8 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(
       children,
       followCursor = false,
       enterAtCursorPosition = true,
+      enterDelay = 1000,
+      enterNextDelay = 500,
       ...rest
     } = props;
 
@@ -104,8 +106,8 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(
       <MuiTooltip
         ref={ref}
         {...rest}
+        {...{ followCursor, enterDelay, enterNextDelay }}
         className={clsx(classes.root)}
-        followCursor={followCursor}
         PopperProps={{
           ...(() => {
             if (enterAtCursorPosition && !followCursor) {

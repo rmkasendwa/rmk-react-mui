@@ -8,7 +8,6 @@ import {
   ComponentsVariants,
   IconButton,
   Stack,
-  Tooltip,
   Typography,
   alpha,
   chipClasses,
@@ -56,6 +55,7 @@ import PaginatedDropdownOptionList, {
 } from '../PaginatedDropdownOptionList';
 import { getDropdownOptionLabel } from '../PaginatedDropdownOptionList/DropdownOption';
 import RetryErrorMessage from '../RetryErrorMessage';
+import Tooltip from '../Tooltip';
 import TextField, { TextFieldProps } from './TextField';
 
 export interface DataDropdownFieldClasses {

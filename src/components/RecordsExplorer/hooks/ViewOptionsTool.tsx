@@ -10,7 +10,6 @@ import {
   Grow,
   Popper,
   Stack,
-  Tooltip,
   Typography,
   useMediaQuery,
   useTheme,
@@ -23,6 +22,7 @@ import PaginatedDropdownOptionList, {
   DropdownOption,
 } from '../../PaginatedDropdownOptionList';
 import { Tool } from '../../SearchSyncToolbar';
+import Tooltip from '../../Tooltip';
 
 /******* View Options Tool ********************/
 

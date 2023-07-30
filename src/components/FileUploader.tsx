@@ -17,7 +17,6 @@ import ListItem from '@mui/material/ListItem';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import ListItemText from '@mui/material/ListItemText';
 import useTheme from '@mui/material/styles/useTheme';
-import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import { alpha } from '@mui/system/colorManipulator';
 import { Fragment, forwardRef, useEffect, useState } from 'react';
@@ -31,6 +30,7 @@ import {
 import { flickerElement } from '../utils/page';
 import FileIcon from './FileIcon';
 import { TextFieldProps } from './InputFields/TextField';
+import Tooltip from './Tooltip';
 
 export interface FileUploaderProps
   extends Pick<

@@ -1,7 +1,7 @@
 import 'flag-icons/css/flag-icons.min.css';
 
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { Tooltip, useTheme } from '@mui/material';
+import { useTheme } from '@mui/material';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import ClickAwayListener from '@mui/material/ClickAwayListener';
@@ -28,6 +28,7 @@ import FieldValueDisplay from '../../FieldValueDisplay';
 import PaginatedDropdownOptionList, {
   DropdownOption,
 } from '../../PaginatedDropdownOptionList';
+import Tooltip from '../../Tooltip';
 import TextField, { TextFieldProps } from '../TextField';
 import { Country, countries } from './countries';
 

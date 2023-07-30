@@ -2,7 +2,6 @@ import {
   ComponentsOverrides,
   ComponentsProps,
   ComponentsVariants,
-  Tooltip,
   alpha,
   unstable_composeClasses as composeClasses,
   darken,
@@ -14,6 +13,8 @@ import Chip, { ChipProps } from '@mui/material/Chip';
 import useTheme from '@mui/material/styles/useTheme';
 import clsx from 'clsx';
 import { ReactElement, Ref, forwardRef } from 'react';
+
+import Tooltip from './Tooltip';
 
 export interface EnumValueChipClasses {
   /** Styles applied to the root element. */
