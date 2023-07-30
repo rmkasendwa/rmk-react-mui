@@ -44,7 +44,9 @@ declare module '@mui/material/styles/components' {
   }
 }
 
-export interface TooltipProps extends Omit<MuiTooltipProps, 'ref'> {}
+export interface TooltipProps extends Omit<MuiTooltipProps, 'ref'> {
+  enterAtCursorPosition?: boolean;
+}
 
 export function getTooltipUtilityClass(slot: string): string {
   return generateUtilityClass('MuiTooltipExtended', slot);
@@ -62,7 +64,13 @@ const slots = {
 export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(
   function Tooltip(inProps, ref) {
     const props = useThemeProps({ props: inProps, name: 'MuiTooltipExtended' });
-    const { className, children, ...rest } = props;
+    const {
+      className,
+      children,
+      followCursor = false,
+      enterAtCursorPosition = true,
+      ...rest
+    } = props;
 
     const classes = composeClasses(
       slots,
@@ -97,13 +105,20 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(
         ref={ref}
         {...rest}
         className={clsx(classes.root)}
+        followCursor={followCursor}
         PopperProps={{
-          anchorEl: {
-            getBoundingClientRect: () => {
-              const { x, y } = mouseCoordinatesRef.current;
-              return new DOMRect(x, y, 0, 0);
-            },
-          },
+          ...(() => {
+            if (enterAtCursorPosition && !followCursor) {
+              return {
+                anchorEl: {
+                  getBoundingClientRect: () => {
+                    const { x, y } = mouseCoordinatesRef.current;
+                    return new DOMRect(x, y, 0, 0);
+                  },
+                },
+              };
+            }
+          })(),
           ...rest.PopperProps,
         }}
         onOpen={(...args) => {

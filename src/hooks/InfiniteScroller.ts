@@ -256,9 +256,8 @@ export const useLoadOnScrollToBottom = ({
         }
       };
       element.addEventListener('scroll', scrollEventCallback);
-      const scrollCallbackTimeout = setTimeout(() => scrollEventCallback(), 0);
+      scrollEventCallback();
       return () => {
-        clearTimeout(scrollCallbackTimeout);
         element.removeEventListener('scroll', scrollEventCallback);
       };
     }
