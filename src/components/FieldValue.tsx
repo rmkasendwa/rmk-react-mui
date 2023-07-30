@@ -10,7 +10,6 @@ import {
   Grid,
   GridProps,
   IconButton,
-  Tooltip,
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
   generateUtilityClasses,
@@ -42,6 +41,7 @@ import FormikPercentageInputField from './FormikInputFields/FormikPercentageInpu
 import FormikPhoneNumberInputField from './FormikInputFields/FormikPhoneNumberInputField';
 import FormikTextField from './FormikInputFields/FormikTextField';
 import LoadingTypography, { LoadingTypographyProps } from './LoadingTypography';
+import Tooltip from './Tooltip';
 
 export interface FieldValueClasses {
   /** Styles applied to the root element. */

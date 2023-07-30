@@ -16,7 +16,6 @@ import {
 } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import useTheme from '@mui/material/styles/useTheme';
-import Tooltip from '@mui/material/Tooltip';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import clsx from 'clsx';
 import formatDate from 'date-fns/format';
@@ -35,6 +34,7 @@ import { isDescendant } from '../../utils/html';
 import DatePicker, { DatePickerProps } from '../DatePicker';
 import FieldValueDisplay from '../FieldValueDisplay';
 import ModalPopup from '../ModalPopup';
+import Tooltip from '../Tooltip';
 import TextField, { TextFieldProps } from './TextField';
 
 export interface DateInputFieldClasses {

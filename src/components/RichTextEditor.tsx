@@ -25,7 +25,6 @@ import {
   FormHelperText,
   Grid,
   TextFieldProps,
-  Tooltip,
   alpha,
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
@@ -69,6 +68,7 @@ import RedoIcon from './Icons/RedoIcon';
 import UndoIcon from './Icons/UndoIcon';
 import ModalForm from './ModalForm';
 import RenderIfVisible from './RenderIfVisible';
+import Tooltip from './Tooltip';
 
 const imagePlugin = createImagePlugin();
 const plugins = [imagePlugin];

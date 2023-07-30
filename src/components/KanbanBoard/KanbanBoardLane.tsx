@@ -13,7 +13,6 @@ import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
 import Grid from '@mui/material/Grid';
 import useTheme from '@mui/material/styles/useTheme';
-import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import { alpha, darken } from '@mui/system/colorManipulator';
 import clsx from 'clsx';
@@ -25,6 +24,7 @@ import {
 
 import EllipsisMenuIconButton from '../EllipsisMenuIconButton';
 import RenderIfVisible from '../RenderIfVisible';
+import Tooltip from '../Tooltip';
 import KanbanBoardCard from './KanbanBoardCard';
 import { useKanbanBoardContext } from './KanbanBoardContext';
 import { Lane } from './models';

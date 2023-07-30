@@ -5,7 +5,6 @@ import {
   ComponentsOverrides,
   ComponentsProps,
   ComponentsVariants,
-  Tooltip,
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
   generateUtilityClasses,
@@ -19,6 +18,7 @@ import formatRelative from 'date-fns/formatRelative';
 import { forwardRef, useEffect, useState } from 'react';
 
 import LoadingTypography, { LoadingTypographyProps } from './LoadingTypography';
+import Tooltip from './Tooltip';
 
 export interface TimeStampDisplayClasses {
   /** Styles applied to the root element. */

@@ -11,13 +11,13 @@ import {
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import useTheme from '@mui/material/styles/useTheme';
-import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import { alpha } from '@mui/system/colorManipulator';
 import clsx from 'clsx';
 import { forwardRef } from 'react';
 
 import EllipsisMenuIconButton from '../EllipsisMenuIconButton';
+import Tooltip from '../Tooltip';
 import { useKanbanBoardContext } from './KanbanBoardContext';
 import { Card } from './models';
 

@@ -1,12 +1,12 @@
 import { formatBytes } from '@infinite-debugger/rmk-utils/bytes';
 import CloseIcon from '@mui/icons-material/Close';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import { Tooltip } from '@mui/material';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import { forwardRef, useEffect, useRef, useState } from 'react';
 
+import Tooltip from '../Tooltip';
 import TextField, { TextFieldProps } from './TextField';
 
 export interface FileInputFieldProps extends Omit<TextFieldProps, 'value'> {

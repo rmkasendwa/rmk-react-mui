@@ -16,7 +16,6 @@ import Skeleton from '@mui/material/Skeleton';
 import MuiTextField, {
   TextFieldProps as MuiTextFieldProps,
 } from '@mui/material/TextField';
-import Tooltip from '@mui/material/Tooltip';
 import clsx from 'clsx';
 import {
   ReactNode,
@@ -32,6 +31,7 @@ import ErrorSkeleton from '../ErrorSkeleton';
 import FieldValueDisplay, {
   FieldValueDisplayProps,
 } from '../FieldValueDisplay';
+import Tooltip from '../Tooltip';
 
 export interface TextFieldClasses {
   /** Styles applied to the root element. */

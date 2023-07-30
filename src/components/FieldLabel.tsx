@@ -5,7 +5,6 @@ import {
   ComponentsVariants,
   Grid,
   GridProps,
-  Tooltip,
   Typography,
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
@@ -17,6 +16,7 @@ import clsx from 'clsx';
 import { ReactNode, forwardRef } from 'react';
 
 import LoadingTypography, { LoadingTypographyProps } from './LoadingTypography';
+import Tooltip from './Tooltip';
 
 export interface FieldLabelClasses {
   /** Styles applied to the root element. */

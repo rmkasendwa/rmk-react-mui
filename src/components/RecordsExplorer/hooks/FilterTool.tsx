@@ -11,7 +11,6 @@ import {
   TableBody,
   TableCell,
   TableRow,
-  Tooltip,
   Typography,
   tableCellClasses,
 } from '@mui/material';
@@ -27,6 +26,7 @@ import NumberInputField from '../../InputFields/NumberInputField';
 import TextField from '../../InputFields/TextField';
 import { DropdownOption } from '../../PaginatedDropdownOptionList';
 import { BaseDataRow } from '../../Table';
+import Tooltip from '../../Tooltip';
 import {
   ConditionGroup,
   Conjunction,

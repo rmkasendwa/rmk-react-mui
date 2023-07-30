@@ -21,7 +21,7 @@ import TableRow, {
 } from '@mui/material/TableRow';
 import clsx from 'clsx';
 import { result } from 'lodash';
-import { Fragment, useRef } from 'react';
+import { useRef } from 'react';
 
 import {
   BaseDataRow,
@@ -241,7 +241,7 @@ export const TableBodyRow = <T extends BaseDataRow>(
         return holdsPriorityInformation;
       }
     );
-    const [highestPriorityColumn, ...restColumns] = importantColumns;
+    const [highestPriorityColumn] = importantColumns;
     const {
       id,
       sx,
@@ -333,113 +333,34 @@ export const TableBodyRow = <T extends BaseDataRow>(
             minWidth: 0,
           }}
         >
-          <Stack
-            sx={{
-              gap: 1,
+          <TableBodyColumn
+            key={String(id)}
+            {...{
+              column,
+              row,
+              enableSmallScreenOptimization,
+              getToolTipWrappedColumnNode,
             }}
-          >
-            <TableBodyColumn
-              key={String(id)}
-              {...{
-                column,
-                row,
-                enableSmallScreenOptimization,
-                getToolTipWrappedColumnNode,
-              }}
-              {...{
-                opaque: opaque ?? rowPropsOpaque,
-              }}
-              {...column}
-              onClick={() => {
-                if (
-                  isClickable &&
-                  onClickRow &&
-                  shouldPropagateClickToParentRowClickEvent
-                ) {
-                  onClickRow(row);
-                }
-              }}
-              columnTypographyProps={{
-                noWrap,
-                sx: {
-                  fontSize: 16,
-                },
-              }}
-            />
-            {(() => {
-              if (!isGroupHeader && restColumns.length > 0) {
-                return (
-                  <Grid
-                    container
-                    sx={{
-                      gap: 1,
-                      flexWrap: 'nowrap',
-                      overflow: 'hidden',
-                    }}
-                  >
-                    {restColumns.slice(0, 3).map((column, index) => {
-                      const {
-                        id,
-                        sx,
-                        decimalPlaces = rowDecimalPlaces,
-                        textTransform = rowTextTransform,
-                        defaultColumnValue = rowDefaultColumnValue,
-                        editable = rowEditable,
-                        dateFormat = defaultDateFormat,
-                        dateTimeFormat = defaultDateTimeFormat,
-                        defaultCountryCode = rowDefaultCountryCode,
-                        noWrap = rowNoWrap,
-                      } = column;
-                      return (
-                        <Fragment key={index}>
-                          {index > 0 ? (
-                            <Grid
-                              item
-                              sx={{
-                                flex: 'none',
-                              }}
-                            >
-                              &bull;
-                            </Grid>
-                          ) : null}
-                          <Grid
-                            item
-                            sx={{
-                              flex: 'none',
-                            }}
-                          >
-                            <TableBodyColumn
-                              key={String(id)}
-                              {...({} as any)}
-                              {...{
-                                column,
-                                row,
-                                columnTypographyProps,
-                                decimalPlaces,
-                                textTransform,
-                                defaultColumnValue,
-                                editable,
-                                dateFormat,
-                                dateTimeFormat,
-                                defaultCountryCode,
-                                noWrap,
-                                sx,
-                                enableSmallScreenOptimization,
-                              }}
-                              {...{
-                                opaque: opaque ?? rowPropsOpaque,
-                              }}
-                              {...column}
-                            />
-                          </Grid>
-                        </Fragment>
-                      );
-                    })}
-                  </Grid>
-                );
+            {...{
+              opaque: opaque ?? rowPropsOpaque,
+            }}
+            {...column}
+            onClick={() => {
+              if (
+                isClickable &&
+                onClickRow &&
+                shouldPropagateClickToParentRowClickEvent
+              ) {
+                onClickRow(row);
               }
-            })()}
-          </Stack>
+            }}
+            columnTypographyProps={{
+              noWrap,
+              sx: {
+                fontSize: 16,
+              },
+            }}
+          />
         </Grid>
         {(() => {
           if (ellipsisMenuToolColumn) {

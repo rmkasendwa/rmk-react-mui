@@ -11,7 +11,6 @@ import {
   Grid,
   Grow,
   Popper,
-  Tooltip,
   Typography,
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
@@ -33,6 +32,7 @@ import PaginatedDropdownOptionList, {
   DropdownOption,
 } from './PaginatedDropdownOptionList';
 import ProfileGravatar, { ProfileGravatarProps } from './ProfileGravatar';
+import Tooltip from './Tooltip';
 
 export interface EmailAddressSelectorClasses {
   /** Styles applied to the root element. */
