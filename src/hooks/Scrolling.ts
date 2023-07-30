@@ -1,12 +1,35 @@
 import { useEffect, useRef } from 'react';
 
+/**
+ * Represents the properties for the useDragToScroll hook.
+ */
 export interface DragToScrollProps {
+  /**
+   * The element to which the drag-to-scroll functionality is applied.
+   */
   targetElement?: HTMLElement | null;
+
+  /**
+   * The scrollable element where the content should be scrolled.
+   * If not provided, the targetElement will be used as the scrollable element.
+   */
   scrollableElement?: HTMLElement | null;
+
+  /**
+   * Flag to enable or disable the drag-to-scroll functionality.
+   * If set to false, the scrolling behavior will be disabled.
+   */
+  enableDragToScroll?: boolean;
 }
+
+/**
+ * Custom hook to enable drag-to-scroll functionality for an element.
+ * @param {DragToScrollProps} props - The properties for the useDragToScroll hook.
+ */
 export const useDragToScroll = ({
   targetElement,
   scrollableElement = targetElement,
+  enableDragToScroll = true,
 }: DragToScrollProps) => {
   //#region Refs
   const momentumIdRef = useRef<number>();
@@ -23,6 +46,7 @@ export const useDragToScroll = ({
   //#endregion
 
   //#region Utility functions
+  // Function to start tracking momentum when scrolling
   const beginMomentumTracking = () => {
     cancelMomentumTracking();
     momentumIdRef.current = requestAnimationFrame(momentumLoop);
@@ -30,12 +54,14 @@ export const useDragToScroll = ({
   const beginMomentumTrackingRef = useRef(beginMomentumTracking);
   beginMomentumTrackingRef.current = beginMomentumTracking;
 
+  // Function to cancel the momentum tracking animation
   const cancelMomentumTracking = () => {
     momentumIdRef.current && cancelAnimationFrame(momentumIdRef.current);
   };
   const cancelMomentumTrackingRef = useRef(cancelMomentumTracking);
   cancelMomentumTrackingRef.current = cancelMomentumTracking;
 
+  // Function to handle the momentum animation loop
   const momentumLoop = () => {
     if (scrollableElement) {
       scrollableElement.scrollLeft += velXRef.current;
@@ -52,8 +78,11 @@ export const useDragToScroll = ({
   //#endregion
 
   useEffect(() => {
-    if (targetElement && scrollableElement) {
+    if (enableDragToScroll && targetElement && scrollableElement) {
+      // Function to handle the mouse down event
       const mouseDownEventCallback = (event: MouseEvent) => {
+        window.removeEventListener('mouseup', mouseUpEventCallback);
+        window.addEventListener('mouseup', mouseUpEventCallback);
         isDownRef.current = true;
 
         //#region Compute X
@@ -68,13 +97,21 @@ export const useDragToScroll = ({
 
         cancelMomentumTracking();
       };
+
+      // Function to handle the mouse leave event
       const mouseLeaveEventCallback = () => {
+        window.removeEventListener('mouseup', mouseUpEventCallback);
         isDownRef.current = false;
       };
+
+      // Function to handle the mouse up event
       const mouseUpEventCallback = () => {
+        window.removeEventListener('mouseup', mouseUpEventCallback);
         isDownRef.current = false;
         beginMomentumTrackingRef.current();
       };
+
+      // Function to handle the mouse move event
       const mouseMoveEventCallback = (event: MouseEvent) => {
         if (!isDownRef.current) return;
         event.preventDefault();
@@ -99,11 +136,12 @@ export const useDragToScroll = ({
         //#endregion
       };
 
+      // Add event listeners
       targetElement.addEventListener('mousedown', mouseDownEventCallback);
-      window.addEventListener('mouseup', mouseUpEventCallback);
       window.addEventListener('mouseleave', mouseLeaveEventCallback);
       window.addEventListener('mousemove', mouseMoveEventCallback);
 
+      // Clean up event listeners when the component is unmounted
       return () => {
         targetElement.removeEventListener('mousedown', mouseDownEventCallback);
         window.removeEventListener('mouseup', mouseUpEventCallback);
@@ -111,5 +149,5 @@ export const useDragToScroll = ({
         window.removeEventListener('mousemove', mouseMoveEventCallback);
       };
     }
-  }, [scrollableElement, targetElement]);
+  }, [enableDragToScroll, scrollableElement, targetElement]);
 };

@@ -1121,15 +1121,27 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
 
   useEffect(() => {
     const parentElement = scrollingAncenstorElement;
-    const timelineMeterContainerContainer =
-      scrollingAncenstorElement?.querySelector(
-        `.${classes.timelineMeterContainer}`
-      ) as HTMLElement;
-    if (parentElement && timelineMeterContainerContainer) {
+    const timelineMeterContainer = scrollingAncenstorElement?.querySelector(
+      `.${classes.timelineMeterContainer}`
+    ) as HTMLElement;
+    if (parentElement && timelineMeterContainer) {
       const scrollEventCallback = () => {
         const { scrollLeft, offsetWidth: parentElementOffsetWidth } =
           parentElement;
-        const { offsetWidth } = timelineMeterContainerContainer;
+        const { offsetWidth } = timelineMeterContainer;
+        const dateAtStart = addHours(
+          minCalendarDate,
+          totalNumberOfHours *
+            ((scrollLeft - baseSpacingUnits) / (offsetWidth - baseSpacingUnits))
+        );
+        if (todayIndicatorRef.current) {
+          if (isBefore(new Date(), dateAtStart)) {
+            todayIndicatorRef.current.style.display = 'none';
+          } else {
+            todayIndicatorRef.current.style.display = '';
+          }
+        }
+
         const dateAtCenter = addHours(
           minCalendarDate,
           totalNumberOfHours *
