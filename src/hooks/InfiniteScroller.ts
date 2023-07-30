@@ -45,8 +45,14 @@ export const useLoadOnScrollToBottom = ({
   keyboardFocusElement: keyboardFocusElementProp,
   orientation = 'vertical',
 }: UseLoadOnScrollToBottomOptions) => {
-  // Refs
+  //#region Refs
   const isInitialMountRef = useRef(true);
+  useEffect(() => {
+    isInitialMountRef.current = false;
+    return () => {
+      isInitialMountRef.current = true;
+    };
+  }, []);
 
   const loadRef = useRef(load);
   loadRef.current = load;
@@ -62,6 +68,7 @@ export const useLoadOnScrollToBottom = ({
 
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
+  //#endregion
 
   const limit = (() => {
     return (
@@ -237,11 +244,10 @@ export const useLoadOnScrollToBottom = ({
             }
             break;
         }
-        onChangeScrollLengthRef.current &&
-          onChangeScrollLengthRef.current({
-            scrollTop,
-            scrollLeft,
-          });
+        onChangeScrollLengthRef.current?.({
+          scrollTop,
+          scrollLeft,
+        });
         if (dataElementLength) {
           setOffset(Math.floor(scrollTop / dataElementLength));
         }
@@ -261,13 +267,6 @@ export const useLoadOnScrollToBottom = ({
     orientation,
     shouldLoadOnScroll,
   ]);
-
-  useEffect(() => {
-    isInitialMountRef.current = false;
-    return () => {
-      isInitialMountRef.current = true;
-    };
-  }, []);
 
   const displayableDataSet = (() => {
     if (dataElements) {

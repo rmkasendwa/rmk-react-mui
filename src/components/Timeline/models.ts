@@ -55,8 +55,6 @@ export const shortMonthLabels = [
 
 export const quarterLabels = ['Q1', 'Q2', 'Q3', 'Q4'] as const;
 
-export const baseTimeScaleWidth = 120;
-
 export interface TimeScaleRow extends Partial<BoxProps> {
   id: string;
   label: ReactNode;

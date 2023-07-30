@@ -133,7 +133,7 @@ export const TimeScaleMeter = forwardRef<HTMLDivElement, TimeScaleMeterProps>(
       timeScaleLevel3Offset: 0,
     });
 
-    const {} = useLoadOnScrollToBottom({
+    useLoadOnScrollToBottom({
       element: scrollingElement,
       onChangeScrollLength({ scrollLeft }) {
         const scrollOffset = Math.max(scrollLeft - leftOffset, 0);
