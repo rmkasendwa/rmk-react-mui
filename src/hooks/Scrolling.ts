@@ -9,11 +9,17 @@ export const useDragToScroll = ({
   scrollableElement = targetElement,
 }: DragToScrollProps) => {
   //#region Refs
-  const velXRef = useRef(0);
   const momentumIdRef = useRef<number>();
   const isDownRef = useRef(false);
+
+  const velXRef = useRef(0);
+  const velYRef = useRef(0);
+
   const startXRef = useRef<number>();
+  const startYRef = useRef<number>();
+
   const scrollLeftRef = useRef<number>();
+  const scrollTopRef = useRef<number>();
   //#endregion
 
   //#region Utility functions
@@ -33,8 +39,10 @@ export const useDragToScroll = ({
   const momentumLoop = () => {
     if (scrollableElement) {
       scrollableElement.scrollLeft += velXRef.current;
+      scrollableElement.scrollTop += velYRef.current;
       velXRef.current *= 0.95;
-      if (Math.abs(velXRef.current) > 0.5) {
+      velYRef.current *= 0.95;
+      if (Math.abs(velXRef.current) > 0.5 || Math.abs(velYRef.current) > 0.5) {
         momentumIdRef.current = requestAnimationFrame(momentumLoop);
       }
     }
@@ -46,12 +54,19 @@ export const useDragToScroll = ({
   useEffect(() => {
     if (targetElement && scrollableElement) {
       const mouseDownEventCallback = (event: MouseEvent) => {
-        if (scrollableElement) {
-          isDownRef.current = true;
-          startXRef.current = event.pageX - scrollableElement.offsetLeft;
-          scrollLeftRef.current = scrollableElement.scrollLeft;
-          cancelMomentumTracking();
-        }
+        isDownRef.current = true;
+
+        //#region Compute X
+        startXRef.current = event.pageX - scrollableElement.offsetLeft;
+        scrollLeftRef.current = scrollableElement.scrollLeft;
+        //#endregion
+
+        //#region Compute Y
+        startYRef.current = event.pageY - scrollableElement.offsetTop;
+        scrollTopRef.current = scrollableElement.scrollTop;
+        //#endregion
+
+        cancelMomentumTracking();
       };
       const mouseLeaveEventCallback = () => {
         isDownRef.current = false;
@@ -63,28 +78,37 @@ export const useDragToScroll = ({
       const mouseMoveEventCallback = (event: MouseEvent) => {
         if (!isDownRef.current) return;
         event.preventDefault();
-        if (startXRef.current && scrollLeftRef.current) {
+        //#region Compute X
+        if (startXRef.current != null && scrollLeftRef.current != null) {
           const x = event.pageX - scrollableElement.offsetLeft;
-          const walk = (x - startXRef.current) * 3; //scroll-fast
           const prevScrollLeft = scrollableElement.scrollLeft;
-          scrollableElement.scrollLeft = scrollLeftRef.current - walk;
+          const walkX = (x - startXRef.current) * 3;
+          scrollableElement.scrollLeft = scrollLeftRef.current - walkX;
           velXRef.current = scrollableElement.scrollLeft - prevScrollLeft;
         }
+        //#endregion
+
+        //#region Compute Y
+        if (startYRef.current != null && scrollTopRef.current != null) {
+          const y = event.pageY - scrollableElement.offsetTop;
+          const prevScrollTop = scrollableElement.scrollTop;
+          const walkY = (y - startYRef.current) * 3;
+          scrollableElement.scrollTop = scrollTopRef.current - walkY;
+          velYRef.current = scrollableElement.scrollTop - prevScrollTop;
+        }
+        //#endregion
       };
 
       targetElement.addEventListener('mousedown', mouseDownEventCallback);
-      targetElement.addEventListener('mouseleave', mouseLeaveEventCallback);
-      targetElement.addEventListener('mouseup', mouseUpEventCallback);
-      targetElement.addEventListener('mousemove', mouseMoveEventCallback);
+      window.addEventListener('mouseup', mouseUpEventCallback);
+      window.addEventListener('mouseleave', mouseLeaveEventCallback);
+      window.addEventListener('mousemove', mouseMoveEventCallback);
 
       return () => {
         targetElement.removeEventListener('mousedown', mouseDownEventCallback);
-        targetElement.removeEventListener(
-          'mouseleave',
-          mouseLeaveEventCallback
-        );
-        targetElement.removeEventListener('mouseup', mouseUpEventCallback);
-        targetElement.removeEventListener('mousemove', mouseMoveEventCallback);
+        window.removeEventListener('mouseup', mouseUpEventCallback);
+        window.removeEventListener('mouseleave', mouseLeaveEventCallback);
+        window.removeEventListener('mousemove', mouseMoveEventCallback);
       };
     }
   }, [scrollableElement, targetElement]);
