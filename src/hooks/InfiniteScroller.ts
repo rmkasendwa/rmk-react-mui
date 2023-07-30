@@ -22,6 +22,7 @@ export interface UseLoadOnScrollToBottomOptions {
   onClose?: () => void;
   enableKeyboardNavigationWrapping?: boolean;
   orientation?: 'vertical' | 'horizontal';
+  revalidationKey?: string;
 }
 
 /**
@@ -44,6 +45,7 @@ export const useLoadOnScrollToBottom = ({
   enableKeyboardNavigationWrapping = false,
   keyboardFocusElement: keyboardFocusElementProp,
   orientation = 'vertical',
+  revalidationKey,
 }: UseLoadOnScrollToBottomOptions) => {
   //#region Refs
   const isInitialMountRef = useRef(true);
@@ -197,6 +199,7 @@ export const useLoadOnScrollToBottom = ({
 
   useEffect(() => {
     if (element && shouldLoadOnScroll) {
+      revalidationKey;
       const scrollEventCallback = () => {
         const scrollTop = Math.abs(element.scrollTop);
         const scrollLeft = Math.abs(element.scrollLeft);
@@ -265,6 +268,7 @@ export const useLoadOnScrollToBottom = ({
     element,
     invertScrollDirection,
     orientation,
+    revalidationKey,
     shouldLoadOnScroll,
   ]);
 
