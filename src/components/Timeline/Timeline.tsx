@@ -60,7 +60,6 @@ import {
   TimeScaleConfiguration,
   TimeScaleOption,
   TimeScaleRow,
-  baseTimeScaleWidth,
   fullMonthLabels,
   quarterLabels,
   shortMonthLabels,
@@ -803,9 +802,11 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       const getMonthlyTickTimeScale = ({
         monthSplit,
         unitTimeScaleWidth,
+        timeScaleWidth,
       }: {
         monthSplit: number;
         unitTimeScaleWidth: number;
+        timeScaleWidth: number;
       }): TimeScaleConfiguration => {
         const totalTimeScaleRegions = timelineYears.length * 12 * monthSplit;
         return {
@@ -906,7 +907,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
             }),
           ],
           unitTimeScaleWidth,
-          timeScaleWidth: unitTimeScaleWidth * timelineYears.length,
+          timeScaleWidth,
         };
       };
 
@@ -985,7 +986,8 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         case 'Quarter':
           return getMonthlyTickTimeScale({
             monthSplit: 4,
-            unitTimeScaleWidth: baseTimeScaleWidth * 4 * 12,
+            unitTimeScaleWidth: 480 * 3,
+            timeScaleWidth: 480 * 12 * timelineYears.length,
           });
         case 'Year':
           return getMonthlyTickTimeScale({
@@ -995,10 +997,12 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
               }
               return 3;
             })(),
-            unitTimeScaleWidth: baseTimeScaleWidth * 12,
+            unitTimeScaleWidth: 120 * 12,
+            timeScaleWidth: 120 * 12 * timelineYears.length,
           });
-        case '5 year':
-          const unitTimeScaleWidth = baseTimeScaleWidth * 12;
+        case '5 year': {
+          const yearWidth = 360;
+          const unitTimeScaleWidth = yearWidth * 5;
           return {
             timeScaleRows: [
               timelineYears.flatMap((year) => {
@@ -1025,8 +1029,9 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
               }),
             ],
             unitTimeScaleWidth,
-            timeScaleWidth: (unitTimeScaleWidth * timelineYears.length) / 4,
+            timeScaleWidth: yearWidth * timelineYears.length,
           };
+        }
       }
     }, [
       TimeScaleMeterPropsVariant,
@@ -1037,6 +1042,54 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       totalNumberOfDays,
       totalNumberOfHours,
     ]);
+
+  //#region Unit time scaling
+  const [timelineWidthScaleFactor, setTimelineWidthScaleFactor] = useState(
+    () => {
+      if (scrollingAncenstorElement) {
+        return (
+          (scrollingAncenstorElement.clientWidth -
+            (shouldShowRowLabelsColumn ? rowLabelsColumnWidth : 0)) /
+          unitTimeScaleWidth
+        );
+      }
+      return 1;
+    }
+  );
+
+  useEffect(() => {
+    if (scrollingAncenstorElement) {
+      const resizeObserver = new ResizeObserver(() => {
+        setTimelineWidthScaleFactor(() => {
+          if (scrollingAncenstorElement) {
+            return (
+              (scrollingAncenstorElement.clientWidth -
+                (shouldShowRowLabelsColumn ? rowLabelsColumnWidth : 0)) /
+              unitTimeScaleWidth
+            );
+          }
+          return 1;
+        });
+      });
+      resizeObserver.observe(scrollingAncenstorElement);
+      return () => {
+        resizeObserver.disconnect();
+      };
+    }
+  }, [
+    rowLabelsColumnWidth,
+    scrollingAncenstorElement,
+    shouldShowRowLabelsColumn,
+    unitTimeScaleWidth,
+  ]);
+
+  const { scaledUnitTimeScaleWidth, scaledTimeScaleWidth } = useMemo(() => {
+    return {
+      scaledUnitTimeScaleWidth: unitTimeScaleWidth * timelineWidthScaleFactor,
+      scaledTimeScaleWidth: timeScaleWidth * timelineWidthScaleFactor,
+    };
+  }, [timeScaleWidth, timelineWidthScaleFactor, unitTimeScaleWidth]);
+  //#endregion
 
   const resetToDefaultView = useRef(() => {
     setSearchParams(
@@ -1177,7 +1230,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                   bgcolor: palette.primary.main,
                   color: palette.getContrastText(palette.primary.main),
                   border: `1px solid ${palette.divider}`,
-                  borderRadius: '4px',
+                  borderRadius: 1,
                   height: 42,
                   '&:hover': {
                     zIndex: 1,
@@ -1357,10 +1410,10 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
 
   const jumpToPreviousUnitTimeScale = useCallback(() => {
     scrollingAncenstorElement?.scrollBy({
-      left: -unitTimeScaleWidth,
+      left: -scaledUnitTimeScaleWidth,
       behavior: 'smooth',
     });
-  }, [scrollingAncenstorElement, unitTimeScaleWidth]);
+  }, [scrollingAncenstorElement, scaledUnitTimeScaleWidth]);
 
   useEffect(() => {
     getJumpToPreviousUnitTimeScaleFunctionRef.current?.(
@@ -1370,10 +1423,10 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
 
   const jumpToNextUnitTimeScale = useCallback(() => {
     scrollingAncenstorElement?.scrollBy({
-      left: unitTimeScaleWidth,
+      left: scaledUnitTimeScaleWidth,
       behavior: 'smooth',
     });
-  }, [scrollingAncenstorElement, unitTimeScaleWidth]);
+  }, [scrollingAncenstorElement, scaledUnitTimeScaleWidth]);
 
   useEffect(() => {
     getJumpToNextUnitTimeScaleFunctionRef.current?.(jumpToNextUnitTimeScale);
@@ -1405,7 +1458,8 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         >
           <TimeScaleMeter
             {...TimeScaleMeterPropsRest}
-            {...{ timeScaleRows, timeScaleWidth }}
+            timeScaleRows={timeScaleRows}
+            timeScaleWidth={scaledTimeScaleWidth}
             scrollingElement={scrollingAncenstorElement}
             leftOffset={
               (shouldShowRowLabelsColumn ? rowLabelsColumnWidth : 0) +
@@ -1477,7 +1531,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                 px: 1,
                 bgcolor: palette.text.primary,
                 color: palette.background.paper,
-                borderBottomRightRadius: '8px',
+                borderBottomRightRadius: '4px',
                 fontSize: 12,
                 top: 0,
                 left: '100%',
@@ -1547,7 +1601,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           });
         }
       },
-      width: timeScaleWidth + baseSpacingUnits,
+      width: scaledTimeScaleWidth + baseSpacingUnits,
       wrapColumnContentInFieldValue: false,
       headerClassName: classes.timelineMeterContainer,
       headerSx: {
