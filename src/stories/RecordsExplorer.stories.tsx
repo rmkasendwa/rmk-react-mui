@@ -75,9 +75,9 @@ const baseArgs = {
       //     ],
       //   },
       // ],
-      TimeScaleMeterProps: {
-        variant: 'compact',
-      },
+      // TimeScaleMeterProps: {
+      //   variant: 'compact',
+      // },
       // todayMarkerVariant: 'foregroundFullSpan',
       // rowLabelsColumnHeader: 'Row Labels Header',
       // defaultTimelineCenter: 'now',

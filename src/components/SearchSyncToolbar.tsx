@@ -120,6 +120,8 @@ export type Tool = ButtonTool | IconButtonTool | ElementTool | DividerTool;
 
 const MAX_BUTTON_WIDTH = 150;
 const MAX_ELEMENT_TOOL_WIDTH = 300;
+const MAX_TITLE_WIDTH = 300;
+const MAX_SEARCH_FIELD_WIDTH = 240;
 
 export const getToolNodes = (
   tools: (ReactNode | Tool)[],
@@ -253,6 +255,10 @@ export const getToolNodes = (
     });
 };
 
+/**
+ * Props interface for the SearchSyncToolbar component.
+ * Extends the BoxProps interface with some properties omitted and some properties picked from other interfaces.
+ */
 export interface SearchSyncToolbarProps
   extends Omit<BoxProps, 'title'>,
     Partial<Pick<ReloadIconButtonProps, 'load' | 'loading' | 'errorMessage'>>,
@@ -260,6 +266,9 @@ export interface SearchSyncToolbarProps
       SearchFieldProps,
       'searchTerm' | 'onChangeSearchTerm' | 'onSearch' | 'searchVelocity'
     > {
+  /**
+   * The title of the toolbar. It can accept a ReactNode to render custom content.
+   */
   title?: ReactNode;
   /**
    * Determines whether the component should be rendered with a search tool.
@@ -267,6 +276,9 @@ export interface SearchSyncToolbarProps
    * @default true
    */
   hasSearchTool?: boolean;
+  /**
+   * The placeholder text for the search field.
+   */
   searchFieldPlaceholder?: string;
   /**
    * Determines whether the component should be rendered with a synchronize tool.
@@ -276,21 +288,47 @@ export interface SearchSyncToolbarProps
    */
   hasSyncTool?: boolean;
   /**
-   * Extra tools to be added to the toolbar.
-   *
+   * An array of extra tools to be added to the toolbar.
+   * These tools can be ReactNodes or Tool objects.
    */
   tools?: (ReactNode | Tool)[];
+  /**
+   * An array of extra tools to be added before the title in the toolbar.
+   * These tools can be ReactNodes or Tool objects.
+   */
   preTitleTools?: (ReactNode | Tool)[];
+  /**
+   * An array of extra tools to be added after the synchronize button in the toolbar.
+   * These tools can be ReactNodes or Tool objects.
+   */
   postSyncButtonTools?: (ReactNode | Tool)[];
   /**
    * Extra tools to be added to the toolbar.
-   * Note: Tools will always over-write children.
+   * Note: Tools will always overwrite children.
    *
+   * These tools can be ReactNodes or Tool objects.
    */
   children?: ReactNode;
+  /**
+   * Props for customizing the title component.
+   * Accepts properties from LoadingTypographyProps interface with some properties omitted.
+   */
   TitleProps?: Partial<Omit<LoadingTypographyProps, 'ref'>>;
+  /**
+   * Determines whether the search field should be open or closed.
+   */
   searchFieldOpen?: boolean;
+  /**
+   * Props for customizing the search field component.
+   * Accepts properties from SearchFieldProps interface.
+   */
   SearchFieldProps?: Partial<SearchFieldProps>;
+  /**
+   * The alignment of the tools in the toolbar.
+   *
+   * @default 'end'
+   */
+  alignTools?: 'start' | 'end';
 }
 
 export function getSearchSyncToolbarUtilityClass(slot: string): string {
@@ -329,6 +367,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
       searchFieldOpen: searchFieldOpenProp,
       SearchFieldProps = {},
       searchVelocity = 'slow',
+      alignTools = 'end',
       sx,
       ...rest
     } = omit(props, 'tools');
@@ -438,10 +477,10 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
           const searchFieldAndTitleSpaceWidth = (() => {
             let width = 0;
             if (title) {
-              width += 300;
+              width += MAX_TITLE_WIDTH;
             }
             if (hasSearchTool) {
-              width += 200;
+              width += MAX_SEARCH_FIELD_WIDTH;
             }
             return width;
           })();
@@ -595,7 +634,11 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
 
             if (isSmallScreenSize && hasSearchTool && searchFieldOpen) {
               return (
-                <Grid item xs sx={{ minWidth: 0 }}>
+                <Grid
+                  item
+                  xs={Boolean(alignTools === 'end')}
+                  sx={{ minWidth: 0 }}
+                >
                   <ClickAwayListener
                     onClickAway={() => {
                       if (!searchTerm || searchTerm.length <= 0) {
@@ -612,7 +655,20 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
             if (title) {
               return (
                 <>
-                  <Grid item xs sx={{ minWidth: 0 }}>
+                  <Grid
+                    item
+                    xs={Boolean(alignTools === 'end')}
+                    sx={{
+                      minWidth: 0,
+                      ...(() => {
+                        if (alignTools === 'start') {
+                          return {
+                            width: MAX_TITLE_WIDTH,
+                          };
+                        }
+                      })(),
+                    }}
+                  >
                     <LoadingTypography
                       {...({ component: 'div' } as any)}
                       {...TitlePropsRest}
@@ -635,13 +691,20 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                           (searchFieldOpenProp && !isSmallScreenSize)
                             ? 1
                             : 'none',
-                        maxWidth: 300,
+                        maxWidth: MAX_SEARCH_FIELD_WIDTH,
+                        ...(() => {
+                          if (alignTools === 'start') {
+                            return {
+                              width: MAX_SEARCH_FIELD_WIDTH,
+                            };
+                          }
+                        })(),
                         minWidth: (() => {
                           if (
                             searchFieldOpen ||
                             (searchFieldOpenProp && !isSmallScreenSize)
                           ) {
-                            return 240;
+                            return MAX_SEARCH_FIELD_WIDTH;
                           }
                           return 0;
                         })(),
@@ -720,7 +783,20 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
 
             if (hasSearchTool) {
               return (
-                <Grid item xs sx={{ minWidth: 0 }}>
+                <Grid
+                  item
+                  xs={Boolean(alignTools === 'end')}
+                  sx={{
+                    minWidth: 0,
+                    ...(() => {
+                      if (alignTools === 'start') {
+                        return {
+                          width: MAX_SEARCH_FIELD_WIDTH,
+                        };
+                      }
+                    })(),
+                  }}
+                >
                   {standardSearchFieldElement}
                 </Grid>
               );

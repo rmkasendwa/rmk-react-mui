@@ -1484,6 +1484,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
 
   useEffect(() => {
     if (scrollingAncenstorElement) {
+      rows; // Re-render the component when the rows prop changes.
       switch (defaultTimelineCenter) {
         case 'now':
           scrollToDateRef.current(new Date(), 'auto');
@@ -1494,7 +1495,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           break;
       }
     }
-  }, [centerOfGravity, defaultTimelineCenter, scrollingAncenstorElement]);
+  }, [centerOfGravity, defaultTimelineCenter, rows, scrollingAncenstorElement]);
 
   useEffect(() => {
     if (
@@ -1842,6 +1843,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       wrapColumnContentInFieldValue: false,
       headerClassName: classes.timelineMeterContainer,
       headerSx: {
+        cursor: 'move',
         '&>div': {
           py: 0,
           pl: `${baseSpacingUnits}px`,
