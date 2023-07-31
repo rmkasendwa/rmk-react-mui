@@ -405,12 +405,6 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
 
   //#region Refs
   const isInitialMountRef = useRef(true);
-  useEffect(() => {
-    isInitialMountRef.current = false;
-    return () => {
-      isInitialMountRef.current = true;
-    };
-  }, []);
 
   const currentDateAtCenterRef = useRef<Date | null>(null);
   const lastDateAtCenterRef = useRef<Date | null>(null);
@@ -1572,6 +1566,13 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     timelineContainerElement,
     totalNumberOfHours,
   ]);
+
+  useEffect(() => {
+    isInitialMountRef.current = false;
+    return () => {
+      isInitialMountRef.current = true;
+    };
+  }, []);
 
   //#region TimeScale Tool
   const onSelectTimeScale: SelectTimeScaleCallbackFunction = useCallback(

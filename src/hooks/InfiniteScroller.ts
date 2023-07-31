@@ -49,12 +49,6 @@ export const useLoadOnScrollToBottom = ({
 }: UseLoadOnScrollToBottomOptions) => {
   //#region Refs
   const isInitialMountRef = useRef(true);
-  useEffect(() => {
-    isInitialMountRef.current = false;
-    return () => {
-      isInitialMountRef.current = true;
-    };
-  }, []);
 
   const loadRef = useRef(load);
   loadRef.current = load;
@@ -270,6 +264,13 @@ export const useLoadOnScrollToBottom = ({
     revalidationKey,
     shouldLoadOnScroll,
   ]);
+
+  useEffect(() => {
+    isInitialMountRef.current = false;
+    return () => {
+      isInitialMountRef.current = true;
+    };
+  }, []);
 
   const displayableDataSet = (() => {
     if (dataElements) {

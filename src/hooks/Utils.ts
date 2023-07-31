@@ -337,12 +337,6 @@ export const useCacheableData = <Data>(
 ) => {
   //#region Refs
   const isInitialMountRef = useRef(true);
-  useEffect(() => {
-    isInitialMountRef.current = false;
-    return () => {
-      isInitialMountRef.current = true;
-    };
-  }, []);
 
   const recordFinderRef = useRef(recordFinder);
   recordFinderRef.current = recordFinder;
@@ -397,6 +391,13 @@ export const useCacheableData = <Data>(
       load();
     }
   }, [load, revalidationKey]);
+
+  useEffect(() => {
+    isInitialMountRef.current = false;
+    return () => {
+      isInitialMountRef.current = true;
+    };
+  }, []);
 
   return {
     load,

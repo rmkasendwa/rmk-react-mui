@@ -660,12 +660,6 @@ const BaseRecordsExplorer = <
 
   //#region Refs
   const isInitialMountRef = useRef(true);
-  useEffect(() => {
-    isInitialMountRef.current = false;
-    return () => {
-      isInitialMountRef.current = true;
-    };
-  }, []);
 
   const headerElementRef = useRef<HTMLDivElement | null>(null);
   const bodyElementRef = useRef<HTMLDivElement | null>(null);
@@ -2466,6 +2460,13 @@ const BaseRecordsExplorer = <
     return children;
   })() as ReactNode | undefined;
   //#endregion
+
+  useEffect(() => {
+    isInitialMountRef.current = false;
+    return () => {
+      isInitialMountRef.current = true;
+    };
+  }, []);
 
   const title = (() => {
     if (!recordsFinder && dataPresets && dataPresets.length > 0) {

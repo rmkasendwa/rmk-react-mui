@@ -377,12 +377,6 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
 
     //#region Refs
     const isInitialMountRef = useRef(true);
-    useEffect(() => {
-      isInitialMountRef.current = false;
-      return () => {
-        isInitialMountRef.current = true;
-      };
-    }, []);
 
     const anchorElementRef = useRef<HTMLDivElement | null>(null);
     const toolsRef = useRef(tools);
@@ -509,6 +503,13 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
         };
       }
     }, [updateCollapsedWidthToolIndex]);
+
+    useEffect(() => {
+      isInitialMountRef.current = false;
+      return () => {
+        isInitialMountRef.current = true;
+      };
+    }, []);
 
     const syncButtonElement = (() => {
       if (hasSyncTool && load) {
