@@ -899,6 +899,14 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                             (dayOfWeekIndex === 1 &&
                               dayOfMonthIndex >= 2 &&
                               daysInMonth - dayOfMonthIndex >= 2),
+                          color: alpha(palette.text.primary, 0.3),
+                          ...(() => {
+                            if (dayOfMonthIndex === 0) {
+                              return {
+                                color: palette.text.primary,
+                              };
+                            }
+                          })(),
                         } as TimeScaleRow;
                       }
                     );
@@ -1157,7 +1165,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           return getMonthlyTickTimeScale({
             monthSplit: (() => {
               if (TimeScaleMeterPropsVariant === 'compact') {
-                return 2;
+                return 1;
               }
               return 3;
             })(),
