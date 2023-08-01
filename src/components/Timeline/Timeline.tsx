@@ -406,7 +406,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   //#region Refs
   const isInitialMountRef = useRef(true);
   const isScrollingToTimelineCenterRef = useRef(false);
-  const isScrolledRef = useRef(false);
+  const isTimelineScrolledRef = useRef(false);
   const currentDateAtCenterRef = useRef<Date | null>(null);
   const lastDateAtCenterRef = useRef<Date | null>(null);
   const [timelineContainerElement, setTimelineContainerElement] =
@@ -1296,7 +1296,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     if (parentElement && timelineMeterContainer) {
       const scrollEventCallback = () => {
         if (!isScrollingToTimelineCenterRef.current) {
-          isScrolledRef.current = true;
+          isTimelineScrolledRef.current = true;
         }
         isScrollingToTimelineCenterRef.current = false;
         const { scrollLeft, offsetWidth: parentElementOffsetWidth } =
@@ -1487,26 +1487,28 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     }
   };
 
-  const scrollingAncenstorElementScrollWidth =
-    scrollingAncenstorElement?.scrollWidth;
   useEffect(() => {
-    if (scrollingAncenstorElementScrollWidth && !isScrolledRef.current) {
-      isScrollingToTimelineCenterRef.current = true;
-      switch (defaultTimelineCenter) {
-        case 'now':
-          scrollToDateRef.current(new Date(), 'auto');
-          break;
-        case 'centerOfDataSet':
-        default:
-          scrollToDateRef.current(centerOfGravity, 'auto');
-          break;
-      }
+    if (timelineContainerElement) {
+      const observer = new ResizeObserver(() => {
+        if (!isTimelineScrolledRef.current) {
+          isScrollingToTimelineCenterRef.current = true;
+          switch (defaultTimelineCenter) {
+            case 'now':
+              scrollToDateRef.current(new Date(), 'auto');
+              break;
+            case 'centerOfDataSet':
+            default:
+              scrollToDateRef.current(centerOfGravity, 'auto');
+              break;
+          }
+        }
+      });
+      observer.observe(timelineContainerElement);
+      return () => {
+        observer.disconnect();
+      };
     }
-  }, [
-    centerOfGravity,
-    defaultTimelineCenter,
-    scrollingAncenstorElementScrollWidth,
-  ]);
+  }, [centerOfGravity, defaultTimelineCenter, timelineContainerElement]);
 
   useEffect(() => {
     if (
