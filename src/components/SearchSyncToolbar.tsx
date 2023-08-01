@@ -13,6 +13,7 @@ import {
   IconButton,
   IconButtonProps,
   Typography,
+  alpha,
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
   generateUtilityClasses,
@@ -424,7 +425,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
 
     const { sx: TitlePropsSx, ...TitlePropsRest } = TitleProps;
 
-    const { breakpoints } = useTheme();
+    const { breakpoints, palette } = useTheme();
     const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
 
     const [collapsedWidthToolIndex, setCollapsedWidthToolIndex] = useState(
@@ -581,6 +582,9 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
         sx={{
           px: isSmallScreenSize ? 2 : 3,
           ...sx,
+          [`.${buttonClasses.containedInherit}`]: {
+            bgcolor: alpha(palette.text.primary, 0.04),
+          },
         }}
       >
         <Grid
