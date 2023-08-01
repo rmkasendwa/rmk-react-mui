@@ -533,13 +533,12 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
     useEffect(() => {
       if (anchorElementRef.current) {
         const anchorElement = anchorElementRef.current;
-        const windowResizeEventCallback = () => {
+        const observer = new ResizeObserver(() => {
           updateCollapsedWidthToolIndex(anchorElement);
-        };
-        window.addEventListener('resize', windowResizeEventCallback);
-        windowResizeEventCallback();
+        });
+        observer.observe(anchorElement);
         return () => {
-          window.removeEventListener('resize', windowResizeEventCallback);
+          observer.disconnect();
         };
       }
     }, [updateCollapsedWidthToolIndex]);
