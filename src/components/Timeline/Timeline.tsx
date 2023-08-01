@@ -405,7 +405,8 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
 
   //#region Refs
   const isInitialMountRef = useRef(true);
-
+  const isScrollingToTimelineCenterRef = useRef(false);
+  const isScrolledRef = useRef(false);
   const currentDateAtCenterRef = useRef<Date | null>(null);
   const lastDateAtCenterRef = useRef<Date | null>(null);
   const [timelineContainerElement, setTimelineContainerElement] =
@@ -1294,6 +1295,10 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     // Check if the required elements are present before attaching the scroll event listener.
     if (parentElement && timelineMeterContainer) {
       const scrollEventCallback = () => {
+        if (!isScrollingToTimelineCenterRef.current) {
+          isScrolledRef.current = true;
+        }
+        isScrollingToTimelineCenterRef.current = false;
         const { scrollLeft, offsetWidth: parentElementOffsetWidth } =
           parentElement;
         const { offsetWidth } = timelineMeterContainer;
@@ -1482,9 +1487,11 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     }
   };
 
+  const scrollingAncenstorElementScrollWidth =
+    scrollingAncenstorElement?.scrollWidth;
   useEffect(() => {
-    if (scrollingAncenstorElement) {
-      rows; // Re-render the component when the rows prop changes.
+    if (scrollingAncenstorElementScrollWidth && !isScrolledRef.current) {
+      isScrollingToTimelineCenterRef.current = true;
       switch (defaultTimelineCenter) {
         case 'now':
           scrollToDateRef.current(new Date(), 'auto');
@@ -1495,7 +1502,11 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           break;
       }
     }
-  }, [centerOfGravity, defaultTimelineCenter, rows, scrollingAncenstorElement]);
+  }, [
+    centerOfGravity,
+    defaultTimelineCenter,
+    scrollingAncenstorElementScrollWidth,
+  ]);
 
   useEffect(() => {
     if (

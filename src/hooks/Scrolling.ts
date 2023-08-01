@@ -81,6 +81,7 @@ export const useDragToScroll = ({
     if (enableDragToScroll && targetElement && scrollableElement) {
       // Function to handle the mouse down event
       const mouseDownEventCallback = (event: MouseEvent) => {
+        if (event.button !== 0) return;
         window.removeEventListener('mouseup', mouseUpEventCallback);
         window.addEventListener('mouseup', mouseUpEventCallback);
         isDownRef.current = true;
