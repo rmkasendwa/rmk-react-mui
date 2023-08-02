@@ -1,5 +1,4 @@
 import {
-  Box,
   ComponentsOverrides,
   ComponentsProps,
   ComponentsVariants,
@@ -14,9 +13,11 @@ import {
 } from '@mui/material';
 import Typography, { TypographyProps } from '@mui/material/Typography';
 import clsx from 'clsx';
-import { forwardRef } from 'react';
+import { forwardRef, useState } from 'react';
+import { mergeRefs } from 'react-merge-refs';
 
 import { useLoadingContext } from '../contexts/LoadingContext';
+import Tooltip from './Tooltip';
 
 export interface LoadingTypographyClasses {
   /** Styles applied to the root element. */
@@ -78,6 +79,7 @@ export interface LoadingTypographyProps
   extends Omit<TypographyProps, 'ref'>,
     Pick<SkeletonProps, 'animation'> {
   enableLoadingState?: boolean;
+  component?: string;
 }
 
 export function getLoadingTypographyUtilityClass(slot: string): string {
@@ -119,12 +121,20 @@ export const LoadingTypography = forwardRef<
 
   const { palette } = useTheme();
   const { loading, errorMessage } = useLoadingContext();
+  const [hasTextOverflow, setHasTextOverflow] = useState(false);
 
   const typographyElement = (
     <Typography
-      ref={ref}
+      ref={mergeRefs([
+        ref,
+        (el) => {
+          if (el && rest.noWrap) {
+            setHasTextOverflow(el.offsetWidth < el.scrollWidth);
+          }
+        },
+      ])}
       component="div"
-      {...(rest as any)}
+      {...rest}
       className={clsx(classes.root)}
       sx={{
         ...sx,
@@ -200,8 +210,8 @@ export const LoadingTypography = forwardRef<
     </Typography>
   );
 
-  if (enableLoadingState && (loading || errorMessage)) {
-    return <Box>{typographyElement}</Box>;
+  if (hasTextOverflow) {
+    return <Tooltip title={children}>{typographyElement}</Tooltip>;
   }
 
   return typographyElement;

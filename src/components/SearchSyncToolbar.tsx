@@ -330,6 +330,14 @@ export interface SearchSyncToolbarProps
    * @default 'end'
    */
   alignTools?: 'start' | 'end';
+  /**
+   * The maximum width of the title.
+   */
+  maxTitleWidth?: number;
+  /**
+   * The maximum width of the search field.
+   */
+  maxSearchFieldWidth?: number;
 }
 
 export function getSearchSyncToolbarUtilityClass(slot: string): string {
@@ -369,6 +377,8 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
       SearchFieldProps = {},
       searchVelocity = 'slow',
       alignTools = 'end',
+      maxTitleWidth = MAX_TITLE_WIDTH,
+      maxSearchFieldWidth = MAX_SEARCH_FIELD_WIDTH,
       sx,
       ...rest
     } = omit(props, 'tools');
@@ -437,6 +447,8 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
       Boolean(searchTerm && searchTerm.length > 0)
     );
 
+    const shouldRenderSyncTool = Boolean(hasSyncTool && load);
+
     const updateCollapsedWidthToolIndex = useCallback(
       (anchorElement: HTMLDivElement) => {
         if (tools?.length != null) {
@@ -474,18 +486,28 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
             };
           });
 
-          const containerWidth = anchorElement.offsetWidth;
+          let containerToolsMaxWidth =
+            anchorElement.clientWidth - (isSmallScreenSize ? 16 : 24);
+          if (shouldRenderSyncTool) {
+            containerToolsMaxWidth -= 32;
+          }
           const searchFieldAndTitleSpaceWidth = (() => {
             let width = 0;
             if (title) {
-              width += MAX_TITLE_WIDTH;
+              width += maxTitleWidth;
             }
             if (hasSearchTool) {
-              width += MAX_SEARCH_FIELD_WIDTH;
+              width += maxSearchFieldWidth;
             }
             return width;
           })();
-          const cummulativeToolsGapWidth = (toolsRef.current.length - 1) * 8;
+          let cummulativeToolsGapWidth = (toolsRef.current.length - 1) * 8;
+          if (title && hasSearchTool) {
+            cummulativeToolsGapWidth += 8;
+          }
+          if (shouldRenderSyncTool) {
+            cummulativeToolsGapWidth += 8;
+          }
 
           for (let i = 0; i < tools.length; i++) {
             const fullWidthToolsWidth = toolMaxWidths
@@ -503,7 +525,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                 : 0;
 
             if (
-              containerWidth -
+              containerToolsMaxWidth -
                 (fullWidthToolsWidth +
                   collapsedWidthToolsWidth +
                   cummulativeToolsGapWidth) >=
@@ -521,13 +543,21 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
             0
           );
           setCollapseAllToolsIntoEllipsis(
-            containerWidth -
+            containerToolsMaxWidth -
               (collapsedWidthToolsWidth + cummulativeToolsGapWidth) <
               searchFieldAndTitleSpaceWidth
           );
         }
       },
-      [hasSearchTool, title, tools.length]
+      [
+        hasSearchTool,
+        isSmallScreenSize,
+        maxSearchFieldWidth,
+        maxTitleWidth,
+        shouldRenderSyncTool,
+        title,
+        tools.length,
+      ]
     );
 
     useEffect(() => {
@@ -551,7 +581,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
     }, []);
 
     const syncButtonElement = (() => {
-      if (hasSyncTool && load) {
+      if (shouldRenderSyncTool) {
         return (
           <ReloadIconButton
             {...{ load, loading, errorMessage }}
@@ -666,7 +696,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                       ...(() => {
                         if (alignTools === 'start') {
                           return {
-                            width: MAX_TITLE_WIDTH,
+                            width: maxTitleWidth,
                           };
                         }
                       })(),
@@ -694,11 +724,11 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                           (searchFieldOpenProp && !isSmallScreenSize)
                             ? 1
                             : 'none',
-                        maxWidth: MAX_SEARCH_FIELD_WIDTH,
+                        maxWidth: maxSearchFieldWidth,
                         ...(() => {
                           if (alignTools === 'start') {
                             return {
-                              width: MAX_SEARCH_FIELD_WIDTH,
+                              width: maxSearchFieldWidth,
                             };
                           }
                         })(),
@@ -707,16 +737,9 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                             searchFieldOpen ||
                             (searchFieldOpenProp && !isSmallScreenSize)
                           ) {
-                            return MAX_SEARCH_FIELD_WIDTH;
+                            return maxSearchFieldWidth;
                           }
                           return 0;
-                        })(),
-                        ...(() => {
-                          if (!isSmallScreenSize) {
-                            return {
-                              pr: 1,
-                            };
-                          }
                         })(),
                       }}
                     >
@@ -794,7 +817,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                     ...(() => {
                       if (alignTools === 'start') {
                         return {
-                          width: MAX_SEARCH_FIELD_WIDTH,
+                          width: maxSearchFieldWidth,
                         };
                       }
                     })(),
