@@ -179,7 +179,7 @@ export const useViewOptionsTool = <ViewType extends string = string>({
               })}
             </Stack>
           ),
-          elementMaxWidth: 180,
+          elementMaxWidth: 170,
           collapsedElement: (
             <Stack direction="row">
               {options.map(({ icon, value }) => {
