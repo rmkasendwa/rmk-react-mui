@@ -69,8 +69,14 @@ export const contacts = Array.from({ length: 1000 }).map((_, index) => {
     accountBalance: Math.round(Math.random() * 1000_000),
     source: contactSources[Math.floor(Math.random() * contactSources.length)],
     countryCode: countryCodes[Math.floor(Math.random() * countryCodes.length)],
-    joinedAt: joinedAtDate.toISOString(),
-    leftAt: leftAtDate.toISOString(),
+    ...(() => {
+      if (Math.random() < 0.25) {
+        return {
+          joinedAt: joinedAtDate.toISOString(),
+          leftAt: leftAtDate.toISOString(),
+        };
+      }
+    })(),
   } as Contact;
 });
 
