@@ -40,6 +40,7 @@ import {
   useRef,
   useState,
 } from 'react';
+import { mergeRefs } from 'react-merge-refs';
 import { Link as RouterLink, useLocation, useNavigate } from 'react-router-dom';
 import * as Yup from 'yup';
 
@@ -3057,7 +3058,7 @@ const BaseRecordsExplorer = <
       </Paper>
       <Box
         {...BodyPropsRest}
-        ref={bodyElementRef}
+        ref={mergeRefs([bodyElementRef, BodyPropsRest.ref as any])}
         className={clsx(classes.section, BodyPropsRest.className)}
         component="section"
         sx={{
