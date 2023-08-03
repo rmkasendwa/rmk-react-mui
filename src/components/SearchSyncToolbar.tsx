@@ -427,10 +427,13 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
 
     //#region Refs
     const isInitialMountRef = useRef(true);
-
     const anchorElementRef = useRef<HTMLDivElement | null>(null);
     const toolsRef = useRef(tools);
     toolsRef.current = tools;
+
+    const allTools = [...preTitleTools, ...tools, ...postSyncButtonTools];
+    const allToolsRef = useRef(allTools);
+    allToolsRef.current = tools;
     //#endregion
 
     const { sx: TitlePropsSx, ...TitlePropsRest } = TitleProps;
@@ -441,8 +444,8 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
     const [collapsedWidthToolIndex, setCollapsedWidthToolIndex] = useState(
       tools.length
     );
-    const [collapseAllToolsIntoEllipsis, setCollapseAllToolsIntoEllipsis] =
-      useState(false);
+    const [collapsedIntoEllipsisToolIndex, setCollapsedIntoEllipsisToolIndex] =
+      useState<number | null>(null);
     const [searchFieldOpen, setSearchFieldOpen] = useState(
       Boolean(searchTerm && searchTerm.length > 0)
     );
@@ -451,9 +454,9 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
 
     const updateCollapsedWidthToolIndex = useCallback(
       (anchorElement: HTMLDivElement) => {
-        if (tools?.length != null) {
-          const toolMaxWidths = toolsRef.current.map((tool) => {
-            if (typeof tool === 'object') {
+        if (allTools?.length != null) {
+          const toolMaxWidths = allToolsRef.current.map((tool) => {
+            if (tool && typeof tool === 'object') {
               if ('type' in tool) {
                 switch (tool.type) {
                   case 'button':
@@ -501,7 +504,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
             }
             return width;
           })();
-          let cummulativeToolsGapWidth = (toolsRef.current.length - 1) * 8;
+          let cummulativeToolsGapWidth = (allToolsRef.current.length - 1) * 8;
           if (title && hasSearchTool) {
             cummulativeToolsGapWidth += 8;
           }
@@ -509,7 +512,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
             cummulativeToolsGapWidth += 8;
           }
 
-          for (let i = 0; i < tools.length; i++) {
+          for (let i = 0; i < allTools.length; i++) {
             const fullWidthToolsWidth = toolMaxWidths
               .slice(0, toolMaxWidths.length - i)
               .reduce((a, { elementMaxWidth }) => a + elementMaxWidth, 0);
@@ -532,31 +535,40 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
               searchFieldAndTitleSpaceWidth
             ) {
               setCollapsedWidthToolIndex(i);
-              setCollapseAllToolsIntoEllipsis(false);
+              setCollapsedIntoEllipsisToolIndex(null);
               return;
             }
           }
-          setCollapsedWidthToolIndex(tools.length);
+          setCollapsedWidthToolIndex(allTools.length);
 
-          const collapsedWidthToolsWidth = toolMaxWidths.reduce(
-            (a, { collapsedElementWidth }) => a + collapsedElementWidth,
-            0
-          );
-          setCollapseAllToolsIntoEllipsis(
-            containerToolsMaxWidth -
-              (collapsedWidthToolsWidth + cummulativeToolsGapWidth) <
+          for (let i = 0; i < allTools.length; i++) {
+            const collapsedWidthToolsWidth = toolMaxWidths
+              .slice(0, toolMaxWidths.length - i)
+              .reduce(
+                (a, { collapsedElementWidth }) => a + collapsedElementWidth,
+                0
+              );
+
+            if (
+              containerToolsMaxWidth -
+                (collapsedWidthToolsWidth + cummulativeToolsGapWidth) >=
               searchFieldAndTitleSpaceWidth
-          );
+            ) {
+              setCollapsedIntoEllipsisToolIndex(i);
+              return;
+            }
+          }
+          setCollapsedIntoEllipsisToolIndex(allTools.length);
         }
       },
       [
+        allTools?.length,
         hasSearchTool,
         isSmallScreenSize,
         maxSearchFieldWidth,
         maxTitleWidth,
         shouldRenderSyncTool,
         title,
-        tools.length,
       ]
     );
 
@@ -610,6 +622,13 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
         className={clsx(classes.root)}
         sx={{
           px: isSmallScreenSize ? 2 : 3,
+          ...(() => {
+            if (collapsedIntoEllipsisToolIndex) {
+              return {
+                pr: 0,
+              };
+            }
+          })(),
           ...sx,
           [`.${buttonClasses.containedInherit}`]: {
             bgcolor: alpha(palette.text.primary, 0.04),
@@ -628,17 +647,23 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
             if (
               preTitleTools.length > 0 &&
               !isSmallScreenSize &&
-              !collapseAllToolsIntoEllipsis
+              !collapsedIntoEllipsisToolIndex
             ) {
-              return getToolNodes(preTitleTools, collapsedWidthToolIndex).map(
-                (tool, index) => {
-                  return (
-                    <Grid item key={index} sx={{ minWidth: 0 }}>
-                      {tool}
-                    </Grid>
-                  );
-                }
-              );
+              return getToolNodes(
+                preTitleTools,
+                (() => {
+                  if (collapsedWidthToolIndex > preTitleTools.length) {
+                    return preTitleTools.length;
+                  }
+                  return collapsedWidthToolIndex;
+                })()
+              ).map((tool, index) => {
+                return (
+                  <Grid item key={index} sx={{ minWidth: 0 }}>
+                    {tool}
+                  </Grid>
+                );
+              });
             }
           })()}
           {(() => {
@@ -830,26 +855,37 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
             return <Grid item xs />;
           })()}
           {(() => {
-            if (!isSmallScreenSize && !collapseAllToolsIntoEllipsis) {
-              return getToolNodes(tools, collapsedWidthToolIndex).map(
-                (tool, index) => {
-                  return (
-                    <Grid item key={index} sx={{ minWidth: 0 }}>
-                      {tool}
-                    </Grid>
-                  );
-                }
-              );
+            if (!isSmallScreenSize) {
+              return getToolNodes(
+                (() => {
+                  if (collapsedIntoEllipsisToolIndex) {
+                    return tools.slice(0, -collapsedIntoEllipsisToolIndex);
+                  }
+                  return tools;
+                })(),
+                (() => {
+                  if (collapsedWidthToolIndex > preTitleTools.length) {
+                    return collapsedWidthToolIndex - preTitleTools.length;
+                  }
+                  return 0;
+                })()
+              ).map((tool, index) => {
+                return (
+                  <Grid item key={index} sx={{ minWidth: 0 }}>
+                    {tool}
+                  </Grid>
+                );
+              });
             }
           })()}
           {(() => {
-            if (isSmallScreenSize || collapseAllToolsIntoEllipsis) {
-              const allTools = [
-                ...preTitleTools,
-                ...tools,
-                ...postSyncButtonTools,
-              ];
-              const smallScreenDisplayableTools = allTools
+            if (isSmallScreenSize || collapsedIntoEllipsisToolIndex) {
+              const smallScreenDisplayableTools = (() => {
+                if (collapsedIntoEllipsisToolIndex && !isSmallScreenSize) {
+                  return allTools.slice(-collapsedIntoEllipsisToolIndex);
+                }
+                return allTools;
+              })()
                 .filter((tool) => {
                   return (
                     tool && !isValidElement(tool) && typeof tool === 'object'
@@ -892,17 +928,6 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                 );
               return (
                 <>
-                  {allTools
-                    .filter((tool) => {
-                      return tool && isValidElement(tool);
-                    })
-                    .map((tool, index) => {
-                      return (
-                        <Grid item key={index} sx={{ minWidth: 0 }}>
-                          {tool as ReactNode}
-                        </Grid>
-                      );
-                    })}
                   {smallScreenTools.length > 0
                     ? getToolNodes(
                         smallScreenTools,
@@ -984,7 +1009,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
             if (
               postSyncButtonTools.length > 0 &&
               !isSmallScreenSize &&
-              !collapseAllToolsIntoEllipsis
+              !collapsedIntoEllipsisToolIndex
             ) {
               return getToolNodes(
                 postSyncButtonTools,
