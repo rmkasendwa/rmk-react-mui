@@ -49,12 +49,14 @@ const baseArgs = {
       startDateProperty: 'joinedAt',
       endDateProperty: 'leftAt',
       getTimelineElements: ({ joinedAt, leftAt }) => {
-        return [
-          {
-            startDate: joinedAt,
-            endDate: leftAt,
-          },
-        ];
+        if (joinedAt) {
+          return [
+            {
+              startDate: joinedAt,
+              endDate: leftAt,
+            },
+          ];
+        }
       },
       onClickRow: (contact) => {
         console.log({ contact });

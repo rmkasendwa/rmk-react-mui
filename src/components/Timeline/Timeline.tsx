@@ -82,6 +82,7 @@ export interface TimelineClasses {
   todayMarker: string;
   dateAtCursorMarker: string;
   dateAtCursorMarkerLabel: string;
+  emptyTimelineRowPlaceholder: string;
 }
 
 export type TimelineClassKey = keyof TimelineClasses;
@@ -308,6 +309,7 @@ export const timelineClasses: TimelineClasses = generateUtilityClasses(
     'todayMarker',
     'dateAtCursorMarker',
     'dateAtCursorMarkerLabel',
+    'emptyTimelineRowPlaceholder',
   ]
 );
 
@@ -318,6 +320,7 @@ const slots = {
   todayMarker: ['todayMarker'],
   dateAtCursorMarker: ['dateAtCursorMarker'],
   dateAtCursorMarkerLabel: ['dateAtCursorMarkerLabel'],
+  emptyTimelineRowPlaceholder: ['emptyTimelineRowPlaceholder'],
 };
 
 export const BaseTimeline = <RecordRow extends BaseDataRow>(
@@ -408,6 +411,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   const isScrollingToTimelineCenterRef = useRef(false);
   const isTimelineScrolledRef = useRef(false);
   const currentDateAtCenterRef = useRef<Date | null>(null);
+  const currentDateAtCenterPositionLeftOffsetRef = useRef<number | null>(null);
   const lastDateAtCenterRef = useRef<Date | null>(null);
   const [timelineContainerElement, setTimelineContainerElement] =
     useState<HTMLTableElement | null>(null);
@@ -849,6 +853,16 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       if (timelineContainerHeight) {
         dateAtCursorMarkerElement.style.height = `${timelineContainerHeight}px`;
       }
+    }
+
+    if (currentDateAtCenterPositionLeftOffsetRef.current) {
+      timelineContainerElement
+        .querySelectorAll(`.${classes.emptyTimelineRowPlaceholder}`)
+        .forEach((placeholderElement) => {
+          (placeholderElement as HTMLDivElement).style.left = `calc(${
+            currentDateAtCenterPositionLeftOffsetRef.current! * 100
+          }% - 40px)`;
+        });
     }
   };
   const caliberateDateCursorElementsRef = useRef(caliberateDateCursorElements);
@@ -1319,19 +1333,24 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           }
         }
 
+        const leftOffset =
+          (scrollLeft -
+            baseSpacingUnits +
+            Math.round(
+              (parentElementOffsetWidth -
+                (shouldShowRowLabelsColumn ? rowLabelsColumnWidth : 0)) /
+                2
+            )) /
+          (offsetWidth - baseSpacingUnits);
+
         // Calculate the date at the center of the timeline based on the current scroll position.
         const dateAtCenter = addHours(
           minCalendarDate,
-          totalNumberOfHours *
-            ((scrollLeft -
-              baseSpacingUnits +
-              Math.round(
-                (parentElementOffsetWidth -
-                  (shouldShowRowLabelsColumn ? rowLabelsColumnWidth : 0)) /
-                  2
-              )) /
-              (offsetWidth - baseSpacingUnits))
+          totalNumberOfHours * leftOffset
         );
+
+        // Update the mutable ref with the current date at the center position left offset.
+        currentDateAtCenterPositionLeftOffsetRef.current = leftOffset;
 
         // Update the mutable ref with the current date at the center.
         currentDateAtCenterRef.current = dateAtCenter;
@@ -1802,7 +1821,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
             return getTimelineElements(row);
           }
         })();
-        if (timelineElements) {
+        if (timelineElements && timelineElements.length > 0) {
           return (
             <>
               {timelineElements
@@ -1828,7 +1847,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           );
         }
         if (startDateProperty && endDateProperty) {
-          return getTimelineElementNode({
+          const timelineElementNode = getTimelineElementNode({
             startDate: result(row, startDateProperty),
             endDate: result(row, endDateProperty),
             label: ((): ReactNode => {
@@ -1850,7 +1869,31 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
               }
             })(),
           });
+          if (timelineElementNode) {
+            return timelineElementNode;
+          }
         }
+        return (
+          <Box
+            className={clsx(classes.emptyTimelineRowPlaceholder)}
+            sx={{
+              width: 80,
+              height: 2,
+              position: 'absolute',
+              bgcolor: palette.divider,
+              top: `calc(50% - 1px)`,
+              ...(() => {
+                if (currentDateAtCenterPositionLeftOffsetRef.current) {
+                  return {
+                    left: `calc(${
+                      currentDateAtCenterPositionLeftOffsetRef.current * 100
+                    }% - 40px)`,
+                  };
+                }
+              })(),
+            }}
+          />
+        );
       },
       width: scaledTimeScaleWidth + baseSpacingUnits,
       wrapColumnContentInFieldValue: false,
