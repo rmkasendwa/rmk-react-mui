@@ -58,6 +58,9 @@ export interface TimeScaleMeterProps extends Partial<StackProps> {
   scrollingElement?: HTMLElement | null;
   leftOffset?: number;
   variant?: 'default' | 'compact';
+  timeScaleLevel1TickMinTextDisplayWidth?: number;
+  timeScaleLevel2TickMinTextDisplayWidth?: number;
+  timeScaleLevel3TickMinTextDisplayWidth?: number;
 }
 
 export function getTimeScaleMeterUtilityClass(slot: string): string {
@@ -87,6 +90,9 @@ export const TimeScaleMeter = forwardRef<HTMLDivElement, TimeScaleMeterProps>(
       scrollingElement,
       leftOffset = 0,
       variant = 'default',
+      timeScaleLevel1TickMinTextDisplayWidth = 50,
+      timeScaleLevel2TickMinTextDisplayWidth = 40,
+      timeScaleLevel3TickMinTextDisplayWidth = 40,
       sx,
       ...rest
     } = props;
@@ -105,26 +111,72 @@ export const TimeScaleMeter = forwardRef<HTMLDivElement, TimeScaleMeterProps>(
 
     const { palette } = useTheme();
 
-    const [timeScaleLevel1, timeScaleLevel2, timeScaleLevel3] = timeScaleRows;
+    const [baseTimeScaleLevel1, baseTimeScaleLevel2, baseTimeScaleLevel3] =
+      timeScaleRows;
+
     const {
+      timeScaleLevel1,
       timeScaleLevel1TickWidth,
+      timeScaleLevel2,
       timeScaleLevel2TickWidth,
+      timeScaleLevel3,
       timeScaleLevel3TickWidth,
     } = useMemo(() => {
-      const timeScaleLevel1TickWidth = timeScaleWidth / timeScaleLevel1.length;
-      const timeScaleLevel2TickWidth = timeScaleWidth / timeScaleLevel2.length;
-      const timeScaleLevel3TickWidth = timeScaleWidth / timeScaleLevel3.length;
+      const timeScaleLevel1TickWidth =
+        timeScaleWidth / baseTimeScaleLevel1.length;
+      const timeScaleLevel2TickWidth =
+        timeScaleWidth / baseTimeScaleLevel2.length;
+      const timeScaleLevel3TickWidth =
+        timeScaleWidth / baseTimeScaleLevel3.length;
+
+      const getTimeScaleTicks = (
+        baseTimeScaleTicks: TimeScaleRow[],
+        tickWidth: number,
+        minTickWidth: number
+      ) => {
+        return baseTimeScaleTicks.map(({ label, ...rest }, index) => {
+          const mergeableTicksIndex = Math.ceil(1 / (tickWidth / minTickWidth));
+          return {
+            ...rest,
+            ...(() => {
+              if (index % mergeableTicksIndex === 0) {
+                return {
+                  label,
+                };
+              }
+            })(),
+          } as TimeScaleRow;
+        });
+      };
 
       return {
+        timeScaleLevel1: getTimeScaleTicks(
+          baseTimeScaleLevel1,
+          timeScaleLevel1TickWidth,
+          timeScaleLevel1TickMinTextDisplayWidth
+        ),
         timeScaleLevel1TickWidth,
+        timeScaleLevel2: getTimeScaleTicks(
+          baseTimeScaleLevel2,
+          timeScaleLevel2TickWidth,
+          timeScaleLevel2TickMinTextDisplayWidth
+        ),
         timeScaleLevel2TickWidth,
+        timeScaleLevel3: getTimeScaleTicks(
+          baseTimeScaleLevel3,
+          timeScaleLevel3TickWidth,
+          timeScaleLevel3TickMinTextDisplayWidth
+        ),
         timeScaleLevel3TickWidth,
       };
     }, [
+      baseTimeScaleLevel1,
+      baseTimeScaleLevel2,
+      baseTimeScaleLevel3,
+      timeScaleLevel1TickMinTextDisplayWidth,
+      timeScaleLevel2TickMinTextDisplayWidth,
+      timeScaleLevel3TickMinTextDisplayWidth,
       timeScaleWidth,
-      timeScaleLevel1.length,
-      timeScaleLevel2.length,
-      timeScaleLevel3.length,
     ]);
 
     const [offsets, setOffsets] = useState({
@@ -238,7 +290,6 @@ export const TimeScaleMeter = forwardRef<HTMLDivElement, TimeScaleMeterProps>(
                             className={clsx(classes.timeScaleLevel1Tick)}
                             sx={{
                               position: 'sticky',
-                              overflow: 'hidden',
                             }}
                           >
                             <Typography
@@ -285,13 +336,6 @@ export const TimeScaleMeter = forwardRef<HTMLDivElement, TimeScaleMeterProps>(
                     height: 24,
                     display: 'flex',
                     alignItems: 'center',
-                    ...(() => {
-                      if (variant === 'default') {
-                        return {
-                          overflow: 'hidden',
-                        };
-                      }
-                    })(),
                   }}
                 >
                   {showLabel ? (
@@ -351,13 +395,12 @@ export const TimeScaleMeter = forwardRef<HTMLDivElement, TimeScaleMeterProps>(
                   ...sx,
                   width: timeScaleLevel3TickWidth,
                   minWidth: 0,
-                  overflow: 'hidden',
                   display: 'flex',
                   alignItems: 'center',
                 }}
               >
                 {(() => {
-                  if (variant === 'default') {
+                  if (variant === 'default' && label) {
                     return (
                       <Typography
                         variant="body2"
