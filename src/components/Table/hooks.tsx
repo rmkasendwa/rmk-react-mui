@@ -1378,7 +1378,7 @@ export const useTable = <DataRow extends BaseDataRow>(
           ) {
             return (TableBodyRowPlaceholderPropsSx as any).height;
           }
-          return optimizeForSmallScreen ? 73 : 41;
+          return optimizeForSmallScreen ? 65 : 41;
         })();
         pageRowElementPlaceholders.push(
           <RenderIfVisible
