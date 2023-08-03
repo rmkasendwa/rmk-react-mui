@@ -1142,50 +1142,34 @@ export const useTable = <DataRow extends BaseDataRow>(
             }
             return row.id;
           })();
-          const rowElement = (
-            <>
-              {index > 0 ? <Divider /> : null}
-              <TableBodyRow
-                {...{
-                  columnTypographyProps,
-                  decimalPlaces,
-                  defaultColumnValue,
-                  defaultCountryCode,
-                  defaultDateFormat,
-                  defaultDateTimeFormat,
-                  editable,
-                  minColumnWidth,
-                  noWrap,
-                  onClickRow,
-                  row,
-                  textTransform,
-                  enableSmallScreenOptimization,
-                  getToolTipWrappedColumnNode,
-                }}
-                columns={displayingColumns}
-                getRowProps={forEachRowProps}
-                className={clsx(rowNumber % 2 === 0 ? 'even' : 'odd')}
-                applyCellWidthParameters={!showHeaderRow}
-              />
-            </>
-          );
           accumulator.push({
             id: compositeId,
-            element: lazyRows ? (
-              <RenderIfVisible
-                {...TableBodyRowPlaceholderPropsRest}
-                key={compositeId}
-                displayPlaceholder={false}
-                unWrapChildrenIfVisible
-                sx={{
-                  height: 89,
-                  ...TableBodyRowPlaceholderPropsSx,
-                }}
-              >
-                {rowElement}
-              </RenderIfVisible>
-            ) : (
-              <Fragment key={compositeId}>{rowElement}</Fragment>
+            element: (
+              <Fragment key={compositeId}>
+                {index > 0 ? <Divider /> : null}
+                <TableBodyRow
+                  {...{
+                    columnTypographyProps,
+                    decimalPlaces,
+                    defaultColumnValue,
+                    defaultCountryCode,
+                    defaultDateFormat,
+                    defaultDateTimeFormat,
+                    editable,
+                    minColumnWidth,
+                    noWrap,
+                    onClickRow,
+                    row,
+                    textTransform,
+                    enableSmallScreenOptimization,
+                    getToolTipWrappedColumnNode,
+                  }}
+                  columns={displayingColumns}
+                  getRowProps={forEachRowProps}
+                  className={clsx(rowNumber % 2 === 0 ? 'even' : 'odd')}
+                  applyCellWidthParameters={!showHeaderRow}
+                />
+              </Fragment>
             ),
           });
           return accumulator;
@@ -1200,47 +1184,31 @@ export const useTable = <DataRow extends BaseDataRow>(
           }
           return row.id;
         })();
-        const rowElement = (
-          <TableBodyRow
-            {...{
-              columnTypographyProps,
-              decimalPlaces,
-              defaultColumnValue,
-              defaultCountryCode,
-              defaultDateFormat,
-              defaultDateTimeFormat,
-              editable,
-              minColumnWidth,
-              noWrap,
-              onClickRow,
-              row,
-              textTransform,
-              getToolTipWrappedColumnNode,
-            }}
-            columns={displayingColumns}
-            getRowProps={forEachRowProps}
-            className={clsx(rowNumber % 2 === 0 ? 'even' : 'odd')}
-            applyCellWidthParameters={!showHeaderRow}
-          />
-        );
         accumulator.push({
           id: compositeId,
-          element: lazyRows ? (
-            <RenderIfVisible
-              {...TableBodyRowPlaceholderPropsRest}
-              key={compositeId}
-              component="tr"
-              displayPlaceholder={false}
-              unWrapChildrenIfVisible
-              sx={{
-                height: 41,
-                ...TableBodyRowPlaceholderPropsSx,
+          element: (
+            <TableBodyRow
+              {...{
+                columnTypographyProps,
+                decimalPlaces,
+                defaultColumnValue,
+                defaultCountryCode,
+                defaultDateFormat,
+                defaultDateTimeFormat,
+                editable,
+                minColumnWidth,
+                noWrap,
+                onClickRow,
+                row,
+                textTransform,
+                getToolTipWrappedColumnNode,
               }}
-            >
-              {rowElement}
-            </RenderIfVisible>
-          ) : (
-            <Fragment key={compositeId}>{rowElement}</Fragment>
+              key={compositeId}
+              columns={displayingColumns}
+              getRowProps={forEachRowProps}
+              className={clsx(rowNumber % 2 === 0 ? 'even' : 'odd')}
+              applyCellWidthParameters={!showHeaderRow}
+            />
           ),
         });
         return accumulator;
@@ -1387,6 +1355,51 @@ export const useTable = <DataRow extends BaseDataRow>(
     }
   })();
 
+  const getTableBodyRowElements = () => {
+    if (tableBodyRows) {
+      if (!lazyRows) {
+        return tableBodyRows.map(({ element }) => element);
+      }
+      const pageRowElementsToProcess = [...tableBodyRows];
+      const pageRowElementPlaceholders: ReactNode[] = [];
+      while (pageRowElementsToProcess.length > 0) {
+        const bufferedPageRows = pageRowElementsToProcess.splice(0, 15);
+        const bufferedPageRowElements = bufferedPageRows.map(({ element }) => {
+          return element;
+        });
+        const placeholderElementKey = bufferedPageRows
+          .map(({ id }) => {
+            return id;
+          })
+          .join(';');
+        const baseHeight = (() => {
+          if (
+            typeof (TableBodyRowPlaceholderPropsSx as any)?.height === 'number'
+          ) {
+            return (TableBodyRowPlaceholderPropsSx as any).height;
+          }
+          return optimizeForSmallScreen ? 73 : 41;
+        })();
+        pageRowElementPlaceholders.push(
+          <RenderIfVisible
+            {...TableBodyRowPlaceholderPropsRest}
+            key={placeholderElementKey}
+            component={optimizeForSmallScreen ? 'div' : 'tr'}
+            displayPlaceholder={false}
+            unWrapChildrenIfVisible
+            sx={{
+              ...TableBodyRowPlaceholderPropsSx,
+              height: baseHeight * bufferedPageRowElements.length,
+            }}
+          >
+            {bufferedPageRowElements}
+          </RenderIfVisible>
+        );
+      }
+      return pageRowElementPlaceholders;
+    }
+  };
+
   const baseTableElement = (() => {
     if (optimizeForSmallScreen) {
       if (!tableBodyRows) {
@@ -1401,9 +1414,8 @@ export const useTable = <DataRow extends BaseDataRow>(
           }}
         >
           {(() => {
-            const pageRowElements = tableBodyRows.map(({ element }) => element);
-            if (pageRowElements.length > 0) {
-              return pageRowElements;
+            if (tableBodyRows.length > 0) {
+              return getTableBodyRowElements();
             }
             return (
               <Box
@@ -1466,11 +1478,8 @@ export const useTable = <DataRow extends BaseDataRow>(
               return (
                 <TableBody>
                   {(() => {
-                    const pageRowElements = tableBodyRows.map(
-                      ({ element }) => element
-                    );
-                    if (pageRowElements.length > 0) {
-                      return pageRowElements;
+                    if (tableBodyRows.length > 0) {
+                      return getTableBodyRowElements();
                     }
                     return (
                       <TableRow>
