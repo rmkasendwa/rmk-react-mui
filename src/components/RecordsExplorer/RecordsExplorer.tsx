@@ -99,6 +99,8 @@ import Table, {
 } from '../Table';
 import Timeline, {
   ScrollToDateFunction,
+  SelectCustomDates,
+  SelectCustomDatesTimeScaleCallbackFunction,
   SelectTimeScaleCallbackFunction,
   TimeScaleOption,
   TimelineProps,
@@ -1847,6 +1849,8 @@ const BaseRecordsExplorer = <
   //#region Timeline view tools
   const currentDateAtCenterRef = useRef<Date | null>(null);
   const selectTimeScaleRef = useRef<SelectTimeScaleCallbackFunction>();
+  const selectCustomDatesTimeScaleRef =
+    useRef<SelectCustomDatesTimeScaleCallbackFunction>();
   const scrollToDateRef = useRef<ScrollToDateFunction>();
   const jumpToOptimalTimeScaleRef = useRef<() => void>();
   const jumpToPreviousUnitTimeScaleRef = useRef<() => void>();
@@ -1859,6 +1863,11 @@ const BaseRecordsExplorer = <
 
   const [selectedTimeScale, setSelectedTimeScale] =
     useState<TimeScaleOption>('Year');
+  const [isCustomDatesTimeScaleSelected, setIsCustomDatesTimeScaleSelected] =
+    useState<boolean | undefined>();
+  const [selectedCustomDates, setSelectedCustomDates] = useState<
+    SelectCustomDates | undefined
+  >();
   const [timelineDateBounds, setTimelineDateBounds] = useState<
     | {
         minDate: Date;
@@ -1872,6 +1881,9 @@ const BaseRecordsExplorer = <
     ...TimelineViewProps?.TimeScaleToolProps,
     selectedTimeScale,
     onSelectTimeScale: selectTimeScaleRef.current,
+    onSelectCustomDatesTimeScale: selectCustomDatesTimeScaleRef.current,
+    isCustomDatesTimeScaleSelected,
+    selectedCustomDates,
     supportedTimeScales:
       timelineView?.supportedTimeScales ||
       TimelineViewProps?.supportedTimeScales,
@@ -2414,6 +2426,13 @@ const BaseRecordsExplorer = <
                 onChangeSelectedTimeScale={(selectedTimeScale) => {
                   setSelectedTimeScale(selectedTimeScale);
                 }}
+                onChangeSelectedCustomDatesTimeScale={(
+                  isCustomDatesSelected,
+                  selectedCustomDates
+                ) => {
+                  setIsCustomDatesTimeScaleSelected(isCustomDatesSelected);
+                  setSelectedCustomDates(selectedCustomDates);
+                }}
                 onChangeTimelineDateBounds={(dateBounds) => {
                   setTimelineDateBounds(dateBounds);
                 }}
@@ -2425,6 +2444,12 @@ const BaseRecordsExplorer = <
                 }}
                 getSelectTimeScaleFunction={(selectTimeScale) => {
                   selectTimeScaleRef.current = selectTimeScale;
+                }}
+                getSelectCustomDatesTimeScaleFunction={(
+                  selectCustomDatesTimeScale
+                ) => {
+                  selectCustomDatesTimeScaleRef.current =
+                    selectCustomDatesTimeScale;
                 }}
                 getJumpToOptimalTimeScaleFunction={(jumpToOptimalTimeScale) => {
                   jumpToOptimalTimeScaleRef.current = jumpToOptimalTimeScale;

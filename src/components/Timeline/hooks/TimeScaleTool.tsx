@@ -1,3 +1,4 @@
+import { createDateWithoutTimezoneOffset } from '@infinite-debugger/rmk-utils/dates';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import EastIcon from '@mui/icons-material/East';
 import {
@@ -11,7 +12,7 @@ import {
 } from '@mui/material';
 import formatDate from 'date-fns/format';
 import { omit } from 'lodash';
-import { ReactNode, useState } from 'react';
+import { ReactNode } from 'react';
 
 import { usePopupTool } from '../../../hooks/Tools/PopupTool';
 import DatePicker from '../../DatePicker';
@@ -29,8 +30,14 @@ export type SelectTimeScaleCallbackFunction = (
   timeScale: TimeScaleOption | null
 ) => void;
 
+export type SelectCustomDates = {
+  startDate: string;
+  endDate?: string;
+};
+
 export type SelectCustomDatesTimeScaleCallbackFunction = (
-  isCustomDatesTimeScaleSelected: boolean
+  isCustomDatesTimeScaleSelected?: boolean,
+  selectedCustomDates?: SelectCustomDates
 ) => void;
 
 export interface TimeScaleToolProps {
@@ -41,6 +48,7 @@ export interface TimeScaleToolProps {
   wrapDatePickerNode?: (datePickerNode: ReactNode) => ReactNode;
   isCustomDatesTimeScaleSelected?: boolean;
   onSelectCustomDatesTimeScale?: SelectCustomDatesTimeScaleCallbackFunction;
+  selectedCustomDates?: SelectCustomDates;
 }
 
 export const useTimeScaleTool = ({
@@ -51,6 +59,12 @@ export const useTimeScaleTool = ({
   wrapDatePickerNode,
   isCustomDatesTimeScaleSelected,
   onSelectCustomDatesTimeScale,
+  selectedCustomDates: {
+    startDate: startDateString,
+    endDate: endDateString,
+  } = {
+    startDate: new Date().toISOString(),
+  },
 }: TimeScaleToolProps) => {
   const { breakpoints } = useTheme();
   const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
@@ -132,8 +146,12 @@ export const useTimeScaleTool = ({
     </Button>
   );
 
-  const [startDate, setStartDate] = useState(() => new Date());
-  const [endDate, setEndDate] = useState<Date | null>(null);
+  const startDate = createDateWithoutTimezoneOffset(startDateString);
+  const endDate = (() => {
+    if (endDateString) {
+      return createDateWithoutTimezoneOffset(endDateString);
+    }
+  })();
 
   const datePickerNode = (
     <DatePicker
@@ -142,9 +160,14 @@ export const useTimeScaleTool = ({
       endDate={endDate}
       selectsRange={true as any}
       onChange={(dates: any) => {
-        const [start, end] = dates as [Date, Date | null];
-        setStartDate(start);
-        setEndDate(end);
+        const [startDate, endDate] = dates as [Date, Date | null];
+        onSelectCustomDatesTimeScale?.(
+          isCustomDatesTimeScaleSelected ?? false,
+          {
+            startDate: startDate.toISOString(),
+            endDate: endDate?.toISOString(),
+          }
+        );
       }}
     />
   );

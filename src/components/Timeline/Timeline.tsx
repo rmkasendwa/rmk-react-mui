@@ -53,6 +53,7 @@ import { BaseDataRow, Table, TableColumn, TableProps } from '../Table';
 import Tooltip, { TooltipProps } from '../Tooltip';
 import {
   ScrollTimelineToolsProps,
+  SelectCustomDatesTimeScaleCallbackFunction,
   SelectTimeScaleCallbackFunction,
   TimeScaleToolProps,
   useScrollTimelineTools,
@@ -236,6 +237,9 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
   /** A function to be called when the selected time scale option changes. */
   onChangeSelectedTimeScale?: (selectedTimeScale: TimeScaleOption) => void;
 
+  /** A function to be called when the selected custom dates time scale option changes. */
+  onChangeSelectedCustomDatesTimeScale?: SelectCustomDatesTimeScaleCallbackFunction;
+
   /** A function to be called when the timeline date bounds change. */
   onChangeTimelineDateBounds?: (dateBounds: {
     minDate: Date;
@@ -251,6 +255,11 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
   /** A function to get the select-time-scale function for the timeline. */
   getSelectTimeScaleFunction?: (
     selectTimeScale: SelectTimeScaleCallbackFunction
+  ) => void;
+
+  /** A function to get the select-custom-dates-time-scale function for the timeline. */
+  getSelectCustomDatesTimeScaleFunction?: (
+    selectCustomDatesTimeScale: SelectCustomDatesTimeScaleCallbackFunction
   ) => void;
 
   /** A function to get the jump-to-optimal-time-scale function for the timeline. */
@@ -355,11 +364,13 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     TimeScaleMeterProps = {},
     ScrollTimelineToolsProps = {},
     onChangeSelectedTimeScale,
+    onChangeSelectedCustomDatesTimeScale,
     getJumpToNextUnitTimeScaleFunction,
     getJumpToOptimalTimeScaleFunction,
     getJumpToPreviousUnitTimeScaleFunction,
     getScrollToDateFunction,
     getSelectTimeScaleFunction,
+    getSelectCustomDatesTimeScaleFunction,
     todayMarkerVariant = 'default',
     TimeScaleToolProps,
     onChangeTimelineDateBounds,
@@ -430,6 +441,12 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   const onChangeSelectedTimeScaleRef = useRef(onChangeSelectedTimeScale);
   onChangeSelectedTimeScaleRef.current = onChangeSelectedTimeScale;
 
+  const onChangeSelectedCustomDatesTimeScaleRef = useRef(
+    onChangeSelectedCustomDatesTimeScale
+  );
+  onChangeSelectedCustomDatesTimeScaleRef.current =
+    onChangeSelectedCustomDatesTimeScale;
+
   const onChangeTimelineDateBoundsRef = useRef(onChangeTimelineDateBounds);
   onChangeTimelineDateBoundsRef.current = onChangeTimelineDateBounds;
 
@@ -441,6 +458,12 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
 
   const getSelectTimeScaleFunctionRef = useRef(getSelectTimeScaleFunction);
   getSelectTimeScaleFunctionRef.current = getSelectTimeScaleFunction;
+
+  const getSelectCustomDatesTimeScaleFunctionRef = useRef(
+    getSelectCustomDatesTimeScaleFunction
+  );
+  getSelectCustomDatesTimeScaleFunctionRef.current =
+    getSelectCustomDatesTimeScaleFunction;
 
   const getJumpToOptimalTimeScaleFunctionRef = useRef(
     getJumpToOptimalTimeScaleFunction
@@ -475,7 +498,11 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   })();
 
   const {
-    searchParams: { timeScale: searchParamsSelectedTimeScale },
+    searchParams: {
+      timeScale: searchParamsSelectedTimeScale,
+      isCustomDatesSelected,
+      customDateRange,
+    },
     setSearchParams,
   } = useReactRouterDOMSearchParams({
     mode: 'json',
@@ -871,6 +898,13 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   useEffect(() => {
     onChangeSelectedTimeScaleRef.current?.(selectedTimeScale);
   }, [selectedTimeScale]);
+
+  useEffect(() => {
+    onChangeSelectedCustomDatesTimeScaleRef.current?.(
+      isCustomDatesSelected,
+      customDateRange
+    );
+  }, [customDateRange, isCustomDatesSelected]);
 
   const { timeScaleRows, unitTimeScaleWidth, timeScaleWidth } =
     useMemo((): TimeScaleConfiguration => {
@@ -1635,11 +1669,46 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     getSelectTimeScaleFunctionRef.current?.(onSelectTimeScale);
   }, [onSelectTimeScale]);
 
+  const onSelectCustomDatesTimeScale: SelectCustomDatesTimeScaleCallbackFunction =
+    useCallback(
+      (isCustomDatesTimeScaleSelected, selectedCustomDates) => {
+        if (isCustomDatesTimeScaleSelected) {
+          setSearchParams(
+            {
+              isCustomDatesSelected: true,
+              customDateRange: (() => {
+                if (selectedCustomDates) {
+                  return {
+                    ...selectedCustomDates,
+                    endDate: selectedCustomDates.endDate || undefined,
+                  };
+                }
+                return null;
+              })(),
+            },
+            {
+              replace: true,
+            }
+          );
+        }
+      },
+      [setSearchParams]
+    );
+
+  useEffect(() => {
+    getSelectCustomDatesTimeScaleFunctionRef.current?.(
+      onSelectCustomDatesTimeScale
+    );
+  }, [onSelectCustomDatesTimeScale]);
+
   const { element: timeScaleToolElement } = useTimeScaleTool({
     ...TimeScaleToolProps,
     selectedTimeScale,
     supportedTimeScales,
     onSelectTimeScale,
+    onSelectCustomDatesTimeScale,
+    isCustomDatesTimeScaleSelected: isCustomDatesSelected,
+    selectedCustomDates: customDateRange,
   });
   //#endregion
 
