@@ -61,6 +61,7 @@ import {
 } from './hooks';
 import {
   ScrollToDateFunction,
+  ScrollToDateFunctionOptions,
   TimeScaleConfiguration,
   TimeScaleOption,
   TimeScaleRow,
@@ -740,10 +741,25 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
    * Function to scroll the timeline to a specific date.
    *
    * @param date - The date to which the timeline should be scrolled.
-   * @param scrollBehaviour - Optional. The scroll behavior to be used, defaults to 'smooth'.
+   * @param options - Optional. The scroll behavior to be used, defaults to 'smooth'.
    */
   const scrollToDate: ScrollToDateFunction = useCallback(
-    (date, scrollBehaviour: ScrollBehavior = 'smooth') => {
+    (date, options = 'smooth') => {
+      const scrollBehaviour: ScrollBehavior = (() => {
+        if (typeof options === 'string') {
+          return options;
+        }
+        if (typeof options === 'object' && options.scrollBehaviour) {
+          return options.scrollBehaviour;
+        }
+        return 'smooth';
+      })();
+      const { dateAlignment = 'center' } = ((): ScrollToDateFunctionOptions => {
+        if (typeof options === 'string') {
+          return {};
+        }
+        return options;
+      })();
       // Get the container element for the timeline meter container
       const timelineMeterContainerContainer =
         scrollingAncenstorElement?.querySelector(
@@ -765,17 +781,28 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         const { offsetWidth: scrollingAncenstorElementOffsetWidth } =
           scrollingAncenstorElement;
         const { offsetWidth } = timelineMeterContainerContainer;
-
-        // Scroll to the appropriate position within the timeline
-        scrollingAncenstorElement.scrollTo({
-          left:
-            Math.round((offsetWidth - baseSpacingUnits) * offsetPercentage) +
-            baseSpacingUnits -
-            Math.round(
+        let dateScrollLeftPosition =
+          Math.round((offsetWidth - baseSpacingUnits) * offsetPercentage) +
+          baseSpacingUnits;
+        switch (dateAlignment) {
+          case 'center':
+            dateScrollLeftPosition -= Math.round(
               (scrollingAncenstorElementOffsetWidth -
                 (shouldShowRowLabelsColumn ? rowLabelsColumnWidth : 0)) /
                 2
-            ),
+            );
+            break;
+          case 'end':
+            dateScrollLeftPosition -= Math.round(
+              scrollingAncenstorElementOffsetWidth -
+                (shouldShowRowLabelsColumn ? rowLabelsColumnWidth : 0)
+            );
+            break;
+        }
+
+        // Scroll to the appropriate position within the timeline
+        scrollingAncenstorElement.scrollTo({
+          left: dateScrollLeftPosition,
           behavior: scrollBehaviour,
         });
       }
@@ -1365,6 +1392,8 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     setSearchParams(
       {
         timeScale: null,
+        customDateRange: null,
+        isCustomDatesSelected: null,
       },
       {
         replace: true,
@@ -1592,7 +1621,11 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   useEffect(() => {
     if (timelineContainerElement) {
       const observer = new ResizeObserver(() => {
-        if (!isTimelineScrolledRef.current) {
+        const hasCustomDatesSelected =
+          isCustomDatesSelected &&
+          customDateRange?.startDate &&
+          customDateRange?.endDate;
+        if (!isTimelineScrolledRef.current && !hasCustomDatesSelected) {
           isScrollingToTimelineCenterRef.current = true;
           switch (defaultTimelineCenter) {
             case 'now':
@@ -1603,6 +1636,14 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
               scrollToDateRef.current(centerOfGravity, 'auto');
               break;
           }
+        } else if (hasCustomDatesSelected) {
+          scrollToDateRef.current(
+            createDateWithoutTimezoneOffset(customDateRange.startDate),
+            {
+              dateAlignment: 'start',
+              scrollBehaviour: 'auto',
+            }
+          );
         }
       });
       observer.observe(timelineContainerElement);
@@ -1610,7 +1651,14 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         observer.disconnect();
       };
     }
-  }, [centerOfGravity, defaultTimelineCenter, timelineContainerElement]);
+  }, [
+    centerOfGravity,
+    customDateRange?.endDate,
+    customDateRange?.startDate,
+    defaultTimelineCenter,
+    isCustomDatesSelected,
+    timelineContainerElement,
+  ]);
 
   useEffect(() => {
     if (
