@@ -29,11 +29,18 @@ export type SelectTimeScaleCallbackFunction = (
   timeScale: TimeScaleOption | null
 ) => void;
 
+export type SelectCustomDatesTimeScaleCallbackFunction = (
+  isCustomDatesTimeScaleSelected: boolean
+) => void;
+
 export interface TimeScaleToolProps {
   selectedTimeScale: TimeScaleOption;
   supportedTimeScales?: TimeScaleOption[];
   onSelectTimeScale?: SelectTimeScaleCallbackFunction;
   label?: ReactNode;
+  wrapDatePickerNode?: (datePickerNode: ReactNode) => ReactNode;
+  isCustomDatesTimeScaleSelected?: boolean;
+  onSelectCustomDatesTimeScale?: SelectCustomDatesTimeScaleCallbackFunction;
 }
 
 export const useTimeScaleTool = ({
@@ -41,19 +48,24 @@ export const useTimeScaleTool = ({
   supportedTimeScales = [...timeScaleOptions],
   onSelectTimeScale,
   label = 'Timescale',
+  wrapDatePickerNode,
+  isCustomDatesTimeScaleSelected,
+  onSelectCustomDatesTimeScale,
 }: TimeScaleToolProps) => {
   const { breakpoints } = useTheme();
   const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
-  const [isCustomDatesSelected, setIsCustomDatesSelected] = useState(false);
 
   const dataDropdownProps: DataDropdownFieldProps = {
     placeholder: label as string,
     size: 'small',
-    value: isCustomDatesSelected ? CUSTOM_DATE_OPTION_LABEL : selectedTimeScale,
+    value: isCustomDatesTimeScaleSelected
+      ? CUSTOM_DATE_OPTION_LABEL
+      : selectedTimeScale,
     onChange: (event) => {
-      if (event.target.value === CUSTOM_DATE_OPTION_LABEL) {
-        setIsCustomDatesSelected(true);
-      } else {
+      onSelectCustomDatesTimeScale?.(
+        event.target.value === CUSTOM_DATE_OPTION_LABEL
+      );
+      if (event.target.value !== CUSTOM_DATE_OPTION_LABEL) {
         onSelectTimeScale?.((event.target.value as any) || null);
       }
     },
@@ -79,14 +91,14 @@ export const useTimeScaleTool = ({
   };
 
   let buttonElementWidth = 90;
-  if (isCustomDatesSelected) {
+  if (isCustomDatesTimeScaleSelected) {
     buttonElementWidth += 50;
   }
 
   const buttonElement = (
     <Button
       color="inherit"
-      variant={isCustomDatesSelected ? 'text' : 'contained'}
+      variant={isCustomDatesTimeScaleSelected ? 'text' : 'contained'}
       size="small"
       disableRipple
       sx={{
@@ -96,14 +108,23 @@ export const useTimeScaleTool = ({
     >
       <DataDropdownField
         {...dataDropdownProps}
-        options={[...supportedTimeScales, CUSTOM_DATE_OPTION_LABEL].map(
-          (timeScaleOption) => {
-            return {
-              value: timeScaleOption,
-              label: timeScaleOption,
-            };
-          }
-        )}
+        options={[
+          ...supportedTimeScales,
+          ...(() => {
+            if (
+              onSelectCustomDatesTimeScale ||
+              isCustomDatesTimeScaleSelected
+            ) {
+              return [CUSTOM_DATE_OPTION_LABEL];
+            }
+            return [];
+          })(),
+        ].map((timeScaleOption) => {
+          return {
+            value: timeScaleOption,
+            label: timeScaleOption,
+          };
+        })}
         sx={{
           width: buttonElementWidth,
         }}
@@ -135,7 +156,21 @@ export const useTimeScaleTool = ({
     label: 'From',
     type: 'button',
     wrapBodyContentInCard: false,
-    bodyContent: datePickerNode,
+    bodyContent: wrapDatePickerNode
+      ? wrapDatePickerNode(datePickerNode)
+      : datePickerNode,
+  });
+  const {
+    popupElement: toButtonPopupElement,
+    ref: toButtonAnchorRef,
+    ...toButtonPropsRest
+  } = usePopupTool({
+    label: 'To',
+    type: 'button',
+    wrapBodyContentInCard: false,
+    bodyContent: wrapDatePickerNode
+      ? wrapDatePickerNode(datePickerNode)
+      : datePickerNode,
   });
 
   const customDatesElementsNode = (
@@ -161,8 +196,14 @@ export const useTimeScaleTool = ({
         </Typography>
       </Button>
       {fromButtonPopupElement}
-      <EastIcon />
+      <EastIcon
+        sx={{
+          fontSize: 18,
+        }}
+      />
       <Button
+        ref={toButtonAnchorRef}
+        {...omit(toButtonPropsRest, 'title', 'extraToolProps')}
         startIcon={<CalendarTodayIcon />}
         variant="contained"
         color="inherit"
@@ -175,16 +216,15 @@ export const useTimeScaleTool = ({
           {endDate ? formatDate(endDate, 'MM/dd/yy') : 'Select'}
         </Typography>
       </Button>
+      {toButtonPopupElement}
     </>
   );
 
-  let elementMaxWidth =
-    buttonElementWidth +
-    (typeof label === 'string' ? label.length * 5 : 60) +
-    4;
+  let elementMaxWidth = buttonElementWidth;
   let collapsedElementMaxWidth = buttonElementWidth;
 
-  if (isCustomDatesSelected) {
+  if (isCustomDatesTimeScaleSelected) {
+    elementMaxWidth += (typeof label === 'string' ? label.length * 5 : 60) + 4;
     const customDatesElementsNodeWidth = 4 + 10 + 4 + 100 + 4 + 24 + 4 + 100;
     elementMaxWidth += customDatesElementsNodeWidth;
     collapsedElementMaxWidth += customDatesElementsNodeWidth;
@@ -199,11 +239,11 @@ export const useTimeScaleTool = ({
           alignItems: 'center',
         }}
       >
-        {!isSmallScreenSize ? (
+        {!isSmallScreenSize && !isCustomDatesTimeScaleSelected ? (
           <Typography variant="body2">{label}:</Typography>
         ) : null}
         {buttonElement}
-        {isCustomDatesSelected ? customDatesElementsNode : null}
+        {isCustomDatesTimeScaleSelected ? customDatesElementsNode : null}
       </Stack>
     ),
     elementMaxWidth,
