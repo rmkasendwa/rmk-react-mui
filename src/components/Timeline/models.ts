@@ -1,7 +1,6 @@
 import { BoxProps } from '@mui/material';
 import { ReactNode } from 'react';
 import * as Yup from 'yup';
-import { ObjectShape } from 'yup/lib/object';
 
 export const timeScaleOptions = [
   'Day',
@@ -61,8 +60,13 @@ export interface TimeScaleRow extends Partial<BoxProps> {
   showLabel?: boolean;
 }
 
-export const timelineSearchParamValidationSpec: ObjectShape = {
+export const timelineSearchParamValidationSpec = {
   timeScale: Yup.mixed<TimeScaleOption>().oneOf([...timeScaleOptions]),
+  isCustomDatesSelected: Yup.boolean(),
+  customDateRange: Yup.object({
+    startDate: Yup.string().required(),
+    endDate: Yup.string(),
+  }),
 };
 
 export type ScrollToDateFunction = (
