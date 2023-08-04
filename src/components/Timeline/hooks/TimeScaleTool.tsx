@@ -7,8 +7,6 @@ import {
   Stack,
   Typography,
   outlinedInputClasses,
-  useMediaQuery,
-  useTheme,
 } from '@mui/material';
 import formatDate from 'date-fns/format';
 import { omit } from 'lodash';
@@ -66,9 +64,6 @@ export const useTimeScaleTool = ({
     startDate: new Date().toISOString(),
   },
 }: TimeScaleToolProps) => {
-  const { breakpoints } = useTheme();
-  const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
-
   const dataDropdownProps: DataDropdownFieldProps = {
     placeholder: label as string,
     size: 'small',
@@ -266,7 +261,7 @@ export const useTimeScaleTool = ({
           alignItems: 'center',
         }}
       >
-        {!isSmallScreenSize && !isCustomDatesTimeScaleSelected ? (
+        {!isCustomDatesTimeScaleSelected ? (
           <Typography variant="body2">{label}:</Typography>
         ) : null}
         {buttonElement}
@@ -274,7 +269,18 @@ export const useTimeScaleTool = ({
       </Stack>
     ),
     elementMaxWidth,
-    collapsedElement: <Tooltip title={label}>{buttonElement}</Tooltip>,
+    collapsedElement: (
+      <Stack
+        direction="row"
+        sx={{
+          gap: 0.5,
+          alignItems: 'center',
+        }}
+      >
+        <Tooltip title={label}>{buttonElement}</Tooltip>
+        {isCustomDatesTimeScaleSelected ? customDatesElementsNode : null}
+      </Stack>
+    ),
     collapsedElementMaxWidth,
   } as ElementTool;
 };
