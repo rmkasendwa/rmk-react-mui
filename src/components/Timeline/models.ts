@@ -69,9 +69,14 @@ export const timelineSearchParamValidationSpec = {
   }),
 };
 
+export type ScrollToDateFunctionOptions = {
+  scrollBehaviour?: ScrollBehavior;
+  dateAlignment?: 'start' | 'center' | 'end';
+};
+
 export type ScrollToDateFunction = (
   date: Date,
-  scrollBehaviour?: ScrollBehavior
+  scrollBehaviour?: ScrollBehavior | ScrollToDateFunctionOptions
 ) => void;
 
 export type TimeScaleConfiguration = {
