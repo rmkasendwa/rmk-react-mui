@@ -906,8 +906,12 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     );
   }, [customDateRange, isCustomDatesSelected]);
 
-  const { timeScaleRows, unitTimeScaleWidth, timeScaleWidth } =
-    useMemo((): TimeScaleConfiguration => {
+  const { timeScaleRows, unitTimeScaleWidth, timeScaleWidth } = useMemo(() => {
+    const {
+      timeScaleRows,
+      unitTimeScaleWidth: baseUnitTimeScaleWidth,
+      timeScaleWidth,
+    } = ((): TimeScaleConfiguration => {
       const getDailyTickTimeScale = ({
         dayWidth,
         unitTimeScale,
@@ -1254,15 +1258,60 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           };
         }
       }
-    }, [
-      TimeScaleMeterPropsVariant,
-      minCalendarDate,
-      palette.text.primary,
-      selectedTimeScale,
-      timelineYears,
-      totalNumberOfDays,
-      totalNumberOfHours,
-    ]);
+    })();
+
+    const unitTimeScaleWidth = (() => {
+      if (
+        isCustomDatesSelected &&
+        customDateRange?.startDate &&
+        customDateRange?.endDate
+      ) {
+        const timeScaleHourWidth = (() => {
+          switch (selectedTimeScale) {
+            case 'Day':
+              return baseUnitTimeScaleWidth / 24;
+            case 'Week':
+              return baseUnitTimeScaleWidth / (7 * 24);
+            case '2 week':
+              return baseUnitTimeScaleWidth / (2 * 7 * 24);
+            case 'Month':
+              return baseUnitTimeScaleWidth / (30 * 24);
+            case 'Quarter':
+              return baseUnitTimeScaleWidth / (3 * 30 * 24);
+            case 'Year':
+              return baseUnitTimeScaleWidth / (365 * 24);
+            case '5 year':
+              return baseUnitTimeScaleWidth / (5 * 365 * 24);
+          }
+        })();
+        return (
+          timeScaleHourWidth *
+          differenceInHours(
+            createDateWithoutTimezoneOffset(customDateRange.endDate),
+            createDateWithoutTimezoneOffset(customDateRange.startDate)
+          )
+        );
+      }
+      return baseUnitTimeScaleWidth;
+    })();
+
+    return {
+      timeScaleRows,
+      unitTimeScaleWidth,
+      timeScaleWidth,
+    };
+  }, [
+    TimeScaleMeterPropsVariant,
+    customDateRange?.endDate,
+    customDateRange?.startDate,
+    isCustomDatesSelected,
+    minCalendarDate,
+    palette.text.primary,
+    selectedTimeScale,
+    timelineYears,
+    totalNumberOfDays,
+    totalNumberOfHours,
+  ]);
 
   //#region Unit time scaling
   const [timelineWidthScaleFactor, setTimelineWidthScaleFactor] = useState(
@@ -1685,6 +1734,15 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                 }
                 return null;
               })(),
+            },
+            {
+              replace: true,
+            }
+          );
+        } else {
+          setSearchParams(
+            {
+              isCustomDatesSelected: null,
             },
             {
               replace: true,
