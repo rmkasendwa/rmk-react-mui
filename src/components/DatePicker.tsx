@@ -141,6 +141,7 @@ export const DatePicker = forwardRef<HTMLDivElement, DatePickerProps>(
           },
           [`
           .react-datepicker__day.react-datepicker__day--selected,
+          .react-datepicker__day--in-range,
           .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item--selected
         `]: {
             '&,&:hover': {
