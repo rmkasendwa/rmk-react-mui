@@ -39,7 +39,7 @@ export type SelectCustomDatesTimeScaleCallbackFunction = (
 ) => void;
 
 export interface TimeScaleToolProps {
-  selectedTimeScale: TimeScaleOption;
+  selectedTimeScale?: TimeScaleOption;
   supportedTimeScales?: TimeScaleOption[];
   onSelectTimeScale?: SelectTimeScaleCallbackFunction;
   label?: ReactNode;
@@ -210,7 +210,7 @@ export const useTimeScaleTool = ({
         color="inherit"
         sx={{
           minWidth: 80,
-          maxWidth: 100,
+          maxWidth: 105,
         }}
       >
         <Typography variant="inherit" component="div" noWrap>
@@ -231,7 +231,7 @@ export const useTimeScaleTool = ({
         color="inherit"
         sx={{
           minWidth: 80,
-          maxWidth: 100,
+          maxWidth: 105,
         }}
       >
         <Typography variant="inherit" component="div" noWrap>
@@ -247,7 +247,7 @@ export const useTimeScaleTool = ({
 
   if (isCustomDatesTimeScaleSelected) {
     elementMaxWidth += (typeof label === 'string' ? label.length * 5 : 60) + 4;
-    const customDatesElementsNodeWidth = 4 + 10 + 4 + 100 + 4 + 24 + 4 + 100;
+    const customDatesElementsNodeWidth = 4 + 10 + 4 + 105 + 4 + 24 + 4 + 105;
     elementMaxWidth += customDatesElementsNodeWidth;
     collapsedElementMaxWidth += customDatesElementsNodeWidth;
   }
