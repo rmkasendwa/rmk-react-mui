@@ -50,7 +50,7 @@ import * as Yup from 'yup';
 import { useReactRouterDOMSearchParams } from '../../hooks/ReactRouterDOM';
 import { DragToScrollProps, useDragToScroll } from '../../hooks/Scrolling';
 import { BaseDataRow, Table, TableColumn, TableProps } from '../Table';
-import Tooltip, { TooltipProps } from '../Tooltip';
+import { TooltipProps } from '../Tooltip';
 import {
   ScrollTimelineToolsProps,
   SelectCustomDatesTimeScaleCallbackFunction,
@@ -71,6 +71,7 @@ import {
   timeScaleOptions,
   timelineSearchParamValidationSpec,
 } from './models';
+import TimelineElement, { TimelineElementProps } from './TimelineElement';
 import TimeScaleMeter, {
   TimeScaleMeterProps,
   timeScaleMeterClasses,
@@ -112,13 +113,6 @@ declare module '@mui/material/styles/components' {
       variants?: ComponentsVariants['MuiTimeline'];
     };
   }
-}
-
-export interface TimelineElement extends Partial<BoxProps> {
-  startDate?: string | number | Date;
-  endDate?: string | number | Date;
-  label?: ReactNode;
-  TooltipProps?: Partial<TooltipProps>;
 }
 
 /**
@@ -182,7 +176,7 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
   rowLabelsColumnHeader?: ReactNode;
 
   /** A function to get an array of timeline elements for each row. */
-  getTimelineElements?: (row: RecordRow) => TimelineElement[];
+  getTimelineElements?: (row: RecordRow) => TimelineElementProps[];
 
   /** An optional ID for the timeline component. */
   id?: string;
@@ -286,7 +280,7 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
 
   /** An array of static rows with additional data, like timeline elements and label. */
   staticRows?: (BaseDataRow & {
-    timelineElements: TimelineElement[];
+    timelineElements: TimelineElementProps[];
     label?: ReactNode;
   })[];
 
@@ -1507,7 +1501,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     TooltipProps = {},
     sx,
     ...rest
-  }: TimelineElement) => {
+  }: TimelineElementProps) => {
     if (startDateValue) {
       const startDate = createDateWithoutTimezoneOffset(startDateValue as any);
 
@@ -1553,65 +1547,35 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
             if (label) {
               return label;
             }
-            return baseTimelineElementLabel;
-          })();
-
-          const {
-            PopperProps: TooltipPropsPopperProps = {},
-            ...TooltipPropsRest
-          } = TooltipProps;
-
-          return (
-            // Render the timeline element wrapped with a tooltip.
-            <Tooltip
-              title={baseTimelineElementLabel}
-              enterDelay={1000}
-              enterNextDelay={500}
-              disableInteractive
-              {...TooltipPropsRest}
-              PopperProps={{
-                ...TooltipPropsPopperProps,
-                sx: {
-                  zIndex: 9999,
-                  ...TooltipPropsPopperProps.sx,
-                },
-              }}
-            >
+            return (
               <Box
-                {...rest}
                 sx={{
-                  overflow: 'hidden',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
                   px: 2,
-                  bgcolor: palette.primary.main,
-                  color: palette.getContrastText(palette.primary.main),
-                  border: `1px solid ${palette.divider}`,
-                  borderRadius: 1,
-                  height: 42,
-                  '&:hover': {
-                    zIndex: 1,
-                  },
-                  ...sx,
-                  width: `${percentage * 100}%`,
-                  position: 'absolute',
-                  top: 0,
-                  left: `${offsetPercentage * 100}%`,
                 }}
               >
-                <Typography
-                  component="div"
-                  variant="body2"
-                  noWrap
-                  sx={{
-                    width: '100%',
-                  }}
-                >
-                  {timelineElementLabel}
-                </Typography>
+                {baseTimelineElementLabel}
               </Box>
-            </Tooltip>
+            );
+          })();
+
+          const { ...TooltipPropsRest } = TooltipProps;
+
+          return (
+            <TimelineElement
+              {...rest}
+              label={timelineElementLabel}
+              TooltipProps={{
+                title: baseTimelineElementLabel,
+                ...TooltipPropsRest,
+              }}
+              sx={{
+                ...sx,
+                width: `${percentage * 100}%`,
+                position: 'absolute',
+                top: 0,
+                left: `${offsetPercentage * 100}%`,
+              }}
+            />
           );
         }
       }
@@ -1990,7 +1954,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       getColumnValue: (row) => {
         const timelineElements = (() => {
           if (row.isTimelineStaticRow) {
-            return row.timelineElements as TimelineElement[];
+            return row.timelineElements as TimelineElementProps[];
           }
           if (getTimelineElements) {
             return getTimelineElements(row);
