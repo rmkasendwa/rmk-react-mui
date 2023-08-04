@@ -38,7 +38,6 @@ import {
   useEffect,
   useMemo,
   useRef,
-  useState,
 } from 'react';
 import { mergeRefs } from 'react-merge-refs';
 import { Link as RouterLink, useLocation, useNavigate } from 'react-router-dom';
@@ -99,7 +98,6 @@ import Table, {
 } from '../Table';
 import Timeline, {
   ScrollToDateFunction,
-  SelectCustomDates,
   SelectCustomDatesTimeScaleCallbackFunction,
   SelectTimeScaleCallbackFunction,
   TimeScaleOption,
@@ -1159,6 +1157,9 @@ const BaseRecordsExplorer = <
     selectedRecord: selectedRecordId,
     editRecord,
     selectedDataPreset: searchParamSelectedDataPreset,
+    timeScale: searchParamsSelectedTimeScale,
+    isCustomDatesSelected: isCustomDatesTimeScaleSelected,
+    customDateRange: selectedCustomDates,
   } = searchParams;
 
   const unTrackableSearchParams = [
@@ -1856,25 +1857,22 @@ const BaseRecordsExplorer = <
   const jumpToPreviousUnitTimeScaleRef = useRef<() => void>();
   const jumpToNextUnitTimeScaleRef = useRef<() => void>();
   const resetTimelineToDefaultViewRef = useRef<() => void>();
+  const selectedTimeScaleRef = useRef<TimeScaleOption>();
+  const timelineDateBoundsRef = useRef<{
+    minDate: Date;
+    maxDate: Date;
+  }>();
 
   const timelineView = views?.find(({ type }) => type === 'Timeline') as
     | TimelineView<RecordRow>
     | undefined;
 
-  const [selectedTimeScale, setSelectedTimeScale] =
-    useState<TimeScaleOption>('Year');
-  const [isCustomDatesTimeScaleSelected, setIsCustomDatesTimeScaleSelected] =
-    useState<boolean | undefined>();
-  const [selectedCustomDates, setSelectedCustomDates] = useState<
-    SelectCustomDates | undefined
-  >();
-  const [timelineDateBounds, setTimelineDateBounds] = useState<
-    | {
-        minDate: Date;
-        maxDate: Date;
-      }
-    | undefined
-  >();
+  const selectedTimeScale = ((): TimeScaleOption | undefined => {
+    if (searchParamsSelectedTimeScale) {
+      return searchParamsSelectedTimeScale;
+    }
+    return selectedTimeScaleRef.current;
+  })();
 
   const timeScaleTool = useTimeScaleTool({
     ...timelineView?.TimeScaleToolProps,
@@ -1896,8 +1894,8 @@ const BaseRecordsExplorer = <
     jumpToPreviousUnitTimeScale: jumpToPreviousUnitTimeScaleRef.current,
     jumpToNextUnitTimeScale: jumpToNextUnitTimeScaleRef.current,
     JumpToDateToolProps: {
-      minDate: timelineDateBounds?.minDate,
-      maxDate: timelineDateBounds?.maxDate,
+      minDate: timelineDateBoundsRef.current?.minDate,
+      maxDate: timelineDateBoundsRef.current?.maxDate,
       selectedDate: currentDateAtCenterRef.current,
     },
   });
@@ -2424,17 +2422,10 @@ const BaseRecordsExplorer = <
                     resetTimelineToDefaultView;
                 }}
                 onChangeSelectedTimeScale={(selectedTimeScale) => {
-                  setSelectedTimeScale(selectedTimeScale);
-                }}
-                onChangeSelectedCustomDatesTimeScale={(
-                  isCustomDatesSelected,
-                  selectedCustomDates
-                ) => {
-                  setIsCustomDatesTimeScaleSelected(isCustomDatesSelected);
-                  setSelectedCustomDates(selectedCustomDates);
+                  selectedTimeScaleRef.current = selectedTimeScale;
                 }}
                 onChangeTimelineDateBounds={(dateBounds) => {
-                  setTimelineDateBounds(dateBounds);
+                  timelineDateBoundsRef.current = dateBounds;
                 }}
                 onChangeCurrentDateAtCenter={(currentDateAtCenter) => {
                   currentDateAtCenterRef.current = currentDateAtCenter;

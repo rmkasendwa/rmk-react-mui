@@ -85,7 +85,7 @@ export const RenderIfVisible: FC<RenderIfVisibleProps> = ({
   const { sx: placeholderPropsSx, ...placeholderPropsRest } = PlaceholderProps;
   unWrapChildrenIfVisible && (stayRendered = true);
 
-  const isComponentMountedRef = useRef(true);
+  const isMountedRef = useRef(true);
   const wasVisibleRef = useRef(initialVisible);
   const placeholderDimensionsRef = useRef(defaultPlaceholderDimensions);
   const onChangeVisibilityRef = useRef(onChangeVisibility);
@@ -106,9 +106,9 @@ export const RenderIfVisible: FC<RenderIfVisibleProps> = ({
   }, [isVisible]);
 
   useEffect(() => {
-    isComponentMountedRef.current = true;
+    isMountedRef.current = true;
     return () => {
-      isComponentMountedRef.current = false;
+      isMountedRef.current = false;
     };
   }, []);
 
