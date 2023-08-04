@@ -70,7 +70,7 @@ export const contacts = Array.from({ length: 1000 }).map((_, index) => {
     source: contactSources[Math.floor(Math.random() * contactSources.length)],
     countryCode: countryCodes[Math.floor(Math.random() * countryCodes.length)],
     ...(() => {
-      if (Math.random() < 0.25) {
+      if (Math.random() > 0.9) {
         return {
           joinedAt: joinedAtDate.toISOString(),
           leftAt: leftAtDate.toISOString(),
