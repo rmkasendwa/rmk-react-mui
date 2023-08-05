@@ -195,6 +195,7 @@ export const TimelineElement = forwardRef<HTMLDivElement, TimelineElementProps>(
           noWrap
           sx={{
             width: '100%',
+            px: 2,
           }}
         >
           {label}
