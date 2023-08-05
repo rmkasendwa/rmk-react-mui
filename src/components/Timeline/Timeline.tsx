@@ -888,9 +888,13 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     }
 
     // Get the date at cursor marker element from the timeline container
-    const dateAtCursorMarkerElement = timelineContainerElement.querySelector(
-      `.${classes.dateAtCursorMarker}`
-    ) as HTMLElement;
+    const [dateAtCursorMarkerElement, secondaryDateAtCursorMarkerElement] = [
+      ...timelineContainerElement.querySelectorAll(
+        `.${classes.dateAtCursorMarker}`
+      ),
+    ] as HTMLElement[];
+
+    console.log({ secondaryDateAtCursorMarkerElement });
 
     // If the date at cursor marker element is present, perform calibration
     if (dateAtCursorMarkerElement) {
@@ -905,6 +909,10 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       if (timelineContainerHeight) {
         dateAtCursorMarkerElement.style.height = `${timelineContainerHeight}px`;
       }
+    }
+
+    if (secondaryDateAtCursorMarkerElement) {
+      secondaryDateAtCursorMarkerElement.style.height = `${timelineContainerElement.offsetHeight}px`;
     }
 
     if (currentDateAtCenterPositionLeftOffsetRef.current) {
@@ -1630,23 +1638,20 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     }
   }, [scrollingAncenstorElement, selectedTimeScale]);
 
+  //#region Track date at cursor
   useEffect(() => {
     const timelineMeterContainerElement =
       timelineContainerElement?.querySelector(
         `.${classes.timelineMeterContainer}`
       ) as HTMLElement;
-    const dateAtCursorMarkerElement = timelineContainerElement?.querySelector(
-      `.${classes.dateAtCursorMarker}`
-    ) as HTMLElement;
     const dateAtCursorMarkerLabelElement =
-      dateAtCursorMarkerElement?.querySelector(
-        `.${classes.dateAtCursorMarkerLabel}`
+      timelineContainerElement?.querySelector(
+        `.${classes.dateAtCursorMarker}>.${classes.dateAtCursorMarkerLabel}`
       ) as HTMLElement;
     if (
       timelineMeterContainerElement &&
       scrollingAncenstorElement &&
       timelineContainerElement &&
-      dateAtCursorMarkerElement &&
       dateAtCursorMarkerLabelElement
     ) {
       const mouseMoveEventCallback = (event: MouseEvent) => {
@@ -1666,7 +1671,11 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
             minCalendarDate,
             totalNumberOfHours * percentageAtMousePosition
           );
-          dateAtCursorMarkerElement.style.left = `${timelineX}px`;
+          timelineContainerElement
+            ?.querySelectorAll(`.${classes.dateAtCursorMarker}`)
+            .forEach((dateAtCursorMarkerElement: any) => {
+              dateAtCursorMarkerElement.style.left = `${timelineX}px`;
+            });
           dateAtCursorMarkerLabelElement.innerText = formatDate(
             dateAtMousePosition,
             dateFormat
@@ -1696,6 +1705,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     timelineViewPortLeftOffset,
     totalNumberOfHours,
   ]);
+  //#endregion
 
   useEffect(() => {
     isInitialMountRef.current = false;
@@ -1841,6 +1851,10 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   });
   //#endregion
 
+  const dateAtCursorBgcolor = (palette.mode === 'light' ? lighten : darken)(
+    palette.text.primary,
+    0.5
+  );
   const columns: TableColumn<RecordRow>[] = [
     {
       id: 'timelineElements',
@@ -1902,17 +1916,13 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
             }
           })()}
           {(() => {
-            const bgcolor = (palette.mode === 'light' ? lighten : darken)(
-              palette.text.primary,
-              0.5
-            );
             return (
               <Box
                 className={clsx(classes.dateAtCursorMarker)}
                 {...DateAtCursorMarkerPropsRest}
                 sx={{
                   width: '1px',
-                  bgcolor,
+                  bgcolor: dateAtCursorBgcolor,
                   ...DateAtCursorMarkerPropsSx,
                   bottom: 0,
                   position: 'absolute',
@@ -1927,7 +1937,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                   sx={{
                     py: 0.5,
                     px: 1,
-                    bgcolor,
+                    bgcolor: dateAtCursorBgcolor,
                     color: palette.background.paper,
                     borderBottomRightRadius: '4px',
                     fontSize: 12,
@@ -1942,6 +1952,28 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           })()}
         </Box>
       ),
+      secondaryHeaderRowContent: (() => {
+        return (
+          <Box
+            sx={{
+              position: 'relative',
+              width: '100%',
+            }}
+          >
+            <Box
+              className={clsx(classes.dateAtCursorMarker)}
+              {...DateAtCursorMarkerPropsRest}
+              sx={{
+                width: '1px',
+                bgcolor: dateAtCursorBgcolor,
+                ...DateAtCursorMarkerPropsSx,
+                top: 0,
+                position: 'absolute',
+              }}
+            />
+          </Box>
+        );
+      })(),
       getColumnValue: (row) => {
         const timelineElements = (() => {
           if (row.isTimelineStaticRow) {
@@ -2090,6 +2122,14 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           }
         })(),
       },
+      secondaryHeaderSx: {
+        borderRight: 'none !important',
+        '&>div': {
+          py: 0,
+          pl: `${baseSpacingUnits}px`,
+          pr: 0,
+        },
+      },
       bodySx: {
         zIndex: 2,
         ...(() => {
@@ -2183,6 +2223,14 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
             position: 'relative',
             zIndex: 3,
             verticalAlign: 'bottom',
+          },
+        }}
+        SecondaryHeaderRowProps={{
+          sx: {
+            position: 'relative',
+            th: {
+              borderBottom: 'none',
+            },
           },
         }}
         TableBodyRowPlaceholderProps={{
