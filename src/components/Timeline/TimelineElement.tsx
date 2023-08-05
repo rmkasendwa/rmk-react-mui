@@ -71,7 +71,7 @@ export function getTimelineElementUtilityClass(slot: string): string {
   return generateUtilityClass('MuiTimelineElement', slot);
 }
 
-export const TimelineElementClasses: TimelineElementClasses =
+export const timelineElementClasses: TimelineElementClasses =
   generateUtilityClasses('MuiTimelineElement', [
     'root',
     'leftEdgeIntersecting',
