@@ -1546,15 +1546,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
             if (label) {
               return label;
             }
-            return (
-              <Box
-                sx={{
-                  px: 2,
-                }}
-              >
-                {baseTimelineElementLabel}
-              </Box>
-            );
+            return baseTimelineElementLabel;
           })();
 
           const { ...TooltipPropsRest } = TooltipProps;
