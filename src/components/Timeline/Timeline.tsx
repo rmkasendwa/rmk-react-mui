@@ -894,8 +894,6 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       ),
     ] as HTMLElement[];
 
-    console.log({ secondaryDateAtCursorMarkerElement });
-
     // If the date at cursor marker element is present, perform calibration
     if (dateAtCursorMarkerElement) {
       // Get the height of the timeline meter container
@@ -1680,6 +1678,18 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
             dateAtMousePosition,
             dateFormat
           );
+          if (scrollingAncenstorElement!.clientWidth - localX < 200) {
+            dateAtCursorMarkerLabelElement.style.right = '100%';
+            dateAtCursorMarkerLabelElement.style.left = '';
+            dateAtCursorMarkerLabelElement.style.borderBottomRightRadius = '';
+            dateAtCursorMarkerLabelElement.style.borderBottomLeftRadius = '4px';
+          } else {
+            dateAtCursorMarkerLabelElement.style.right = '';
+            dateAtCursorMarkerLabelElement.style.left = '100%';
+            dateAtCursorMarkerLabelElement.style.borderBottomRightRadius =
+              '4px';
+            dateAtCursorMarkerLabelElement.style.borderBottomLeftRadius = '';
+          }
         }
       };
       scrollingAncenstorElement.addEventListener(
@@ -1939,10 +1949,8 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                     px: 1,
                     bgcolor: dateAtCursorBgcolor,
                     color: palette.background.paper,
-                    borderBottomRightRadius: '4px',
                     fontSize: 12,
                     top: 0,
-                    left: '100%',
                     ...DateAtCursorMarkerLabelPropsSx,
                     position: 'absolute',
                   }}
