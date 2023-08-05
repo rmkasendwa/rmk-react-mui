@@ -12,7 +12,7 @@ import formatDate from 'date-fns/format';
 import { omit } from 'lodash';
 import { ReactNode } from 'react';
 
-import { usePopupTool } from '../../../hooks/Tools/PopupTool';
+import { PopupToolOptions, usePopupTool } from '../../../hooks/Tools/PopupTool';
 import DatePicker from '../../DatePicker';
 import DataDropdownField, {
   DataDropdownFieldProps,
@@ -47,6 +47,7 @@ export interface TimeScaleToolProps {
   isCustomDatesTimeScaleSelected?: boolean;
   onSelectCustomDatesTimeScale?: SelectCustomDatesTimeScaleCallbackFunction;
   selectedCustomDates?: SelectCustomDates;
+  DatePickerToolProps?: Partial<Omit<PopupToolOptions, 'onChange'>>;
 }
 
 export const useTimeScaleTool = ({
@@ -63,6 +64,7 @@ export const useTimeScaleTool = ({
   } = {
     startDate: new Date().toISOString(),
   },
+  DatePickerToolProps,
 }: TimeScaleToolProps) => {
   const dataDropdownProps: DataDropdownFieldProps = {
     placeholder: label as string,
@@ -176,8 +178,9 @@ export const useTimeScaleTool = ({
     ...fromButtonPropsRest
   } = usePopupTool({
     label: 'From',
-    type: 'button',
     wrapBodyContentInCard: false,
+    ...DatePickerToolProps,
+    type: 'button',
     bodyContent: wrapDatePickerNode
       ? wrapDatePickerNode(datePickerNode)
       : datePickerNode,
@@ -188,8 +191,9 @@ export const useTimeScaleTool = ({
     ...toButtonPropsRest
   } = usePopupTool({
     label: 'To',
-    type: 'button',
     wrapBodyContentInCard: false,
+    ...DatePickerToolProps,
+    type: 'button',
     bodyContent: wrapDatePickerNode
       ? wrapDatePickerNode(datePickerNode)
       : datePickerNode,
