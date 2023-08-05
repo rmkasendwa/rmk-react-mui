@@ -176,7 +176,9 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
   rowLabelsColumnHeader?: ReactNode;
 
   /** A function to get an array of timeline elements for each row. */
-  getTimelineElements?: (row: RecordRow) => TimelineElementProps[];
+  getTimelineElements?: (
+    row: RecordRow
+  ) => Omit<TimelineElementProps, 'scrollingAncenstorElement'>[];
 
   /** An optional ID for the timeline component. */
   id?: string;
@@ -280,7 +282,7 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
 
   /** An array of static rows with additional data, like timeline elements and label. */
   staticRows?: (BaseDataRow & {
-    timelineElements: TimelineElementProps[];
+    timelineElements: Omit<TimelineElementProps, 'scrollingAncenstorElement'>[];
     label?: ReactNode;
   })[];
 
@@ -492,6 +494,10 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     return !isSmallScreenSize && showRowLabelsColumn;
   })();
 
+  const timelineViewPortLeftOffset = shouldShowRowLabelsColumn
+    ? rowLabelsColumnWidth
+    : 0;
+
   const {
     searchParams: {
       timeScale: searchParamsSelectedTimeScale,
@@ -674,7 +680,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     // Calculate the width of the timeline viewport.
     const timelineViewPortWidth =
       (scrollingAncenstorElement?.offsetWidth || window.innerWidth) -
-      (shouldShowRowLabelsColumn ? rowLabelsColumnWidth : 0);
+      timelineViewPortLeftOffset;
 
     // Determine the ideal optimal time scale based on the timeline's data and viewport width.
     if (
@@ -782,14 +788,13 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           case 'center':
             dateScrollLeftPosition -= Math.round(
               (scrollingAncenstorElementOffsetWidth -
-                (shouldShowRowLabelsColumn ? rowLabelsColumnWidth : 0)) /
+                timelineViewPortLeftOffset) /
                 2
             );
             break;
           case 'end':
             dateScrollLeftPosition -= Math.round(
-              scrollingAncenstorElementOffsetWidth -
-                (shouldShowRowLabelsColumn ? rowLabelsColumnWidth : 0)
+              scrollingAncenstorElementOffsetWidth - timelineViewPortLeftOffset
             );
             break;
         }
@@ -807,9 +812,8 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       classes.timelineMeterContainer,
       maxCalendarDate,
       minCalendarDate,
-      rowLabelsColumnWidth,
       scrollingAncenstorElement,
-      shouldShowRowLabelsColumn,
+      timelineViewPortLeftOffset,
       totalNumberOfHours,
     ]
   );
@@ -1339,8 +1343,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     () => {
       if (scrollingAncenstorElement) {
         return (
-          (scrollingAncenstorElement.clientWidth -
-            (shouldShowRowLabelsColumn ? rowLabelsColumnWidth : 0)) /
+          (scrollingAncenstorElement.clientWidth - timelineViewPortLeftOffset) /
           unitTimeScaleWidth
         );
       }
@@ -1355,7 +1358,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           if (scrollingAncenstorElement) {
             return (
               (scrollingAncenstorElement.clientWidth -
-                (shouldShowRowLabelsColumn ? rowLabelsColumnWidth : 0)) /
+                timelineViewPortLeftOffset) /
               unitTimeScaleWidth
             );
           }
@@ -1368,9 +1371,8 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       };
     }
   }, [
-    rowLabelsColumnWidth,
     scrollingAncenstorElement,
-    shouldShowRowLabelsColumn,
+    timelineViewPortLeftOffset,
     unitTimeScaleWidth,
   ]);
 
@@ -1443,9 +1445,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           (scrollLeft -
             baseSpacingUnits +
             Math.round(
-              (parentElementOffsetWidth -
-                (shouldShowRowLabelsColumn ? rowLabelsColumnWidth : 0)) /
-                2
+              (parentElementOffsetWidth - timelineViewPortLeftOffset) / 2
             )) /
           (offsetWidth - baseSpacingUnits);
 
@@ -1482,10 +1482,9 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     baseSpacingUnits,
     classes.timelineMeterContainer,
     minCalendarDate,
-    rowLabelsColumnWidth,
     scrollingAncenstorElement,
-    shouldShowRowLabelsColumn,
     timelineContainerElement,
+    timelineViewPortLeftOffset,
     totalNumberOfHours,
   ]);
 
@@ -1501,7 +1500,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     TooltipProps = {},
     sx,
     ...rest
-  }: TimelineElementProps) => {
+  }: Omit<TimelineElementProps, 'scrollingAncenstorElement'>) => {
     if (startDateValue) {
       const startDate = createDateWithoutTimezoneOffset(startDateValue as any);
 
@@ -1564,6 +1563,10 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
             <TimelineElement
               {...rest}
               label={timelineElementLabel}
+              scrollingAncenstorElement={scrollingAncenstorElement}
+              viewportOffsets={{
+                left: timelineViewPortLeftOffset,
+              }}
               TooltipProps={{
                 title: baseTimelineElementLabel,
                 ...TooltipPropsRest,
@@ -1661,7 +1664,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         const localX = clientX - left;
         const timelineX =
           localX -
-          (shouldShowRowLabelsColumn ? rowLabelsColumnWidth : 0) -
+          timelineViewPortLeftOffset -
           baseSpacingUnits +
           scrollingAncenstorElement!.scrollLeft;
         if (timelineX >= 0) {
@@ -1696,10 +1699,9 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     classes.timelineMeterContainer,
     dateFormat,
     minCalendarDate,
-    rowLabelsColumnWidth,
     scrollingAncenstorElement,
-    shouldShowRowLabelsColumn,
     timelineContainerElement,
+    timelineViewPortLeftOffset,
     totalNumberOfHours,
   ]);
 
@@ -1862,16 +1864,13 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
             timeScaleRows={timeScaleRows}
             timeScaleWidth={scaledTimeScaleWidth}
             scrollingElement={scrollingAncenstorElement}
-            leftOffset={
-              (shouldShowRowLabelsColumn ? rowLabelsColumnWidth : 0) +
-              baseSpacingUnits
-            }
+            leftOffset={timelineViewPortLeftOffset + baseSpacingUnits}
             variant={TimeScaleMeterPropsVariant}
             sx={{
               ...TimeScaleMeterPropsSx,
               [`.${timeScaleMeterClasses.timeScaleLevel1Tick}`]: {
                 left:
-                  (shouldShowRowLabelsColumn ? rowLabelsColumnWidth : 0) +
+                  timelineViewPortLeftOffset +
                   (() => {
                     if (shouldShowRowLabelsColumn) {
                       return 16;
@@ -1954,7 +1953,10 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       getColumnValue: (row) => {
         const timelineElements = (() => {
           if (row.isTimelineStaticRow) {
-            return row.timelineElements as TimelineElementProps[];
+            return row.timelineElements as Omit<
+              TimelineElementProps,
+              'scrollingAncenstorElement'
+            >[];
           }
           if (getTimelineElements) {
             return getTimelineElements(row);
