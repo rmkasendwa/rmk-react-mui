@@ -3,8 +3,6 @@ import {
   ComponentsOverrides,
   ComponentsProps,
   ComponentsVariants,
-  Tooltip,
-  TooltipProps,
   Typography,
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
@@ -17,6 +15,8 @@ import clsx from 'clsx';
 import { ReactNode, forwardRef, useEffect, useRef } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { mergeRefs } from 'react-merge-refs';
+
+import Tooltip, { TooltipProps } from '../Tooltip';
 
 export interface TimelineElementClasses {
   /** Styles applied to the root element. */
