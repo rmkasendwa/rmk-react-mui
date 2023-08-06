@@ -214,7 +214,7 @@ export const useTimeScaleTool = ({
         color="inherit"
         sx={{
           minWidth: 80,
-          maxWidth: 105,
+          maxWidth: 110,
         }}
       >
         <Typography variant="inherit" component="div" noWrap>
@@ -235,7 +235,7 @@ export const useTimeScaleTool = ({
         color="inherit"
         sx={{
           minWidth: 80,
-          maxWidth: 105,
+          maxWidth: 110,
         }}
       >
         <Typography variant="inherit" component="div" noWrap>
@@ -251,7 +251,7 @@ export const useTimeScaleTool = ({
 
   if (isCustomDatesTimeScaleSelected) {
     elementMaxWidth += (typeof label === 'string' ? label.length * 5 : 60) + 4;
-    const customDatesElementsNodeWidth = 4 + 10 + 4 + 105 + 4 + 24 + 4 + 105;
+    const customDatesElementsNodeWidth = 4 + 10 + 4 + 110 + 4 + 24 + 4 + 110;
     elementMaxWidth += customDatesElementsNodeWidth;
     collapsedElementMaxWidth += customDatesElementsNodeWidth;
   }

@@ -1339,19 +1339,51 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                     label: String(year),
                   };
                 }),
-                timelineYears.flatMap(() => {
-                  return quarterLabels.map((quarter) => {
-                    return {
-                      id: uniqueId(),
-                      label: quarter,
-                    };
+                (() => {
+                  if (TimeScaleMeterPropsVariant === 'compact') {
+                    return timelineYears.flatMap((year) => {
+                      return {
+                        id: uniqueId(),
+                        label: String(year),
+                      };
+                    });
+                  }
+                  return timelineYears.flatMap(() => {
+                    return quarterLabels.map((quarter) => {
+                      return {
+                        id: uniqueId(),
+                        label: quarter,
+                      };
+                    });
                   });
-                }),
+                })(),
                 timelineYears.flatMap(() => {
-                  return shortMonthLabels.map((label) => {
+                  return shortMonthLabels.map((label, monthIndex) => {
                     return {
                       id: uniqueId(),
                       label,
+                      ...(() => {
+                        if (TimeScaleMeterPropsVariant === 'compact') {
+                          return {
+                            sx: {
+                              ...(() => {
+                                if (monthIndex % 3 === 0) {
+                                  return {
+                                    borderLeftColor: '#f00',
+                                  };
+                                }
+                              })(),
+                              ...(() => {
+                                if (monthIndex === 0) {
+                                  return {
+                                    borderLeftColor: palette.text.primary,
+                                  };
+                                }
+                              })(),
+                            },
+                          };
+                        }
+                      })(),
                     };
                   });
                 }),
@@ -1426,8 +1458,8 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     unitTimeScaleWidth,
     timeScaleWidth,
   } = useMemo(() => {
-    return getTimeScaleMeterConfigurationRef.current(selectedTimeScale);
-  }, [selectedTimeScale]);
+    return getTimeScaleMeterConfiguration(selectedTimeScale);
+  }, [getTimeScaleMeterConfiguration, selectedTimeScale]);
 
   const timeScaleRows = useMemo(() => {
     if (
@@ -1499,6 +1531,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   //#endregion
 
   const resetToDefaultView = useRef(() => {
+    isTimelineScrolledRef.current = false;
     setSearchParams(
       {
         timeScale: null,
