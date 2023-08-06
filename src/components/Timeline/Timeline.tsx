@@ -1416,10 +1416,40 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       totalNumberOfHours,
     ]
   );
+  const getTimeScaleMeterConfigurationRef = useRef(
+    getTimeScaleMeterConfiguration
+  );
+  getTimeScaleMeterConfigurationRef.current = getTimeScaleMeterConfiguration;
 
-  const { timeScaleRows, unitTimeScaleWidth, timeScaleWidth } = useMemo(() => {
-    return getTimeScaleMeterConfiguration(selectedTimeScale);
-  }, [getTimeScaleMeterConfiguration, selectedTimeScale]);
+  const {
+    timeScaleRows: baseTimeScaleRows,
+    unitTimeScaleWidth,
+    timeScaleWidth,
+  } = useMemo(() => {
+    return getTimeScaleMeterConfigurationRef.current(selectedTimeScale);
+  }, [selectedTimeScale]);
+
+  const timeScaleRows = useMemo(() => {
+    if (
+      isCustomDatesSelected &&
+      customDateRange?.startDate &&
+      customDateRange.endDate
+    ) {
+      const { timeScaleRows } = getTimeScaleMeterConfigurationRef.current(
+        getIdealOptimalTimeScaleRef.current({
+          startDate: createDateWithoutTimezoneOffset(customDateRange.startDate),
+          endDate: createDateWithoutTimezoneOffset(customDateRange.endDate),
+        })
+      );
+      return timeScaleRows;
+    }
+    return baseTimeScaleRows;
+  }, [
+    baseTimeScaleRows,
+    customDateRange?.endDate,
+    customDateRange?.startDate,
+    isCustomDatesSelected,
+  ]);
 
   //#region Unit time scaling
   const [timelineWidthScaleFactor, setTimelineWidthScaleFactor] = useState(
@@ -1794,13 +1824,6 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   ]);
   //#endregion
 
-  useEffect(() => {
-    isInitialMountRef.current = false;
-    return () => {
-      isInitialMountRef.current = true;
-    };
-  }, []);
-
   //#region TimeScale Tool
   const onSelectTimeScale: SelectTimeScaleCallbackFunction = useCallback(
     (timeScale) => {
@@ -1950,6 +1973,13 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   });
   //#endregion
 
+  useEffect(() => {
+    isInitialMountRef.current = false;
+    return () => {
+      isInitialMountRef.current = true;
+    };
+  }, []);
+
   const dateAtCursorBgcolor = (palette.mode === 'light' ? lighten : darken)(
     palette.text.primary,
     0.5
@@ -1966,26 +1996,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         >
           <TimeScaleMeter
             {...TimeScaleMeterPropsRest}
-            timeScaleRows={(() => {
-              if (
-                isCustomDatesSelected &&
-                customDateRange?.startDate &&
-                customDateRange.endDate
-              ) {
-                const { timeScaleRows } = getTimeScaleMeterConfiguration(
-                  getIdealOptimalTimeScale({
-                    startDate: createDateWithoutTimezoneOffset(
-                      customDateRange.startDate
-                    ),
-                    endDate: createDateWithoutTimezoneOffset(
-                      customDateRange.endDate
-                    ),
-                  })
-                );
-                return timeScaleRows;
-              }
-              return timeScaleRows;
-            })()}
+            timeScaleRows={timeScaleRows}
             timeScaleWidth={scaledTimeScaleWidth}
             scrollingElement={scrollingAncenstorElement}
             leftOffset={timelineViewPortLeftOffset + baseSpacingUnits}
