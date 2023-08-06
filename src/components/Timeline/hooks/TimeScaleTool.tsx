@@ -62,7 +62,7 @@ export const useTimeScaleTool = ({
     startDate: startDateString,
     endDate: endDateString,
   } = {
-    startDate: new Date().toISOString(),
+    startDate: new Date().toISOString().split('T')[0],
   },
   DatePickerToolProps,
 }: TimeScaleToolProps) => {
@@ -165,8 +165,8 @@ export const useTimeScaleTool = ({
         onSelectCustomDatesTimeScale?.(
           isCustomDatesTimeScaleSelected ?? false,
           {
-            startDate: startDate.toISOString(),
-            endDate: endDate?.toISOString(),
+            startDate: formatDate(startDate, 'yyyy-MM-dd'),
+            endDate: endDate ? formatDate(endDate, 'yyyy-MM-dd') : undefined,
           }
         );
       }}
