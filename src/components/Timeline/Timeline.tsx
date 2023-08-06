@@ -740,6 +740,24 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     return idealOptimalTimeScale; // If the ideal optimal time scale is supported, use it as the final optimal time scale.
   })();
 
+  const getDateAtPercentage = useCallback(
+    (percentage: number) => {
+      return addHours(minCalendarDate, totalNumberOfHours * percentage);
+    },
+    [minCalendarDate, totalNumberOfHours]
+  );
+  const getDateAtPercentageRef = useRef(getDateAtPercentage);
+  getDateAtPercentageRef.current = getDateAtPercentage;
+
+  const getPercentageAtDate = useCallback(
+    (date: Date) => {
+      return differenceInHours(date, minCalendarDate) / totalNumberOfHours;
+    },
+    [minCalendarDate, totalNumberOfHours]
+  );
+  const getPercentageAtDateRef = useRef(getPercentageAtDate);
+  getPercentageAtDateRef.current = getPercentageAtDate;
+
   /**
    * Function to scroll the timeline to a specific date.
    *
@@ -777,8 +795,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         isBefore(date, maxCalendarDate)
       ) {
         // Calculate the percentage offset of the date within the timeline
-        const offsetPercentage =
-          differenceInHours(date, minCalendarDate) / totalNumberOfHours;
+        const offsetPercentage = getPercentageAtDateRef.current(date);
 
         // Get the width of the scrolling ancestor element and the timeline meter container
         const { offsetWidth: scrollingAncenstorElementOffsetWidth } =
@@ -817,7 +834,6 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       minCalendarDate,
       scrollingAncenstorElement,
       timelineViewPortLeftOffset,
-      totalNumberOfHours,
     ]
   );
   const scrollToDateRef = useRef(scrollToDate);
@@ -1360,7 +1376,9 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     () => {
       if (scrollingAncenstorElement) {
         return (
-          (scrollingAncenstorElement.clientWidth - timelineViewPortLeftOffset) /
+          (scrollingAncenstorElement.clientWidth +
+            baseSpacingUnits -
+            timelineViewPortLeftOffset) /
           unitTimeScaleWidth
         );
       }
@@ -1374,7 +1392,8 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         setTimelineWidthScaleFactor(() => {
           if (scrollingAncenstorElement) {
             return (
-              (scrollingAncenstorElement.clientWidth -
+              (scrollingAncenstorElement.clientWidth +
+                baseSpacingUnits -
                 timelineViewPortLeftOffset) /
               unitTimeScaleWidth
             );
@@ -1388,6 +1407,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       };
     }
   }, [
+    baseSpacingUnits,
     scrollingAncenstorElement,
     timelineViewPortLeftOffset,
     unitTimeScaleWidth,
@@ -1646,24 +1666,6 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       lastDateAtCenterRef.current = null;
     }
   }, [scrollingAncenstorElement, selectedTimeScale]);
-
-  const getDateAtPercentage = useCallback(
-    (percentage: number) => {
-      return addHours(minCalendarDate, totalNumberOfHours * percentage);
-    },
-    [minCalendarDate, totalNumberOfHours]
-  );
-  const getDateAtPercentageRef = useRef(getDateAtPercentage);
-  getDateAtPercentageRef.current = getDateAtPercentage;
-
-  const getPercentageAtDate = useCallback(
-    (date: Date) => {
-      return differenceInHours(date, minCalendarDate) / totalNumberOfHours;
-    },
-    [minCalendarDate, totalNumberOfHours]
-  );
-  const getPercentageAtDateRef = useRef(getPercentageAtDate);
-  getPercentageAtDateRef.current = getPercentageAtDate;
 
   //#region Track date at cursor
   useEffect(() => {
