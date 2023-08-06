@@ -671,53 +671,87 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     });
   }, [maxCalendarDate, minCalendarDate]);
 
+  const getIdealOptimalTimeScale = useCallback(
+    (
+      options:
+        | {
+            startDate: Date;
+            endDate: Date;
+          }
+        | {
+            timelineDifferenceInDays: number;
+            timelineDifferenceInHours: number;
+          }
+    ): TimeScaleOption => {
+      const timelineDifferenceInDays = (() => {
+        if ('timelineDifferenceInDays' in options) {
+          return options.timelineDifferenceInDays;
+        }
+        return differenceInDays(options.endDate, options.startDate);
+      })();
+      const timelineDifferenceInHours = (() => {
+        if ('timelineDifferenceInHours' in options) {
+          return options.timelineDifferenceInHours;
+        }
+        return differenceInHours(options.endDate, options.startDate);
+      })();
+
+      // Calculate the width of the timeline viewport.
+      const timelineViewPortWidth =
+        (scrollingAncenstorElement?.offsetWidth || window.innerWidth) -
+        timelineViewPortLeftOffset;
+
+      // Determine the ideal optimal time scale based on the timeline's data and viewport width.
+      if (
+        timelineDifferenceInHours <= 24 &&
+        timelineDifferenceInHours * 64 <= timelineViewPortWidth
+      ) {
+        return 'Day';
+      }
+      if (
+        timelineDifferenceInDays <= 7 &&
+        timelineDifferenceInDays * 200 <= timelineViewPortWidth
+      ) {
+        return 'Week';
+      }
+      if (
+        timelineDifferenceInDays <= 14 &&
+        timelineDifferenceInDays * 100 <= timelineViewPortWidth
+      ) {
+        return '2 week';
+      }
+      if (
+        timelineDifferenceInDays <= 30 &&
+        timelineDifferenceInDays * 60 <= timelineViewPortWidth
+      ) {
+        return 'Month';
+      }
+      if (timelineDifferenceInDays <= 90) {
+        return 'Quarter';
+      }
+      if (timelineDifferenceInDays <= 365) {
+        return 'Year';
+      }
+      return '5 year'; // If none of the conditions match, the ideal optimal time scale is set to '5 year'.
+    },
+    [scrollingAncenstorElement?.offsetWidth, timelineViewPortLeftOffset]
+  );
+  const getIdealOptimalTimeScaleRef = useRef(getIdealOptimalTimeScale);
+  getIdealOptimalTimeScaleRef.current = getIdealOptimalTimeScale;
+
   /**
    * Calculates the ideal optimal time scale for the timeline based on the timeline's data and viewport width.
    */
-  const idealOptimalTimeScale = ((): TimeScaleOption => {
+  const idealOptimalTimeScale = useMemo(() => {
     // If there is only one date, the optimal time scale is set to 'Year'.
     if (allDates.length <= 1) {
       return 'Year';
     }
-
-    // Calculate the width of the timeline viewport.
-    const timelineViewPortWidth =
-      (scrollingAncenstorElement?.offsetWidth || window.innerWidth) -
-      timelineViewPortLeftOffset;
-
-    // Determine the ideal optimal time scale based on the timeline's data and viewport width.
-    if (
-      timelineDifferenceInHours <= 24 &&
-      timelineDifferenceInHours * 64 <= timelineViewPortWidth
-    ) {
-      return 'Day';
-    }
-    if (
-      timelineDifferenceInDays <= 7 &&
-      timelineDifferenceInDays * 200 <= timelineViewPortWidth
-    ) {
-      return 'Week';
-    }
-    if (
-      timelineDifferenceInDays <= 14 &&
-      timelineDifferenceInDays * 100 <= timelineViewPortWidth
-    ) {
-      return '2 week';
-    }
-    if (
-      timelineDifferenceInDays <= 30 &&
-      timelineDifferenceInDays * 60 <= timelineViewPortWidth
-    ) {
-      return 'Month';
-    }
-    if (timelineDifferenceInDays <= 90) {
-      return 'Quarter';
-    }
-    if (timelineDifferenceInDays <= 365) {
-      return 'Year';
-    }
-    return '5 year'; // If none of the conditions match, the ideal optimal time scale is set to '5 year'.
-  })();
+    return getIdealOptimalTimeScaleRef.current({
+      timelineDifferenceInDays,
+      timelineDifferenceInHours,
+    });
+  }, [allDates.length, timelineDifferenceInDays, timelineDifferenceInHours]);
 
   /**
    * Calculates the final optimal time scale for the timeline based on the ideal optimal time scale and supported time scales.
@@ -2022,7 +2056,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                         sx={{
                           position: 'absolute',
                           top: 0,
-                          left: 0,
+                          left: -baseSpacingUnits,
                           width: `${
                             getPercentageAtDate(
                               createDateWithoutTimezoneOffset(
@@ -2043,7 +2077,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                         sx={{
                           position: 'absolute',
                           top: 0,
-                          right: 0,
+                          right: -baseSpacingUnits,
                           left: `${
                             getPercentageAtDate(
                               createDateWithoutTimezoneOffset(
