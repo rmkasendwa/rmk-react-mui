@@ -900,26 +900,27 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       `.${classes.todayMarker}`
     ) as HTMLElement;
 
+    // Get the timeline meter container element from the timeline container
+    const timelineMeterContainer = timelineContainerElement.querySelector(
+      `.${classes.timelineMeterContainer}`
+    ) as HTMLElement;
+
+    const dateCursorHeight =
+      timelineContainerElement.offsetHeight -
+      (timelineMeterContainer?.offsetHeight ?? 0);
+
     // If the today marker element is present, perform calibration
     if (todayMarkerElement) {
-      // Get the height of the root container of the timeline
-      const rootContainerHeight = timelineContainerElement.offsetHeight;
-
-      // Get the timeline meter container element from the timeline container
-      const timelineMeterContainer = timelineContainerElement.querySelector(
-        `.${classes.timelineMeterContainer}`
-      ) as HTMLElement;
-
       // Get the height of the timeline meter container
       const timelineContainerHeight = timelineMeterContainer?.offsetHeight;
 
       // Calculate the height and set it to the today marker element based on the todayMarkerVariant
       const height = (() => {
         if (todayMarkerVariant === 'foregroundFullSpan') {
-          return rootContainerHeight;
+          return timelineContainerElement.offsetHeight;
         }
-        if (rootContainerHeight != null && timelineContainerHeight != null) {
-          return rootContainerHeight - timelineContainerHeight;
+        if (timelineContainerHeight != null) {
+          return dateCursorHeight;
         }
       })();
       todayMarkerElement.style.height = height ? `${height}px` : '';
@@ -963,7 +964,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     }
 
     if (secondaryDateAtCursorMarkerElement) {
-      secondaryDateAtCursorMarkerElement.style.height = `${timelineContainerElement.offsetHeight}px`;
+      secondaryDateAtCursorMarkerElement.style.height = `${dateCursorHeight}px`;
     }
 
     if (currentDateAtCenterPositionLeftOffsetRef.current) {
@@ -981,7 +982,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       .forEach((customDateRangeBlockerElement) => {
         (
           customDateRangeBlockerElement as HTMLDivElement
-        ).style.height = `${timelineContainerElement.offsetHeight}px`;
+        ).style.height = `${dateCursorHeight}px`;
       });
   };
   const caliberateDateCursorElementsRef = useRef(caliberateDateCursorElements);
