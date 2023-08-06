@@ -207,6 +207,7 @@ export interface TableRowProps<DataRow extends BaseDataRow = any>
   minColumnWidth?: number;
   defaultDateFormat?: string;
   defaultDateTimeFormat?: string;
+  controlZIndex?: boolean;
 }
 
 export type TableVariant =
@@ -239,6 +240,7 @@ export interface TableProps<DataRow extends BaseDataRow = any>
       | 'onClickRow'
       | 'textTransform'
       | 'getToolTipWrappedColumnNode'
+      | 'controlZIndex'
     >,
     Partial<
       Pick<

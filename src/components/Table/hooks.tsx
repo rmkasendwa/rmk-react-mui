@@ -181,6 +181,7 @@ export const useTable = <DataRow extends BaseDataRow>(
     staticRows,
     onChangeMinWidth,
     lazyRows = true,
+    controlZIndex = true,
     sx,
     ...rest
   } = props;
@@ -430,11 +431,23 @@ export const useTable = <DataRow extends BaseDataRow>(
               }, 0),
           };
           column.headerSx = {
-            zIndex: 5,
+            ...(() => {
+              if (controlZIndex) {
+                return {
+                  zIndex: 5,
+                };
+              }
+            })(),
             ...baseHeaderSx,
           };
           column.bodySx = {
-            zIndex: 1,
+            ...(() => {
+              if (controlZIndex) {
+                return {
+                  zIndex: 1,
+                };
+              }
+            })(),
             ...baseBodySx,
           };
           column.opaque = true;
@@ -830,8 +843,16 @@ export const useTable = <DataRow extends BaseDataRow>(
                       ...column,
                       minWidth: minWidth ?? minColumnWidth,
                     }),
-                    position: stickyHeader ? 'sticky' : 'relative',
+                    position: 'relative',
                     bgcolor: 'transparent',
+                    ...(() => {
+                      if (stickyHeader) {
+                        return {
+                          position: 'sticky',
+                          top: 0,
+                        };
+                      }
+                    })(),
                     ...sx,
                     ...headerSx,
                     ...(primaryHeaderSx as any),
@@ -1072,10 +1093,7 @@ export const useTable = <DataRow extends BaseDataRow>(
                     return (
                       <TableCell
                         key={String(id)}
-                        className={clsx(
-                          className,
-                          stickyHeader && tableBodyColumnClasses.opaque
-                        )}
+                        className={clsx(className)}
                         {...{ style }}
                         sx={{
                           fontWeight: 'bold',
@@ -1084,7 +1102,7 @@ export const useTable = <DataRow extends BaseDataRow>(
                             ...column,
                             minWidth: minWidth ?? minColumnWidth,
                           }),
-                          position: stickyHeader ? 'sticky' : 'relative',
+                          position: 'relative',
                           bgcolor: 'transparent',
                           ...sx,
                           ...headerSx,
@@ -1443,10 +1461,10 @@ export const useTable = <DataRow extends BaseDataRow>(
           'scrollableElement'
         )}
         ref={ref}
-        {...{ stickyHeader }}
         className={clsx(classes.root, `Mui-table-${variant}`)}
         sx={{
           tableLayout: 'fixed',
+          borderCollapse: 'separate',
           minWidth,
           ...variantStyles,
           ...borderVariantStyles,

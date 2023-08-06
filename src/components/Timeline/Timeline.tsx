@@ -2111,6 +2111,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                           borderColor,
                           borderRight: `1px solid ${borderColor}`,
                           pointerEvents: 'none',
+                          zIndex: 2,
                         }}
                       />
                     ) : null}
@@ -2132,6 +2133,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                           borderColor,
                           borderLeft: `1px solid ${borderColor}`,
                           pointerEvents: 'none',
+                          zIndex: 2,
                         }}
                       />
                     ) : null}
@@ -2148,6 +2150,8 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                 ...DateAtCursorMarkerPropsSx,
                 top: 0,
                 position: 'absolute',
+                pointerEvents: 'none',
+                zIndex: 1,
               }}
             />
           </Box>
@@ -2383,6 +2387,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         ])}
         className={clsx(className, classes.root)}
         {...rest}
+        controlZIndex={false}
         parentBackgroundColor={parentBackgroundColor}
         columns={columns}
         rows={rows}
@@ -2400,8 +2405,10 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         HeaderRowProps={{
           sx: {
             position: 'relative',
-            zIndex: 3,
             verticalAlign: 'bottom',
+            th: {
+              zIndex: 3,
+            },
           },
         }}
         SecondaryHeaderRowProps={{
