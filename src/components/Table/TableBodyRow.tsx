@@ -570,10 +570,12 @@ export const TableBodyRow = <T extends BaseDataRow>(
         ...(() => {
           if (row.GroupingProps && 'isGroupHeader' in row.GroupingProps) {
             return {
-              position: 'sticky',
-              top: 48,
-              zIndex: 2,
               boxShadow: `0 -1px 2px -1px ${palette.divider}`,
+              td: {
+                position: 'sticky',
+                top: 48,
+                zIndex: 2,
+              },
             };
           }
         })(),
