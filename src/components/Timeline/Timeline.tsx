@@ -1828,6 +1828,17 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
 
   //#region Scroll Timeline Tools
   const jumpToOptimalTimeScale = useCallback(() => {
+    if (isCustomDatesSelected) {
+      if (customDateRange?.startDate) {
+        scrollToDateRef.current(
+          createDateWithoutTimezoneOffset(customDateRange.startDate),
+          {
+            dateAlignment: 'start',
+          }
+        );
+      }
+      return;
+    }
     lastDateAtCenterRef.current = centerOfGravity;
     if (selectedTimeScale !== optimalTimeScale) {
       setSearchParams(
@@ -1839,12 +1850,13 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         }
       );
     } else {
-      scrollToDate(centerOfGravity);
+      scrollToDateRef.current(centerOfGravity);
     }
   }, [
     centerOfGravity,
+    customDateRange?.startDate,
+    isCustomDatesSelected,
     optimalTimeScale,
-    scrollToDate,
     selectedTimeScale,
     setSearchParams,
   ]);
@@ -2000,7 +2012,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           >
             {(() => {
               if (isCustomDatesSelected) {
-                const bgcolor = alpha(palette.background.paper, 0.7);
+                const bgcolor = alpha(palette.background.paper, 0.75);
                 const borderColor = alpha('#f00', 0.15);
                 return (
                   <>
