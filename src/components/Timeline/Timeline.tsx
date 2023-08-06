@@ -2089,7 +2089,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           >
             {(() => {
               if (isCustomDatesSelected) {
-                const bgcolor = alpha(palette.background.paper, 0.75);
+                const bgcolor = alpha(palette.grey[900], 0.75);
                 const borderColor = alpha('#f00', 0.15);
                 return (
                   <>
@@ -2111,7 +2111,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                           borderColor,
                           borderRight: `1px solid ${borderColor}`,
                           pointerEvents: 'none',
-                          zIndex: 2,
+                          zIndex: 3,
                         }}
                       />
                     ) : null}
@@ -2133,7 +2133,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                           borderColor,
                           borderLeft: `1px solid ${borderColor}`,
                           pointerEvents: 'none',
-                          zIndex: 2,
+                          zIndex: 3,
                         }}
                       />
                     ) : null}
@@ -2151,7 +2151,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                 top: 0,
                 position: 'absolute',
                 pointerEvents: 'none',
-                zIndex: 1,
+                zIndex: 2,
               }}
             />
           </Box>
@@ -2282,12 +2282,12 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           return result(row, rowLabelProperty);
         }
       },
-      headerClassName: classes.rowLabelColumn,
+      className: classes.rowLabelColumn,
       headerSx: {
         ...(() => {
           if (todayMarkerVariant === 'foregroundFullSpan') {
             return {
-              zIndex: 3,
+              zIndex: 4,
             };
           }
         })(),
@@ -2314,11 +2314,11 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         },
       },
       bodySx: {
-        zIndex: 2,
+        zIndex: 3,
         ...(() => {
           if (todayMarkerVariant === 'foregroundFullSpan') {
             return {
-              zIndex: 3,
+              zIndex: 4,
             };
           }
         })(),
@@ -2407,7 +2407,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
             position: 'relative',
             verticalAlign: 'bottom',
             th: {
-              zIndex: 3,
+              zIndex: 4,
             },
           },
         }}
