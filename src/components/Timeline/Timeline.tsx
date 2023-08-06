@@ -86,6 +86,7 @@ export interface TimelineClasses {
   dateAtCursorMarker: string;
   dateAtCursorMarkerLabel: string;
   emptyTimelineRowPlaceholder: string;
+  customDateRangeBlocker: string;
 }
 
 export type TimelineClassKey = keyof TimelineClasses;
@@ -316,6 +317,7 @@ export const timelineClasses: TimelineClasses = generateUtilityClasses(
     'dateAtCursorMarker',
     'dateAtCursorMarkerLabel',
     'emptyTimelineRowPlaceholder',
+    'customDateRangeBlocker',
   ]
 );
 
@@ -327,6 +329,7 @@ const slots = {
   dateAtCursorMarker: ['dateAtCursorMarker'],
   dateAtCursorMarkerLabel: ['dateAtCursorMarkerLabel'],
   emptyTimelineRowPlaceholder: ['emptyTimelineRowPlaceholder'],
+  customDateRangeBlocker: ['customDateRangeBlocker'],
 };
 
 export const BaseTimeline = <RecordRow extends BaseDataRow>(
@@ -922,6 +925,14 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           }% - 40px)`;
         });
     }
+
+    timelineContainerElement
+      .querySelectorAll(`.${classes.customDateRangeBlocker}`)
+      .forEach((customDateRangeBlockerElement) => {
+        (
+          customDateRangeBlockerElement as HTMLDivElement
+        ).style.height = `${timelineContainerElement.offsetHeight}px`;
+      });
   };
   const caliberateDateCursorElementsRef = useRef(caliberateDateCursorElements);
   caliberateDateCursorElementsRef.current = caliberateDateCursorElements;
@@ -1636,6 +1647,24 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     }
   }, [scrollingAncenstorElement, selectedTimeScale]);
 
+  const getDateAtPercentage = useCallback(
+    (percentage: number) => {
+      return addHours(minCalendarDate, totalNumberOfHours * percentage);
+    },
+    [minCalendarDate, totalNumberOfHours]
+  );
+  const getDateAtPercentageRef = useRef(getDateAtPercentage);
+  getDateAtPercentageRef.current = getDateAtPercentage;
+
+  const getPercentageAtDate = useCallback(
+    (date: Date) => {
+      return differenceInHours(date, minCalendarDate) / totalNumberOfHours;
+    },
+    [minCalendarDate, totalNumberOfHours]
+  );
+  const getPercentageAtDateRef = useRef(getPercentageAtDate);
+  getPercentageAtDateRef.current = getPercentageAtDate;
+
   //#region Track date at cursor
   useEffect(() => {
     const timelineMeterContainerElement =
@@ -1665,9 +1694,8 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         if (timelineX >= 0) {
           const percentageAtMousePosition =
             timelineX / (offsetWidth - baseSpacingUnits);
-          const dateAtMousePosition = addHours(
-            minCalendarDate,
-            totalNumberOfHours * percentageAtMousePosition
+          const dateAtMousePosition = getDateAtPercentageRef.current(
+            percentageAtMousePosition
           );
           timelineContainerElement
             ?.querySelectorAll(`.${classes.dateAtCursorMarker}`)
@@ -1968,6 +1996,58 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
               width: '100%',
             }}
           >
+            {(() => {
+              if (isCustomDatesSelected) {
+                const bgcolor = alpha(palette.background.paper, 0.7);
+                const borderColor = alpha('#f00', 0.15);
+                return (
+                  <>
+                    {customDateRange?.startDate ? (
+                      <Box
+                        className={clsx(classes.customDateRangeBlocker)}
+                        sx={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          width: `${
+                            getPercentageAtDate(
+                              createDateWithoutTimezoneOffset(
+                                customDateRange.startDate
+                              )
+                            ) * 100
+                          }%`,
+                          bgcolor,
+                          borderColor,
+                          borderRight: `1px solid ${borderColor}`,
+                          pointerEvents: 'none',
+                        }}
+                      />
+                    ) : null}
+                    {customDateRange?.endDate ? (
+                      <Box
+                        className={clsx(classes.customDateRangeBlocker)}
+                        sx={{
+                          position: 'absolute',
+                          top: 0,
+                          right: 0,
+                          left: `${
+                            getPercentageAtDate(
+                              createDateWithoutTimezoneOffset(
+                                customDateRange.endDate
+                              )
+                            ) * 100
+                          }%`,
+                          bgcolor,
+                          borderColor,
+                          borderLeft: `1px solid ${borderColor}`,
+                          pointerEvents: 'none',
+                        }}
+                      />
+                    ) : null}
+                  </>
+                );
+              }
+            })()}
             <Box
               className={clsx(classes.dateAtCursorMarker)}
               {...DateAtCursorMarkerPropsRest}
