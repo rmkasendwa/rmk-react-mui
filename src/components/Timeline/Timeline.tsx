@@ -1426,9 +1426,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     () => {
       if (scrollingAncenstorElement) {
         return (
-          (scrollingAncenstorElement.clientWidth +
-            baseSpacingUnits -
-            timelineViewPortLeftOffset) /
+          (scrollingAncenstorElement.clientWidth - timelineViewPortLeftOffset) /
           unitTimeScaleWidth
         );
       }
@@ -1442,8 +1440,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         setTimelineWidthScaleFactor(() => {
           if (scrollingAncenstorElement) {
             return (
-              (scrollingAncenstorElement.clientWidth +
-                baseSpacingUnits -
+              (scrollingAncenstorElement.clientWidth -
                 timelineViewPortLeftOffset) /
               unitTimeScaleWidth
             );
@@ -2092,13 +2089,13 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                           position: 'absolute',
                           top: 0,
                           left: -baseSpacingUnits,
-                          width: `${
+                          width: `calc(${
                             getPercentageAtDate(
                               createDateWithoutTimezoneOffset(
                                 customDateRange.startDate
                               )
                             ) * 100
-                          }%`,
+                          }% + ${baseSpacingUnits}px)`,
                           bgcolor,
                           borderColor,
                           borderRight: `1px solid ${borderColor}`,
