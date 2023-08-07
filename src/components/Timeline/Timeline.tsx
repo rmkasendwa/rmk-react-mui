@@ -47,6 +47,7 @@ import * as Yup from 'yup';
 
 import { useReactRouterDOMSearchParams } from '../../hooks/ReactRouterDOM';
 import { DragToScrollProps, useDragToScroll } from '../../hooks/Scrolling';
+import { BLACK_COLOR } from '../../theme';
 import { BaseDataRow, Table, TableColumn, TableProps } from '../Table';
 import { TooltipProps } from '../Tooltip';
 import {
@@ -483,7 +484,6 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
 
   const { palette, breakpoints } = useTheme();
   const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
-  const baseSpacingUnits = isSmallScreenSize ? 16 : 24;
 
   parentBackgroundColor || (parentBackgroundColor = palette.background.paper);
 
@@ -829,9 +829,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         const { offsetWidth: scrollingAncenstorElementOffsetWidth } =
           scrollingAncenstorElement;
         const { offsetWidth } = timelineMeterContainerContainer;
-        let dateScrollLeftPosition =
-          Math.round((offsetWidth - baseSpacingUnits) * offsetPercentage) +
-          baseSpacingUnits;
+        let dateScrollLeftPosition = Math.round(offsetWidth * offsetPercentage);
         switch (dateAlignment) {
           case 'center':
             dateScrollLeftPosition -= Math.round(
@@ -856,7 +854,6 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     },
     // Dependencies for the callback function
     [
-      baseSpacingUnits,
       classes.timelineMeterContainer,
       maxCalendarDate,
       minCalendarDate,
@@ -1048,7 +1045,6 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       };
     }
   }, [
-    baseSpacingUnits,
     scrollingAncenstorElement,
     timelineViewPortLeftOffset,
     unitTimeScaleWidth,
@@ -1107,8 +1103,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         // Calculate the date at the start of the timeline based on the current scroll position.
         const dateAtStart = addHours(
           minCalendarDate,
-          totalNumberOfHours *
-            ((scrollLeft - baseSpacingUnits) / (offsetWidth - baseSpacingUnits))
+          totalNumberOfHours * (scrollLeft / offsetWidth)
         );
 
         // Hide or show the "today" markder based on whether it is before or after the date at the beginning of the timeline viewport.
@@ -1121,12 +1116,11 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         }
 
         const leftOffset =
-          (scrollLeft -
-            baseSpacingUnits +
+          (scrollLeft +
             Math.round(
               (parentElementOffsetWidth - timelineViewPortLeftOffset) / 2
             )) /
-          (offsetWidth - baseSpacingUnits);
+          offsetWidth;
 
         // Calculate the date at the center of the timeline based on the current scroll position.
         const dateAtCenter = addHours(
@@ -1158,7 +1152,6 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       };
     }
   }, [
-    baseSpacingUnits,
     classes.timelineMeterContainer,
     minCalendarDate,
     scrollingAncenstorElement,
@@ -1180,78 +1173,76 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     sx,
     ...rest
   }: Omit<TimelineElementProps, 'scrollingAncenstorElement'>) => {
-    if (startDateValue) {
-      const startDate = createDateWithoutTimezoneOffset(startDateValue as any);
+    const startDate = startDateValue
+      ? createDateWithoutTimezoneOffset(startDateValue)
+      : minCalendarDate;
 
-      // Check if the provided start date is a valid date.
-      if (!isNaN(startDate.getTime())) {
-        const endDate = (() => {
-          if (endDateValue) {
-            const endDate = createDateWithoutTimezoneOffset(
-              endDateValue as any
-            );
+    // Check if the provided start date is a valid date.
+    if (!isNaN(startDate.getTime())) {
+      const endDate = (() => {
+        if (endDateValue) {
+          const endDate = createDateWithoutTimezoneOffset(endDateValue);
 
-            // Check if the provided end date is a valid date.
-            if (!isNaN(endDate.getTime())) {
-              // If the end date is provided as a string without a time component, set the time to 23:59:59.999.
-              if (
-                typeof endDateValue === 'string' &&
-                !dateStringHasTimeComponent(endDateValue)
-              ) {
-                endDate.setHours(23, 59, 59, 999);
-              }
-              return endDate;
+          // Check if the provided end date is a valid date.
+          if (!isNaN(endDate.getTime())) {
+            // If the end date is provided as a string without a time component, set the time to 23:59:59.999.
+            if (
+              typeof endDateValue === 'string' &&
+              !dateStringHasTimeComponent(endDateValue)
+            ) {
+              endDate.setHours(23, 59, 59, 999);
             }
+            return endDate;
           }
-          // If no valid end date is provided, use the maximum calendar date as the end date.
-          return maxCalendarDate;
+        }
+        // If no valid end date is provided, use the maximum calendar date as the end date.
+        return maxCalendarDate;
+      })();
+
+      // Check if the end date is after the start date.
+      if (isAfter(endDate, startDate)) {
+        const numberOfHours = differenceInHours(endDate, startDate);
+        const offsetPercentage =
+          differenceInHours(startDate, minCalendarDate) / totalNumberOfHours;
+        const percentage = numberOfHours / totalNumberOfHours;
+
+        // Create the base label for the timeline element using the start and end dates.
+        const baseTimelineElementLabel = `${formatDate(
+          startDate,
+          'MMM dd, yyyy'
+        )} - ${formatDate(endDate, 'MMM dd, yyyy')}`;
+
+        // Determine the final timeline element label to be displayed.
+        const timelineElementLabel = (() => {
+          if (label) {
+            return label;
+          }
+          return baseTimelineElementLabel;
         })();
 
-        // Check if the end date is after the start date.
-        if (isAfter(endDate, startDate)) {
-          const numberOfHours = differenceInHours(endDate, startDate);
-          const offsetPercentage =
-            differenceInHours(startDate, minCalendarDate) / totalNumberOfHours;
-          const percentage = numberOfHours / totalNumberOfHours;
+        const { ...TooltipPropsRest } = TooltipProps;
 
-          // Create the base label for the timeline element using the start and end dates.
-          const baseTimelineElementLabel = `${formatDate(
-            startDate,
-            'MMM dd, yyyy'
-          )} - ${formatDate(endDate, 'MMM dd, yyyy')}`;
-
-          // Determine the final timeline element label to be displayed.
-          const timelineElementLabel = (() => {
-            if (label) {
-              return label;
-            }
-            return baseTimelineElementLabel;
-          })();
-
-          const { ...TooltipPropsRest } = TooltipProps;
-
-          return (
-            <TimelineElement
-              {...rest}
-              label={timelineElementLabel}
-              scrollingAncenstorElement={scrollingAncenstorElement}
-              viewportOffsets={{
-                left: timelineViewPortLeftOffset,
-              }}
-              TooltipProps={{
-                title: baseTimelineElementLabel,
-                ...TooltipPropsRest,
-              }}
-              sx={{
-                ...sx,
-                width: `${percentage * 100}%`,
-                position: 'absolute',
-                top: 0,
-                left: `${offsetPercentage * 100}%`,
-              }}
-            />
-          );
-        }
+        return (
+          <TimelineElement
+            {...rest}
+            label={timelineElementLabel}
+            scrollingAncenstorElement={scrollingAncenstorElement}
+            viewportOffsets={{
+              left: timelineViewPortLeftOffset,
+            }}
+            TooltipProps={{
+              title: baseTimelineElementLabel,
+              ...TooltipPropsRest,
+            }}
+            sx={{
+              ...sx,
+              width: `${percentage * 100}%`,
+              position: 'absolute',
+              top: 0,
+              left: `${offsetPercentage * 100}%`,
+            }}
+          />
+        );
       }
     }
   };
@@ -1330,38 +1321,37 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         const { left } = scrollingAncenstorElement!.getBoundingClientRect();
         const { clientX } = event;
         const localX = clientX - left;
-        const timelineX =
+        let timelineX =
           localX -
-          timelineViewPortLeftOffset -
-          baseSpacingUnits +
+          timelineViewPortLeftOffset +
           scrollingAncenstorElement!.scrollLeft;
-        if (timelineX >= 0) {
-          const percentageAtMousePosition =
-            timelineX / (offsetWidth - baseSpacingUnits);
-          const dateAtMousePosition = getDateAtPercentageRef.current(
-            percentageAtMousePosition
-          );
-          timelineContainerElement
-            ?.querySelectorAll(`.${classes.dateAtCursorMarker}`)
-            .forEach((dateAtCursorMarkerElement: any) => {
-              dateAtCursorMarkerElement.style.left = `${timelineX}px`;
-            });
-          dateAtCursorMarkerLabelElement.innerText = formatDate(
-            dateAtMousePosition,
-            dateFormat
-          );
-          if (scrollingAncenstorElement!.clientWidth - localX < 200) {
-            dateAtCursorMarkerLabelElement.style.right = '100%';
-            dateAtCursorMarkerLabelElement.style.left = '';
-            dateAtCursorMarkerLabelElement.style.borderBottomRightRadius = '';
-            dateAtCursorMarkerLabelElement.style.borderBottomLeftRadius = '4px';
-          } else {
-            dateAtCursorMarkerLabelElement.style.right = '';
-            dateAtCursorMarkerLabelElement.style.left = '100%';
-            dateAtCursorMarkerLabelElement.style.borderBottomRightRadius =
-              '4px';
-            dateAtCursorMarkerLabelElement.style.borderBottomLeftRadius = '';
-          }
+
+        timelineX > 0 || (timelineX = 0);
+        timelineX < offsetWidth || (timelineX = offsetWidth);
+
+        const percentageAtMousePosition = timelineX / offsetWidth;
+        const dateAtMousePosition = getDateAtPercentageRef.current(
+          percentageAtMousePosition
+        );
+        timelineContainerElement
+          ?.querySelectorAll(`.${classes.dateAtCursorMarker}`)
+          .forEach((dateAtCursorMarkerElement: any) => {
+            dateAtCursorMarkerElement.style.left = `${timelineX}px`;
+          });
+        dateAtCursorMarkerLabelElement.innerText = formatDate(
+          dateAtMousePosition,
+          dateFormat
+        );
+        if (scrollingAncenstorElement!.clientWidth - localX < 200) {
+          dateAtCursorMarkerLabelElement.style.right = '100%';
+          dateAtCursorMarkerLabelElement.style.left = '';
+          dateAtCursorMarkerLabelElement.style.borderBottomRightRadius = '';
+          dateAtCursorMarkerLabelElement.style.borderBottomLeftRadius = '4px';
+        } else {
+          dateAtCursorMarkerLabelElement.style.right = '';
+          dateAtCursorMarkerLabelElement.style.left = '100%';
+          dateAtCursorMarkerLabelElement.style.borderBottomRightRadius = '4px';
+          dateAtCursorMarkerLabelElement.style.borderBottomLeftRadius = '';
         }
       };
       scrollingAncenstorElement.addEventListener(
@@ -1376,7 +1366,6 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       };
     }
   }, [
-    baseSpacingUnits,
     classes.dateAtCursorMarker,
     classes.dateAtCursorMarkerLabel,
     classes.timelineMeterContainer,
@@ -1561,19 +1550,12 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
             timeScaleRows={timeScaleRows}
             timeScaleWidth={scaledTimeScaleWidth}
             scrollingElement={scrollingAncenstorElement}
-            leftOffset={timelineViewPortLeftOffset + baseSpacingUnits}
+            leftOffset={timelineViewPortLeftOffset}
             variant={TimeScaleMeterPropsVariant}
             sx={{
               ...TimeScaleMeterPropsSx,
               [`.${timeScaleMeterClasses.timeScaleLevel1Tick}`]: {
-                left:
-                  timelineViewPortLeftOffset +
-                  (() => {
-                    if (shouldShowRowLabelsColumn) {
-                      return 16;
-                    }
-                    return baseSpacingUnits;
-                  })(),
+                left: timelineViewPortLeftOffset,
               },
             }}
           />
@@ -1656,35 +1638,41 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                 customDateRange.endDate
               ) {
                 const bgcolor = alpha(palette.grey[900], 0.75);
-                const borderColor = alpha('#f00', 0.15);
+                const borderColor = '#fff';
+                const blockerStyles: BoxProps['sx'] = {
+                  position: 'absolute',
+                  top: 0,
+                  bgcolor,
+                  borderRight: `2px solid ${borderColor}`,
+                  zIndex: 3,
+                  backdropFilter: 'blur(5px)',
+                  boxSizing: 'border-box',
+                };
                 return (
                   <>
                     <Box
                       className={clsx(classes.customDateRangeBlocker)}
                       sx={{
-                        position: 'absolute',
-                        top: 0,
-                        left: -baseSpacingUnits,
-                        width: `calc(${
+                        ...blockerStyles,
+                        left: 0,
+                        width: `${
                           getPercentageAtDate(
                             createDateWithoutTimezoneOffset(
                               customDateRange.startDate
                             )
                           ) * 100
-                        }% + ${baseSpacingUnits}px)`,
-                        bgcolor,
-                        borderColor,
-                        borderRight: `1px solid ${borderColor}`,
-                        pointerEvents: 'none',
-                        zIndex: 3,
+                        }%`,
+                        boxShadow: `1px 0px 4px 0px ${alpha(
+                          BLACK_COLOR,
+                          0.25
+                        )}`,
                       }}
                     />
                     <Box
                       className={clsx(classes.customDateRangeBlocker)}
                       sx={{
-                        position: 'absolute',
-                        top: 0,
-                        right: -baseSpacingUnits,
+                        ...blockerStyles,
+                        right: 0,
                         left: `${
                           getPercentageAtDate(
                             createDateWithoutTimezoneOffset(
@@ -1692,11 +1680,10 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                             )
                           ) * 100
                         }%`,
-                        bgcolor,
-                        borderColor,
-                        borderLeft: `1px solid ${borderColor}`,
-                        pointerEvents: 'none',
-                        zIndex: 3,
+                        boxShadow: `-1px 0px 4px 0px ${alpha(
+                          BLACK_COLOR,
+                          0.25
+                        )}`,
                       }}
                     />
                   </>
@@ -1805,20 +1792,18 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           />
         );
       },
-      width: scaledTimeScaleWidth + baseSpacingUnits,
+      width: scaledTimeScaleWidth,
       wrapColumnContentInFieldValue: false,
       headerClassName: classes.timelineMeterContainer,
       headerSx: {
         cursor: 'move',
         '&>div': {
           py: 0,
-          pl: `${baseSpacingUnits}px`,
-          pr: 0,
+          px: 0,
         },
       },
       bodySx: {
-        pl: `${baseSpacingUnits}px`,
-        pr: 0,
+        px: 0,
         py: 0.5,
         '&>div': {
           height: 42,
@@ -1860,7 +1845,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
               zIndex: 1,
               '&>div': {
                 py: 0,
-                pl: `${baseSpacingUnits}px`,
+                pl: 0,
                 pr: 0,
               },
             };
@@ -1871,7 +1856,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         borderRight: 'none !important',
         '&>div': {
           py: 0,
-          pl: `${baseSpacingUnits}px`,
+          pl: 0,
           pr: 0,
         },
       },
@@ -1920,7 +1905,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           <Grid
             container
             sx={{
-              pr: `${baseSpacingUnits}px`,
+              pr: 0,
               pl: 1,
               py: 1,
               position: 'sticky',
