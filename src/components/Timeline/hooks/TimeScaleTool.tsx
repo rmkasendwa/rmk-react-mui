@@ -78,11 +78,7 @@ export const useTimeScaleTool = ({
       : selectedTimeScale,
     onChange: (event) => {
       onSelectCustomDatesTimeScale?.(
-        event.target.value === CUSTOM_DATE_OPTION_LABEL,
-        {
-          startDate: startDateString,
-          endDate: endDateString,
-        }
+        event.target.value === CUSTOM_DATE_OPTION_LABEL
       );
       if (event.target.value !== CUSTOM_DATE_OPTION_LABEL) {
         onSelectTimeScale?.((event.target.value as any) || null);
