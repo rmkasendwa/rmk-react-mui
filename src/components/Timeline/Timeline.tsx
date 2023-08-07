@@ -13,7 +13,6 @@ import {
   TypographyProps,
   alpha,
   unstable_composeClasses as composeClasses,
-  darken,
   generateUtilityClass,
   generateUtilityClasses,
   lighten,
@@ -1546,10 +1545,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     };
   }, []);
 
-  const dateAtCursorBgcolor = (palette.mode === 'light' ? lighten : darken)(
-    palette.text.primary,
-    0.75
-  );
+  const dateAtCursorBgcolor = lighten(palette.grey[900], 0.75);
   const columns: TableColumn<RecordRow>[] = [
     {
       id: 'timelineElements',
