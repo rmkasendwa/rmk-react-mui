@@ -46,7 +46,7 @@ export const useTimeScaleMeterConfiguration = ({
     const {
       timeScaleRows,
       unitTimeScaleWidth: baseUnitTimeScaleWidth,
-      timeScaleWidth,
+      timeScaleWidth: baseTimeScaleWidth,
     } = ((): TimeScaleConfiguration => {
       const getDailyTickTimeScale = ({
         dayWidth,
@@ -428,39 +428,26 @@ export const useTimeScaleMeterConfiguration = ({
       }
     })();
 
-    const unitTimeScaleWidth = (() => {
+    const { unitTimeScaleWidth, timeScaleWidth } = (() => {
       if (
         isCustomDatesSelected &&
         customDateRange?.startDate &&
         customDateRange?.endDate
       ) {
-        const timeScaleHourWidth = (() => {
-          switch (selectedTimeScale) {
-            case 'Day':
-              return baseUnitTimeScaleWidth / 24;
-            case 'Week':
-              return baseUnitTimeScaleWidth / (7 * 24);
-            case '2 week':
-              return baseUnitTimeScaleWidth / (2 * 7 * 24);
-            case 'Month':
-              return baseUnitTimeScaleWidth / (30 * 24);
-            case 'Quarter':
-              return baseUnitTimeScaleWidth / (3 * 30 * 24);
-            case 'Year':
-              return baseUnitTimeScaleWidth / (365 * 24);
-            case '5 year':
-              return baseUnitTimeScaleWidth / (5 * 365 * 24);
-          }
-        })();
-        return (
-          timeScaleHourWidth *
-          differenceInHours(
-            createDateWithoutTimezoneOffset(customDateRange.endDate),
-            createDateWithoutTimezoneOffset(customDateRange.startDate)
-          )
-        );
+        return {
+          unitTimeScaleWidth:
+            40 *
+            differenceInHours(
+              createDateWithoutTimezoneOffset(customDateRange.endDate),
+              createDateWithoutTimezoneOffset(customDateRange.startDate)
+            ),
+          timeScaleWidth: 40 * totalNumberOfHours,
+        };
       }
-      return baseUnitTimeScaleWidth;
+      return {
+        unitTimeScaleWidth: baseUnitTimeScaleWidth,
+        timeScaleWidth: baseTimeScaleWidth,
+      };
     })();
 
     return {
