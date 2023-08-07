@@ -1240,6 +1240,24 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
               position: 'absolute',
               top: 0,
               left: `${offsetPercentage * 100}%`,
+              ...(() => {
+                if (!startDateValue) {
+                  return {
+                    borderTopLeftRadius: 0,
+                    borderBottomLeftRadius: 0,
+                    borderLeft: 'none',
+                  };
+                }
+              })(),
+              ...(() => {
+                if (!endDateValue) {
+                  return {
+                    borderTopRightRadius: 0,
+                    borderBottomRightRadius: 0,
+                    borderRight: 'none',
+                  };
+                }
+              })(),
             }}
           />
         );
