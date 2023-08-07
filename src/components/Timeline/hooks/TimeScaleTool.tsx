@@ -48,6 +48,8 @@ export interface TimeScaleToolProps {
   onSelectCustomDatesTimeScale?: SelectCustomDatesTimeScaleCallbackFunction;
   selectedCustomDates?: SelectCustomDates;
   DatePickerToolProps?: Partial<Omit<PopupToolOptions, 'onChange'>>;
+  minDate?: string;
+  maxDate?: string;
 }
 
 export const useTimeScaleTool = ({
@@ -65,6 +67,8 @@ export const useTimeScaleTool = ({
     startDate: new Date().toISOString().split('T')[0],
   },
   DatePickerToolProps,
+  minDate,
+  maxDate,
 }: TimeScaleToolProps) => {
   const dataDropdownProps: DataDropdownFieldProps = {
     placeholder: label as string,
@@ -170,6 +174,8 @@ export const useTimeScaleTool = ({
           }
         );
       }}
+      minDate={minDate ? createDateWithoutTimezoneOffset(minDate) : null}
+      maxDate={maxDate ? createDateWithoutTimezoneOffset(maxDate) : null}
     />
   );
   const {
