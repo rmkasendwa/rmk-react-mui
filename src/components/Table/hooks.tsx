@@ -850,6 +850,13 @@ export const useTable = <DataRow extends BaseDataRow>(
                         return {
                           position: 'sticky',
                           top: 0,
+                          ...(() => {
+                            if (controlZIndex) {
+                              return {
+                                zIndex: 1,
+                              };
+                            }
+                          })(),
                         };
                       }
                     })(),
