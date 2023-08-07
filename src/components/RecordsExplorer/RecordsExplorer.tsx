@@ -26,6 +26,7 @@ import {
 } from '@mui/material';
 import { BoxProps } from '@mui/material/Box';
 import clsx from 'clsx';
+import formatDate from 'date-fns/format';
 import { FormikValues } from 'formik';
 import hashIt from 'hash-it';
 import { omit, result } from 'lodash';
@@ -1159,7 +1160,7 @@ const BaseRecordsExplorer = <
     selectedDataPreset: searchParamSelectedDataPreset,
     timeScale: searchParamsSelectedTimeScale,
     isCustomDatesSelected: isCustomDatesTimeScaleSelected,
-    customDateRange: selectedCustomDates,
+    customDateRange,
   } = searchParams;
 
   const unTrackableSearchParams = [
@@ -1848,7 +1849,6 @@ const BaseRecordsExplorer = <
   const { showSuccessMessage } = useMessagingContext();
 
   //#region Timeline view tools
-  const currentDateAtCenterRef = useRef<Date | null>(null);
   const selectTimeScaleRef = useRef<SelectTimeScaleCallbackFunction>();
   const selectCustomDatesTimeScaleRef =
     useRef<SelectCustomDatesTimeScaleCallbackFunction>();
@@ -1862,6 +1862,9 @@ const BaseRecordsExplorer = <
     minDate: Date;
     maxDate: Date;
   }>();
+  const currentDateAtStartRef = useRef<Date | null>(null);
+  const currentDateAtCenterRef = useRef<Date | null>(null);
+  const currentDateAtEndRef = useRef<Date | null>(null);
 
   const timelineView = views?.find(({ type }) => type === 'Timeline') as
     | TimelineView<RecordRow>
@@ -1881,10 +1884,22 @@ const BaseRecordsExplorer = <
     onSelectTimeScale: selectTimeScaleRef.current,
     onSelectCustomDatesTimeScale: selectCustomDatesTimeScaleRef.current,
     isCustomDatesTimeScaleSelected,
-    selectedCustomDates,
     supportedTimeScales:
       timelineView?.supportedTimeScales ||
       TimelineViewProps?.supportedTimeScales,
+    selectedCustomDates: (() => {
+      if (
+        !customDateRange &&
+        currentDateAtStartRef.current &&
+        currentDateAtEndRef.current
+      ) {
+        return {
+          startDate: formatDate(currentDateAtStartRef.current, 'yyyy-MM-dd'),
+          endDate: formatDate(currentDateAtEndRef.current, 'yyyy-MM-dd'),
+        };
+      }
+      return customDateRange;
+    })(),
   });
   const scrollTimelineTools = useScrollTimelineTools({
     ...timelineView?.ScrollTimelineToolsProps,
@@ -2415,7 +2430,13 @@ const BaseRecordsExplorer = <
             return (
               <Timeline
                 {...viewProps}
-                {...{ id, clearSearchStateOnUnmount }}
+                {...{
+                  id,
+                  clearSearchStateOnUnmount,
+                  currentDateAtStartRef,
+                  currentDateAtCenterRef,
+                  currentDateAtEndRef,
+                }}
                 rows={filteredData}
                 getDefaultViewResetFunction={(resetTimelineToDefaultView) => {
                   resetTimelineToDefaultViewRef.current =

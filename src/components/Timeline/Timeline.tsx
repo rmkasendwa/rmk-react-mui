@@ -32,6 +32,7 @@ import isBefore from 'date-fns/isBefore';
 import { omit, result } from 'lodash';
 import {
   Fragment,
+  MutableRefObject,
   ReactElement,
   ReactNode,
   Ref,
@@ -296,6 +297,12 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
 
   /** Custom props for the useDragToScroll hook. */
   DragToScrollProps?: Partial<Pick<DragToScrollProps, 'enableDragToScroll'>>;
+
+  currentDateAtStartRef?: MutableRefObject<Date | null>;
+  currentDateAtCenterRef?: MutableRefObject<Date | null>;
+  currentDateAtEndRef?: MutableRefObject<Date | null>;
+
+  blockCustomDateRangeRegion?: boolean;
 }
 
 export function getTimelineUtilityClass(slot: string): string {
@@ -377,6 +384,10 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     DateAtCursorMarkerLabelProps = {},
     DateAtCursorMarkerProps = {},
     DragToScrollProps = {},
+    blockCustomDateRangeRegion = true,
+    currentDateAtStartRef: currentDateAtStartRefProp,
+    currentDateAtCenterRef: currentDateAtCenterRefProp,
+    currentDateAtEndRef: currentDateAtEndRefProp,
     sx,
     ...rest
   } = omit(props, 'parentBackgroundColor', 'scrollingAncenstorElement');
@@ -416,7 +427,11 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   const isInitialMountRef = useRef(true);
   const isScrollingToTimelineCenterRef = useRef(false);
   const isTimelineScrolledRef = useRef(false);
+
+  const currentDateAtStartRef = useRef<Date | null>(null);
   const currentDateAtCenterRef = useRef<Date | null>(null);
+  const currentDateAtEndRef = useRef<Date | null>(null);
+
   const currentDateAtCenterPositionLeftOffsetRef = useRef<number | null>(null);
   const lastDateAtCenterRef = useRef<Date | null>(null);
   const [timelineContainerElement, setTimelineContainerElement] =
@@ -1096,15 +1111,18 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           isTimelineScrolledRef.current = true;
         }
         isScrollingToTimelineCenterRef.current = false;
-        const { scrollLeft, offsetWidth: parentElementOffsetWidth } =
+        const { scrollLeft, clientWidth: parentElementClientWidth } =
           parentElement;
         const { offsetWidth } = timelineMeterContainer;
 
-        // Calculate the date at the start of the timeline based on the current scroll position.
+        const startX = scrollLeft / offsetWidth;
         const dateAtStart = addHours(
           minCalendarDate,
-          totalNumberOfHours * (scrollLeft / offsetWidth)
+          totalNumberOfHours * startX
         );
+        currentDateAtStartRef.current = dateAtStart;
+        currentDateAtStartRefProp &&
+          (currentDateAtStartRefProp.current = dateAtStart);
 
         // Hide or show the "today" markder based on whether it is before or after the date at the beginning of the timeline viewport.
         if (todayMarkerRef.current) {
@@ -1115,24 +1133,28 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           }
         }
 
-        const leftOffset =
+        const centerX =
           (scrollLeft +
             Math.round(
-              (parentElementOffsetWidth - timelineViewPortLeftOffset) / 2
+              (parentElementClientWidth - timelineViewPortLeftOffset) / 2
             )) /
           offsetWidth;
-
-        // Calculate the date at the center of the timeline based on the current scroll position.
         const dateAtCenter = addHours(
           minCalendarDate,
-          totalNumberOfHours * leftOffset
+          totalNumberOfHours * centerX
         );
-
-        // Update the mutable ref with the current date at the center position left offset.
-        currentDateAtCenterPositionLeftOffsetRef.current = leftOffset;
-
-        // Update the mutable ref with the current date at the center.
+        currentDateAtCenterPositionLeftOffsetRef.current = centerX;
         currentDateAtCenterRef.current = dateAtCenter;
+        currentDateAtCenterRefProp &&
+          (currentDateAtCenterRefProp.current = dateAtCenter);
+
+        const endX =
+          (scrollLeft + parentElementClientWidth - timelineViewPortLeftOffset) /
+          offsetWidth;
+        const dateAtEnd = addHours(minCalendarDate, totalNumberOfHours * endX);
+        currentDateAtEndRef.current = dateAtEnd;
+        currentDateAtEndRefProp &&
+          (currentDateAtEndRefProp.current = dateAtEnd);
 
         // Call the provided callback function to notify about the updated date at the center.
         onChangeCurrentDateAtCenterRef.current?.(dateAtCenter);
@@ -1153,6 +1175,9 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     }
   }, [
     classes.timelineMeterContainer,
+    currentDateAtCenterRefProp,
+    currentDateAtEndRefProp,
+    currentDateAtStartRefProp,
     minCalendarDate,
     scrollingAncenstorElement,
     timelineContainerElement,
@@ -1464,7 +1489,19 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     onSelectTimeScale,
     onSelectCustomDatesTimeScale,
     isCustomDatesTimeScaleSelected: isCustomDatesSelected,
-    selectedCustomDates: customDateRange,
+    selectedCustomDates: (() => {
+      if (
+        !customDateRange &&
+        currentDateAtStartRef.current &&
+        currentDateAtEndRef.current
+      ) {
+        return {
+          startDate: formatDate(currentDateAtStartRef.current, 'yyyy-MM-dd'),
+          endDate: formatDate(currentDateAtEndRef.current, 'yyyy-MM-dd'),
+        };
+      }
+      return customDateRange;
+    })(),
   });
   //#endregion
 
@@ -1650,10 +1687,30 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
             }}
           >
             {(() => {
+              const startDate = (() => {
+                if (customDateRange?.startDate) {
+                  return customDateRange.startDate;
+                }
+                if (currentDateAtStartRef.current) {
+                  return formatDate(
+                    currentDateAtStartRef.current,
+                    'yyyy-MM-dd'
+                  );
+                }
+              })();
+              const endDate = (() => {
+                if (customDateRange?.endDate) {
+                  return customDateRange.endDate;
+                }
+                if (currentDateAtEndRef.current) {
+                  return formatDate(currentDateAtEndRef.current, 'yyyy-MM-dd');
+                }
+              })();
               if (
+                blockCustomDateRangeRegion &&
                 isCustomDatesSelected &&
-                customDateRange?.startDate &&
-                customDateRange.endDate
+                startDate &&
+                endDate
               ) {
                 const bgcolor = alpha(palette.grey[900], 0.75);
                 const borderColor = '#fff';
@@ -1675,9 +1732,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                         left: 0,
                         width: `${
                           getPercentageAtDate(
-                            createDateWithoutTimezoneOffset(
-                              customDateRange.startDate
-                            )
+                            createDateWithoutTimezoneOffset(startDate)
                           ) * 100
                         }%`,
                         boxShadow: `1px 0px 4px 0px ${alpha(
@@ -1693,9 +1748,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                         right: 0,
                         left: `${
                           getPercentageAtDate(
-                            createDateWithoutTimezoneOffset(
-                              customDateRange.endDate
-                            )
+                            createDateWithoutTimezoneOffset(endDate)
                           ) * 100
                         }%`,
                         boxShadow: `-1px 0px 4px 0px ${alpha(
