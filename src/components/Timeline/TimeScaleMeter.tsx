@@ -324,7 +324,7 @@ export const TimeScaleMeter = forwardRef<HTMLDivElement, TimeScaleMeterProps>(
             }}
           />
           {displayableTimeScaleLevel2.map(
-            ({ id, label, showLabel = true, sx, ...rest }) => {
+            ({ id, label, showLabel = true, sx, ...rest }, index) => {
               return (
                 <Box
                   {...rest}
@@ -346,7 +346,10 @@ export const TimeScaleMeter = forwardRef<HTMLDivElement, TimeScaleMeterProps>(
                         fontWeight: 700,
                         whiteSpace: 'nowrap',
                         ...(() => {
-                          if (variant === 'compact') {
+                          if (
+                            variant === 'compact' &&
+                            timeScaleLevel2Offset + index > 0
+                          ) {
                             return {
                               transform: 'translateX(-50%)',
                             };

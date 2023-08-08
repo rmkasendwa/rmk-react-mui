@@ -1871,11 +1871,13 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         cursor: 'move',
         '&>div': {
           py: 0,
-          px: 0,
+          pl: 0,
+          pr: 0,
         },
       },
       bodySx: {
-        px: 0,
+        pl: 0,
+        pr: 0,
         py: 0.5,
         '&>div': {
           height: 42,
