@@ -35,6 +35,7 @@ import {
   useRef,
   useState,
 } from 'react';
+import { useInView } from 'react-intersection-observer';
 import { mergeRefs } from 'react-merge-refs';
 
 import {
@@ -271,6 +272,8 @@ const BaseDataDropdownField = <Entity,>(
 
   const [open, setOpen] = useState(false);
   const [focused, setFocused] = useState(false);
+  const [selectedOptionsWrapperElement, setSelectedOptionsWrapperElement] =
+    useState<HTMLDivElement | null>(null);
 
   //#region Selected Options
   const onChangeSelectedOptionsRef = useRef(onChangeSelectedOptionsProp);
@@ -568,6 +571,31 @@ const BaseDataDropdownField = <Entity,>(
     }
   }, [revalidationKey]);
 
+  const { ref: observerRef, inView: isVisible } = useInView();
+  useEffect(() => {
+    if (!isVisible) {
+      setOpen(false);
+    } else if (focused) {
+      setOpen(true);
+    }
+  }, [focused, isVisible]);
+
+  useEffect(() => {
+    if (selectedOptionsWrapperElement) {
+      const resizeObserver = new ResizeObserver(() => {
+        setSelectedOptionsRowSpan(
+          Math.ceil(selectedOptionsWrapperElement.clientHeight / 24)
+        );
+      });
+      resizeObserver.observe(selectedOptionsWrapperElement);
+      return () => {
+        resizeObserver.unobserve(selectedOptionsWrapperElement);
+      };
+    } else {
+      setSelectedOptionsRowSpan(1);
+    }
+  }, [selectedOptionsWrapperElement]);
+
   const selectedOptionsElement = (() => {
     const optionsToDisplay = (() => {
       if (selectedOptions.length > 0) {
@@ -757,7 +785,7 @@ const BaseDataDropdownField = <Entity,>(
         if (isTextVariant) {
           return (
             <FieldValueDisplay
-              ref={mergeRefs([ref, anchorRef])}
+              ref={mergeRefs([ref, anchorRef, observerRef])}
               {...{ label }}
               FieldValueProps={{
                 variant: 'inherit',
@@ -838,7 +866,7 @@ const BaseDataDropdownField = <Entity,>(
           <TextField
             ref={ref}
             onFocus={(event) => {
-              if (!multilineSearchMode) {
+              if (!multilineSearchMode && isVisible) {
                 event.preventDefault();
                 if (!isSmallScreenSize) {
                   setOpen(true);
@@ -848,7 +876,7 @@ const BaseDataDropdownField = <Entity,>(
               }
             }}
             onBlur={() => {
-              if (!multilineSearchMode) {
+              if (!multilineSearchMode && isVisible) {
                 setFocused(false);
                 if (onBlur) {
                   const event: any = new Event('blur', { bubbles: true });
@@ -889,7 +917,7 @@ const BaseDataDropdownField = <Entity,>(
                   setOpen(true);
                 }
               },
-              ref: anchorRef,
+              ref: mergeRefs([anchorRef, observerRef]),
               sx: {
                 ...(() => {
                   if (rest.multiline) {
@@ -977,14 +1005,8 @@ const BaseDataDropdownField = <Entity,>(
                 return (
                   <Box
                     className={classes.selectedOptionsWrapper}
-                    ref={(el: HTMLDivElement) => {
-                      if (el) {
-                        setSelectedOptionsRowSpan(
-                          Math.ceil(el.clientHeight / 24)
-                        );
-                      } else {
-                        setSelectedOptionsRowSpan(1);
-                      }
+                    ref={(element: HTMLDivElement) => {
+                      setSelectedOptionsWrapperElement(element);
                     }}
                     sx={{
                       position: 'absolute',
