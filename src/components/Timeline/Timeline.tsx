@@ -1718,7 +1718,6 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                   position: 'absolute',
                   top: 0,
                   bgcolor,
-                  borderRight: `2px solid ${borderColor}`,
                   zIndex: 3,
                   backdropFilter: 'blur(5px)',
                   boxSizing: 'border-box',
@@ -1735,6 +1734,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                             createDateWithoutTimezoneOffset(startDate)
                           ) * 100
                         }%`,
+                        borderRight: `2px solid ${borderColor}`,
                         boxShadow: `1px 0px 4px 0px ${alpha(
                           BLACK_COLOR,
                           0.25
@@ -1751,6 +1751,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                             createDateWithoutTimezoneOffset(endDate)
                           ) * 100
                         }%`,
+                        borderLeft: `2px solid ${borderColor}`,
                         boxShadow: `-1px 0px 4px 0px ${alpha(
                           BLACK_COLOR,
                           0.25
