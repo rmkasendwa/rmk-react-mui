@@ -123,6 +123,7 @@ const MAX_BUTTON_WIDTH = 150;
 const MAX_ELEMENT_TOOL_WIDTH = 300;
 const MAX_TITLE_WIDTH = 300;
 const MAX_SEARCH_FIELD_WIDTH = 240;
+const ELLIPSIS_MENU_TOOL_WIDTH = 40;
 
 export const getToolNodes = (
   tools: (ReactNode | Tool)[],
@@ -452,9 +453,46 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
 
     const shouldRenderSyncTool = Boolean(hasSyncTool && load);
 
+    const { collapsedElementWidth, elementMaxWidth } = allTools.reduce<{
+      elementMaxWidth: number;
+      collapsedElementWidth: number;
+    }>(
+      (accumulator, tool) => {
+        if (tool && typeof tool === 'object') {
+          if ('type' in tool) {
+            switch (tool.type) {
+              case 'button':
+                accumulator.elementMaxWidth += MAX_BUTTON_WIDTH;
+                accumulator.collapsedElementWidth += 32;
+                break;
+              case 'icon-button':
+                accumulator.elementMaxWidth += 32;
+                accumulator.collapsedElementWidth += 32;
+                break;
+              case 'divider':
+                accumulator.elementMaxWidth += 33;
+                accumulator.collapsedElementWidth += 33;
+                break;
+            }
+          }
+          if ('element' in tool) {
+            accumulator.elementMaxWidth += tool.elementMaxWidth;
+            accumulator.collapsedElementWidth += tool.collapsedElementMaxWidth;
+          }
+        }
+        return accumulator;
+      },
+      {
+        elementMaxWidth: 0,
+        collapsedElementWidth: 0,
+      }
+    );
+
     const updateCollapsedWidthToolIndex = useCallback(
       (anchorElement: HTMLDivElement) => {
         if (allTools?.length != null) {
+          collapsedElementWidth;
+          elementMaxWidth;
           const toolMaxWidths = allToolsRef.current.map((tool) => {
             if (tool && typeof tool === 'object') {
               if ('type' in tool) {
@@ -551,7 +589,9 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
 
             if (
               containerToolsMaxWidth -
-                (collapsedWidthToolsWidth + cummulativeToolsGapWidth) >=
+                (collapsedWidthToolsWidth +
+                  cummulativeToolsGapWidth +
+                  ELLIPSIS_MENU_TOOL_WIDTH) >=
               searchFieldAndTitleSpaceWidth
             ) {
               setCollapsedIntoEllipsisToolIndex(i);
@@ -562,7 +602,9 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
         }
       },
       [
-        allTools?.length,
+        allTools.length,
+        collapsedElementWidth,
+        elementMaxWidth,
         hasSearchTool,
         isSmallScreenSize,
         maxSearchFieldWidth,
@@ -694,7 +736,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
               return (
                 <Grid
                   item
-                  xs={Boolean(alignTools === 'end')}
+                  xs={alignTools === 'end' || isSmallScreenSize}
                   sx={{ minWidth: 0 }}
                 >
                   <ClickAwayListener
@@ -715,11 +757,11 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                 <>
                   <Grid
                     item
-                    xs={Boolean(alignTools === 'end')}
+                    xs={alignTools === 'end' || isSmallScreenSize}
                     sx={{
                       minWidth: 0,
                       ...(() => {
-                        if (alignTools === 'start') {
+                        if (alignTools === 'start' && !isSmallScreenSize) {
                           return {
                             width: maxTitleWidth,
                           };
@@ -751,7 +793,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                             : 'none',
                         maxWidth: maxSearchFieldWidth,
                         ...(() => {
-                          if (alignTools === 'start') {
+                          if (alignTools === 'start' && !isSmallScreenSize) {
                             return {
                               width: maxSearchFieldWidth,
                             };
@@ -836,13 +878,13 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
               return (
                 <Grid
                   item
-                  xs={Boolean(alignTools === 'end')}
+                  xs={alignTools === 'end' || isSmallScreenSize}
                   sx={{
                     minWidth: 0,
                     ...(() => {
-                      if (alignTools === 'start') {
+                      if (alignTools === 'start' && !isSmallScreenSize) {
                         return {
-                          width: maxSearchFieldWidth,
+                          maxWidth: maxSearchFieldWidth,
                         };
                       }
                     })(),
@@ -944,59 +986,64 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                     <Grid item>{syncButtonElement}</Grid>
                   ) : null}
                   {ellipsisTools.length > 0 ? (
-                    <Grid item>
-                      <EllipsisMenuIconButton
-                        options={ellipsisTools.map((tool, index) => {
-                          if ('type' in tool) {
-                            if (tool.type === 'divider') {
+                    <>
+                      {alignTools === 'start' && !isSmallScreenSize ? (
+                        <Grid item xs />
+                      ) : null}
+                      <Grid item>
+                        <EllipsisMenuIconButton
+                          options={ellipsisTools.map((tool, index) => {
+                            if ('type' in tool) {
+                              if (tool.type === 'divider') {
+                                return {
+                                  label: <Divider />,
+                                  value: index,
+                                  selectable: false,
+                                  isDropdownOption: false,
+                                };
+                              }
+                              const { label, icon, ref, onClick } = tool;
                               return {
-                                label: <Divider />,
+                                ref: ref as any,
+                                label,
+                                icon,
                                 value: index,
-                                selectable: false,
-                                isDropdownOption: false,
+                                onClick: onClick as any,
                               };
                             }
-                            const { label, icon, ref, onClick } = tool;
+                            const { element } = tool;
                             return {
-                              ref: ref as any,
-                              label,
-                              icon,
+                              label: (
+                                <Box
+                                  sx={{
+                                    px: 2,
+                                    py: 1,
+                                  }}
+                                >
+                                  {element}
+                                </Box>
+                              ),
                               value: index,
-                              onClick: onClick as any,
+                              isDropdownOption: false,
                             };
-                          }
-                          const { element } = tool;
-                          return {
-                            label: (
-                              <Box
-                                sx={{
-                                  px: 2,
-                                  py: 1,
-                                }}
-                              >
-                                {element}
-                              </Box>
-                            ),
-                            value: index,
-                            isDropdownOption: false,
-                          };
+                          })}
+                          PaginatedDropdownOptionListProps={{
+                            paging: false,
+                          }}
+                        />
+                        {ellipsisTools.map((tool, index) => {
+                          return (
+                            <Fragment key={index}>
+                              {(() => {
+                                if ('popupElement' in tool) {
+                                  return tool.popupElement;
+                                }
+                              })()}
+                            </Fragment>
+                          );
                         })}
-                        PaginatedDropdownOptionListProps={{
-                          paging: false,
-                        }}
-                      />
-                      {ellipsisTools.map((tool, index) => {
-                        return (
-                          <Fragment key={index}>
-                            {(() => {
-                              if ('popupElement' in tool) {
-                                return tool.popupElement;
-                              }
-                            })()}
-                          </Fragment>
-                        );
-                      })}
-                    </Grid>
+                      </Grid>
+                    </>
                   ) : null}
                 </>
               );
