@@ -30,15 +30,7 @@ import { alpha, darken, lighten } from '@mui/system/colorManipulator';
 import { SxProps } from '@mui/system/styleFunctionSx';
 import clsx from 'clsx';
 import { omit } from 'lodash';
-import {
-  Fragment,
-  ReactNode,
-  Ref,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { Fragment, ReactNode, Ref, useEffect, useRef, useState } from 'react';
 
 import { SortDirection, SortOptions } from '../../models/Sort';
 import { sort } from '../../utils/Sort';
@@ -263,19 +255,26 @@ export const useTable = <DataRow extends BaseDataRow>(
       onChangeCheckedRowIdsRef.current(checkedRowIds, allRowsChecked);
   }, [allRowsChecked, checkedRowIds]);
 
-  /********************************
-   * Column toggling state state. *
-   * *******************************/
-  const baseSelectedColumnIds = useMemo(() => {
+  const baseSelectedColumnIds = (() => {
     if (selectedColumnIdsProp) {
       return selectedColumnIdsProp;
     }
     return columnsProp.map(({ id }) => String(id) as any);
-  }, [columnsProp, selectedColumnIdsProp]);
+  })();
 
   const [localSelectedColumnIds, setLocalSelectedColumnIds] = useState<
     NonNullable<typeof selectedColumnIdsProp>
   >(baseSelectedColumnIds);
+
+  const serializedLocalSelectedColumnIds = JSON.stringify(
+    localSelectedColumnIds
+  );
+  const serializedBaseSelectedColumnIds = JSON.stringify(baseSelectedColumnIds);
+  useEffect(() => {
+    if (serializedLocalSelectedColumnIds !== serializedBaseSelectedColumnIds) {
+      setLocalSelectedColumnIds(JSON.parse(serializedBaseSelectedColumnIds));
+    }
+  }, [serializedBaseSelectedColumnIds, serializedLocalSelectedColumnIds]);
 
   const selectedColumnIds = (() => {
     if (onChangeSelectedColumnIdsRef.current && selectedColumnIdsProp) {
