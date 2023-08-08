@@ -122,6 +122,10 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(
             }
           })(),
           ...rest.PopperProps,
+          sx: {
+            zIndex: 9999,
+            ...rest.PopperProps?.sx,
+          },
         }}
         onOpen={(...args) => {
           if (lastMouseEventRef.current) {
