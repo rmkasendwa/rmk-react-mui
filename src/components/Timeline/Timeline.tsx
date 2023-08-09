@@ -1312,7 +1312,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
               scrollToDateRef.current(centerOfGravity, 'auto');
               break;
           }
-        } else if (hasCustomDatesSelected) {
+        } else if (hasCustomDatesSelected && customDateRange.startDate) {
           scrollToDateRef.current(
             createDateWithoutTimezoneOffset(customDateRange.startDate),
             {
@@ -1452,7 +1452,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           setSearchParams(
             {
               isCustomDatesSelected: true,
-              customDateRange: (() => {
+              customDateRange: ((): any => {
                 if (selectedCustomDates) {
                   return {
                     ...selectedCustomDates,
@@ -1470,6 +1470,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           setSearchParams(
             {
               isCustomDatesSelected: null,
+              customDateRange: null,
             },
             {
               replace: true,

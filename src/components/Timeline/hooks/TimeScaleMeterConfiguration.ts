@@ -21,7 +21,7 @@ export interface TimeScaleConfigurationProps {
   selectedTimeScale: TimeScaleOption;
   TimeScaleMeterPropsVariant: 'compact' | 'default';
   customDateRange?: {
-    startDate: string;
+    startDate?: string;
     endDate?: string;
   };
   isCustomDatesSelected?: boolean;
