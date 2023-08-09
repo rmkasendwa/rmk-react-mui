@@ -1506,6 +1506,8 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       }
       return customDateRange;
     })(),
+    startDateRef: currentDateAtStartRef,
+    endDateRef: currentDateAtEndRef,
   });
   //#endregion
 
