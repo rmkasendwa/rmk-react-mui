@@ -283,6 +283,9 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
     label?: ReactNode;
   })[];
 
+  /** A boolean indicating whether to show the placeholder when the static row is empty. */
+  showPlaceholderWhenStaticRowIsEmpty?: boolean;
+
   /** The HTMLElement or null that is the ancestor of the scrolling element. */
   scrollingAncenstorElement?: HTMLElement | null;
 
@@ -380,6 +383,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     defaultTimelineCenter,
     TodayIndicatorProps = {},
     staticRows,
+    showPlaceholderWhenStaticRowIsEmpty = true,
     dateFormat = 'MMM dd, yyyy hh:mm aa',
     DateAtCursorMarkerLabelProps = {},
     DateAtCursorMarkerProps = {},
@@ -1841,6 +1845,10 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           if (timelineElementNode) {
             return timelineElementNode;
           }
+        }
+
+        if (row.isTimelineStaticRow && !showPlaceholderWhenStaticRowIsEmpty) {
+          return null;
         }
         return (
           <Box
