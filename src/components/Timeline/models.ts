@@ -64,7 +64,7 @@ export const timelineSearchParamValidationSpec = {
   timeScale: Yup.mixed<TimeScaleOption>().oneOf([...timeScaleOptions]),
   isCustomDatesSelected: Yup.boolean(),
   customDateRange: Yup.object({
-    startDate: Yup.string().required(),
+    startDate: Yup.string(),
     endDate: Yup.string(),
   }),
 };

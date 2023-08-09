@@ -29,7 +29,7 @@ export type SelectTimeScaleCallbackFunction = (
 ) => void;
 
 export type SelectCustomDates = {
-  startDate: string;
+  startDate?: string;
   endDate?: string;
 };
 
@@ -65,9 +65,7 @@ export const useTimeScaleTool = ({
   selectedCustomDates: {
     startDate: startDateString,
     endDate: endDateString,
-  } = {
-    startDate: new Date().toISOString().split('T')[0],
-  },
+  } = {},
   DatePickerToolProps,
   minDate,
   maxDate,
@@ -165,7 +163,12 @@ export const useTimeScaleTool = ({
     </Button>
   );
 
-  const startDate = createDateWithoutTimezoneOffset(startDateString);
+  const startDate = (() => {
+    if (startDateString) {
+      return createDateWithoutTimezoneOffset(startDateString);
+    }
+    return new Date();
+  })();
   const endDate = (() => {
     if (endDateString) {
       return createDateWithoutTimezoneOffset(endDateString);
