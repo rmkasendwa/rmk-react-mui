@@ -1900,6 +1900,8 @@ const BaseRecordsExplorer = <
       }
       return customDateRange;
     })(),
+    startDateRef: currentDateAtStartRef,
+    endDateRef: currentDateAtEndRef,
   });
   const scrollTimelineTools = useScrollTimelineTools({
     ...timelineView?.ScrollTimelineToolsProps,

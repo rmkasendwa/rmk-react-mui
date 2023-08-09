@@ -10,7 +10,7 @@ import {
 } from '@mui/material';
 import formatDate from 'date-fns/format';
 import { omit } from 'lodash';
-import { ReactNode } from 'react';
+import { MutableRefObject, ReactNode } from 'react';
 
 import { PopupToolOptions, usePopupTool } from '../../../hooks/Tools/PopupTool';
 import DatePicker from '../../DatePicker';
@@ -50,6 +50,8 @@ export interface TimeScaleToolProps {
   DatePickerToolProps?: Partial<Omit<PopupToolOptions, 'onChange'>>;
   minDate?: string;
   maxDate?: string;
+  startDateRef?: MutableRefObject<Date | null>;
+  endDateRef?: MutableRefObject<Date | null>;
 }
 
 export const useTimeScaleTool = ({
@@ -69,6 +71,8 @@ export const useTimeScaleTool = ({
   DatePickerToolProps,
   minDate,
   maxDate,
+  startDateRef,
+  endDateRef,
 }: TimeScaleToolProps) => {
   const dataDropdownProps: DataDropdownFieldProps = {
     placeholder: label as string,
@@ -78,7 +82,21 @@ export const useTimeScaleTool = ({
       : selectedTimeScale,
     onChange: (event) => {
       onSelectCustomDatesTimeScale?.(
-        event.target.value === CUSTOM_DATE_OPTION_LABEL
+        event.target.value === CUSTOM_DATE_OPTION_LABEL,
+        (() => {
+          if (startDateString && endDateString) {
+            return {
+              startDate: startDateString,
+              endDate: endDateString,
+            };
+          }
+          if (startDateRef?.current && endDateRef?.current) {
+            return {
+              startDate: formatDate(startDateRef.current, 'yyyy-MM-dd'),
+              endDate: formatDate(endDateRef.current, 'yyyy-MM-dd'),
+            };
+          }
+        })()
       );
       if (event.target.value !== CUSTOM_DATE_OPTION_LABEL) {
         onSelectTimeScale?.((event.target.value as any) || null);
