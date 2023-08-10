@@ -116,7 +116,7 @@ export const useFilterTool = <RecordRow extends BaseDataRow>({
     return 'text';
   })();
 
-  return usePopupTool({
+  const tool = usePopupTool({
     icon: <FilterAltOutlinedIcon />,
     ...rest,
     label: (() => {
@@ -548,4 +548,6 @@ export const useFilterTool = <RecordRow extends BaseDataRow>({
     ),
     variant,
   });
+
+  return omit(tool, 'open', 'setOpen');
 };

@@ -1,4 +1,5 @@
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import { omit } from 'lodash';
 import { ReactNode } from 'react';
 
 import { PopupToolOptions, usePopupTool } from '../../../hooks/Tools/PopupTool';
@@ -28,7 +29,7 @@ export const useJumpToDateTool = ({
       }}
     />
   );
-  return usePopupTool({
+  const tool = usePopupTool({
     label: 'Jump to date',
     icon: <CalendarTodayIcon />,
     wrapBodyContentInCard: false,
@@ -37,4 +38,5 @@ export const useJumpToDateTool = ({
       ? wrapDatePickerNode(datePickerNode)
       : datePickerNode,
   });
+  return omit(tool, 'open', 'setOpen');
 };

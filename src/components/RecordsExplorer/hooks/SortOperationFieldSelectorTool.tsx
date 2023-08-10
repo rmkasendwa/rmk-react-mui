@@ -15,6 +15,7 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
+import { omit } from 'lodash';
 import { FC, ReactNode, useEffect, useRef, useState } from 'react';
 import { DndProvider, useDrag, useDragLayer, useDrop } from 'react-dnd';
 import { HTML5Backend, getEmptyImage } from 'react-dnd-html5-backend';
@@ -408,7 +409,7 @@ export const useSortOperationFieldSelectorTool = <
     return 'text';
   })();
 
-  return usePopupTool({
+  const tool = usePopupTool({
     ...rest,
     label: hasSortParams
       ? (() => {
@@ -554,4 +555,6 @@ export const useSortOperationFieldSelectorTool = <
     footerContent,
     variant,
   });
+
+  return omit(tool, 'open', 'setOpen');
 };
