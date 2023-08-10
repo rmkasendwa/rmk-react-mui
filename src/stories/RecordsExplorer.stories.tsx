@@ -62,6 +62,7 @@ const baseArgs = {
         console.log({ contact });
       },
       mergeTools: true,
+      defaultTimelineCenter: 'now',
       // staticRows: [
       //   {
       //     id: 'static-row-1',

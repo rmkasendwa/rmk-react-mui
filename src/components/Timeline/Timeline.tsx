@@ -1032,42 +1032,15 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     });
 
   //#region Unit time scaling
-  const [timelineWidthScaleFactor, setTimelineWidthScaleFactor] = useState(
-    () => {
-      if (scrollingAncenstorElement) {
-        return (
-          (scrollingAncenstorElement.clientWidth - timelineViewPortLeftOffset) /
-          unitTimeScaleWidth
-        );
-      }
-      return 1;
-    }
-  );
-
-  useEffect(() => {
+  const timelineWidthScaleFactor = (() => {
     if (scrollingAncenstorElement) {
-      const resizeObserver = new ResizeObserver(() => {
-        setTimelineWidthScaleFactor(() => {
-          if (scrollingAncenstorElement) {
-            return (
-              (scrollingAncenstorElement.clientWidth -
-                timelineViewPortLeftOffset) /
-              unitTimeScaleWidth
-            );
-          }
-          return 1;
-        });
-      });
-      resizeObserver.observe(scrollingAncenstorElement);
-      return () => {
-        resizeObserver.disconnect();
-      };
+      return (
+        (scrollingAncenstorElement.clientWidth - timelineViewPortLeftOffset) /
+        unitTimeScaleWidth
+      );
     }
-  }, [
-    scrollingAncenstorElement,
-    timelineViewPortLeftOffset,
-    unitTimeScaleWidth,
-  ]);
+    return 1;
+  })();
 
   const { scaledUnitTimeScaleWidth, scaledTimeScaleWidth } = useMemo(() => {
     return {
@@ -1336,17 +1309,6 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     timelineContainerElement,
   ]);
 
-  useEffect(() => {
-    if (
-      selectedTimeScale &&
-      lastDateAtCenterRef.current &&
-      scrollingAncenstorElement
-    ) {
-      scrollToDateRef.current(lastDateAtCenterRef.current, 'auto');
-      lastDateAtCenterRef.current = null;
-    }
-  }, [scrollingAncenstorElement, selectedTimeScale]);
-
   //#region Track date at cursor
   useEffect(() => {
     const timelineMeterContainerElement =
@@ -1588,6 +1550,17 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     jumpToNextUnitTimeScale,
   });
   //#endregion
+
+  useEffect(() => {
+    if (
+      selectedTimeScale &&
+      lastDateAtCenterRef.current &&
+      scrollingAncenstorElement
+    ) {
+      scrollToDateRef.current(lastDateAtCenterRef.current, 'auto');
+      lastDateAtCenterRef.current = null;
+    }
+  }, [scrollingAncenstorElement, selectedTimeScale]);
 
   useEffect(() => {
     isInitialMountRef.current = false;
