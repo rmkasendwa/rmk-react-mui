@@ -301,6 +301,9 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
   /** Custom props for the useDragToScroll hook. */
   DragToScrollProps?: Partial<Pick<DragToScrollProps, 'enableDragToScroll'>>;
 
+  minCalendarDateRef?: MutableRefObject<Date | null>;
+  maxCalendarDateRef?: MutableRefObject<Date | null>;
+
   currentDateAtStartRef?: MutableRefObject<Date | null>;
   currentDateAtCenterRef?: MutableRefObject<Date | null>;
   currentDateAtEndRef?: MutableRefObject<Date | null>;
@@ -389,6 +392,8 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     DateAtCursorMarkerProps = {},
     DragToScrollProps = {},
     blockCustomDateRangeRegion = true,
+    minCalendarDateRef,
+    maxCalendarDateRef,
     currentDateAtStartRef: currentDateAtStartRefProp,
     currentDateAtCenterRef: currentDateAtCenterRefProp,
     currentDateAtEndRef: currentDateAtEndRefProp,
@@ -541,8 +546,8 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
    * Memoized calculation of various timeline-related values and properties.
    */
   const {
-    minCalendarDate, // The minimum date in the calendar (without time) based on the timeline data.
-    maxCalendarDate, // The maximum date in the calendar (without time) based on the timeline data.
+    minCalendarDate, // The minimum date in the calendar based on the timeline data.
+    maxCalendarDate, // The maximum date in the calendar based on the timeline data.
     timelineYears, // An array of years represented in the timeline data.
     totalNumberOfDays, // The total number of days covered by the timeline.
     totalNumberOfHours, // The total number of hours covered by the timeline.
@@ -676,6 +681,9 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       allDates,
     };
   }, [endDateProperty, maxDateProp, minDateProp, rows, startDateProperty]);
+
+  minCalendarDateRef && (minCalendarDateRef.current = minCalendarDate);
+  maxCalendarDateRef && (maxCalendarDateRef.current = maxCalendarDate);
 
   useEffect(() => {
     onChangeTimelineDateBoundsRef.current?.({
@@ -1471,6 +1479,8 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     })(),
     startDateRef: currentDateAtStartRef,
     endDateRef: currentDateAtEndRef,
+    minDate: minCalendarDate,
+    maxDate: maxCalendarDate,
   });
   //#endregion
 
