@@ -46,13 +46,14 @@ export interface TimeScaleToolProps {
   supportedTimeScales?: TimeScaleOption[];
   onSelectTimeScale?: SelectTimeScaleCallbackFunction;
   label?: ReactNode;
-  wrapDatePickerNode?: (datePickerNode: ReactNode) => ReactNode;
+  wrapStartDatePickerNode?: (datePickerNode: ReactNode) => ReactNode;
+  wrapEndDatePickerNode?: (datePickerNode: ReactNode) => ReactNode;
   isCustomDatesTimeScaleSelected?: boolean;
   onSelectCustomDatesTimeScale?: SelectCustomDatesTimeScaleCallbackFunction;
   selectedCustomDates?: SelectCustomDates;
   DatePickerToolProps?: Partial<Omit<PopupToolOptions, 'onChange'>>;
-  minDate?: string;
-  maxDate?: string;
+  minDate?: string | number | Date;
+  maxDate?: string | number | Date;
   startDateRef?: MutableRefObject<Date | null>;
   endDateRef?: MutableRefObject<Date | null>;
 }
@@ -62,7 +63,8 @@ export const useTimeScaleTool = ({
   supportedTimeScales = [...timeScaleOptions],
   onSelectTimeScale,
   label = 'Timescale',
-  wrapDatePickerNode,
+  wrapStartDatePickerNode,
+  wrapEndDatePickerNode,
   isCustomDatesTimeScaleSelected,
   onSelectCustomDatesTimeScale,
   selectedCustomDates: {
@@ -97,7 +99,7 @@ export const useTimeScaleTool = ({
       endDate={endDate}
       selectsRange={true as any}
       onChange={(dates: any) => {
-        const [startDate, endDate] = dates as [Date, Date | null];
+        const [startDate] = dates as [Date, Date | null];
         onSelectCustomDatesTimeScale?.(
           isCustomDatesTimeScaleSelected ?? false,
           {
@@ -106,8 +108,19 @@ export const useTimeScaleTool = ({
           }
         );
       }}
-      minDate={minDate ? createDateWithoutTimezoneOffset(minDate) : null}
-      maxDate={maxDate ? createDateWithoutTimezoneOffset(maxDate) : null}
+      minDate={(() => {
+        if (minDate) {
+          return createDateWithoutTimezoneOffset(minDate);
+        }
+      })()}
+      maxDate={(() => {
+        if (endDate) {
+          return endDate;
+        }
+        if (maxDate) {
+          return createDateWithoutTimezoneOffset(maxDate);
+        }
+      })()}
     />
   );
   const {
@@ -121,29 +134,42 @@ export const useTimeScaleTool = ({
     wrapBodyContentInCard: false,
     ...DatePickerToolProps,
     type: 'button',
-    bodyContent: wrapDatePickerNode
-      ? wrapDatePickerNode(startDatePickerNode)
+    bodyContent: wrapStartDatePickerNode
+      ? wrapStartDatePickerNode(startDatePickerNode)
       : startDatePickerNode,
   });
 
   const endDatePickerNode = (
     <DatePicker
-      selected={startDate}
+      selected={endDate}
       startDate={startDate}
       endDate={endDate}
       selectsRange={true as any}
       onChange={(dates: any) => {
-        const [startDate, endDate] = dates as [Date, Date | null];
+        const [, endDate] = dates as [Date, Date | null];
         onSelectCustomDatesTimeScale?.(
           isCustomDatesTimeScaleSelected ?? false,
           {
-            startDate: formatDate(startDate, 'yyyy-MM-dd'),
+            startDate: startDate
+              ? formatDate(startDate, 'yyyy-MM-dd')
+              : undefined,
             endDate: endDate ? formatDate(endDate, 'yyyy-MM-dd') : undefined,
           }
         );
       }}
-      minDate={minDate ? createDateWithoutTimezoneOffset(minDate) : null}
-      maxDate={maxDate ? createDateWithoutTimezoneOffset(maxDate) : null}
+      minDate={(() => {
+        if (startDate) {
+          return startDate;
+        }
+        if (minDate) {
+          return createDateWithoutTimezoneOffset(minDate);
+        }
+      })()}
+      maxDate={(() => {
+        if (maxDate) {
+          return createDateWithoutTimezoneOffset(maxDate);
+        }
+      })()}
     />
   );
   const {
@@ -156,8 +182,8 @@ export const useTimeScaleTool = ({
     wrapBodyContentInCard: false,
     ...DatePickerToolProps,
     type: 'button',
-    bodyContent: wrapDatePickerNode
-      ? wrapDatePickerNode(endDatePickerNode)
+    bodyContent: wrapEndDatePickerNode
+      ? wrapEndDatePickerNode(endDatePickerNode)
       : endDatePickerNode,
   });
 

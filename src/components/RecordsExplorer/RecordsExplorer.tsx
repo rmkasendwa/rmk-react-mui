@@ -1878,6 +1878,8 @@ const BaseRecordsExplorer = <
   })();
 
   const timeScaleTool = useTimeScaleTool({
+    minDate: timelineDateBoundsRef.current?.minDate,
+    maxDate: timelineDateBoundsRef.current?.maxDate,
     ...timelineView?.TimeScaleToolProps,
     ...TimelineViewProps?.TimeScaleToolProps,
     selectedTimeScale,

@@ -986,64 +986,59 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                     <Grid item>{syncButtonElement}</Grid>
                   ) : null}
                   {ellipsisTools.length > 0 ? (
-                    <>
-                      {alignTools === 'start' && !isSmallScreenSize ? (
-                        <Grid item xs />
-                      ) : null}
-                      <Grid item>
-                        <EllipsisMenuIconButton
-                          options={ellipsisTools.map((tool, index) => {
-                            if ('type' in tool) {
-                              if (tool.type === 'divider') {
-                                return {
-                                  label: <Divider />,
-                                  value: index,
-                                  selectable: false,
-                                  isDropdownOption: false,
-                                };
-                              }
-                              const { label, icon, ref, onClick } = tool;
+                    <Grid item>
+                      <EllipsisMenuIconButton
+                        options={ellipsisTools.map((tool, index) => {
+                          if ('type' in tool) {
+                            if (tool.type === 'divider') {
                               return {
-                                ref: ref as any,
-                                label,
-                                icon,
+                                label: <Divider />,
                                 value: index,
-                                onClick: onClick as any,
+                                selectable: false,
+                                isDropdownOption: false,
                               };
                             }
-                            const { element } = tool;
+                            const { label, icon, ref, onClick } = tool;
                             return {
-                              label: (
-                                <Box
-                                  sx={{
-                                    px: 2,
-                                    py: 1,
-                                  }}
-                                >
-                                  {element}
-                                </Box>
-                              ),
+                              ref: ref as any,
+                              label,
+                              icon,
                               value: index,
-                              isDropdownOption: false,
+                              onClick: onClick as any,
                             };
-                          })}
-                          PaginatedDropdownOptionListProps={{
-                            paging: false,
-                          }}
-                        />
-                        {ellipsisTools.map((tool, index) => {
-                          return (
-                            <Fragment key={index}>
-                              {(() => {
-                                if ('popupElement' in tool) {
-                                  return tool.popupElement;
-                                }
-                              })()}
-                            </Fragment>
-                          );
+                          }
+                          const { element } = tool;
+                          return {
+                            label: (
+                              <Box
+                                sx={{
+                                  px: 2,
+                                  py: 1,
+                                }}
+                              >
+                                {element}
+                              </Box>
+                            ),
+                            value: index,
+                            isDropdownOption: false,
+                          };
                         })}
-                      </Grid>
-                    </>
+                        PaginatedDropdownOptionListProps={{
+                          paging: false,
+                        }}
+                      />
+                      {ellipsisTools.map((tool, index) => {
+                        return (
+                          <Fragment key={index}>
+                            {(() => {
+                              if ('popupElement' in tool) {
+                                return tool.popupElement;
+                              }
+                            })()}
+                          </Fragment>
+                        );
+                      })}
+                    </Grid>
                   ) : null}
                 </>
               );
