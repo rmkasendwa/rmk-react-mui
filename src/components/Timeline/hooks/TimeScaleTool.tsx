@@ -6,11 +6,14 @@ import {
   Button,
   Stack,
   Typography,
+  alpha,
+  buttonClasses,
   outlinedInputClasses,
+  useTheme,
 } from '@mui/material';
 import formatDate from 'date-fns/format';
 import { omit } from 'lodash';
-import { MutableRefObject, ReactNode } from 'react';
+import { MutableRefObject, ReactNode, useEffect, useRef } from 'react';
 
 import { PopupToolOptions, usePopupTool } from '../../../hooks/Tools/PopupTool';
 import DatePicker from '../../DatePicker';
@@ -72,6 +75,92 @@ export const useTimeScaleTool = ({
   startDateRef,
   endDateRef,
 }: TimeScaleToolProps) => {
+  const shouldOpenFromDatePickerRef = useRef(false);
+  const { palette } = useTheme();
+
+  const startDate = (() => {
+    if (startDateString) {
+      return createDateWithoutTimezoneOffset(startDateString);
+    }
+    return new Date();
+  })();
+  const endDate = (() => {
+    if (endDateString) {
+      return createDateWithoutTimezoneOffset(endDateString);
+    }
+  })();
+
+  const startDatePickerNode = (
+    <DatePicker
+      selected={startDate}
+      startDate={startDate}
+      endDate={endDate}
+      selectsRange={true as any}
+      onChange={(dates: any) => {
+        const [startDate, endDate] = dates as [Date, Date | null];
+        onSelectCustomDatesTimeScale?.(
+          isCustomDatesTimeScaleSelected ?? false,
+          {
+            startDate: formatDate(startDate, 'yyyy-MM-dd'),
+            endDate: endDate ? formatDate(endDate, 'yyyy-MM-dd') : undefined,
+          }
+        );
+      }}
+      minDate={minDate ? createDateWithoutTimezoneOffset(minDate) : null}
+      maxDate={maxDate ? createDateWithoutTimezoneOffset(maxDate) : null}
+    />
+  );
+  const {
+    popupElement: fromButtonPopupElement,
+    ref: fromButtonAnchorRef,
+    open: fromButtonPopupElementOpen,
+    setOpen: fromButtonPopupElementSetOpen,
+    ...fromButtonPropsRest
+  } = usePopupTool({
+    label: 'From',
+    wrapBodyContentInCard: false,
+    ...DatePickerToolProps,
+    type: 'button',
+    bodyContent: wrapDatePickerNode
+      ? wrapDatePickerNode(startDatePickerNode)
+      : startDatePickerNode,
+  });
+
+  const endDatePickerNode = (
+    <DatePicker
+      selected={startDate}
+      startDate={startDate}
+      endDate={endDate}
+      selectsRange={true as any}
+      onChange={(dates: any) => {
+        const [startDate, endDate] = dates as [Date, Date | null];
+        onSelectCustomDatesTimeScale?.(
+          isCustomDatesTimeScaleSelected ?? false,
+          {
+            startDate: formatDate(startDate, 'yyyy-MM-dd'),
+            endDate: endDate ? formatDate(endDate, 'yyyy-MM-dd') : undefined,
+          }
+        );
+      }}
+      minDate={minDate ? createDateWithoutTimezoneOffset(minDate) : null}
+      maxDate={maxDate ? createDateWithoutTimezoneOffset(maxDate) : null}
+    />
+  );
+  const {
+    popupElement: toButtonPopupElement,
+    ref: toButtonAnchorRef,
+    open: toButtonPopupElementOpen,
+    ...toButtonPropsRest
+  } = usePopupTool({
+    label: 'To',
+    wrapBodyContentInCard: false,
+    ...DatePickerToolProps,
+    type: 'button',
+    bodyContent: wrapDatePickerNode
+      ? wrapDatePickerNode(endDatePickerNode)
+      : endDatePickerNode,
+  });
+
   const dataDropdownProps: DataDropdownFieldProps = {
     placeholder: label as string,
     size: 'small',
@@ -96,7 +185,9 @@ export const useTimeScaleTool = ({
           }
         })()
       );
-      if (event.target.value !== CUSTOM_DATE_OPTION_LABEL) {
+      if (event.target.value === CUSTOM_DATE_OPTION_LABEL) {
+        shouldOpenFromDatePickerRef.current = true;
+      } else {
         onSelectTimeScale?.((event.target.value as any) || null);
       }
     },
@@ -163,65 +254,6 @@ export const useTimeScaleTool = ({
     </Button>
   );
 
-  const startDate = (() => {
-    if (startDateString) {
-      return createDateWithoutTimezoneOffset(startDateString);
-    }
-    return new Date();
-  })();
-  const endDate = (() => {
-    if (endDateString) {
-      return createDateWithoutTimezoneOffset(endDateString);
-    }
-  })();
-
-  const datePickerNode = (
-    <DatePicker
-      selected={startDate}
-      startDate={startDate}
-      endDate={endDate}
-      selectsRange={true as any}
-      onChange={(dates: any) => {
-        const [startDate, endDate] = dates as [Date, Date | null];
-        onSelectCustomDatesTimeScale?.(
-          isCustomDatesTimeScaleSelected ?? false,
-          {
-            startDate: formatDate(startDate, 'yyyy-MM-dd'),
-            endDate: endDate ? formatDate(endDate, 'yyyy-MM-dd') : undefined,
-          }
-        );
-      }}
-      minDate={minDate ? createDateWithoutTimezoneOffset(minDate) : null}
-      maxDate={maxDate ? createDateWithoutTimezoneOffset(maxDate) : null}
-    />
-  );
-  const {
-    popupElement: fromButtonPopupElement,
-    ref: fromButtonAnchorRef,
-    ...fromButtonPropsRest
-  } = usePopupTool({
-    label: 'From',
-    wrapBodyContentInCard: false,
-    ...DatePickerToolProps,
-    type: 'button',
-    bodyContent: wrapDatePickerNode
-      ? wrapDatePickerNode(datePickerNode)
-      : datePickerNode,
-  });
-  const {
-    popupElement: toButtonPopupElement,
-    ref: toButtonAnchorRef,
-    ...toButtonPropsRest
-  } = usePopupTool({
-    label: 'To',
-    wrapBodyContentInCard: false,
-    ...DatePickerToolProps,
-    type: 'button',
-    bodyContent: wrapDatePickerNode
-      ? wrapDatePickerNode(datePickerNode)
-      : datePickerNode,
-  });
-
   const customDatesElementsNode = (
     <>
       <Box
@@ -231,13 +263,29 @@ export const useTimeScaleTool = ({
       />
       <Button
         ref={fromButtonAnchorRef}
-        {...omit(fromButtonPropsRest, 'title', 'extraToolProps')}
+        {...omit(
+          fromButtonPropsRest,
+          'title',
+          'extraToolProps',
+          'open',
+          'setOpen'
+        )}
         startIcon={<CalendarTodayIcon />}
         variant="contained"
         color="inherit"
         sx={{
           minWidth: 80,
           maxWidth: 110,
+          ...(() => {
+            if (fromButtonPopupElementOpen) {
+              return {
+                [`&.${buttonClasses.colorInherit},&.${buttonClasses.colorInherit}:hover`]:
+                  {
+                    bgcolor: alpha(palette.primary.main, 0.15),
+                  },
+              };
+            }
+          })(),
         }}
       >
         <Typography variant="inherit" component="div" noWrap>
@@ -252,13 +300,29 @@ export const useTimeScaleTool = ({
       />
       <Button
         ref={toButtonAnchorRef}
-        {...omit(toButtonPropsRest, 'title', 'extraToolProps')}
+        {...omit(
+          toButtonPropsRest,
+          'title',
+          'extraToolProps',
+          'open',
+          'setOpen'
+        )}
         startIcon={<CalendarTodayIcon />}
         variant="contained"
         color="inherit"
         sx={{
           minWidth: 80,
           maxWidth: 110,
+          ...(() => {
+            if (toButtonPopupElementOpen) {
+              return {
+                [`&.${buttonClasses.colorInherit},&.${buttonClasses.colorInherit}:hover`]:
+                  {
+                    bgcolor: alpha(palette.primary.main, 0.15),
+                  },
+              };
+            }
+          })(),
         }}
       >
         <Typography variant="inherit" component="div" noWrap>
@@ -268,6 +332,13 @@ export const useTimeScaleTool = ({
       {toButtonPopupElement}
     </>
   );
+
+  useEffect(() => {
+    if (isCustomDatesTimeScaleSelected && shouldOpenFromDatePickerRef.current) {
+      fromButtonPopupElementSetOpen(true);
+      shouldOpenFromDatePickerRef.current = false;
+    }
+  }, [fromButtonPopupElementSetOpen, isCustomDatesTimeScaleSelected]);
 
   let elementMaxWidth = buttonElementWidth;
   let collapsedElementMaxWidth = buttonElementWidth;

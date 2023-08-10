@@ -38,6 +38,8 @@ export const usePopupTool = ({
   extraToolProps: {
     closePopup: () => void;
   };
+  open: boolean;
+  setOpen: (open: boolean) => void;
 } => {
   const { sx: BodyContentPropsSx, ...BodyContentPropsRest } = BodyContentProps;
   const anchorRef = useRef<HTMLButtonElement | null>(null);
@@ -174,5 +176,7 @@ export const usePopupTool = ({
         setOpen(false);
       },
     },
+    open,
+    setOpen,
   };
 };
