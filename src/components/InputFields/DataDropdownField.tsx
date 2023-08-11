@@ -575,8 +575,6 @@ const BaseDataDropdownField = <Entity,>(
   useEffect(() => {
     if (!isVisible) {
       setOpen(false);
-    } else if (focused) {
-      setOpen(true);
     }
   }, [focused, isVisible]);
 
