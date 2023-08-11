@@ -123,7 +123,6 @@ const MAX_BUTTON_WIDTH = 150;
 const MAX_ELEMENT_TOOL_WIDTH = 300;
 const MAX_TITLE_WIDTH = 300;
 const MAX_SEARCH_FIELD_WIDTH = 240;
-const ELLIPSIS_MENU_TOOL_WIDTH = 40;
 
 export const getToolNodes = (
   tools: (ReactNode | Tool)[],
@@ -463,7 +462,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
             switch (tool.type) {
               case 'button':
                 accumulator.elementMaxWidth += MAX_BUTTON_WIDTH;
-                accumulator.collapsedElementWidth += 32;
+                accumulator.collapsedElementWidth += 36;
                 break;
               case 'icon-button':
                 accumulator.elementMaxWidth += 32;
@@ -500,7 +499,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                   case 'button':
                     return {
                       elementMaxWidth: MAX_BUTTON_WIDTH,
-                      collapsedElementWidth: 32,
+                      collapsedElementWidth: 36,
                     };
                   case 'icon-button':
                     return {
@@ -523,12 +522,12 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
             }
             return {
               elementMaxWidth: MAX_ELEMENT_TOOL_WIDTH,
-              collapsedElementWidth: 32,
+              collapsedElementWidth: 36,
             };
           });
 
           let containerToolsMaxWidth =
-            anchorElement.clientWidth - (isSmallScreenSize ? 16 : 24);
+            anchorElement.clientWidth - (isSmallScreenSize ? 16 : 24) * 2;
           if (shouldRenderSyncTool) {
             containerToolsMaxWidth -= 32;
           }
@@ -542,13 +541,11 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
             }
             return width;
           })();
-          let cummulativeToolsGapWidth = (allToolsRef.current.length - 1) * 8;
-          if (title && hasSearchTool) {
-            cummulativeToolsGapWidth += 8;
-          }
-          if (shouldRenderSyncTool) {
-            cummulativeToolsGapWidth += 8;
-          }
+          let toolsCount = allToolsRef.current.length;
+          title && (toolsCount += 1);
+          hasSearchTool && (toolsCount += 1);
+          shouldRenderSyncTool && (toolsCount += 1);
+          const cummulativeToolsGapWidth = (toolsCount - 1) * 8;
 
           for (let i = 0; i < allTools.length; i++) {
             const fullWidthToolsWidth = toolMaxWidths
@@ -579,6 +576,8 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
           }
           setCollapsedWidthToolIndex(allTools.length);
 
+          const cummulativeCollapsedToolsGapWidth = (toolsCount - 1) * 4;
+
           for (let i = 0; i < allTools.length; i++) {
             const collapsedWidthToolsWidth = toolMaxWidths
               .slice(0, toolMaxWidths.length - i)
@@ -590,8 +589,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
             if (
               containerToolsMaxWidth -
                 (collapsedWidthToolsWidth +
-                  cummulativeToolsGapWidth +
-                  ELLIPSIS_MENU_TOOL_WIDTH) >=
+                  cummulativeCollapsedToolsGapWidth) >=
               searchFieldAndTitleSpaceWidth
             ) {
               setCollapsedIntoEllipsisToolIndex(i);
@@ -1025,6 +1023,10 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                         })}
                         PaginatedDropdownOptionListProps={{
                           paging: false,
+                        }}
+                        sx={{
+                          width: 32,
+                          height: 32,
                         }}
                       />
                       {ellipsisTools.map((tool, index) => {
