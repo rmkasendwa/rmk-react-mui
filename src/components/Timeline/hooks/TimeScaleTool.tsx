@@ -369,8 +369,8 @@ export const useTimeScaleTool = ({
   let elementMaxWidth = buttonElementWidth;
   let collapsedElementMaxWidth = buttonElementWidth;
 
+  elementMaxWidth += (typeof label === 'string' ? label.length * 5 : 60) + 4;
   if (isCustomDatesTimeScaleSelected) {
-    elementMaxWidth += (typeof label === 'string' ? label.length * 5 : 60) + 4;
     const customDatesElementsNodeWidth = 4 + 10 + 4 + 110 + 4 + 24 + 4 + 110;
     elementMaxWidth += customDatesElementsNodeWidth;
     collapsedElementMaxWidth += customDatesElementsNodeWidth;
