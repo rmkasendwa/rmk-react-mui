@@ -732,22 +732,20 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         const offsetPercentage = getPercentageAtDateRef.current(date);
 
         // Get the width of the scrolling ancestor element and the timeline meter container
-        const { offsetWidth: scrollingAncenstorElementOffsetWidth } =
+        const { clientWidth: scrollingAncenstorElementOffsetWidth } =
           scrollingAncenstorElement;
-        const { offsetWidth } = timelineMeterContainerContainer;
-        let dateScrollLeftPosition = Math.round(offsetWidth * offsetPercentage);
+        const { clientWidth } = timelineMeterContainerContainer;
+        let dateScrollLeftPosition = clientWidth * offsetPercentage;
         switch (dateAlignment) {
           case 'center':
-            dateScrollLeftPosition -= Math.round(
+            dateScrollLeftPosition -=
               (scrollingAncenstorElementOffsetWidth -
                 timelineViewPortLeftOffset) /
-                2
-            );
+              2;
             break;
           case 'end':
-            dateScrollLeftPosition -= Math.round(
-              scrollingAncenstorElementOffsetWidth - timelineViewPortLeftOffset
-            );
+            dateScrollLeftPosition -=
+              scrollingAncenstorElementOffsetWidth - timelineViewPortLeftOffset;
             break;
         }
 
@@ -939,6 +937,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
 
   const resetToDefaultView = useRef(() => {
     isTimelineScrolledRef.current = false;
+    isScrollingToTimelineCenterRef.current = true;
     setSearchParams(
       {
         timeScale: null,
@@ -999,9 +998,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
 
         const centerX =
           (scrollLeft +
-            Math.round(
-              (parentElementClientWidth - timelineViewPortLeftOffset) / 2
-            )) /
+            (parentElementClientWidth - timelineViewPortLeftOffset) / 2) /
           offsetWidth;
         const dateAtCenter = addHours(
           minCalendarDate,
