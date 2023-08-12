@@ -426,28 +426,34 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
 
     toolsProp || (toolsProp = [...Children.toArray(children)]);
 
-    //#region Filter null element tools and pointless divider tools
-    const tools = toolsProp.reduce<NonNullable<(typeof toolsProp)[number]>[]>(
-      (accumulator, tool) => {
-        if (tool != null) {
-          const lastTool = accumulator[accumulator.length - 1];
-          if (
-            typeof tool === 'object' &&
-            'type' in tool &&
-            tool.type === 'divider' &&
-            (!lastTool ||
-              (typeof lastTool === 'object' &&
-                'type' in lastTool &&
-                lastTool.type === 'divider'))
-          ) {
-            return accumulator;
+    const filterPointlessDividerTools = (
+      tools: NonNullable<typeof toolsProp>
+    ) => {
+      return tools.reduce<(typeof tools)[number][]>(
+        (accumulator, tool, index) => {
+          if (tool != null) {
+            const lastTool = accumulator[accumulator.length - 1];
+            if (
+              typeof tool === 'object' &&
+              'type' in tool &&
+              tool.type === 'divider' &&
+              (!lastTool ||
+                (typeof lastTool === 'object' &&
+                  'type' in lastTool &&
+                  lastTool.type === 'divider') ||
+                index === 0 ||
+                index === tools.length - 1)
+            ) {
+              return accumulator;
+            }
+            accumulator.push(tool);
           }
-          accumulator.push(tool);
-        }
-        return accumulator;
-      },
-      []
-    );
+          return accumulator;
+        },
+        []
+      );
+    };
+    const tools = filterPointlessDividerTools(toolsProp);
     //#endregion
 
     const { InputProps, ...SearchFieldPropsRest } = SearchFieldProps;
@@ -942,210 +948,38 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
             return <Grid item className={clsx(classes.expansionGap)} xs />;
           })()}
           {(() => {
-            if (!isSmallScreenSize) {
-              const displayableTools = (() => {
-                if (collapsedIntoEllipsisToolIndex) {
-                  return tools.slice(0, -collapsedIntoEllipsisToolIndex);
-                }
-                return tools;
-              })();
-              const collapsedToolIndex = (() => {
-                if (collapsedWidthToolIndex > preTitleTools.length) {
-                  return collapsedWidthToolIndex - preTitleTools.length;
-                }
-                return 0;
-              })();
-              return getToolNodes(displayableTools, collapsedToolIndex).map(
-                (tool, index) => {
-                  const isToolCollapsed =
-                    index >= displayableTools.length - collapsedToolIndex;
+            const displayableTools = (() => {
+              if (
+                collapsedIntoEllipsisToolIndex &&
+                collapsedIntoEllipsisToolIndex > 0
+              ) {
+                return tools.filter((tool, index) => {
                   return (
-                    <Grid
-                      item
-                      className={clsx(
-                        isToolCollapsed
-                          ? classes.collapsedToolWrapper
-                          : classes.fullWidthToolWrapper
-                      )}
-                      key={index}
-                      sx={{ minWidth: 0 }}
-                    >
-                      {tool}
-                    </Grid>
-                  );
-                }
-              );
-            }
-          })()}
-          {(() => {
-            if (isSmallScreenSize || collapsedIntoEllipsisToolIndex) {
-              const smallScreenDisplayableTools = (() => {
-                if (collapsedIntoEllipsisToolIndex && !isSmallScreenSize) {
-                  return allTools.slice(-collapsedIntoEllipsisToolIndex);
-                }
-                return allTools;
-              })()
-                .filter((tool) => {
-                  return (
-                    tool && !isValidElement(tool) && typeof tool === 'object'
-                  );
-                })
-                .map((tool) => {
-                  return tool as
-                    | ButtonTool
-                    | IconButtonTool
-                    | DividerTool
-                    | ElementTool;
-                });
-              const [smallScreenTools, ellipsisTools] =
-                smallScreenDisplayableTools.reduce<
-                  [
-                    typeof smallScreenDisplayableTools,
-                    typeof smallScreenDisplayableTools
-                  ]
-                >(
-                  (accumulator, tool) => {
-                    const [smallScreenTools, ellipsisTools] = accumulator;
-                    if (
-                      tool.alwaysShowOn &&
+                    collapsedIntoEllipsisToolIndex < tools.length - index ||
+                    (tool &&
+                      typeof tool === 'object' &&
+                      'alwaysShowOn' in tool &&
                       (
                         [
                           'All Screens',
                           'Small Screen',
                         ] as (typeof tool.alwaysShowOn)[]
-                      ).includes(tool.alwaysShowOn) &&
-                      'type' in tool &&
-                      tool.type === 'icon-button'
-                    ) {
-                      smallScreenTools.push(tool);
-                    } else {
-                      ellipsisTools.push(tool);
-                    }
-                    return accumulator;
-                  },
-                  [[], []]
-                );
-              return (
-                <>
-                  {smallScreenTools.length > 0
-                    ? getToolNodes(
-                        smallScreenTools,
-                        collapsedWidthToolIndex
-                      ).map((tool, index) => {
-                        const isToolCollapsed =
-                          index >=
-                          smallScreenTools.length - collapsedWidthToolIndex;
-                        return (
-                          <Grid
-                            item
-                            className={clsx(
-                              isToolCollapsed
-                                ? classes.collapsedToolWrapper
-                                : classes.fullWidthToolWrapper
-                            )}
-                            key={index}
-                            sx={{ minWidth: 0 }}
-                          >
-                            {tool}
-                          </Grid>
-                        );
-                      })
-                    : null}
-                  {syncButtonElement ? (
-                    <Grid className={clsx(classes.syncToolWrapper)} item>
-                      {syncButtonElement}
-                    </Grid>
-                  ) : null}
-                  {ellipsisTools.length > 0 ? (
-                    <Grid
-                      item
-                      className={clsx(classes.ellipsisButtonToolWrapper)}
-                    >
-                      <EllipsisMenuIconButton
-                        options={ellipsisTools.map((tool, index) => {
-                          if ('type' in tool) {
-                            if (tool.type === 'divider') {
-                              return {
-                                label: <Divider />,
-                                value: index,
-                                selectable: false,
-                                isDropdownOption: false,
-                              };
-                            }
-                            const { label, icon, ref, onClick } = tool;
-                            return {
-                              ref: ref as any,
-                              label,
-                              icon,
-                              value: index,
-                              onClick: onClick as any,
-                            };
-                          }
-                          const { element } = tool;
-                          return {
-                            label: (
-                              <Box
-                                sx={{
-                                  px: 2,
-                                  py: 1,
-                                }}
-                              >
-                                {element}
-                              </Box>
-                            ),
-                            value: index,
-                            isDropdownOption: false,
-                          };
-                        })}
-                        PaginatedDropdownOptionListProps={{
-                          paging: false,
-                        }}
-                        sx={{
-                          width: ELLIPSIS_MENU_TOOL_WIDTH,
-                          height: ELLIPSIS_MENU_TOOL_WIDTH,
-                        }}
-                      />
-                      {ellipsisTools.map((tool, index) => {
-                        return (
-                          <Fragment key={index}>
-                            {(() => {
-                              if ('popupElement' in tool) {
-                                return tool.popupElement;
-                              }
-                            })()}
-                          </Fragment>
-                        );
-                      })}
-                    </Grid>
-                  ) : null}
-                </>
-              );
-            }
-            if (syncButtonElement) {
-              return (
-                <Grid item className={clsx(classes.syncToolWrapper)}>
-                  {syncButtonElement}
-                </Grid>
-              );
-            }
-          })()}
-          {(() => {
-            if (
-              postSyncButtonTools.length > 0 &&
-              !isSmallScreenSize &&
-              !collapsedIntoEllipsisToolIndex
-            ) {
-              const collapsedToolIndex = (() => {
-                const index =
-                  collapsedWidthToolIndex - preTitleTools.length - tools.length;
-                return index >= 0 ? index : 0;
-              })();
-              return getToolNodes(
-                postSyncButtonTools,
-                collapsedWidthToolIndex
-              ).map((tool, index) => {
+                      ).includes(tool.alwaysShowOn))
+                  );
+                });
+              }
+              return tools;
+            })();
+            const collapsedToolIndex = (() => {
+              if (collapsedWidthToolIndex > preTitleTools.length) {
+                return collapsedWidthToolIndex - preTitleTools.length;
+              }
+              return 0;
+            })();
+            return getToolNodes(displayableTools, collapsedToolIndex).map(
+              (tool, index) => {
                 const isToolCollapsed =
-                  index >= postSyncButtonTools.length - collapsedToolIndex;
+                  index >= displayableTools.length - collapsedToolIndex;
                 return (
                   <Grid
                     item
@@ -1160,8 +994,152 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                     {tool}
                   </Grid>
                 );
-              });
-            }
+              }
+            );
+          })()}
+          {(() => {
+            const ellipsisTools = (() => {
+              if (
+                collapsedIntoEllipsisToolIndex &&
+                collapsedIntoEllipsisToolIndex > 0
+              ) {
+                const ellipsisTools = allTools.filter((tool, index) => {
+                  return (
+                    collapsedIntoEllipsisToolIndex >= tools.length - index &&
+                    !(
+                      tool &&
+                      typeof tool === 'object' &&
+                      'alwaysShowOn' in tool &&
+                      (
+                        [
+                          'All Screens',
+                          'Small Screen',
+                        ] as (typeof tool.alwaysShowOn)[]
+                      ).includes(tool.alwaysShowOn)
+                    )
+                  );
+                });
+                return filterPointlessDividerTools(ellipsisTools);
+              }
+              return [];
+            })();
+            return (
+              <>
+                {syncButtonElement ? (
+                  <Grid className={clsx(classes.syncToolWrapper)} item>
+                    {syncButtonElement}
+                  </Grid>
+                ) : null}
+                {(() => {
+                  if (
+                    postSyncButtonTools.length > 0 &&
+                    !isSmallScreenSize &&
+                    !collapsedIntoEllipsisToolIndex
+                  ) {
+                    const collapsedToolIndex = (() => {
+                      const index =
+                        collapsedWidthToolIndex -
+                        preTitleTools.length -
+                        tools.length;
+                      return index >= 0 ? index : 0;
+                    })();
+                    return getToolNodes(
+                      postSyncButtonTools,
+                      collapsedWidthToolIndex
+                    ).map((tool, index) => {
+                      const isToolCollapsed =
+                        index >=
+                        postSyncButtonTools.length - collapsedToolIndex;
+                      return (
+                        <Grid
+                          item
+                          className={clsx(
+                            isToolCollapsed
+                              ? classes.collapsedToolWrapper
+                              : classes.fullWidthToolWrapper
+                          )}
+                          key={index}
+                          sx={{ minWidth: 0 }}
+                        >
+                          {tool}
+                        </Grid>
+                      );
+                    });
+                  }
+                })()}
+                {ellipsisTools.length > 0 ? (
+                  <Grid
+                    item
+                    className={clsx(classes.ellipsisButtonToolWrapper)}
+                  >
+                    <EllipsisMenuIconButton
+                      options={ellipsisTools.map((tool, index) => {
+                        if (
+                          tool &&
+                          typeof tool === 'object' &&
+                          'type' in tool
+                        ) {
+                          if (tool.type === 'divider') {
+                            return {
+                              label: <Divider />,
+                              value: index,
+                              selectable: false,
+                              isDropdownOption: false,
+                            };
+                          }
+                          const { label, icon, ref, onClick } =
+                            tool as ButtonTool;
+                          return {
+                            ref: ref as any,
+                            label,
+                            icon,
+                            value: index,
+                            onClick: onClick as any,
+                          };
+                        }
+                        const { element } = tool as ElementTool;
+                        return {
+                          label: (
+                            <Box
+                              sx={{
+                                px: 2,
+                                py: 1,
+                              }}
+                            >
+                              {element}
+                            </Box>
+                          ),
+                          value: index,
+                          isDropdownOption: false,
+                        };
+                      })}
+                      PaginatedDropdownOptionListProps={{
+                        paging: false,
+                      }}
+                      sx={{
+                        width: ELLIPSIS_MENU_TOOL_WIDTH,
+                        height: ELLIPSIS_MENU_TOOL_WIDTH,
+                      }}
+                    />
+                    {ellipsisTools.map((tool, index) => {
+                      return (
+                        <Fragment key={index}>
+                          {(() => {
+                            if (
+                              tool &&
+                              typeof tool === 'object' &&
+                              'popupElement' in tool
+                            ) {
+                              return tool.popupElement;
+                            }
+                          })()}
+                        </Fragment>
+                      );
+                    })}
+                  </Grid>
+                ) : null}
+              </>
+            );
           })()}
         </Grid>
       </Box>
