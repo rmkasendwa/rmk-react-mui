@@ -495,6 +495,23 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
 
     const shouldRenderSyncTool = Boolean(hasSyncTool && load);
 
+    const getEllipsisToolsRef = useRef(
+      (tools: NonNullable<typeof toolsProp>) => {
+        return filterPointlessDividerTools(
+          tools.filter((tool) => {
+            return !(
+              tool &&
+              typeof tool === 'object' &&
+              'alwaysShowOn' in tool &&
+              (
+                ['All Screens', 'Small Screen'] as (typeof tool.alwaysShowOn)[]
+              ).includes(tool.alwaysShowOn)
+            );
+          })
+        );
+      }
+    );
+
     const updateCollapsedWidthToolIndex = useCallback(
       (anchorElement: HTMLDivElement) => {
         if (allTools?.length != null) {
@@ -613,7 +630,12 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                 (() => {
                   let baseGapWidth = 0;
                   title && hasSearchTool && (baseGapWidth += 4);
-                  i > 0 && (baseGapWidth += 4 + ELLIPSIS_MENU_TOOL_WIDTH);
+                  const ellipsisTools = getEllipsisToolsRef.current(
+                    toolsWithActualWidths.slice(-i)
+                  );
+                  i > 0 &&
+                    ellipsisTools.length > 0 &&
+                    (baseGapWidth += 4 + ELLIPSIS_MENU_TOOL_WIDTH);
                   return baseGapWidth;
                 })()
               );
@@ -1021,22 +1043,9 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                 collapsedIntoEllipsisToolIndex &&
                 collapsedIntoEllipsisToolIndex > 0
               ) {
-                const ellipsisTools = allTools
-                  .slice(-collapsedIntoEllipsisToolIndex)
-                  .filter((tool) => {
-                    return !(
-                      tool &&
-                      typeof tool === 'object' &&
-                      'alwaysShowOn' in tool &&
-                      (
-                        [
-                          'All Screens',
-                          'Small Screen',
-                        ] as (typeof tool.alwaysShowOn)[]
-                      ).includes(tool.alwaysShowOn)
-                    );
-                  });
-                return filterPointlessDividerTools(ellipsisTools);
+                return getEllipsisToolsRef.current(
+                  allTools.slice(-collapsedIntoEllipsisToolIndex)
+                );
               }
               return [];
             })();
