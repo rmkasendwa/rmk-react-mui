@@ -509,7 +509,9 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                     return {
                       elementMaxWidth:
                         actualToolElementWidth ?? MAX_BUTTON_WIDTH,
-                      collapsedElementWidth: 36,
+                      collapsedElementWidth: (tool as ButtonTool).endIcon
+                        ? 54
+                        : 36,
                     };
                   case 'icon-button':
                     return {
@@ -587,21 +589,37 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
           }
           setCollapsedWidthToolIndex(toolsWithActualWidths.length);
 
-          const cummulativeCollapsedToolsGapWidth = (toolsCount - 1) * 4;
-
           for (let i = 0; i < toolsWithActualWidths.length; i++) {
             const collapsedWidthToolsWidth = toolMaxWidths
-              .slice(0, toolMaxWidths.length - i)
+              .filter((_, index) => {
+                const tool = toolsWithActualWidths[index];
+                return (
+                  index < toolMaxWidths.length - i ||
+                  (tool &&
+                    typeof tool === 'object' &&
+                    'alwaysShowOn' in tool &&
+                    (
+                      [
+                        'All Screens',
+                        'Small Screen',
+                      ] as (typeof tool.alwaysShowOn)[]
+                    ).includes(tool.alwaysShowOn))
+                );
+              })
               .reduce(
-                (a, { collapsedElementWidth }) => a + collapsedElementWidth,
-                0
+                (a, { collapsedElementWidth }) => {
+                  return a + 4 + collapsedElementWidth;
+                },
+                (() => {
+                  let baseGapWidth = 0;
+                  title && hasSearchTool && (baseGapWidth += 4);
+                  i > 0 && (baseGapWidth += 4 + ELLIPSIS_MENU_TOOL_WIDTH);
+                  return baseGapWidth;
+                })()
               );
 
             if (
-              containerToolsMaxWidth -
-                (collapsedWidthToolsWidth +
-                  cummulativeCollapsedToolsGapWidth +
-                  (i > 0 ? ELLIPSIS_MENU_TOOL_WIDTH : 0)) >=
+              containerToolsMaxWidth - collapsedWidthToolsWidth >=
               searchFieldAndTitleSpaceWidth
             ) {
               setCollapsedIntoEllipsisToolIndex(i);
@@ -1003,10 +1021,10 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                 collapsedIntoEllipsisToolIndex &&
                 collapsedIntoEllipsisToolIndex > 0
               ) {
-                const ellipsisTools = allTools.filter((tool, index) => {
-                  return (
-                    collapsedIntoEllipsisToolIndex >= tools.length - index &&
-                    !(
+                const ellipsisTools = allTools
+                  .slice(-collapsedIntoEllipsisToolIndex)
+                  .filter((tool) => {
+                    return !(
                       tool &&
                       typeof tool === 'object' &&
                       'alwaysShowOn' in tool &&
@@ -1016,9 +1034,8 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                           'Small Screen',
                         ] as (typeof tool.alwaysShowOn)[]
                       ).includes(tool.alwaysShowOn)
-                    )
-                  );
-                });
+                    );
+                  });
                 return filterPointlessDividerTools(ellipsisTools);
               }
               return [];
