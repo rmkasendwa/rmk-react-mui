@@ -440,11 +440,11 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   const currentDateAtStartRef = useRef<Date | null>(null);
   const currentDateAtCenterRef = useRef<Date | null>(null);
   const currentDateAtEndRef = useRef<Date | null>(null);
+  const timelineContainerElementRef = useRef<HTMLDivElement>(null);
 
   const currentDateAtCenterPositionLeftOffsetRef = useRef<number | null>(null);
   const lastDateAtCenterRef = useRef<Date | null>(null);
-  const [timelineContainerElement, setTimelineContainerElement] =
-    useState<HTMLTableElement | null>(null);
+  const timelineContainerElement = timelineContainerElementRef.current;
   if (!scrollingAncenstorElement && timelineContainerElement) {
     scrollingAncenstorElement = timelineContainerElement?.parentElement;
   }
@@ -917,15 +917,17 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     });
 
   //#region Unit time scaling
-  const timelineWidthScaleFactor = (() => {
-    if (scrollingAncenstorElement) {
-      return (
-        (scrollingAncenstorElement.clientWidth - timelineViewPortLeftOffset) /
-        unitTimeScaleWidth
-      );
+  const [timelineWidthScaleFactor, setTimelineWidthScaleFactor] = useState(
+    () => {
+      if (scrollingAncenstorElement) {
+        return (
+          (scrollingAncenstorElement.clientWidth - timelineViewPortLeftOffset) /
+          unitTimeScaleWidth
+        );
+      }
+      return 1;
     }
-    return 1;
-  })();
+  );
 
   const { scaledUnitTimeScaleWidth, scaledTimeScaleWidth } = useMemo(() => {
     return {
@@ -1191,6 +1193,31 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     defaultTimelineCenter,
     isCustomDatesSelected,
     timelineContainerElement,
+  ]);
+
+  useEffect(() => {
+    if (scrollingAncenstorElement) {
+      const observer = new ResizeObserver(() => {
+        setTimelineWidthScaleFactor(() => {
+          if (scrollingAncenstorElement) {
+            return (
+              (scrollingAncenstorElement.clientWidth -
+                timelineViewPortLeftOffset) /
+              unitTimeScaleWidth
+            );
+          }
+          return 1;
+        });
+      });
+      observer.observe(scrollingAncenstorElement);
+      return () => {
+        observer.disconnect();
+      };
+    }
+  }, [
+    scrollingAncenstorElement,
+    timelineViewPortLeftOffset,
+    unitTimeScaleWidth,
   ]);
 
   //#region Track date at cursor
@@ -1868,13 +1895,13 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       ) : null}
       <Table
         ref={mergeRefs([
+          ref,
+          timelineContainerElementRef,
           (rootElement: HTMLTableElement | null) => {
             if (rootElement) {
               caliberateDateCursorElements(rootElement);
-              setTimelineContainerElement(rootElement);
             }
           },
-          ref,
         ])}
         className={clsx(className, classes.root)}
         {...rest}
