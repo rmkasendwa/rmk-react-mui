@@ -131,6 +131,7 @@ const MAX_BUTTON_WIDTH = 150;
 const MAX_ELEMENT_TOOL_WIDTH = 300;
 const MAX_TITLE_WIDTH = 300;
 const MAX_SEARCH_FIELD_WIDTH = 240;
+const ELLIPSIS_MENU_TOOL_WIDTH = 32;
 
 export const getToolNodes = (
   tools: (ReactNode | Tool)[],
@@ -593,7 +594,8 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
             if (
               containerToolsMaxWidth -
                 (collapsedWidthToolsWidth +
-                  cummulativeCollapsedToolsGapWidth) >=
+                  cummulativeCollapsedToolsGapWidth +
+                  (i > 0 ? ELLIPSIS_MENU_TOOL_WIDTH : 0)) >=
               searchFieldAndTitleSpaceWidth
             ) {
               setCollapsedIntoEllipsisToolIndex(i);
@@ -1099,8 +1101,8 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                           paging: false,
                         }}
                         sx={{
-                          width: 32,
-                          height: 32,
+                          width: ELLIPSIS_MENU_TOOL_WIDTH,
+                          height: ELLIPSIS_MENU_TOOL_WIDTH,
                         }}
                       />
                       {ellipsisTools.map((tool, index) => {
