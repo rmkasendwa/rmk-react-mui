@@ -629,8 +629,10 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
           `
             )
             .forEach((element, index) => {
+              const { width: elementMaxWidth } =
+                element.getBoundingClientRect();
               actualToolsWidthsRef.current.set(index, {
-                elementMaxWidth: element.clientWidth,
+                elementMaxWidth,
               });
             });
         });
@@ -692,13 +694,6 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
         className={clsx(classes.root)}
         sx={{
           px: isSmallScreenSize ? 2 : 3,
-          ...(() => {
-            if (collapsedIntoEllipsisToolIndex) {
-              return {
-                pr: 0,
-              };
-            }
-          })(),
           ...sx,
           [`.${buttonClasses.containedInherit}`]: {
             bgcolor: alpha(palette.text.primary, 0.04),
@@ -958,7 +953,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                 }
                 return 0;
               })();
-              return getToolNodes(tools, collapsedToolIndex).map(
+              return getToolNodes(displayableTools, collapsedToolIndex).map(
                 (tool, index) => {
                   const isToolCollapsed =
                     index >= displayableTools.length - collapsedToolIndex;
