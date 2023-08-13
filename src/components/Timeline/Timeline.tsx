@@ -430,7 +430,6 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   const currentDateAtEndRef = useRef<Date | null>(null);
 
   const currentDateAtCenterPositionLeftOffsetRef = useRef<number | null>(null);
-  const lastDateAtCenterRef = useRef<Date | null>(null);
   const [timelineContainerElement, setTimelineContainerElement] =
     useState<HTMLTableElement | null>(null);
   if (!scrollingAncenstorElement && timelineContainerElement) {
@@ -1107,7 +1106,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           isCustomDatesSelected &&
           customDateRange?.startDate &&
           customDateRange?.endDate;
-        if (!isTimelineScrolledRef.current && !hasCustomDatesSelected) {
+        if (!hasCustomDatesSelected) {
           isScrollingToTimelineCenterRef.current = true;
           switch (defaultTimelineCenter) {
             case 'now':
@@ -1248,7 +1247,6 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   //#region TimeScale Tool
   const onSelectTimeScale: SelectTimeScaleCallbackFunction = useCallback(
     (timeScale) => {
-      lastDateAtCenterRef.current = currentDateAtCenterRef.current;
       setSearchParams(
         {
           timeScale,
@@ -1344,7 +1342,6 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       }
       return;
     }
-    lastDateAtCenterRef.current = centerOfGravity;
     if (selectedTimeScale !== optimalTimeScale) {
       setSearchParams(
         {
@@ -1403,17 +1400,6 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     jumpToNextUnitTimeScale,
   });
   //#endregion
-
-  useEffect(() => {
-    if (
-      selectedTimeScale &&
-      lastDateAtCenterRef.current &&
-      scrollingAncenstorElement
-    ) {
-      scrollToDateRef.current(lastDateAtCenterRef.current, 'auto');
-      lastDateAtCenterRef.current = null;
-    }
-  }, [scrollingAncenstorElement, selectedTimeScale]);
 
   useEffect(() => {
     isInitialMountRef.current = false;
