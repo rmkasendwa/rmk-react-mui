@@ -195,9 +195,6 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
   /** A boolean indicating whether to clear the search state when the component unmounts. */
   clearSearchStateOnUnmount?: boolean;
 
-  /** A function to get the default view reset function. */
-  getDefaultViewResetFunction?: (resetToDefaultView: () => void) => void;
-
   /** The width of the row labels column. */
   rowLabelsColumnWidth?: number;
 
@@ -243,34 +240,6 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
   /** A function to be called when the current date at the center of the timeline changes. */
   onChangeCurrentDateAtCenter?: (currentDateAtCenter: Date) => void;
 
-  /** A function to get the scroll-to-date function for the timeline. */
-  getScrollToDateFunction?: (scrollToDate: ScrollToDateFunction) => void;
-
-  /** A function to get the select-time-scale function for the timeline. */
-  getSelectTimeScaleFunction?: (
-    selectTimeScale: SelectTimeScaleCallbackFunction
-  ) => void;
-
-  /** A function to get the select-custom-dates-time-scale function for the timeline. */
-  getSelectCustomDatesTimeScaleFunction?: (
-    selectCustomDatesTimeScale: SelectCustomDatesTimeScaleCallbackFunction
-  ) => void;
-
-  /** A function to get the jump-to-optimal-time-scale function for the timeline. */
-  getJumpToOptimalTimeScaleFunction?: (
-    jumpToOptimalTimeScale: () => void
-  ) => void;
-
-  /** A function to get the jump-to-previous-unit-time-scale function for the timeline. */
-  getJumpToPreviousUnitTimeScaleFunction?: (
-    jumpToPreviousUnitTimeScale: () => void
-  ) => void;
-
-  /** A function to get the jump-to-next-unit-time-scale function for the timeline. */
-  getJumpToNextUnitTimeScaleFunction?: (
-    jumpToNextUnitTimeScale: () => void
-  ) => void;
-
   /** The default center for the timeline: either the center of the data set or the current date ("now"). */
   defaultTimelineCenter?: 'centerOfDataSet' | 'now';
 
@@ -301,12 +270,31 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
   /** Custom props for the useDragToScroll hook. */
   DragToScrollProps?: Partial<Pick<DragToScrollProps, 'enableDragToScroll'>>;
 
+  scrollToDateFunctionRef?: MutableRefObject<ScrollToDateFunction | undefined>;
+  selectTimeScaleFunctionRef?: MutableRefObject<
+    SelectTimeScaleCallbackFunction | undefined
+  >;
+  selectCustomDatesTimeScaleFunctionRef?: MutableRefObject<
+    SelectCustomDatesTimeScaleCallbackFunction | undefined
+  >;
+  jumpToOptimalTimeScaleFunctionRef?: MutableRefObject<
+    (() => void) | undefined
+  >;
+  jumpToPreviousUnitTimeScaleFunctionRef?: MutableRefObject<
+    (() => void) | undefined
+  >;
+  jumpToNextUnitTimeScaleFunctionRef?: MutableRefObject<
+    (() => void) | undefined
+  >;
+
   minCalendarDateRef?: MutableRefObject<Date | null>;
   maxCalendarDateRef?: MutableRefObject<Date | null>;
 
   currentDateAtStartRef?: MutableRefObject<Date | null>;
   currentDateAtCenterRef?: MutableRefObject<Date | null>;
   currentDateAtEndRef?: MutableRefObject<Date | null>;
+
+  defaultViewResetFunctionRef?: MutableRefObject<(() => void) | undefined>;
 
   blockCustomDateRangeRegion?: boolean;
 }
@@ -364,7 +352,6 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     maxDate: maxDateProp,
     selectedTimeScale: selectedTimeScaleProp,
     clearSearchStateOnUnmount = false,
-    getDefaultViewResetFunction,
     rowLabelsColumnWidth = 256,
     getTimelineDates,
     showToolBar = true,
@@ -373,12 +360,6 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     ScrollTimelineToolsProps = {},
     onChangeSelectedTimeScale,
     onChangeSelectedCustomDatesTimeScale,
-    getJumpToNextUnitTimeScaleFunction,
-    getJumpToOptimalTimeScaleFunction,
-    getJumpToPreviousUnitTimeScaleFunction,
-    getScrollToDateFunction,
-    getSelectTimeScaleFunction,
-    getSelectCustomDatesTimeScaleFunction,
     todayMarkerVariant = 'default',
     TimeScaleToolProps,
     onChangeTimelineDateBounds,
@@ -392,11 +373,18 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     DateAtCursorMarkerProps = {},
     DragToScrollProps = {},
     blockCustomDateRangeRegion = true,
+    jumpToNextUnitTimeScaleFunctionRef,
+    jumpToOptimalTimeScaleFunctionRef,
+    jumpToPreviousUnitTimeScaleFunctionRef,
+    scrollToDateFunctionRef,
+    selectTimeScaleFunctionRef,
+    selectCustomDatesTimeScaleFunctionRef,
     minCalendarDateRef,
     maxCalendarDateRef,
     currentDateAtStartRef: currentDateAtStartRefProp,
     currentDateAtCenterRef: currentDateAtCenterRefProp,
     currentDateAtEndRef: currentDateAtEndRefProp,
+    defaultViewResetFunctionRef,
     sx,
     ...rest
   } = omit(props, 'parentBackgroundColor', 'scrollingAncenstorElement');
@@ -451,9 +439,6 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
 
   const todayMarkerRef = useRef<HTMLDivElement>(null);
 
-  const getDefaultViewResetFunctionRef = useRef(getDefaultViewResetFunction);
-  getDefaultViewResetFunctionRef.current = getDefaultViewResetFunction;
-
   const onChangeSelectedTimeScaleRef = useRef(onChangeSelectedTimeScale);
   onChangeSelectedTimeScaleRef.current = onChangeSelectedTimeScale;
 
@@ -468,36 +453,6 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
 
   const onChangeCurrentDateAtCenterRef = useRef(onChangeCurrentDateAtCenter);
   onChangeCurrentDateAtCenterRef.current = onChangeCurrentDateAtCenter;
-
-  const getScrollToDateFunctionRef = useRef(getScrollToDateFunction);
-  getScrollToDateFunctionRef.current = getScrollToDateFunction;
-
-  const getSelectTimeScaleFunctionRef = useRef(getSelectTimeScaleFunction);
-  getSelectTimeScaleFunctionRef.current = getSelectTimeScaleFunction;
-
-  const getSelectCustomDatesTimeScaleFunctionRef = useRef(
-    getSelectCustomDatesTimeScaleFunction
-  );
-  getSelectCustomDatesTimeScaleFunctionRef.current =
-    getSelectCustomDatesTimeScaleFunction;
-
-  const getJumpToOptimalTimeScaleFunctionRef = useRef(
-    getJumpToOptimalTimeScaleFunction
-  );
-  getJumpToOptimalTimeScaleFunctionRef.current =
-    getJumpToOptimalTimeScaleFunction;
-
-  const getJumpToPreviousUnitTimeScaleFunctionRef = useRef(
-    getJumpToPreviousUnitTimeScaleFunction
-  );
-  getJumpToPreviousUnitTimeScaleFunctionRef.current =
-    getJumpToPreviousUnitTimeScaleFunction;
-
-  const getJumpToNextUnitTimeScaleFunctionRef = useRef(
-    getJumpToNextUnitTimeScaleFunction
-  );
-  getJumpToNextUnitTimeScaleFunctionRef.current =
-    getJumpToNextUnitTimeScaleFunction;
 
   const supportedTimeScalesRef = useRef(supportedTimeScales);
   supportedTimeScalesRef.current = supportedTimeScales;
@@ -767,10 +722,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   );
   const scrollToDateRef = useRef(scrollToDate);
   scrollToDateRef.current = scrollToDate;
-
-  useEffect(() => {
-    getScrollToDateFunctionRef.current?.(scrollToDate);
-  }, [scrollToDate]);
+  scrollToDateFunctionRef && (scrollToDateFunctionRef.current = scrollToDate);
 
   const selectedTimeScale = ((): TimeScaleOption => {
     if (
@@ -937,26 +889,21 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   }, [timeScaleWidth, timelineWidthScaleFactor, unitTimeScaleWidth]);
   //#endregion
 
-  const resetToDefaultView = useRef(() => {
-    isTimelineScrolledRef.current = false;
-    isScrollingToTimelineCenterRef.current = true;
-    setSearchParams(
-      {
-        timeScale: null,
-        customDateRange: null,
-        isCustomDatesSelected: null,
-      },
-      {
-        replace: true,
-      }
-    );
-  });
-
-  useEffect(() => {
-    if (getDefaultViewResetFunctionRef.current) {
-      getDefaultViewResetFunctionRef.current(resetToDefaultView.current);
-    }
-  }, []);
+  defaultViewResetFunctionRef &&
+    (defaultViewResetFunctionRef.current = () => {
+      isTimelineScrolledRef.current = false;
+      isScrollingToTimelineCenterRef.current = true;
+      setSearchParams(
+        {
+          timeScale: null,
+          customDateRange: null,
+          isCustomDatesSelected: null,
+        },
+        {
+          replace: true,
+        }
+      );
+    });
 
   /**
    * useEffect hook to add a scroll event listener to the scrolling ancestor element.
@@ -1314,9 +1261,8 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     [setSearchParams]
   );
 
-  useEffect(() => {
-    getSelectTimeScaleFunctionRef.current?.(onSelectTimeScale);
-  }, [onSelectTimeScale]);
+  selectTimeScaleFunctionRef &&
+    (selectTimeScaleFunctionRef.current = onSelectTimeScale);
 
   const onSelectCustomDatesTimeScale: SelectCustomDatesTimeScaleCallbackFunction =
     useCallback(
@@ -1354,11 +1300,9 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       [setSearchParams]
     );
 
-  useEffect(() => {
-    getSelectCustomDatesTimeScaleFunctionRef.current?.(
-      onSelectCustomDatesTimeScale
-    );
-  }, [onSelectCustomDatesTimeScale]);
+  selectCustomDatesTimeScaleFunctionRef &&
+    (selectCustomDatesTimeScaleFunctionRef.current =
+      onSelectCustomDatesTimeScale);
 
   const { element: timeScaleToolElement } = useTimeScaleTool({
     ...TimeScaleToolProps,
@@ -1422,9 +1366,8 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     setSearchParams,
   ]);
 
-  useEffect(() => {
-    getJumpToOptimalTimeScaleFunctionRef.current?.(jumpToOptimalTimeScale);
-  }, [jumpToOptimalTimeScale]);
+  jumpToOptimalTimeScaleFunctionRef &&
+    (jumpToOptimalTimeScaleFunctionRef.current = jumpToOptimalTimeScale);
 
   const jumpToPreviousUnitTimeScale = useCallback(() => {
     scrollingAncenstorElement?.scrollBy({
@@ -1433,11 +1376,9 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     });
   }, [scrollingAncenstorElement, scaledUnitTimeScaleWidth]);
 
-  useEffect(() => {
-    getJumpToPreviousUnitTimeScaleFunctionRef.current?.(
-      jumpToPreviousUnitTimeScale
-    );
-  }, [jumpToPreviousUnitTimeScale]);
+  jumpToPreviousUnitTimeScaleFunctionRef &&
+    (jumpToPreviousUnitTimeScaleFunctionRef.current =
+      jumpToPreviousUnitTimeScale);
 
   const jumpToNextUnitTimeScale = useCallback(() => {
     scrollingAncenstorElement?.scrollBy({
@@ -1446,9 +1387,8 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     });
   }, [scrollingAncenstorElement, scaledUnitTimeScaleWidth]);
 
-  useEffect(() => {
-    getJumpToNextUnitTimeScaleFunctionRef.current?.(jumpToNextUnitTimeScale);
-  }, [jumpToNextUnitTimeScale]);
+  jumpToNextUnitTimeScaleFunctionRef &&
+    (jumpToNextUnitTimeScaleFunctionRef.current = jumpToNextUnitTimeScale);
 
   const { element: scrollTimelineToolsElement } = useScrollTimelineTools({
     ...ScrollTimelineToolsProps,

@@ -2442,10 +2442,7 @@ const BaseRecordsExplorer = <
                   currentDateAtEndRef,
                 }}
                 rows={filteredData}
-                getDefaultViewResetFunction={(resetTimelineToDefaultView) => {
-                  resetTimelineToDefaultViewRef.current =
-                    resetTimelineToDefaultView;
-                }}
+                defaultViewResetFunctionRef={resetTimelineToDefaultViewRef}
                 onChangeSelectedTimeScale={(selectedTimeScale) => {
                   selectedTimeScaleRef.current = selectedTimeScale;
                 }}
@@ -2455,32 +2452,16 @@ const BaseRecordsExplorer = <
                 onChangeCurrentDateAtCenter={(currentDateAtCenter) => {
                   currentDateAtCenterRef.current = currentDateAtCenter;
                 }}
-                getScrollToDateFunction={(scrollToDate) => {
-                  scrollToDateRef.current = scrollToDate;
-                }}
-                getSelectTimeScaleFunction={(selectTimeScale) => {
-                  selectTimeScaleRef.current = selectTimeScale;
-                }}
-                getSelectCustomDatesTimeScaleFunction={(
-                  selectCustomDatesTimeScale
-                ) => {
-                  selectCustomDatesTimeScaleRef.current =
-                    selectCustomDatesTimeScale;
-                }}
-                getJumpToOptimalTimeScaleFunction={(jumpToOptimalTimeScale) => {
-                  jumpToOptimalTimeScaleRef.current = jumpToOptimalTimeScale;
-                }}
-                getJumpToPreviousUnitTimeScaleFunction={(
-                  jumpToPreviousUnitTimeScale
-                ) => {
-                  jumpToPreviousUnitTimeScaleRef.current =
-                    jumpToPreviousUnitTimeScale;
-                }}
-                getJumpToNextUnitTimeScaleFunction={(
-                  jumpToNextUnitTimeScale
-                ) => {
-                  jumpToNextUnitTimeScaleRef.current = jumpToNextUnitTimeScale;
-                }}
+                scrollToDateFunctionRef={scrollToDateRef}
+                selectTimeScaleFunctionRef={selectTimeScaleRef}
+                selectCustomDatesTimeScaleFunctionRef={
+                  selectCustomDatesTimeScaleRef
+                }
+                jumpToOptimalTimeScaleFunctionRef={jumpToOptimalTimeScaleRef}
+                jumpToPreviousUnitTimeScaleFunctionRef={
+                  jumpToPreviousUnitTimeScaleRef
+                }
+                jumpToNextUnitTimeScaleFunctionRef={jumpToNextUnitTimeScaleRef}
                 showToolBar={!mergeTools}
                 onClickRow={
                   onClickRow ??
