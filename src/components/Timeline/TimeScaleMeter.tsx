@@ -142,7 +142,8 @@ export const TimeScaleMeter = forwardRef<HTMLDivElement, TimeScaleMeterProps>(
             const mergeableTicksIndex = Math.ceil(
               1 / (tickWidth / minTickWidth)
             );
-            label && showLabel && (lastTickWithLabelIndex = index);
+            const shouldShowLabel = showLabel ?? true;
+            label && shouldShowLabel && (lastTickWithLabelIndex = index);
             return {
               ...rest,
               showLabel,
