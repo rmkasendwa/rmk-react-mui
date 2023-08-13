@@ -690,17 +690,20 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
         toolsContainerElement = toolsContainerElementRef.current;
         toolsContainerElementObserver = new ResizeObserver(() => {
           toolsContainerElement
-            .querySelectorAll(
-              `
-            .${classes.fullWidthToolWrapper}
-          `
-            )
+            .querySelectorAll(`.${classes.fullWidthToolWrapper}`)
             .forEach((element, index) => {
               const { width: elementMaxWidth } =
                 element.getBoundingClientRect();
-              actualToolsWidthsRef.current.set(index, {
-                elementMaxWidth,
-              });
+              const actualToolsWidthsItem = (() => {
+                const item = actualToolsWidthsRef.current.get(index);
+                if (item) {
+                  return item;
+                }
+                return {};
+              })();
+              actualToolsWidthsItem.elementMaxWidth =
+                Math.ceil(elementMaxWidth);
+              actualToolsWidthsRef.current.set(index, actualToolsWidthsItem);
             });
         });
         toolsContainerElementObserver.observe(toolsContainerElement);
