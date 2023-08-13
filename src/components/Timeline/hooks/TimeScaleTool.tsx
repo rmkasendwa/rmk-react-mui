@@ -417,7 +417,9 @@ export const useTimeScaleTool = ({
           alignItems: 'center',
         }}
       >
-        <Tooltip title={label}>{buttonElement}</Tooltip>
+        <Tooltip title={label} disableInteractive>
+          {buttonElement}
+        </Tooltip>
         {isCustomDatesTimeScaleSelected ? customDatesElementsNode : null}
       </Stack>
     ),

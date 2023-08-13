@@ -107,7 +107,7 @@ export const useScrollTimelineTools = ({
     </Button>
   );
   const collapsedTodayToolElement = (
-    <Tooltip title="Jump to today">
+    <Tooltip title="Jump to today" disableInteractive>
       <Button
         ref={jumpToDateAnchorRef}
         variant="contained"
@@ -127,7 +127,7 @@ export const useScrollTimelineTools = ({
     </Tooltip>
   );
   const jumpToDateToolElement = (
-    <Tooltip title="Jump to date">
+    <Tooltip title="Jump to date" disableInteractive>
       <Button
         ref={jumpToDateAnchorRef}
         variant="contained"
@@ -145,7 +145,7 @@ export const useScrollTimelineTools = ({
     </Tooltip>
   );
   const jumpToOptimalTimeScaleToolElement = (
-    <Tooltip title="Jump to optimal timescale">
+    <Tooltip title="Jump to optimal timescale" disableInteractive>
       <Button
         variant="contained"
         color="inherit"
