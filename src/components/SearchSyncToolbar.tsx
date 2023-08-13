@@ -489,6 +489,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
     );
     const [collapsedIntoEllipsisToolIndex, setCollapsedIntoEllipsisToolIndex] =
       useState<number | null>(null);
+    const [isSearchFieldCollapsed, setIsSearchFieldCollapsed] = useState(false);
     const [searchFieldOpen, setSearchFieldOpen] = useState(
       Boolean(searchTerm && searchTerm.length > 0)
     );
@@ -601,11 +602,16 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
             ) {
               setCollapsedWidthToolIndex(i);
               setCollapsedIntoEllipsisToolIndex(null);
+              setIsSearchFieldCollapsed(false);
               return;
             }
           }
+          setIsSearchFieldCollapsed(false);
           setCollapsedWidthToolIndex(toolsWithActualWidths.length);
 
+          let collapsedSearchFieldAndTitleSpaceWidth =
+            searchFieldAndTitleSpaceWidth;
+          let isSearchFieldCollapsed = false;
           for (let i = 0; i < toolsWithActualWidths.length; i++) {
             const collapsedWidthToolsWidth = toolMaxWidths
               .filter((_, index) => {
@@ -642,10 +648,23 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
 
             if (
               containerToolsMaxWidth - collapsedWidthToolsWidth >=
-              searchFieldAndTitleSpaceWidth
+              collapsedSearchFieldAndTitleSpaceWidth
             ) {
               setCollapsedIntoEllipsisToolIndex(i);
               return;
+            } else if (!isSearchFieldCollapsed) {
+              if (title && hasSearchTool) {
+                setIsSearchFieldCollapsed(true);
+                isSearchFieldCollapsed = true;
+                collapsedSearchFieldAndTitleSpaceWidth = maxTitleWidth + 32;
+              }
+              if (
+                containerToolsMaxWidth - collapsedWidthToolsWidth >=
+                collapsedSearchFieldAndTitleSpaceWidth
+              ) {
+                setCollapsedIntoEllipsisToolIndex(i);
+                return;
+              }
             }
           }
           setCollapsedIntoEllipsisToolIndex(toolsWithActualWidths.length);
@@ -815,12 +834,12 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
               />
             );
 
-            if (isSmallScreenSize && hasSearchTool && searchFieldOpen) {
+            if (isSearchFieldCollapsed && hasSearchTool && searchFieldOpen) {
               return (
                 <Grid
                   item
                   className={clsx(classes.fullWidthSearchToolWrapper)}
-                  xs={alignTools === 'end' || isSmallScreenSize}
+                  xs={alignTools === 'end' || isSearchFieldCollapsed}
                   sx={{ minWidth: 0 }}
                 >
                   <ClickAwayListener
@@ -855,7 +874,6 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                     }}
                   >
                     <LoadingTypography
-                      {...({ component: 'div' } as any)}
                       {...TitlePropsRest}
                       noWrap
                       sx={{
@@ -878,12 +896,18 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                         display: 'flex',
                         flex:
                           searchFieldOpen ||
-                          (searchFieldOpenProp && !isSmallScreenSize)
+                          (searchFieldOpenProp &&
+                            !isSmallScreenSize &&
+                            !isSearchFieldCollapsed)
                             ? 1
                             : 'none',
                         maxWidth: maxSearchFieldWidth,
                         ...(() => {
-                          if (alignTools === 'start' && !isSmallScreenSize) {
+                          if (
+                            alignTools === 'start' &&
+                            !isSmallScreenSize &&
+                            (!isSearchFieldCollapsed || searchFieldOpen)
+                          ) {
                             return {
                               width: maxSearchFieldWidth,
                             };
@@ -892,7 +916,9 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                         minWidth: (() => {
                           if (
                             searchFieldOpen ||
-                            (searchFieldOpenProp && !isSmallScreenSize)
+                            (searchFieldOpenProp &&
+                              !isSmallScreenSize &&
+                              !isSearchFieldCollapsed)
                           ) {
                             return maxSearchFieldWidth;
                           }
@@ -901,7 +927,9 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                       }}
                     >
                       {searchFieldOpen ||
-                      (searchFieldOpenProp && !isSmallScreenSize) ? (
+                      (searchFieldOpenProp &&
+                        !isSmallScreenSize &&
+                        !isSearchFieldCollapsed) ? (
                         (() => {
                           const textField = (
                             <SearchField
