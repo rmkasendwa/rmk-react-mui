@@ -44,12 +44,21 @@ export type SelectCustomDatesTimeScaleCallbackFunction = (
 export interface TimeScaleToolProps {
   selectedTimeScale?: TimeScaleOption;
   supportedTimeScales?: TimeScaleOption[];
-  onSelectTimeScale?: SelectTimeScaleCallbackFunction;
   label?: ReactNode;
   wrapStartDatePickerNode?: (datePickerNode: ReactNode) => ReactNode;
   wrapEndDatePickerNode?: (datePickerNode: ReactNode) => ReactNode;
   isCustomDatesTimeScaleSelected?: boolean;
+
+  onSelectTimeScale?: SelectTimeScaleCallbackFunction;
+  onSelectTimeScaleFunctionRef?: MutableRefObject<
+    SelectTimeScaleCallbackFunction | undefined
+  >;
+
   onSelectCustomDatesTimeScale?: SelectCustomDatesTimeScaleCallbackFunction;
+  onSelectCustomDatesTimeScaleFunctionRef?: MutableRefObject<
+    SelectCustomDatesTimeScaleCallbackFunction | undefined
+  >;
+
   selectedCustomDates?: SelectCustomDates;
   DatePickerToolProps?: Partial<Omit<PopupToolOptions, 'onChange'>>;
   minDate?: string | number | Date;
@@ -61,12 +70,17 @@ export interface TimeScaleToolProps {
 export const useTimeScaleTool = ({
   selectedTimeScale,
   supportedTimeScales = [...timeScaleOptions],
-  onSelectTimeScale,
   label = 'Timescale',
   wrapStartDatePickerNode,
   wrapEndDatePickerNode,
   isCustomDatesTimeScaleSelected,
+
+  onSelectTimeScale,
+  onSelectTimeScaleFunctionRef,
+
   onSelectCustomDatesTimeScale,
+  onSelectCustomDatesTimeScaleFunctionRef,
+
   selectedCustomDates: {
     startDate: startDateString,
     endDate: endDateString,
@@ -100,13 +114,13 @@ export const useTimeScaleTool = ({
       selectsRange={true as any}
       onChange={(dates: any) => {
         const [startDate] = dates as [Date, Date | null];
-        onSelectCustomDatesTimeScale?.(
-          isCustomDatesTimeScaleSelected ?? false,
-          {
-            startDate: formatDate(startDate, 'yyyy-MM-dd'),
-            endDate: endDate ? formatDate(endDate, 'yyyy-MM-dd') : undefined,
-          }
-        );
+        (
+          onSelectCustomDatesTimeScale ||
+          onSelectCustomDatesTimeScaleFunctionRef?.current
+        )?.(isCustomDatesTimeScaleSelected ?? false, {
+          startDate: formatDate(startDate, 'yyyy-MM-dd'),
+          endDate: endDate ? formatDate(endDate, 'yyyy-MM-dd') : undefined,
+        });
       }}
       minDate={(() => {
         if (minDate) {
@@ -214,7 +228,9 @@ export const useTimeScaleTool = ({
       if (event.target.value === CUSTOM_DATE_OPTION_LABEL) {
         shouldOpenFromDatePickerRef.current = true;
       } else {
-        onSelectTimeScale?.((event.target.value as any) || null);
+        (onSelectTimeScale || onSelectTimeScaleFunctionRef?.current)?.(
+          (event.target.value as any) || null
+        );
       }
     },
     showClearButton: false,
