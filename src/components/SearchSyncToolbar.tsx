@@ -868,9 +868,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                   <Grid
                     item
                     className={clsx(classes.titleWrapper)}
-                    xs={Boolean(
-                      alignTools === 'end' || collapsedIntoEllipsisToolIndex
-                    )}
+                    xs={Boolean(alignTools === 'end' || isSearchFieldCollapsed)}
                     sx={{
                       minWidth: 0,
                       ...(() => {
@@ -1017,7 +1015,10 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                 </Grid>
               );
             }
-            return <Grid item className={clsx(classes.expansionGap)} xs />;
+
+            if (alignTools === 'end' || isSearchFieldCollapsed) {
+              return <Grid item className={clsx(classes.expansionGap)} xs />;
+            }
           })()}
           {(() => {
             const displayableTools = (() => {
