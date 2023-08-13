@@ -428,11 +428,11 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   const currentDateAtStartRef = useRef<Date | null>(null);
   const currentDateAtCenterRef = useRef<Date | null>(null);
   const currentDateAtEndRef = useRef<Date | null>(null);
-  const timelineContainerElementRef = useRef<HTMLDivElement>(null);
 
   const currentDateAtCenterPositionLeftOffsetRef = useRef<number | null>(null);
   const lastDateAtCenterRef = useRef<Date | null>(null);
-  const timelineContainerElement = timelineContainerElementRef.current;
+  const [timelineContainerElement, setTimelineContainerElement] =
+    useState<HTMLTableElement | null>(null);
   if (!scrollingAncenstorElement && timelineContainerElement) {
     scrollingAncenstorElement = timelineContainerElement?.parentElement;
   }
@@ -1836,11 +1836,11 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       <Table
         ref={mergeRefs([
           ref,
-          timelineContainerElementRef,
           (rootElement: HTMLTableElement | null) => {
             if (rootElement) {
               caliberateDateCursorElements(rootElement);
             }
+            setTimelineContainerElement(rootElement);
           },
         ])}
         className={clsx(className, classes.root)}
