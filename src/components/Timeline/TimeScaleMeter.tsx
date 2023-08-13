@@ -13,6 +13,7 @@ import {
 } from '@mui/material';
 import Box from '@mui/material/Box';
 import clsx from 'clsx';
+import { omit } from 'lodash';
 import { forwardRef, useMemo, useState } from 'react';
 
 import { useLoadOnScrollToBottom } from '../../hooks/InfiniteScroller';
@@ -134,19 +135,31 @@ export const TimeScaleMeter = forwardRef<HTMLDivElement, TimeScaleMeterProps>(
         tickWidth: number,
         minTickWidth: number
       ) => {
-        return baseTimeScaleTicks.map(({ label, ...rest }, index) => {
-          const mergeableTicksIndex = Math.ceil(1 / (tickWidth / minTickWidth));
-          return {
-            ...rest,
-            ...(() => {
-              if (index % mergeableTicksIndex === 0) {
-                return {
-                  label,
-                };
-              }
-            })(),
-          } as TimeScaleRow;
-        });
+        let lastTickWithLabelIndex = 0;
+        return baseTimeScaleTicks.map(
+          ({ label, showLabel, ...rest }, index) => {
+            const prevLastTickWithLabelIndex = lastTickWithLabelIndex;
+            const mergeableTicksIndex = Math.ceil(
+              1 / (tickWidth / minTickWidth)
+            );
+            label && showLabel && (lastTickWithLabelIndex = index);
+            return {
+              ...rest,
+              showLabel,
+              ...(() => {
+                if (
+                  index % mergeableTicksIndex === 0 ||
+                  (index - prevLastTickWithLabelIndex) * tickWidth >=
+                    minTickWidth
+                ) {
+                  return {
+                    label,
+                  };
+                }
+              })(),
+            } as TimeScaleRow;
+          }
+        );
       };
 
       return {
@@ -275,7 +288,7 @@ export const TimeScaleMeter = forwardRef<HTMLDivElement, TimeScaleMeterProps>(
                     ({ id, label, sx, ...rest }) => {
                       return (
                         <Box
-                          {...rest}
+                          {...omit(rest, 'showLabel')}
                           key={id}
                           className={clsx(classes.timeScaleLevel1)}
                           sx={{
@@ -381,7 +394,7 @@ export const TimeScaleMeter = forwardRef<HTMLDivElement, TimeScaleMeterProps>(
           {displayableTimeScaleLevel3.map(({ id, label, sx, ...rest }) => {
             return (
               <Box
-                {...rest}
+                {...omit(rest, 'showLabel')}
                 key={id}
                 sx={{
                   ...(() => {
