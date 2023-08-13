@@ -761,6 +761,13 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
         className={clsx(classes.root)}
         sx={{
           px: isSmallScreenSize ? 2 : 3,
+          ...(() => {
+            if (collapsedIntoEllipsisToolIndex) {
+              return {
+                pr: 1,
+              };
+            }
+          })(),
           ...sx,
           [`.${buttonClasses.containedInherit}`]: {
             bgcolor: alpha(palette.text.primary, 0.04),
@@ -861,11 +868,13 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                   <Grid
                     item
                     className={clsx(classes.titleWrapper)}
-                    xs={alignTools === 'end' || isSmallScreenSize}
+                    xs={Boolean(
+                      alignTools === 'end' || collapsedIntoEllipsisToolIndex
+                    )}
                     sx={{
                       minWidth: 0,
                       ...(() => {
-                        if (alignTools === 'start' && !isSmallScreenSize) {
+                        if (alignTools === 'start' && !isSearchFieldCollapsed) {
                           return {
                             width: maxTitleWidth,
                           };
@@ -896,16 +905,13 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                         display: 'flex',
                         flex:
                           searchFieldOpen ||
-                          (searchFieldOpenProp &&
-                            !isSmallScreenSize &&
-                            !isSearchFieldCollapsed)
+                          (searchFieldOpenProp && !isSearchFieldCollapsed)
                             ? 1
                             : 'none',
                         maxWidth: maxSearchFieldWidth,
                         ...(() => {
                           if (
                             alignTools === 'start' &&
-                            !isSmallScreenSize &&
                             (!isSearchFieldCollapsed || searchFieldOpen)
                           ) {
                             return {
@@ -916,9 +922,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                         minWidth: (() => {
                           if (
                             searchFieldOpen ||
-                            (searchFieldOpenProp &&
-                              !isSmallScreenSize &&
-                              !isSearchFieldCollapsed)
+                            (searchFieldOpenProp && !isSearchFieldCollapsed)
                           ) {
                             return maxSearchFieldWidth;
                           }
@@ -927,9 +931,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                       }}
                     >
                       {searchFieldOpen ||
-                      (searchFieldOpenProp &&
-                        !isSmallScreenSize &&
-                        !isSearchFieldCollapsed) ? (
+                      (searchFieldOpenProp && !isSearchFieldCollapsed) ? (
                         (() => {
                           const textField = (
                             <SearchField
@@ -997,11 +999,13 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                 <Grid
                   item
                   className={clsx(classes.fullWidthSearchToolWrapper)}
-                  xs={alignTools === 'end' || isSmallScreenSize}
+                  xs={Boolean(
+                    alignTools === 'end' || collapsedIntoEllipsisToolIndex
+                  )}
                   sx={{
                     minWidth: 0,
                     ...(() => {
-                      if (alignTools === 'start' && !isSmallScreenSize) {
+                      if (alignTools === 'start' && !isSearchFieldCollapsed) {
                         return {
                           maxWidth: maxSearchFieldWidth,
                         };
