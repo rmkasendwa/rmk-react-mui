@@ -1883,8 +1883,8 @@ const BaseRecordsExplorer = <
     ...timelineView?.TimeScaleToolProps,
     ...TimelineViewProps?.TimeScaleToolProps,
     selectedTimeScale,
-    onSelectTimeScale: selectTimeScaleRef.current,
-    onSelectCustomDatesTimeScale: selectCustomDatesTimeScaleRef.current,
+    onSelectTimeScaleFunctionRef: selectTimeScaleRef,
+    onSelectCustomDatesTimeScaleFunctionRef: selectCustomDatesTimeScaleRef,
     isCustomDatesTimeScaleSelected,
     supportedTimeScales:
       timelineView?.supportedTimeScales ||
@@ -1905,13 +1905,14 @@ const BaseRecordsExplorer = <
     startDateRef: currentDateAtStartRef,
     endDateRef: currentDateAtEndRef,
   });
+
   const scrollTimelineTools = useScrollTimelineTools({
     ...timelineView?.ScrollTimelineToolsProps,
     ...TimelineViewProps?.ScrollTimelineToolsProps,
-    scrollToDate: scrollToDateRef.current,
-    jumpToOptimalTimeScale: jumpToOptimalTimeScaleRef.current,
-    jumpToPreviousUnitTimeScale: jumpToPreviousUnitTimeScaleRef.current,
-    jumpToNextUnitTimeScale: jumpToNextUnitTimeScaleRef.current,
+    scrollToDateFunctionRef: scrollToDateRef,
+    jumpToOptimalTimeScaleFunctionRef: jumpToOptimalTimeScaleRef,
+    jumpToPreviousUnitTimeScaleFunctionRef: jumpToPreviousUnitTimeScaleRef,
+    jumpToNextUnitTimeScaleFunctionRef: jumpToNextUnitTimeScaleRef,
     JumpToDateToolProps: {
       minDate: timelineDateBoundsRef.current?.minDate,
       maxDate: timelineDateBoundsRef.current?.maxDate,

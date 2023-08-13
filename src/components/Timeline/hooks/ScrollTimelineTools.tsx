@@ -10,6 +10,7 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material';
+import { MutableRefObject } from 'react';
 
 import { ElementTool } from '../../SearchSyncToolbar';
 import Tooltip from '../../Tooltip';
@@ -17,25 +18,57 @@ import { JumpToDateToolProps, useJumpToDateTool } from './JumpToDateTool';
 
 export interface ScrollTimelineToolsProps {
   JumpToDateToolProps?: Partial<JumpToDateToolProps>;
+
   scrollToDate?: (date: Date) => void;
+  scrollToDateFunctionRef?: MutableRefObject<
+    ((date: Date) => void) | undefined
+  >;
+
   showJumpToOptimalTimeScaleTool?: boolean;
+
   jumpToOptimalTimeScale?: () => void;
+  jumpToOptimalTimeScaleFunctionRef?: MutableRefObject<
+    (() => void) | undefined
+  >;
+
   canJumpToPreviousUnitTimeScale?: boolean;
+
   jumpToPreviousUnitTimeScale?: () => void;
+  jumpToPreviousUnitTimeScaleFunctionRef?: MutableRefObject<
+    (() => void) | undefined
+  >;
+
   canJumpToNextUnitTimeScale?: boolean;
+
   jumpToNextUnitTimeScale?: () => void;
+  jumpToNextUnitTimeScaleFunctionRef?: MutableRefObject<
+    (() => void) | undefined
+  >;
+
   showNavigationTools?: boolean;
 }
 
 export const useScrollTimelineTools = ({
   JumpToDateToolProps,
+
   scrollToDate,
+  scrollToDateFunctionRef,
+
   showJumpToOptimalTimeScaleTool = true,
+
   jumpToOptimalTimeScale,
+  jumpToOptimalTimeScaleFunctionRef,
+
   canJumpToPreviousUnitTimeScale = true,
+
   jumpToPreviousUnitTimeScale,
+  jumpToPreviousUnitTimeScaleFunctionRef,
+
   canJumpToNextUnitTimeScale = true,
+
   jumpToNextUnitTimeScale,
+  jumpToNextUnitTimeScaleFunctionRef,
+
   showNavigationTools = true,
 }: ScrollTimelineToolsProps = {}) => {
   const { breakpoints } = useTheme();
@@ -52,7 +85,7 @@ export const useScrollTimelineTools = ({
     onChange: (selectedDate) => {
       if (selectedDate) {
         selectedDate.setHours(0, 0, 0, 0);
-        scrollToDate?.(selectedDate);
+        (scrollToDate || scrollToDateFunctionRef?.current)?.(selectedDate);
       }
       jumpToDateClosePopup();
     },
@@ -64,7 +97,7 @@ export const useScrollTimelineTools = ({
       color="inherit"
       size="small"
       onClick={() => {
-        scrollToDate?.(new Date());
+        (scrollToDate || scrollToDateFunctionRef?.current)?.(new Date());
       }}
       sx={{
         height: 32,
@@ -81,7 +114,7 @@ export const useScrollTimelineTools = ({
         color="inherit"
         size="small"
         onClick={() => {
-          scrollToDate?.(new Date());
+          (scrollToDate || scrollToDateFunctionRef?.current)?.(new Date());
         }}
         sx={{
           px: 1,
@@ -117,7 +150,9 @@ export const useScrollTimelineTools = ({
         variant="contained"
         color="inherit"
         size="small"
-        onClick={jumpToOptimalTimeScale}
+        onClick={
+          jumpToOptimalTimeScale || jumpToOptimalTimeScaleFunctionRef?.current
+        }
         sx={{
           px: 1,
           minWidth: 'auto !important',
@@ -139,7 +174,10 @@ export const useScrollTimelineTools = ({
       }}
     >
       <Button
-        onClick={jumpToPreviousUnitTimeScale}
+        onClick={
+          jumpToPreviousUnitTimeScale ||
+          jumpToPreviousUnitTimeScaleFunctionRef?.current
+        }
         disabled={!canJumpToPreviousUnitTimeScale}
         sx={{
           px: 1,
@@ -150,7 +188,9 @@ export const useScrollTimelineTools = ({
         <NavigateBeforeIcon />
       </Button>
       <Button
-        onClick={jumpToNextUnitTimeScale}
+        onClick={
+          jumpToNextUnitTimeScale || jumpToNextUnitTimeScaleFunctionRef?.current
+        }
         disabled={!canJumpToNextUnitTimeScale}
         sx={{
           px: 1,
@@ -191,7 +231,8 @@ export const useScrollTimelineTools = ({
         {todayToolElement}
         {jumpToDateToolElement}
         {jumpToDatePopupElement}
-        {showJumpToOptimalTimeScaleTool && jumpToOptimalTimeScale
+        {showJumpToOptimalTimeScaleTool &&
+        (jumpToOptimalTimeScale || jumpToOptimalTimeScaleFunctionRef?.current)
           ? jumpToOptimalTimeScaleToolElement
           : null}
         {showNavigationTools ? jumpToUnitTimeScaleToolsElement : null}
@@ -209,7 +250,8 @@ export const useScrollTimelineTools = ({
         {collapsedTodayToolElement}
         {jumpToDateToolElement}
         {jumpToDatePopupElement}
-        {showJumpToOptimalTimeScaleTool && jumpToOptimalTimeScale
+        {showJumpToOptimalTimeScaleTool &&
+        (jumpToOptimalTimeScale || jumpToOptimalTimeScaleFunctionRef?.current)
           ? jumpToOptimalTimeScaleToolElement
           : null}
         {showNavigationTools ? jumpToUnitTimeScaleToolsElement : null}
