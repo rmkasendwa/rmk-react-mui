@@ -2862,8 +2862,13 @@ const BaseRecordsExplorer = <
           {(() => {
             if (enableViewSelectedRecordModalPopup) {
               const loadingState = {
-                loading: loadingRecordDetails || loadingProp || loading,
-                errorMessage: loadingRecordDetailsErrorMessage,
+                loading: Boolean(
+                  !selectedRecord &&
+                    (loadingRecordDetails || loadingProp || loading)
+                ),
+                errorMessage: !selectedRecord
+                  ? loadingRecordDetailsErrorMessage
+                  : '',
                 load: loadRecordDetails,
                 locked: !editRecord,
               };
