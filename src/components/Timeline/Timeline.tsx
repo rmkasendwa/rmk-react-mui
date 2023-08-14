@@ -198,6 +198,8 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
   /** The width of the row labels column. */
   rowLabelsColumnWidth?: number;
 
+  RowLabelColumnProps?: Partial<TableColumn>;
+
   /** A boolean indicating whether to show the toolbar in the timeline. */
   showToolBar?: boolean;
 
@@ -384,6 +386,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     currentDateAtStartRef: currentDateAtStartRefProp,
     currentDateAtCenterRef: currentDateAtCenterRefProp,
     currentDateAtEndRef: currentDateAtEndRefProp,
+    RowLabelColumnProps,
     defaultViewResetFunctionRef,
     sx,
     ...rest
@@ -1711,6 +1714,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
 
   if (shouldShowRowLabelsColumn) {
     columns.unshift({
+      ...RowLabelColumnProps,
       id: 'label',
       label: rowLabelsColumnHeader,
       width: rowLabelsColumnWidth,
@@ -1726,7 +1730,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           return result(row, rowLabelProperty);
         }
       },
-      className: classes.rowLabelColumn,
+      className: clsx(classes.rowLabelColumn, RowLabelColumnProps?.className),
       headerSx: {
         ...(() => {
           if (todayMarkerVariant === 'foregroundFullSpan') {
@@ -1750,6 +1754,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         })(),
       },
       secondaryHeaderSx: {
+        ...RowLabelColumnProps?.secondaryHeaderSx,
         borderRight: 'none !important',
         '&>div': {
           py: 0,
@@ -1758,6 +1763,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         },
       },
       bodySx: {
+        ...RowLabelColumnProps?.bodySx,
         zIndex: 3,
         ...(() => {
           if (todayMarkerVariant === 'foregroundFullSpan') {
@@ -1833,8 +1839,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         {...rest}
         controlZIndex={false}
         parentBackgroundColor={parentBackgroundColor}
-        columns={columns}
-        rows={rows}
+        {...{ columns, rows }}
         paging={false}
         bordersVariant="square"
         {...(() => {
