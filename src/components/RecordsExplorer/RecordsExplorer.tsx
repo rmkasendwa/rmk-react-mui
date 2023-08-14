@@ -1960,6 +1960,7 @@ const BaseRecordsExplorer = <
             if (listView && listView.columns.length > 0) {
               viewProps.rowLabelProperty = listView.columns[0].id;
               viewProps.getRowLabel = listView.columns[0].getColumnValue as any;
+              viewProps.RowLabelColumnProps = listView.columns[0];
             }
           }
           return {

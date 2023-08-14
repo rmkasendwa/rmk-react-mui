@@ -105,11 +105,9 @@ const slots = {
 export const TableBodyColumn = forwardRef<any, TableBodyColumnProps<any>>(
   function TableBodyColumn(inProps, ref) {
     const props = useThemeProps({ props: inProps, name: 'MuiTableBodyColumn' });
+    const { className, id, align = 'left', sx, column } = props;
+
     const {
-      className,
-      id,
-      align = 'left',
-      sx,
       onClickColumn,
       bodySx,
       getColumnValue,
@@ -119,7 +117,6 @@ export const TableBodyColumn = forwardRef<any, TableBodyColumnProps<any>>(
       getColumnTypographyProps,
       defaultColumnValue,
       decimalPlaces,
-      column,
       onClick,
       row,
       fieldValueEditor,
@@ -141,7 +138,7 @@ export const TableBodyColumn = forwardRef<any, TableBodyColumnProps<any>>(
       opaque,
       getToolTipWrappedColumnNode,
       wrapColumnContentInFieldValue = true,
-    } = props;
+    } = { ...props, ...column };
 
     const classes = composeClasses(
       slots,
