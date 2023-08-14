@@ -120,6 +120,7 @@ export interface ModalFormProps<Values extends FormikValues = any>
   editableFields?: (keyof Values)[];
   draftManager?: DraftsManager;
   draft?: Pick<Draft, 'id' | 'draftMessage' | 'draftUrl'>;
+  errorAlertPlacement?: 'top' | 'bottom';
 }
 
 export function getModalFormUtilityClass(slot: string): string {
@@ -181,6 +182,7 @@ export const BaseModalForm = <Values extends FormikValues>(
     draftManager,
     draft: draftProp,
     open,
+    errorAlertPlacement = 'bottom',
     ...rest
   } = props;
 
@@ -499,6 +501,13 @@ export const BaseModalForm = <Values extends FormikValues>(
                         ...CardBodyPropsSx,
                       }}
                     >
+                      {errorMessage && errorAlertPlacement === 'top' ? (
+                        <Box
+                          sx={{ pb: 2, position: 'sticky', top: 0, zIndex: 5 }}
+                        >
+                          <ErrorAlert message={errorMessage} />
+                        </Box>
+                      ) : null}
                       {(() => {
                         if (submitted && successMessage) {
                           return (
@@ -524,8 +533,15 @@ export const BaseModalForm = <Values extends FormikValues>(
                             })
                           : children;
                       })()}
-                      {errorMessage ? (
-                        <Box sx={{ pt: 2, position: 'sticky', bottom: 0 }}>
+                      {errorMessage && errorAlertPlacement === 'bottom' ? (
+                        <Box
+                          sx={{
+                            pt: 2,
+                            position: 'sticky',
+                            bottom: 0,
+                            zIndex: 5,
+                          }}
+                        >
                           <ErrorAlert message={errorMessage} />
                         </Box>
                       ) : null}
