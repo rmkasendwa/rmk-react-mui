@@ -555,7 +555,6 @@ const BasePaginatedDropdownOptionList = <Entity,>(
                     key={value}
                     onClick={(event) => {
                       if (selectable) {
-                        event.preventDefault();
                         triggerChangeEvent(option);
                         onClick && onClick(event);
                         onSelectOption && onSelectOption(option);
@@ -648,7 +647,7 @@ const BasePaginatedDropdownOptionList = <Entity,>(
           <Divider />
           <DropdownOption
             onClick={(event) => {
-              event.preventDefault();
+              event.stopPropagation();
               const selectableOptions = (() => {
                 const selectedLockedOptions = selectedOptions
                   .map(({ value: selectedOptionValue }) => {
@@ -701,7 +700,7 @@ const BasePaginatedDropdownOptionList = <Entity,>(
           ) : null}
           <DropdownOption
             onClick={(event) => {
-              event.preventDefault();
+              event.stopPropagation();
               loadAsyncOptions();
             }}
             height={optionHeight}
