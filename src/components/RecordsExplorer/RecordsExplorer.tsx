@@ -215,6 +215,7 @@ export interface RecordsExplorerChildrenOptions<
   errorMessage?: string;
   searchParamSelectedDataPreset?: string | number;
   selectedDataPreset?: RecordsExplorerDataPreset<RecordRow>;
+  selectedRecord?: RecordRow;
 }
 
 export type RecordsExplorerTools = Partial<
@@ -487,6 +488,7 @@ export interface RecordsExplorerProps<
   renderViews?: boolean;
   enableViewSelectedRecordModalPopup?: boolean;
   resetToDefaultView?: () => void;
+  showModalForm?: boolean;
 }
 
 export function getRecordsExplorerUtilityClass(slot: string): string {
@@ -617,6 +619,7 @@ const BaseRecordsExplorer = <
     enableViewSelectedRecordModalPopup = true,
     resetToDefaultView: resetToDefaultViewProp,
     onChangeMinWidth,
+    showModalForm = true,
     ...rest
   } = omit(
     props,
@@ -1996,6 +1999,7 @@ const BaseRecordsExplorer = <
       searchParamSelectedDataPreset,
       selectedDataPreset,
       selectedViewProps,
+      selectedRecord,
     };
   //#endregion
 
@@ -2813,7 +2817,7 @@ const BaseRecordsExplorer = <
               {...CreateModalFormPropsRest}
               initialValues={initialValues || {}}
               validationSchema={validationSchema || {}}
-              open={createNewRecord}
+              open={showModalForm && createNewRecord}
               errorMessage={createErrorMessage}
               loading={creating}
               onSubmit={async (values) => {
@@ -2909,7 +2913,7 @@ const BaseRecordsExplorer = <
                     editableFields={editableFields}
                     validationSchema={editValidationSchema || validationSchema}
                     initialValues={editInitialValues || {}}
-                    open={Boolean(selectedRecordId)}
+                    open={Boolean(showModalForm && selectedRecordId)}
                     errorMessage={updateErrorMessage}
                     loading={updating}
                     onSubmit={async (values) => {
