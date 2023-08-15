@@ -299,6 +299,15 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
   defaultViewResetFunctionRef?: MutableRefObject<(() => void) | undefined>;
 
   blockCustomDateRangeRegion?: boolean;
+
+  /**
+   * Whether the timeline is the master timeline. A master timeline is a timeline that controls its own operations and
+   * the operations of other timelines. If true the timeline will be able to control the operations of other timelines.
+   * Otherwise, the timeline will be controlled by other timelines.
+   *
+   * @default true
+   */
+  isMasterTimeline?: boolean;
 }
 
 export function getTimelineUtilityClass(slot: string): string {
@@ -388,6 +397,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     currentDateAtEndRef: currentDateAtEndRefProp,
     RowLabelColumnProps,
     defaultViewResetFunctionRef,
+    isMasterTimeline = true,
     sx,
     ...rest
   } = omit(props, 'parentBackgroundColor', 'scrollingAncenstorElement');
@@ -427,6 +437,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   const isInitialMountRef = useRef(true);
   const isScrollingToTimelineCenterRef = useRef(false);
   const isTimelineScrolledRef = useRef(false);
+  const lastMouseEventRef = useRef<MouseEvent | null>(null);
 
   const currentDateAtStartRef = useRef<Date | null>(null);
   const currentDateAtCenterRef = useRef<Date | null>(null);
@@ -435,6 +446,13 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   const currentDateAtCenterPositionLeftOffsetRef = useRef<number | null>(null);
   const [timelineContainerElement, setTimelineContainerElement] =
     useState<HTMLTableElement | null>(null);
+  const timelineMeterContainerElement = timelineContainerElement?.querySelector(
+    `.${classes.timelineMeterContainer}`
+  ) as HTMLElement;
+  const dateAtCursorMarkerLabelElement =
+    timelineContainerElement?.querySelector(
+      `.${classes.dateAtCursorMarker}>.${classes.dateAtCursorMarkerLabel}`
+    ) as HTMLElement;
   if (!scrollingAncenstorElement && timelineContainerElement) {
     scrollingAncenstorElement = timelineContainerElement?.parentElement;
   }
@@ -1036,11 +1054,56 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     }
   };
 
-  /**
-   * useEffect hook to add a scroll event listener to the scrolling ancestor element.
-   * This hook calculates and updates the date at the start and center of the timeline,
-   * and updates the current date at the center reference accordingly.
-   */
+  const updateDateAtCursor = () => {
+    if (
+      lastMouseEventRef.current &&
+      timelineMeterContainerElement &&
+      scrollingAncenstorElement &&
+      timelineContainerElement &&
+      dateAtCursorMarkerLabelElement
+    ) {
+      const event = lastMouseEventRef.current;
+      const { offsetWidth } = timelineMeterContainerElement;
+      const { left } = scrollingAncenstorElement!.getBoundingClientRect();
+      const { clientX } = event;
+      const localX = clientX - left;
+      let timelineX =
+        localX -
+        timelineViewPortLeftOffset +
+        scrollingAncenstorElement!.scrollLeft;
+
+      timelineX > 0 || (timelineX = 0);
+      timelineX < offsetWidth || (timelineX = offsetWidth);
+
+      const percentageAtMousePosition = timelineX / offsetWidth;
+      const dateAtMousePosition = getDateAtPercentageRef.current(
+        percentageAtMousePosition
+      );
+      timelineContainerElement
+        ?.querySelectorAll(`.${classes.dateAtCursorMarker}`)
+        .forEach((dateAtCursorMarkerElement: any) => {
+          dateAtCursorMarkerElement.style.left = `${timelineX}px`;
+        });
+      dateAtCursorMarkerLabelElement.innerText = formatDate(
+        dateAtMousePosition,
+        dateFormat
+      );
+      if (scrollingAncenstorElement!.clientWidth - localX < 200) {
+        dateAtCursorMarkerLabelElement.style.right = '100%';
+        dateAtCursorMarkerLabelElement.style.left = '';
+        dateAtCursorMarkerLabelElement.style.borderBottomRightRadius = '';
+        dateAtCursorMarkerLabelElement.style.borderBottomLeftRadius = '4px';
+      } else {
+        dateAtCursorMarkerLabelElement.style.right = '';
+        dateAtCursorMarkerLabelElement.style.left = '100%';
+        dateAtCursorMarkerLabelElement.style.borderBottomRightRadius = '4px';
+        dateAtCursorMarkerLabelElement.style.borderBottomLeftRadius = '';
+      }
+    }
+  };
+  const updateDateAtCursorRef = useRef(updateDateAtCursor);
+  updateDateAtCursorRef.current = updateDateAtCursor;
+
   useEffect(() => {
     const parentElement = scrollingAncenstorElement;
     const timelineMeterContainer = scrollingAncenstorElement?.querySelector(
@@ -1104,6 +1167,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         if (timelineContainerElement) {
           caliberateDateCursorElementsRef.current(timelineContainerElement);
         }
+        updateDateAtCursorRef.current();
       };
 
       // Attach the scroll event listener to the parentElement.
@@ -1127,7 +1191,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   ]);
 
   useEffect(() => {
-    if (timelineContainerElement) {
+    if (isMasterTimeline && timelineContainerElement) {
       const observer = new ResizeObserver(() => {
         const hasCustomDatesSelected =
           isCustomDatesSelected &&
@@ -1165,6 +1229,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     customDateRange?.startDate,
     defaultTimelineCenter,
     isCustomDatesSelected,
+    isMasterTimeline,
     timelineContainerElement,
   ]);
 
@@ -1195,57 +1260,10 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
 
   //#region Track date at cursor
   useEffect(() => {
-    const timelineMeterContainerElement =
-      timelineContainerElement?.querySelector(
-        `.${classes.timelineMeterContainer}`
-      ) as HTMLElement;
-    const dateAtCursorMarkerLabelElement =
-      timelineContainerElement?.querySelector(
-        `.${classes.dateAtCursorMarker}>.${classes.dateAtCursorMarkerLabel}`
-      ) as HTMLElement;
-    if (
-      timelineMeterContainerElement &&
-      scrollingAncenstorElement &&
-      timelineContainerElement &&
-      dateAtCursorMarkerLabelElement
-    ) {
+    if (scrollingAncenstorElement) {
       const mouseMoveEventCallback = (event: MouseEvent) => {
-        const { offsetWidth } = timelineMeterContainerElement;
-        const { left } = scrollingAncenstorElement!.getBoundingClientRect();
-        const { clientX } = event;
-        const localX = clientX - left;
-        let timelineX =
-          localX -
-          timelineViewPortLeftOffset +
-          scrollingAncenstorElement!.scrollLeft;
-
-        timelineX > 0 || (timelineX = 0);
-        timelineX < offsetWidth || (timelineX = offsetWidth);
-
-        const percentageAtMousePosition = timelineX / offsetWidth;
-        const dateAtMousePosition = getDateAtPercentageRef.current(
-          percentageAtMousePosition
-        );
-        timelineContainerElement
-          ?.querySelectorAll(`.${classes.dateAtCursorMarker}`)
-          .forEach((dateAtCursorMarkerElement: any) => {
-            dateAtCursorMarkerElement.style.left = `${timelineX}px`;
-          });
-        dateAtCursorMarkerLabelElement.innerText = formatDate(
-          dateAtMousePosition,
-          dateFormat
-        );
-        if (scrollingAncenstorElement!.clientWidth - localX < 200) {
-          dateAtCursorMarkerLabelElement.style.right = '100%';
-          dateAtCursorMarkerLabelElement.style.left = '';
-          dateAtCursorMarkerLabelElement.style.borderBottomRightRadius = '';
-          dateAtCursorMarkerLabelElement.style.borderBottomLeftRadius = '4px';
-        } else {
-          dateAtCursorMarkerLabelElement.style.right = '';
-          dateAtCursorMarkerLabelElement.style.left = '100%';
-          dateAtCursorMarkerLabelElement.style.borderBottomRightRadius = '4px';
-          dateAtCursorMarkerLabelElement.style.borderBottomLeftRadius = '';
-        }
+        lastMouseEventRef.current = event;
+        updateDateAtCursorRef.current();
       };
       scrollingAncenstorElement.addEventListener(
         'mousemove',
@@ -1258,17 +1276,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         );
       };
     }
-  }, [
-    classes.dateAtCursorMarker,
-    classes.dateAtCursorMarkerLabel,
-    classes.timelineMeterContainer,
-    dateFormat,
-    minCalendarDate,
-    scrollingAncenstorElement,
-    timelineContainerElement,
-    timelineViewPortLeftOffset,
-    totalNumberOfHours,
-  ]);
+  }, [scrollingAncenstorElement]);
   //#endregion
 
   //#region TimeScale Tool
