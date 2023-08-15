@@ -437,7 +437,8 @@ export interface RecordsExplorerProps<
   templatePathToView?: string;
   pathToView?: string;
   getPathToView?: (record: RecordRow) => string;
-  getViewTitle?: (record: RecordRow) => ReactNode;
+  getViewFormTitle?: (record: RecordRow) => ReactNode;
+  getEditFormTitle?: (record: RecordRow) => ReactNode;
 
   // Edit Path
   templatePathToEdit?: string;
@@ -569,7 +570,8 @@ const BaseRecordsExplorer = <
     recordEditor,
     editableFields,
     editValidationSchema,
-    getViewTitle,
+    getViewFormTitle,
+    getEditFormTitle,
     onEditRecord,
     pathToEdit,
     getPathToEdit,
@@ -2887,10 +2889,13 @@ const BaseRecordsExplorer = <
                         <Grid item>
                           {(() => {
                             if (editRecord) {
+                              if (getEditFormTitle && selectedRecord) {
+                                return getEditFormTitle(selectedRecord);
+                              }
                               return `Edit ${recordLabelSingular}`;
                             }
-                            if (getViewTitle && selectedRecord) {
-                              return getViewTitle(selectedRecord);
+                            if (getViewFormTitle && selectedRecord) {
+                              return getViewFormTitle(selectedRecord);
                             }
                             return recordLabelSingular;
                           })()}
