@@ -64,7 +64,9 @@ export interface TimelineElementProps extends Partial<Omit<BoxProps, 'ref'>> {
   label?: ReactNode;
   TooltipProps?: Partial<TooltipProps>;
   scrollingAncenstorElement?: HTMLElement | null;
-  viewportOffsets?: TimelineElementViewPortOffsets;
+  percentage?: number;
+  offsetPercentage?: number;
+  timelineContainerWidth?: number;
 }
 
 export function getTimelineElementUtilityClass(slot: string): string {
@@ -91,7 +93,9 @@ export const TimelineElement = forwardRef<HTMLDivElement, TimelineElementProps>(
       label,
       TooltipProps = {},
       scrollingAncenstorElement,
-      viewportOffsets = {},
+      percentage = 0,
+      offsetPercentage = 0,
+      timelineContainerWidth = 0,
       ...rest
     } = props;
 
@@ -119,6 +123,9 @@ export const TimelineElement = forwardRef<HTMLDivElement, TimelineElementProps>(
 
     const { palette } = useTheme();
     const { ref: observerRef, inView: isVisible } = useInView();
+    const baseLeftEdgeOffset = timelineContainerWidth * offsetPercentage;
+    const width = timelineContainerWidth * percentage;
+    const baseRightEdgeOffset = baseLeftEdgeOffset + width;
     useEffect(() => {
       if (
         isVisible &&
@@ -127,18 +134,20 @@ export const TimelineElement = forwardRef<HTMLDivElement, TimelineElementProps>(
       ) {
         const timelineElement = timelineElementRef.current;
         const scrollEventCallback = () => {
-          const scrollingAncenstorElementRect =
-            scrollingAncenstorElement.getBoundingClientRect();
-          const timelineElementRect = timelineElement.getBoundingClientRect();
-          const scrollingAncenstorElementRectLeft =
-            scrollingAncenstorElementRect.left + (viewportOffsets.left ?? 0);
+          const scrollingAncenstorElementLeftEdgeOffset = 0;
+          const timelineElementLeftOffset =
+            baseLeftEdgeOffset - scrollingAncenstorElement.scrollLeft;
+          const timelineElementRightOffset =
+            baseRightEdgeOffset - scrollingAncenstorElement.scrollLeft;
           if (
-            scrollingAncenstorElementRectLeft > timelineElementRect.left &&
-            scrollingAncenstorElementRectLeft < timelineElementRect.right
+            scrollingAncenstorElementLeftEdgeOffset >
+              timelineElementLeftOffset &&
+            scrollingAncenstorElementLeftEdgeOffset < timelineElementRightOffset
           ) {
             timelineElement.classList.add(classes.leftEdgeIntersecting);
             timelineElement.style.paddingLeft = `${
-              scrollingAncenstorElementRectLeft - timelineElementRect.left
+              scrollingAncenstorElementLeftEdgeOffset -
+              timelineElementLeftOffset
             }px`;
           } else {
             timelineElement.classList.remove(classes.leftEdgeIntersecting);
@@ -161,10 +170,11 @@ export const TimelineElement = forwardRef<HTMLDivElement, TimelineElementProps>(
         };
       }
     }, [
+      baseLeftEdgeOffset,
+      baseRightEdgeOffset,
       classes.leftEdgeIntersecting,
       isVisible,
       scrollingAncenstorElement,
-      viewportOffsets.left,
     ]);
 
     const timelineElementNode = (
@@ -185,8 +195,8 @@ export const TimelineElement = forwardRef<HTMLDivElement, TimelineElementProps>(
           '&:hover': {
             zIndex: 1,
           },
-          ...sx,
           boxSizing: 'border-box',
+          ...sx,
         }}
       >
         <Typography
