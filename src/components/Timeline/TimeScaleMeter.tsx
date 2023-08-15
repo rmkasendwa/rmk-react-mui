@@ -59,9 +59,6 @@ export interface TimeScaleMeterProps extends Partial<StackProps> {
   scrollingElement?: HTMLElement | null;
   leftOffset?: number;
   variant?: 'default' | 'compact';
-  timeScaleLevel1TickMinTextDisplayWidth?: number;
-  timeScaleLevel2TickMinTextDisplayWidth?: number;
-  timeScaleLevel3TickMinTextDisplayWidth?: number;
 }
 
 export function getTimeScaleMeterUtilityClass(slot: string): string {
@@ -91,9 +88,6 @@ export const TimeScaleMeter = forwardRef<HTMLDivElement, TimeScaleMeterProps>(
       scrollingElement,
       leftOffset = 0,
       variant = 'default',
-      timeScaleLevel1TickMinTextDisplayWidth = 50,
-      timeScaleLevel2TickMinTextDisplayWidth = 40,
-      timeScaleLevel3TickMinTextDisplayWidth = 40,
       sx,
       ...rest
     } = props;
@@ -109,6 +103,19 @@ export const TimeScaleMeter = forwardRef<HTMLDivElement, TimeScaleMeterProps>(
         }
       })()
     );
+
+    const [
+      timeScaleLevel1TickMinTextDisplayWidth,
+      setTimeScaleLevel1TickMinTextDisplayWidth,
+    ] = useState(50);
+    const [
+      timeScaleLevel2TickMinTextDisplayWidth,
+      setTimeScaleLevel2TickMinTextDisplayWidth,
+    ] = useState(40);
+    const [
+      timeScaleLevel3TickMinTextDisplayWidth,
+      setTimeScaleLevel3TickMinTextDisplayWidth,
+    ] = useState(40);
 
     const { palette } = useTheme();
 
@@ -307,6 +314,18 @@ export const TimeScaleMeter = forwardRef<HTMLDivElement, TimeScaleMeterProps>(
                             }}
                           >
                             <Typography
+                              ref={(element) => {
+                                if (element) {
+                                  setTimeScaleLevel1TickMinTextDisplayWidth(
+                                    (prevWidth) => {
+                                      return Math.max(
+                                        prevWidth,
+                                        element.offsetWidth + 10
+                                      );
+                                    }
+                                  );
+                                }
+                              }}
                               variant="body2"
                               sx={{
                                 fontWeight: 500,
@@ -354,6 +373,18 @@ export const TimeScaleMeter = forwardRef<HTMLDivElement, TimeScaleMeterProps>(
                 >
                   {showLabel ? (
                     <Typography
+                      ref={(element) => {
+                        if (element) {
+                          setTimeScaleLevel2TickMinTextDisplayWidth(
+                            (prevWidth) => {
+                              return Math.max(
+                                prevWidth,
+                                element.offsetWidth + 10
+                              );
+                            }
+                          );
+                        }
+                      }}
                       variant="body2"
                       sx={{
                         fontSize: 11,
@@ -420,6 +451,18 @@ export const TimeScaleMeter = forwardRef<HTMLDivElement, TimeScaleMeterProps>(
                   if (variant === 'default' && label) {
                     return (
                       <Typography
+                        ref={(element) => {
+                          if (element) {
+                            setTimeScaleLevel3TickMinTextDisplayWidth(
+                              (prevWidth) => {
+                                return Math.max(
+                                  prevWidth,
+                                  element.offsetWidth + 10
+                                );
+                              }
+                            );
+                          }
+                        }}
                         variant="body2"
                         sx={{
                           fontSize: 12,
