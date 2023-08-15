@@ -907,6 +907,135 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       );
     });
 
+  const timelineElementNodes = useMemo(() => {
+    return new Map<
+      string,
+      {
+        element: HTMLElement;
+        leftEdgeOffset: number;
+        rightEdgeOffset: number;
+        width: number;
+      }
+    >();
+  }, []);
+
+  /**
+   * Generates a timeline element node based on the provided start and end dates, label, and other props.
+   * @param TimelineElement - Object containing the properties for the timeline element.
+   * @returns ReactNode - The generated timeline element node.
+   */
+  const getTimelineElementNode = ({
+    id,
+    startDate: startDateValue,
+    endDate: endDateValue,
+    label,
+    TooltipProps = {},
+    sx,
+    ...rest
+  }: Omit<TimelineElementProps, 'scrollingAncenstorElement'> & {
+    id: string;
+  }) => {
+    const startDate = startDateValue
+      ? createDateWithoutTimezoneOffset(startDateValue)
+      : minCalendarDate;
+
+    // Check if the provided start date is a valid date.
+    if (!isNaN(startDate.getTime())) {
+      const endDate = (() => {
+        if (endDateValue) {
+          const endDate = createDateWithoutTimezoneOffset(endDateValue);
+
+          // Check if the provided end date is a valid date.
+          if (!isNaN(endDate.getTime())) {
+            // If the end date is provided as a string without a time component, set the time to 23:59:59.999.
+            if (
+              typeof endDateValue === 'string' &&
+              !dateStringHasTimeComponent(endDateValue)
+            ) {
+              endDate.setHours(23, 59, 59, 999);
+            }
+            return endDate;
+          }
+        }
+        // If no valid end date is provided, use the maximum calendar date as the end date.
+        return maxCalendarDate;
+      })();
+
+      // Check if the end date is after the start date.
+      if (isAfter(endDate, startDate)) {
+        const numberOfHours = differenceInHours(endDate, startDate);
+        const offsetPercentage =
+          differenceInHours(startDate, minCalendarDate) / totalNumberOfHours;
+        const percentage = numberOfHours / totalNumberOfHours;
+
+        // Create the base label for the timeline element using the start and end dates.
+        const baseTimelineElementLabel = `${formatDate(
+          startDate,
+          'MMM dd, yyyy'
+        )} - ${formatDate(endDate, 'MMM dd, yyyy')}`;
+
+        // Determine the final timeline element label to be displayed.
+        const timelineElementLabel = (() => {
+          if (label) {
+            return label;
+          }
+          return baseTimelineElementLabel;
+        })();
+
+        const { ...TooltipPropsRest } = TooltipProps;
+
+        return (
+          <TimelineElement
+            {...rest}
+            ref={(element) => {
+              if (element) {
+                timelineElementNodes.set(id, {
+                  element,
+                  leftEdgeOffset: offsetPercentage * scaledTimeScaleWidth,
+                  rightEdgeOffset:
+                    (offsetPercentage + percentage) * scaledTimeScaleWidth,
+                  width: percentage * scaledTimeScaleWidth,
+                });
+              }
+            }}
+            label={timelineElementLabel}
+            {...{ scrollingAncenstorElement, percentage, offsetPercentage }}
+            timelineContainerWidth={scaledTimeScaleWidth}
+            TooltipProps={{
+              title: baseTimelineElementLabel,
+              ...TooltipPropsRest,
+            }}
+            sx={{
+              ...sx,
+              position: 'absolute',
+              top: 0,
+              width: `${percentage * 100}%`,
+              left: `${offsetPercentage * 100}%`,
+              ...(() => {
+                if (!startDateValue) {
+                  return {
+                    borderTopLeftRadius: 0,
+                    borderBottomLeftRadius: 0,
+                    borderLeft: 'none',
+                  };
+                }
+              })(),
+              ...(() => {
+                if (!endDateValue) {
+                  return {
+                    borderTopRightRadius: 0,
+                    borderBottomRightRadius: 0,
+                    borderRight: 'none',
+                  };
+                }
+              })(),
+            }}
+          />
+        );
+      }
+    }
+  };
+
   /**
    * useEffect hook to add a scroll event listener to the scrolling ancestor element.
    * This hook calculates and updates the date at the start and center of the timeline,
@@ -921,12 +1050,12 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     // Check if the required elements are present before attaching the scroll event listener.
     if (parentElement && timelineMeterContainer) {
       const scrollEventCallback = () => {
+        const { scrollLeft, clientWidth: parentElementClientWidth } =
+          parentElement;
         if (!isScrollingToTimelineCenterRef.current) {
           isTimelineScrolledRef.current = true;
         }
         isScrollingToTimelineCenterRef.current = false;
-        const { scrollLeft, clientWidth: parentElementClientWidth } =
-          parentElement;
         const { offsetWidth } = timelineMeterContainer;
 
         const startX = scrollLeft / offsetWidth;
@@ -996,111 +1125,6 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     timelineViewPortLeftOffset,
     totalNumberOfHours,
   ]);
-
-  /**
-   * Generates a timeline element node based on the provided start and end dates, label, and other props.
-   * @param TimelineElement - Object containing the properties for the timeline element.
-   * @returns ReactNode - The generated timeline element node.
-   */
-  const getTimelineElementNode = ({
-    startDate: startDateValue,
-    endDate: endDateValue,
-    label,
-    TooltipProps = {},
-    sx,
-    ...rest
-  }: Omit<TimelineElementProps, 'scrollingAncenstorElement'>) => {
-    const startDate = startDateValue
-      ? createDateWithoutTimezoneOffset(startDateValue)
-      : minCalendarDate;
-
-    // Check if the provided start date is a valid date.
-    if (!isNaN(startDate.getTime())) {
-      const endDate = (() => {
-        if (endDateValue) {
-          const endDate = createDateWithoutTimezoneOffset(endDateValue);
-
-          // Check if the provided end date is a valid date.
-          if (!isNaN(endDate.getTime())) {
-            // If the end date is provided as a string without a time component, set the time to 23:59:59.999.
-            if (
-              typeof endDateValue === 'string' &&
-              !dateStringHasTimeComponent(endDateValue)
-            ) {
-              endDate.setHours(23, 59, 59, 999);
-            }
-            return endDate;
-          }
-        }
-        // If no valid end date is provided, use the maximum calendar date as the end date.
-        return maxCalendarDate;
-      })();
-
-      // Check if the end date is after the start date.
-      if (isAfter(endDate, startDate)) {
-        const numberOfHours = differenceInHours(endDate, startDate);
-        const offsetPercentage =
-          differenceInHours(startDate, minCalendarDate) / totalNumberOfHours;
-        const percentage = numberOfHours / totalNumberOfHours;
-
-        // Create the base label for the timeline element using the start and end dates.
-        const baseTimelineElementLabel = `${formatDate(
-          startDate,
-          'MMM dd, yyyy'
-        )} - ${formatDate(endDate, 'MMM dd, yyyy')}`;
-
-        // Determine the final timeline element label to be displayed.
-        const timelineElementLabel = (() => {
-          if (label) {
-            return label;
-          }
-          return baseTimelineElementLabel;
-        })();
-
-        const { ...TooltipPropsRest } = TooltipProps;
-
-        return (
-          <TimelineElement
-            {...rest}
-            label={timelineElementLabel}
-            scrollingAncenstorElement={scrollingAncenstorElement}
-            viewportOffsets={{
-              left: timelineViewPortLeftOffset,
-            }}
-            TooltipProps={{
-              title: baseTimelineElementLabel,
-              ...TooltipPropsRest,
-            }}
-            sx={{
-              ...sx,
-              width: `${percentage * 100}%`,
-              position: 'absolute',
-              top: 0,
-              left: `${offsetPercentage * 100}%`,
-              ...(() => {
-                if (!startDateValue) {
-                  return {
-                    borderTopLeftRadius: 0,
-                    borderBottomLeftRadius: 0,
-                    borderLeft: 'none',
-                  };
-                }
-              })(),
-              ...(() => {
-                if (!endDateValue) {
-                  return {
-                    borderTopRightRadius: 0,
-                    borderBottomRightRadius: 0,
-                    borderRight: 'none',
-                  };
-                }
-              })(),
-            }}
-          />
-        );
-      }
-    }
-  };
 
   useEffect(() => {
     if (timelineContainerElement) {
@@ -1630,7 +1654,10 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                 .map((timelineElement, index) => {
                   return (
                     <Fragment key={index}>
-                      {getTimelineElementNode(timelineElement)}
+                      {getTimelineElementNode({
+                        ...timelineElement,
+                        id: String(row.id + index),
+                      })}
                     </Fragment>
                   );
                 })}
@@ -1639,6 +1666,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         }
         if (startDateProperty && endDateProperty) {
           const timelineElementNode = getTimelineElementNode({
+            id: row.id,
             startDate: result(row, startDateProperty),
             endDate: result(row, endDateProperty),
             label: ((): ReactNode => {
