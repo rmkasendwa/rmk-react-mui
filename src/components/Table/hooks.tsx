@@ -90,6 +90,7 @@ declare module '@mui/material/styles/components' {
 }
 
 const TABLE_HEAD_ALPHA = 0.05;
+const LAZY_ROWS_BUFFER_SIZE = 20;
 
 export function getTableUtilityClass(slot: string): string {
   return generateUtilityClass('MuiTableExtended', slot);
@@ -172,7 +173,7 @@ export const useTable = <DataRow extends BaseDataRow>(
     startStickyColumnIndex,
     staticRows,
     onChangeMinWidth,
-    lazyRows = true,
+    lazyRows = rows.length > LAZY_ROWS_BUFFER_SIZE,
     controlZIndex = true,
     sx,
     ...rest
@@ -1387,7 +1388,10 @@ export const useTable = <DataRow extends BaseDataRow>(
       const pageRowElementsToProcess = [...tableBodyRows];
       const pageRowElementPlaceholders: ReactNode[] = [];
       while (pageRowElementsToProcess.length > 0) {
-        const bufferedPageRows = pageRowElementsToProcess.splice(0, 15);
+        const bufferedPageRows = pageRowElementsToProcess.splice(
+          0,
+          LAZY_ROWS_BUFFER_SIZE
+        );
         const bufferedPageRowElements = bufferedPageRows.map(({ element }) => {
           return element;
         });
@@ -1411,6 +1415,7 @@ export const useTable = <DataRow extends BaseDataRow>(
             component={optimizeForSmallScreen ? 'div' : 'tr'}
             displayPlaceholder={false}
             unWrapChildrenIfVisible
+            initialVisible={pageRowElementPlaceholders.length === 0}
             sx={{
               ...TableBodyRowPlaceholderPropsSx,
               height: baseHeight * bufferedPageRowElements.length,
