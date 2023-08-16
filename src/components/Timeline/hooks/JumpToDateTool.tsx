@@ -1,9 +1,31 @@
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import {
+  ComponentsProps,
+  ComponentsVariants,
+  useThemeProps,
+} from '@mui/material';
 import { omit } from 'lodash';
 import { ReactNode } from 'react';
 
 import { PopupToolOptions, usePopupTool } from '../../../hooks/Tools/PopupTool';
 import DatePicker, { DatePickerProps } from '../../DatePicker';
+
+// Adding theme prop types
+declare module '@mui/material/styles/props' {
+  interface ComponentsPropsList {
+    MuiJumpToDateTool: JumpToDateToolProps;
+  }
+}
+
+// Adding theme component types
+declare module '@mui/material/styles/components' {
+  interface Components {
+    MuiJumpToDateTool?: {
+      defaultProps?: ComponentsProps['MuiJumpToDateTool'];
+      variants?: ComponentsVariants['MuiJumpToDateTool'];
+    };
+  }
+}
 
 export interface JumpToDateToolProps
   extends Partial<Pick<DatePickerProps, 'minDate' | 'maxDate' | 'onChange'>>,
@@ -12,14 +34,16 @@ export interface JumpToDateToolProps
   wrapDatePickerNode?: (datePickerNode: ReactNode) => ReactNode;
 }
 
-export const useJumpToDateTool = ({
-  minDate,
-  maxDate,
-  onChange,
-  selectedDate,
-  wrapDatePickerNode,
-  ...rest
-}: JumpToDateToolProps = {}) => {
+export const useJumpToDateTool = (inProps: JumpToDateToolProps = {}) => {
+  const props = useThemeProps({ props: inProps, name: 'MuiJumpToDateTool' });
+  const {
+    minDate,
+    maxDate,
+    onChange,
+    selectedDate,
+    wrapDatePickerNode,
+    ...rest
+  } = props;
   const datePickerNode = (
     <DatePicker
       {...{ minDate, maxDate }}

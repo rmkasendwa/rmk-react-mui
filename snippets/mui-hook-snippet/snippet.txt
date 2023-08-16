@@ -1,0 +1,30 @@
+import {
+  ComponentsProps,
+  ComponentsVariants,
+  useThemeProps,
+} from '@mui/material';
+
+// Adding theme prop types
+declare module '@mui/material/styles/props' {
+  interface ComponentsPropsList {
+    Mui${1:${TM_FILENAME_BASE}}: ${1:${TM_FILENAME_BASE}}Props;
+  }
+}
+
+// Adding theme component types
+declare module '@mui/material/styles/components' {
+  interface Components {
+    Mui${1:${TM_FILENAME_BASE}}?: {
+      defaultProps?: ComponentsProps['Mui${1:${TM_FILENAME_BASE}}'];
+      variants?: ComponentsVariants['Mui${1:${TM_FILENAME_BASE}}'];
+    };
+  }
+}
+
+export interface ${1:${TM_FILENAME_BASE}}Props {}
+
+export const use${1:${TM_FILENAME_BASE}} = (inProps: ${1:${TM_FILENAME_BASE}}Props = {}) => {
+  const props = useThemeProps({ props: inProps, name: 'Mui${1:${TM_FILENAME_BASE}}' });
+  const { ...rest } = props;
+  return { ...rest };
+};

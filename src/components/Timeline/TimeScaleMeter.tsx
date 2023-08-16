@@ -270,6 +270,8 @@ export const TimeScaleMeter = forwardRef<HTMLDivElement, TimeScaleMeterProps>(
         className={clsx(classes.root)}
         sx={{
           width: '100%',
+          minHeight: 50,
+          justifyContent: 'end',
           ...sx,
         }}
       >

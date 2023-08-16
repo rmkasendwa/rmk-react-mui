@@ -131,6 +131,7 @@ export interface TableColumn<
   id: keyof DataRow;
   type?: ColumnType;
   align?: 'left' | 'center' | 'right';
+  setDefaultWidth?: boolean;
   width?: number;
   minWidth?: number;
   extraWidth?: number;
