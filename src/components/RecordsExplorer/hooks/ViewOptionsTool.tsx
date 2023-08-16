@@ -6,6 +6,8 @@ import {
   Button,
   ButtonProps,
   ClickAwayListener,
+  ComponentsProps,
+  ComponentsVariants,
   Grid,
   Grow,
   Popper,
@@ -13,6 +15,7 @@ import {
   Typography,
   useMediaQuery,
   useTheme,
+  useThemeProps,
 } from '@mui/material';
 import { ReactNode, useMemo, useRef, useState } from 'react';
 
@@ -24,7 +27,22 @@ import PaginatedDropdownOptionList, {
 import { Tool } from '../../SearchSyncToolbar';
 import Tooltip from '../../Tooltip';
 
-/******* View Options Tool ********************/
+// Adding theme prop types
+declare module '@mui/material/styles/props' {
+  interface ComponentsPropsList {
+    MuiViewOptionsTool: ViewOptionsToolProps;
+  }
+}
+
+// Adding theme component types
+declare module '@mui/material/styles/components' {
+  interface Components {
+    MuiViewOptionsTool?: {
+      defaultProps?: ComponentsProps['MuiViewOptionsTool'];
+      variants?: ComponentsVariants['MuiViewOptionsTool'];
+    };
+  }
+}
 
 export const viewOptionTypes = ['Timeline', 'Grid', 'List'] as const;
 
@@ -45,7 +63,7 @@ const defaultViewOptions: ViewOption[] = [
 
 const DEFAULT_VIEW_OPTIONS_TYPES = defaultViewOptions.map(({ label }) => label);
 
-export interface ViewOptionsToolOptions<ViewType extends string = string> {
+export interface ViewOptionsToolProps<ViewType extends string = string> {
   viewOptions?: ViewOption<ViewType>[];
   onChangeViewType?: (viewType: ViewOptionType<ViewType>) => void;
   viewType?: ViewOptionType<ViewType>;
@@ -54,15 +72,19 @@ export interface ViewOptionsToolOptions<ViewType extends string = string> {
   SelectedViewOptionButtonProps?: Partial<ButtonProps>;
 }
 
-export const useViewOptionsTool = <ViewType extends string = string>({
-  onChangeViewType,
-  viewType = 'List',
-  viewOptionTypes = DEFAULT_VIEW_OPTIONS_TYPES as any,
-  expandedIfHasLessOptions = false,
-  viewOptions = defaultViewOptions as any,
-  SelectedViewOptionButtonProps = {},
-  ...rest
-}: ViewOptionsToolOptions<ViewType>) => {
+export const useViewOptionsTool = <ViewType extends string = string>(
+  inProps: ViewOptionsToolProps<ViewType>
+) => {
+  const props = useThemeProps({ props: inProps, name: 'MuiViewOptionsTool' });
+  const {
+    onChangeViewType,
+    viewType = 'List',
+    viewOptionTypes = DEFAULT_VIEW_OPTIONS_TYPES as any,
+    expandedIfHasLessOptions = false,
+    viewOptions = defaultViewOptions,
+    SelectedViewOptionButtonProps = {},
+    ...rest
+  } = props;
   const {
     sx: SelectedViewOptionButtonPropsSx,
     ...SelectedViewOptionButtonPropsRest

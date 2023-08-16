@@ -113,7 +113,7 @@ import { useGroupTool } from './hooks/GroupTool';
 import { useSortTool } from './hooks/SortTool';
 import {
   ViewOptionType,
-  ViewOptionsToolOptions,
+  ViewOptionsToolProps,
   useViewOptionsTool,
 } from './hooks/ViewOptionsTool';
 import {
@@ -338,7 +338,7 @@ export interface RecordsExplorerProps<
   /**
    * Extra props to be assigned to the ViewOptionsTool component.
    */
-  ViewOptionsToolProps?: Partial<ViewOptionsToolOptions>;
+  ViewOptionsToolProps?: Partial<ViewOptionsToolProps>;
   /**
    * Extra props to be assigned to the Header component.
    */

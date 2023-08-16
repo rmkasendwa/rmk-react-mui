@@ -4,12 +4,15 @@ import EastIcon from '@mui/icons-material/East';
 import {
   Box,
   Button,
+  ComponentsProps,
+  ComponentsVariants,
   Stack,
   Typography,
   alpha,
   buttonClasses,
   outlinedInputClasses,
   useTheme,
+  useThemeProps,
 } from '@mui/material';
 import formatDate from 'date-fns/format';
 import { omit } from 'lodash';
@@ -24,6 +27,23 @@ import DataDropdownField, {
 import { ElementTool } from '../../SearchSyncToolbar';
 import Tooltip from '../../Tooltip';
 import { TimeScaleOption, timeScaleOptions } from '../models';
+
+// Adding theme prop types
+declare module '@mui/material/styles/props' {
+  interface ComponentsPropsList {
+    MuiTimeScaleTool: TimeScaleToolProps;
+  }
+}
+
+// Adding theme component types
+declare module '@mui/material/styles/components' {
+  interface Components {
+    MuiTimeScaleTool?: {
+      defaultProps?: ComponentsProps['MuiTimeScaleTool'];
+      variants?: ComponentsVariants['MuiTimeScaleTool'];
+    };
+  }
+}
 
 export const CUSTOM_DATE_OPTION_LABEL = 'Custom Dates';
 
@@ -67,30 +87,32 @@ export interface TimeScaleToolProps {
   endDateRef?: MutableRefObject<Date | null>;
 }
 
-export const useTimeScaleTool = ({
-  selectedTimeScale,
-  supportedTimeScales = [...timeScaleOptions],
-  label = 'Timescale',
-  wrapStartDatePickerNode,
-  wrapEndDatePickerNode,
-  isCustomDatesTimeScaleSelected,
+export const useTimeScaleTool = (inProps: TimeScaleToolProps) => {
+  const props = useThemeProps({ props: inProps, name: 'MuiTimeScaleTool' });
+  const {
+    selectedTimeScale,
+    supportedTimeScales = [...timeScaleOptions],
+    label = 'Timescale',
+    wrapStartDatePickerNode,
+    wrapEndDatePickerNode,
+    isCustomDatesTimeScaleSelected,
 
-  onSelectTimeScale,
-  onSelectTimeScaleFunctionRef,
+    onSelectTimeScale,
+    onSelectTimeScaleFunctionRef,
 
-  onSelectCustomDatesTimeScale,
-  onSelectCustomDatesTimeScaleFunctionRef,
+    onSelectCustomDatesTimeScale,
+    onSelectCustomDatesTimeScaleFunctionRef,
 
-  selectedCustomDates: {
-    startDate: startDateString,
-    endDate: endDateString,
-  } = {},
-  DatePickerToolProps,
-  minDate,
-  maxDate,
-  startDateRef,
-  endDateRef,
-}: TimeScaleToolProps) => {
+    selectedCustomDates: {
+      startDate: startDateString,
+      endDate: endDateString,
+    } = {},
+    DatePickerToolProps,
+    minDate,
+    maxDate,
+    startDateRef,
+    endDateRef,
+  } = props;
   const shouldOpenFromDatePickerRef = useRef(false);
   const { palette } = useTheme();
 
