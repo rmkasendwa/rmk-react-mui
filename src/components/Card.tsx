@@ -148,9 +148,6 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(function Card(
               px: '0 !important',
             };
           }
-          return {
-            pr: `${spacing(1.75)} !important`,
-          };
         })(),
         [`&>.${gridClasses.container}`]: {
           columnGap: 1,
@@ -166,8 +163,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(function Card(
         <MuiCard ref={ref} {...rest} className={clsx(classes.root)} sx={sx}>
           <Box
             sx={{
-              pl: 3,
-              pr: 2,
+              px: isSmallScreenSize ? 2 : 3,
             }}
           >
             {searchSyncToolBar}
@@ -190,8 +186,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(function Card(
       <Box ref={ref} {...rest} className={clsx(classes.root)} sx={sx}>
         <Box
           sx={{
-            pl: 3,
-            pr: 2,
+            px: isSmallScreenSize ? 2 : 3,
           }}
         >
           {searchSyncToolBar}

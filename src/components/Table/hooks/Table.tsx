@@ -32,29 +32,29 @@ import clsx from 'clsx';
 import { omit } from 'lodash';
 import { Fragment, ReactNode, Ref, useEffect, useRef, useState } from 'react';
 
-import { SortDirection, SortOptions } from '../../models/Sort';
-import { sort } from '../../utils/Sort';
-import DataTablePagination from '../DataTablePagination';
-import EllipsisMenuIconButton from '../EllipsisMenuIconButton';
-import RenderIfVisible from '../RenderIfVisible';
+import { SortDirection, SortOptions } from '../../../models/Sort';
+import { sort } from '../../../utils/Sort';
+import DataTablePagination from '../../DataTablePagination';
+import EllipsisMenuIconButton from '../../EllipsisMenuIconButton';
+import RenderIfVisible from '../../RenderIfVisible';
 import {
   BaseDataRow,
   CHECKBOX_COLUMN_ID,
   ELLIPSIS_MENU_TOOL_COLUMN_ID,
   ROW_NUMBER_COLUMN_ID,
   TableProps,
-} from './models';
-import { tableBodyColumnClasses } from './TableBodyColumn';
-import TableBodyRow, { tableBodyRowClasses } from './TableBodyRow';
-import TableColumnToggleIconButton from './TableColumnToggleIconButton';
-import TableGroupCollapseTool from './TableGroupCollapseTool';
+} from '../models';
+import { tableBodyColumnClasses } from '../TableBodyColumn';
+import TableBodyRow, { tableBodyRowClasses } from '../TableBodyRow';
+import TableColumnToggleIconButton from '../TableColumnToggleIconButton';
+import TableGroupCollapseTool from '../TableGroupCollapseTool';
 import {
   expandTableColumnWidths,
   getColumnWidthStyles,
   getComputedTableProps,
   getTableMinWidth,
   mapTableColumnTypeToPrimitiveDataType,
-} from './utils';
+} from '../utils';
 
 export interface TableClasses {
   /** Styles applied to the root element. */
@@ -227,10 +227,6 @@ export const useTable = <DataRow extends BaseDataRow>(
   const [rowsPerPage, setRowsPerPage] = useState(rowsPerPageProp);
   const [sortBy, setSortBy] = useState<SortOptions<DataRow>>([]);
 
-  /*******************
-   * Checkbox state. *
-   * *****************
-   */
   const [allRowsChecked, setAllRowsChecked] = useState(allRowsCheckedProp);
   const [checkedRowIds, setCheckedRowIds] = useState<string[]>(() => {
     return checkedRowIdsProp || [];
@@ -458,6 +454,7 @@ export const useTable = <DataRow extends BaseDataRow>(
       enableColumnDisplayToggle,
     }).map((column) => {
       const nextColumn = { ...column } as typeof column;
+      const { setDefaultWidth = true } = column;
       nextColumn.type || (nextColumn.type = 'string');
       nextColumn.className = clsx(
         `MuiTableCell-${nextColumn.type}`,
@@ -493,7 +490,7 @@ export const useTable = <DataRow extends BaseDataRow>(
           break;
         case 'phoneNumber':
           nextColumn.columnClassName = 'phone-number-column';
-          nextColumn.width || (nextColumn.width = 220);
+          !nextColumn.width && setDefaultWidth && (nextColumn.width = 220);
           break;
         case 'currencyInput':
           nextColumn.align = 'right';
@@ -512,7 +509,7 @@ export const useTable = <DataRow extends BaseDataRow>(
       switch (nextColumn.type) {
         case 'date':
         case 'timestamp':
-          nextColumn.width || (nextColumn.width = 220);
+          !nextColumn.width && setDefaultWidth && (nextColumn.width = 220);
           break;
       }
 
@@ -626,10 +623,7 @@ export const useTable = <DataRow extends BaseDataRow>(
     onChangePage && onChangePage(newPage);
   };
 
-  /************
-   * Variants *
-   * **********
-   */
+  //#region Variants
   const variantStyles: SxProps<Theme> = {
     [`.${tableBodyClasses.root} tr.${tableRowClasses.hover}:not(.${tableBodyRowClasses.groupHeaderColumn}):hover`]:
       {
@@ -732,11 +726,9 @@ export const useTable = <DataRow extends BaseDataRow>(
       });
       break;
   }
+  //#endregion
 
-  /*******************
-   * Border variants *
-   * *****************
-   */
+  //#region Border variants
   const borderVariantStyles: SxProps<Theme> = {};
 
   if (
@@ -794,6 +786,7 @@ export const useTable = <DataRow extends BaseDataRow>(
       },
     });
   }
+  //#endregion
 
   const optimizeForSmallScreen =
     enableSmallScreenOptimization && isSmallScreenSize;

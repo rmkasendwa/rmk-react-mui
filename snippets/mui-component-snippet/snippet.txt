@@ -1,0 +1,78 @@
+import {
+  BoxProps,
+  ComponentsOverrides,
+  ComponentsProps,
+  ComponentsVariants, generateUtilityClass,
+  generateUtilityClasses, unstable_composeClasses as composeClasses, useThemeProps
+} from '@mui/material';
+import Box from '@mui/material/Box';
+import clsx from 'clsx';
+import { forwardRef } from 'react';
+
+export interface ${1:${TM_FILENAME_BASE}}Classes {
+  /** Styles applied to the root element. */
+  root: string;
+}
+
+export type ${1:${TM_FILENAME_BASE}}ClassKey = keyof ${1:${TM_FILENAME_BASE}}Classes;
+
+// Adding theme prop types
+declare module '@mui/material/styles/props' {
+  interface ComponentsPropsList {
+    Mui${1:${TM_FILENAME_BASE}}: ${1:${TM_FILENAME_BASE}}Props;
+  }
+}
+
+// Adding theme override types
+declare module '@mui/material/styles/overrides' {
+  interface ComponentNameToClassKey {
+    Mui${1:${TM_FILENAME_BASE}}: keyof ${1:${TM_FILENAME_BASE}}Classes;
+  }
+}
+
+// Adding theme component types
+declare module '@mui/material/styles/components' {
+  interface Components<Theme = unknown> {
+    Mui${1:${TM_FILENAME_BASE}}?: {
+      defaultProps?: ComponentsProps['Mui${1:${TM_FILENAME_BASE}}'];
+      styleOverrides?: ComponentsOverrides<Theme>['Mui${1:${TM_FILENAME_BASE}}'];
+      variants?: ComponentsVariants['Mui${1:${TM_FILENAME_BASE}}'];
+    };
+  }
+}
+
+export interface ${1:${TM_FILENAME_BASE}}Props extends Partial<BoxProps> {}
+
+export function get${1:${TM_FILENAME_BASE}}UtilityClass(slot: string): string {
+  return generateUtilityClass('Mui${1:${TM_FILENAME_BASE}}', slot);
+}
+
+export const ${2:${TM_FILENAME_BASE/(\w)/${1:/downcase}/}}Classes: ${1:${TM_FILENAME_BASE}}Classes =
+  generateUtilityClasses('Mui${1:${TM_FILENAME_BASE}}', ['root']);
+
+const slots = {
+  root: ['root'],
+};
+
+export const ${1:${TM_FILENAME_BASE}} = forwardRef<HTMLDivElement, ${1:${TM_FILENAME_BASE}}Props>(function ${1:${TM_FILENAME_BASE}}(inProps, ref) {
+  const props = useThemeProps({ props: inProps, name: 'Mui${1:${TM_FILENAME_BASE}}' });
+  const { className, ...rest } = props;
+
+  const classes = composeClasses(
+    slots,
+    get${1:${TM_FILENAME_BASE}}UtilityClass,
+    (() => {
+      if (className) {
+        return {
+          root: className,
+        };
+      }
+    })()
+  );
+
+  return (
+    <Box ref={ref} {...rest} className={clsx(classes.root)}></Box>
+  );
+});
+
+export default ${1:${TM_FILENAME_BASE}};

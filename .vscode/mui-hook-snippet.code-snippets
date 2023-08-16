@@ -1,0 +1,10 @@
+{
+  "Mui Hook": {
+    "scope": "javascript,typescript,typescriptreact",
+    "prefix": "muihook",
+    "body": [
+      "import {\r\n  ComponentsProps,\r\n  ComponentsVariants,\r\n  useThemeProps,\r\n} from '@mui/material';\r\n\r\n// Adding theme prop types\r\ndeclare module '@mui/material/styles/props' {\r\n  interface ComponentsPropsList {\r\n    Mui${1:${TM_FILENAME_BASE}}: ${1:${TM_FILENAME_BASE}}Props;\r\n  }\r\n}\r\n\r\n// Adding theme component types\r\ndeclare module '@mui/material/styles/components' {\r\n  interface Components {\r\n    Mui${1:${TM_FILENAME_BASE}}?: {\r\n      defaultProps?: ComponentsProps['Mui${1:${TM_FILENAME_BASE}}'];\r\n      variants?: ComponentsVariants['Mui${1:${TM_FILENAME_BASE}}'];\r\n    };\r\n  }\r\n}\r\n\r\nexport interface ${1:${TM_FILENAME_BASE}}Props {}\r\n\r\nexport const use${1:${TM_FILENAME_BASE}} = (inProps: ${1:${TM_FILENAME_BASE}}Props = {}) => {\r\n  const props = useThemeProps({ props: inProps, name: 'Mui${1:${TM_FILENAME_BASE}}' });\r\n  const { ...rest } = props;\r\n  return { ...rest };\r\n};"
+    ],
+    "description": "Mui Hook"
+  }
+}
