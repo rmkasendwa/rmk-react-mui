@@ -44,18 +44,21 @@ declare module '@mui/material/styles/components' {
 }
 //#endregion
 
-export interface ${1:${TM_FILENAME_BASE}}Props extends Partial<BoxProps> {}
-
-export function get${1:${TM_FILENAME_BASE}}UtilityClass(slot: string): string {
+export const get${1:${TM_FILENAME_BASE}}UtilityClass = (slot: string) => {
   return generateUtilityClass('Mui${1:${TM_FILENAME_BASE}}', slot);
 }
-
-export const ${2:${TM_FILENAME_BASE/(\w)/${1:/downcase}/}}Classes: ${1:${TM_FILENAME_BASE}}Classes =
-  generateUtilityClasses('Mui${1:${TM_FILENAME_BASE}}', ['root']);
 
 const slots: Record<${1:${TM_FILENAME_BASE}}ClassKey, [${1:${TM_FILENAME_BASE}}ClassKey]> = {
   root: ['root'],
 };
+
+export const ${2:${TM_FILENAME_BASE/(\w)/${1:/downcase}/}}Classes: ${1:${TM_FILENAME_BASE}}Classes =
+  generateUtilityClasses(
+    'Mui${1:${TM_FILENAME_BASE}}',
+    Object.keys(slots) as ${1:${TM_FILENAME_BASE}}ClassKey[]
+  );
+
+export interface ${1:${TM_FILENAME_BASE}}Props extends Partial<BoxProps> {}
 
 export const ${1:${TM_FILENAME_BASE}} = forwardRef<HTMLDivElement, ${1:${TM_FILENAME_BASE}}Props>(function ${1:${TM_FILENAME_BASE}}(inProps, ref) {
   const props = useThemeProps({ props: inProps, name: 'Mui${1:${TM_FILENAME_BASE}}' });
