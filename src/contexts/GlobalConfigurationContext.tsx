@@ -1,39 +1,29 @@
-import { FC, ReactNode, createContext, useContext, useState } from 'react';
+import { FC, ReactNode, createContext, useContext } from 'react';
 
-import { DEFAULT_COUNTRY_CODE, DEFAULT_CURRENCY_CODE } from '../constants';
-import { CountryCode } from '../models/Countries';
+import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_TIME_FORMAT } from '../constants';
 
 export interface GlobalConfigurationContext {
-  countryCode: CountryCode;
-  currencyCode: string;
-  setCountryCode?: (countryCode: CountryCode) => void;
-  setCurrencyCode?: (countryCode: CountryCode) => void;
+  dateFormat: string;
+  dateTimeFormat: string;
 }
 
-export const GlobalConfigurationContext =
-  createContext<GlobalConfigurationContext>({
-    countryCode: DEFAULT_COUNTRY_CODE,
-    currencyCode: DEFAULT_CURRENCY_CODE,
-  });
+export const baseGlobalConfiguration: GlobalConfigurationContext = {
+  dateFormat: DEFAULT_DATE_FORMAT,
+  dateTimeFormat: DEFAULT_DATE_TIME_FORMAT,
+};
+
+export const GlobalConfigurationContext = createContext(
+  baseGlobalConfiguration
+);
 
 export const GlobalConfigurationProvider: FC<{
   children: ReactNode;
-  value?: Record<string, any>;
+  value?: Partial<GlobalConfigurationContext>;
 }> = ({ children, value }) => {
-  const [countryCode, setCountryCode] = useState(
-    value?.countryCode || DEFAULT_COUNTRY_CODE
-  );
-  const [currencyCode, setCurrencyCode] = useState(
-    value?.currencyCode || DEFAULT_CURRENCY_CODE
-  );
-
   return (
     <GlobalConfigurationContext.Provider
       value={{
-        countryCode,
-        currencyCode,
-        setCountryCode,
-        setCurrencyCode,
+        ...baseGlobalConfiguration,
         ...value,
       }}
     >
