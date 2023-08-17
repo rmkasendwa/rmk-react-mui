@@ -45,6 +45,7 @@ import {
 import { mergeRefs } from 'react-merge-refs';
 import * as Yup from 'yup';
 
+import { useGlobalConfiguration } from '../../contexts/GlobalConfigurationContext';
 import { useReactRouterDOMSearchParams } from '../../hooks/ReactRouterDOM';
 import { DragToScrollProps, useDragToScroll } from '../../hooks/Scrolling';
 import { BLACK_COLOR } from '../../theme';
@@ -379,7 +380,6 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     TodayIndicatorProps = {},
     staticRows,
     showPlaceholderWhenStaticRowIsEmpty = true,
-    dateFormat = 'MMM dd, yyyy hh:mm aa',
     DateAtCursorMarkerLabelProps = {},
     DateAtCursorMarkerProps = {},
     DragToScrollProps = {},
@@ -400,9 +400,14 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     isMasterTimeline = true,
     sx,
     ...rest
-  } = omit(props, 'parentBackgroundColor', 'scrollingAncenstorElement');
+  } = omit(
+    props,
+    'parentBackgroundColor',
+    'scrollingAncenstorElement',
+    'dateFormat'
+  );
 
-  let { parentBackgroundColor, scrollingAncenstorElement } = props;
+  let { parentBackgroundColor, scrollingAncenstorElement, dateFormat } = props;
 
   const classes = composeClasses(
     slots,
@@ -513,6 +518,11 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     scrollableElement: scrollingAncenstorElement,
     ...DragToScrollPropsRest,
   });
+
+  const { dateFormat: globalDateFormat, dateTimeFormat: globalDateTimeFormat } =
+    useGlobalConfiguration();
+
+  dateFormat || (dateFormat = globalDateTimeFormat);
 
   /**
    * Memoized calculation of various timeline-related values and properties.
@@ -989,8 +999,8 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         // Create the base label for the timeline element using the start and end dates.
         const baseTimelineElementLabel = `${formatDate(
           startDate,
-          'MMM dd, yyyy'
-        )} - ${formatDate(endDate, 'MMM dd, yyyy')}`;
+          globalDateFormat
+        )} - ${formatDate(endDate, globalDateFormat)}`;
 
         // Determine the final timeline element label to be displayed.
         const timelineElementLabel = (() => {
@@ -1086,7 +1096,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         });
       dateAtCursorMarkerLabelElement.innerText = formatDate(
         dateAtMousePosition,
-        dateFormat
+        dateFormat!
       );
       if (scrollingAncenstorElement!.clientWidth - localX < 200) {
         dateAtCursorMarkerLabelElement.style.right = '100%';

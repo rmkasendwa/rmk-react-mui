@@ -17,6 +17,7 @@ import formatDistance from 'date-fns/formatDistance';
 import formatRelative from 'date-fns/formatRelative';
 import { forwardRef, useEffect, useState } from 'react';
 
+import { useGlobalConfiguration } from '../contexts/GlobalConfigurationContext';
 import LoadingTypography, { LoadingTypographyProps } from './LoadingTypography';
 import Tooltip from './Tooltip';
 
@@ -102,6 +103,12 @@ export const TimeStampDisplay = forwardRef<HTMLElement, TimeStampDisplayProps>(
       return createDateWithoutTimezoneOffset(timestamp);
     });
 
+    const {
+      shortDateFormat: globalShortDateFormat,
+      dateFormat: globalDateFormat,
+      timeFormat: globalTimeFormat,
+    } = useGlobalConfiguration();
+
     useEffect(() => {
       setDate(new Date(timestamp));
     }, [timestamp]);
@@ -134,9 +141,12 @@ export const TimeStampDisplay = forwardRef<HTMLElement, TimeStampDisplayProps>(
         return formatRelative(date, today);
       }
       if (date.getFullYear() !== today.getFullYear()) {
-        return formatDate(date, "MMM dd, yyyy 'at' hh:mm aa");
+        return formatDate(date, `${globalDateFormat} 'at' ${globalTimeFormat}`);
       }
-      return formatDate(date, "MMM dd 'at' hh:mm aa");
+      return formatDate(
+        date,
+        `${globalShortDateFormat} 'at' ${globalTimeFormat}`
+      );
     })();
 
     const displayElement = (
@@ -159,7 +169,12 @@ export const TimeStampDisplay = forwardRef<HTMLElement, TimeStampDisplayProps>(
 
     if (showTooltip) {
       return (
-        <Tooltip title={formatDate(date, "EEEE MMM dd, yyyy 'at' hh:mm:ss aa")}>
+        <Tooltip
+          title={formatDate(
+            date,
+            `EEEE ${globalDateFormat} 'at' ${globalTimeFormat}`
+          )}
+        >
           {displayElement}
         </Tooltip>
       );
