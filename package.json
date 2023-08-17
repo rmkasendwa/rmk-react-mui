@@ -35,6 +35,7 @@
     "postinstall": "npm run prepare",
     "prepare": "husky install",
     "publish": "npm run build && npm publish ./lib/ --access=public",
+    "snippets:update": "ts-node --project tsconfig-cjs.compile.json ./snippets/update-snippets",
     "start": "concurrently --names \"Typescript,Assets\" -c \"blue.bold,magenta.bold\" \"tsc -w\" \"copy-and-watch --watch src/**/*.{png,jpg,css,scss,sass,json} lib\"",
     "storybook": "storybook dev -p 6006",
     "test": "react-scripts test --watchAll=false",

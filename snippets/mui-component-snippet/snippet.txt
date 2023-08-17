@@ -16,21 +16,23 @@ export interface ${1:${TM_FILENAME_BASE}}Classes {
 
 export type ${1:${TM_FILENAME_BASE}}ClassKey = keyof ${1:${TM_FILENAME_BASE}}Classes;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     Mui${1:${TM_FILENAME_BASE}}: ${1:${TM_FILENAME_BASE}}Props;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     Mui${1:${TM_FILENAME_BASE}}: keyof ${1:${TM_FILENAME_BASE}}Classes;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     Mui${1:${TM_FILENAME_BASE}}?: {
@@ -40,6 +42,7 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
 
 export interface ${1:${TM_FILENAME_BASE}}Props extends Partial<BoxProps> {}
 
@@ -50,7 +53,7 @@ export function get${1:${TM_FILENAME_BASE}}UtilityClass(slot: string): string {
 export const ${2:${TM_FILENAME_BASE/(\w)/${1:/downcase}/}}Classes: ${1:${TM_FILENAME_BASE}}Classes =
   generateUtilityClasses('Mui${1:${TM_FILENAME_BASE}}', ['root']);
 
-const slots = {
+const slots: Record<${1:${TM_FILENAME_BASE}}ClassKey, [${1:${TM_FILENAME_BASE}}ClassKey]> = {
   root: ['root'],
 };
 

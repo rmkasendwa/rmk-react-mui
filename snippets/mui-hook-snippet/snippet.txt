@@ -4,14 +4,15 @@ import {
   useThemeProps,
 } from '@mui/material';
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     Mui${1:${TM_FILENAME_BASE}}: ${1:${TM_FILENAME_BASE}}Props;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components {
     Mui${1:${TM_FILENAME_BASE}}?: {
@@ -20,6 +21,7 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
 
 export interface ${1:${TM_FILENAME_BASE}}Props {}
 
