@@ -29,6 +29,7 @@ import {
   useState,
 } from 'react';
 
+import { useGlobalConfiguration } from '../../contexts/GlobalConfigurationContext';
 import { useLoadingContext } from '../../contexts/LoadingContext';
 import { isDescendant } from '../../utils/html';
 import DatePicker, { DatePickerProps } from '../DatePicker';
@@ -134,14 +135,6 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
       })()
     );
 
-    if (!displayFormat) {
-      if (enableTimeSelector) {
-        displayFormat = 'MMM dd, yyyy hh:mm aa';
-      } else {
-        displayFormat = 'MMM dd, yyyy';
-      }
-    }
-
     const { ...DatePickerPropsRest } = DatePickerProps;
 
     const anchorRef = useRef<HTMLInputElement>(null);
@@ -152,6 +145,19 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [open, setOpen] = useState(false);
     const { locked } = useLoadingContext();
+
+    const {
+      dateFormat: globalDateFormat,
+      dateTimeFormat: globalDateTimeFormat,
+    } = useGlobalConfiguration();
+
+    if (!displayFormat) {
+      if (enableTimeSelector) {
+        displayFormat = globalDateTimeFormat;
+      } else {
+        displayFormat = globalDateFormat;
+      }
+    }
 
     const triggerChangeEvent = useCallback(
       (inputValue: any) => {

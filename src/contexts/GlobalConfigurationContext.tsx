@@ -1,14 +1,20 @@
 import { FC, ReactNode, createContext, useContext } from 'react';
 
-import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_TIME_FORMAT } from '../constants';
+import {
+  DEFAULT_DATE_FORMAT,
+  DEFAULT_DATE_TIME_FORMAT,
+  DEFAULT_TIME_FORMAT,
+} from '../constants';
 
 export interface GlobalConfigurationContext {
   dateFormat: string;
+  timeFormat: string;
   dateTimeFormat: string;
 }
 
 export const baseGlobalConfiguration: GlobalConfigurationContext = {
   dateFormat: DEFAULT_DATE_FORMAT,
+  timeFormat: DEFAULT_TIME_FORMAT,
   dateTimeFormat: DEFAULT_DATE_TIME_FORMAT,
 };
 
