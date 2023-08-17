@@ -30,21 +30,23 @@ export interface ErrorPageClasses {
 
 export type ErrorPageClassKey = keyof ErrorPageClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiErrorPage: ErrorPageProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiErrorPage: keyof ErrorPageClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiErrorPage?: {
@@ -54,6 +56,20 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getErrorPageUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiErrorPage', slot);
+};
+
+const slots: Record<ErrorPageClassKey, [ErrorPageClassKey]> = {
+  root: ['root'],
+};
+
+export const errorPageClasses: ErrorPageClasses = generateUtilityClasses(
+  'MuiErrorPage',
+  Object.keys(slots) as ErrorPageClassKey[]
+);
 
 export interface ErrorPageProps extends Pick<BoxProps, 'className' | 'sx'> {
   showDefaultPageLinks?: boolean;
@@ -63,17 +79,6 @@ export interface ErrorPageProps extends Pick<BoxProps, 'className' | 'sx'> {
   errorCode?: ReactNode;
   tools?: ReactNode | ReactNode[];
 }
-
-export function getErrorPageUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiErrorPage', slot);
-}
-
-export const resourceNotFoundPageClasses: ErrorPageClasses =
-  generateUtilityClasses('MuiErrorPage', ['root']);
-
-const slots = {
-  root: ['root'],
-};
 
 export const ErrorPage = forwardRef<HTMLDivElement, ErrorPageProps>(
   function ErrorPage(inProps, ref) {

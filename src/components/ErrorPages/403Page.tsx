@@ -20,21 +20,23 @@ export interface AccessDeniedPageClasses {
 
 export type AccessDeniedPageClassKey = keyof AccessDeniedPageClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiAccessDeniedPage: AccessDeniedPageProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiAccessDeniedPage: keyof AccessDeniedPageClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiAccessDeniedPage?: {
@@ -44,19 +46,23 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
 
-export interface AccessDeniedPageProps extends Partial<ErrorPageProps> {}
-
-export function getAccessDeniedPageUtilityClass(slot: string): string {
+export const getAccessDeniedPageUtilityClass = (slot: string) => {
   return generateUtilityClass('MuiAccessDeniedPage', slot);
-}
+};
 
-export const resourceNotFoundPageClasses: AccessDeniedPageClasses =
-  generateUtilityClasses('MuiAccessDeniedPage', ['root']);
-
-const slots = {
+const slots: Record<AccessDeniedPageClassKey, [AccessDeniedPageClassKey]> = {
   root: ['root'],
 };
+
+export const accessDeniedPageClasses: AccessDeniedPageClasses =
+  generateUtilityClasses(
+    'MuiAccessDeniedPage',
+    Object.keys(slots) as AccessDeniedPageClassKey[]
+  );
+
+export interface AccessDeniedPageProps extends Partial<ErrorPageProps> {}
 
 export const AccessDeniedPage = forwardRef<
   HTMLDivElement,

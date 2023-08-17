@@ -22,21 +22,23 @@ export interface InternalErrorPageClasses {
 
 export type InternalErrorPageClassKey = keyof InternalErrorPageClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiInternalErrorPage: InternalErrorPageProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiInternalErrorPage: keyof InternalErrorPageClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiInternalErrorPage?: {
@@ -46,19 +48,23 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
 
-export interface InternalErrorPageProps extends Partial<ErrorPageProps> {}
-
-export function getInternalErrorPageUtilityClass(slot: string): string {
+export const getInternalErrorPageUtilityClass = (slot: string) => {
   return generateUtilityClass('MuiInternalErrorPage', slot);
-}
+};
 
-export const resourceNotFoundPageClasses: InternalErrorPageClasses =
-  generateUtilityClasses('MuiInternalErrorPage', ['root']);
-
-const slots = {
+const slots: Record<InternalErrorPageClassKey, [InternalErrorPageClassKey]> = {
   root: ['root'],
 };
+
+export const internalErrorPageClasses: InternalErrorPageClasses =
+  generateUtilityClasses(
+    'MuiInternalErrorPage',
+    Object.keys(slots) as InternalErrorPageClassKey[]
+  );
+
+export interface InternalErrorPageProps extends Partial<ErrorPageProps> {}
 
 export const InternalErrorPage = forwardRef<
   HTMLDivElement,

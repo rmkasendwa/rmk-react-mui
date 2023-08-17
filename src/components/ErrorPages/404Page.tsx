@@ -21,21 +21,23 @@ export interface ResourceNotFoundPageClasses {
 
 export type ResourceNotFoundPageClassKey = keyof ResourceNotFoundPageClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiResourceNotFoundPage: ResourceNotFoundPageProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiResourceNotFoundPage: keyof ResourceNotFoundPageClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiResourceNotFoundPage?: {
@@ -45,19 +47,26 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
 
-export interface ResourceNotFoundPageProps extends Partial<ErrorPageProps> {}
-
-export function getResourceNotFoundPageUtilityClass(slot: string): string {
+export const getResourceNotFoundPageUtilityClass = (slot: string) => {
   return generateUtilityClass('MuiResourceNotFoundPage', slot);
-}
+};
 
-export const resourceNotFoundPageClasses: ResourceNotFoundPageClasses =
-  generateUtilityClasses('MuiResourceNotFoundPage', ['root']);
-
-const slots = {
+const slots: Record<
+  ResourceNotFoundPageClassKey,
+  [ResourceNotFoundPageClassKey]
+> = {
   root: ['root'],
 };
+
+export const resourceNotFoundPageClasses: ResourceNotFoundPageClasses =
+  generateUtilityClasses(
+    'MuiResourceNotFoundPage',
+    Object.keys(slots) as ResourceNotFoundPageClassKey[]
+  );
+
+export interface ResourceNotFoundPageProps extends Partial<ErrorPageProps> {}
 
 export const ResourceNotFoundPage = forwardRef<
   HTMLDivElement,
