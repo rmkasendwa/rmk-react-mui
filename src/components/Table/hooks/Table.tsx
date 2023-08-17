@@ -32,6 +32,7 @@ import clsx from 'clsx';
 import { omit } from 'lodash';
 import { Fragment, ReactNode, Ref, useEffect, useRef, useState } from 'react';
 
+import { useGlobalConfiguration } from '../../../contexts/GlobalConfigurationContext';
 import { SortDirection, SortOptions } from '../../../models/Sort';
 import { sort } from '../../../utils/Sort';
 import DataTablePagination from '../../DataTablePagination';
@@ -158,8 +159,6 @@ export const useTable = <DataRow extends BaseDataRow>(
     checkedRowIds: checkedRowIdsProp,
     onChangeCheckedRowIds: onChangeCheckedRowIdsProp,
     rowsPerPageOptions: rowsPerPageOptionsProp = [10, 25, 50, 100],
-    defaultDateFormat = 'MMM dd, yyyy',
-    defaultDateTimeFormat = 'MMM dd, yyyy hh:mm aa',
     enableSmallScreenOptimization = false,
     showRowNumber = false,
     defaultCountryCode,
@@ -179,7 +178,13 @@ export const useTable = <DataRow extends BaseDataRow>(
     ...rest
   } = props;
 
-  let { lowercaseLabelPlural, parentBackgroundColor, emptyRowsLabel } = props;
+  let {
+    lowercaseLabelPlural,
+    parentBackgroundColor,
+    emptyRowsLabel,
+    defaultDateFormat,
+    defaultDateTimeFormat,
+  } = props;
 
   const classes = composeClasses(
     slots,
@@ -205,6 +210,12 @@ export const useTable = <DataRow extends BaseDataRow>(
     ColumnDisplayToggleProps;
   lowercaseLabelPlural || (lowercaseLabelPlural = labelPlural.toLowerCase());
   emptyRowsLabel || (emptyRowsLabel = `No ${lowercaseLabelPlural} found`);
+
+  const { dateFormat: globalDateFormat, dateTimeFormat: globalDateTimeFormat } =
+    useGlobalConfiguration();
+
+  defaultDateFormat || (defaultDateFormat = globalDateFormat);
+  defaultDateTimeFormat || (defaultDateTimeFormat = globalDateTimeFormat);
 
   //#region Refs
   const columnsRef = useRef(columnsProp);
@@ -1462,7 +1473,12 @@ export const useTable = <DataRow extends BaseDataRow>(
           'parentBackgroundColor',
           'currencyCode',
           'emptyRowsLabel',
-          'scrollableElement'
+          'scrollableElement',
+          'lowercaseLabelPlural',
+          'parentBackgroundColor',
+          'emptyRowsLabel',
+          'defaultDateFormat',
+          'defaultDateTimeFormat'
         )}
         ref={ref}
         className={clsx(classes.root, `Mui-table-${variant}`)}
