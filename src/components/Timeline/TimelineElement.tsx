@@ -126,6 +126,32 @@ export const TimelineElement = forwardRef<HTMLDivElement, TimelineElementProps>(
     const baseLeftEdgeOffset = timelineContainerWidth * offsetPercentage;
     const width = timelineContainerWidth * percentage;
     const baseRightEdgeOffset = baseLeftEdgeOffset + width;
+
+    const updateStickyContentPosition = () => {
+      if (timelineElementRef.current && scrollingAncenstorElement) {
+        const timelineElement = timelineElementRef.current;
+        const scrollingAncenstorElementLeftEdgeOffset = 0;
+        const timelineElementLeftOffset =
+          baseLeftEdgeOffset - scrollingAncenstorElement.scrollLeft;
+        const timelineElementRightOffset =
+          baseRightEdgeOffset - scrollingAncenstorElement.scrollLeft;
+        if (
+          scrollingAncenstorElementLeftEdgeOffset > timelineElementLeftOffset &&
+          scrollingAncenstorElementLeftEdgeOffset < timelineElementRightOffset
+        ) {
+          timelineElement.classList.add(classes.leftEdgeIntersecting);
+          timelineElement.style.paddingLeft = `${
+            scrollingAncenstorElementLeftEdgeOffset - timelineElementLeftOffset
+          }px`;
+        } else {
+          timelineElement.classList.remove(classes.leftEdgeIntersecting);
+          timelineElement.style.paddingLeft = '';
+        }
+      }
+    };
+    const updateStickyContentPositionRef = useRef(updateStickyContentPosition);
+    updateStickyContentPositionRef.current = updateStickyContentPosition;
+
     useEffect(() => {
       if (
         isVisible &&
@@ -134,25 +160,7 @@ export const TimelineElement = forwardRef<HTMLDivElement, TimelineElementProps>(
       ) {
         const timelineElement = timelineElementRef.current;
         const scrollEventCallback = () => {
-          const scrollingAncenstorElementLeftEdgeOffset = 0;
-          const timelineElementLeftOffset =
-            baseLeftEdgeOffset - scrollingAncenstorElement.scrollLeft;
-          const timelineElementRightOffset =
-            baseRightEdgeOffset - scrollingAncenstorElement.scrollLeft;
-          if (
-            scrollingAncenstorElementLeftEdgeOffset >
-              timelineElementLeftOffset &&
-            scrollingAncenstorElementLeftEdgeOffset < timelineElementRightOffset
-          ) {
-            timelineElement.classList.add(classes.leftEdgeIntersecting);
-            timelineElement.style.paddingLeft = `${
-              scrollingAncenstorElementLeftEdgeOffset -
-              timelineElementLeftOffset
-            }px`;
-          } else {
-            timelineElement.classList.remove(classes.leftEdgeIntersecting);
-            timelineElement.style.paddingLeft = '';
-          }
+          updateStickyContentPositionRef.current();
         };
         scrollingAncenstorElement.addEventListener(
           'scroll',
