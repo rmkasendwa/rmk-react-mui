@@ -103,8 +103,11 @@ export const TimeStampDisplay = forwardRef<HTMLElement, TimeStampDisplayProps>(
       return createDateWithoutTimezoneOffset(timestamp);
     });
 
-    const { dateFormat: globalDateFormat, timeFormat: globalTimeFormat } =
-      useGlobalConfiguration();
+    const {
+      shortDateFormat: globalShortDateFormat,
+      dateFormat: globalDateFormat,
+      timeFormat: globalTimeFormat,
+    } = useGlobalConfiguration();
 
     useEffect(() => {
       setDate(new Date(timestamp));
@@ -140,7 +143,10 @@ export const TimeStampDisplay = forwardRef<HTMLElement, TimeStampDisplayProps>(
       if (date.getFullYear() !== today.getFullYear()) {
         return formatDate(date, `${globalDateFormat} 'at' ${globalTimeFormat}`);
       }
-      return formatDate(date, `MMM dd 'at' ${globalTimeFormat}`);
+      return formatDate(
+        date,
+        `${globalShortDateFormat} 'at' ${globalTimeFormat}`
+      );
     })();
 
     const displayElement = (
