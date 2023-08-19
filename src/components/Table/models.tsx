@@ -316,4 +316,5 @@ export interface TableProps<DataRow extends BaseDataRow = any>
   onChangeMinWidth?: (minWidth: number) => void;
 
   lazyRows?: boolean;
+  highlightRowOnHover?: boolean;
 }
