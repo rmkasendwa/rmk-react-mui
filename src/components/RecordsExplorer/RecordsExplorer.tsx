@@ -1777,6 +1777,8 @@ const BaseRecordsExplorer = <
     },
     {
       revalidationKey: selectedRecordId,
+      loadOnMount: Boolean(recordDetailsFinder && autoSync),
+      autoSync,
     }
   );
 
