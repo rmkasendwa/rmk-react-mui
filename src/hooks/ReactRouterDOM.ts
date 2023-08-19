@@ -24,9 +24,14 @@ export type SetSearchParams<SearchParams = BaseSearchParams> = (
   }
 ) => void;
 
+export type AddSearchParamsToPathOptions = {
+  ignoreUnspecifiedParams?: boolean;
+};
+
 export type AddSearchParamsToPath<SearchParams = BaseSearchParams> = (
   pathname: string,
-  searchParams: SearchParams
+  searchParams: SearchParams,
+  options?: AddSearchParamsToPathOptions
 ) => string;
 
 export function useReactRouterDOMSearchParams<
@@ -81,7 +86,7 @@ export function useReactRouterDOMSearchParams<
   id,
   paramStorage = 'url',
   clearSearchStateOnUnmount = false,
-  ignoreUnspecifiedParams = false,
+  ignoreUnspecifiedParams: ignoreUnspecifiedParamsProp = false,
 }: {
   mode?: 'string' | 'json';
   spec?: ValidationSpec;
@@ -110,7 +115,10 @@ export function useReactRouterDOMSearchParams<
   const jsonSearchParamsCacheRef = useRef<any>({});
 
   const getSearchParams = useCallback(
-    (searchParams: BaseSearchParams) => {
+    (
+      searchParams: BaseSearchParams,
+      ignoreUnspecifiedParams = ignoreUnspecifiedParamsProp
+    ) => {
       const existingSearchParams: Record<string, string> = (() => {
         switch (paramStorage) {
           case 'url': {
@@ -211,7 +219,7 @@ export function useReactRouterDOMSearchParams<
           }, {} as Record<string, string>),
       };
     },
-    [hashedId, ignoreUnspecifiedParams, mode, paramStorage]
+    [hashedId, ignoreUnspecifiedParamsProp, mode, paramStorage]
   );
 
   const setSearchParams = useCallback<SetSearchParams>(
@@ -234,13 +242,17 @@ export function useReactRouterDOMSearchParams<
   );
 
   const addSearchParamsToPath = useCallback<AddSearchParamsToPath>(
-    (pathname, searchParams) => {
+    (
+      pathname,
+      searchParams,
+      { ignoreUnspecifiedParams = ignoreUnspecifiedParamsProp } = {}
+    ) => {
       return addSearchParams(
         pathname,
-        getSearchParams(searchParams).nextSearchParams
+        getSearchParams(searchParams, ignoreUnspecifiedParams).nextSearchParams
       );
     },
-    [getSearchParams]
+    [getSearchParams, ignoreUnspecifiedParamsProp]
   );
 
   useEffect(() => {
