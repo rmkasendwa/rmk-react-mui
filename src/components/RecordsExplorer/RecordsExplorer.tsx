@@ -446,8 +446,6 @@ export interface RecordsExplorerProps<
   pathToEdit?: string;
   getPathToEdit?: (record: RecordRow) => string;
 
-  showRecords?: boolean;
-
   getRecordTools?: (record: RecordRow) => DropdownOption[];
   extraActionsColumnWidth?: number;
   ModalFormProps?: Partial<ModalFormProps>;
@@ -579,7 +577,6 @@ const BaseRecordsExplorer = <
     getPathToEdit,
     getEditableRecordInitialValues,
     recordsFinder,
-    showRecords,
     revalidationKey,
     recordDeletor,
     getRecordTools,
@@ -1429,7 +1426,7 @@ const BaseRecordsExplorer = <
     },
     {
       revalidationKey,
-      loadOnMount: showRecords,
+      loadOnMount: renderExplorerElement,
       refreshInterval,
       ...PaginatedRecordsOptions,
     }
@@ -1777,8 +1774,6 @@ const BaseRecordsExplorer = <
     },
     {
       revalidationKey: selectedRecordId,
-      loadOnMount: Boolean(recordDetailsFinder && autoSync),
-      autoSync,
     }
   );
 
