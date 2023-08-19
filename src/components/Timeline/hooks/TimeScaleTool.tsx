@@ -28,14 +28,15 @@ import { ElementTool } from '../../SearchSyncToolbar';
 import Tooltip from '../../Tooltip';
 import { TimeScaleOption, timeScaleOptions } from '../models';
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiTimeScaleTool: TimeScaleToolProps;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components {
     MuiTimeScaleTool?: {
@@ -44,6 +45,7 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
 
 export const CUSTOM_DATE_OPTION_LABEL = 'Custom Dates';
 
@@ -182,16 +184,16 @@ export const useTimeScaleTool = (inProps: TimeScaleToolProps) => {
       endDate={endDate}
       selectsRange={true as any}
       onChange={(dates: any) => {
-        const [, endDate] = dates as [Date, Date | null];
-        onSelectCustomDatesTimeScale?.(
-          isCustomDatesTimeScaleSelected ?? false,
-          {
-            startDate: startDate
-              ? formatDate(startDate, 'yyyy-MM-dd')
-              : undefined,
-            endDate: endDate ? formatDate(endDate, 'yyyy-MM-dd') : undefined,
-          }
-        );
+        const [endDate] = dates as [Date, Date | null];
+        (
+          onSelectCustomDatesTimeScale ||
+          onSelectCustomDatesTimeScaleFunctionRef?.current
+        )?.(isCustomDatesTimeScaleSelected ?? false, {
+          startDate: startDate
+            ? formatDate(startDate, 'yyyy-MM-dd')
+            : undefined,
+          endDate: endDate ? formatDate(endDate, 'yyyy-MM-dd') : undefined,
+        });
       }}
       minDate={(() => {
         if (startDate) {
@@ -230,7 +232,10 @@ export const useTimeScaleTool = (inProps: TimeScaleToolProps) => {
       ? CUSTOM_DATE_OPTION_LABEL
       : selectedTimeScale,
     onChange: (event) => {
-      onSelectCustomDatesTimeScale?.(
+      (
+        onSelectCustomDatesTimeScale ||
+        onSelectCustomDatesTimeScaleFunctionRef?.current
+      )?.(
         event.target.value === CUSTOM_DATE_OPTION_LABEL,
         (() => {
           if (startDateString && endDateString) {
@@ -299,6 +304,7 @@ export const useTimeScaleTool = (inProps: TimeScaleToolProps) => {
           ...(() => {
             if (
               onSelectCustomDatesTimeScale ||
+              onSelectCustomDatesTimeScaleFunctionRef ||
               isCustomDatesTimeScaleSelected
             ) {
               return [CUSTOM_DATE_OPTION_LABEL];
