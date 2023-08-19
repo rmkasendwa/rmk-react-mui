@@ -174,6 +174,7 @@ export const useTable = <DataRow extends BaseDataRow>(
     onChangeMinWidth,
     lazyRows = rows.length > LAZY_ROWS_BUFFER_SIZE,
     controlZIndex = true,
+    highlightRowOnHover = true,
     sx,
     ...rest
   } = props;
@@ -636,13 +637,20 @@ export const useTable = <DataRow extends BaseDataRow>(
 
   //#region Variants
   const variantStyles: SxProps<Theme> = {
-    [`.${tableBodyClasses.root} tr.${tableRowClasses.hover}:not(.${tableBodyRowClasses.groupHeaderColumn}):hover`]:
-      {
-        bgcolor: 'transparent',
-        [`.${tableCellClasses.root}:before`]: {
-          bgcolor: alpha(palette.primary.main, 0.1),
-        },
-      },
+    [`
+      .${tableBodyClasses.root} tr.${tableRowClasses.hover}:not(.${tableBodyRowClasses.groupHeaderColumn}):hover
+    `]: {
+      bgcolor: 'transparent',
+      ...(() => {
+        if (highlightRowOnHover) {
+          return {
+            [`.${tableCellClasses.root}:before`]: {
+              bgcolor: alpha(palette.primary.main, 0.1),
+            },
+          };
+        }
+      })(),
+    },
   };
 
   switch (variant) {
@@ -1441,9 +1449,15 @@ export const useTable = <DataRow extends BaseDataRow>(
       return (
         <Box
           sx={{
-            [`.${tableBodyRowClasses.root}:hover`]: {
-              bgcolor: alpha(palette.primary.main, 0.1),
-            },
+            ...(() => {
+              if (highlightRowOnHover) {
+                return {
+                  [`.${tableBodyRowClasses.root}:hover`]: {
+                    bgcolor: alpha(palette.primary.main, 0.1),
+                  },
+                };
+              }
+            })(),
           }}
         >
           {(() => {
