@@ -201,6 +201,7 @@ export interface RecordsExplorerChildrenOptions<
   > {
   data: RecordRow[];
   groupedData?: NestedDataGroup<RecordRow>[];
+  flattenedGroupedData: RecordRow[];
   selectedView: View;
   selectedViewProps?: DataView<RecordRow>;
   headerHeight?: number;
@@ -1630,7 +1631,7 @@ const BaseRecordsExplorer = <
   ]);
   //#endregion
 
-  // Grouping data
+  //#region Grouping data
   const groupedData =
     useMemo(() => {
       if (selectedGroupParams.length > 0) {
@@ -1699,6 +1700,7 @@ const BaseRecordsExplorer = <
         return groupData(filteredData);
       }
     }, [filteredData, selectedGroupParams]) || groupedDataProp;
+  //#endregion
 
   const pathToAddNewRecord = (() => {
     if (pathToAddNew) {
@@ -2136,6 +2138,7 @@ const BaseRecordsExplorer = <
       ...props,
       selectedView: selectedViewType,
       data: filteredData,
+      flattenedGroupedData,
       groupedData,
       headerHeight: headerElementRef.current?.offsetHeight,
       filterFields,
