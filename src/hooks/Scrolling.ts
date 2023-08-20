@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { MutableRefObject, useEffect, useRef } from 'react';
 
 /**
  * Represents the properties for the useDragToScroll hook.
@@ -20,6 +20,8 @@ export interface DragToScrollProps {
    * If set to false, the scrolling behavior will be disabled.
    */
   enableDragToScroll?: boolean;
+
+  cancelMomentumTrackingRef?: MutableRefObject<(() => void) | undefined>;
 }
 
 /**
@@ -30,6 +32,7 @@ export const useDragToScroll = ({
   targetElement,
   scrollableElement = targetElement,
   enableDragToScroll = true,
+  cancelMomentumTrackingRef: cancelMomentumTrackingRefProp,
 }: DragToScrollProps) => {
   //#region Refs
   const momentumIdRef = useRef<number>();
@@ -60,6 +63,8 @@ export const useDragToScroll = ({
   };
   const cancelMomentumTrackingRef = useRef(cancelMomentumTracking);
   cancelMomentumTrackingRef.current = cancelMomentumTracking;
+  cancelMomentumTrackingRefProp &&
+    (cancelMomentumTrackingRefProp.current = cancelMomentumTracking);
 
   // Function to handle the momentum animation loop
   const momentumLoop = () => {

@@ -484,6 +484,8 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
 
   const supportedTimeScalesRef = useRef(supportedTimeScales);
   supportedTimeScalesRef.current = supportedTimeScales;
+
+  const cancelMomentumTrackingRef = useRef<(() => void) | undefined>(undefined);
   //#endregion
 
   const { palette, breakpoints } = useTheme();
@@ -520,6 +522,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     targetElement: timelineContainerElement,
     scrollableElement: scrollingAncenstorElement,
     ...DragToScrollPropsRest,
+    cancelMomentumTrackingRef,
   });
 
   const { dateFormat: globalDateFormat, dateTimeFormat: globalDateTimeFormat } =
@@ -716,6 +719,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         isAfter(date, minCalendarDate) &&
         isBefore(date, maxCalendarDate)
       ) {
+        cancelMomentumTrackingRef.current?.();
         // Calculate the percentage offset of the date within the timeline
         const offsetPercentage = getPercentageAtDateRef.current(date);
 
