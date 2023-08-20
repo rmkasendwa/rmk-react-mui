@@ -38,7 +38,7 @@ export interface TableBodyRowClasses {
   /** Styles applied to the root element. */
   root: string;
   smallScreen: string;
-  groupHeaderColumn: string;
+  groupHeaderRow: string;
 }
 
 export type TableBodyRowClassKey = keyof TableBodyRowClasses;
@@ -81,13 +81,13 @@ export function getTableBodyRowUtilityClass(slot: string): string {
 
 export const tableBodyRowClasses: TableBodyRowClasses = generateUtilityClasses(
   'MuiTableBodyRow',
-  ['root', 'smallScreen', 'groupHeaderColumn']
+  ['root', 'smallScreen', 'groupHeaderRow']
 );
 
 const slots = {
   root: ['root'],
   smallScreen: ['smallScreen'],
-  groupHeaderColumn: ['groupHeaderColumn'],
+  groupHeaderRow: ['groupHeaderRow'],
 };
 
 export const TableBodyRow = <T extends BaseDataRow>(
@@ -310,7 +310,7 @@ export const TableBodyRow = <T extends BaseDataRow>(
         className={clsx(
           classes.root,
           classes.smallScreen,
-          isGroupHeader && classes.groupHeaderColumn
+          isGroupHeader && classes.groupHeaderRow
         )}
         container
         onClick={() => {
@@ -561,24 +561,12 @@ export const TableBodyRow = <T extends BaseDataRow>(
         classes.root,
         className,
         rowPropsRest?.className,
-        isGroupHeader && classes.groupHeaderColumn
+        isGroupHeader && classes.groupHeaderRow
       )}
       hover
       sx={{
         verticalAlign: 'top',
         cursor: isClickable ? 'pointer' : 'inherit',
-        ...(() => {
-          if (row.GroupingProps && 'isGroupHeader' in row.GroupingProps) {
-            return {
-              boxShadow: `0 -1px 2px -1px ${palette.divider}`,
-              td: {
-                position: 'sticky',
-                top: 48,
-                zIndex: 2,
-              },
-            };
-          }
-        })(),
         ...(components?.MuiTableBodyRow?.styleOverrides?.root as any),
         ...rowPropsSx,
         ...sx,
