@@ -35,7 +35,7 @@ import Tooltip from './Tooltip';
 export interface FileUploaderProps
   extends Pick<
     TextFieldProps,
-    'helperText' | 'error' | 'onChange' | 'name' | 'id'
+    'helperText' | 'error' | 'onChange' | 'name' | 'id' | 'className'
   > {
   value?: FileContainer[];
   upload?: FileUploadFunction;
@@ -44,7 +44,17 @@ export interface FileUploaderProps
 
 export const FileUploader = forwardRef<HTMLDivElement, FileUploaderProps>(
   function FileUploader(
-    { helperText, error, onChange, name, id, value, upload, download },
+    {
+      helperText,
+      error,
+      onChange,
+      name,
+      id,
+      value,
+      upload,
+      download,
+      className,
+    },
     ref
   ) {
     const { palette } = useTheme();
@@ -79,7 +89,7 @@ export const FileUploader = forwardRef<HTMLDivElement, FileUploaderProps>(
     }, [duplicateFileSelections, fileListContainer]);
 
     return (
-      <FormControl ref={ref} fullWidth error={error}>
+      <FormControl ref={ref} fullWidth error={error} className={className}>
         <input
           type="file"
           ref={(fileField) => {
