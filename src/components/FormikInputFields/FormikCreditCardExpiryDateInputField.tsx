@@ -23,21 +23,23 @@ export interface FormikCreditCardExpiryDateInputFieldClasses {
 export type FormikCreditCardExpiryDateInputFieldClassKey =
   keyof FormikCreditCardExpiryDateInputFieldClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiFormikCreditCardExpiryDateInputField: FormikCreditCardExpiryDateInputFieldProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiFormikCreditCardExpiryDateInputField: keyof FormikCreditCardExpiryDateInputFieldClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiFormikCreditCardExpiryDateInputField?: {
@@ -47,22 +49,29 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getFormikCreditCardExpiryDateInputFieldUtilityClass = (
+  slot: string
+) => {
+  return generateUtilityClass('MuiFormikCreditCardExpiryDateInputField', slot);
+};
+
+const slots: Record<
+  FormikCreditCardExpiryDateInputFieldClassKey,
+  [FormikCreditCardExpiryDateInputFieldClassKey]
+> = {
+  root: ['root'],
+};
+
+export const formikCreditCardExpiryDateInputFieldClasses: FormikCreditCardExpiryDateInputFieldClasses =
+  generateUtilityClasses(
+    'MuiFormikCreditCardExpiryDateInputField',
+    Object.keys(slots) as FormikCreditCardExpiryDateInputFieldClassKey[]
+  );
 
 export interface FormikCreditCardExpiryDateInputFieldProps
   extends CreditCardExpiryDateInputFieldProps {}
-
-export function getFormikCreditCardExpiryDateInputFieldUtilityClass(
-  slot: string
-): string {
-  return generateUtilityClass('MuiFormikCreditCardExpiryDateInputField', slot);
-}
-
-export const formikCreditCardExpiryDateInputFieldClasses: FormikCreditCardExpiryDateInputFieldClasses =
-  generateUtilityClasses('MuiFormikCreditCardExpiryDateInputField', ['root']);
-
-const slots = {
-  root: ['root'],
-};
 
 export const FormikCreditCardExpiryDateInputField = forwardRef<
   HTMLDivElement,

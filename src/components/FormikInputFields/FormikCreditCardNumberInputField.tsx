@@ -23,21 +23,23 @@ export interface FormikCreditCardNumberInputFieldClasses {
 export type FormikCreditCardNumberInputFieldClassKey =
   keyof FormikCreditCardNumberInputFieldClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiFormikCreditCardNumberInputField: FormikCreditCardNumberInputFieldProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiFormikCreditCardNumberInputField: keyof FormikCreditCardNumberInputFieldClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiFormikCreditCardNumberInputField?: {
@@ -47,22 +49,29 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getFormikCreditCardNumberInputFieldUtilityClass = (
+  slot: string
+) => {
+  return generateUtilityClass('MuiFormikCreditCardNumberInputField', slot);
+};
+
+const slots: Record<
+  FormikCreditCardNumberInputFieldClassKey,
+  [FormikCreditCardNumberInputFieldClassKey]
+> = {
+  root: ['root'],
+};
+
+export const formikCreditCardNumberInputFieldClasses: FormikCreditCardNumberInputFieldClasses =
+  generateUtilityClasses(
+    'MuiFormikCreditCardNumberInputField',
+    Object.keys(slots) as FormikCreditCardNumberInputFieldClassKey[]
+  );
 
 export interface FormikCreditCardNumberInputFieldProps
   extends CreditCardNumberInputFieldProps {}
-
-export function getFormikCreditCardNumberInputFieldUtilityClass(
-  slot: string
-): string {
-  return generateUtilityClass('MuiFormikCreditCardNumberInputField', slot);
-}
-
-export const formikCreditCardNumberInputFieldClasses: FormikCreditCardNumberInputFieldClasses =
-  generateUtilityClasses('MuiFormikCreditCardNumberInputField', ['root']);
-
-const slots = {
-  root: ['root'],
-};
 
 export const FormikCreditCardNumberInputField = forwardRef<
   HTMLDivElement,

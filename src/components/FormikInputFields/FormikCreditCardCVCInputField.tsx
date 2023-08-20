@@ -23,21 +23,23 @@ export interface FormikCreditCardCVCInputFieldClasses {
 export type FormikCreditCardCVCInputFieldClassKey =
   keyof FormikCreditCardCVCInputFieldClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiFormikCreditCardCVCInputField: FormikCreditCardCVCInputFieldProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiFormikCreditCardCVCInputField: keyof FormikCreditCardCVCInputFieldClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiFormikCreditCardCVCInputField?: {
@@ -47,22 +49,27 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getFormikCreditCardCVCInputFieldUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiFormikCreditCardCVCInputField', slot);
+};
+
+const slots: Record<
+  FormikCreditCardCVCInputFieldClassKey,
+  [FormikCreditCardCVCInputFieldClassKey]
+> = {
+  root: ['root'],
+};
+
+export const formikCreditCardCVCInputFieldClasses: FormikCreditCardCVCInputFieldClasses =
+  generateUtilityClasses(
+    'MuiFormikCreditCardCVCInputField',
+    Object.keys(slots) as FormikCreditCardCVCInputFieldClassKey[]
+  );
 
 export interface FormikCreditCardCVCInputFieldProps
   extends CreditCardCVCInputFieldProps {}
-
-export function getFormikCreditCardCVCInputFieldUtilityClass(
-  slot: string
-): string {
-  return generateUtilityClass('MuiFormikCreditCardCVCInputField', slot);
-}
-
-export const formikCreditCardCVCInputFieldClasses: FormikCreditCardCVCInputFieldClasses =
-  generateUtilityClasses('MuiFormikCreditCardCVCInputField', ['root']);
-
-const slots = {
-  root: ['root'],
-};
 
 export const FormikCreditCardCVCInputField = forwardRef<
   HTMLDivElement,
