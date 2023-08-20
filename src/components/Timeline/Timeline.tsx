@@ -127,6 +127,8 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
       | 'onClickRow'
       | 'forEachRowProps'
       | 'onChangeMinWidth'
+      | 'isGroupedTable'
+      | 'TableGroupingProps'
     >
   > {
   /** The property from each row to be used as the label in the timeline. */

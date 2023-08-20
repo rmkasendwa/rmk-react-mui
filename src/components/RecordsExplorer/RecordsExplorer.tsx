@@ -1810,13 +1810,166 @@ const BaseRecordsExplorer = <
   const allGroupsExpanded = Boolean(
     !searchParamExpandedGroups || searchParamExpandedGroups === 'All'
   );
-  const expandedGroups = (() => {
-    if (Array.isArray(searchParamExpandedGroups)) {
-      return searchParamExpandedGroups;
+
+  const flattenedGroupedData = (() => {
+    if (groupedData) {
+      const groupRows: RecordRow[] = [];
+      const allGroupIds: string[] = [];
+
+      const expandedGroups = (() => {
+        if (Array.isArray(searchParamExpandedGroups)) {
+          return searchParamExpandedGroups;
+        }
+        return [];
+      })();
+      const expandedGroupsInverted = Boolean(searchParamExpandedGroupsInverted);
+
+      interface FlattenGroupHierachyOptions {
+        indentLevel?: number;
+        parentGroupId?: string;
+        generateGroupHeaderRow?: boolean;
+        parentGroupCollapsed?: boolean;
+      }
+      const flattenGroupHierachy = (
+        inputGroupedData: typeof groupedData,
+        {
+          indentLevel = 0,
+          parentGroupId,
+          generateGroupHeaderRow = true,
+          parentGroupCollapsed = false,
+        }: FlattenGroupHierachyOptions = {}
+      ) => {
+        inputGroupedData.forEach(
+          ({ id, label, children, childrenCount, ...rest }) => {
+            const groupId = `group:${indentLevel}${id}${parentGroupId || ''}`;
+            const groupCollapsed =
+              parentGroupCollapsed ||
+              (() => {
+                if (expandedGroupsInverted) {
+                  return expandedGroups.includes(groupId);
+                }
+                return !expandedGroups.includes(groupId) && !allGroupsExpanded;
+              })();
+            allGroupIds.push(groupId);
+            if (generateGroupHeaderRow) {
+              groupRows.push({
+                id: groupId,
+                ...rest,
+                GroupingProps: {
+                  isGroupHeader: true,
+                  groupId,
+                  groupLabel: label,
+                  groupCollapsed,
+                  indentLevel,
+                  parentGroupId,
+                  childrenCount,
+                  onChangeGroupCollapsed: (collapsed) => {
+                    const allExpandedGroups = (() => {
+                      if (expandedGroupsInverted) {
+                        return allGroupIds.filter((groupId) => {
+                          return !expandedGroups.includes(groupId);
+                        });
+                      }
+                      return allGroupsExpanded
+                        ? [...allGroupIds]
+                        : [...expandedGroups];
+                    })();
+                    if (collapsed) {
+                      allExpandedGroups.includes(groupId) &&
+                        allExpandedGroups.splice(
+                          allExpandedGroups.indexOf(groupId),
+                          1
+                        );
+                    } else {
+                      allExpandedGroups.includes(groupId) ||
+                        allExpandedGroups.push(groupId);
+                    }
+                    const allCollapsedGroups = allGroupIds.filter((groupId) => {
+                      return !allExpandedGroups.includes(groupId);
+                    });
+                    const nextExpandedGroupsInverted =
+                      allCollapsedGroups.length < allExpandedGroups.length;
+                    setSearchParams(
+                      {
+                        expandedGroups: (() => {
+                          if (allExpandedGroups.length > 0) {
+                            if (
+                              groupedData.length === allExpandedGroups.length
+                            ) {
+                              return 'All';
+                            }
+                            if (allExpandedGroups.includes('None')) {
+                              allExpandedGroups.splice(
+                                allExpandedGroups.indexOf('None'),
+                                1
+                              );
+                            }
+                            if (nextExpandedGroupsInverted) {
+                              return allCollapsedGroups;
+                            }
+                            return allExpandedGroups;
+                          } else {
+                            return 'None';
+                          }
+                        })(),
+                        expandedGroupsInverted: nextExpandedGroupsInverted,
+                      },
+                      {
+                        replace: true,
+                      }
+                    );
+                    updateChangedSearchParamKeys('expandedGroups');
+                  },
+                },
+              } as RecordRow);
+            }
+
+            const { children: nestedChildren, groupName } =
+              (children[0] as NestedDataGroup<RecordRow>) || {};
+            if (!groupCollapsed) {
+              if (nestedChildren && groupName) {
+                return flattenGroupHierachy(
+                  children as NestedDataGroup<RecordRow>[],
+                  {
+                    indentLevel: indentLevel + 1,
+                    parentGroupId: groupId,
+                    parentGroupCollapsed: groupCollapsed,
+                  }
+                );
+              } else {
+                (children as RecordRow[]).forEach(({ ...rest }) => {
+                  groupRows.push({
+                    ...rest,
+                    GroupingProps: {
+                      parentGroupId: groupId,
+                      parentGroupIndentLevel: indentLevel,
+                      groupCollapsed,
+                    },
+                  } as RecordRow);
+                });
+              }
+            } else {
+              if (nestedChildren && groupName) {
+                return flattenGroupHierachy(
+                  children as NestedDataGroup<RecordRow>[],
+                  {
+                    indentLevel: indentLevel + 1,
+                    parentGroupId: groupId,
+                    parentGroupCollapsed: groupCollapsed,
+                    generateGroupHeaderRow: false,
+                  }
+                );
+              }
+            }
+          }
+        );
+      };
+      flattenGroupHierachy(groupedData);
+
+      return groupRows;
     }
-    return [];
+    return filteredData;
   })();
-  const expandedGroupsInverted = Boolean(searchParamExpandedGroupsInverted);
 
   const editFunctionRef = useRef((record: RecordRow) => {
     resetSelectedRecordState();
@@ -2004,6 +2157,28 @@ const BaseRecordsExplorer = <
   const viewElement = (() => {
     if (selectedViewProps && renderViews) {
       const { type, renderView = true } = selectedViewProps;
+      const groupedDataViewProps = (() => {
+        if (groupedData) {
+          return {
+            isGroupedTable: true,
+            TableGroupingProps: {
+              allGroupsCollapsed: !allGroupsExpanded,
+              onChangeAllGroupsCollapsed: (allGroupsExpanded) => {
+                setSearchParams(
+                  {
+                    expandedGroups: allGroupsExpanded ? 'None' : 'All',
+                    expandedGroupsInverted: null,
+                  },
+                  {
+                    replace: true,
+                  }
+                );
+                updateChangedSearchParamKeys('expandedGroups');
+              },
+            },
+          } as Pick<TableProps, 'isGroupedTable' | 'TableGroupingProps'>;
+        }
+      })();
       if (renderView) {
         switch (type) {
           case 'List': {
@@ -2028,6 +2203,160 @@ const BaseRecordsExplorer = <
                 return selectedColumnIds.includes(String(id) as any);
               }
             );
+            const { columns, sx } = viewProps;
+            const baseTableColumns = columns.map((column) => ({
+              ...column,
+            }));
+
+            if (groupedData) {
+              const firstDisplayingColumn = baseTableColumns.find(({ id }) => {
+                return id === displayingColumns[0].id;
+              });
+              if (firstDisplayingColumn) {
+                delete firstDisplayingColumn.width;
+              }
+            }
+
+            const baseTableProps: typeof viewProps = {
+              startStickyColumnIndex: 0,
+              ...viewProps,
+              ...ListViewProps,
+              paging: false,
+              enableColumnDisplayToggle,
+              enableCheckboxAllRowSelector,
+              enableCheckboxRowSelectors,
+              enableSmallScreenOptimization,
+              showRowNumber,
+              bordersVariant: 'square',
+              selectedColumnIds,
+              ...(() => {
+                if (isEditable || isDeletable || getRecordTools) {
+                  return {
+                    getEllipsisMenuToolProps: (row) => {
+                      const ellipsisMenuToolProps = (() => {
+                        if (getEllipsisMenuToolProps) {
+                          return getEllipsisMenuToolProps(row);
+                        }
+                      })();
+                      const options = ellipsisMenuToolProps?.options || [];
+
+                      return {
+                        ...ellipsisMenuToolProps,
+                        options: [
+                          ...(() => {
+                            if (isEditable) {
+                              return [
+                                {
+                                  label: 'Edit',
+                                  value: 'Edit',
+                                  icon: <EditIcon />,
+                                  onClick: () => {
+                                    editFunctionRef.current(row);
+                                  },
+                                },
+                              ];
+                            }
+                            return [];
+                          })(),
+                          ...(() => {
+                            if (isDeletable) {
+                              return [
+                                {
+                                  label: 'Delete',
+                                  value: 'Delete',
+                                  icon: <DeleteOutlineIcon />,
+                                  onClick: () => {
+                                    deleteFunctionRef.current(row);
+                                  },
+                                },
+                              ];
+                            }
+                            return [];
+                          })(),
+                          ...options,
+                          ...(() => {
+                            if (getRecordTools) {
+                              return getRecordTools(row);
+                            }
+                            return [];
+                          })(),
+                        ],
+                      };
+                    },
+                  };
+                }
+                return {
+                  getEllipsisMenuToolProps,
+                };
+              })(),
+              onClickRow:
+                onClickRow ??
+                (() => {
+                  if (editorForm || getPathToView) {
+                    return viewFunctionRef.current;
+                  }
+                })(),
+            };
+            const tableControlProps: Partial<typeof viewProps> = {
+              sortable: true,
+              handleSortOperations: false,
+              sortBy: selectedSortParams,
+              onChangeSortBy: (sortOptions) => {
+                if (
+                  sortOptions
+                    .map(({ id, sortDirection }) => String(id) + sortDirection)
+                    .join(',') !==
+                  selectedSortParams
+                    .map(({ id, sortDirection }) => String(id) + sortDirection)
+                    .join(',')
+                ) {
+                  setSearchParams(
+                    {
+                      sortBy: sortOptions
+                        .map((sortBy) => {
+                          const { id } = sortBy;
+                          return [
+                            sortableFields.find(
+                              ({ id: currentId }) => currentId === id
+                            )!,
+                            sortBy,
+                          ];
+                        })
+                        .filter(
+                          ([selectedSortParam]) => selectedSortParam != null
+                        )
+                        .map(([selectedSortParam, { sortDirection }]) => {
+                          return {
+                            ...selectedSortParam,
+                            sortDirection: sortDirection || 'ASC',
+                          } as SelectedSortOption<RecordRow>;
+                        }),
+                    },
+                    {
+                      replace: true,
+                    }
+                  );
+                  updateChangedSearchParamKeys('sortBy');
+                }
+              },
+              onChangeSelectedColumnIds: (localSelectedColumnIds) => {
+                if (selectedColumnIds !== localSelectedColumnIds) {
+                  setSearchParams(
+                    {
+                      selectedColumns: localSelectedColumnIds.map(
+                        (selectedColumnId) => {
+                          return String(selectedColumnId);
+                        }
+                      ),
+                    },
+                    {
+                      replace: true,
+                    }
+                  );
+                  updateChangedSearchParamKeys('selectedColumns');
+                }
+              },
+            };
 
             return (
               <Box
@@ -2035,398 +2364,32 @@ const BaseRecordsExplorer = <
                   position: 'relative',
                 }}
               >
-                {(() => {
-                  const { columns, sx } = viewProps;
-                  const baseTableColumns = columns.map((column) => ({
-                    ...column,
-                  }));
-
-                  const tableData = (() => {
-                    if (groupedData) {
-                      const groupRows: RecordRow[] = [];
-                      const allGroupIds: string[] = [];
-
-                      interface FlattenGroupHierachyOptions {
-                        indentLevel?: number;
-                        parentGroupId?: string;
-                        generateGroupHeaderRow?: boolean;
-                        parentGroupCollapsed?: boolean;
-                      }
-                      const flattenGroupHierachy = (
-                        inputGroupedData: typeof groupedData,
-                        {
-                          indentLevel = 0,
-                          parentGroupId,
-                          generateGroupHeaderRow = true,
-                          parentGroupCollapsed = false,
-                        }: FlattenGroupHierachyOptions = {}
-                      ) => {
-                        inputGroupedData.forEach(
-                          ({ id, label, children, childrenCount, ...rest }) => {
-                            const groupId = `group:${indentLevel}${id}${
-                              parentGroupId || ''
-                            }`;
-                            const groupCollapsed =
-                              parentGroupCollapsed ||
-                              (() => {
-                                if (expandedGroupsInverted) {
-                                  return expandedGroups.includes(groupId);
-                                }
-                                return (
-                                  !expandedGroups.includes(groupId) &&
-                                  !allGroupsExpanded
-                                );
-                              })();
-                            allGroupIds.push(groupId);
-                            if (generateGroupHeaderRow) {
-                              groupRows.push({
-                                id: groupId,
-                                ...rest,
-                                GroupingProps: {
-                                  isGroupHeader: true,
-                                  groupId,
-                                  groupLabel: label,
-                                  groupCollapsed,
-                                  indentLevel,
-                                  parentGroupId,
-                                  childrenCount,
-                                  onChangeGroupCollapsed: (collapsed) => {
-                                    const allExpandedGroups = (() => {
-                                      if (expandedGroupsInverted) {
-                                        return allGroupIds.filter((groupId) => {
-                                          return !expandedGroups.includes(
-                                            groupId
-                                          );
-                                        });
-                                      }
-                                      return allGroupsExpanded
-                                        ? [...allGroupIds]
-                                        : [...expandedGroups];
-                                    })();
-                                    if (collapsed) {
-                                      allExpandedGroups.includes(groupId) &&
-                                        allExpandedGroups.splice(
-                                          allExpandedGroups.indexOf(groupId),
-                                          1
-                                        );
-                                    } else {
-                                      allExpandedGroups.includes(groupId) ||
-                                        allExpandedGroups.push(groupId);
-                                    }
-                                    const allCollapsedGroups =
-                                      allGroupIds.filter((groupId) => {
-                                        return !allExpandedGroups.includes(
-                                          groupId
-                                        );
-                                      });
-                                    const nextExpandedGroupsInverted =
-                                      allCollapsedGroups.length <
-                                      allExpandedGroups.length;
-                                    setSearchParams(
-                                      {
-                                        expandedGroups: (() => {
-                                          if (allExpandedGroups.length > 0) {
-                                            if (
-                                              groupedData.length ===
-                                              allExpandedGroups.length
-                                            ) {
-                                              return 'All';
-                                            }
-                                            if (
-                                              allExpandedGroups.includes('None')
-                                            ) {
-                                              allExpandedGroups.splice(
-                                                allExpandedGroups.indexOf(
-                                                  'None'
-                                                ),
-                                                1
-                                              );
-                                            }
-                                            if (nextExpandedGroupsInverted) {
-                                              return allCollapsedGroups;
-                                            }
-                                            return allExpandedGroups;
-                                          } else {
-                                            return 'None';
-                                          }
-                                        })(),
-                                        expandedGroupsInverted:
-                                          nextExpandedGroupsInverted,
-                                      },
-                                      {
-                                        replace: true,
-                                      }
-                                    );
-                                    updateChangedSearchParamKeys(
-                                      'expandedGroups'
-                                    );
-                                  },
-                                },
-                              } as RecordRow);
-                            }
-
-                            const { children: nestedChildren, groupName } =
-                              (children[0] as NestedDataGroup<RecordRow>) || {};
-                            if (!groupCollapsed) {
-                              if (nestedChildren && groupName) {
-                                return flattenGroupHierachy(
-                                  children as NestedDataGroup<RecordRow>[],
-                                  {
-                                    indentLevel: indentLevel + 1,
-                                    parentGroupId: groupId,
-                                    parentGroupCollapsed: groupCollapsed,
-                                  }
-                                );
-                              } else {
-                                (children as RecordRow[]).forEach(
-                                  ({ ...rest }) => {
-                                    groupRows.push({
-                                      ...rest,
-                                      GroupingProps: {
-                                        parentGroupId: groupId,
-                                        parentGroupIndentLevel: indentLevel,
-                                        groupCollapsed,
-                                      },
-                                    } as RecordRow);
-                                  }
-                                );
-                              }
-                            } else {
-                              if (nestedChildren && groupName) {
-                                return flattenGroupHierachy(
-                                  children as NestedDataGroup<RecordRow>[],
-                                  {
-                                    indentLevel: indentLevel + 1,
-                                    parentGroupId: groupId,
-                                    parentGroupCollapsed: groupCollapsed,
-                                    generateGroupHeaderRow: false,
-                                  }
-                                );
-                              }
-                            }
-                          }
-                        );
-                      };
-                      flattenGroupHierachy(groupedData);
-
-                      const firstDisplayingColumn = baseTableColumns.find(
-                        ({ id }) => {
-                          return id === displayingColumns[0].id;
-                        }
-                      );
-                      if (firstDisplayingColumn) {
-                        delete firstDisplayingColumn.width;
-                      }
-
-                      return groupRows;
-                    }
-                    return filteredData;
-                  })();
-
-                  const baseTableProps: typeof viewProps = {
-                    startStickyColumnIndex: 0,
-                    ...viewProps,
-                    ...ListViewProps,
-                    paging: false,
-                    enableColumnDisplayToggle,
-                    enableCheckboxAllRowSelector,
-                    enableCheckboxRowSelectors,
-                    enableSmallScreenOptimization,
-                    showRowNumber,
-                    bordersVariant: 'square',
-                    selectedColumnIds,
-                    ...(() => {
-                      if (isEditable || isDeletable || getRecordTools) {
-                        return {
-                          getEllipsisMenuToolProps: (row) => {
-                            const ellipsisMenuToolProps = (() => {
-                              if (getEllipsisMenuToolProps) {
-                                return getEllipsisMenuToolProps(row);
-                              }
-                            })();
-                            const options =
-                              ellipsisMenuToolProps?.options || [];
-
-                            return {
-                              ...ellipsisMenuToolProps,
-                              options: [
-                                ...(() => {
-                                  if (isEditable) {
-                                    return [
-                                      {
-                                        label: 'Edit',
-                                        value: 'Edit',
-                                        icon: <EditIcon />,
-                                        onClick: () => {
-                                          editFunctionRef.current(row);
-                                        },
-                                      },
-                                    ];
-                                  }
-                                  return [];
-                                })(),
-                                ...(() => {
-                                  if (isDeletable) {
-                                    return [
-                                      {
-                                        label: 'Delete',
-                                        value: 'Delete',
-                                        icon: <DeleteOutlineIcon />,
-                                        onClick: () => {
-                                          deleteFunctionRef.current(row);
-                                        },
-                                      },
-                                    ];
-                                  }
-                                  return [];
-                                })(),
-                                ...options,
-                                ...(() => {
-                                  if (getRecordTools) {
-                                    return getRecordTools(row);
-                                  }
-                                  return [];
-                                })(),
-                              ],
-                            };
-                          },
-                        };
-                      }
-                      return {
-                        getEllipsisMenuToolProps,
-                      };
-                    })(),
-                    onClickRow:
-                      onClickRow ??
-                      (() => {
-                        if (editorForm || getPathToView) {
-                          return viewFunctionRef.current;
-                        }
-                      })(),
-                  };
-
-                  const tableControlProps: Partial<typeof viewProps> = {
-                    sortable: true,
-                    handleSortOperations: false,
-                    sortBy: selectedSortParams,
-                    onChangeSortBy: (sortOptions) => {
-                      if (
-                        sortOptions
-                          .map(
-                            ({ id, sortDirection }) =>
-                              String(id) + sortDirection
-                          )
-                          .join(',') !==
-                        selectedSortParams
-                          .map(
-                            ({ id, sortDirection }) =>
-                              String(id) + sortDirection
-                          )
-                          .join(',')
-                      ) {
-                        setSearchParams(
-                          {
-                            sortBy: sortOptions
-                              .map((sortBy) => {
-                                const { id } = sortBy;
-                                return [
-                                  sortableFields.find(
-                                    ({ id: currentId }) => currentId === id
-                                  )!,
-                                  sortBy,
-                                ];
-                              })
-                              .filter(
-                                ([selectedSortParam]) =>
-                                  selectedSortParam != null
-                              )
-                              .map(([selectedSortParam, { sortDirection }]) => {
-                                return {
-                                  ...selectedSortParam,
-                                  sortDirection: sortDirection || 'ASC',
-                                } as SelectedSortOption<RecordRow>;
-                              }),
-                          },
-                          {
-                            replace: true,
-                          }
-                        );
-                        updateChangedSearchParamKeys('sortBy');
-                      }
+                <Table
+                  {...baseTableProps}
+                  {...tableControlProps}
+                  columns={baseTableColumns}
+                  rows={flattenedGroupedData}
+                  {...groupedDataViewProps}
+                  scrollableElement={bodyElementRef.current}
+                  stickyHeader
+                  sx={{
+                    [`
+                  & .${tableContainerClasses.root}
+                `]: {
+                      overflow: 'visible',
                     },
-                    onChangeSelectedColumnIds: (localSelectedColumnIds) => {
-                      if (selectedColumnIds !== localSelectedColumnIds) {
-                        setSearchParams(
-                          {
-                            selectedColumns: localSelectedColumnIds.map(
-                              (selectedColumnId) => {
-                                return String(selectedColumnId);
-                              }
-                            ),
-                          },
-                          {
-                            replace: true,
-                          }
-                        );
-                        updateChangedSearchParamKeys('selectedColumns');
-                      }
+                    [`
+                  & .${tableHeadClasses.root}
+                `]: {
+                      bgcolor: palette.background.paper,
+                      zIndex: 5,
+                      '& th': {
+                        borderBottom: `1px solid ${palette.divider}`,
+                      },
                     },
-                  };
-
-                  return (
-                    <Table
-                      {...baseTableProps}
-                      {...tableControlProps}
-                      columns={baseTableColumns}
-                      rows={tableData}
-                      {...(() => {
-                        if (groupedData) {
-                          return {
-                            isGroupedTable: true,
-                            TableGroupingProps: {
-                              allGroupsCollapsed: !allGroupsExpanded,
-                              onChangeAllGroupsCollapsed: (
-                                allGroupsExpanded
-                              ) => {
-                                setSearchParams(
-                                  {
-                                    expandedGroups: allGroupsExpanded
-                                      ? 'None'
-                                      : 'All',
-                                    expandedGroupsInverted: null,
-                                  },
-                                  {
-                                    replace: true,
-                                  }
-                                );
-                                updateChangedSearchParamKeys('expandedGroups');
-                              },
-                            },
-                          };
-                        }
-                      })()}
-                      scrollableElement={bodyElementRef.current}
-                      stickyHeader
-                      sx={{
-                        [`
-                        & .${tableContainerClasses.root}
-                      `]: {
-                          overflow: 'visible',
-                        },
-                        [`
-                        & .${tableHeadClasses.root}
-                      `]: {
-                          bgcolor: palette.background.paper,
-                          zIndex: 5,
-                          '& th': {
-                            borderBottom: `1px solid ${palette.divider}`,
-                          },
-                        },
-                        ...sx,
-                      }}
-                    />
-                  );
-                })()}
+                    ...sx,
+                  }}
+                />
               </Box>
             );
           }
@@ -2446,7 +2409,8 @@ const BaseRecordsExplorer = <
                   currentDateAtCenterRef,
                   currentDateAtEndRef,
                 }}
-                rows={filteredData}
+                rows={flattenedGroupedData}
+                {...groupedDataViewProps}
                 defaultViewResetFunctionRef={resetTimelineToDefaultViewRef}
                 onChangeSelectedTimeScale={(selectedTimeScale) => {
                   selectedTimeScaleRef.current = selectedTimeScale;

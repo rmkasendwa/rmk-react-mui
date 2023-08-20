@@ -638,7 +638,7 @@ export const useTable = <DataRow extends BaseDataRow>(
   //#region Variants
   const variantStyles: SxProps<Theme> = {
     [`
-      .${tableBodyClasses.root} tr.${tableRowClasses.hover}:not(.${tableBodyRowClasses.groupHeaderColumn}):hover
+      .${tableBodyClasses.root} tr.${tableRowClasses.hover}:not(.${tableBodyRowClasses.groupHeaderRow}):hover
     `]: {
       bgcolor: 'transparent',
       ...(() => {
@@ -1205,6 +1205,22 @@ export const useTable = <DataRow extends BaseDataRow>(
                   getRowProps={forEachRowProps}
                   className={clsx(rowNumber % 2 === 0 ? 'even' : 'odd')}
                   applyCellWidthParameters={!showHeaderRow}
+                  sx={{
+                    [`&.${tableBodyRowClasses.groupHeaderRow}`]: {
+                      boxShadow: `0 -1px 2px -1px ${palette.divider}`,
+                      td: {
+                        position: 'sticky',
+                        top: 48,
+                        ...(() => {
+                          if (controlZIndex) {
+                            return {
+                              zIndex: 2,
+                            };
+                          }
+                        })(),
+                      },
+                    },
+                  }}
                 />
               </Fragment>
             ),
@@ -1245,6 +1261,22 @@ export const useTable = <DataRow extends BaseDataRow>(
               getRowProps={forEachRowProps}
               className={clsx(rowNumber % 2 === 0 ? 'even' : 'odd')}
               applyCellWidthParameters={!showHeaderRow}
+              sx={{
+                [`&.${tableBodyRowClasses.groupHeaderRow}`]: {
+                  boxShadow: `0 -1px 2px -1px ${palette.divider}`,
+                  td: {
+                    position: 'sticky',
+                    top: 48,
+                    ...(() => {
+                      if (controlZIndex) {
+                        return {
+                          zIndex: 2,
+                        };
+                      }
+                    })(),
+                  },
+                },
+              }}
             />
           ),
         });
