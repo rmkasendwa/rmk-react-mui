@@ -219,6 +219,7 @@ export const useTable = <DataRow extends BaseDataRow>(
   defaultDateTimeFormat || (defaultDateTimeFormat = globalDateTimeFormat);
 
   //#region Refs
+  const tableHeaderElementRef = useRef<HTMLTableSectionElement | null>(null);
   const columnsRef = useRef(columnsProp);
   columnsRef.current = columnsProp;
   const onChangeSelectedColumnIdsRef = useRef(onChangeSelectedColumnIds);
@@ -238,6 +239,19 @@ export const useTable = <DataRow extends BaseDataRow>(
   const [pageIndex, setPageIndex] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(rowsPerPageProp);
   const [sortBy, setSortBy] = useState<SortOptions<DataRow>>([]);
+  const [tableHeaderHeight, setTableHeaderHeight] = useState(49);
+  useEffect(() => {
+    if (tableHeaderElementRef.current) {
+      const tableHeaderElement = tableHeaderElementRef.current;
+      const observer = new ResizeObserver(() => {
+        setTableHeaderHeight(tableHeaderElement.clientHeight);
+      });
+      observer.observe(tableHeaderElement);
+      return () => {
+        observer.disconnect();
+      };
+    }
+  }, []);
 
   const [allRowsChecked, setAllRowsChecked] = useState(allRowsCheckedProp);
   const [checkedRowIds, setCheckedRowIds] = useState<string[]>(() => {
@@ -1210,7 +1224,7 @@ export const useTable = <DataRow extends BaseDataRow>(
                       boxShadow: `0 -1px 2px -1px ${palette.divider}`,
                       td: {
                         position: 'sticky',
-                        top: 48,
+                        top: tableHeaderHeight,
                         ...(() => {
                           if (controlZIndex) {
                             return {
@@ -1266,7 +1280,7 @@ export const useTable = <DataRow extends BaseDataRow>(
                   boxShadow: `0 -1px 2px -1px ${palette.divider}`,
                   td: {
                     position: 'sticky',
-                    top: 48,
+                    top: tableHeaderHeight,
                     ...(() => {
                       if (controlZIndex) {
                         return {
@@ -1542,16 +1556,9 @@ export const useTable = <DataRow extends BaseDataRow>(
       >
         {tableHeaderRow ? (
           <TableHead
+            ref={tableHeaderElementRef}
             sx={{
               bgcolor: alpha(palette.text.primary, TABLE_HEAD_ALPHA),
-              ...(() => {
-                if (isGroupedTable) {
-                  return {
-                    position: 'sticky',
-                    top: 0,
-                  };
-                }
-              })(),
             }}
           >
             {tableHeaderRow}
