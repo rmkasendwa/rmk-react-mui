@@ -20,21 +20,23 @@ export interface FormikRichTextEditorClasses {
 
 export type FormikRichTextEditorClassKey = keyof FormikRichTextEditorClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiFormikRichTextEditor: FormikRichTextEditorProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiFormikRichTextEditor: keyof FormikRichTextEditorClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiFormikRichTextEditor?: {
@@ -44,19 +46,26 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
 
-export interface FormikRichTextEditorProps extends RichTextEditorProps {}
-
-export function getFormikRichTextEditorUtilityClass(slot: string): string {
+export const getFormikRichTextEditorUtilityClass = (slot: string) => {
   return generateUtilityClass('MuiFormikRichTextEditor', slot);
-}
+};
 
-export const formikRichTextEditorClasses: FormikRichTextEditorClasses =
-  generateUtilityClasses('MuiFormikRichTextEditor', ['root']);
-
-const slots = {
+const slots: Record<
+  FormikRichTextEditorClassKey,
+  [FormikRichTextEditorClassKey]
+> = {
   root: ['root'],
 };
+
+export const formikRichTextEditorClasses: FormikRichTextEditorClasses =
+  generateUtilityClasses(
+    'MuiFormikRichTextEditor',
+    Object.keys(slots) as FormikRichTextEditorClassKey[]
+  );
+
+export interface FormikRichTextEditorProps extends RichTextEditorProps {}
 
 export const FormikRichTextEditor = forwardRef<
   HTMLDivElement,

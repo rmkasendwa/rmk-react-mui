@@ -1,3 +1,13 @@
+import {
+  ComponentsOverrides,
+  ComponentsProps,
+  ComponentsVariants,
+  unstable_composeClasses as composeClasses,
+  generateUtilityClass,
+  generateUtilityClasses,
+  useThemeProps,
+} from '@mui/material';
+import clsx from 'clsx';
 import { forwardRef } from 'react';
 import * as Yup from 'yup';
 
@@ -6,6 +16,59 @@ import { isValidPhoneNumber } from '../../utils/PhoneNumberUtil';
 import PhoneNumberInputField, {
   PhoneNumberInputFieldProps,
 } from '../InputFields/PhoneNumberInputField';
+
+export interface FormikPhoneNumberInputFieldClasses {
+  /** Styles applied to the root element. */
+  root: string;
+}
+
+export type FormikPhoneNumberInputFieldClassKey =
+  keyof FormikPhoneNumberInputFieldClasses;
+
+//#region Adding theme prop types
+declare module '@mui/material/styles/props' {
+  interface ComponentsPropsList {
+    MuiFormikPhoneNumberInputField: FormikPhoneNumberInputFieldProps;
+  }
+}
+//#endregion
+
+//#region Adding theme override types
+declare module '@mui/material/styles/overrides' {
+  interface ComponentNameToClassKey {
+    MuiFormikPhoneNumberInputField: keyof FormikPhoneNumberInputFieldClasses;
+  }
+}
+//#endregion
+
+//#region Adding theme component types
+declare module '@mui/material/styles/components' {
+  interface Components<Theme = unknown> {
+    MuiFormikPhoneNumberInputField?: {
+      defaultProps?: ComponentsProps['MuiFormikPhoneNumberInputField'];
+      styleOverrides?: ComponentsOverrides<Theme>['MuiFormikPhoneNumberInputField'];
+      variants?: ComponentsVariants['MuiFormikPhoneNumberInputField'];
+    };
+  }
+}
+//#endregion
+
+export const getFormikPhoneNumberInputFieldUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiFormikPhoneNumberInputField', slot);
+};
+
+const slots: Record<
+  FormikPhoneNumberInputFieldClassKey,
+  [FormikPhoneNumberInputFieldClassKey]
+> = {
+  root: ['root'],
+};
+
+export const formikPhoneNumberInputFieldClasses: FormikPhoneNumberInputFieldClasses =
+  generateUtilityClasses(
+    'MuiFormikPhoneNumberInputField',
+    Object.keys(slots) as FormikPhoneNumberInputFieldClassKey[]
+  );
 
 declare module 'yup' {
   interface StringSchema {
@@ -33,8 +96,13 @@ export interface FormikPhoneNumberInputFieldProps
 export const FormikPhoneNumberInputField = forwardRef<
   HTMLDivElement,
   FormikPhoneNumberInputFieldProps
->(function FormikPhoneNumberInputField(
-  {
+>(function FormikPhoneNumberInputField(inProps, ref) {
+  const props = useThemeProps({
+    props: inProps,
+    name: 'MuiFormikPhoneNumberInputField',
+  });
+  const {
+    className,
     name,
     value: valueProp,
     onBlur: onBlurProp,
@@ -42,9 +110,20 @@ export const FormikPhoneNumberInputField = forwardRef<
     error: errorProp,
     helperText: helperTextProp,
     ...rest
-  },
-  ref
-) {
+  } = props;
+
+  const classes = composeClasses(
+    slots,
+    getFormikPhoneNumberInputFieldUtilityClass,
+    (() => {
+      if (className) {
+        return {
+          root: className,
+        };
+      }
+    })()
+  );
+
   const { value, onChange, onBlur, error, helperText } =
     useAggregatedFormikContext({
       value: valueProp,
@@ -59,6 +138,7 @@ export const FormikPhoneNumberInputField = forwardRef<
     <PhoneNumberInputField
       ref={ref}
       {...rest}
+      className={clsx(classes.root)}
       {...({ name, value, onChange, onBlur, error, helperText } as any)}
     />
   );
