@@ -776,7 +776,7 @@ export const useTable = <DataRow extends BaseDataRow>(
       `]: {
         [`
           &:not(:nth-last-of-type(2)):not(:nth-last-of-type(1)),
-          &.${tableBodyColumnClasses.groupHeaderColumn}
+          &.${tableBodyColumnClasses.groupHeaderColumn}:not(:last-of-type)
         `]: {
           borderRightWidth: 1,
           borderRightStyle: 'solid',
@@ -931,23 +931,24 @@ export const useTable = <DataRow extends BaseDataRow>(
                     }}
                   >
                     {(() => {
-                      if (isGroupedTable && index === 0) {
-                        return (
-                          <TableGroupCollapseTool
-                            groupCollapsed={
-                              TableGroupingProps?.allGroupsCollapsed || false
-                            }
-                            onChangeGroupCollapsed={
-                              TableGroupingProps?.onChangeAllGroupsCollapsed
-                            }
-                          />
-                        );
-                      }
-                    })()}
-                    {(() => {
                       if (showHeaderText && label) {
                         return (
                           <>
+                            {(() => {
+                              if (isGroupedTable && index === 0) {
+                                return (
+                                  <TableGroupCollapseTool
+                                    groupCollapsed={
+                                      TableGroupingProps?.allGroupsCollapsed ||
+                                      false
+                                    }
+                                    onChangeGroupCollapsed={
+                                      TableGroupingProps?.onChangeAllGroupsCollapsed
+                                    }
+                                  />
+                                );
+                              }
+                            })()}
                             {(() => {
                               if (wrapColumnContentInFieldValue) {
                                 return (

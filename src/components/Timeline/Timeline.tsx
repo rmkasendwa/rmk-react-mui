@@ -50,6 +50,7 @@ import { useReactRouterDOMSearchParams } from '../../hooks/ReactRouterDOM';
 import { DragToScrollProps, useDragToScroll } from '../../hooks/Scrolling';
 import { BLACK_COLOR } from '../../theme';
 import { BaseDataRow, Table, TableColumn, TableProps } from '../Table';
+import { tableBodyColumnClasses } from '../Table/TableBodyColumn';
 import { TooltipProps } from '../Tooltip';
 import {
   ScrollTimelineToolsProps,
@@ -1756,6 +1757,9 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         '&>div': {
           height: 42,
         },
+        [`&.${tableBodyColumnClasses.groupHeaderColumn}`]: {
+          zIndex: 1,
+        },
       },
     },
   ];
@@ -1813,6 +1817,9 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       bodySx: {
         ...RowLabelColumnProps?.bodySx,
         zIndex: 3,
+        [`&.${tableBodyColumnClasses.groupHeaderColumn}`]: {
+          zIndex: 4,
+        },
         ...(() => {
           if (todayMarkerVariant === 'foregroundFullSpan') {
             return {

@@ -507,6 +507,7 @@ export const TableBodyRow = <T extends BaseDataRow>(
           },
           {
             ...secondColumn,
+            isGroupHeaderColumn: true,
             showBodyContent: false,
             opaque: true,
             colSpan: restColumns.length + 1,
