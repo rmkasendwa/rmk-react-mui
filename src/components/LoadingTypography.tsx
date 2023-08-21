@@ -211,7 +211,21 @@ export const LoadingTypography = forwardRef<
   );
 
   if (hasTextOverflow) {
-    return <Tooltip title={children}>{typographyElement}</Tooltip>;
+    return (
+      <Tooltip
+        title={children}
+        PopperProps={{
+          sx: {
+            'a,a:hover': {
+              textDecoration: 'none',
+              color: 'inherit !important',
+            },
+          },
+        }}
+      >
+        {typographyElement}
+      </Tooltip>
+    );
   }
 
   return typographyElement;

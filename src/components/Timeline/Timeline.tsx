@@ -66,10 +66,12 @@ import {
   ScrollToDateFunction,
   ScrollToDateFunctionOptions,
   TimeScaleOption,
+  TimelineDataComputedProperties,
+  TimelineElement as TimelineElementType,
   timeScaleOptions,
   timelineSearchParamValidationSpec,
 } from './models';
-import TimelineElement, { TimelineElementProps } from './TimelineElement';
+import TimelineElement from './TimelineElement';
 import TimeScaleMeter, {
   TimeScaleMeterProps,
   timeScaleMeterClasses,
@@ -177,9 +179,7 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
   rowLabelsColumnHeader?: ReactNode;
 
   /** A function to get an array of timeline elements for each row. */
-  getTimelineElements?: (
-    row: RecordRow
-  ) => Omit<TimelineElementProps, 'scrollingAncenstorElement'>[];
+  getTimelineElements?: (row: RecordRow) => TimelineElementType[];
 
   /** An optional ID for the timeline component. */
   id?: string;
@@ -254,7 +254,7 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
 
   /** An array of static rows with additional data, like timeline elements and label. */
   staticRows?: (BaseDataRow & {
-    timelineElements: Omit<TimelineElementProps, 'scrollingAncenstorElement'>[];
+    timelineElements: TimelineElementType[];
     label?: ReactNode;
   })[];
 
@@ -312,6 +312,15 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
    * @default true
    */
   isMasterTimeline?: boolean;
+
+  /**
+   * Function to be called when the timeline computed properties change.
+   *
+   * @param timelineDataComputedProperties The properties computed from the timeline data.
+   */
+  onChangeTimelineComputedProperties?: (
+    timelineDataComputedProperties: TimelineDataComputedProperties
+  ) => void;
 }
 
 export function getTimelineUtilityClass(slot: string): string {
@@ -401,6 +410,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     RowLabelColumnProps,
     defaultViewResetFunctionRef,
     isMasterTimeline = true,
+    onChangeTimelineComputedProperties,
     sx,
     ...rest
   } = omit(
@@ -482,6 +492,12 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   const onChangeCurrentDateAtCenterRef = useRef(onChangeCurrentDateAtCenter);
   onChangeCurrentDateAtCenterRef.current = onChangeCurrentDateAtCenter;
 
+  const onChangeTimelineComputedPropertiesRef = useRef(
+    onChangeTimelineComputedProperties
+  );
+  onChangeTimelineComputedPropertiesRef.current =
+    onChangeTimelineComputedProperties;
+
   const supportedTimeScalesRef = useRef(supportedTimeScales);
   supportedTimeScalesRef.current = supportedTimeScales;
 
@@ -533,6 +549,15 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   /**
    * Memoized calculation of various timeline-related values and properties.
    */
+  const timelineDataComputedProperties = useTimelineDataComputedProperties({
+    rows,
+    endDateProperty,
+    startDateProperty,
+    minDate: minDateProp,
+    maxDate: maxDateProp,
+    getTimelineDates,
+  });
+
   const {
     minCalendarDate,
     maxCalendarDate,
@@ -543,14 +568,13 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     allDates,
     timelineDifferenceInDays,
     timelineDifferenceInHours,
-  } = useTimelineDataComputedProperties({
-    rows,
-    endDateProperty,
-    startDateProperty,
-    minDate: minDateProp,
-    maxDate: maxDateProp,
-    getTimelineDates,
-  });
+  } = timelineDataComputedProperties;
+
+  useEffect(() => {
+    onChangeTimelineComputedPropertiesRef.current?.(
+      timelineDataComputedProperties
+    );
+  }, [timelineDataComputedProperties]);
 
   minCalendarDateRef && (minCalendarDateRef.current = minCalendarDate);
   maxCalendarDateRef && (maxCalendarDateRef.current = maxCalendarDate);
@@ -967,7 +991,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     TooltipProps = {},
     sx,
     ...rest
-  }: Omit<TimelineElementProps, 'scrollingAncenstorElement'> & {
+  }: TimelineElementType & {
     id: string;
   }) => {
     const startDate = startDateValue
@@ -1652,13 +1676,37 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       getColumnValue: (row) => {
         const timelineElements = (() => {
           if (row.isTimelineStaticRow) {
-            return row.timelineElements as Omit<
-              TimelineElementProps,
-              'scrollingAncenstorElement'
-            >[];
+            return row.timelineElements as TimelineElementType[];
           }
           if (getTimelineElements) {
             return getTimelineElements(row);
+          }
+          if (startDateProperty && endDateProperty) {
+            return [
+              {
+                id: row.id,
+                startDate: result(row, startDateProperty),
+                endDate: result(row, endDateProperty),
+                label: ((): ReactNode => {
+                  if (getTimelineElementLabel) {
+                    return getTimelineElementLabel(row);
+                  }
+                  if (timelineElementLabelProperty) {
+                    return result(row, timelineElementLabelProperty);
+                  }
+                })(),
+                TooltipProps: (() => {
+                  if (getTimelineElementTooltipProps) {
+                    return getTimelineElementTooltipProps(row);
+                  }
+                })(),
+                ...(() => {
+                  if (getTimelineElementProps) {
+                    return getTimelineElementProps(row);
+                  }
+                })(),
+              },
+            ] as TimelineElementType[];
           }
         })();
         if (timelineElements && timelineElements.length > 0) {
