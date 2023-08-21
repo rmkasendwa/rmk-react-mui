@@ -9,6 +9,7 @@ import {
   ComponentsProps,
   ComponentsVariants,
   Grid,
+  Stack,
   Typography,
   TypographyProps,
   alpha,
@@ -16,18 +17,20 @@ import {
   generateUtilityClass,
   generateUtilityClasses,
   lighten,
-  tableBodyClasses,
   useMediaQuery,
   useTheme,
   useThemeProps,
 } from '@mui/material';
 import clsx from 'clsx';
 import addHours from 'date-fns/addHours';
+import addYears from 'date-fns/addYears';
 import differenceInDays from 'date-fns/differenceInDays';
 import differenceInHours from 'date-fns/differenceInHours';
 import formatDate from 'date-fns/format';
 import isAfter from 'date-fns/isAfter';
 import isBefore from 'date-fns/isBefore';
+import maxDate from 'date-fns/max';
+import minDate from 'date-fns/min';
 import { omit, result } from 'lodash';
 import {
   Fragment,
@@ -1710,60 +1713,116 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           }
         })();
         if (timelineElements && timelineElements.length > 0) {
-          return (
-            <>
-              {timelineElements
-                .sort(
-                  ({ startDate: aStartDate }, { startDate: bStartDate }) => {
-                    if (aStartDate && bStartDate) {
-                      return (
-                        createDateWithoutTimezoneOffset(aStartDate).getTime() -
-                        createDateWithoutTimezoneOffset(bStartDate).getTime()
-                      );
-                    }
-                    return 0;
+          const timelineElementsSwimLanes = (() => {
+            const timelineElementsToRender = [...timelineElements];
+            const swimLanes = [timelineElementsToRender.splice(0, 1)];
+
+            //#region Compute overlaps
+            while (timelineElementsToRender.length > 0) {
+              const timelineElementToRender = timelineElementsToRender.shift()!;
+              const valueStartDate = (() => {
+                if (timelineElementToRender.startDate) {
+                  return new Date(timelineElementToRender.startDate);
+                }
+                return addYears(new Date(), -1000);
+              })();
+              const valueEndDate = (() => {
+                if (timelineElementToRender.endDate) {
+                  return new Date(timelineElementToRender.endDate);
+                }
+                return addYears(new Date(), 1000);
+              })();
+              const idealSwimLane = (() => {
+                for (let i = 0; i < swimLanes.length; i++) {
+                  if (
+                    swimLanes[i].every(
+                      ({
+                        startDate: startDateString,
+                        endDate: endDateString,
+                      }) => {
+                        const startDate = (() => {
+                          if (startDateString) {
+                            return new Date(startDateString);
+                          }
+                          return addYears(new Date(), -1000);
+                        })();
+                        const endDate = (() => {
+                          if (endDateString) {
+                            return new Date(endDateString);
+                          }
+                          return addYears(new Date(), 1000);
+                        })();
+                        //#region Check that the timeline element to render does not overlap with the timeline element in the swim lane
+                        return !(
+                          maxDate([valueStartDate, startDate]) <
+                          minDate([valueEndDate, endDate])
+                        );
+                        //#endregion
+                      }
+                    )
+                  ) {
+                    return swimLanes[i];
                   }
-                )
-                .map((timelineElement, index) => {
-                  return (
-                    <Fragment key={index}>
-                      {getTimelineElementNode({
-                        ...timelineElement,
-                        id: String(row.id + index),
+                }
+                const newSwimLane: (typeof swimLanes)[number] = [];
+                swimLanes.push(newSwimLane);
+                return newSwimLane;
+              })();
+              idealSwimLane.push(timelineElementToRender);
+            }
+            //#endregion
+            return swimLanes;
+          })();
+          return (
+            <Stack
+              sx={{
+                width: '100%',
+                gap: 0.5,
+              }}
+            >
+              {timelineElementsSwimLanes.map((timelineElements, index) => {
+                return (
+                  <Box
+                    key={index}
+                    sx={{
+                      position: 'relative',
+                      height: 42,
+                    }}
+                  >
+                    {timelineElements
+                      .sort(
+                        (
+                          { startDate: aStartDate },
+                          { startDate: bStartDate }
+                        ) => {
+                          if (aStartDate && bStartDate) {
+                            return (
+                              createDateWithoutTimezoneOffset(
+                                aStartDate
+                              ).getTime() -
+                              createDateWithoutTimezoneOffset(
+                                bStartDate
+                              ).getTime()
+                            );
+                          }
+                          return 0;
+                        }
+                      )
+                      .map((timelineElement, index) => {
+                        return (
+                          <Fragment key={index}>
+                            {getTimelineElementNode({
+                              ...timelineElement,
+                              id: String(row.id + index),
+                            })}
+                          </Fragment>
+                        );
                       })}
-                    </Fragment>
-                  );
-                })}
-            </>
+                  </Box>
+                );
+              })}
+            </Stack>
           );
-        }
-        if (startDateProperty && endDateProperty) {
-          const timelineElementNode = getTimelineElementNode({
-            id: row.id,
-            startDate: result(row, startDateProperty),
-            endDate: result(row, endDateProperty),
-            label: ((): ReactNode => {
-              if (getTimelineElementLabel) {
-                return getTimelineElementLabel(row);
-              }
-              if (timelineElementLabelProperty) {
-                return result(row, timelineElementLabelProperty);
-              }
-            })(),
-            TooltipProps: (() => {
-              if (getTimelineElementTooltipProps) {
-                return getTimelineElementTooltipProps(row);
-              }
-            })(),
-            ...(() => {
-              if (getTimelineElementProps) {
-                return getTimelineElementProps(row);
-              }
-            })(),
-          });
-          if (timelineElementNode) {
-            return timelineElementNode;
-          }
         }
 
         if (row.isTimelineStaticRow && !showPlaceholderWhenStaticRowIsEmpty) {
@@ -1806,9 +1865,6 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         pl: 0,
         pr: 0,
         py: 0.5,
-        '&>div': {
-          height: 42,
-        },
         [`&.${tableBodyColumnClasses.groupHeaderColumn}`]: {
           zIndex: 1,
         },
@@ -1867,6 +1923,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         },
       },
       bodySx: {
+        pt: '14px',
         ...RowLabelColumnProps?.bodySx,
         zIndex: 3,
         [`&.${tableBodyColumnClasses.groupHeaderColumn}`]: {
@@ -1992,9 +2049,6 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         })()}
         sx={{
           ...sx,
-          [`.${tableBodyClasses.root} tr`]: {
-            verticalAlign: 'middle',
-          },
           [`.${classes.dateAtCursorMarker}`]: {
             display: 'none',
           },
