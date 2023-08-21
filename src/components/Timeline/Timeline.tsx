@@ -16,6 +16,7 @@ import {
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
   generateUtilityClasses,
+  keyframes,
   lighten,
   useMediaQuery,
   useTheme,
@@ -46,6 +47,7 @@ import {
   useState,
 } from 'react';
 import { mergeRefs } from 'react-merge-refs';
+import scrollIntoView from 'scroll-into-view-if-needed';
 import * as Yup from 'yup';
 
 import { useGlobalConfiguration } from '../../contexts/GlobalConfigurationContext';
@@ -90,25 +92,29 @@ export interface TimelineClasses {
   dateAtCursorMarkerLabel: string;
   emptyTimelineRowPlaceholder: string;
   customDateRangeBlocker: string;
+  newTimelineElement: string;
+  flicker: string;
 }
 
 export type TimelineClassKey = keyof TimelineClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiTimeline: TimelineProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiTimeline: keyof TimelineClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiTimeline?: {
@@ -118,6 +124,42 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getTimelineUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiTimeline', slot);
+};
+
+const slots: Record<TimelineClassKey, [TimelineClassKey]> = {
+  root: ['root'],
+  timelineMeterContainer: ['timelineMeterContainer'],
+  rowLabelColumn: ['rowLabelColumn'],
+  todayMarker: ['todayMarker'],
+  dateAtCursorMarker: ['dateAtCursorMarker'],
+  dateAtCursorMarkerLabel: ['dateAtCursorMarkerLabel'],
+  emptyTimelineRowPlaceholder: ['emptyTimelineRowPlaceholder'],
+  customDateRangeBlocker: ['customDateRangeBlocker'],
+  newTimelineElement: ['newTimelineElement'],
+  flicker: ['flicker'],
+};
+
+export const timelineClasses: TimelineClasses = generateUtilityClasses(
+  'MuiTimeline',
+  Object.keys(slots) as TimelineClassKey[]
+);
+
+export const flickerAnimation = keyframes`
+  0% {
+    opacity: 0;
+  }
+  10%,
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+`;
 
 /**
  * Interface for the Timeline component props.
@@ -324,36 +366,13 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
   onChangeTimelineComputedProperties?: (
     timelineDataComputedProperties: TimelineDataComputedProperties
   ) => void;
+
+  /**
+   * The ids of the timeline elements that have just been added. The timeline will scroll to the first element in the
+   * list and highlight the elements in the list.
+   */
+  newTimelineElementIds?: string[];
 }
-
-export function getTimelineUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiTimeline', slot);
-}
-
-export const timelineClasses: TimelineClasses = generateUtilityClasses(
-  'MuiTimeline',
-  [
-    'root',
-    'timelineMeterContainer',
-    'rowLabelColumn',
-    'todayMarker',
-    'dateAtCursorMarker',
-    'dateAtCursorMarkerLabel',
-    'emptyTimelineRowPlaceholder',
-    'customDateRangeBlocker',
-  ]
-);
-
-const slots = {
-  root: ['root'],
-  timelineMeterContainer: ['timelineMeterContainer'],
-  rowLabelColumn: ['rowLabelColumn'],
-  todayMarker: ['todayMarker'],
-  dateAtCursorMarker: ['dateAtCursorMarker'],
-  dateAtCursorMarkerLabel: ['dateAtCursorMarkerLabel'],
-  emptyTimelineRowPlaceholder: ['emptyTimelineRowPlaceholder'],
-  customDateRangeBlocker: ['customDateRangeBlocker'],
-};
 
 export const BaseTimeline = <RecordRow extends BaseDataRow>(
   inProps: TimelineProps<RecordRow>,
@@ -414,6 +433,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     defaultViewResetFunctionRef,
     isMasterTimeline = true,
     onChangeTimelineComputedProperties,
+    newTimelineElementIds,
     sx,
     ...rest
   } = omit(
@@ -503,6 +523,15 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
 
   const supportedTimeScalesRef = useRef(supportedTimeScales);
   supportedTimeScalesRef.current = supportedTimeScales;
+
+  const newTimelineElementIdsRef = useRef(newTimelineElementIds);
+  newTimelineElementIdsRef.current = newTimelineElementIds;
+  const hasScrolledToNewTimelineElementsRef = useRef(false);
+  useEffect(() => {
+    if (rows) {
+      hasScrolledToNewTimelineElementsRef.current = false;
+    }
+  }, [rows]);
 
   const cancelMomentumTrackingRef = useRef<(() => void) | undefined>(undefined);
   //#endregion
@@ -1046,6 +1075,8 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
 
         const { ...TooltipPropsRest } = TooltipProps;
 
+        console.log({ id });
+
         return (
           <TimelineElement
             {...rest}
@@ -1060,6 +1091,11 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                 });
               }
             }}
+            className={clsx(
+              newTimelineElementIdsRef.current &&
+                newTimelineElementIdsRef.current.includes(id) &&
+                classes.newTimelineElement
+            )}
             label={timelineElementLabel}
             {...{ scrollingAncenstorElement, percentage, offsetPercentage }}
             timelineContainerWidth={scaledTimeScaleWidth}
@@ -1237,29 +1273,35 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   useEffect(() => {
     if (isMasterTimeline && timelineContainerElement) {
       const observer = new ResizeObserver(() => {
-        const hasCustomDatesSelected =
-          isCustomDatesSelected &&
-          customDateRange?.startDate &&
-          customDateRange?.endDate;
-        if (!hasCustomDatesSelected) {
-          isScrollingToTimelineCenterRef.current = true;
-          switch (defaultTimelineCenter) {
-            case 'now':
-              scrollToDateRef.current(new Date(), 'auto');
-              break;
-            case 'centerOfDataSet':
-            default:
-              scrollToDateRef.current(centerOfGravity, 'auto');
-              break;
-          }
-        } else if (hasCustomDatesSelected && customDateRange.startDate) {
-          scrollToDateRef.current(
-            createDateWithoutTimezoneOffset(customDateRange.startDate),
-            {
-              dateAlignment: 'start',
-              scrollBehaviour: 'auto',
+        if (
+          !newTimelineElementIdsRef.current ||
+          newTimelineElementIdsRef.current.length === 0 ||
+          hasScrolledToNewTimelineElementsRef.current
+        ) {
+          const hasCustomDatesSelected =
+            isCustomDatesSelected &&
+            customDateRange?.startDate &&
+            customDateRange?.endDate;
+          if (!hasCustomDatesSelected) {
+            isScrollingToTimelineCenterRef.current = true;
+            switch (defaultTimelineCenter) {
+              case 'now':
+                scrollToDateRef.current(new Date(), 'auto');
+                break;
+              case 'centerOfDataSet':
+              default:
+                scrollToDateRef.current(centerOfGravity, 'auto');
+                break;
             }
-          );
+          } else if (hasCustomDatesSelected && customDateRange.startDate) {
+            scrollToDateRef.current(
+              createDateWithoutTimezoneOffset(customDateRange.startDate),
+              {
+                dateAlignment: 'start',
+                scrollBehaviour: 'auto',
+              }
+            );
+          }
         }
       });
       observer.observe(timelineContainerElement);
@@ -1301,6 +1343,37 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     timelineViewPortLeftOffset,
     unitTimeScaleWidth,
   ]);
+
+  useEffect(() => {
+    if (
+      scrollingAncenstorElement &&
+      newTimelineElementIdsRef.current &&
+      newTimelineElementIdsRef.current.length > 0 &&
+      !hasScrolledToNewTimelineElementsRef.current
+    ) {
+      const newTimelineElementNodes =
+        scrollingAncenstorElement.querySelectorAll(
+          `.${classes.newTimelineElement}`
+        );
+      if (newTimelineElementNodes.length > 0) {
+        setTimeout(() => {
+          scrollIntoView(newTimelineElementNodes[0], {
+            scrollMode: 'if-needed',
+            behavior: 'smooth',
+            block: 'center',
+            inline: 'center',
+          });
+          setTimeout(() => {
+            newTimelineElementNodes.forEach((field) => {
+              field.classList.add(classes.flicker);
+              setTimeout(() => field.classList.remove(classes.flicker), 1000);
+            });
+          }, 500);
+        }, 1000);
+      }
+      hasScrolledToNewTimelineElementsRef.current = true;
+    }
+  }, [classes.flicker, classes.newTimelineElement, scrollingAncenstorElement]);
 
   //#region Track date at cursor
   useEffect(() => {
@@ -1813,7 +1886,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                           <Fragment key={index}>
                             {getTimelineElementNode({
                               ...timelineElement,
-                              id: String(row.id + index),
+                              id: timelineElement.id || String(row.id + index),
                             })}
                           </Fragment>
                         );
@@ -1865,6 +1938,9 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         pl: 0,
         pr: 0,
         py: 0.5,
+        '&>div': {
+          minHeight: 42,
+        },
         [`&.${tableBodyColumnClasses.groupHeaderColumn}`]: {
           zIndex: 1,
         },
@@ -2054,6 +2130,9 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           },
           [`&:hover .${classes.dateAtCursorMarker}`]: {
             display: 'block',
+          },
+          [`.${classes.flicker}`]: {
+            animation: `0.1s linear 0s infinite normal none running ${flickerAnimation}`,
           },
         }}
         minColumnWidth={0}

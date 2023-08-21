@@ -48,12 +48,14 @@ const baseArgs = {
       type: 'Timeline',
       startDateProperty: 'joinedAt',
       endDateProperty: 'leftAt',
-      getTimelineElements: ({ joinedAt, leftAt }) => {
+      getTimelineElements: ({ joinedAt, leftAt, id }) => {
+        console.log({ id });
         if (joinedAt) {
           return [
             {
               startDate: joinedAt,
               endDate: leftAt,
+              id: `timeline-element-${id}-1`,
             },
           ];
         }
@@ -63,6 +65,7 @@ const baseArgs = {
       },
       mergeTools: true,
       defaultTimelineCenter: 'now',
+      // newTimelineElementIds: [`timeline-element-4-1`, `timeline-element-5-1`],
       // staticRows: [
       //   {
       //     id: 'static-row-1',

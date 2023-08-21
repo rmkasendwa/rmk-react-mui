@@ -107,4 +107,5 @@ export type TimelineElement = {
   percentage?: number;
   offsetPercentage?: number;
   timelineContainerWidth?: number;
+  id?: string;
 } & Partial<Omit<BoxProps, 'ref'>>;
