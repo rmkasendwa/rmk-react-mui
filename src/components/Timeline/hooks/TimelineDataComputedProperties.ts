@@ -6,6 +6,7 @@ import { result } from 'lodash';
 import { useMemo, useRef } from 'react';
 
 import { BaseDataRow } from '../../Table';
+import { TimelineDataComputedProperties } from '../models';
 
 export interface TimelineDataComputedPropertiesProps<
   RecordRow extends BaseDataRow = any
@@ -163,6 +164,6 @@ export const useTimelineDataComputedProperties = ({
       timelineDifferenceInHours, // The difference in hours between the maximum and minimum dates in the timeline data.
       centerOfGravity, // The calculated center of gravity date based on the timeline data.
       allDates, // An array containing all the dates extracted from the timeline data.
-    };
+    } as TimelineDataComputedProperties;
   }, [endDateProperty, maxDateProp, minDateProp, rows, startDateProperty]);
 };

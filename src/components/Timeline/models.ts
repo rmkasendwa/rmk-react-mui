@@ -1,4 +1,4 @@
-import { BoxProps } from '@mui/material';
+import { BoxProps, TooltipProps } from '@mui/material';
 import { ReactNode } from 'react';
 import * as Yup from 'yup';
 
@@ -84,3 +84,27 @@ export type TimeScaleConfiguration = {
   unitTimeScaleWidth: number;
   timeScaleWidth: number;
 };
+
+export type TimelineDataComputedProperties = {
+  minDate: Date;
+  maxDate: Date;
+  minCalendarDate: Date;
+  maxCalendarDate: Date;
+  timelineYears: number[];
+  totalNumberOfDays: number;
+  totalNumberOfHours: number;
+  timelineDifferenceInDays: number;
+  timelineDifferenceInHours: number;
+  centerOfGravity: Date;
+  allDates: Date[];
+};
+
+export type TimelineElement = {
+  startDate?: string | number | Date;
+  endDate?: string | number | Date;
+  label?: ReactNode;
+  TooltipProps?: Partial<Omit<TooltipProps, 'ref'>>;
+  percentage?: number;
+  offsetPercentage?: number;
+  timelineContainerWidth?: number;
+} & Partial<Omit<BoxProps, 'ref'>>;

@@ -1,5 +1,4 @@
 import {
-  BoxProps,
   ComponentsOverrides,
   ComponentsProps,
   ComponentsVariants,
@@ -12,11 +11,12 @@ import {
 } from '@mui/material';
 import Box from '@mui/material/Box';
 import clsx from 'clsx';
-import { ReactNode, forwardRef, useEffect, useRef } from 'react';
+import { forwardRef, useEffect, useRef } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { mergeRefs } from 'react-merge-refs';
 
-import Tooltip, { TooltipProps } from '../Tooltip';
+import Tooltip from '../Tooltip';
+import { TimelineElement as TimelineElementType } from './models';
 
 export interface TimelineElementClasses {
   /** Styles applied to the root element. */
@@ -58,15 +58,8 @@ export interface TimelineElementViewPortOffsets {
   left?: number;
 }
 
-export interface TimelineElementProps extends Partial<Omit<BoxProps, 'ref'>> {
-  startDate?: string | number | Date;
-  endDate?: string | number | Date;
-  label?: ReactNode;
-  TooltipProps?: Partial<TooltipProps>;
+export interface TimelineElementProps extends TimelineElementType {
   scrollingAncenstorElement?: HTMLElement | null;
-  percentage?: number;
-  offsetPercentage?: number;
-  timelineContainerWidth?: number;
 }
 
 export function getTimelineElementUtilityClass(slot: string): string {
