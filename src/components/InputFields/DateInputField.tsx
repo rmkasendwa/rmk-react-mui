@@ -45,21 +45,23 @@ export interface DateInputFieldClasses {
 
 export type DateInputFieldClassKey = keyof DateInputFieldClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiDateInputField: DateInputFieldProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiDateInputField: keyof DateInputFieldClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiDateInputField?: {
@@ -69,6 +71,21 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getDateInputFieldUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiDateInputField', slot);
+};
+
+const slots: Record<DateInputFieldClassKey, [DateInputFieldClassKey]> = {
+  root: ['root'],
+};
+
+export const dateInputFieldClasses: DateInputFieldClasses =
+  generateUtilityClasses(
+    'MuiDateInputField',
+    Object.keys(slots) as DateInputFieldClassKey[]
+  );
 
 export interface DateInputFieldProps extends TextFieldProps {
   value?: string;
@@ -88,17 +105,6 @@ export interface DateInputFieldProps extends TextFieldProps {
     >
   >;
 }
-
-export function getDateInputFieldUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiDateInputField', slot);
-}
-
-export const dateInputFieldClasses: DateInputFieldClasses =
-  generateUtilityClasses('MuiDateInputField', ['root']);
-
-const slots = {
-  root: ['root'],
-};
 
 export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
   function DateInputField(inProps, ref) {
@@ -176,8 +182,12 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
     );
 
     const { minDate, maxDate } = useMemo(() => {
-      const minDate = minDateProp ? new Date(minDateProp) : null;
-      const maxDate = maxDateProp ? new Date(maxDateProp) : null;
+      const minDate = minDateProp
+        ? createDateWithoutTimezoneOffset(minDateProp)
+        : null;
+      const maxDate = maxDateProp
+        ? createDateWithoutTimezoneOffset(maxDateProp)
+        : null;
       if (minDate) {
         minDate.setHours(0, 0, 0, 0);
       }
@@ -296,10 +306,7 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
                         if (enableTimeSelector) {
                           return selectedDate.toISOString();
                         }
-                        return formatDate(
-                          createDateWithoutTimezoneOffset(selectedDate),
-                          'yyyy-MM-dd'
-                        );
+                        return formatDate(selectedDate, 'yyyy-MM-dd');
                       }
                       return '';
                     })()
