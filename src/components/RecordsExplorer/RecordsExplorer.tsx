@@ -432,7 +432,7 @@ export interface RecordsExplorerProps<
   getViewFunction?: (viewFunction: (record: RecordRow) => void) => void;
   getEditFunction?: (editFunction: (record: RecordRow) => void) => void;
   getDeleteFunction?: (editFunction: (record: RecordRow) => void) => void;
-  onEditRecord?: () => void;
+  onEditRecord?: (updatedRecord: RecordRow) => void;
   getToolbarElement?: (toolbarElement: ReactElement) => ReactElement;
 
   // View Path
@@ -1798,6 +1798,7 @@ const BaseRecordsExplorer = <
     update,
     updating,
     updated,
+    updatedRecord,
     errorMessage: updateErrorMessage,
     reset: resetUpdate,
   } = useUpdate(recordEditor!);
@@ -2888,16 +2889,18 @@ const BaseRecordsExplorer = <
                       }
                     }}
                     onClose={() => {
+                      modalFormProps.onClose?.();
+                      ViewModalFormProps.onClose?.();
+                      resetUpdate();
+                      resetSelectedRecordState();
                       if (updated) {
-                        onEditRecord && onEditRecord();
                         autoSync && renderExplorerElement && load();
                         showSuccessMessage(
                           recordEditSuccessMessage ||
                             `The ${lowercaseRecordLabelSingular} was updated successfully`
                         );
+                        onEditRecord?.(updatedRecord);
                       }
-                      resetUpdate();
-                      resetSelectedRecordState();
                       if (defaultPath) {
                         navigate(defaultPath);
                       } else {
