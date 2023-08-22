@@ -44,16 +44,12 @@ export const useAggregatedFormikContext = ({
 
   const onChange = useCallback<NonNullable<typeof onChangeProp>>(
     (event) => {
-      if (propertyPath && rootPropertyPath) {
-        if (event.target.value != null) {
-          setFieldValueRef.current(propertyPath, event.target.value);
-        } else {
-          setFieldValueRef.current(rootPropertyPath, undefined);
-        }
+      if (propertyPath) {
+        setFieldValueRef.current(propertyPath, event.target.value);
       }
       onChangePropRef.current && onChangePropRef.current(event);
     },
-    [propertyPath, rootPropertyPath]
+    [propertyPath]
   );
 
   const onBlur = useCallback<NonNullable<typeof onBlurProp>>((event) => {

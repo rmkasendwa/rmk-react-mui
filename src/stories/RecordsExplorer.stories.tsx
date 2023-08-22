@@ -49,7 +49,6 @@ const baseArgs = {
       startDateProperty: 'joinedAt',
       endDateProperty: 'leftAt',
       getTimelineElements: ({ joinedAt, leftAt, id }) => {
-        console.log({ id });
         if (joinedAt) {
           return [
             {

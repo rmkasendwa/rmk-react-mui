@@ -1075,8 +1075,6 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
 
         const { ...TooltipPropsRest } = TooltipProps;
 
-        console.log({ id });
-
         return (
           <TimelineElement
             {...rest}
@@ -1349,7 +1347,8 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       scrollingAncenstorElement &&
       newTimelineElementIdsRef.current &&
       newTimelineElementIdsRef.current.length > 0 &&
-      !hasScrolledToNewTimelineElementsRef.current
+      !hasScrolledToNewTimelineElementsRef.current &&
+      rows.length > 0
     ) {
       const newTimelineElementNodes =
         scrollingAncenstorElement.querySelectorAll(
@@ -1373,7 +1372,12 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       }
       hasScrolledToNewTimelineElementsRef.current = true;
     }
-  }, [classes.flicker, classes.newTimelineElement, scrollingAncenstorElement]);
+  }, [
+    classes.flicker,
+    classes.newTimelineElement,
+    scrollingAncenstorElement,
+    rows,
+  ]);
 
   //#region Track date at cursor
   useEffect(() => {

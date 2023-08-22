@@ -2790,6 +2790,8 @@ const BaseRecordsExplorer = <
                 }
               }}
               onClose={() => {
+                modalFormProps.onClose?.();
+                CreateModalFormPropsRest.onClose?.();
                 resetCreation();
                 if (created) {
                   if (showSuccessMessageOnCreateRecord) {
@@ -2801,8 +2803,8 @@ const BaseRecordsExplorer = <
                   autoSync &&
                     renderExplorerElement &&
                     setTimeout(() => load(), 1000);
+                  onCreateNewRecord?.(createdRecord);
                 }
-                onCreateNewRecord && onCreateNewRecord(createdRecord);
                 if (defaultPath) {
                   navigate(defaultPath);
                 } else {
