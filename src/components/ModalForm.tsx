@@ -294,11 +294,11 @@ export const BaseModalForm = <Values extends FormikValues>(
   }, [draftProp?.id, open]);
 
   useEffect(() => {
-    if (submitted && !successMessage) {
+    if (submitted && !loading && !successMessage) {
       onCloseRef.current({ force: true });
       onSubmitSuccessRef.current && onSubmitSuccessRef.current();
     }
-  }, [submitted, successMessage]);
+  }, [loading, submitted, successMessage]);
 
   const modalElement = (
     <Card
@@ -509,7 +509,7 @@ export const BaseModalForm = <Values extends FormikValues>(
                         </Box>
                       ) : null}
                       {(() => {
-                        if (submitted && successMessage) {
+                        if (submitted && !loading && successMessage) {
                           return (
                             <Alert
                               variant="filled"
@@ -575,7 +575,7 @@ export const BaseModalForm = <Values extends FormikValues>(
                       <>
                         {editMode
                           ? (() => {
-                              if (submitted || !showForm) {
+                              if ((submitted || !showForm) && !loading) {
                                 if (showCloseActionButton) {
                                   return (
                                     <Grid item>
