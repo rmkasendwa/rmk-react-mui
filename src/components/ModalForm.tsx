@@ -294,11 +294,11 @@ export const BaseModalForm = <Values extends FormikValues>(
   }, [draftProp?.id, open]);
 
   useEffect(() => {
-    if (submitted && !loading && !successMessage) {
+    if (submitted && !successMessage) {
       onCloseRef.current({ force: true });
       onSubmitSuccessRef.current && onSubmitSuccessRef.current();
     }
-  }, [loading, submitted, successMessage]);
+  }, [submitted, successMessage]);
 
   const modalElement = (
     <Card
@@ -614,7 +614,7 @@ export const BaseModalForm = <Values extends FormikValues>(
                                         {submitButtonText}
                                       </LoadingButton>
                                     </Grid>
-                                    {!isSubmitting ? (
+                                    {!isSubmitting && !loading ? (
                                       <Grid item>
                                         <Button
                                           variant="text"
