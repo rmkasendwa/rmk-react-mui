@@ -1348,7 +1348,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       newTimelineElementIdsRef.current &&
       newTimelineElementIdsRef.current.length > 0 &&
       !hasScrolledToNewTimelineElementsRef.current &&
-      rows.length > 0
+      rows
     ) {
       const newTimelineElementNodes =
         scrollingAncenstorElement.querySelectorAll(
@@ -1360,23 +1360,34 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
             scrollMode: 'if-needed',
             behavior: 'smooth',
             block: 'center',
-            inline: 'center',
+            inline: 'start',
           });
           setTimeout(() => {
-            newTimelineElementNodes.forEach((field) => {
-              field.classList.add(classes.flicker);
-              setTimeout(() => field.classList.remove(classes.flicker), 1000);
+            scrollingAncenstorElement?.scrollBy({
+              left: -(
+                (scrollingAncenstorElement.clientWidth +
+                  timelineViewPortLeftOffset) /
+                2
+              ),
+              behavior: 'smooth',
             });
-          }, 500);
-        }, 1000);
+            setTimeout(() => {
+              newTimelineElementNodes.forEach((field) => {
+                field.classList.add(classes.flicker);
+                setTimeout(() => field.classList.remove(classes.flicker), 1000);
+              });
+            }, 300);
+          }, 800);
+        }, 500);
       }
       hasScrolledToNewTimelineElementsRef.current = true;
     }
   }, [
     classes.flicker,
     classes.newTimelineElement,
-    scrollingAncenstorElement,
     rows,
+    scrollingAncenstorElement,
+    timelineViewPortLeftOffset,
   ]);
 
   //#region Track date at cursor
