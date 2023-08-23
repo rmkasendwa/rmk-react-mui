@@ -53,9 +53,15 @@ export const AuthProvider: FC<{
   } = useAPIService(loggedInUser);
 
   useEffect(() => {
-    const user = StorageManager.get('user');
-    setLoggedInUser(user);
-    setLoadingCurrentSession(false);
+    const focusCallback = async () => {
+      setLoggedInUser(StorageManager.get('user'));
+      setLoadingCurrentSession(false);
+    };
+    window.addEventListener('focus', focusCallback);
+    focusCallback();
+    return () => {
+      window.removeEventListener('focus', focusCallback);
+    };
   }, []);
 
   const updateLoggedInUserSession = useCallback(
