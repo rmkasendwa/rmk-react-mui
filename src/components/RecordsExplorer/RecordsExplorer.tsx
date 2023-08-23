@@ -1807,8 +1807,8 @@ const BaseRecordsExplorer = <
     if (getEditableRecordInitialValuesRef.current && selectedRecord) {
       return getEditableRecordInitialValuesRef.current(selectedRecord);
     }
-    return { ...initialValues, ...(selectedRecord as any) };
-  }, [selectedRecord, initialValues]);
+    return { ...(selectedRecord as any) };
+  }, [selectedRecord]);
 
   const allGroupsExpanded = Boolean(
     !searchParamExpandedGroups || searchParamExpandedGroups === 'All'
@@ -2784,28 +2784,26 @@ const BaseRecordsExplorer = <
               validationSchema={validationSchema || {}}
               open={showModalForm && createNewRecord}
               errorMessage={createErrorMessage}
-              loading={creating}
+              loading={creating || created}
               onSubmit={async (values) => {
                 if (recordCreator) {
                   await create(values);
                 }
               }}
-              onClose={() => {
-                modalFormProps.onClose?.();
-                CreateModalFormPropsRest.onClose?.();
-                resetCreation();
+              onClose={async () => {
+                await modalFormProps.onClose?.();
+                await CreateModalFormPropsRest.onClose?.();
                 if (created) {
+                  autoSync && renderExplorerElement && (await load());
+                  await onCreateNewRecord?.(createdRecord);
                   if (showSuccessMessageOnCreateRecord) {
                     showSuccessMessage(
                       recordCreateSuccessMessage ||
                         `The new ${lowercaseRecordLabelSingular} was created successfully`
                     );
                   }
-                  autoSync &&
-                    renderExplorerElement &&
-                    setTimeout(() => load(), 1000);
-                  onCreateNewRecord?.(createdRecord);
                 }
+                resetCreation();
                 if (defaultPath) {
                   navigate(defaultPath);
                 } else {
@@ -2882,25 +2880,25 @@ const BaseRecordsExplorer = <
                     initialValues={editInitialValues || {}}
                     open={Boolean(showModalForm && selectedRecordId)}
                     errorMessage={updateErrorMessage}
-                    loading={updating}
+                    loading={updating || updated}
                     onSubmit={async (values) => {
                       if (recordEditor && selectedRecord) {
                         await update(selectedRecord, values);
                       }
                     }}
-                    onClose={() => {
-                      modalFormProps.onClose?.();
-                      ViewModalFormProps.onClose?.();
-                      resetUpdate();
-                      resetSelectedRecordState();
+                    onClose={async () => {
+                      await modalFormProps.onClose?.();
+                      await ViewModalFormProps.onClose?.();
                       if (updated) {
-                        autoSync && renderExplorerElement && load();
+                        autoSync && renderExplorerElement && (await load());
+                        await onEditRecord?.(updatedRecord);
                         showSuccessMessage(
                           recordEditSuccessMessage ||
                             `The ${lowercaseRecordLabelSingular} was updated successfully`
                         );
-                        onEditRecord?.(updatedRecord);
                       }
+                      resetUpdate();
+                      resetSelectedRecordState();
                       if (defaultPath) {
                         navigate(defaultPath);
                       } else {

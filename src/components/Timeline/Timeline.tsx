@@ -1355,28 +1355,26 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           `.${classes.newTimelineElement}`
         );
       if (newTimelineElementNodes.length > 0) {
+        const anchorElement = document.createElement('div');
         setTimeout(() => {
-          scrollIntoView(newTimelineElementNodes[0], {
-            scrollMode: 'if-needed',
+          anchorElement.style.position = 'absolute';
+          anchorElement.style.top = '0';
+          anchorElement.style.left = `-${timelineViewPortLeftOffset}px`;
+          anchorElement.style.width = `${timelineViewPortLeftOffset}px`;
+          anchorElement.style.height = '1px';
+          newTimelineElementNodes[0].prepend(anchorElement);
+          scrollIntoView(anchorElement, {
+            scrollMode: 'always',
             behavior: 'smooth',
             block: 'center',
-            inline: 'start',
+            inline: 'center',
           });
           setTimeout(() => {
-            scrollingAncenstorElement?.scrollBy({
-              left: -(
-                (scrollingAncenstorElement.clientWidth +
-                  timelineViewPortLeftOffset) /
-                2
-              ),
-              behavior: 'smooth',
+            newTimelineElementNodes.forEach((field) => {
+              field.classList.add(classes.flicker);
+              setTimeout(() => field.classList.remove(classes.flicker), 1000);
             });
-            setTimeout(() => {
-              newTimelineElementNodes.forEach((field) => {
-                field.classList.add(classes.flicker);
-                setTimeout(() => field.classList.remove(classes.flicker), 1000);
-              });
-            }, 300);
+            anchorElement.remove();
           }, 800);
         }, 500);
       }
