@@ -751,7 +751,7 @@ export const BaseModalForm = <Values extends FormikValues>(
   return (
     <ModalPopup
       {...rest}
-      {...{ modalElement, title, placement, open }}
+      {...{ modalElement, title, placement, open, onClose }}
       ref={ref}
       className={clsx(classes.root)}
     />
