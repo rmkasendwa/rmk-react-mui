@@ -526,6 +526,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
 
   const newTimelineElementIdsRef = useRef(newTimelineElementIds);
   newTimelineElementIdsRef.current = newTimelineElementIds;
+
   const hasScrolledToNewTimelineElementsRef = useRef(false);
   useEffect(() => {
     if (rows) {
@@ -1374,11 +1375,11 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
               field.classList.add(classes.flicker);
               setTimeout(() => field.classList.remove(classes.flicker), 1000);
             });
+            hasScrolledToNewTimelineElementsRef.current = true;
             anchorElement.remove();
           }, 800);
         }, 500);
       }
-      hasScrolledToNewTimelineElementsRef.current = true;
     }
   }, [
     classes.flicker,
