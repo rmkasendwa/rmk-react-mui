@@ -931,166 +931,152 @@ export const useTable = <DataRow extends BaseDataRow>(
                     }}
                   >
                     {(() => {
-                      if (showHeaderText && label) {
+                      if (isGroupedTable && index === 0) {
                         return (
-                          <>
-                            {(() => {
-                              if (isGroupedTable && index === 0) {
-                                return (
-                                  <TableGroupCollapseTool
-                                    groupCollapsed={
-                                      TableGroupingProps?.allGroupsCollapsed ||
-                                      false
-                                    }
-                                    onChangeGroupCollapsed={
-                                      TableGroupingProps?.onChangeAllGroupsCollapsed
-                                    }
-                                  />
-                                );
-                              }
-                            })()}
-                            {(() => {
-                              if (wrapColumnContentInFieldValue) {
-                                return (
-                                  <Typography
-                                    component="div"
-                                    variant="body2"
-                                    sx={{ fontWeight: 'bold' }}
-                                    noWrap
-                                  >
-                                    {label}
-                                  </Typography>
-                                );
-                              }
-                              return label;
-                            })()}
-                            {(() => {
-                              if (
-                                columnSortable &&
-                                (!enableColumnDisplayToggle || !isLastColumn)
-                              ) {
-                                const sortDirection = (() => {
-                                  if (sortBy[0] && sortBy[0].id === id) {
-                                    return sortBy[0].sortDirection || 'ASC';
-                                  }
-                                })();
-                                return (
-                                  <Stack
-                                    sx={{
-                                      position: 'absolute',
-                                      top: 0,
-                                      right: 0,
-                                      height: '100%',
-                                      fontSize: 10,
-                                      lineHeight: 1,
-                                      color: alpha(palette.text.primary, 0.1),
-                                    }}
-                                  >
-                                    {(
-                                      ['ASC', 'DESC'] as [
-                                        SortDirection,
-                                        SortDirection
-                                      ]
-                                    ).map((baseSortDirection) => {
-                                      return (
-                                        <Box
-                                          key={baseSortDirection}
-                                          onClick={() => {
-                                            const sortOptions: typeof sortBy = [
-                                              {
-                                                id,
-                                                sortDirection:
-                                                  baseSortDirection,
-                                                type: mapTableColumnTypeToPrimitiveDataType(
-                                                  type
-                                                ),
-                                                getSortValue: (row) => {
-                                                  const columnValue = (() => {
-                                                    if (getColumnValue) {
-                                                      return getColumnValue(
-                                                        row,
-                                                        column
-                                                      );
-                                                    }
-                                                    return row[id];
-                                                  })();
-                                                  const acceptableTypes = [
-                                                    'number',
-                                                    'string',
-                                                    'boolean',
-                                                  ];
-                                                  if (
-                                                    acceptableTypes.includes(
-                                                      typeof columnValue
-                                                    )
-                                                  ) {
-                                                    return columnValue as
-                                                      | number
-                                                      | string
-                                                      | boolean;
-                                                  }
-                                                  if (
-                                                    acceptableTypes.includes(
-                                                      typeof row[id]
-                                                    )
-                                                  ) {
-                                                    return row[id] as
-                                                      | number
-                                                      | string
-                                                      | boolean;
-                                                  }
-                                                  return '';
-                                                },
-                                              },
-                                            ];
-                                            setSortBy(sortOptions);
-                                            onChangeSortBy &&
-                                              onChangeSortBy(sortOptions);
-                                          }}
-                                          sx={{
-                                            flex: 1,
-                                            display: 'flex',
-                                            px: 0.8,
-                                            alignItems:
-                                              baseSortDirection === 'ASC'
-                                                ? 'end'
-                                                : 'start',
-                                            cursor: 'pointer',
-                                            ...(() => {
-                                              if (
-                                                sortDirection ===
-                                                baseSortDirection
-                                              ) {
-                                                return {
-                                                  color: palette.text.primary,
-                                                };
-                                              }
-                                              return {
-                                                '&:hover': {
-                                                  color: alpha(
-                                                    palette.text.primary,
-                                                    0.3
-                                                  ),
-                                                },
-                                              };
-                                            })(),
-                                          }}
-                                        >
-                                          <span>
-                                            {baseSortDirection === 'ASC' ? (
-                                              <>&#9650;</>
-                                            ) : (
-                                              <>&#9660;</>
-                                            )}
-                                          </span>
-                                        </Box>
-                                      );
-                                    })}
-                                  </Stack>
-                                );
-                              }
-                            })()}
-                          </>
+                          <TableGroupCollapseTool
+                            groupCollapsed={
+                              TableGroupingProps?.allGroupsCollapsed || false
+                            }
+                            onChangeGroupCollapsed={
+                              TableGroupingProps?.onChangeAllGroupsCollapsed
+                            }
+                          />
+                        );
+                      }
+                    })()}
+                    {(() => {
+                      if (showHeaderText) {
+                        if (wrapColumnContentInFieldValue && label) {
+                          return (
+                            <Typography
+                              component="div"
+                              variant="body2"
+                              sx={{ fontWeight: 'bold' }}
+                              noWrap
+                            >
+                              {label}
+                            </Typography>
+                          );
+                        }
+                        return label;
+                      }
+                    })()}
+                    {(() => {
+                      if (
+                        columnSortable &&
+                        (!enableColumnDisplayToggle || !isLastColumn)
+                      ) {
+                        const sortDirection = (() => {
+                          if (sortBy[0] && sortBy[0].id === id) {
+                            return sortBy[0].sortDirection || 'ASC';
+                          }
+                        })();
+                        return (
+                          <Stack
+                            sx={{
+                              position: 'absolute',
+                              top: 0,
+                              right: 0,
+                              height: '100%',
+                              fontSize: 10,
+                              lineHeight: 1,
+                              color: alpha(palette.text.primary, 0.1),
+                            }}
+                          >
+                            {(
+                              ['ASC', 'DESC'] as [SortDirection, SortDirection]
+                            ).map((baseSortDirection) => {
+                              return (
+                                <Box
+                                  key={baseSortDirection}
+                                  onClick={() => {
+                                    const sortOptions: typeof sortBy = [
+                                      {
+                                        id,
+                                        sortDirection: baseSortDirection,
+                                        type: mapTableColumnTypeToPrimitiveDataType(
+                                          type
+                                        ),
+                                        getSortValue: (row) => {
+                                          const columnValue = (() => {
+                                            if (getColumnValue) {
+                                              return getColumnValue(
+                                                row,
+                                                column
+                                              );
+                                            }
+                                            return row[id];
+                                          })();
+                                          const acceptableTypes = [
+                                            'number',
+                                            'string',
+                                            'boolean',
+                                          ];
+                                          if (
+                                            acceptableTypes.includes(
+                                              typeof columnValue
+                                            )
+                                          ) {
+                                            return columnValue as
+                                              | number
+                                              | string
+                                              | boolean;
+                                          }
+                                          if (
+                                            acceptableTypes.includes(
+                                              typeof row[id]
+                                            )
+                                          ) {
+                                            return row[id] as
+                                              | number
+                                              | string
+                                              | boolean;
+                                          }
+                                          return '';
+                                        },
+                                      },
+                                    ];
+                                    setSortBy(sortOptions);
+                                    onChangeSortBy &&
+                                      onChangeSortBy(sortOptions);
+                                  }}
+                                  sx={{
+                                    flex: 1,
+                                    display: 'flex',
+                                    px: 0.8,
+                                    alignItems:
+                                      baseSortDirection === 'ASC'
+                                        ? 'end'
+                                        : 'start',
+                                    cursor: 'pointer',
+                                    ...(() => {
+                                      if (sortDirection === baseSortDirection) {
+                                        return {
+                                          color: palette.text.primary,
+                                        };
+                                      }
+                                      return {
+                                        '&:hover': {
+                                          color: alpha(
+                                            palette.text.primary,
+                                            0.3
+                                          ),
+                                        },
+                                      };
+                                    })(),
+                                  }}
+                                >
+                                  <span>
+                                    {baseSortDirection === 'ASC' ? (
+                                      <>&#9650;</>
+                                    ) : (
+                                      <>&#9660;</>
+                                    )}
+                                  </span>
+                                </Box>
+                              );
+                            })}
+                          </Stack>
                         );
                       }
                     })()}
