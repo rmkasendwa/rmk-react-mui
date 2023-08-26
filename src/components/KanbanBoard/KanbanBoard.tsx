@@ -23,21 +23,23 @@ export interface KanbanBoardClasses {
 
 export type KanbanBoardClassKey = keyof KanbanBoardClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiKanbanBoard: KanbanBoardProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiKanbanBoard: keyof KanbanBoardClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiKanbanBoard?: {
@@ -47,25 +49,26 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getKanbanBoardUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiKanbanBoard', slot);
+};
+
+const slots: Record<KanbanBoardClassKey, [KanbanBoardClassKey]> = {
+  root: ['root'],
+};
+
+export const kanbanBoardClasses: KanbanBoardClasses = generateUtilityClasses(
+  'MuiKanbanBoard',
+  Object.keys(slots) as KanbanBoardClassKey[]
+);
 
 export interface KanbanBoardProps extends KanbanBoardDragAndDropContainerProps {
   lanes: Lane[];
   onCardClick?: CardClickHandler;
   onCardMoveAcrossLanes?: CardMoveAcrossLanesHandler;
 }
-
-export function getKanbanBoardUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiKanbanBoard', slot);
-}
-
-export const kanbanBoardClasses: KanbanBoardClasses = generateUtilityClasses(
-  'MuiKanbanBoard',
-  ['root']
-);
-
-const slots = {
-  root: ['root'],
-};
 
 export const KanbanBoard = forwardRef<HTMLDivElement, KanbanBoardProps>(
   function KanbanBoard(inProps, ref) {

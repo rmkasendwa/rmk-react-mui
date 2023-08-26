@@ -28,21 +28,23 @@ export interface KanbanBoardCardClasses {
 
 export type KanbanBoardCardClassKey = keyof KanbanBoardCardClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiKanbanBoardCard: KanbanBoardCardProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiKanbanBoardCard: keyof KanbanBoardCardClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiKanbanBoardCard?: {
@@ -52,19 +54,23 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
 
-export interface KanbanBoardCardProps extends Card {}
-
-export function getKanbanBoardCardUtilityClass(slot: string): string {
+export const getKanbanBoardCardUtilityClass = (slot: string) => {
   return generateUtilityClass('MuiKanbanBoardCard', slot);
-}
+};
 
-export const kanbanBoardCardClasses: KanbanBoardCardClasses =
-  generateUtilityClasses('MuiKanbanBoardCard', ['root']);
-
-const slots = {
+const slots: Record<KanbanBoardCardClassKey, [KanbanBoardCardClassKey]> = {
   root: ['root'],
 };
+
+export const kanbanBoardCardClasses: KanbanBoardCardClasses =
+  generateUtilityClasses(
+    'MuiKanbanBoardCard',
+    Object.keys(slots) as KanbanBoardCardClassKey[]
+  );
+
+export interface KanbanBoardCardProps extends Card {}
 
 export const KanbanBoardCard = forwardRef<any, KanbanBoardCardProps>(
   function KanbanBoardCard(inProps, ref) {
