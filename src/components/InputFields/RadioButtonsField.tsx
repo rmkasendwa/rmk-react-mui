@@ -28,21 +28,23 @@ export interface RadioButtonsFieldClasses {
 
 export type RadioButtonsFieldClassKey = keyof RadioButtonsFieldClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiRadioButtonsField: RadioButtonsFieldProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiRadioButtonsField: keyof RadioButtonsFieldClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiRadioButtonsField?: {
@@ -52,6 +54,21 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getRadioButtonsFieldUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiRadioButtonsField', slot);
+};
+
+const slots: Record<RadioButtonsFieldClassKey, [RadioButtonsFieldClassKey]> = {
+  root: ['root'],
+};
+
+export const radioButtonsFieldClasses: RadioButtonsFieldClasses =
+  generateUtilityClasses(
+    'MuiRadioButtonsField',
+    Object.keys(slots) as RadioButtonsFieldClassKey[]
+  );
 
 export interface RadioButtonsFieldProps
   extends Partial<Omit<FormControlProps, 'id' | 'name' | 'onChange' | 'value'>>,
@@ -64,17 +81,6 @@ export interface RadioButtonsFieldProps
   helperText?: ReactNode;
   options: (DropdownOption | string)[];
 }
-
-export function getRadioButtonsFieldUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiRadioButtonsField', slot);
-}
-
-export const radioButtonsFieldClasses: RadioButtonsFieldClasses =
-  generateUtilityClasses('MuiRadioButtonsField', ['root']);
-
-const slots = {
-  root: ['root'],
-};
 
 export const RadioButtonsField = forwardRef<
   HTMLDivElement,

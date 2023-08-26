@@ -20,21 +20,23 @@ export interface CreditCardExpiryDateInputFieldClasses {
 export type CreditCardExpiryDateInputFieldClassKey =
   keyof CreditCardExpiryDateInputFieldClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiCreditCardExpiryDateInputField: CreditCardExpiryDateInputFieldProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiCreditCardExpiryDateInputField: keyof CreditCardExpiryDateInputFieldClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiCreditCardExpiryDateInputField?: {
@@ -44,6 +46,24 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getCreditCardExpiryDateInputFieldUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiCreditCardExpiryDateInputField', slot);
+};
+
+const slots: Record<
+  CreditCardExpiryDateInputFieldClassKey,
+  [CreditCardExpiryDateInputFieldClassKey]
+> = {
+  root: ['root'],
+};
+
+export const creditCardExpiryDateInputFieldClasses: CreditCardExpiryDateInputFieldClasses =
+  generateUtilityClasses(
+    'MuiCreditCardExpiryDateInputField',
+    Object.keys(slots) as CreditCardExpiryDateInputFieldClassKey[]
+  );
 
 export const getValidInputValue = (inputValue: string) => {
   const numericDigitsMatch = inputValue.match(/\d{1,2}\/?\d{0,2}/);
@@ -66,19 +86,6 @@ export interface CreditCardExpiryDateInputFieldProps
   extends Omit<TextFieldProps, 'value'> {
   value?: string;
 }
-
-export function getCreditCardExpiryDateInputFieldUtilityClass(
-  slot: string
-): string {
-  return generateUtilityClass('MuiCreditCardExpiryDateInputField', slot);
-}
-
-export const creditCardExpiryDateInputFieldClasses: CreditCardExpiryDateInputFieldClasses =
-  generateUtilityClasses('MuiCreditCardExpiryDateInputField', ['root']);
-
-const slots = {
-  root: ['root'],
-};
 
 export const CreditCardExpiryDateInputField = forwardRef<
   HTMLDivElement,

@@ -21,21 +21,23 @@ export interface CreditCardCVCInputFieldClasses {
 export type CreditCardCVCInputFieldClassKey =
   keyof CreditCardCVCInputFieldClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiCreditCardCVCInputField: CreditCardCVCInputFieldProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiCreditCardCVCInputField: keyof CreditCardCVCInputFieldClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiCreditCardCVCInputField?: {
@@ -45,6 +47,24 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getCreditCardCVCInputFieldUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiCreditCardCVCInputField', slot);
+};
+
+const slots: Record<
+  CreditCardCVCInputFieldClassKey,
+  [CreditCardCVCInputFieldClassKey]
+> = {
+  root: ['root'],
+};
+
+export const creditCardCVCInputFieldClasses: CreditCardCVCInputFieldClasses =
+  generateUtilityClasses(
+    'MuiCreditCardCVCInputField',
+    Object.keys(slots) as CreditCardCVCInputFieldClassKey[]
+  );
 
 export const getValidInputValue = (inputValue: string) => {
   const numericDigitsMatch = inputValue.match(/\d/g);
@@ -58,17 +78,6 @@ export interface CreditCardCVCInputFieldProps
   extends Omit<TextFieldProps, 'value'> {
   value?: string;
 }
-
-export function getCreditCardCVCInputFieldUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiCreditCardCVCInputField', slot);
-}
-
-export const creditCardCVCInputFieldClasses: CreditCardCVCInputFieldClasses =
-  generateUtilityClasses('MuiCreditCardCVCInputField', ['root']);
-
-const slots = {
-  root: ['root'],
-};
 
 export const CreditCardCVCInputField = forwardRef<
   HTMLDivElement,

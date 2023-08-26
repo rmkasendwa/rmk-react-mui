@@ -40,21 +40,23 @@ export interface TextFieldClasses {
 
 export type TextFieldClassKey = keyof TextFieldClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiTextFieldExtended: TextFieldProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiTextFieldExtended: keyof TextFieldClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiTextFieldExtended?: {
@@ -64,6 +66,20 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getTextFieldUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiTextFieldExtended', slot);
+};
+
+const slots: Record<TextFieldClassKey, [TextFieldClassKey]> = {
+  root: ['root'],
+};
+
+export const textFieldClasses: TextFieldClasses = generateUtilityClasses(
+  'MuiTextFieldExtended',
+  Object.keys(slots) as TextFieldClassKey[]
+);
 
 export interface TextFieldProps
   extends Omit<MuiTextFieldProps, 'variant'>,
@@ -79,19 +95,6 @@ export interface TextFieldProps
   showClearButton?: boolean;
   enableLoadingState?: boolean;
 }
-
-export function getTextFieldUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiTextFieldExtended', slot);
-}
-
-export const textFieldClasses: TextFieldClasses = generateUtilityClasses(
-  'MuiTextFieldExtended',
-  ['root']
-);
-
-const slots = {
-  root: ['root'],
-};
 
 export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
   function TextField(inProps, ref) {

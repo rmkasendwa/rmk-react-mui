@@ -67,21 +67,23 @@ export interface DataDropdownFieldClasses {
 
 export type DataDropdownFieldClassKey = keyof DataDropdownFieldClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiDataDropdownField: DataDropdownFieldProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiDataDropdownField: keyof DataDropdownFieldClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiDataDropdownField?: {
@@ -91,6 +93,22 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getDataDropdownFieldUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiDataDropdownField', slot);
+};
+
+const slots: Record<DataDropdownFieldClassKey, [DataDropdownFieldClassKey]> = {
+  root: ['root'],
+  selectedOptionsWrapper: ['selectedOptionsWrapper'],
+};
+
+export const dataDropdownFieldClasses: DataDropdownFieldClasses =
+  generateUtilityClasses(
+    'MuiDataDropdownField',
+    Object.keys(slots) as DataDropdownFieldClassKey[]
+  );
 
 export interface DataDropdownFieldProps<Entity = any>
   extends Omit<TextFieldProps, 'value' | 'variant'>,
@@ -131,21 +149,6 @@ export interface DataDropdownFieldProps<Entity = any>
   showRichTextValue?: boolean;
   selectedOptionRevalidationKey?: string;
 }
-
-export function getDataDropdownFieldUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiDataDropdownField', slot);
-}
-
-export const dataDropdownFieldClasses: DataDropdownFieldClasses =
-  generateUtilityClasses('MuiDataDropdownField', [
-    'root',
-    'selectedOptionsWrapper',
-  ]);
-
-const slots = {
-  root: ['root'],
-  selectedOptionsWrapper: ['selectedOptionsWrapper'],
-};
 
 const BaseDataDropdownField = <Entity,>(
   inProps: DataDropdownFieldProps<Entity>,

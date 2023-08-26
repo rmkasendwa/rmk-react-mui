@@ -21,21 +21,23 @@ export interface CreditCardNumberInputFieldClasses {
 export type CreditCardNumberInputFieldClassKey =
   keyof CreditCardNumberInputFieldClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiCreditCardNumberInputField: CreditCardNumberInputFieldProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiCreditCardNumberInputField: keyof CreditCardNumberInputFieldClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiCreditCardNumberInputField?: {
@@ -45,6 +47,24 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getCreditCardNumberInputFieldUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiCreditCardNumberInputField', slot);
+};
+
+const slots: Record<
+  CreditCardNumberInputFieldClassKey,
+  [CreditCardNumberInputFieldClassKey]
+> = {
+  root: ['root'],
+};
+
+export const creditCardNumberInputFieldClasses: CreditCardNumberInputFieldClasses =
+  generateUtilityClasses(
+    'MuiCreditCardNumberInputField',
+    Object.keys(slots) as CreditCardNumberInputFieldClassKey[]
+  );
 
 export const getValidInputValue = (inputValue: string) => {
   const numericDigitsMatch = inputValue.match(/\d/g);
@@ -62,19 +82,6 @@ export interface CreditCardNumberInputFieldProps
   extends Omit<TextFieldProps, 'value'> {
   value?: string;
 }
-
-export function getCreditCardNumberInputFieldUtilityClass(
-  slot: string
-): string {
-  return generateUtilityClass('MuiCreditCardNumberInputField', slot);
-}
-
-export const creditCardNumberInputFieldClasses: CreditCardNumberInputFieldClasses =
-  generateUtilityClasses('MuiCreditCardNumberInputField', ['root']);
-
-const slots = {
-  root: ['root'],
-};
 
 export const CreditCardNumberInputField = forwardRef<
   HTMLDivElement,
