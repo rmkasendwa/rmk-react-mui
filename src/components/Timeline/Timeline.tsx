@@ -94,6 +94,7 @@ export interface TimelineClasses {
   customDateRangeBlocker: string;
   newTimelineElement: string;
   flicker: string;
+  timelineElementsSwimLane: string;
 }
 
 export type TimelineClassKey = keyof TimelineClasses;
@@ -141,6 +142,7 @@ const slots: Record<TimelineClassKey, [TimelineClassKey]> = {
   customDateRangeBlocker: ['customDateRangeBlocker'],
   newTimelineElement: ['newTimelineElement'],
   flicker: ['flicker'],
+  timelineElementsSwimLane: ['timelineElementsSwimLane'],
 };
 
 export const timelineClasses: TimelineClasses = generateUtilityClasses(
@@ -1871,6 +1873,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                 return (
                   <Box
                     key={index}
+                    className={clsx(classes.timelineElementsSwimLane)}
                     sx={{
                       position: 'relative',
                       height: 42,

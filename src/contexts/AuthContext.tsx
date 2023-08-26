@@ -54,7 +54,13 @@ export const AuthProvider: FC<{
 
   useEffect(() => {
     const focusCallback = async () => {
-      setLoggedInUser(StorageManager.get('user'));
+      setLoggedInUser((prevLoggedInUser) => {
+        const sessionUser = StorageManager.get('user');
+        if (JSON.stringify(sessionUser) !== JSON.stringify(prevLoggedInUser)) {
+          return sessionUser;
+        }
+        return prevLoggedInUser;
+      });
       setLoadingCurrentSession(false);
     };
     window.addEventListener('focus', focusCallback);
