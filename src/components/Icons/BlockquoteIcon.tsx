@@ -18,21 +18,23 @@ export interface BlockquoteIconClasses {
 
 export type BlockquoteIconClassKey = keyof BlockquoteIconClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiBlockquoteIcon: BlockquoteIconProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiBlockquoteIcon: keyof BlockquoteIconClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiBlockquoteIcon?: {
@@ -42,19 +44,23 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
 
-export interface BlockquoteIconProps extends SvgIconProps {}
-
-export function getBlockquoteIconUtilityClass(slot: string): string {
+export const getBlockquoteIconUtilityClass = (slot: string) => {
   return generateUtilityClass('MuiBlockquoteIcon', slot);
-}
+};
 
-export const blockquoteIconClasses: BlockquoteIconClasses =
-  generateUtilityClasses('MuiBlockquoteIcon', ['root']);
-
-const slots = {
+const slots: Record<BlockquoteIconClassKey, [BlockquoteIconClassKey]> = {
   root: ['root'],
 };
+
+export const blockquoteIconClasses: BlockquoteIconClasses =
+  generateUtilityClasses(
+    'MuiBlockquoteIcon',
+    Object.keys(slots) as BlockquoteIconClassKey[]
+  );
+
+export interface BlockquoteIconProps extends SvgIconProps {}
 
 export const BlockquoteIcon = forwardRef<SVGSVGElement, BlockquoteIconProps>(
   function BlockquoteIcon(inProps, ref) {

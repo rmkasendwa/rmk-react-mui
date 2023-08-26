@@ -18,21 +18,23 @@ export interface ImportIconClasses {
 
 export type ImportIconClassKey = keyof ImportIconClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiImportIcon: ImportIconProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiImportIcon: keyof ImportIconClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiImportIcon?: {
@@ -42,21 +44,22 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
 
-export interface ImportIconProps extends SvgIconProps {}
-
-export function getImportIconUtilityClass(slot: string): string {
+export const getImportIconUtilityClass = (slot: string) => {
   return generateUtilityClass('MuiImportIcon', slot);
-}
+};
 
-export const codeBlockIconClasses: ImportIconClasses = generateUtilityClasses(
-  'MuiImportIcon',
-  ['root']
-);
-
-const slots = {
+const slots: Record<ImportIconClassKey, [ImportIconClassKey]> = {
   root: ['root'],
 };
+
+export const importIconClasses: ImportIconClasses = generateUtilityClasses(
+  'MuiImportIcon',
+  Object.keys(slots) as ImportIconClassKey[]
+);
+
+export interface ImportIconProps extends SvgIconProps {}
 
 export const ImportIcon = forwardRef<SVGSVGElement, ImportIconProps>(
   function ImportIcon(inProps, ref) {

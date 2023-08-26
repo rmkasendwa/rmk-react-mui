@@ -18,21 +18,23 @@ export interface LinkIconClasses {
 
 export type LinkIconClassKey = keyof LinkIconClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiLinkIcon: LinkIconProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiLinkIcon: keyof LinkIconClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiLinkIcon?: {
@@ -42,21 +44,22 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
 
-export interface LinkIconProps extends SvgIconProps {}
-
-export function getLinkIconUtilityClass(slot: string): string {
+export const getLinkIconUtilityClass = (slot: string) => {
   return generateUtilityClass('MuiLinkIcon', slot);
-}
+};
+
+const slots: Record<LinkIconClassKey, [LinkIconClassKey]> = {
+  root: ['root'],
+};
 
 export const linkIconClasses: LinkIconClasses = generateUtilityClasses(
   'MuiLinkIcon',
-  ['root']
+  Object.keys(slots) as LinkIconClassKey[]
 );
 
-const slots = {
-  root: ['root'],
-};
+export interface LinkIconProps extends SvgIconProps {}
 
 export const LinkIcon = forwardRef<SVGSVGElement, LinkIconProps>(
   function LinkIcon(inProps, ref) {

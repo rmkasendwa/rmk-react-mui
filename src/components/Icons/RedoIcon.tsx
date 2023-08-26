@@ -18,21 +18,23 @@ export interface RedoIconClasses {
 
 export type RedoIconClassKey = keyof RedoIconClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiRedoIcon: RedoIconProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiRedoIcon: keyof RedoIconClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiRedoIcon?: {
@@ -42,21 +44,22 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
 
-export interface RedoIconProps extends SvgIconProps {}
-
-export function getRedoIconUtilityClass(slot: string): string {
+export const getRedoIconUtilityClass = (slot: string) => {
   return generateUtilityClass('MuiRedoIcon', slot);
-}
+};
+
+const slots: Record<RedoIconClassKey, [RedoIconClassKey]> = {
+  root: ['root'],
+};
 
 export const redoIconClasses: RedoIconClasses = generateUtilityClasses(
   'MuiRedoIcon',
-  ['root']
+  Object.keys(slots) as RedoIconClassKey[]
 );
 
-const slots = {
-  root: ['root'],
-};
+export interface RedoIconProps extends SvgIconProps {}
 
 export const RedoIcon = forwardRef<SVGSVGElement, RedoIconProps>(
   function RedoIcon(inProps, ref) {

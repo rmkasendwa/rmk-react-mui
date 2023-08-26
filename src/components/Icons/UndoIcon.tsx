@@ -18,21 +18,23 @@ export interface UndoIconClasses {
 
 export type UndoIconClassKey = keyof UndoIconClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiUndoIcon: UndoIconProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiUndoIcon: keyof UndoIconClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiUndoIcon?: {
@@ -42,21 +44,22 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
 
-export interface UndoIconProps extends SvgIconProps {}
-
-export function getUndoIconUtilityClass(slot: string): string {
+export const getUndoIconUtilityClass = (slot: string) => {
   return generateUtilityClass('MuiUndoIcon', slot);
-}
+};
+
+const slots: Record<UndoIconClassKey, [UndoIconClassKey]> = {
+  root: ['root'],
+};
 
 export const undoIconClasses: UndoIconClasses = generateUtilityClasses(
   'MuiUndoIcon',
-  ['root']
+  Object.keys(slots) as UndoIconClassKey[]
 );
 
-const slots = {
-  root: ['root'],
-};
+export interface UndoIconProps extends SvgIconProps {}
 
 export const UndoIcon = forwardRef<SVGSVGElement, UndoIconProps>(
   function UndoIcon(inProps, ref) {
