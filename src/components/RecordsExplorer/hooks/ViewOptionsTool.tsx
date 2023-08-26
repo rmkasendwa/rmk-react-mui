@@ -27,14 +27,15 @@ import PaginatedDropdownOptionList, {
 import { Tool } from '../../SearchSyncToolbar';
 import Tooltip from '../../Tooltip';
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiViewOptionsTool: ViewOptionsToolProps;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components {
     MuiViewOptionsTool?: {
@@ -43,6 +44,7 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
 
 export const viewOptionTypes = ['Timeline', 'Grid', 'List'] as const;
 

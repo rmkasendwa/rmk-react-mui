@@ -7,6 +7,8 @@ import {
   Box,
   Button,
   ClickAwayListener,
+  ComponentsProps,
+  ComponentsVariants,
   Grid,
   Grow,
   IconButton,
@@ -14,6 +16,7 @@ import {
   Popper,
   Stack,
   Typography,
+  useThemeProps,
 } from '@mui/material';
 import { omit } from 'lodash';
 import { FC, ReactNode, useEffect, useRef, useState } from 'react';
@@ -34,6 +37,25 @@ import PaginatedDropdownOptionList, {
   PaginatedDropdownOptionListProps,
 } from '../../PaginatedDropdownOptionList';
 import { BaseDataRow } from '../../Table';
+
+//#region Adding theme prop types
+declare module '@mui/material/styles/props' {
+  interface ComponentsPropsList {
+    MuiSortOperationFieldSelectorTool: SortOperationFieldSelectorToolProps;
+  }
+}
+//#endregion
+
+//#region Adding theme component types
+declare module '@mui/material/styles/components' {
+  interface Components {
+    MuiSortOperationFieldSelectorTool?: {
+      defaultProps?: ComponentsProps['MuiSortOperationFieldSelectorTool'];
+      variants?: ComponentsVariants['MuiSortOperationFieldSelectorTool'];
+    };
+  }
+}
+//#endregion
 
 const itemTypes = {
   LIST_ITEM: 'listItem',
@@ -353,7 +375,7 @@ const DraggableSortedFieldsContainer = <RecordRow extends BaseDataRow>({
   );
 };
 
-export interface SortOperationFieldSelectorToolOptions<
+export interface SortOperationFieldSelectorToolProps<
   RecordRow extends BaseDataRow = any
 > extends Partial<PopupToolOptions> {
   sortableFields: SortableFields<RecordRow>;
@@ -369,18 +391,27 @@ export interface SortOperationFieldSelectorToolOptions<
 
 export const useSortOperationFieldSelectorTool = <
   RecordRow extends BaseDataRow
->({
-  sortableFields,
-  onSelectSortOption,
-  addFieldText = 'Add another sort',
-  footerContent,
-  title,
-  icon = <SortIcon />,
-  sortLabel = 'Sort',
-  selectedSortParams,
-  onChangeSelectedSortParams,
-  ...rest
-}: SortOperationFieldSelectorToolOptions<RecordRow>) => {
+>(
+  inProps: SortOperationFieldSelectorToolProps<RecordRow>
+) => {
+  const props = useThemeProps({
+    props: inProps,
+    name: 'MuiSortOperationFieldSelectorTool',
+  });
+  const {
+    sortableFields,
+    onSelectSortOption,
+    addFieldText = 'Add another sort',
+    footerContent,
+    icon = <SortIcon />,
+    sortLabel = 'Sort',
+    selectedSortParams,
+    onChangeSelectedSortParams,
+    ...rest
+  } = omit(props, 'title');
+
+  let { title } = props;
+
   title || (title = `${sortLabel} by`);
 
   const unselectedSortableFieldsAnchorRef = useRef<HTMLButtonElement | null>(

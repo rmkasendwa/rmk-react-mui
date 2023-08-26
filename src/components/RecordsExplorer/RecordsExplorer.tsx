@@ -141,21 +141,23 @@ export interface RecordsExplorerClasses {
 
 export type RecordsExplorerClassKey = keyof RecordsExplorerClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiRecordsExplorer: RecordsExplorerProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiRecordsExplorer: keyof RecordsExplorerClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiRecordsExplorer?: {
@@ -165,6 +167,24 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getRecordsExplorerUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiRecordsExplorer', slot);
+};
+
+const slots: Record<RecordsExplorerClassKey, [RecordsExplorerClassKey]> = {
+  root: ['root'],
+  header: ['header'],
+  section: ['section'],
+  footer: ['footer'],
+};
+
+export const recordsExplorerClasses: RecordsExplorerClasses =
+  generateUtilityClasses(
+    'MuiRecordsExplorer',
+    Object.keys(slots) as RecordsExplorerClassKey[]
+  );
 
 const ENUM_TABLE_COLUMN_TYPES: TableColumnType[] = ['enum'];
 
@@ -489,25 +509,6 @@ export interface RecordsExplorerProps<
   resetToDefaultView?: () => void;
   showModalForm?: boolean;
 }
-
-export function getRecordsExplorerUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiRecordsExplorer', slot);
-}
-
-export const recordsExplorerClasses: RecordsExplorerClasses =
-  generateUtilityClasses('MuiRecordsExplorer', [
-    'root',
-    'header',
-    'section',
-    'footer',
-  ]);
-
-const slots = {
-  root: ['root'],
-  header: ['header'],
-  section: ['section'],
-  footer: ['footer'],
-};
 
 const BaseRecordsExplorer = <
   RecordRow extends BaseDataRow,
