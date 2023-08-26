@@ -26,21 +26,23 @@ export interface TimelineElementClasses {
 
 export type TimelineElementClassKey = keyof TimelineElementClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiTimelineElement: TimelineElementProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiTimelineElement: keyof TimelineElementClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiTimelineElement?: {
@@ -50,32 +52,26 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
 
-export interface TimelineElementViewPortOffsets {
-  top?: number;
-  right?: number;
-  bottom?: number;
-  left?: number;
-}
+export const getTimelineElementUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiTimelineElement', slot);
+};
+
+const slots: Record<TimelineElementClassKey, [TimelineElementClassKey]> = {
+  root: ['root'],
+  leftEdgeIntersecting: ['leftEdgeIntersecting'],
+};
+
+export const timelineElementClasses: TimelineElementClasses =
+  generateUtilityClasses(
+    'MuiTimelineElement',
+    Object.keys(slots) as TimelineElementClassKey[]
+  );
 
 export interface TimelineElementProps extends TimelineElementType {
   scrollingAncenstorElement?: HTMLElement | null;
 }
-
-export function getTimelineElementUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiTimelineElement', slot);
-}
-
-export const timelineElementClasses: TimelineElementClasses =
-  generateUtilityClasses('MuiTimelineElement', [
-    'root',
-    'leftEdgeIntersecting',
-  ]);
-
-const slots = {
-  root: ['root'],
-  leftEdgeIntersecting: ['leftEdgeIntersecting'],
-};
 
 export const TimelineElement = forwardRef<HTMLDivElement, TimelineElementProps>(
   function TimelineElement(inProps, ref) {

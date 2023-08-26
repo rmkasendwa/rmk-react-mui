@@ -5,16 +5,38 @@ import TodayIcon from '@mui/icons-material/Today';
 import {
   Button,
   ButtonGroup,
+  ComponentsProps,
+  ComponentsVariants,
   Stack,
   Typography,
   useMediaQuery,
   useTheme,
+  useThemeProps,
 } from '@mui/material';
 import { MutableRefObject } from 'react';
 
 import { ElementTool } from '../../SearchSyncToolbar';
 import Tooltip from '../../Tooltip';
 import { JumpToDateToolProps, useJumpToDateTool } from './JumpToDateTool';
+
+//#region Adding theme prop types
+declare module '@mui/material/styles/props' {
+  interface ComponentsPropsList {
+    MuiScrollTimelineTools: ScrollTimelineToolsProps;
+  }
+}
+//#endregion
+
+//#region Adding theme component types
+declare module '@mui/material/styles/components' {
+  interface Components {
+    MuiScrollTimelineTools?: {
+      defaultProps?: ComponentsProps['MuiScrollTimelineTools'];
+      variants?: ComponentsVariants['MuiScrollTimelineTools'];
+    };
+  }
+}
+//#endregion
 
 export interface ScrollTimelineToolsProps {
   JumpToDateToolProps?: Partial<JumpToDateToolProps>;
@@ -48,29 +70,38 @@ export interface ScrollTimelineToolsProps {
   showNavigationTools?: boolean;
 }
 
-export const useScrollTimelineTools = ({
-  JumpToDateToolProps,
+export const useScrollTimelineTools = (
+  inProps: ScrollTimelineToolsProps = {}
+) => {
+  const props = useThemeProps({
+    props: inProps,
+    name: 'MuiScrollTimelineTools',
+  });
+  const {
+    JumpToDateToolProps,
 
-  scrollToDate,
-  scrollToDateFunctionRef,
+    scrollToDate,
+    scrollToDateFunctionRef,
 
-  showJumpToOptimalTimeScaleTool = true,
+    showJumpToOptimalTimeScaleTool = true,
 
-  jumpToOptimalTimeScale,
-  jumpToOptimalTimeScaleFunctionRef,
+    jumpToOptimalTimeScale,
+    jumpToOptimalTimeScaleFunctionRef,
 
-  canJumpToPreviousUnitTimeScale = true,
+    canJumpToPreviousUnitTimeScale = true,
 
-  jumpToPreviousUnitTimeScale,
-  jumpToPreviousUnitTimeScaleFunctionRef,
+    jumpToPreviousUnitTimeScale,
+    jumpToPreviousUnitTimeScaleFunctionRef,
 
-  canJumpToNextUnitTimeScale = true,
+    canJumpToNextUnitTimeScale = true,
 
-  jumpToNextUnitTimeScale,
-  jumpToNextUnitTimeScaleFunctionRef,
+    jumpToNextUnitTimeScale,
+    jumpToNextUnitTimeScaleFunctionRef,
 
-  showNavigationTools = true,
-}: ScrollTimelineToolsProps = {}) => {
+    showNavigationTools = true,
+    ...rest
+  } = props;
+
   const { breakpoints } = useTheme();
   const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
 
@@ -217,6 +248,7 @@ export const useScrollTimelineTools = ({
   }
 
   return {
+    ...rest,
     element: (
       <Stack
         direction="row"
