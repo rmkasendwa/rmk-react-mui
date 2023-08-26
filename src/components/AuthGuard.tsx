@@ -1,3 +1,8 @@
+import {
+  ComponentsProps,
+  ComponentsVariants,
+  useThemeProps,
+} from '@mui/material';
 import { FC, useEffect, useMemo } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 
@@ -10,6 +15,25 @@ import {
   SESSION_LOGIN_PAGE_ROUTE_PATH,
 } from '../route-paths';
 
+//#region Adding theme prop types
+declare module '@mui/material/styles/props' {
+  interface ComponentsPropsList {
+    MuiAuthGuard: AuthGuardProps;
+  }
+}
+//#endregion
+
+//#region Adding theme component types
+declare module '@mui/material/styles/components' {
+  interface Components {
+    MuiAuthGuard?: {
+      defaultProps?: ComponentsProps['MuiAuthGuard'];
+      variants?: ComponentsVariants['MuiAuthGuard'];
+    };
+  }
+}
+//#endregion
+
 export interface AuthGuardProps {
   variant?: 'PROTECTED' | 'PUBLIC_ONLY' | 'PUBLIC';
   indexPageRoutePath?: string;
@@ -18,13 +42,16 @@ export interface AuthGuardProps {
   logoutPageRoutePath?: string;
 }
 
-export const AuthGuard: FC<AuthGuardProps> = ({
-  variant,
-  indexPageRoutePath = INDEX_PAGE_ROUTE_PATH,
-  loginPageRoutePath = LOGIN_PAGE_ROUTE_PATH,
-  sessionLoginPageRoutePath = SESSION_LOGIN_PAGE_ROUTE_PATH,
-  logoutPageRoutePath = LOGOUT_PAGE_ROUTE_PATH,
-}) => {
+export const AuthGuard: FC<AuthGuardProps> = (inProps) => {
+  const props = useThemeProps({ props: inProps, name: 'MuiAuthGuard' });
+  const {
+    variant,
+    indexPageRoutePath = INDEX_PAGE_ROUTE_PATH,
+    loginPageRoutePath = LOGIN_PAGE_ROUTE_PATH,
+    sessionLoginPageRoutePath = SESSION_LOGIN_PAGE_ROUTE_PATH,
+    logoutPageRoutePath = LOGOUT_PAGE_ROUTE_PATH,
+  } = props;
+
   const navigate = useNavigate();
   const { pathname, search } = useLocation();
   const { sessionExpired } = useAPIContext();
