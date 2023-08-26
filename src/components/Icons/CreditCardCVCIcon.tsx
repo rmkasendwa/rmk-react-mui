@@ -1,14 +1,94 @@
-import { SvgIcon, SvgIconProps } from '@mui/material';
+import {
+  ComponentsOverrides,
+  ComponentsProps,
+  ComponentsVariants,
+  SvgIcon,
+  SvgIconProps,
+  unstable_composeClasses as composeClasses,
+  generateUtilityClass,
+  generateUtilityClasses,
+  useThemeProps,
+} from '@mui/material';
+import clsx from 'clsx';
 import { forwardRef } from 'react';
+
+export interface CreditCardCVCIconClasses {
+  /** Styles applied to the root element. */
+  root: string;
+}
+
+export type CreditCardCVCIconClassKey = keyof CreditCardCVCIconClasses;
+
+//#region Adding theme prop types
+declare module '@mui/material/styles/props' {
+  interface ComponentsPropsList {
+    MuiCreditCardCVCIcon: CreditCardCVCIconProps;
+  }
+}
+//#endregion
+
+//#region Adding theme override types
+declare module '@mui/material/styles/overrides' {
+  interface ComponentNameToClassKey {
+    MuiCreditCardCVCIcon: keyof CreditCardCVCIconClasses;
+  }
+}
+//#endregion
+
+//#region Adding theme component types
+declare module '@mui/material/styles/components' {
+  interface Components<Theme = unknown> {
+    MuiCreditCardCVCIcon?: {
+      defaultProps?: ComponentsProps['MuiCreditCardCVCIcon'];
+      styleOverrides?: ComponentsOverrides<Theme>['MuiCreditCardCVCIcon'];
+      variants?: ComponentsVariants['MuiCreditCardCVCIcon'];
+    };
+  }
+}
+//#endregion
+
+export const getCreditCardCVCIconUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiCreditCardCVCIcon', slot);
+};
+
+const slots: Record<CreditCardCVCIconClassKey, [CreditCardCVCIconClassKey]> = {
+  root: ['root'],
+};
+
+export const creditCardCVCIconClasses: CreditCardCVCIconClasses =
+  generateUtilityClasses(
+    'MuiCreditCardCVCIcon',
+    Object.keys(slots) as CreditCardCVCIconClassKey[]
+  );
 
 export interface CreditCardCVCIconProps extends SvgIconProps {}
 
 export const CreditCardCVCIcon = forwardRef<
   SVGSVGElement,
   CreditCardCVCIconProps
->(function CreditCardCVCIcon({ ...rest }, ref) {
+>(function CreditCardCVCIcon(inProps, ref) {
+  const props = useThemeProps({ props: inProps, name: 'MuiCreditCardCVCIcon' });
+  const { className, ...rest } = props;
+
+  const classes = composeClasses(
+    slots,
+    getCreditCardCVCIconUtilityClass,
+    (() => {
+      if (className) {
+        return {
+          root: className,
+        };
+      }
+    })()
+  );
+
   return (
-    <SvgIcon ref={ref} {...rest} viewBox="0 0 27 18">
+    <SvgIcon
+      ref={ref}
+      {...rest}
+      className={clsx(classes.root)}
+      viewBox="0 0 27 18"
+    >
       <path
         d="M27 4.00001V3.37501C27 2.4799 26.6444 1.62146 26.0115 0.988518C25.3786 0.355581 24.5201 0 23.625 0H3.375C2.47989 0 1.62145 0.355581 0.988514 0.988518C0.355579 1.62146 0 2.4799 0 3.37501V4.00001H27Z"
         fill="#E6E9EB"

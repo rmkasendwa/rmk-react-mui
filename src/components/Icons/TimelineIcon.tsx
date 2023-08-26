@@ -18,21 +18,23 @@ export interface TimelineIconClasses {
 
 export type TimelineIconClassKey = keyof TimelineIconClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiTimelineIcon: TimelineIconProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiTimelineIcon: keyof TimelineIconClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiTimelineIcon?: {
@@ -42,21 +44,22 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
 
-export interface TimelineIconProps extends SvgIconProps {}
-
-export function getTimelineIconUtilityClass(slot: string): string {
+export const getTimelineIconUtilityClass = (slot: string) => {
   return generateUtilityClass('MuiTimelineIcon', slot);
-}
+};
 
-export const codeIconClasses: TimelineIconClasses = generateUtilityClasses(
-  'MuiTimelineIcon',
-  ['root']
-);
-
-const slots = {
+const slots: Record<TimelineIconClassKey, [TimelineIconClassKey]> = {
   root: ['root'],
 };
+
+export const timelineIconClasses: TimelineIconClasses = generateUtilityClasses(
+  'MuiTimelineIcon',
+  Object.keys(slots) as TimelineIconClassKey[]
+);
+
+export interface TimelineIconProps extends SvgIconProps {}
 
 export const TimelineIcon = forwardRef<SVGSVGElement, TimelineIconProps>(
   function TimelineIcon(inProps, ref) {

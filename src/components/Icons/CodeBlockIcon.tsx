@@ -18,21 +18,23 @@ export interface CodeBlockIconClasses {
 
 export type CodeBlockIconClassKey = keyof CodeBlockIconClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiCodeBlockIcon: CodeBlockIconProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiCodeBlockIcon: keyof CodeBlockIconClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiCodeBlockIcon?: {
@@ -42,19 +44,23 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
 
-export interface CodeBlockIconProps extends SvgIconProps {}
-
-export function getCodeBlockIconUtilityClass(slot: string): string {
+export const getCodeBlockIconUtilityClass = (slot: string) => {
   return generateUtilityClass('MuiCodeBlockIcon', slot);
-}
+};
 
-export const codeBlockIconClasses: CodeBlockIconClasses =
-  generateUtilityClasses('MuiCodeBlockIcon', ['root']);
-
-const slots = {
+const slots: Record<CodeBlockIconClassKey, [CodeBlockIconClassKey]> = {
   root: ['root'],
 };
+
+export const codeBlockIconClasses: CodeBlockIconClasses =
+  generateUtilityClasses(
+    'MuiCodeBlockIcon',
+    Object.keys(slots) as CodeBlockIconClassKey[]
+  );
+
+export interface CodeBlockIconProps extends SvgIconProps {}
 
 export const CodeBlockIcon = forwardRef<SVGSVGElement, CodeBlockIconProps>(
   function CodeBlockIcon(inProps, ref) {

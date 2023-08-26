@@ -18,21 +18,23 @@ export interface CodeIconClasses {
 
 export type CodeIconClassKey = keyof CodeIconClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiCodeIcon: CodeIconProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiCodeIcon: keyof CodeIconClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiCodeIcon?: {
@@ -42,21 +44,22 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
 
-export interface CodeIconProps extends SvgIconProps {}
-
-export function getCodeIconUtilityClass(slot: string): string {
+export const getCodeIconUtilityClass = (slot: string) => {
   return generateUtilityClass('MuiCodeIcon', slot);
-}
+};
+
+const slots: Record<CodeIconClassKey, [CodeIconClassKey]> = {
+  root: ['root'],
+};
 
 export const codeIconClasses: CodeIconClasses = generateUtilityClasses(
   'MuiCodeIcon',
-  ['root']
+  Object.keys(slots) as CodeIconClassKey[]
 );
 
-const slots = {
-  root: ['root'],
-};
+export interface CodeIconProps extends SvgIconProps {}
 
 export const CodeIcon = forwardRef<SVGSVGElement, CodeIconProps>(
   function CodeIcon(inProps, ref) {
