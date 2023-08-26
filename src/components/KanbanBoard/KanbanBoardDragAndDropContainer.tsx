@@ -34,21 +34,23 @@ export interface KanbanBoardDragAndDropContainerClasses {
 export type KanbanBoardDragAndDropContainerClassKey =
   keyof KanbanBoardDragAndDropContainerClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiKanbanBoardDragAndDropContainer: KanbanBoardDragAndDropContainerProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiKanbanBoardDragAndDropContainer: keyof KanbanBoardDragAndDropContainerClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiKanbanBoardDragAndDropContainer?: {
@@ -58,23 +60,30 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getKanbanBoardDragAndDropContainerUtilityClass = (
+  slot: string
+) => {
+  return generateUtilityClass('MuiKanbanBoardDragAndDropContainer', slot);
+};
+
+const slots: Record<
+  KanbanBoardDragAndDropContainerClassKey,
+  [KanbanBoardDragAndDropContainerClassKey]
+> = {
+  root: ['root'],
+};
+
+export const kanbanBoardDragAndDropContainerClasses: KanbanBoardDragAndDropContainerClasses =
+  generateUtilityClasses(
+    'MuiKanbanBoardDragAndDropContainer',
+    Object.keys(slots) as KanbanBoardDragAndDropContainerClassKey[]
+  );
 
 export interface KanbanBoardDragAndDropContainerProps
   extends Pick<Lane, 'showCardCount' | 'loading' | 'errorMessage'>,
     Partial<BoxProps> {}
-
-export function getKanbanBoardDragAndDropContainerUtilityClass(
-  slot: string
-): string {
-  return generateUtilityClass('MuiKanbanBoardDragAndDropContainer', slot);
-}
-
-export const kanbanBoardDragAndDropContainerClasses: KanbanBoardDragAndDropContainerClasses =
-  generateUtilityClasses('MuiKanbanBoardDragAndDropContainer', ['root']);
-
-const slots = {
-  root: ['root'],
-};
 
 export const KanbanBoardDragAndDropContainer = forwardRef<
   any,

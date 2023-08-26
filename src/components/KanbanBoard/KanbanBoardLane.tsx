@@ -39,21 +39,23 @@ export interface KanbanBoardLaneClasses {
 
 export type KanbanBoardLaneClassKey = keyof KanbanBoardLaneClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiKanbanBoardLane: KanbanBoardLaneProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiKanbanBoardLane: keyof KanbanBoardLaneClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiKanbanBoardLane?: {
@@ -63,19 +65,23 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
 
-export interface KanbanBoardLaneProps extends Lane {}
-
-export function getKanbanBoardLaneUtilityClass(slot: string): string {
+export const getKanbanBoardLaneUtilityClass = (slot: string) => {
   return generateUtilityClass('MuiKanbanBoardLane', slot);
-}
+};
 
-export const kanbanBoardLaneClasses: KanbanBoardLaneClasses =
-  generateUtilityClasses('MuiKanbanBoardLane', ['root']);
-
-const slots = {
+const slots: Record<KanbanBoardLaneClassKey, [KanbanBoardLaneClassKey]> = {
   root: ['root'],
 };
+
+export const kanbanBoardLaneClasses: KanbanBoardLaneClasses =
+  generateUtilityClasses(
+    'MuiKanbanBoardLane',
+    Object.keys(slots) as KanbanBoardLaneClassKey[]
+  );
+
+export interface KanbanBoardLaneProps extends Lane {}
 
 export const KanbanBoardLane = forwardRef<any, KanbanBoardLaneProps>(
   function KanbanBoardLane(inProps, ref) {
