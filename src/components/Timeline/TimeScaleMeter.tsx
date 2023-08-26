@@ -28,21 +28,23 @@ export interface TimeScaleMeterClasses {
 
 export type TimeScaleMeterClassKey = keyof TimeScaleMeterClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiTimeScaleMeter: TimeScaleMeterProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiTimeScaleMeter: keyof TimeScaleMeterClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiTimeScaleMeter?: {
@@ -52,6 +54,23 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getTimeScaleMeterUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiTimeScaleMeter', slot);
+};
+
+const slots: Record<TimeScaleMeterClassKey, [TimeScaleMeterClassKey]> = {
+  root: ['root'],
+  timeScaleLevel1: ['timeScaleLevel1'],
+  timeScaleLevel1Tick: ['timeScaleLevel1Tick'],
+};
+
+export const timeScaleMeterClasses: TimeScaleMeterClasses =
+  generateUtilityClasses(
+    'MuiTimeScaleMeter',
+    Object.keys(slots) as TimeScaleMeterClassKey[]
+  );
 
 export interface TimeScaleMeterProps extends Partial<StackProps> {
   timeScaleRows: [TimeScaleRow[], TimeScaleRow[], TimeScaleRow[]];
@@ -60,23 +79,6 @@ export interface TimeScaleMeterProps extends Partial<StackProps> {
   leftOffset?: number;
   variant?: 'default' | 'compact';
 }
-
-export function getTimeScaleMeterUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiTimeScaleMeter', slot);
-}
-
-export const timeScaleMeterClasses: TimeScaleMeterClasses =
-  generateUtilityClasses('MuiTimeScaleMeter', [
-    'root',
-    'timeScaleLevel1',
-    'timeScaleLevel1Tick',
-  ]);
-
-const slots = {
-  root: ['root'],
-  timeScaleLevel1: ['timeScaleLevel1'],
-  timeScaleLevel1Tick: ['timeScaleLevel1Tick'],
-};
 
 export const TimeScaleMeter = forwardRef<HTMLDivElement, TimeScaleMeterProps>(
   function TimeScaleMeter(inProps, ref) {

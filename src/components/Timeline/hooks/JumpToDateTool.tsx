@@ -10,14 +10,15 @@ import { ReactNode } from 'react';
 import { PopupToolOptions, usePopupTool } from '../../../hooks/Tools/PopupTool';
 import DatePicker, { DatePickerProps } from '../../DatePicker';
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiJumpToDateTool: JumpToDateToolProps;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components {
     MuiJumpToDateTool?: {
@@ -26,6 +27,7 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
 
 export interface JumpToDateToolProps
   extends Partial<Pick<DatePickerProps, 'minDate' | 'maxDate' | 'onChange'>>,
