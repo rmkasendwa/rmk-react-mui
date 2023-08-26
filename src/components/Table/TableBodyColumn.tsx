@@ -36,21 +36,23 @@ export interface TableBodyColumnClasses {
 
 export type TableBodyColumnClassKey = keyof TableBodyColumnClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiTableBodyColumn: TableBodyColumnProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiTableBodyColumn: keyof TableBodyColumnClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiTableBodyColumn?: {
@@ -60,6 +62,23 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getTableBodyColumnUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiTableBodyColumn', slot);
+};
+
+const slots: Record<TableBodyColumnClassKey, [TableBodyColumnClassKey]> = {
+  root: ['root'],
+  groupHeaderColumn: ['groupHeaderColumn'],
+  opaque: ['opaque'],
+};
+
+export const tableBodyColumnClasses: TableBodyColumnClasses =
+  generateUtilityClasses(
+    'MuiTableBodyColumn',
+    Object.keys(slots) as TableBodyColumnClassKey[]
+  );
 
 const allowedDataTypes = ['number', 'string', 'boolean'];
 
@@ -84,23 +103,6 @@ export interface TableBodyColumnProps<DataRow extends BaseDataRow = any>
   row: DataRow;
   enableSmallScreenOptimization?: boolean;
 }
-
-export function getTableBodyColumnUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiTableBodyColumn', slot);
-}
-
-export const tableBodyColumnClasses: TableBodyColumnClasses =
-  generateUtilityClasses('MuiTableBodyColumn', [
-    'root',
-    'groupHeaderColumn',
-    'opaque',
-  ]);
-
-const slots = {
-  root: ['root'],
-  groupHeaderColumn: ['groupHeaderColumn'],
-  opaque: ['opaque'],
-};
 
 export const TableBodyColumn = forwardRef<any, TableBodyColumnProps<any>>(
   function TableBodyColumn(inProps, ref) {

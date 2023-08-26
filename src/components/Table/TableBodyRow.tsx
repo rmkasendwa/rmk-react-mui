@@ -43,21 +43,23 @@ export interface TableBodyRowClasses {
 
 export type TableBodyRowClassKey = keyof TableBodyRowClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiTableBodyRow: TableBodyRowProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiTableBodyRow: keyof TableBodyRowClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiTableBodyRow?: {
@@ -67,6 +69,22 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getTableBodyRowUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiTableBodyRow', slot);
+};
+
+const slots: Record<TableBodyRowClassKey, [TableBodyRowClassKey]> = {
+  root: ['root'],
+  smallScreen: ['smallScreen'],
+  groupHeaderRow: ['groupHeaderRow'],
+};
+
+export const tableBodyRowClasses: TableBodyRowClasses = generateUtilityClasses(
+  'MuiTableBodyRow',
+  Object.keys(slots) as TableBodyRowClassKey[]
+);
 
 export interface TableBodyRowProps<DataRow extends BaseDataRow = any>
   extends Partial<Omit<MuiTableRowProps, 'defaultValue'>>,
@@ -74,21 +92,6 @@ export interface TableBodyRowProps<DataRow extends BaseDataRow = any>
   enableSmallScreenOptimization?: boolean;
   applyCellWidthParameters?: boolean;
 }
-
-export function getTableBodyRowUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiTableBodyRow', slot);
-}
-
-export const tableBodyRowClasses: TableBodyRowClasses = generateUtilityClasses(
-  'MuiTableBodyRow',
-  ['root', 'smallScreen', 'groupHeaderRow']
-);
-
-const slots = {
-  root: ['root'],
-  smallScreen: ['smallScreen'],
-  groupHeaderRow: ['groupHeaderRow'],
-};
 
 export const TableBodyRow = <T extends BaseDataRow>(
   inProps: TableBodyRowProps<T>

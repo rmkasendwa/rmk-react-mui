@@ -9,8 +9,7 @@ export const BaseTable = <T extends BaseDataRow>(
   inProps: TableProps<T>,
   ref: Ref<HTMLTableElement>
 ) => {
-  const { tableElement } = useTable(inProps, ref);
-  return tableElement;
+  return useTable(inProps, ref).tableElement;
 };
 
 export const Table = forwardRef(BaseTable) as <DataRow extends BaseDataRow>(
