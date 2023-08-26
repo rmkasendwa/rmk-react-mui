@@ -24,21 +24,23 @@ export interface NumberInputFieldClasses {
 
 export type NumberInputFieldClassKey = keyof NumberInputFieldClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiNumberInputField: NumberInputFieldProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiNumberInputField: keyof NumberInputFieldClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiNumberInputField?: {
@@ -48,6 +50,21 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getNumberInputFieldUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiNumberInputField', slot);
+};
+
+const slots: Record<NumberInputFieldClassKey, [NumberInputFieldClassKey]> = {
+  root: ['root'],
+};
+
+export const numberInputFieldClasses: NumberInputFieldClasses =
+  generateUtilityClasses(
+    'MuiNumberInputField',
+    Object.keys(slots) as NumberInputFieldClassKey[]
+  );
 
 const findNumericCharacters = (number: string) => {
   number = cleanDemicalPoint(number);
@@ -85,17 +102,6 @@ export interface NumberInputFieldProps extends Omit<TextFieldProps, 'value'> {
   valueSuffix?: string;
   valueScaleFactor?: number;
 }
-
-export function getNumberInputFieldUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiNumberInputField', slot);
-}
-
-export const numberInputFieldClasses: NumberInputFieldClasses =
-  generateUtilityClasses('MuiNumberInputField', ['root']);
-
-const slots = {
-  root: ['root'],
-};
 
 export const NumberInputField = forwardRef<
   HTMLDivElement,

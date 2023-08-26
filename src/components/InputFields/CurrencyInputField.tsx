@@ -21,21 +21,23 @@ export interface CurrencyInputFieldClasses {
 
 export type CurrencyInputFieldClassKey = keyof CurrencyInputFieldClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiCurrencyInputField: CurrencyInputFieldProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiCurrencyInputField: keyof CurrencyInputFieldClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiCurrencyInputField?: {
@@ -45,22 +47,27 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getCurrencyInputFieldUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiCurrencyInputField', slot);
+};
+
+const slots: Record<CurrencyInputFieldClassKey, [CurrencyInputFieldClassKey]> =
+  {
+    root: ['root'],
+  };
+
+export const currencyInputFieldClasses: CurrencyInputFieldClasses =
+  generateUtilityClasses(
+    'MuiCurrencyInputField',
+    Object.keys(slots) as CurrencyInputFieldClassKey[]
+  );
 
 export interface CurrencyInputFieldProps extends NumberInputFieldProps {
   showCurrency?: boolean;
   currency?: string;
 }
-
-export function getCurrencyInputFieldUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiCurrencyInputField', slot);
-}
-
-export const currencyInputFieldClasses: CurrencyInputFieldClasses =
-  generateUtilityClasses('MuiCurrencyInputField', ['root']);
-
-const slots = {
-  root: ['root'],
-};
 
 export const CurrencyInputField = forwardRef<
   HTMLDivElement,
