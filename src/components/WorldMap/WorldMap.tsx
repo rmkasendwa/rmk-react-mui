@@ -42,21 +42,23 @@ export interface WorldMapClasses {
 
 export type WorldMapClassKey = keyof WorldMapClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiWorldMap: WorldMapProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiWorldMap: keyof WorldMapClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiWorldMap?: {
@@ -66,6 +68,20 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getWorldMapUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiWorldMap', slot);
+};
+
+const slots: Record<WorldMapClassKey, [WorldMapClassKey]> = {
+  root: ['root'],
+};
+
+export const worldMapClasses: WorldMapClasses = generateUtilityClasses(
+  'MuiWorldMap',
+  Object.keys(slots) as WorldMapClassKey[]
+);
 
 type PolygonFeature = GeoJSON.Feature<
   GeoJSON.Polygon,
@@ -93,19 +109,6 @@ export interface WorldMapProps extends Partial<SvgIconProps> {
   CountriesProps?: CountriesProps;
   TimeZonesProps?: TimeZonesProps;
 }
-
-export function getWorldMapUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiWorldMap', slot);
-}
-
-export const worldMapClasses: WorldMapClasses = generateUtilityClasses(
-  'MuiWorldMap',
-  ['root']
-);
-
-const slots = {
-  root: ['root'],
-};
 
 export const WorldMap = forwardRef<SVGSVGElement, WorldMapProps>(
   function WorldMap(inProps, ref) {
