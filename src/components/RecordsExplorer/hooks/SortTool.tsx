@@ -1,19 +1,44 @@
-import { FormControlLabel, Switch } from '@mui/material';
+import {
+  ComponentsProps,
+  ComponentsVariants,
+  FormControlLabel,
+  Switch,
+  useThemeProps,
+} from '@mui/material';
 
 import { SelectedSortOption } from '../../../models/Sort';
 import { BaseDataRow } from '../../Table';
 import {
-  SortOperationFieldSelectorToolOptions,
+  SortOperationFieldSelectorToolProps,
   useSortOperationFieldSelectorTool,
 } from './SortOperationFieldSelectorTool';
+
+//#region Adding theme prop types
+declare module '@mui/material/styles/props' {
+  interface ComponentsPropsList {
+    MuiSortTool: SortToolProps;
+  }
+}
+//#endregion
+
+//#region Adding theme component types
+declare module '@mui/material/styles/components' {
+  interface Components {
+    MuiSortTool?: {
+      defaultProps?: ComponentsProps['MuiSortTool'];
+      variants?: ComponentsVariants['MuiSortTool'];
+    };
+  }
+}
+//#endregion
 
 export const expandedGroupsOptions = ['All', 'None'] as const;
 
 export type ExpandedGroupsOption = (typeof expandedGroupsOptions)[number];
 
-export interface SortToolOptions<RecordRow extends BaseDataRow = any>
+export interface SortToolProps<RecordRow extends BaseDataRow = any>
   extends Pick<
-    SortOperationFieldSelectorToolOptions<RecordRow>,
+    SortOperationFieldSelectorToolProps<RecordRow>,
     'sortableFields'
   > {
   selectedSortParams: SelectedSortOption<RecordRow>[];
@@ -22,15 +47,14 @@ export interface SortToolOptions<RecordRow extends BaseDataRow = any>
   ) => void;
 }
 
-export const useSortTool = <RecordRow extends BaseDataRow>({
-  sortableFields,
-  selectedSortParams,
-  onChangeSelectedSortParams,
-}: SortToolOptions<RecordRow>) => {
+export const useSortTool = <RecordRow extends BaseDataRow>(
+  inProps: SortToolProps<RecordRow>
+) => {
+  const props = useThemeProps({ props: inProps, name: 'MuiSortTool' });
+  const { ...rest } = props;
+
   return useSortOperationFieldSelectorTool({
-    sortableFields,
-    selectedSortParams,
-    onChangeSelectedSortParams,
+    ...rest,
     footerContent: (
       <FormControlLabel
         control={<Switch defaultChecked disabled color="success" />}

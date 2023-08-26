@@ -4,6 +4,8 @@ import FilterAltOutlinedIcon from '@mui/icons-material/FilterAltOutlined';
 import {
   Box,
   Button,
+  ComponentsProps,
+  ComponentsVariants,
   Grid,
   IconButton,
   Stack,
@@ -13,6 +15,7 @@ import {
   TableRow,
   Typography,
   tableCellClasses,
+  useThemeProps,
 } from '@mui/material';
 import { omit, result } from 'lodash';
 import { useEffect, useMemo, useRef } from 'react';
@@ -40,6 +43,25 @@ import {
   textFilterOperators,
 } from '../models';
 
+//#region Adding theme prop types
+declare module '@mui/material/styles/props' {
+  interface ComponentsPropsList {
+    MuiFilterTool: FilterToolProps;
+  }
+}
+//#endregion
+
+//#region Adding theme component types
+declare module '@mui/material/styles/components' {
+  interface Components {
+    MuiFilterTool?: {
+      defaultProps?: ComponentsProps['MuiFilterTool'];
+      variants?: ComponentsVariants['MuiFilterTool'];
+    };
+  }
+}
+//#endregion
+
 export const MULTI_SELECT_DROPDOWN_TYPE = 'enum';
 export const DROPDOWN_FILTER_FIELD_TYPES: PrimitiveDataType[] = ['enum'];
 
@@ -47,7 +69,7 @@ export const DROPDOWN_OPERATORS: EnumFilterOperator[] = ['is', 'is not'];
 
 export const MULTI_SELECT_DROPDOWN_OPERATORS = enumFilterOperators;
 
-export interface FilterToolOptions<RecordRow extends BaseDataRow = any>
+export interface FilterToolProps<RecordRow extends BaseDataRow = any>
   extends Partial<PopupToolOptions> {
   data: RecordRow[];
   filterFields: DataFilterField<RecordRow>[];
@@ -57,13 +79,18 @@ export interface FilterToolOptions<RecordRow extends BaseDataRow = any>
   ) => void;
 }
 
-export const useFilterTool = <RecordRow extends BaseDataRow>({
-  data,
-  filterFields,
-  selectedConditionGroup,
-  onChangeSelectedConditionGroup,
-  ...rest
-}: FilterToolOptions<RecordRow>) => {
+export const useFilterTool = <RecordRow extends BaseDataRow>(
+  inProps: FilterToolProps<RecordRow>
+) => {
+  const props = useThemeProps({ props: inProps, name: 'MuiFilterTool' });
+  const {
+    data,
+    filterFields,
+    selectedConditionGroup,
+    onChangeSelectedConditionGroup,
+    ...rest
+  } = props;
+
   const filterFieldsRef = useRef(filterFields);
   useEffect(() => {
     filterFieldsRef.current = filterFields;

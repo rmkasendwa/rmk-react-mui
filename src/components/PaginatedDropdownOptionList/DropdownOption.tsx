@@ -30,21 +30,23 @@ export interface DropdownOptionClasses {
 
 export type DropdownOptionClassKey = keyof DropdownOptionClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiDropdownOption: DropdownOptionProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiDropdownOption: keyof DropdownOptionClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiDropdownOption?: {
@@ -54,16 +56,24 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getDropdownOptionUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiDropdownOption', slot);
+};
+
+const slots: Record<DropdownOptionClassKey, [DropdownOptionClassKey]> = {
+  root: ['root'],
+  iconContainer: ['iconContainer'],
+};
+
+export const dropdownOptionClasses: DropdownOptionClasses =
+  generateUtilityClasses(
+    'MuiDropdownOption',
+    Object.keys(slots) as DropdownOptionClassKey[]
+  );
 
 export type DropdownOptionVariant = 'text' | 'checkbox' | 'check';
-
-export interface DropdownOptionProps extends Omit<ButtonProps, 'variant'> {
-  height?: number;
-  selectable?: boolean;
-  selected?: boolean;
-  variant?: DropdownOptionVariant;
-  icon?: ReactNode;
-}
 
 export const getDropdownOptionLabel = ({
   icon,
@@ -89,17 +99,13 @@ export const getDropdownOptionLabel = ({
   return label;
 };
 
-export function getDropdownOptionUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiDropdownOption', slot);
+export interface DropdownOptionProps extends Omit<ButtonProps, 'variant'> {
+  height?: number;
+  selectable?: boolean;
+  selected?: boolean;
+  variant?: DropdownOptionVariant;
+  icon?: ReactNode;
 }
-
-export const dropdownOptionClasses: DropdownOptionClasses =
-  generateUtilityClasses('MuiDropdownOption', ['root', 'iconContainer']);
-
-const slots = {
-  root: ['root'],
-  iconContainer: ['iconContainer'],
-};
 
 export const DropdownOption = forwardRef<
   HTMLButtonElement,
