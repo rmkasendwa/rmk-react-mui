@@ -65,21 +65,23 @@ export interface TableClasses {
 
 export type TableClassKey = keyof TableClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiTableExtended: TableProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiTableExtended: keyof TableClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiTableExtended?: {
@@ -89,23 +91,24 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
 
-const TABLE_HEAD_ALPHA = 0.05;
-const LAZY_ROWS_BUFFER_SIZE = 20;
-
-export function getTableUtilityClass(slot: string): string {
+export const getTableUtilityClass = (slot: string) => {
   return generateUtilityClass('MuiTableExtended', slot);
-}
+};
 
-export const tableClasses: TableClasses = generateUtilityClasses(
-  'MuiTableExtended',
-  ['root', 'columnDisplayToggle']
-);
-
-const slots = {
+const slots: Record<TableClassKey, [TableClassKey]> = {
   root: ['root'],
   columnDisplayToggle: ['columnDisplayToggle'],
 };
+
+export const tableClasses: TableClasses = generateUtilityClasses(
+  'MuiTableExtended',
+  Object.keys(slots) as TableClassKey[]
+);
+
+const TABLE_HEAD_ALPHA = 0.05;
+const LAZY_ROWS_BUFFER_SIZE = 20;
 
 export const useTable = <DataRow extends BaseDataRow>(
   inProps: TableProps<DataRow>,

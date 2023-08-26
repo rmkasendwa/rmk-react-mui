@@ -22,21 +22,23 @@ export interface TableGroupCollapseToolClasses {
 export type TableGroupCollapseToolClassKey =
   keyof TableGroupCollapseToolClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiTableGroupCollapseTool: TableGroupCollapseToolProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiTableGroupCollapseTool: keyof TableGroupCollapseToolClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiTableGroupCollapseTool?: {
@@ -46,22 +48,29 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getTableGroupCollapseToolUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiTableGroupCollapseTool', slot);
+};
+
+const slots: Record<
+  TableGroupCollapseToolClassKey,
+  [TableGroupCollapseToolClassKey]
+> = {
+  root: ['root'],
+};
+
+export const tableGroupCollapseToolClasses: TableGroupCollapseToolClasses =
+  generateUtilityClasses(
+    'MuiTableGroupCollapseTool',
+    Object.keys(slots) as TableGroupCollapseToolClassKey[]
+  );
 
 export interface TableGroupCollapseToolProps extends Partial<BoxProps> {
   groupCollapsed: boolean;
   onChangeGroupCollapsed?: (groupCollapsed: boolean) => void;
 }
-
-export function getTableGroupCollapseToolUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiTableGroupCollapseTool', slot);
-}
-
-export const tableGroupCollapseToolClasses: TableGroupCollapseToolClasses =
-  generateUtilityClasses('MuiTableGroupCollapseTool', ['root']);
-
-const slots = {
-  root: ['root'],
-};
 
 export const TableGroupCollapseTool = forwardRef<
   HTMLDivElement,

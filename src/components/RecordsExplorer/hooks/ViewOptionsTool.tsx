@@ -153,7 +153,7 @@ export const useViewOptionsTool = <ViewType extends string = string>(
 
   const expandOptions = expandedIfHasLessOptions && options.length <= 2;
 
-  const tool: Tool = {
+  return {
     ...rest,
     ...(() => {
       if (expandOptions) {
@@ -342,6 +342,5 @@ export const useViewOptionsTool = <ViewType extends string = string>(
         })(),
       };
     })(),
-  };
-  return tool;
+  } as Tool;
 };

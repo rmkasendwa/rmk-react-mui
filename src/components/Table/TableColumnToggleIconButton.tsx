@@ -25,21 +25,23 @@ export interface TableColumnToggleIconButtonClasses {
 export type TableColumnToggleIconButtonClassKey =
   keyof TableColumnToggleIconButtonClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiTableColumnToggleIconButton: TableColumnToggleIconButtonProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiTableColumnToggleIconButton: keyof TableColumnToggleIconButtonClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiTableColumnToggleIconButton?: {
@@ -49,6 +51,24 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getTableColumnToggleIconButtonUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiTableColumnToggleIconButton', slot);
+};
+
+const slots: Record<
+  TableColumnToggleIconButtonClassKey,
+  [TableColumnToggleIconButtonClassKey]
+> = {
+  root: ['root'],
+};
+
+export const tableColumnToggleIconButtonClasses: TableColumnToggleIconButtonClasses =
+  generateUtilityClasses(
+    'MuiTableColumnToggleIconButton',
+    Object.keys(slots) as TableColumnToggleIconButtonClassKey[]
+  );
 
 export interface TableColumnToggleIconButtonProps<DataRow = BaseDataRow>
   extends Partial<Omit<EllipsisMenuIconButtonProps, 'options'>> {
@@ -56,19 +76,6 @@ export interface TableColumnToggleIconButtonProps<DataRow = BaseDataRow>
   selectedColumnIds: (keyof DataRow)[];
   onChangeSelectedColumnIds?: (selectedColumnIds: (keyof DataRow)[]) => void;
 }
-
-export function getTableColumnToggleIconButtonUtilityClass(
-  slot: string
-): string {
-  return generateUtilityClass('MuiTableColumnToggleIconButton', slot);
-}
-
-export const tableColumnToggleIconButtonClasses: TableColumnToggleIconButtonClasses =
-  generateUtilityClasses('MuiTableColumnToggleIconButton', ['root']);
-
-const slots = {
-  root: ['root'],
-};
 
 const BaseTableColumnToggleIconButton = <DataRow extends BaseDataRow>(
   inProps: TableColumnToggleIconButtonProps<DataRow>,
