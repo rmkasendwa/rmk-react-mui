@@ -194,11 +194,12 @@ export const LoadingTypography = forwardRef<
         if (enableLoadingState && (loading || errorMessage)) {
           return (
             <Typography
+              {...rest}
               component="span"
               variant="inherit"
               sx={{
                 fontSize: '0.75em',
-                lineHeight: 2.5,
+                ...sx,
               }}
             >
               {children}
@@ -222,6 +223,7 @@ export const LoadingTypography = forwardRef<
             },
           },
         }}
+        disableInteractive
       >
         {typographyElement}
       </Tooltip>
