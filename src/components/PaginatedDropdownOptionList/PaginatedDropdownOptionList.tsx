@@ -49,12 +49,6 @@ import SearchField, { SearchFieldProps } from '../SearchField';
 import Tooltip from '../Tooltip';
 import DropdownOption, { DropdownOptionVariant } from './DropdownOption';
 
-export interface DropdownOption<Entity = any>
-  extends Pick<ButtonProps, 'onClick'>,
-    BaseDropdownOption<Entity> {}
-
-const DEFAULT_DROPDOWN_MENU_MAX_HEIGHT = 200;
-
 export interface PaginatedDropdownOptionListClasses {
   /** Styles applied to the root element. */
   root: string;
@@ -63,21 +57,23 @@ export interface PaginatedDropdownOptionListClasses {
 export type PaginatedDropdownOptionListClassKey =
   keyof PaginatedDropdownOptionListClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiPaginatedDropdownOptionList: PaginatedDropdownOptionListProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiPaginatedDropdownOptionList: keyof PaginatedDropdownOptionListClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiPaginatedDropdownOptionList?: {
@@ -87,6 +83,30 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getPaginatedDropdownOptionListUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiPaginatedDropdownOptionList', slot);
+};
+
+const slots: Record<
+  PaginatedDropdownOptionListClassKey,
+  [PaginatedDropdownOptionListClassKey]
+> = {
+  root: ['root'],
+};
+
+export const paginatedDropdownOptionListClasses: PaginatedDropdownOptionListClasses =
+  generateUtilityClasses(
+    'MuiPaginatedDropdownOptionList',
+    Object.keys(slots) as PaginatedDropdownOptionListClassKey[]
+  );
+
+export interface DropdownOption<Entity = any>
+  extends Pick<ButtonProps, 'onClick'>,
+    BaseDropdownOption<Entity> {}
+
+const DEFAULT_DROPDOWN_MENU_MAX_HEIGHT = 200;
 
 export interface PaginatedDropdownOptionListProps<Entity = any>
   extends Partial<
@@ -129,19 +149,6 @@ export interface PaginatedDropdownOptionListProps<Entity = any>
   revalidationKey?: string;
   noOptionsText?: ReactNode;
 }
-
-export function getPaginatedDropdownOptionListUtilityClass(
-  slot: string
-): string {
-  return generateUtilityClass('MuiPaginatedDropdownOptionList', slot);
-}
-
-export const paginatedDropdownOptionListClasses: PaginatedDropdownOptionListClasses =
-  generateUtilityClasses('MuiPaginatedDropdownOptionList', ['root']);
-
-const slots = {
-  root: ['root'],
-};
 
 const BasePaginatedDropdownOptionList = <Entity,>(
   inProps: PaginatedDropdownOptionListProps<Entity>,
