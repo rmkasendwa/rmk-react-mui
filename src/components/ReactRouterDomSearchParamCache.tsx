@@ -1,7 +1,7 @@
 import { FC, useEffect, useRef } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 
-import { useCachedData } from '../contexts/DataStoreContext';
+import { useLocalStorageData } from '../contexts/LocalStorageDataContext';
 
 export const ROUTE_CACHE_KEY = 'routeCache';
 
@@ -11,7 +11,7 @@ export const ReactRouterDomSearchParamCache: FC<
   ReactRouterDomSearchParamCacheProps
 > = () => {
   const { pathname, search } = useLocation();
-  const { data, updateData } = useCachedData();
+  const { data, updateData } = useLocalStorageData();
 
   const dataRef = useRef(data);
   dataRef.current = data;

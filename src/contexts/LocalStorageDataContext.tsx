@@ -55,35 +55,40 @@ const updateData = (data: Record<string, any>): Record<string, any> => {
 };
 
 const reset = () => {
-  // Clear local storage
+  //#region Clear local storage
   dataKeys.forEach((key) => {
     StorageManager.remove(`${CACHED_DATA_PREFIX}-${key}`);
   });
   StorageManager.remove(`${CACHED_DATA_PREFIX}-keys`);
+  //#endregion
 
-  // Clear memory
+  //#region Clear memory
   dataKeys.splice(0);
   Object.keys(baseData).forEach((key) => {
     delete baseData[key];
   });
+  //#endregion
 };
 
-export interface DataStoreContext {
+export interface LocalStorageDataContext {
   data: Record<string, any>;
   updateData: (data: Record<string, any>) => void;
   reset: () => void;
 }
-export const DataStoreContext = createContext<DataStoreContext>({
+
+export const LocalStorageDataContext = createContext<LocalStorageDataContext>({
   data: baseData,
   updateData,
   reset,
 });
 
-export interface DataStoreProviderProps {
+export interface LocalStorageDataProviderProps {
   children: ReactNode;
 }
 
-export const DataStoreProvider: FC<DataStoreProviderProps> = ({ children }) => {
+export const LocalStorageDataProvider: FC<LocalStorageDataProviderProps> = ({
+  children,
+}) => {
   const [data, setData] = useState(baseData);
 
   const updateLocalData = useCallback((data: Record<string, any>) => {
@@ -96,7 +101,7 @@ export const DataStoreProvider: FC<DataStoreProviderProps> = ({ children }) => {
   }, []);
 
   return (
-    <DataStoreContext.Provider
+    <LocalStorageDataContext.Provider
       value={{
         data,
         updateData: updateLocalData,
@@ -104,10 +109,10 @@ export const DataStoreProvider: FC<DataStoreProviderProps> = ({ children }) => {
       }}
     >
       {children}
-    </DataStoreContext.Provider>
+    </LocalStorageDataContext.Provider>
   );
 };
 
-export const useCachedData = () => {
-  return useContext(DataStoreContext);
+export const useLocalStorageData = () => {
+  return useContext(LocalStorageDataContext);
 };

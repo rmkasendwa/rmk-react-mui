@@ -14,7 +14,7 @@ import { useAPIService } from '../hooks/Utils';
 import { PermissionCode } from '../models/Users';
 import { TAPIFunction } from '../models/Utils';
 import { useAPIContext } from './APIContext';
-import { useCachedData } from './DataStoreContext';
+import { useLocalStorageData } from './LocalStorageDataContext';
 
 export interface LoggedInUser {
   id: string;
@@ -44,7 +44,7 @@ export const AuthProvider: FC<{
   const [loggedInUser, setLoggedInUser] = useState<LoggedInUser | null>(null);
   const [loadingCurrentSession, setLoadingCurrentSession] = useState(true);
   const { setSessionExpired } = useAPIContext();
-  const { reset: resetCachedData } = useCachedData();
+  const { reset: resetCachedData } = useLocalStorageData();
   const {
     record: user,
     load,
