@@ -1,4 +1,5 @@
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
+import CloseIcon from '@mui/icons-material/Close';
 import ReplayIcon from '@mui/icons-material/Replay';
 import {
   ComponentsOverrides,
@@ -16,9 +17,10 @@ import Card from '@mui/material/Card';
 import FormControl from '@mui/material/FormControl';
 import FormHelperText from '@mui/material/FormHelperText';
 import Grid from '@mui/material/Grid';
+import IconButton from '@mui/material/IconButton';
 import useTheme from '@mui/material/styles/useTheme';
 import Typography from '@mui/material/Typography';
-import { darken } from '@mui/system/colorManipulator';
+import { alpha, darken } from '@mui/system/colorManipulator';
 import clsx from 'clsx';
 import { CSSProperties, forwardRef, useEffect, useState } from 'react';
 
@@ -29,7 +31,6 @@ import {
   LoadableFile,
 } from '../models/Utils';
 import { flickerElement } from '../utils/page';
-import CloseButton from './CloseButton';
 import ImagePreview from './ImagePreview';
 import { TextFieldProps } from './InputFields/TextField';
 
@@ -40,21 +41,23 @@ export interface ImageSelectorClasses {
 
 export type ImageSelectorClassKey = keyof ImageSelectorClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiImageSelector: ImageSelectorProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiImageSelector: keyof ImageSelectorClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiImageSelector?: {
@@ -64,6 +67,21 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getImageSelectorUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiImageSelector', slot);
+};
+
+const slots: Record<ImageSelectorClassKey, [ImageSelectorClassKey]> = {
+  root: ['root'],
+};
+
+export const imageSelectorClasses: ImageSelectorClasses =
+  generateUtilityClasses(
+    'MuiImageSelector',
+    Object.keys(slots) as ImageSelectorClassKey[]
+  );
 
 export interface ImageSelectorProps
   extends Pick<
@@ -73,17 +91,6 @@ export interface ImageSelectorProps
   value?: FileContainer[];
   upload?: FileUploadFunction;
 }
-
-export function getImageSelectorUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiImageSelector', slot);
-}
-
-export const imageSelectorClasses: ImageSelectorClasses =
-  generateUtilityClasses('MuiImageSelector', ['root']);
-
-const slots = {
-  root: ['root'],
-};
 
 export const ImageSelector = forwardRef<HTMLDivElement, ImageSelectorProps>(
   function ImageSelector(inProps, ref) {
@@ -111,6 +118,9 @@ export const ImageSelector = forwardRef<HTMLDivElement, ImageSelectorProps>(
         }
       })()
     );
+
+    const { palette } = useTheme();
+    const alphaBGColor = alpha(palette.text.primary, 0.3);
 
     const [imageThumbnailContainer, setImageThumbnailContainer] =
       useState<HTMLDivElement | null>(null);
@@ -152,7 +162,6 @@ export const ImageSelector = forwardRef<HTMLDivElement, ImageSelectorProps>(
       }
     }, [duplicateFileSelections, imageThumbnailContainer]);
 
-    const { palette } = useTheme();
     const wrapperStyle: CSSProperties = {};
     error && (wrapperStyle.borderColor = palette.error.main);
 
@@ -230,24 +239,46 @@ export const ImageSelector = forwardRef<HTMLDivElement, ImageSelectorProps>(
                           gap: '5px',
                         }}
                       >
-                        <CloseButton
+                        <IconButton
                           onClick={(event) => {
                             event.stopPropagation();
                             handleClickImageRemoveButton(index);
                             cancelUpload && cancelUpload();
                           }}
                           size="small"
-                          IconProps={{ sx: { fontSize: '12px' } }}
-                        />
+                          sx={{
+                            '&,&:hover': {
+                              bgcolor: alphaBGColor,
+                              color: palette.background.paper,
+                            },
+                          }}
+                        >
+                          <CloseIcon
+                            sx={{
+                              fontSize: '12px',
+                            }}
+                          />
+                        </IconButton>
                         {retryUpload && (
-                          <CloseButton
+                          <IconButton
                             onClick={(event) => {
                               event.stopPropagation();
                               retryUpload();
                             }}
                             size="small"
-                            icon={<ReplayIcon sx={{ fontSize: '12px' }} />}
-                          />
+                            sx={{
+                              '&,&:hover': {
+                                bgcolor: alphaBGColor,
+                                color: palette.background.paper,
+                              },
+                            }}
+                          >
+                            <ReplayIcon
+                              sx={{
+                                fontSize: '12px',
+                              }}
+                            />
+                          </IconButton>
                         )}
                       </Box>
                       {uploadProgress && (uploading || uploadError) ? (

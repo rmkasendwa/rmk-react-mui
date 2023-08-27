@@ -1,16 +1,91 @@
+import CloseIcon from '@mui/icons-material/Close';
+import {
+  ComponentsOverrides,
+  ComponentsProps,
+  ComponentsVariants,
+  unstable_composeClasses as composeClasses,
+  generateUtilityClass,
+  generateUtilityClasses,
+  useThemeProps,
+} from '@mui/material';
 import Card from '@mui/material/Card';
+import IconButton from '@mui/material/IconButton';
 import Modal, { ModalProps } from '@mui/material/Modal';
 import useTheme from '@mui/material/styles/useTheme';
+import { alpha } from '@mui/system/colorManipulator';
+import clsx from 'clsx';
 import { forwardRef, useCallback, useEffect, useRef, useState } from 'react';
+import { mergeRefs } from 'react-merge-refs';
 
-import CloseButton from './CloseButton';
+export interface ImagePreviewClasses {
+  /** Styles applied to the root element. */
+  root: string;
+}
+
+export type ImagePreviewClassKey = keyof ImagePreviewClasses;
+
+//#region Adding theme prop types
+declare module '@mui/material/styles/props' {
+  interface ComponentsPropsList {
+    MuiImagePreview: ImagePreviewProps;
+  }
+}
+//#endregion
+
+//#region Adding theme override types
+declare module '@mui/material/styles/overrides' {
+  interface ComponentNameToClassKey {
+    MuiImagePreview: keyof ImagePreviewClasses;
+  }
+}
+//#endregion
+
+//#region Adding theme component types
+declare module '@mui/material/styles/components' {
+  interface Components<Theme = unknown> {
+    MuiImagePreview?: {
+      defaultProps?: ComponentsProps['MuiImagePreview'];
+      styleOverrides?: ComponentsOverrides<Theme>['MuiImagePreview'];
+      variants?: ComponentsVariants['MuiImagePreview'];
+    };
+  }
+}
+//#endregion
+
+export const getImagePreviewUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiImagePreview', slot);
+};
+
+const slots: Record<ImagePreviewClassKey, [ImagePreviewClassKey]> = {
+  root: ['root'],
+};
+
+export const imagePreviewClasses: ImagePreviewClasses = generateUtilityClasses(
+  'MuiImagePreview',
+  Object.keys(slots) as ImagePreviewClassKey[]
+);
 
 export interface ImagePreviewProps extends Omit<ModalProps, 'children'> {
   imageSource?: string;
 }
 
 export const ImagePreview = forwardRef<HTMLDivElement, ImagePreviewProps>(
-  function ImagePreview({ imageSource, onClose, ...rest }, ref) {
+  function ImagePreview(inProps, ref) {
+    const props = useThemeProps({ props: inProps, name: 'MuiImagePreview' });
+    const { className, imageSource, onClose, ...rest } = props;
+
+    const classes = composeClasses(
+      slots,
+      getImagePreviewUtilityClass,
+      (() => {
+        if (className) {
+          return {
+            root: className,
+          };
+        }
+      })()
+    );
+
     const imageScaleRef = useRef(1);
     const translationRef = useRef({ x: 0, y: 0 });
     const [image, setImage] = useState<HTMLImageElement | null>(null);
@@ -18,7 +93,8 @@ export const ImagePreview = forwardRef<HTMLDivElement, ImagePreviewProps>(
     const [imagePreviewElement, setImagePreviewElement] =
       useState<HTMLDivElement | null>(null);
 
-    const { spacing } = useTheme();
+    const { spacing, palette } = useTheme();
+    const alphaBGColor = alpha(palette.text.primary, 0.3);
 
     const transformImagePreview = useCallback(() => {
       if (imagePreviewElement) {
@@ -142,18 +218,22 @@ export const ImagePreview = forwardRef<HTMLDivElement, ImagePreviewProps>(
       <Modal
         {...rest}
         {...{ onClose }}
-        ref={(modal: HTMLDivElement) => {
-          if (modal) {
-            Object.assign(modal.style, {
-              width: '100%',
-              height: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            });
-          }
-          typeof ref === 'function' && ref(modal);
-        }}
+        ref={mergeRefs([
+          ref,
+          (modal: HTMLDivElement) => {
+            if (modal) {
+              Object.assign(modal.style, {
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              });
+            }
+          },
+        ])}
+        {...rest}
+        className={clsx(classes.root)}
       >
         <>
           {(() => {
@@ -172,16 +252,23 @@ export const ImagePreview = forwardRef<HTMLDivElement, ImagePreviewProps>(
                       cursor: 'move',
                     }}
                   />
-                  <CloseButton
+                  <IconButton
                     onClick={() => {
-                      onClose && onClose({}, 'backdropClick');
+                      onClose?.({}, 'backdropClick');
                     }}
                     sx={{
+                      bgcolor: alphaBGColor,
+                      '&:hover': {
+                        bgcolor: alphaBGColor,
+                      },
+                      color: palette.background.paper,
                       position: 'fixed',
                       top: spacing(3),
                       right: spacing(3),
                     }}
-                  />
+                  >
+                    <CloseIcon />
+                  </IconButton>
                 </>
               );
             }
