@@ -71,7 +71,7 @@ export const timeStampDisplayClasses: TimeStampDisplayClasses =
   );
 
 export interface TimeStampDisplayProps extends LoadingTypographyProps {
-  timestamp: number | string;
+  timestamp: number | string | Date;
   showTooltip?: boolean;
   sentenceCase?: boolean;
   refreshTimeout?: number;
