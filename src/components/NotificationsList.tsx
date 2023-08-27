@@ -132,7 +132,7 @@ export const NotificationsList = forwardRef<
                 message,
                 timestamp,
                 ProfileGravatarProps = {},
-                MessageImageProps = {},
+                MessageImageProps,
               },
               index
             ) => {
@@ -140,8 +140,6 @@ export const NotificationsList = forwardRef<
                 sx: ProfileGravatarPropsSx,
                 ...ProfileGravatarPropsRest
               } = ProfileGravatarProps;
-              const { sx: MessageImagePropsSx, ...MessageImagePropsRest } =
-                MessageImageProps;
               const avatar = (
                 <ProfileGravatar
                   variant="circular"
@@ -202,19 +200,29 @@ export const NotificationsList = forwardRef<
                       }
                       secondary={<TimeStampDisplay timestamp={timestamp} />}
                     />
-                    <ListItemAvatar>
-                      <Avatar
-                        variant="rounded"
-                        {...MessageImagePropsRest}
-                        sx={{
-                          ...MessageImagePropsSx,
-                          width: 60,
-                          height: 38,
-                        }}
-                      >
-                        <LandscapeIcon />
-                      </Avatar>
-                    </ListItemAvatar>
+                    {(() => {
+                      if (MessageImageProps) {
+                        const {
+                          sx: MessageImagePropsSx,
+                          ...MessageImagePropsRest
+                        } = MessageImageProps;
+                        return (
+                          <ListItemAvatar>
+                            <Avatar
+                              variant="rounded"
+                              {...MessageImagePropsRest}
+                              sx={{
+                                ...MessageImagePropsSx,
+                                width: 60,
+                                height: 38,
+                              }}
+                            >
+                              <LandscapeIcon />
+                            </Avatar>
+                          </ListItemAvatar>
+                        );
+                      }
+                    })()}
                   </ListItem>
                 </Fragment>
               );
