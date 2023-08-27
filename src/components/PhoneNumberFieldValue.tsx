@@ -26,21 +26,23 @@ export interface PhoneNumberFieldValueClasses {
 
 export type PhoneNumberFieldValueClassKey = keyof PhoneNumberFieldValueClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiPhoneNumberFieldValue: PhoneNumberFieldValueProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiPhoneNumberFieldValue: keyof PhoneNumberFieldValueClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiPhoneNumberFieldValue?: {
@@ -50,23 +52,30 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getPhoneNumberFieldValueUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiPhoneNumberFieldValue', slot);
+};
+
+const slots: Record<
+  PhoneNumberFieldValueClassKey,
+  [PhoneNumberFieldValueClassKey]
+> = {
+  root: ['root'],
+};
+
+export const phoneNumberFieldValueClasses: PhoneNumberFieldValueClasses =
+  generateUtilityClasses(
+    'MuiPhoneNumberFieldValue',
+    Object.keys(slots) as PhoneNumberFieldValueClassKey[]
+  );
 
 export interface PhoneNumberFieldValueProps
   extends Partial<Omit<CountryFieldValueProps, 'countryLabel'>> {
   phoneNumber: string;
   LinkProps?: Partial<LinkProps>;
 }
-
-export function getPhoneNumberFieldValueUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiPhoneNumberFieldValue', slot);
-}
-
-export const phoneNumberFieldValueClasses: PhoneNumberFieldValueClasses =
-  generateUtilityClasses('MuiPhoneNumberFieldValue', ['root']);
-
-const slots = {
-  root: ['root'],
-};
 
 export const PhoneNumberFieldValue = forwardRef<
   HTMLDivElement,
