@@ -35,21 +35,23 @@ export interface EllipsisMenuIconButtonClasses {
 export type EllipsisMenuIconButtonClassKey =
   keyof EllipsisMenuIconButtonClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiEllipsisMenuIconButton: EllipsisMenuIconButtonProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiEllipsisMenuIconButton: keyof EllipsisMenuIconButtonClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiEllipsisMenuIconButton?: {
@@ -59,6 +61,24 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getEllipsisMenuIconButtonUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiEllipsisMenuIconButton', slot);
+};
+
+const slots: Record<
+  EllipsisMenuIconButtonClassKey,
+  [EllipsisMenuIconButtonClassKey]
+> = {
+  root: ['root'],
+};
+
+export const ellipsisMenuIconButtonClasses: EllipsisMenuIconButtonClasses =
+  generateUtilityClasses(
+    'MuiEllipsisMenuIconButton',
+    Object.keys(slots) as EllipsisMenuIconButtonClassKey[]
+  );
 
 export interface EllipsisMenuIconButtonProps
   extends IconButtonProps,
@@ -66,17 +86,6 @@ export interface EllipsisMenuIconButtonProps
   PaginatedDropdownOptionListProps?: Partial<PaginatedDropdownOptionListProps>;
   closeOnSelectOption?: boolean;
 }
-
-export function getEllipsisMenuIconButtonUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiEllipsisMenuIconButton', slot);
-}
-
-export const ellipsisMenuIconButtonClasses: EllipsisMenuIconButtonClasses =
-  generateUtilityClasses('MuiEllipsisMenuIconButton', ['root']);
-
-const slots = {
-  root: ['root'],
-};
 
 export const EllipsisMenuIconButton = forwardRef<
   HTMLButtonElement,
