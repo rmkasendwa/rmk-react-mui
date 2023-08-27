@@ -27,7 +27,12 @@ dataKeys.forEach((key) => {
 
 const updateData = (data: Record<string, any>): Record<string, any> => {
   Object.assign(baseData, data);
-  if (data && getMemorySize(data) <= MAX_DATA_MEMORY_SIZE) {
+  const memorySize = getMemorySize(data);
+  if (
+    data &&
+    typeof memorySize === 'number' &&
+    memorySize <= MAX_DATA_MEMORY_SIZE
+  ) {
     Object.keys(data).forEach((key) => {
       StorageManager.add(`${CACHED_DATA_PREFIX}-${key}`, data[key]);
       if (dataKeys.includes(key)) {

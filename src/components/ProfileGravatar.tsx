@@ -29,21 +29,23 @@ export interface ProfileGravatarClasses {
 
 export type ProfileGravatarClassKey = keyof ProfileGravatarClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiProfileGravatar: ProfileGravatarProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiProfileGravatar: keyof ProfileGravatarClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiProfileGravatar?: {
@@ -53,6 +55,21 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getProfileGravatarUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiProfileGravatar', slot);
+};
+
+const slots: Record<ProfileGravatarClassKey, [ProfileGravatarClassKey]> = {
+  root: ['root'],
+};
+
+export const profileGravatarClasses: ProfileGravatarClasses =
+  generateUtilityClasses(
+    'MuiProfileGravatar',
+    Object.keys(slots) as ProfileGravatarClassKey[]
+  );
 
 export interface ProfileGravatarProps
   extends Omit<BoxProps, 'ref'>,
@@ -78,17 +95,6 @@ export interface ProfileGravatarProps
     | 'robohash'
     | 'blank';
 }
-
-export function getProfileGravatarUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiProfileGravatar', slot);
-}
-
-export const profileGravatarClasses: ProfileGravatarClasses =
-  generateUtilityClasses('MuiProfileGravatar', ['root']);
-
-const slots = {
-  root: ['root'],
-};
 
 export const ProfileGravatar = forwardRef<HTMLDivElement, ProfileGravatarProps>(
   function ProfileGravatar(inProps, ref) {

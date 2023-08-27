@@ -14,9 +14,7 @@ export const ReactRouterDomSearchParamCache: FC<
   const { data, updateData } = useCachedData();
 
   const dataRef = useRef(data);
-  useEffect(() => {
-    dataRef.current = data;
-  }, [data]);
+  dataRef.current = data;
 
   useEffect(() => {
     const routeCache = dataRef.current[ROUTE_CACHE_KEY] || {};

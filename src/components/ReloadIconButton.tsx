@@ -25,21 +25,23 @@ export interface ReloadIconButtonClasses {
 
 export type ReloadIconButtonClassKey = keyof ReloadIconButtonClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiReloadIconButton: ReloadIconButtonProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiReloadIconButton: keyof ReloadIconButtonClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiReloadIconButton?: {
@@ -49,6 +51,21 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getReloadIconButtonUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiReloadIconButton', slot);
+};
+
+const slots: Record<ReloadIconButtonClassKey, [ReloadIconButtonClassKey]> = {
+  root: ['root'],
+};
+
+export const reloadIconButtonClasses: ReloadIconButtonClasses =
+  generateUtilityClasses(
+    'MuiReloadIconButton',
+    Object.keys(slots) as ReloadIconButtonClassKey[]
+  );
 
 export interface ReloadIconButtonProps
   extends Omit<BoxProps, 'title' | 'children'> {
@@ -57,17 +74,6 @@ export interface ReloadIconButtonProps
   load?: () => void;
   IconButtonProps?: Partial<Omit<IconButtonProps, 'onClick'>>;
 }
-
-export function getReloadIconButtonUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiReloadIconButton', slot);
-}
-
-export const reloadIconButtonClasses: ReloadIconButtonClasses =
-  generateUtilityClasses('MuiReloadIconButton', ['root']);
-
-const slots = {
-  root: ['root'],
-};
 
 export const ReloadIconButton = forwardRef<
   HTMLDivElement,

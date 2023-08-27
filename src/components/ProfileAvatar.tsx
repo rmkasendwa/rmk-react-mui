@@ -24,21 +24,23 @@ export interface ProfileAvatarClasses {
 
 export type ProfileAvatarClassKey = keyof ProfileAvatarClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiProfileAvatar: ProfileAvatarProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiProfileAvatar: keyof ProfileAvatarClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiProfileAvatar?: {
@@ -48,6 +50,21 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getProfileAvatarUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiProfileAvatar', slot);
+};
+
+const slots: Record<ProfileAvatarClassKey, [ProfileAvatarClassKey]> = {
+  root: ['root'],
+};
+
+export const profileAvatarClasses: ProfileAvatarClasses =
+  generateUtilityClasses(
+    'MuiProfileAvatar',
+    Object.keys(slots) as ProfileAvatarClassKey[]
+  );
 
 export type DefaultAvatar =
   | 'standard'
@@ -60,17 +77,6 @@ export interface ProfileAvatarProps extends AvatarProps {
   size?: number;
   enableLoadingState?: boolean;
 }
-
-export function getProfileAvatarUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiProfileAvatar', slot);
-}
-
-export const profileAvatarClasses: ProfileAvatarClasses =
-  generateUtilityClasses('MuiProfileAvatar', ['root']);
-
-const slots = {
-  root: ['root'],
-};
 
 export const ProfileAvatar = forwardRef<HTMLDivElement, ProfileAvatarProps>(
   function ProfileAvatar(inProps, ref) {
