@@ -32,21 +32,23 @@ export interface ButtonPopupClasses {
 
 export type ButtonPopupClassKey = keyof ButtonPopupClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiButtonPopup: ButtonPopupProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiButtonPopup: keyof ButtonPopupClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiButtonPopup?: {
@@ -56,6 +58,20 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getButtonPopupUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiButtonPopup', slot);
+};
+
+const slots: Record<ButtonPopupClassKey, [ButtonPopupClassKey]> = {
+  root: ['root'],
+};
+
+export const buttonPopupClasses: ButtonPopupClasses = generateUtilityClasses(
+  'MuiButtonPopup',
+  Object.keys(slots) as ButtonPopupClassKey[]
+);
 
 export interface ButtonPopupProps extends Partial<Omit<ButtonProps, 'title'>> {
   title: ReactNode;
@@ -64,19 +80,6 @@ export interface ButtonPopupProps extends Partial<Omit<ButtonProps, 'title'>> {
   footerContent?: ReactNode;
   iconButton?: ReactNode;
 }
-
-export function getButtonPopupUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiButtonPopup', slot);
-}
-
-export const buttonPopupClasses: ButtonPopupClasses = generateUtilityClasses(
-  'MuiButtonPopup',
-  ['root']
-);
-
-const slots = {
-  root: ['root'],
-};
 
 export const ButtonPopup = forwardRef<HTMLDivElement, ButtonPopupProps>(
   function ButtonPopup(inProps, ref) {

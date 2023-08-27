@@ -32,21 +32,23 @@ export interface CardClasses {
 
 export type CardClassKey = keyof CardClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiCardWithTools: CardProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiCardWithTools: keyof CardClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiCardWithTools?: {
@@ -56,6 +58,22 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getCardUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiCardWithTools', slot);
+};
+
+const slots: Record<CardClassKey, [CardClassKey]> = {
+  root: ['root'],
+  header: ['header'],
+  section: ['section'],
+};
+
+export const cardClasses: CardClasses = generateUtilityClasses(
+  'MuiCardWithTools',
+  Object.keys(slots) as CardClassKey[]
+);
 
 export interface CardProps
   extends Partial<Omit<PaperProps, 'title'>>,
@@ -68,21 +86,6 @@ export interface CardProps
   wrapToolbarInCard?: boolean;
   showToolbarDivider?: boolean;
 }
-
-export function getCardUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiCardWithTools', slot);
-}
-
-export const cardClasses: CardClasses = generateUtilityClasses(
-  'MuiCardWithTools',
-  ['root', 'header', 'section']
-);
-
-const slots = {
-  root: ['root'],
-  header: ['header'],
-  section: ['section'],
-};
 
 export const Card = forwardRef<HTMLDivElement, CardProps>(function Card(
   inProps,
