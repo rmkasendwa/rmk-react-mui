@@ -64,50 +64,51 @@ export const pageTitleClasses: PageTitleClasses = generateUtilityClasses(
 
 export interface PageTitleProps extends SearchSyncToolbarProps {}
 
-export const PageTitle = forwardRef<HTMLDivElement, PageTitleProps>(
-  function PageTitle(inProps, ref) {
-    const props = useThemeProps({ props: inProps, name: 'MuiPageTitle' });
-    const { className, tools, title, TitleProps = {}, ...rest } = props;
+export const PageTitle = forwardRef<any, PageTitleProps>(function PageTitle(
+  inProps,
+  ref
+) {
+  const props = useThemeProps({ props: inProps, name: 'MuiPageTitle' });
+  const { className, tools, title, TitleProps = {}, ...rest } = props;
 
-    const classes = composeClasses(
-      slots,
-      getPageTitleUtilityClass,
-      (() => {
-        if (className) {
-          return {
-            root: className,
-          };
-        }
-      })()
-    );
+  const classes = composeClasses(
+    slots,
+    getPageTitleUtilityClass,
+    (() => {
+      if (className) {
+        return {
+          root: className,
+        };
+      }
+    })()
+  );
 
-    const { sx: titlePropsSx, ...titlePropsRest } = TitleProps;
-    const { breakpoints } = useTheme();
-    const largeScreen = useMediaQuery(breakpoints.up('sm'));
+  const { sx: titlePropsSx, ...titlePropsRest } = TitleProps;
+  const { breakpoints } = useTheme();
+  const largeScreen = useMediaQuery(breakpoints.up('sm'));
 
-    return (
-      <SearchSyncToolbar
-        {...{ tools }}
-        title={largeScreen ? title : null}
-        hasSearchTool={false}
-        ref={ref}
-        {...rest}
-        className={clsx(classes.root)}
-        TitleProps={{
-          variant: 'h3',
-          ...titlePropsRest,
-          sx: {
-            fontSize: 22,
-            lineHeight: '50px',
-            [breakpoints.down('md')]: {
-              fontSize: 18,
-            },
-            ...titlePropsSx,
+  return (
+    <SearchSyncToolbar
+      {...{ tools }}
+      title={largeScreen ? title : null}
+      hasSearchTool={false}
+      ref={ref}
+      {...rest}
+      className={clsx(classes.root)}
+      TitleProps={{
+        variant: 'h3',
+        ...titlePropsRest,
+        sx: {
+          fontSize: 22,
+          lineHeight: '50px',
+          [breakpoints.down('md')]: {
+            fontSize: 18,
           },
-        }}
-      />
-    );
-  }
-);
+          ...titlePropsSx,
+        },
+      }}
+    />
+  );
+});
 
 export default PageTitle;

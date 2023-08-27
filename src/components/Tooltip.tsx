@@ -19,21 +19,23 @@ export interface TooltipClasses {
 
 export type TooltipClassKey = keyof TooltipClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiTooltipExtended: TooltipProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiTooltipExtended: keyof TooltipClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiTooltipExtended?: {
@@ -43,23 +45,24 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getTooltipUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiTooltipExtended', slot);
+};
+
+const slots: Record<TooltipClassKey, [TooltipClassKey]> = {
+  root: ['root'],
+};
+
+export const tooltipClasses: TooltipClasses = generateUtilityClasses(
+  'MuiTooltipExtended',
+  Object.keys(slots) as TooltipClassKey[]
+);
 
 export interface TooltipProps extends Omit<MuiTooltipProps, 'ref'> {
   enterAtCursorPosition?: boolean;
 }
-
-export function getTooltipUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiTooltipExtended', slot);
-}
-
-export const tooltipClasses: TooltipClasses = generateUtilityClasses(
-  'MuiTooltipExtended',
-  ['root']
-);
-
-const slots = {
-  root: ['root'],
-};
 
 export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(
   function Tooltip(inProps, ref) {

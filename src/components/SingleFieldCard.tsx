@@ -23,21 +23,23 @@ export interface SingleFieldCardClasses {
 
 export type SingleFieldCardClassKey = keyof SingleFieldCardClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiSingleFieldCard: SingleFieldCardProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiSingleFieldCard: keyof SingleFieldCardClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiSingleFieldCard?: {
@@ -47,22 +49,26 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getSingleFieldCardUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiSingleFieldCard', slot);
+};
+
+const slots: Record<SingleFieldCardClassKey, [SingleFieldCardClassKey]> = {
+  root: ['root'],
+};
+
+export const singleFieldCardClasses: SingleFieldCardClasses =
+  generateUtilityClasses(
+    'MuiSingleFieldCard',
+    Object.keys(slots) as SingleFieldCardClassKey[]
+  );
 
 export interface SingleFieldCardProps extends Partial<CardProps> {
   label: string;
   value?: string | number;
 }
-
-export function getSingleFieldCardUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiSingleFieldCard', slot);
-}
-
-export const singleFieldCardClasses: SingleFieldCardClasses =
-  generateUtilityClasses('MuiSingleFieldCard', ['root']);
-
-const slots = {
-  root: ['root'],
-};
 
 export const SingleFieldCard = forwardRef<HTMLDivElement, SingleFieldCardProps>(
   function SingleFieldCard(inProps, ref) {

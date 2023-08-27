@@ -28,21 +28,23 @@ export interface TimeStampDisplayClasses {
 
 export type TimeStampDisplayClassKey = keyof TimeStampDisplayClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiTimeStampDisplay: TimeStampDisplayProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiTimeStampDisplay: keyof TimeStampDisplayClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiTimeStampDisplay?: {
@@ -52,6 +54,21 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getTimeStampDisplayUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiTimeStampDisplay', slot);
+};
+
+const slots: Record<TimeStampDisplayClassKey, [TimeStampDisplayClassKey]> = {
+  root: ['root'],
+};
+
+export const timeStampDisplayClasses: TimeStampDisplayClasses =
+  generateUtilityClasses(
+    'MuiTimeStampDisplay',
+    Object.keys(slots) as TimeStampDisplayClassKey[]
+  );
 
 export interface TimeStampDisplayProps extends LoadingTypographyProps {
   timestamp: number | string;
@@ -59,17 +76,6 @@ export interface TimeStampDisplayProps extends LoadingTypographyProps {
   sentenceCase?: boolean;
   refreshTimeout?: number;
 }
-
-export function getTimeStampDisplayUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiTimeStampDisplay', slot);
-}
-
-export const timeStampDisplayClasses: TimeStampDisplayClasses =
-  generateUtilityClasses('MuiTimeStampDisplay', ['root']);
-
-const slots = {
-  root: ['root'],
-};
 
 export const TimeStampDisplay = forwardRef<HTMLElement, TimeStampDisplayProps>(
   function TimeStampDisplay(inProps, ref) {

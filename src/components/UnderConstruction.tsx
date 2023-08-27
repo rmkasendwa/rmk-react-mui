@@ -25,21 +25,23 @@ export interface UnderConstructionClasses {
 
 export type UnderConstructionClassKey = keyof UnderConstructionClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiUnderConstruction: UnderConstructionProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiUnderConstruction: keyof UnderConstructionClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiUnderConstruction?: {
@@ -49,6 +51,21 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getUnderConstructionUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiUnderConstruction', slot);
+};
+
+const slots: Record<UnderConstructionClassKey, [UnderConstructionClassKey]> = {
+  root: ['root'],
+};
+
+export const underConstructionClasses: UnderConstructionClasses =
+  generateUtilityClasses(
+    'MuiUnderConstruction',
+    Object.keys(slots) as UnderConstructionClassKey[]
+  );
 
 export interface UnderConstructionProps extends Partial<BoxProps> {
   label?: ReactNode;
@@ -56,17 +73,6 @@ export interface UnderConstructionProps extends Partial<BoxProps> {
   IconProps?: Partial<SvgIconProps>;
   Icon?: FC<any>;
 }
-
-export function getUnderConstructionUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiUnderConstruction', slot);
-}
-
-export const underConstructionClasses: UnderConstructionClasses =
-  generateUtilityClasses('MuiUnderConstruction', ['root']);
-
-const slots = {
-  root: ['root'],
-};
 
 export const UnderConstruction = forwardRef<
   HTMLDivElement,

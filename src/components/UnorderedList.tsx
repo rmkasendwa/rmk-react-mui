@@ -22,21 +22,23 @@ export interface UnorderedListClasses {
 
 export type UnorderedListClassKey = keyof UnorderedListClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiUnorderedList: UnorderedListProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiUnorderedList: keyof UnorderedListClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiUnorderedList?: {
@@ -46,21 +48,25 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getUnorderedListUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiUnorderedList', slot);
+};
+
+const slots: Record<UnorderedListClassKey, [UnorderedListClassKey]> = {
+  root: ['root'],
+};
+
+export const unorderedListClasses: UnorderedListClasses =
+  generateUtilityClasses(
+    'MuiUnorderedList',
+    Object.keys(slots) as UnorderedListClassKey[]
+  );
 
 export interface UnorderedListProps extends Partial<BoxProps> {
   children: ReactNode[];
 }
-
-export function getUnorderedListUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiUnorderedList', slot);
-}
-
-export const unorderedListClasses: UnorderedListClasses =
-  generateUtilityClasses('MuiUnorderedList', ['root']);
-
-const slots = {
-  root: ['root'],
-};
 
 export const UnorderedList = forwardRef<HTMLDivElement, UnorderedListProps>(
   function UnorderedList(inProps, ref) {
