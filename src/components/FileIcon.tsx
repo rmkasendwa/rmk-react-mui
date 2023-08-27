@@ -24,21 +24,23 @@ export interface FileIconClasses {
 
 export type FileIconClassKey = keyof FileIconClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiFileIcon: FileIconProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiFileIcon: keyof FileIconClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiFileIcon?: {
@@ -48,23 +50,24 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getFileIconUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiFileIcon', slot);
+};
+
+const slots: Record<FileIconClassKey, [FileIconClassKey]> = {
+  root: ['root'],
+};
+
+export const fileIconClasses: FileIconClasses = generateUtilityClasses(
+  'MuiFileIcon',
+  Object.keys(slots) as FileIconClassKey[]
+);
 
 export interface FileIconProps extends Pick<BoxProps, 'className' | 'sx'> {
   fileName: string;
 }
-
-export function getFileIconUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiFileIcon', slot);
-}
-
-export const fileIconClasses: FileIconClasses = generateUtilityClasses(
-  'MuiFileIcon',
-  ['root']
-);
-
-const slots = {
-  root: ['root'],
-};
 
 export const FileIcon = forwardRef<HTMLDivElement, FileIconProps>(
   function FileIcon(inProps, ref) {

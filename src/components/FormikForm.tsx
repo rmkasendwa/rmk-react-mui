@@ -25,21 +25,23 @@ export interface FormikFormClasses {
 
 export type FormikFormClassKey = keyof FormikFormClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiFormikForm: FormikFormProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiFormikForm: keyof FormikFormClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiFormikForm?: {
@@ -49,6 +51,20 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getFormikFormUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiFormikForm', slot);
+};
+
+const slots: Record<FormikFormClassKey, [FormikFormClassKey]> = {
+  root: ['root'],
+};
+
+export const formikFormClasses: FormikFormClasses = generateUtilityClasses(
+  'MuiFormikForm',
+  Object.keys(slots) as FormikFormClassKey[]
+);
 
 export type FormikFormFunctionChildren<
   Values extends FormikValues = any,
@@ -73,19 +89,6 @@ export interface FormikFormProps<
   children: FormikFormFunctionChildren<Values, ExtraProps> | ReactNode;
   FormikProps?: Partial<FormikConfig<Values>>;
 }
-
-export function getFormikFormUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiFormikForm', slot);
-}
-
-export const formikFormClasses: FormikFormClasses = generateUtilityClasses(
-  'MuiFormikForm',
-  ['root']
-);
-
-const slots = {
-  root: ['root'],
-};
 
 const BaseFormikForm = <Values extends FormikValues>(
   inProps: FormikFormProps<Values>,

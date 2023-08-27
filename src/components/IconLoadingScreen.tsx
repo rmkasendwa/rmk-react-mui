@@ -28,21 +28,23 @@ export interface IconLoadingScreenClasses {
 
 export type IconLoadingScreenClassKey = keyof IconLoadingScreenClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiIconLoadingScreen: IconLoadingScreenProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiIconLoadingScreen: keyof IconLoadingScreenClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiIconLoadingScreen?: {
@@ -52,6 +54,21 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getIconLoadingScreenUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiIconLoadingScreen', slot);
+};
+
+const slots: Record<IconLoadingScreenClassKey, [IconLoadingScreenClassKey]> = {
+  root: ['root'],
+};
+
+export const iconLoadingScreenClasses: IconLoadingScreenClasses =
+  generateUtilityClasses(
+    'MuiIconLoadingScreen',
+    Object.keys(slots) as IconLoadingScreenClassKey[]
+  );
 
 export interface IconLoadingScreenProps extends Partial<BoxProps> {
   recordLabelPlural?: string;
@@ -70,17 +87,6 @@ export interface IconLoadingScreenProps extends Partial<BoxProps> {
   load?: () => void;
   addNewButtonLabel?: ReactNode;
 }
-
-export function getIconLoadingScreenUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiIconLoadingScreen', slot);
-}
-
-export const iconLoadingScreenClasses: IconLoadingScreenClasses =
-  generateUtilityClasses('MuiIconLoadingScreen', ['root']);
-
-const slots = {
-  root: ['root'],
-};
 
 export const IconLoadingScreen = forwardRef<any, IconLoadingScreenProps>(
   function IconLoadingScreen(inProps, ref) {

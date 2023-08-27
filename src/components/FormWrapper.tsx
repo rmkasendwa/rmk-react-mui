@@ -49,21 +49,23 @@ export interface FormWrapperClasses {
 
 export type FormWrapperClassKey = keyof FormWrapperClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiFormWrapper: FormWrapperProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiFormWrapper: keyof FormWrapperClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiFormWrapper?: {
@@ -73,6 +75,20 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getFormWrapperUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiFormWrapper', slot);
+};
+
+const slots: Record<FormWrapperClassKey, [FormWrapperClassKey]> = {
+  root: ['root'],
+};
+
+export const formWrapperClasses: FormWrapperClasses = generateUtilityClasses(
+  'MuiFormWrapper',
+  Object.keys(slots) as FormWrapperClassKey[]
+);
 
 export interface FormWrapperProps<
   RecordRow = any,
@@ -98,19 +114,6 @@ export interface FormWrapperProps<
   onSubmitSuccess?: () => void;
   onLoadRecord?: (record: LoadedRecord) => void;
 }
-
-export function getFormWrapperUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiFormWrapper', slot);
-}
-
-export const formWrapperClasses: FormWrapperClasses = generateUtilityClasses(
-  'MuiFormWrapper',
-  ['root']
-);
-
-const slots = {
-  root: ['root'],
-};
 
 const BaseFormWrapper = <RecordRow, Values extends FormikValues>(
   inProps: FormWrapperProps<RecordRow, Values>,

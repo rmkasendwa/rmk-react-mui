@@ -25,21 +25,23 @@ export interface FormikErrorFieldHighlighterClasses {
 export type FormikErrorFieldHighlighterClassKey =
   keyof FormikErrorFieldHighlighterClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiFormikErrorFieldHighlighter: FormikErrorFieldHighlighterProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiFormikErrorFieldHighlighter: keyof FormikErrorFieldHighlighterClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiFormikErrorFieldHighlighter?: {
@@ -49,6 +51,25 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getFormikErrorFieldHighlighterUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiFormikErrorFieldHighlighter', slot);
+};
+
+const slots: Record<
+  FormikErrorFieldHighlighterClassKey,
+  [FormikErrorFieldHighlighterClassKey]
+> = {
+  root: ['root'],
+  flicker: ['flicker'],
+};
+
+export const formikErrorFieldHighlighterClasses: FormikErrorFieldHighlighterClasses =
+  generateUtilityClasses(
+    'MuiFormikErrorFieldHighlighter',
+    Object.keys(slots) as FormikErrorFieldHighlighterClassKey[]
+  );
 
 export const flickerAnimation = keyframes`
   0% {
@@ -75,20 +96,6 @@ export interface FormikErrorFieldHighlighterProps
   extends Partial<Omit<BoxProps, 'children'>> {
   children: FormikErrorFieldHighlighterFunctionChildren | ReactNode;
 }
-
-export function getFormikErrorFieldHighlighterUtilityClass(
-  slot: string
-): string {
-  return generateUtilityClass('MuiFormikErrorFieldHighlighter', slot);
-}
-
-export const formikErrorFieldHighlighterClasses: FormikErrorFieldHighlighterClasses =
-  generateUtilityClasses('MuiFormikErrorFieldHighlighter', ['root', 'flicker']);
-
-const slots = {
-  root: ['root'],
-  flicker: ['flicker'],
-};
 
 export const FormikErrorFieldHighlighter = forwardRef<
   HTMLDivElement,
