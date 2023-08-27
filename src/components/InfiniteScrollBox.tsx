@@ -25,21 +25,23 @@ export interface InfiniteScrollBoxClasses {
 
 export type InfiniteScrollBoxClassKey = keyof InfiniteScrollBoxClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiInfiniteScrollBox: InfiniteScrollBoxProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiInfiniteScrollBox: keyof InfiniteScrollBoxClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiInfiniteScrollBox?: {
@@ -49,23 +51,27 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getInfiniteScrollBoxUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiInfiniteScrollBox', slot);
+};
+
+const slots: Record<InfiniteScrollBoxClassKey, [InfiniteScrollBoxClassKey]> = {
+  root: ['root'],
+};
+
+export const infiniteScrollBoxClasses: InfiniteScrollBoxClasses =
+  generateUtilityClasses(
+    'MuiInfiniteScrollBox',
+    Object.keys(slots) as InfiniteScrollBoxClassKey[]
+  );
 
 export interface InfiniteScrollBoxProps
   extends Partial<BoxProps>,
     Omit<UseLoadOnScrollToBottomOptions, 'element'> {
   PagingContainer?: Partial<BoxProps>;
 }
-
-export function getInfiniteScrollBoxUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiInfiniteScrollBox', slot);
-}
-
-export const infiniteScrollBoxClasses: InfiniteScrollBoxClasses =
-  generateUtilityClasses('MuiInfiniteScrollBox', ['root']);
-
-const slots = {
-  root: ['root'],
-};
 
 export const InfiniteScrollBox = forwardRef<
   HTMLDivElement,

@@ -55,21 +55,23 @@ export interface ModalFormClasses {
 
 export type ModalFormClassKey = keyof ModalFormClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
-    MuiModalForm: ModalFormProps<FormikValues>;
+    MuiModalForm: ModalFormProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiModalForm: keyof ModalFormClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiModalForm?: {
@@ -79,6 +81,22 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getModalFormUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiModalForm', slot);
+};
+
+const slots: Record<ModalFormClassKey, [ModalFormClassKey]> = {
+  root: ['root'],
+  cardRoot: ['cardRoot'],
+  cardBody: ['cardBody'],
+};
+
+export const modalFormClasses: ModalFormClasses = generateUtilityClasses(
+  'MuiModalForm',
+  Object.keys(slots) as ModalFormClassKey[]
+);
 
 export type ModalFormFunctionChildren<
   Values extends FormikValues = any,
@@ -122,21 +140,6 @@ export interface ModalFormProps<Values extends FormikValues = any>
   draft?: Pick<Draft, 'id' | 'draftMessage' | 'draftUrl'>;
   errorAlertPlacement?: 'top' | 'bottom';
 }
-
-export function getModalFormUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiModalForm', slot);
-}
-
-export const modalFormClasses: ModalFormClasses = generateUtilityClasses(
-  'MuiModalForm',
-  ['root', 'cardRoot', 'cardBody']
-);
-
-const slots = {
-  root: ['root'],
-  cardRoot: ['cardRoot'],
-  cardBody: ['cardBody'],
-};
 
 export const BaseModalForm = <Values extends FormikValues>(
   inProps: ModalFormProps<Values>,
