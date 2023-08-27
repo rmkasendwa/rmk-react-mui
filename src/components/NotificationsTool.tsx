@@ -20,7 +20,8 @@ import IconButton, { IconButtonProps } from '@mui/material/IconButton';
 import Popper from '@mui/material/Popper';
 import Typography from '@mui/material/Typography';
 import clsx from 'clsx';
-import { FC, useRef, useState } from 'react';
+import { forwardRef, useRef, useState } from 'react';
+import { mergeRefs } from 'react-merge-refs';
 
 import NotificationsList from './NotificationsList';
 
@@ -31,28 +32,23 @@ export interface NotificationsToolClasses {
 
 export type NotificationsToolClassKey = keyof NotificationsToolClasses;
 
-export function getNotificationsToolUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiNotificationsTool', slot);
-}
-
-export const notificationToolClasses: NotificationsToolClasses =
-  generateUtilityClasses('MuiNotificationsTool', ['root']);
-
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiNotificationsTool: NotificationsToolProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiNotificationsTool: keyof NotificationsToolClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiNotificationsTool?: {
@@ -62,26 +58,42 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
 
-const useUtilityClasses = (ownerState: any) => {
-  const { classes } = ownerState;
-
-  const slots = {
-    root: ['root'],
-  };
-
-  return composeClasses(slots, getNotificationsToolUtilityClass, classes);
+export const getNotificationsToolUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiNotificationsTool', slot);
 };
+
+const slots: Record<NotificationsToolClassKey, [NotificationsToolClassKey]> = {
+  root: ['root'],
+};
+
+export const notificationsToolClasses: NotificationsToolClasses =
+  generateUtilityClasses(
+    'MuiNotificationsTool',
+    Object.keys(slots) as NotificationsToolClassKey[]
+  );
 
 export interface NotificationsToolProps extends IconButtonProps {}
 
-export const NotificationsTool: FC<NotificationsToolProps> = (inProps) => {
+export const NotificationsTool = forwardRef<
+  HTMLButtonElement,
+  NotificationsToolProps
+>(function NotificationsTool(inProps, ref) {
   const props = useThemeProps({ props: inProps, name: 'MuiNotificationsTool' });
-  const { ...rest } = props;
+  const { className, ...rest } = props;
 
-  const classes = useUtilityClasses({
-    ...props,
-  });
+  const classes = composeClasses(
+    slots,
+    getNotificationsToolUtilityClass,
+    (() => {
+      if (className) {
+        return {
+          root: className,
+        };
+      }
+    })()
+  );
 
   const anchorRef = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -96,12 +108,10 @@ export const NotificationsTool: FC<NotificationsToolProps> = (inProps) => {
   return (
     <>
       <IconButton
-        size="large"
-        color="inherit"
+        ref={mergeRefs([ref, anchorRef])}
         {...rest}
         className={clsx(classes.root)}
         onClick={handleMenuToggle}
-        ref={anchorRef}
       >
         <Badge color="error">
           <NotificationsIcon />
@@ -161,6 +171,6 @@ export const NotificationsTool: FC<NotificationsToolProps> = (inProps) => {
       </Popper>
     </>
   );
-};
+});
 
 export default NotificationsTool;

@@ -1,9 +1,7 @@
 import {
-  ComponentsOverrides,
   ComponentsProps,
   ComponentsVariants,
   generateUtilityClass,
-  generateUtilityClasses,
   useThemeProps,
 } from '@mui/material';
 import { FC, ReactNode } from 'react';
@@ -11,37 +9,28 @@ import { FC, ReactNode } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import AccessDeniedPage from './ErrorPages/403Page';
 
-export interface PermissionGuardClasses {
-  /** Styles applied to the root element. */
-  root: string;
-}
-
-export type PermissionGuardClassKey = keyof PermissionGuardClasses;
-
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiPermissionGuard: PermissionGuardProps;
   }
 }
+//#endregion
 
-// Adding theme override types
-declare module '@mui/material/styles/overrides' {
-  interface ComponentNameToClassKey {
-    MuiPermissionGuard: keyof PermissionGuardClasses;
-  }
-}
-
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
-  interface Components<Theme = unknown> {
+  interface Components {
     MuiPermissionGuard?: {
       defaultProps?: ComponentsProps['MuiPermissionGuard'];
-      styleOverrides?: ComponentsOverrides<Theme>['MuiPermissionGuard'];
       variants?: ComponentsVariants['MuiPermissionGuard'];
     };
   }
 }
+//#endregion
+
+export const getPermissionGuardUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiPermissionGuard', slot);
+};
 
 export interface PermissionGuardProps {
   permission: string | string[];
@@ -49,13 +38,6 @@ export interface PermissionGuardProps {
   showFallbackComponent?: boolean;
   children: ReactNode;
 }
-
-export function getPermissionGuardUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiPermissionGuard', slot);
-}
-
-export const PermissionGuardClasses: PermissionGuardClasses =
-  generateUtilityClasses('MuiPermissionGuard', ['root']);
 
 export const PermissionGuard: FC<PermissionGuardProps> = (inProps) => {
   const props = useThemeProps({ props: inProps, name: 'MuiPermissionGuard' });

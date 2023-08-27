@@ -17,7 +17,56 @@ import ListItemAvatar from '@mui/material/ListItemAvatar';
 import ListItemText from '@mui/material/ListItemText';
 import Typography from '@mui/material/Typography';
 import clsx from 'clsx';
-import { CSSProperties, FC, Fragment } from 'react';
+import { CSSProperties, Fragment, forwardRef } from 'react';
+
+export interface NotificationsListClasses {
+  /** Styles applied to the root element. */
+  root: string;
+}
+
+export type NotificationsListClassKey = keyof NotificationsListClasses;
+
+//#region Adding theme prop types
+declare module '@mui/material/styles/props' {
+  interface ComponentsPropsList {
+    MuiNotificationsList: NotificationsListProps;
+  }
+}
+//#endregion
+
+//#region Adding theme override types
+declare module '@mui/material/styles/overrides' {
+  interface ComponentNameToClassKey {
+    MuiNotificationsList: keyof NotificationsListClasses;
+  }
+}
+//#endregion
+
+//#region Adding theme component types
+declare module '@mui/material/styles/components' {
+  interface Components<Theme = unknown> {
+    MuiNotificationsList?: {
+      defaultProps?: ComponentsProps['MuiNotificationsList'];
+      styleOverrides?: ComponentsOverrides<Theme>['MuiNotificationsList'];
+      variants?: ComponentsVariants['MuiNotificationsList'];
+    };
+  }
+}
+//#endregion
+
+export const getNotificationsListUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiNotificationsList', slot);
+};
+
+const slots: Record<NotificationsListClassKey, [NotificationsListClassKey]> = {
+  root: ['root'],
+};
+
+export const notificationsListClasses: NotificationsListClasses =
+  generateUtilityClasses(
+    'MuiNotificationsList',
+    Object.keys(slots) as NotificationsListClassKey[]
+  );
 
 const notifications: Array<{ isRead: boolean }> = [
   ...Array.from({ length: 4 }).map(() => {
@@ -32,67 +81,30 @@ const unreadNotificationStyles: CSSProperties = {
 };
 const readNotificationStyles: CSSProperties = {};
 
-export interface NotificationsListClasses {
-  /** Styles applied to the root element. */
-  root: string;
-}
+export interface NotificationsListProps extends ListProps {}
 
-export type NotificationsListClassKey = keyof NotificationsListClasses;
-
-export function getNotificationsListUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiNotificationsList', slot);
-}
-
-export const notificationsListClasses: NotificationsListClasses =
-  generateUtilityClasses('MuiNotificationsList', ['root']);
-
-// Adding theme prop types
-declare module '@mui/material/styles/props' {
-  interface ComponentsPropsList {
-    MuiNotificationsList: NotificationsListProps;
-  }
-}
-
-// Adding theme override types
-declare module '@mui/material/styles/overrides' {
-  interface ComponentNameToClassKey {
-    MuiNotificationsList: keyof NotificationsListClasses;
-  }
-}
-
-// Adding theme component types
-declare module '@mui/material/styles/components' {
-  interface Components<Theme = unknown> {
-    MuiNotificationsList?: {
-      defaultProps?: ComponentsProps['MuiNotificationsList'];
-      styleOverrides?: ComponentsOverrides<Theme>['MuiNotificationsList'];
-      variants?: ComponentsVariants['MuiNotificationsList'];
-    };
-  }
-}
-
-const useUtilityClasses = (ownerState: any) => {
-  const { classes } = ownerState;
-
-  const slots = {
-    root: ['root'],
-  };
-
-  return composeClasses(slots, getNotificationsListUtilityClass, classes);
-};
-
-interface NotificationsListProps extends ListProps {}
-
-export const NotificationsList: FC<NotificationsListProps> = (inProps) => {
+export const NotificationsList = forwardRef<
+  HTMLUListElement,
+  NotificationsListProps
+>(function NotificationsList(inProps, ref) {
   const props = useThemeProps({ props: inProps, name: 'MuiNotificationsList' });
-  const { sx, ...rest } = props;
+  const { className, sx, ...rest } = props;
 
-  const classes = useUtilityClasses({
-    ...props,
-  });
+  const classes = composeClasses(
+    slots,
+    getNotificationsListUtilityClass,
+    (() => {
+      if (className) {
+        return {
+          root: className,
+        };
+      }
+    })()
+  );
 
   return (
     <List
+      ref={ref}
       {...rest}
       className={clsx(classes.root)}
       sx={{
@@ -192,6 +204,6 @@ export const NotificationsList: FC<NotificationsListProps> = (inProps) => {
       })()}
     </List>
   );
-};
+});
 
 export default NotificationsList;

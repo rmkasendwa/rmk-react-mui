@@ -22,21 +22,23 @@ export interface PaddedContentAreaClasses {
 
 export type PaddedContentAreaClassKey = keyof PaddedContentAreaClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiPaddedContentArea: PaddedContentAreaProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiPaddedContentArea: keyof PaddedContentAreaClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiPaddedContentArea?: {
@@ -46,6 +48,21 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getPaddedContentAreaUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiPaddedContentArea', slot);
+};
+
+const slots: Record<PaddedContentAreaClassKey, [PaddedContentAreaClassKey]> = {
+  root: ['root'],
+};
+
+export const paddedContentAreaClasses: PaddedContentAreaClasses =
+  generateUtilityClasses(
+    'MuiPaddedContentArea',
+    Object.keys(slots) as PaddedContentAreaClassKey[]
+  );
 
 export interface PaddedContentAreaProps
   extends Pick<BoxProps, 'sx' | 'className'>,
@@ -54,17 +71,6 @@ export interface PaddedContentAreaProps
   PageTitleProps?: Partial<PageTitleProps>;
   children: ReactNode;
 }
-
-export function getPaddedContentAreaUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiPaddedContentArea', slot);
-}
-
-export const paddedContentAreaClasses: PaddedContentAreaClasses =
-  generateUtilityClasses('MuiPaddedContentArea', ['root']);
-
-const slots = {
-  root: ['root'],
-};
 
 export const PaddedContentArea = forwardRef<
   HTMLDivElement,
