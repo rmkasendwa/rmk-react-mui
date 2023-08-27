@@ -20,21 +20,23 @@ export interface ErrorSkeletonClasses {
 
 export type ErrorSkeletonClassKey = keyof ErrorSkeletonClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiErrorSkeleton: ErrorSkeletonProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiErrorSkeleton: keyof ErrorSkeletonClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiErrorSkeleton?: {
@@ -44,19 +46,23 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
 
-export interface ErrorSkeletonProps extends SkeletonProps {}
-
-export function getErrorSkeletonUtilityClass(slot: string): string {
+export const getErrorSkeletonUtilityClass = (slot: string) => {
   return generateUtilityClass('MuiErrorSkeleton', slot);
-}
+};
 
-export const errorSkeletonClasses: ErrorSkeletonClasses =
-  generateUtilityClasses('MuiErrorSkeleton', ['root']);
-
-const slots = {
+const slots: Record<ErrorSkeletonClassKey, [ErrorSkeletonClassKey]> = {
   root: ['root'],
 };
+
+export const errorSkeletonClasses: ErrorSkeletonClasses =
+  generateUtilityClasses(
+    'MuiErrorSkeleton',
+    Object.keys(slots) as ErrorSkeletonClassKey[]
+  );
+
+export interface ErrorSkeletonProps extends SkeletonProps {}
 
 export const ErrorSkeleton = forwardRef<HTMLDivElement, ErrorSkeletonProps>(
   function ErrorSkeleton(inProps, ref) {

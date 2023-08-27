@@ -23,21 +23,23 @@ export interface EnumValueChipClasses {
 
 export type EnumValueChipClassKey = keyof EnumValueChipClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiEnumValueChip: EnumValueChipProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiEnumValueChip: keyof EnumValueChipClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiEnumValueChip?: {
@@ -47,6 +49,21 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getEnumValueChipUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiEnumValueChip', slot);
+};
+
+const slots: Record<EnumValueChipClassKey, [EnumValueChipClassKey]> = {
+  root: ['root'],
+};
+
+export const enumValueChipClasses: EnumValueChipClasses =
+  generateUtilityClasses(
+    'MuiEnumValueChip',
+    Object.keys(slots) as EnumValueChipClassKey[]
+  );
 
 export interface EnumValueChipProps<Value extends string = string>
   extends ChipProps {
@@ -54,17 +71,6 @@ export interface EnumValueChipProps<Value extends string = string>
   value: Value;
   colors: Record<Value, string>;
 }
-
-export function getEnumValueChipUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiEnumValueChip', slot);
-}
-
-export const enumValueChipClasses: EnumValueChipClasses =
-  generateUtilityClasses('MuiEnumValueChip', ['root']);
-
-const slots = {
-  root: ['root'],
-};
 
 export const BaseEnumValueChip = <Value extends string = string>(
   inProps: EnumValueChipProps<Value>,
