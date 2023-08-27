@@ -26,21 +26,23 @@ export interface LoadingTypographyClasses {
 
 export type LoadingTypographyClassKey = keyof LoadingTypographyClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiLoadingTypography: LoadingTypographyProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiLoadingTypography: keyof LoadingTypographyClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiLoadingTypography?: {
@@ -50,6 +52,21 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getLoadingTypographyUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiLoadingTypography', slot);
+};
+
+const slots: Record<LoadingTypographyClassKey, [LoadingTypographyClassKey]> = {
+  root: ['root'],
+};
+
+export const loadingTypographyClasses: LoadingTypographyClasses =
+  generateUtilityClasses(
+    'MuiLoadingTypography',
+    Object.keys(slots) as LoadingTypographyClassKey[]
+  );
 
 export const pulseAnimation = keyframes`
   0% {
@@ -81,17 +98,6 @@ export interface LoadingTypographyProps
   enableLoadingState?: boolean;
   component?: string;
 }
-
-export function getLoadingTypographyUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiLoadingTypography', slot);
-}
-
-export const loadingTypographyClasses: LoadingTypographyClasses =
-  generateUtilityClasses('MuiLoadingTypography', ['root']);
-
-const slots = {
-  root: ['root'],
-};
 
 export const LoadingTypography = forwardRef<
   HTMLElement,

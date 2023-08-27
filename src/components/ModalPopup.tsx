@@ -42,21 +42,23 @@ export interface ModalPopupClasses {
 
 export type ModalPopupClassKey = keyof ModalPopupClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiModalPopup: ModalPopupProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiModalPopup: keyof ModalPopupClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiModalPopup?: {
@@ -66,6 +68,20 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getModalPopupUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiModalPopup', slot);
+};
+
+const slots: Record<ModalPopupClassKey, [ModalPopupClassKey]> = {
+  root: ['root'],
+};
+
+export const modalPopupClasses: ModalPopupClasses = generateUtilityClasses(
+  'MuiModalPopup',
+  Object.keys(slots) as ModalPopupClassKey[]
+);
 
 export interface ModalPopupProps
   extends Partial<Omit<ModalProps, 'children' | 'title'>> {
@@ -91,19 +107,6 @@ export interface ModalPopupProps
   placement?: 'top' | 'right' | 'bottom' | 'left' | 'center';
   popupStatsElement?: ReactNode;
 }
-
-export function getModalPopupUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiModalPopup', slot);
-}
-
-export const modalPopupClasses: ModalPopupClasses = generateUtilityClasses(
-  'MuiModalPopup',
-  ['root']
-);
-
-const slots = {
-  root: ['root'],
-};
 
 export const ModalPopup = forwardRef<HTMLDivElement, ModalPopupProps>(
   function ModalPopup(inProps, ref) {
