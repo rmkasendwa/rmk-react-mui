@@ -25,21 +25,23 @@ export interface DatePickerClasses {
 
 export type DatePickerClassKey = keyof DatePickerClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiDatePicker: DatePickerProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiDatePicker: keyof DatePickerClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiDatePicker?: {
@@ -49,24 +51,25 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getDatePickerUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiDatePicker', slot);
+};
+
+const slots: Record<DatePickerClassKey, [DatePickerClassKey]> = {
+  root: ['root'],
+};
+
+export const datePickerClasses: DatePickerClasses = generateUtilityClasses(
+  'MuiDatePicker',
+  Object.keys(slots) as DatePickerClassKey[]
+);
 
 export interface DatePickerProps
   extends Partial<Omit<ReactDatePickerProps, 'onChange'>>,
     Pick<ReactDatePickerProps, 'onChange'>,
     Partial<Pick<BoxProps, 'sx'>> {}
-
-export function getDatePickerUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiDatePicker', slot);
-}
-
-export const datePickerClasses: DatePickerClasses = generateUtilityClasses(
-  'MuiDatePicker',
-  ['root']
-);
-
-const slots = {
-  root: ['root'],
-};
 
 export const DatePicker = forwardRef<HTMLDivElement, DatePickerProps>(
   function DatePicker(inProps, ref) {

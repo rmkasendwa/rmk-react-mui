@@ -26,21 +26,23 @@ export interface CountryFieldValueClasses {
 
 export type CountryFieldValueClassKey = keyof CountryFieldValueClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiCountryFieldValue: CountryFieldValueProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiCountryFieldValue: keyof CountryFieldValueClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiCountryFieldValue?: {
@@ -50,6 +52,21 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getCountryFieldValueUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiCountryFieldValue', slot);
+};
+
+const slots: Record<CountryFieldValueClassKey, [CountryFieldValueClassKey]> = {
+  root: ['root'],
+};
+
+export const countryFieldValueClasses: CountryFieldValueClasses =
+  generateUtilityClasses(
+    'MuiCountryFieldValue',
+    Object.keys(slots) as CountryFieldValueClassKey[]
+  );
 
 export interface CountryFieldValueProps
   extends Partial<Omit<FieldValueProps, 'icon' | 'children'>> {
@@ -57,17 +74,6 @@ export interface CountryFieldValueProps
   countryLabel?: string;
   FlagIconProps?: Partial<BoxProps>;
 }
-
-export function getCountryFieldValueUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiCountryFieldValue', slot);
-}
-
-export const countryFieldValueClasses: CountryFieldValueClasses =
-  generateUtilityClasses('MuiCountryFieldValue', ['root']);
-
-const slots = {
-  root: ['root'],
-};
 
 export const CountryFieldValue = forwardRef<
   HTMLElement,

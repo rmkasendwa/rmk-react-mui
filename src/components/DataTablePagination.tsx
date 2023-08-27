@@ -27,21 +27,23 @@ export interface DataTablePaginationClasses {
 
 export type DataTablePaginationClassKey = keyof DataTablePaginationClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiDataTablePagination: DataTablePaginationProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiDataTablePagination: keyof DataTablePaginationClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiDataTablePagination?: {
@@ -51,6 +53,24 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getDataTablePaginationUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiDataTablePagination', slot);
+};
+
+const slots: Record<
+  DataTablePaginationClassKey,
+  [DataTablePaginationClassKey]
+> = {
+  root: ['root'],
+};
+
+export const dataTablePaginationClasses: DataTablePaginationClasses =
+  generateUtilityClasses(
+    'MuiDataTablePagination',
+    Object.keys(slots) as DataTablePaginationClassKey[]
+  );
 
 export interface DataTablePaginationProps
   extends GridProps,
@@ -65,17 +85,6 @@ export interface DataTablePaginationProps
   PaginationProps?: Partial<PaginationProps>;
   postCountTools?: ReactNode | ReactNode[];
 }
-
-export function getDataTablePaginationUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiDataTablePagination', slot);
-}
-
-export const dataTablePaginationClasses: DataTablePaginationClasses =
-  generateUtilityClasses('MuiDataTablePagination', ['root']);
-
-const slots = {
-  root: ['root'],
-};
 
 export const DataTablePagination = forwardRef<
   HTMLDivElement,
