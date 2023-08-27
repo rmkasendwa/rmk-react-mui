@@ -74,21 +74,23 @@ export interface TableCrudClasses {
 
 export type TableCrudClassKey = keyof TableCrudClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiTableCrud: TableCrudProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiTableCrud: keyof TableCrudClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiTableCrud?: {
@@ -98,6 +100,20 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getTableCrudUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiTableCrud', slot);
+};
+
+const slots: Record<TableCrudClassKey, [TableCrudClassKey]> = {
+  root: ['root'],
+};
+
+export const tableCrudClasses: TableCrudClasses = generateUtilityClasses(
+  'MuiTableCrud',
+  Object.keys(slots) as TableCrudClassKey[]
+);
 
 export interface TableCrudProps<
   RecordRow extends BaseDataRow = BaseDataRow,
@@ -168,19 +184,6 @@ export interface TableCrudProps<
 
   ModalFormProps?: Partial<ModalFormProps>;
 }
-
-export function getTableCrudUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiTableCrud', slot);
-}
-
-export const tableCrudClasses: TableCrudClasses = generateUtilityClasses(
-  'MuiTableCrud',
-  ['root']
-);
-
-const slots = {
-  root: ['root'],
-};
 
 const BaseTableCrud = <
   RecordRow extends BaseDataRow,

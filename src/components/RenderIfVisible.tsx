@@ -70,7 +70,7 @@ export interface DefaultPlaceholderDimensions {
 }
 
 export interface RenderIfVisibleProps
-  extends Partial<BoxProps>,
+  extends Partial<Omit<BoxProps, 'ref'>>,
     Partial<Pick<IntersectionOptions, 'threshold'>> {
   /**
    * Whether the element should be visible initially or not.
@@ -132,7 +132,7 @@ export interface RenderIfVisibleProps
   onChangeVisibility?: (isVisible: boolean) => void;
 }
 
-export const RenderIfVisible = forwardRef<HTMLDivElement, RenderIfVisibleProps>(
+export const RenderIfVisible = forwardRef<any, RenderIfVisibleProps>(
   function RenderIfVisible(inProps, ref) {
     const props = useThemeProps({ props: inProps, name: 'MuiRenderIfVisible' });
     const {
