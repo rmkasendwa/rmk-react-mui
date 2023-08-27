@@ -50,21 +50,23 @@ export interface FieldValueClasses {
 
 export type FieldValueClassKey = keyof FieldValueClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiFieldValue: FieldValueProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiFieldValue: keyof FieldValueClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiFieldValue?: {
@@ -74,6 +76,20 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getFieldValueUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiFieldValue', slot);
+};
+
+const slots: Record<FieldValueClassKey, [FieldValueClassKey]> = {
+  root: ['root'],
+};
+
+export const fieldValueClasses: FieldValueClasses = generateUtilityClasses(
+  'MuiFieldValue',
+  Object.keys(slots) as FieldValueClassKey[]
+);
 
 export interface FieldValueProps<T extends ReactNode = ReactNode>
   extends LoadingTypographyProps {
@@ -96,19 +112,6 @@ export interface FieldValueProps<T extends ReactNode = ReactNode>
   enableLoadingState?: boolean;
   showDefaultValue?: boolean;
 }
-
-export function getFieldValueUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiFieldValue', slot);
-}
-
-export const fieldValueClasses: FieldValueClasses = generateUtilityClasses(
-  'MuiFieldValue',
-  ['root']
-);
-
-const slots = {
-  root: ['root'],
-};
 
 export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
   function FieldValue(inProps, ref) {

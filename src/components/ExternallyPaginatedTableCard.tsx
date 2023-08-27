@@ -26,21 +26,23 @@ export interface ExternallyPaginatedTableCardClasses {
 export type ExternallyPaginatedTableCardClassKey =
   keyof ExternallyPaginatedTableCardClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiExternallyPaginatedTableCard: ExternallyPaginatedTableCardProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiExternallyPaginatedTableCard: keyof ExternallyPaginatedTableCardClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiExternallyPaginatedTableCard?: {
@@ -50,6 +52,24 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getExternallyPaginatedTableCardUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiExternallyPaginatedTableCard', slot);
+};
+
+const slots: Record<
+  ExternallyPaginatedTableCardClassKey,
+  [ExternallyPaginatedTableCardClassKey]
+> = {
+  root: ['root'],
+};
+
+export const externallyPaginatedTableCardClasses: ExternallyPaginatedTableCardClasses =
+  generateUtilityClasses(
+    'MuiExternallyPaginatedTableCard',
+    Object.keys(slots) as ExternallyPaginatedTableCardClassKey[]
+  );
 
 export interface ExternallyPaginatedTableCardProps<
   RecordRow extends BaseDataRow = any
@@ -67,19 +87,6 @@ export interface ExternallyPaginatedTableCardProps<
   pathToAddNew?: string;
   enableExternalPagination?: boolean;
 }
-
-export function getExternallyPaginatedTableCardUtilityClass(
-  slot: string
-): string {
-  return generateUtilityClass('MuiExternallyPaginatedTableCard', slot);
-}
-
-export const externallyPaginatedTableClasses: ExternallyPaginatedTableCardClasses =
-  generateUtilityClasses('MuiExternallyPaginatedTableCard', ['root']);
-
-const slots = {
-  root: ['root'],
-};
 
 export const ExternallyPaginatedTableCard = forwardRef<
   HTMLDivElement,
