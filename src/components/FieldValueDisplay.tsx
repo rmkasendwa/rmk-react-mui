@@ -33,21 +33,23 @@ export interface FieldValueDisplayClasses {
 
 export type FieldValueDisplayClassKey = keyof FieldValueDisplayClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiFieldValueDisplay: FieldValueDisplayProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiFieldValueDisplay: keyof FieldValueDisplayClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiFieldValueDisplay?: {
@@ -57,6 +59,24 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getFieldValueDisplayUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiFieldValueDisplay', slot);
+};
+
+const slots: Record<FieldValueDisplayClassKey, [FieldValueDisplayClassKey]> = {
+  root: ['root'],
+  label: ['label'],
+  description: ['description'],
+  value: ['value'],
+};
+
+export const fieldValueDisplayClasses: FieldValueDisplayClasses =
+  generateUtilityClasses(
+    'MuiFieldValueDisplay',
+    Object.keys(slots) as FieldValueDisplayClassKey[]
+  );
 
 export interface FieldValueDisplayProps<
   FieldValue extends ReactNode = ReactNode
@@ -85,25 +105,6 @@ export interface FieldValueDisplayProps<
   enableLoadingState?: boolean;
   direction?: 'column' | 'row';
 }
-
-export function getFieldValueDisplayUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiFieldValueDisplay', slot);
-}
-
-export const fieldValueDisplayClasses: FieldValueDisplayClasses =
-  generateUtilityClasses('MuiFieldValueDisplay', [
-    'root',
-    'label',
-    'description',
-    'value',
-  ]);
-
-const slots = {
-  root: ['root'],
-  label: ['label'],
-  description: ['description'],
-  value: ['value'],
-};
 
 export const BaseFieldValueDisplay = <FieldValue extends ReactNode>(
   inProps: FieldValueDisplayProps<FieldValue>,

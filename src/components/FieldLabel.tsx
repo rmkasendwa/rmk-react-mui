@@ -25,21 +25,23 @@ export interface FieldLabelClasses {
 
 export type FieldLabelClassKey = keyof FieldLabelClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiFieldLabel: FieldLabelProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiFieldLabel: keyof FieldLabelClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiFieldLabel?: {
@@ -49,6 +51,20 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getFieldLabelUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiFieldLabel', slot);
+};
+
+const slots: Record<FieldLabelClassKey, [FieldLabelClassKey]> = {
+  root: ['root'],
+};
+
+export const fieldLabelClasses: FieldLabelClasses = generateUtilityClasses(
+  'MuiFieldLabel',
+  Object.keys(slots) as FieldLabelClassKey[]
+);
 
 export interface FieldLabelProps extends LoadingTypographyProps {
   required?: boolean;
@@ -58,19 +74,6 @@ export interface FieldLabelProps extends LoadingTypographyProps {
   disabled?: boolean;
   ContainerGridProps?: Partial<GridProps>;
 }
-
-export function getFieldLabelUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiFieldLabel', slot);
-}
-
-export const fieldLabelClasses: FieldLabelClasses = generateUtilityClasses(
-  'MuiFieldLabel',
-  ['root']
-);
-
-const slots = {
-  root: ['root'],
-};
 
 export const FieldLabel = forwardRef<HTMLElement, FieldLabelProps>(
   function FieldLabel(inProps, ref) {
