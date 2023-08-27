@@ -20,21 +20,23 @@ export interface HtmlViewerClasses {
 
 export type HtmlViewerClassKey = keyof HtmlViewerClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiHtmlViewer: HtmlViewerProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiHtmlViewer: keyof HtmlViewerClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiHtmlViewer?: {
@@ -44,23 +46,24 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getHtmlViewerUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiHtmlViewer', slot);
+};
+
+const slots: Record<HtmlViewerClassKey, [HtmlViewerClassKey]> = {
+  root: ['root'],
+};
+
+export const htmlViewerClasses: HtmlViewerClasses = generateUtilityClasses(
+  'MuiHtmlViewer',
+  Object.keys(slots) as HtmlViewerClassKey[]
+);
 
 export interface HtmlViewerProps extends Partial<BoxProps> {
   children: string;
 }
-
-export function getHtmlViewerUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiHtmlViewer', slot);
-}
-
-export const htmlViewerClasses: HtmlViewerClasses = generateUtilityClasses(
-  'MuiHtmlViewer',
-  ['root']
-);
-
-const slots = {
-  root: ['root'],
-};
 
 export const HtmlViewer = forwardRef<HTMLDivElement, HtmlViewerProps>(
   function HtmlViewer(inProps, ref) {
