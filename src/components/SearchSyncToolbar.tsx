@@ -60,21 +60,23 @@ export interface SearchSyncToolbarClasses {
 
 export type SearchSyncToolbarClassKey = keyof SearchSyncToolbarClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiSearchSyncToolbar: SearchSyncToolbarProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiSearchSyncToolbar: keyof SearchSyncToolbarClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiSearchSyncToolbar?: {
@@ -84,6 +86,29 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getSearchSyncToolbarUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiSearchSyncToolbar', slot);
+};
+
+const slots: Record<SearchSyncToolbarClassKey, [SearchSyncToolbarClassKey]> = {
+  root: ['root'],
+  fullWidthToolWrapper: ['fullWidthToolWrapper'],
+  collapsedToolWrapper: ['collapsedToolWrapper'],
+  syncToolWrapper: ['syncToolWrapper'],
+  fullWidthSearchToolWrapper: ['fullWidthSearchToolWrapper'],
+  collapsedSearchToolWrapper: ['collapsedSearchToolWrapper'],
+  expansionGap: ['expansionGap'],
+  titleWrapper: ['titleWrapper'],
+  ellipsisButtonToolWrapper: ['ellipsisButtonToolWrapper'],
+};
+
+export const searchSyncToolbarClasses: SearchSyncToolbarClasses =
+  generateUtilityClasses(
+    'MuiSearchSyncToolbar',
+    Object.keys(slots) as SearchSyncToolbarClassKey[]
+  );
 
 export interface BaseToolOptions {
   alwaysShowOn?: 'Large Screen' | 'Small Screen' | 'All Screens';
@@ -348,35 +373,6 @@ export interface SearchSyncToolbarProps
    */
   maxSearchFieldWidth?: number;
 }
-
-export function getSearchSyncToolbarUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiSearchSyncToolbar', slot);
-}
-
-export const searchSyncToolbarClasses: SearchSyncToolbarClasses =
-  generateUtilityClasses('MuiSearchSyncToolbar', [
-    'root',
-    'fullWidthToolWrapper',
-    'collapsedToolWrapper',
-    'syncToolWrapper',
-    'fullWidthSearchToolWrapper',
-    'collapsedSearchToolWrapper',
-    'expansionGap',
-    'titleWrapper',
-    'ellipsisButtonToolWrapper',
-  ]);
-
-const slots = {
-  root: ['root'],
-  fullWidthToolWrapper: ['fullWidthToolWrapper'],
-  collapsedToolWrapper: ['collapsedToolWrapper'],
-  syncToolWrapper: ['syncToolWrapper'],
-  fullWidthSearchToolWrapper: ['fullWidthSearchToolWrapper'],
-  collapsedSearchToolWrapper: ['collapsedSearchToolWrapper'],
-  expansionGap: ['expansionGap'],
-  titleWrapper: ['titleWrapper'],
-  ellipsisButtonToolWrapper: ['ellipsisButtonToolWrapper'],
-};
 
 export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
   function SearchSyncToolbar(inProps, ref) {

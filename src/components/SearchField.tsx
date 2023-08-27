@@ -20,21 +20,23 @@ export interface SearchFieldClasses {
 
 export type SearchFieldClassKey = keyof SearchFieldClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiSearchField: SearchFieldProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiSearchField: keyof SearchFieldClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiSearchField?: {
@@ -44,6 +46,20 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getSearchFieldUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiSearchField', slot);
+};
+
+const slots: Record<SearchFieldClassKey, [SearchFieldClassKey]> = {
+  root: ['root'],
+};
+
+export const searchFieldClasses: SearchFieldClasses = generateUtilityClasses(
+  'MuiSearchField',
+  Object.keys(slots) as SearchFieldClassKey[]
+);
 
 export interface SearchFieldProps extends TextFieldProps {
   searchTerm?: string;
@@ -51,19 +67,6 @@ export interface SearchFieldProps extends TextFieldProps {
   onSearch?: (searchTerm: string) => void;
   searchVelocity?: 'slow' | 'fast';
 }
-
-export function getSearchFieldUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiSearchField', slot);
-}
-
-export const searchFieldClasses: SearchFieldClasses = generateUtilityClasses(
-  'MuiSearchField',
-  ['root']
-);
-
-const slots = {
-  root: ['root'],
-};
 
 export const SearchField = forwardRef<HTMLDivElement, SearchFieldProps>(
   function SearchField(inProps, ref) {
