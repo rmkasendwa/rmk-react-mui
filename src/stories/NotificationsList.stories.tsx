@@ -35,14 +35,12 @@ const sampleNotifications: Notification[] = [
   ...Array.from({ length: 4 }).map(() => {
     return {
       isRead: false,
-      message: lorem.generateWords(10 + Math.round(Math.random() * 10)),
       timestamp: addSeconds(new Date(), -Math.round(Math.random() * 200000)),
     };
   }),
   ...Array.from({ length: 5 }).map(() => {
     return {
       isRead: true,
-      message: lorem.generateWords(10 + Math.round(Math.random() * 10)),
       timestamp: addSeconds(new Date(), -Math.round(Math.random() * 200000)),
     };
   }),
@@ -53,6 +51,7 @@ const sampleNotifications: Notification[] = [
   .map((notification) => {
     return {
       ...notification,
+      message: lorem.generateWords(10 + Math.round(Math.random() * 10)),
       ProfileGravatarProps: {
         email: randomEmail(),
         label: uniqueNamesGenerator({
@@ -62,6 +61,16 @@ const sampleNotifications: Notification[] = [
         defaultAvatar: 'highContrastHueShiftingIntials',
         defaultGravatar: 'robohash',
       },
+      ...(() => {
+        if (Math.random() > 0.5) {
+          return {
+            MessageImageProps: {
+              src: `https://picsum.photos/seed/${lorem.generateWords(1)}/60/38`,
+              alt: 'Random image',
+            },
+          };
+        }
+      })(),
     };
   });
 

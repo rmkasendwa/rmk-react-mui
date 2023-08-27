@@ -10,7 +10,7 @@ import {
   useTheme,
   useThemeProps,
 } from '@mui/material';
-import Badge from '@mui/material/Badge';
+import Badge, { BadgeProps } from '@mui/material/Badge';
 import Grid from '@mui/material/Grid';
 import IconButton, { IconButtonProps } from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
@@ -70,14 +70,17 @@ export const notificationsToolClasses: NotificationsToolClasses =
     Object.keys(slots) as NotificationsToolClassKey[]
   );
 
-export interface NotificationsToolProps extends IconButtonProps {}
+export interface NotificationsToolProps extends IconButtonProps {
+  notificationsCount?: number;
+  BadgeProps?: Partial<BadgeProps>;
+}
 
 export const NotificationsTool = forwardRef<
   HTMLButtonElement,
   NotificationsToolProps
 >(function NotificationsTool(inProps, ref) {
   const props = useThemeProps({ props: inProps, name: 'MuiNotificationsTool' });
-  const { className, ...rest } = props;
+  const { className, notificationsCount, BadgeProps, ...rest } = props;
 
   const classes = composeClasses(
     slots,
@@ -101,7 +104,7 @@ export const NotificationsTool = forwardRef<
     onClick,
   } = usePopupTool({
     icon: (
-      <Badge color="error">
+      <Badge color="error" {...BadgeProps} badgeContent={notificationsCount}>
         <NotificationsIcon />
       </Badge>
     ),
