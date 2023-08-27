@@ -41,21 +41,23 @@ export interface EmailAddressSelectorClasses {
 
 export type EmailAddressSelectorClassKey = keyof EmailAddressSelectorClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiEmailAddressSelector: EmailAddressSelectorProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiEmailAddressSelector: keyof EmailAddressSelectorClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiEmailAddressSelector?: {
@@ -65,6 +67,24 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getEmailAddressSelectorUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiEmailAddressSelector', slot);
+};
+
+const slots: Record<
+  EmailAddressSelectorClassKey,
+  [EmailAddressSelectorClassKey]
+> = {
+  root: ['root'],
+};
+
+export const emailAddressSelectorClasses: EmailAddressSelectorClasses =
+  generateUtilityClasses(
+    'MuiEmailAddressSelector',
+    Object.keys(slots) as EmailAddressSelectorClassKey[]
+  );
 
 export interface EmailAddressHolder {
   name: string;
@@ -76,6 +96,8 @@ export type EmailAddressHolderResolverFunction = (
   options: PaginatedRecordsFinderOptions
 ) => Promise<EmailAddressHolder[]>;
 
+const OPTION_HEIGHT = 50;
+
 export interface EmailAddressSelectorProps extends Partial<BoxProps> {
   startAdornment?: ReactNode;
   endAdornment?: ReactNode;
@@ -84,19 +106,6 @@ export interface EmailAddressSelectorProps extends Partial<BoxProps> {
   getEmailAddressHolders?: EmailAddressHolderResolverFunction;
   ProfileGravatarProps?: ProfileGravatarProps;
 }
-
-export function getEmailAddressSelectorUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiEmailAddressSelector', slot);
-}
-
-export const emailAddressSelectorClasses: EmailAddressSelectorClasses =
-  generateUtilityClasses('MuiEmailAddressSelector', ['root']);
-
-const slots = {
-  root: ['root'],
-};
-
-const OPTION_HEIGHT = 50;
 
 export const EmailAddressSelector = forwardRef<
   HTMLDivElement,
