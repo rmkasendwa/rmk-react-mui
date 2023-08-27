@@ -22,21 +22,23 @@ export interface FixedHeaderContentAreaClasses {
 export type FixedHeaderContentAreaClassKey =
   keyof FixedHeaderContentAreaClasses;
 
-// Adding theme prop types
+//#region Adding theme prop types
 declare module '@mui/material/styles/props' {
   interface ComponentsPropsList {
     MuiFixedHeaderContentArea: FixedHeaderContentAreaProps;
   }
 }
+//#endregion
 
-// Adding theme override types
+//#region Adding theme override types
 declare module '@mui/material/styles/overrides' {
   interface ComponentNameToClassKey {
     MuiFixedHeaderContentArea: keyof FixedHeaderContentAreaClasses;
   }
 }
+//#endregion
 
-// Adding theme component types
+//#region Adding theme component types
 declare module '@mui/material/styles/components' {
   interface Components<Theme = unknown> {
     MuiFixedHeaderContentArea?: {
@@ -46,21 +48,28 @@ declare module '@mui/material/styles/components' {
     };
   }
 }
+//#endregion
+
+export const getFixedHeaderContentAreaUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiFixedHeaderContentArea', slot);
+};
+
+const slots: Record<
+  FixedHeaderContentAreaClassKey,
+  [FixedHeaderContentAreaClassKey]
+> = {
+  root: ['root'],
+};
+
+export const fixedHeaderContentAreaClasses: FixedHeaderContentAreaClasses =
+  generateUtilityClasses(
+    'MuiFixedHeaderContentArea',
+    Object.keys(slots) as FixedHeaderContentAreaClassKey[]
+  );
 
 export interface FixedHeaderContentAreaProps extends PaddedContentAreaProps {
   BodyProps?: Partial<BoxProps>;
 }
-
-export function getFixedHeaderContentAreaUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiFixedHeaderContentArea', slot);
-}
-
-export const fixedHeaderContentAreaClasses: FixedHeaderContentAreaClasses =
-  generateUtilityClasses('MuiFixedHeaderContentArea', ['root']);
-
-const slots = {
-  root: ['root'],
-};
 
 export const FixedHeaderContentArea = forwardRef<
   HTMLDivElement,

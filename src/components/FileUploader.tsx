@@ -4,7 +4,17 @@ import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import DeleteIcon from '@mui/icons-material/Delete';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import { Card, IconButton } from '@mui/material';
+import {
+  Card,
+  ComponentsOverrides,
+  ComponentsProps,
+  ComponentsVariants,
+  IconButton,
+  unstable_composeClasses as composeClasses,
+  generateUtilityClass,
+  generateUtilityClasses,
+  useThemeProps,
+} from '@mui/material';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
@@ -19,6 +29,7 @@ import ListItemText from '@mui/material/ListItemText';
 import useTheme from '@mui/material/styles/useTheme';
 import Typography from '@mui/material/Typography';
 import { alpha } from '@mui/system/colorManipulator';
+import clsx from 'clsx';
 import { Fragment, forwardRef, useEffect, useState } from 'react';
 
 import { useFileUpload } from '../hooks/Files';
@@ -32,6 +43,54 @@ import FileIcon from './FileIcon';
 import { TextFieldProps } from './InputFields/TextField';
 import Tooltip from './Tooltip';
 
+export interface FileUploaderClasses {
+  /** Styles applied to the root element. */
+  root: string;
+}
+
+export type FileUploaderClassKey = keyof FileUploaderClasses;
+
+//#region Adding theme prop types
+declare module '@mui/material/styles/props' {
+  interface ComponentsPropsList {
+    MuiFileUploader: FileUploaderProps;
+  }
+}
+//#endregion
+
+//#region Adding theme override types
+declare module '@mui/material/styles/overrides' {
+  interface ComponentNameToClassKey {
+    MuiFileUploader: keyof FileUploaderClasses;
+  }
+}
+//#endregion
+
+//#region Adding theme component types
+declare module '@mui/material/styles/components' {
+  interface Components<Theme = unknown> {
+    MuiFileUploader?: {
+      defaultProps?: ComponentsProps['MuiFileUploader'];
+      styleOverrides?: ComponentsOverrides<Theme>['MuiFileUploader'];
+      variants?: ComponentsVariants['MuiFileUploader'];
+    };
+  }
+}
+//#endregion
+
+export const getFileUploaderUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiFileUploader', slot);
+};
+
+const slots: Record<FileUploaderClassKey, [FileUploaderClassKey]> = {
+  root: ['root'],
+};
+
+export const fileUploaderClasses: FileUploaderClasses = generateUtilityClasses(
+  'MuiFileUploader',
+  Object.keys(slots) as FileUploaderClassKey[]
+);
+
 export interface FileUploaderProps
   extends Pick<
     TextFieldProps,
@@ -43,8 +102,10 @@ export interface FileUploaderProps
 }
 
 export const FileUploader = forwardRef<HTMLDivElement, FileUploaderProps>(
-  function FileUploader(
-    {
+  function FileUploader(inProps, ref) {
+    const props = useThemeProps({ props: inProps, name: 'MuiFileUploader' });
+    const {
+      className,
       helperText,
       error,
       onChange,
@@ -53,10 +114,21 @@ export const FileUploader = forwardRef<HTMLDivElement, FileUploaderProps>(
       value,
       upload,
       download,
-      className,
-    },
-    ref
-  ) {
+      ...rest
+    } = props;
+
+    const classes = composeClasses(
+      slots,
+      getFileUploaderUtilityClass,
+      (() => {
+        if (className) {
+          return {
+            root: className,
+          };
+        }
+      })()
+    );
+
     const { palette } = useTheme();
     const [fileListContainer, setFileListContainer] =
       useState<HTMLUListElement | null>(null);
@@ -89,7 +161,13 @@ export const FileUploader = forwardRef<HTMLDivElement, FileUploaderProps>(
     }, [duplicateFileSelections, fileListContainer]);
 
     return (
-      <FormControl ref={ref} fullWidth error={error} className={className}>
+      <FormControl
+        ref={ref}
+        {...rest}
+        className={clsx(classes.root)}
+        fullWidth
+        error={error}
+      >
         <input
           type="file"
           ref={(fileField) => {
