@@ -70,6 +70,57 @@ import ModalForm from './ModalForm';
 import RenderIfVisible from './RenderIfVisible';
 import Tooltip from './Tooltip';
 
+export interface RichTextEditorClasses {
+  /** Styles applied to the root element. */
+  root: string;
+  toolGroup: string;
+}
+
+export type RichTextEditorClassKey = keyof RichTextEditorClasses;
+
+//#region Adding theme prop types
+declare module '@mui/material/styles/props' {
+  interface ComponentsPropsList {
+    MuiRichTextEditor: RichTextEditorProps;
+  }
+}
+//#endregion
+
+//#region Adding theme override types
+declare module '@mui/material/styles/overrides' {
+  interface ComponentNameToClassKey {
+    MuiRichTextEditor: keyof RichTextEditorClasses;
+  }
+}
+//#endregion
+
+//#region Adding theme component types
+declare module '@mui/material/styles/components' {
+  interface Components<Theme = unknown> {
+    MuiRichTextEditor?: {
+      defaultProps?: ComponentsProps['MuiRichTextEditor'];
+      styleOverrides?: ComponentsOverrides<Theme>['MuiRichTextEditor'];
+      variants?: ComponentsVariants['MuiRichTextEditor'];
+    };
+  }
+}
+//#endregion
+
+export const getRichTextEditorUtilityClass = (slot: string) => {
+  return generateUtilityClass('MuiRichTextEditor', slot);
+};
+
+const slots: Record<RichTextEditorClassKey, [RichTextEditorClassKey]> = {
+  root: ['root'],
+  toolGroup: ['toolGroup'],
+};
+
+export const richTextEditorClasses: RichTextEditorClasses =
+  generateUtilityClasses(
+    'MuiRichTextEditor',
+    Object.keys(slots) as RichTextEditorClassKey[]
+  );
+
 const imagePlugin = createImagePlugin();
 const plugins = [imagePlugin];
 
@@ -261,39 +312,6 @@ const addLinkFormInitialValues: AddLinkFormValues = {
   href: '',
 };
 
-export interface RichTextEditorClasses {
-  /** Styles applied to the root element. */
-  root: string;
-  toolGroup: string;
-}
-
-export type RichTextEditorClassKey = keyof RichTextEditorClasses;
-
-// Adding theme prop types
-declare module '@mui/material/styles/props' {
-  interface ComponentsPropsList {
-    MuiRichTextEditor: RichTextEditorProps;
-  }
-}
-
-// Adding theme override types
-declare module '@mui/material/styles/overrides' {
-  interface ComponentNameToClassKey {
-    MuiRichTextEditor: keyof RichTextEditorClasses;
-  }
-}
-
-// Adding theme component types
-declare module '@mui/material/styles/components' {
-  interface Components<Theme = unknown> {
-    MuiRichTextEditor?: {
-      defaultProps?: ComponentsProps['MuiRichTextEditor'];
-      styleOverrides?: ComponentsOverrides<Theme>['MuiRichTextEditor'];
-      variants?: ComponentsVariants['MuiRichTextEditor'];
-    };
-  }
-}
-
 export interface RichTextEditorProps
   extends Pick<
     TextFieldProps,
@@ -313,18 +331,6 @@ export interface RichTextEditorProps
     tools: RichTextEditorTools
   ) => Tool[][] | undefined | null | void;
 }
-
-export function getRichTextEditorUtilityClass(slot: string): string {
-  return generateUtilityClass('MuiRichTextEditor', slot);
-}
-
-export const richTextEditorClasses: RichTextEditorClasses =
-  generateUtilityClasses('MuiRichTextEditor', ['root', 'toolGroup']);
-
-const slots = {
-  root: ['root'],
-  toolGroup: ['toolGroup'],
-};
 
 export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
   function RichTextEditor(inProps, ref) {
