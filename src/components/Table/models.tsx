@@ -313,7 +313,7 @@ export interface TableProps<DataRow extends BaseDataRow = any>
   // Sticky columns
   startStickyColumnIndex?: number;
   staticRows?: DataRow[];
-  onChangeMinWidth?: (minWidth: number) => void;
+  onChangeMinWidth?: (minWidth?: number) => void;
 
   lazyRows?: boolean;
   highlightRowOnHover?: boolean;

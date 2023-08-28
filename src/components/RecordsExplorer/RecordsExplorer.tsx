@@ -709,6 +709,9 @@ const BaseRecordsExplorer = <
   const getRecordDetailsLoadFunctionRef = useRef(getRecordDetailsLoadFunction);
   getRecordDetailsLoadFunctionRef.current = getRecordDetailsLoadFunction;
 
+  const onChangeMinWidthRef = useRef(onChangeMinWidth);
+  onChangeMinWidthRef.current = onChangeMinWidth;
+
   const dataPresetsRef = useRef(dataPresets);
   dataPresetsRef.current = dataPresets;
   const ListViewPropsRef = useRef(ListViewProps);
@@ -2457,6 +2460,12 @@ const BaseRecordsExplorer = <
     return children;
   })() as ReactNode | undefined;
   //#endregion
+
+  useEffect(() => {
+    if (filteredData.length <= 0) {
+      onChangeMinWidthRef.current?.();
+    }
+  }, [filteredData.length]);
 
   useEffect(() => {
     isInitialMountRef.current = false;
