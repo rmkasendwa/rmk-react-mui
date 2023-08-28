@@ -2,13 +2,15 @@ import { Meta, StoryFn } from '@storybook/react';
 import addSeconds from 'date-fns/addSeconds';
 import { LoremIpsum } from 'lorem-ipsum';
 import randomEmail from 'random-email';
-import React from 'react';
+import React, { forwardRef } from 'react';
+import { Link as RouterLink } from 'react-router-dom';
 import { names, uniqueNamesGenerator } from 'unique-names-generator';
 
 import NotificationsList, {
   Notification,
   NotificationsListProps,
 } from '../components/NotificationsList';
+import { INDEX_PAGE_ROUTE_PATH } from '../route-paths';
 
 export default {
   title: 'Components/Notifications List',
@@ -71,6 +73,14 @@ const sampleNotifications: Notification[] = [
           };
         }
       })(),
+      component: forwardRef<HTMLAnchorElement, any>(function ParentLink(
+        linkProps,
+        ref
+      ) {
+        return (
+          <RouterLink ref={ref} to={INDEX_PAGE_ROUTE_PATH} {...linkProps} />
+        );
+      }),
     };
   });
 

@@ -9,21 +9,21 @@ import {
   useState,
 } from 'react';
 
-export interface IMessagingContext {
+export interface MessagingContext {
   showSuccessMessage: (message: ReactNode) => void;
 }
-export const MessagingContext = createContext<IMessagingContext>({
+export const MessagingContext = createContext<MessagingContext>({
   showSuccessMessage: () => {
     // Do nothing
   },
 });
 
-export interface IMessagingProviderProps {
+export interface MessagingProviderProps {
   children: ReactNode;
   SuccessMessageAlertProps?: Partial<AlertProps>;
 }
 
-export const MessagingProvider: FC<IMessagingProviderProps> = ({
+export const MessagingProvider: FC<MessagingProviderProps> = ({
   children,
   SuccessMessageAlertProps = {},
 }) => {
