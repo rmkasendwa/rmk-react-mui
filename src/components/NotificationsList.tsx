@@ -3,6 +3,8 @@ import {
   ComponentsOverrides,
   ComponentsProps,
   ComponentsVariants,
+  ListItemButton,
+  ListItemButtonProps,
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
   generateUtilityClasses,
@@ -14,7 +16,7 @@ import Avatar, { AvatarProps } from '@mui/material/Avatar';
 import Badge from '@mui/material/Badge';
 import Divider from '@mui/material/Divider';
 import List, { ListProps } from '@mui/material/List';
-import ListItem, { ListItemProps } from '@mui/material/ListItem';
+import ListItem from '@mui/material/ListItem';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import ListItemText from '@mui/material/ListItemText';
 import Typography from '@mui/material/Typography';
@@ -73,12 +75,7 @@ export const notificationsListClasses: NotificationsListClasses =
     Object.keys(slots) as NotificationsListClassKey[]
   );
 
-const unreadNotificationStyles: ListItemProps['sx'] = {
-  bgcolor: 'rgba(0,58,204,0.06)',
-};
-const readNotificationStyles: ListItemProps['sx'] = {};
-
-export interface Notification {
+export interface Notification extends Partial<ListItemButtonProps> {
   message: ReactNode;
   timestamp: number | string | Date;
   ProfileGravatarProps?: Partial<ProfileGravatarProps>;
@@ -133,6 +130,8 @@ export const NotificationsList = forwardRef<
                 timestamp,
                 ProfileGravatarProps = {},
                 MessageImageProps,
+                sx,
+                ...rest
               },
               index
             ) => {
@@ -157,72 +156,91 @@ export const NotificationsList = forwardRef<
                   {index > 0 ? (
                     <Divider variant="inset" component="li" sx={{ mx: 0 }} />
                   ) : null}
-                  <ListItem
-                    sx={{
-                      alignItems: 'flex-start',
-                      gap: 2,
-                      py: 2,
-                      ...(isRead
-                        ? readNotificationStyles
-                        : unreadNotificationStyles),
-                    }}
-                  >
-                    <ListItemAvatar>
-                      {isRead === false ? (
-                        <Badge
-                          overlap="circular"
-                          variant="dot"
-                          color="primary"
-                          anchorOrigin={{ horizontal: 'left', vertical: 'top' }}
-                          sx={{
-                            '.MuiBadge-badge': {
-                              transform: 'translate(-9px, 10px)',
-                            },
-                          }}
-                        >
-                          {avatar}
-                        </Badge>
-                      ) : (
-                        avatar
-                      )}
-                    </ListItemAvatar>
-                    <ListItemText
-                      sx={{ m: 0 }}
-                      primary={
-                        <Typography
-                          variant="body1"
-                          sx={{
-                            fontSize: '0.75em',
-                          }}
-                        >
-                          {message}
-                        </Typography>
-                      }
-                      secondary={<TimeStampDisplay timestamp={timestamp} />}
-                    />
-                    {(() => {
-                      if (MessageImageProps) {
-                        const {
-                          sx: MessageImagePropsSx,
-                          ...MessageImagePropsRest
-                        } = MessageImageProps;
-                        return (
-                          <ListItemAvatar>
-                            <Avatar
-                              variant="rounded"
-                              {...MessageImagePropsRest}
-                              sx={{
-                                ...MessageImagePropsSx,
-                                width: 60,
-                                height: 38,
-                              }}
-                            >
-                              <LandscapeIcon />
-                            </Avatar>
-                          </ListItemAvatar>
-                        );
-                      }
-                    })()}
+                  <ListItem disablePadding>
+                    <ListItemButton
+                      {...rest}
+                      sx={{
+                        py: 2,
+                        alignItems: 'start',
+                        gap: 2,
+                        ...sx,
+                        ...(() => {
+                          if (!isRead) {
+                            return {
+                              '&,&:hover,&:focus': {
+                                bgcolor: 'rgba(0,58,204,0.06)',
+                              },
+                            };
+                          }
+                        })(),
+                      }}
+                    >
+                      <ListItemAvatar>
+                        {isRead === false ? (
+                          <Badge
+                            overlap="circular"
+                            variant="dot"
+                            color="primary"
+                            anchorOrigin={{
+                              horizontal: 'left',
+                              vertical: 'top',
+                            }}
+                            sx={{
+                              '.MuiBadge-badge': {
+                                transform: 'translate(-9px, 10px)',
+                              },
+                            }}
+                          >
+                            {avatar}
+                          </Badge>
+                        ) : (
+                          avatar
+                        )}
+                      </ListItemAvatar>
+                      <ListItemText
+                        sx={{ m: 0 }}
+                        primary={
+                          <Typography
+                            variant="body1"
+                            sx={{
+                              fontSize: '0.75em',
+                            }}
+                          >
+                            {message}
+                          </Typography>
+                        }
+                        secondary={<TimeStampDisplay timestamp={timestamp} />}
+                        secondaryTypographyProps={{
+                          sx: {
+                            fontSize: '0.72em',
+                            opacity: 0.6,
+                          },
+                        }}
+                      />
+                      {(() => {
+                        if (MessageImageProps) {
+                          const {
+                            sx: MessageImagePropsSx,
+                            ...MessageImagePropsRest
+                          } = MessageImageProps;
+                          return (
+                            <ListItemAvatar>
+                              <Avatar
+                                variant="rounded"
+                                {...MessageImagePropsRest}
+                                sx={{
+                                  ...MessageImagePropsSx,
+                                  width: 60,
+                                  height: 38,
+                                }}
+                              >
+                                <LandscapeIcon />
+                              </Avatar>
+                            </ListItemAvatar>
+                          );
+                        }
+                      })()}
+                    </ListItemButton>
                   </ListItem>
                 </Fragment>
               );
