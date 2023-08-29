@@ -404,7 +404,11 @@ export const useFilterTool = <RecordRow extends BaseDataRow>(
                             if (selectedOperator) {
                               return (
                                 <DateFilterConditionRowValue
-                                  condition={condition}
+                                  {...{
+                                    condition,
+                                    selectedConditionGroup,
+                                    onChangeSelectedConditionGroup,
+                                  }}
                                 />
                               );
                             }
@@ -528,6 +532,9 @@ export const useFilterTool = <RecordRow extends BaseDataRow>(
                         >
                           <Tooltip title="Remove condition" disableInteractive>
                             <IconButton
+                              sx={{
+                                p: 0.5,
+                              }}
                               onClick={() => {
                                 const selectedFilterParamIndex =
                                   nextSelectedConditionGroup.conditions.findIndex(
