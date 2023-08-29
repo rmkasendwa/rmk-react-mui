@@ -57,7 +57,7 @@ export const useDataFilter = <RecordRow extends BaseDataRow>(
   const { data, filterFields } = props;
 
   const getDateInstanceFromFilterConditionRef = useRef(
-    ({ value }: Condition<RecordRow>) => {
+    ({ value, numberOfDays, selectedDate }: Condition<RecordRow>) => {
       switch (value as DateFilterOperatorValue) {
         case 'today':
           return new Date();
@@ -83,10 +83,12 @@ export const useDataFilter = <RecordRow extends BaseDataRow>(
           return addYears(new Date(), 1);
         case 'number of days ago':
         case 'the past number of days':
-          return addDays(new Date(), -3);
+          return addDays(new Date(), -numberOfDays);
         case 'number of days from now':
         case 'the next number of days':
-          return addDays(new Date(), 3);
+          return addDays(new Date(), numberOfDays);
+        case 'exact date':
+          return new Date(selectedDate);
       }
     }
   );
@@ -104,13 +106,24 @@ export const useDataFilter = <RecordRow extends BaseDataRow>(
         ) {
           return data.filter((row) => {
             return selectedConditionGroup.conditions
-              .filter(({ operator, value }) => {
+              .filter(({ operator, value, numberOfDays, selectedDate }) => {
                 return (
                   operator &&
                   (contentExistenceFilterOperator.includes(
                     operator as ContentExistenceFilterOperator
                   ) ||
-                    (value != null && String(value).length > 0))
+                    (() => {
+                      switch (value as DateFilterOperatorValue) {
+                        case 'number of days ago':
+                        case 'the past number of days':
+                        case 'number of days from now':
+                        case 'the next number of days':
+                          return Boolean(numberOfDays);
+                        case 'exact date':
+                          return Boolean(selectedDate);
+                      }
+                      return value != null && String(value).length > 0;
+                    })())
                 );
               })
               [selectedConditionGroup.conjunction === 'and' ? 'every' : 'some'](
