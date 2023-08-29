@@ -5,15 +5,40 @@ import { useAPIService } from './APIService';
 import { GetStaleWhileRevalidateFunction, QueryOptions } from './models';
 
 export type CacheableDataFinderOptions = {
+  /**
+   * Function that can be used to retrieve the request controller of the data request.
+   *
+   * @param controller The request controller that can be used to cancel the request.
+   */
   getRequestController?: (controller: RecordFinderRequestController) => void;
+
+  /**
+   * Function that can be used to retrieve stale data while the request is being made.
+   */
   getStaleWhileRevalidate?: GetStaleWhileRevalidateFunction<any>;
 };
+
+/**
+ * Finds data from the cache or makes a request to the API.
+ */
 export type CacheableDataFinder<Data> = (
   options: CacheableDataFinderOptions
 ) => Promise<Data>;
+
 export interface CacheableDataProps<Data> extends QueryOptions {
+  /**
+   * The default value of the data.
+   */
   defaultValue?: Data;
 }
+
+/**
+ * Hook that can be used to find data from the cache or make a request to the API.
+ *
+ * @param recordFinder The function that will be used to find the data.
+ * @param options The options for the hook.
+ * @returns The data and the functions to load it.
+ */
 export const useCacheableData = <Data>(
   recordFinder?: CacheableDataFinder<Data>,
   {

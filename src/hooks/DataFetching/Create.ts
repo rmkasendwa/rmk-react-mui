@@ -1,8 +1,14 @@
 import { APIFunction } from '../../models/Utils';
 import { useMutation } from './Mutation';
 
+/**
+ * Hook that can be used to create a record.
+ *
+ * @param createFunction The API function that will be used to create the record.
+ * @returns The record creation state.
+ */
 export const useCreate = <CreateFunction extends APIFunction>(
-  inputCreate: CreateFunction
+  createFunction: CreateFunction
 ) => {
   const {
     mutate: create,
@@ -11,7 +17,7 @@ export const useCreate = <CreateFunction extends APIFunction>(
     setMutated: setCreated,
     mutatedRecord: createdRecord,
     ...rest
-  } = useMutation(inputCreate);
+  } = useMutation(createFunction);
 
   return {
     create,
