@@ -10,13 +10,18 @@ import {
   useThemeProps,
 } from '@mui/material';
 import clsx from 'clsx';
+import hashIt from 'hash-it';
 import { forwardRef } from 'react';
 
 import DataDropdownField from '../../InputFields/DataDropdownField';
+import DateInputField from '../../InputFields/DateInputField';
+import NumberInputField from '../../InputFields/NumberInputField';
 import { BaseDataRow } from '../../Table';
 import {
   Condition,
+  ConditionGroup,
   DateFilterOperator,
+  DateFilterOperatorValue,
   dateFilterOperatorToValueOptionsMap,
 } from '../models';
 
@@ -77,6 +82,10 @@ export interface DateFilterConditionRowValueProps<
   RecordRow extends BaseDataRow = any
 > extends Partial<TableCellProps> {
   condition: Condition<RecordRow>;
+  selectedConditionGroup: ConditionGroup<RecordRow>;
+  onChangeSelectedConditionGroup: (
+    conditionGroup: ConditionGroup<RecordRow> | null
+  ) => void;
 }
 
 export const DateFilterConditionRowValue = forwardRef<
@@ -87,7 +96,13 @@ export const DateFilterConditionRowValue = forwardRef<
     props: inProps,
     name: 'MuiDateFilterConditionRowValue',
   });
-  const { className, condition, ...rest } = props;
+  const {
+    className,
+    condition,
+    selectedConditionGroup,
+    onChangeSelectedConditionGroup,
+    ...rest
+  } = props;
 
   const classes = composeClasses(
     slots,
@@ -101,23 +116,71 @@ export const DateFilterConditionRowValue = forwardRef<
     })()
   );
 
+  const index = selectedConditionGroup.conditions.findIndex(
+    (currentCondition) => {
+      return hashIt(currentCondition) === hashIt(condition);
+    }
+  );
+
+  const nextSelectedConditionGroup = JSON.parse(
+    JSON.stringify(selectedConditionGroup)
+  ) as typeof selectedConditionGroup;
+
   if (condition.operator) {
+    const conditionValue = condition.value as DateFilterOperatorValue;
     return (
-      <TableCell ref={ref} {...rest} className={clsx(classes.root)}>
-        <DataDropdownField
-          placeholder="Select"
-          variant="text"
-          value={condition.value as any}
-          options={dateFilterOperatorToValueOptionsMap[
-            condition.operator as DateFilterOperator
-          ].map((label) => {
-            return {
-              label,
-              value: label,
-            };
-          })}
-        />
-      </TableCell>
+      <>
+        <TableCell ref={ref} {...rest} className={clsx(classes.root)}>
+          <DataDropdownField
+            placeholder="Select"
+            variant="text"
+            value={conditionValue}
+            options={dateFilterOperatorToValueOptionsMap[
+              condition.operator as DateFilterOperator
+            ].map((label) => {
+              return {
+                label,
+                value: label,
+              };
+            })}
+            showClearButton={false}
+            onChange={(event) => {
+              if (event.target.value) {
+                nextSelectedConditionGroup.conditions[index].value = event
+                  .target.value as any;
+                onChangeSelectedConditionGroup(nextSelectedConditionGroup);
+              }
+            }}
+          />
+        </TableCell>
+        {(() => {
+          switch (conditionValue) {
+            case 'number of days ago':
+            case 'number of days from now':
+              return (
+                <TableCell ref={ref} {...rest} className={clsx(classes.root)}>
+                  <NumberInputField
+                    placeholder="Enter days"
+                    sx={{
+                      width: 120,
+                    }}
+                  />
+                </TableCell>
+              );
+            case 'exact date':
+              return (
+                <TableCell ref={ref} {...rest} className={clsx(classes.root)}>
+                  <DateInputField
+                    placeholder="Select a date"
+                    sx={{
+                      width: 150,
+                    }}
+                  />
+                </TableCell>
+              );
+          }
+        })()}
+      </>
     );
   }
 

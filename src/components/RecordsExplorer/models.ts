@@ -130,6 +130,8 @@ export const dateStaticFilterOperatorValues = [
   'number of days from now',
   'exact date',
 ] as const;
+export type DateStaticFilterOperatorValue =
+  (typeof dateStaticFilterOperatorValues)[number];
 
 export const dateRangeFilterOperatorValues = [
   'the past week',
@@ -141,6 +143,12 @@ export const dateRangeFilterOperatorValues = [
   'the next number of days',
   'the past number of days',
 ] as const;
+export type DateRangeFilterOperatorValue =
+  (typeof dateRangeFilterOperatorValues)[number];
+
+export type DateFilterOperatorValue =
+  | DateStaticFilterOperatorValue
+  | DateRangeFilterOperatorValue;
 
 export const dateFilterOperatorToValueOptionsMap: Record<
   DateFilterOperator,

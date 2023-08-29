@@ -278,10 +278,10 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
           }}
           sx={{
             '& .date-input-clear-button': {
-              visibility: 'hidden',
+              display: 'none',
             },
             '&:hover .date-input-clear-button': {
-              visibility: 'visible',
+              display: 'inline-flex',
             },
             ...sx,
           }}
