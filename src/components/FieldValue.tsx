@@ -174,18 +174,20 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
       editableValue = valueProp as any;
     }
 
-    // Refs
-    const isComponentMountedRef = useRef(true);
+    //#region Refs
+    const isInitialMountRef = useRef(true);
     const anchorRef = useRef<HTMLDivElement>(null);
+
     const onChangeEditModeRef = useRef(onChangeEditMode);
+    onChangeEditModeRef.current = onChangeEditMode;
+
     const onFieldValueUpdatedRef = useRef(onFieldValueUpdated);
-    useEffect(() => {
-      onChangeEditModeRef.current = onChangeEditMode;
-      onFieldValueUpdatedRef.current = onFieldValueUpdated;
-    }, [onChangeEditMode, onFieldValueUpdated]);
+    onFieldValueUpdatedRef.current = onFieldValueUpdated;
+    //#endregion
 
     const { palette, components } = useTheme();
     const [editMode, setEditMode] = useState(editModeProp ?? false);
+
     const {
       update,
       updating,
@@ -194,7 +196,7 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
     } = useUpdate(fieldValueEditor!);
 
     useEffect(() => {
-      onChangeEditModeRef.current && onChangeEditModeRef.current(editMode);
+      onChangeEditModeRef.current?.(editMode);
     }, [editMode]);
 
     useEffect(() => {
@@ -204,7 +206,7 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
     }, [editModeProp]);
 
     useEffect(() => {
-      if (updated && isComponentMountedRef.current) {
+      if (updated && isInitialMountRef.current) {
         (async () => {
           onFieldValueUpdatedRef.current &&
             (await onFieldValueUpdatedRef.current());
@@ -215,19 +217,15 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
     }, [resetUpdateState, updated]);
 
     useEffect(() => {
-      isComponentMountedRef.current = true;
+      isInitialMountRef.current = true;
       return () => {
-        isComponentMountedRef.current = false;
+        isInitialMountRef.current = false;
       };
     }, []);
 
-    if (enableLoadingState && (loading || errorMessage)) {
-      return (
-        <LoadingTypography enableLoadingState={enableLoadingState}>
-          {valueProp}
-        </LoadingTypography>
-      );
-    }
+    const hasLoadingState = Boolean(
+      enableLoadingState && (loading || errorMessage)
+    );
 
     const value = (() => {
       if (editable) {
@@ -435,7 +433,7 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
           ...ContainerGridPropsSx,
         }}
       >
-        {!editMode && icon ? (
+        {!editMode && icon && !hasLoadingState ? (
           <Grid
             {...IconContainerPropsRest}
             item
@@ -481,7 +479,7 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
             {value ?? defaultValue}
           </LoadingTypography>
         </Grid>
-        {!editMode && endIcon ? (
+        {!editMode && endIcon && !hasLoadingState ? (
           <Grid
             {...EndIconContainerPropsRest}
             item
