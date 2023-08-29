@@ -6,9 +6,12 @@ import {
 import addDays from 'date-fns/addDays';
 import addMonths from 'date-fns/addMonths';
 import addWeeks from 'date-fns/addWeeks';
+import addYears from 'date-fns/addYears';
 import isAfter from 'date-fns/isAfter';
 import isBefore from 'date-fns/isBefore';
 import isSameDay from 'date-fns/isSameDay';
+import max from 'date-fns/max';
+import min from 'date-fns/min';
 import { result } from 'lodash';
 import { useCallback, useRef } from 'react';
 
@@ -63,19 +66,27 @@ export const useDataFilter = <RecordRow extends BaseDataRow>(
         case 'yesterday':
           return addDays(new Date(), -1);
         case 'one week ago':
+        case 'the past week':
           return addWeeks(new Date(), -1);
         case 'one week from now':
+        case 'the next week':
           return addWeeks(new Date(), 1);
         case 'one month ago':
+        case 'the past month':
           return addMonths(new Date(), -1);
         case 'one month from now':
+        case 'the next month':
           return addMonths(new Date(), 1);
+        case 'the past year':
+          return addYears(new Date(), -1);
+        case 'the next year':
+          return addYears(new Date(), 1);
         case 'number of days ago':
+        case 'the past number of days':
           return addDays(new Date(), -3);
         case 'number of days from now':
+        case 'the next number of days':
           return addDays(new Date(), 3);
-        case 'number of days from now':
-          return new Date();
       }
     }
   );
@@ -126,6 +137,16 @@ export const useDataFilter = <RecordRow extends BaseDataRow>(
                         switch (operator as DateFilterOperator) {
                           case 'is':
                             return isSameDay(valueDate, conditionValueDate);
+                          case 'is within':
+                            const today = new Date();
+                            const minDate = min([today, conditionValueDate]);
+                            const maxDate = max([today, conditionValueDate]);
+                            return (
+                              isSameDay(valueDate, minDate) ||
+                              (isAfter(valueDate, minDate) &&
+                                isBefore(valueDate, maxDate)) ||
+                              isSameDay(valueDate, maxDate)
+                            );
                           case 'is before':
                             return isBefore(valueDate, conditionValueDate);
                           case 'is after':
