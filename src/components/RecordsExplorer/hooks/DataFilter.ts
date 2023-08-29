@@ -146,7 +146,11 @@ export const useDataFilter = <RecordRow extends BaseDataRow>(
                           condition
                         );
                       const valueDate = new Date(fieldValue);
-                      if (conditionValueDate && !isNaN(valueDate.getTime())) {
+                      if (
+                        conditionValueDate &&
+                        !isNaN(conditionValueDate.getTime()) &&
+                        !isNaN(valueDate.getTime())
+                      ) {
                         switch (operator as DateFilterOperator) {
                           case 'is':
                             return isSameDay(valueDate, conditionValueDate);
@@ -177,6 +181,23 @@ export const useDataFilter = <RecordRow extends BaseDataRow>(
                           case 'is not':
                             return !isSameDay(valueDate, conditionValueDate);
                         }
+                      }
+                      return false;
+                    }
+                    if (filterField?.type === 'number') {
+                      switch (operator) {
+                        case '=':
+                          return fieldValue === value;
+                        case '≠':
+                          return fieldValue !== value;
+                        case '<':
+                          return value != null && fieldValue < value;
+                        case '>':
+                          return value != null && fieldValue > value;
+                        case '≤':
+                          return value != null && fieldValue <= value;
+                        case '≥':
+                          return value != null && fieldValue >= value;
                       }
                       return false;
                     }
@@ -234,18 +255,6 @@ export const useDataFilter = <RecordRow extends BaseDataRow>(
                         return !String(fieldValue)
                           .toLowerCase()
                           .match(String(value).toLowerCase());
-                      case '=':
-                        return fieldValue === value;
-                      case '≠':
-                        return fieldValue !== value;
-                      case '<':
-                        return value != null && fieldValue < value;
-                      case '>':
-                        return value != null && fieldValue > value;
-                      case '≤':
-                        return value != null && fieldValue <= value;
-                      case '≥':
-                        return value != null && fieldValue >= value;
                       default:
                         return false;
                     }
