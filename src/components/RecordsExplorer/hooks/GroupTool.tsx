@@ -4,6 +4,7 @@ import {
   ComponentsVariants,
   useThemeProps,
 } from '@mui/material';
+import { omit } from 'lodash';
 
 import { SelectedSortOption } from '../../../models/Sort';
 import { BaseDataRow } from '../../Table';
@@ -54,7 +55,7 @@ export const useGroupTool = <RecordRow extends BaseDataRow>(
     selectedGroupParams,
     onChangeSelectedGroupParams,
     ...rest
-  } = props;
+  } = omit(props, 'getGroupableData');
 
   return useSortOperationFieldSelectorTool({
     sortableFields: groupableFields.map(

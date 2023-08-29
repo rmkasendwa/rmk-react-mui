@@ -400,7 +400,6 @@ export const useSortOperationFieldSelectorTool = <
   });
   const {
     sortableFields,
-    onSelectSortOption,
     addFieldText = 'Add another sort',
     footerContent,
     icon = <SortIcon />,
@@ -411,16 +410,13 @@ export const useSortOperationFieldSelectorTool = <
   } = omit(props, 'title');
 
   let { title } = props;
-
   title || (title = `${sortLabel} by`);
 
   const unselectedSortableFieldsAnchorRef = useRef<HTMLButtonElement | null>(
     null
   );
   const sortableFieldsRef = useRef(sortableFields);
-  useEffect(() => {
-    sortableFieldsRef.current = sortableFields;
-  }, [onSelectSortOption, sortableFields]);
+  sortableFieldsRef.current = sortableFields;
 
   const [openUnselectedSortableFields, setOpenUnselectedSortableFields] =
     useState(false);
