@@ -80,7 +80,7 @@ export interface APIServiceState<Data> {
  *
  * @param defaultValue The default value of the record
  * @param loadOnMount Whether to load the record on mount
- * @param cacheKey The cache key of the record
+ * @param cacheKey The cache key of the record. If provided, the record will be cached in local storage and will be loaded from local storage on mount.
  * @returns The record loading state of the API service
  */
 export const useAPIService = <Data>(

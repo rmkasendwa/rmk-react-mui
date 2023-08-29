@@ -7,3 +7,4 @@ export * from './Record';
 export * from './Records';
 export * from './CacheableData';
 export * from './PaginatedRecords';
+export * from './models';
