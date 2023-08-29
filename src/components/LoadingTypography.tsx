@@ -95,10 +95,32 @@ export const waveAnimation = keyframes`
 export interface LoadingTypographyProps
   extends Omit<TypographyProps, 'ref'>,
     Pick<SkeletonProps, 'animation'> {
+  /**
+   * Whether to enable the loading state. If `true`, the loading state will be enabled.
+   *
+   * @default true
+   */
   enableLoadingState?: boolean;
+
+  /**
+   * The html component tag used for the root node.
+   */
   component?: string;
+
+  /**
+   * Whether to show the tooltip when the text overflows.
+   *
+   * @default true
+   */
+  showTooltipOnOverflow?: boolean;
 }
 
+/**
+ * A wrapper for the `Typography` component that adds a loading state.
+ * It can be used to display a skeleton preview of the text while the text is loading.
+ * It can also be used to display an error message when the text fails to load.
+ * It can also be used to display a tooltip when the text overflows.
+ */
 export const LoadingTypography = forwardRef<
   HTMLElement,
   LoadingTypographyProps
@@ -109,6 +131,7 @@ export const LoadingTypography = forwardRef<
     children,
     animation = 'pulse',
     enableLoadingState = true,
+    showTooltipOnOverflow = true,
     sx,
     ...rest
   } = props;
@@ -134,8 +157,11 @@ export const LoadingTypography = forwardRef<
       ref={mergeRefs([
         ref,
         (el) => {
-          if (el && rest.noWrap) {
-            setHasTextOverflow(el.offsetWidth < el.scrollWidth);
+          if (hasTextOverflow && el && rest.noWrap) {
+            setHasTextOverflow(
+              el.offsetWidth < el.scrollWidth ||
+                el.offsetHeight < el.scrollHeight
+            );
           }
         },
       ])}
@@ -217,7 +243,7 @@ export const LoadingTypography = forwardRef<
     </Typography>
   );
 
-  if (hasTextOverflow) {
+  if (showTooltipOnOverflow && hasTextOverflow) {
     return (
       <Tooltip
         title={children}
