@@ -111,6 +111,11 @@ export type OnClickColumn<
   ColumnType extends TableColumnType = TableColumnType
 > = (row: DataRow, column: TableColumn<DataRow, ColumnType>) => void;
 
+export type GetToolTipWrappedColumnNodeFunction<DataRow> = (
+  tableColumnNode: ReactElement,
+  row: DataRow
+) => ReactElement;
+
 export interface TableColumn<
   DataRow extends BaseDataRow = any,
   ColumnType extends TableColumnType = TableColumnType
@@ -168,10 +173,7 @@ export interface TableColumn<
   defaultCountryCode?: CountryCode;
   holdsPriorityInformation?: boolean;
   isGroupHeaderColumn?: boolean;
-  getToolTipWrappedColumnNode?: (
-    tableColumnNode: ReactElement,
-    row: DataRow
-  ) => ReactElement;
+  getToolTipWrappedColumnNode?: GetToolTipWrappedColumnNodeFunction<DataRow>;
 }
 
 export interface ForEachDerivedColumnConfiguration<T> {
