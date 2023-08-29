@@ -1,3 +1,4 @@
+import hashIt from 'hash-it';
 import { useCallback, useEffect, useRef } from 'react';
 
 import { RecordFinderRequestController } from '../../models/Utils';
@@ -36,17 +37,14 @@ export interface CacheableDataProps<Data> extends QueryOptions {
  * Hook that can be used to find data from the cache or make a request to the API.
  *
  * @param recordFinder The function that will be used to find the data.
- * @param options The options for the hook.
+ * @param inProps The options for the hook.
  * @returns The data and the functions to load it.
  */
 export const useCacheableData = <Data>(
   recordFinder?: CacheableDataFinder<Data>,
-  {
-    defaultValue,
-    loadOnMount = true,
-    revalidationKey,
-  }: CacheableDataProps<Data> = {}
+  inProps: CacheableDataProps<Data> = {}
 ) => {
+  const { defaultValue, loadOnMount = true, revalidationKey } = inProps;
   //#region Refs
   const isInitialMountRef = useRef(true);
 
@@ -64,7 +62,11 @@ export const useCacheableData = <Data>(
     record,
     setRecord,
     ...rest
-  } = useAPIService(defaultValue, loadOnMount);
+  } = useAPIService(
+    defaultValue,
+    loadOnMount,
+    String(hashIt({ ...inProps, recordFinder }))
+  );
 
   const load = useCallback(() => {
     return baseLoad(async () => {

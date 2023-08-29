@@ -1,3 +1,4 @@
+import hashIt from 'hash-it';
 import {
   Dispatch,
   SetStateAction,
@@ -21,17 +22,15 @@ export interface RecordProps<LoadableRecord> extends QueryOptions {
  * Hook that can be used to find a record.
  *
  * @param recordFinder The API function that will be used to find the record.
- * @param options The options for the hook.
+ * @param inProps The options for the hook.
  * @returns The record state.
  */
 export const useRecord = <LoadableRecord>(
   recordFinder?: APIFunction<LoadableRecord>,
-  {
-    defaultValue,
-    loadOnMount = true,
-    revalidationKey,
-  }: RecordProps<LoadableRecord> = {}
+  inProps: RecordProps<LoadableRecord> = {}
 ) => {
+  const { defaultValue, loadOnMount = true, revalidationKey } = inProps;
+
   //#region Refs
   const isInitialMountRef = useRef(true);
   const recordFinderRef = useRef(recordFinder);
@@ -45,7 +44,11 @@ export const useRecord = <LoadableRecord>(
     record,
     setRecord,
     ...rest
-  } = useAPIService(defaultValue, loadOnMount);
+  } = useAPIService(
+    defaultValue,
+    loadOnMount,
+    String(hashIt({ ...inProps, recordFinder }))
+  );
 
   const load = useCallback(
     (...args: any) => {
