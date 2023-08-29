@@ -1,3 +1,4 @@
+import hashIt from 'hash-it';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import {
@@ -79,7 +80,7 @@ export interface PaginatedRecordsProps<DataRow = any>
  * Hook that can be used to find paginated records.
  *
  * @param recordFinder The function that will be used to find the records.
- * @param options The options for the hook.
+ * @param inProps The options for the hook.
  * @returns The records loading state.
  */
 export const usePaginatedRecords = <
@@ -90,7 +91,9 @@ export const usePaginatedRecords = <
     DataRow,
     PaginatedResponseDataExtensions
   >,
-  {
+  inProps: PaginatedRecordsProps<DataRow> = {}
+) => {
+  const {
     loadOnMount = true,
     limit = 100,
     offset = 0,
@@ -100,8 +103,8 @@ export const usePaginatedRecords = <
     autoSync = true,
     canLoadNextPage = true,
     refreshInterval,
-  }: PaginatedRecordsProps<DataRow> = {}
-) => {
+  } = inProps;
+
   //#region Ref
   const isInitialMountRef = useRef(true);
   const pendingRecordRequestControllers = useRef<
@@ -134,7 +137,16 @@ export const usePaginatedRecords = <
     errorMessage,
     setRecord,
     ...rest
-  } = useAPIService<PaginatedResponseData<DataRow> | null>(null, loadOnMount);
+  } = useAPIService<PaginatedResponseData<DataRow> | null>(
+    null,
+    loadOnMount,
+    String(
+      hashIt({
+        ...inProps,
+        recordFinder,
+      })
+    )
+  );
 
   const loadedPages = useMemo(() => {
     return loadedPagesMapRef.current || new Map<number, DataRow[]>();
