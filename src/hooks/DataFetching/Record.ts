@@ -11,8 +11,19 @@ import { useAPIService } from './APIService';
 import { QueryOptions } from './models';
 
 export interface RecordProps<LoadableRecord> extends QueryOptions {
+  /**
+   * The default value that will be used for the record.
+   */
   defaultValue?: LoadableRecord;
 }
+
+/**
+ * Hook that can be used to find a record.
+ *
+ * @param recordFinder The API function that will be used to find the record.
+ * @param options The options for the hook.
+ * @returns The record state.
+ */
 export const useRecord = <LoadableRecord>(
   recordFinder?: APIFunction<LoadableRecord>,
   {

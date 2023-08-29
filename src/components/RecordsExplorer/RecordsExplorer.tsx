@@ -50,7 +50,7 @@ import { useMessagingContext } from '../../contexts/MessagingContext';
 import {
   CacheableDataFinderOptions,
   PaginatedRecordsFinderOptions,
-  PaginatedRecordsOptions,
+  PaginatedRecordsProps,
   useCacheableData,
   useCreate,
   usePaginatedRecords,
@@ -314,7 +314,7 @@ export interface RecordsExplorerProps<
       Pick<ModalFormProps<InitialValues>, 'validationSchema' | 'editableFields'>
     >,
     Pick<
-      PaginatedRecordsOptions<RecordRow>,
+      PaginatedRecordsProps<RecordRow>,
       'revalidationKey' | 'autoSync' | 'refreshInterval'
     > {
   getTitle?: RecordsExplorerFunctionChildren<
@@ -486,7 +486,7 @@ export interface RecordsExplorerProps<
   showFilterTool?: boolean;
   showResetTool?: boolean;
   stateStorage?: ParamStorage;
-  PaginatedRecordsOptions?: Partial<PaginatedRecordsOptions<RecordRow>>;
+  PaginatedRecordsOptions?: Partial<PaginatedRecordsProps<RecordRow>>;
   dataPresets?: RecordsExplorerDataPreset<RecordRow>[];
   selectedDataPresetId?: string | number;
   tools?: Tool[];
