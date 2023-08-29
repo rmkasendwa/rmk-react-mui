@@ -189,11 +189,11 @@ export const filterConjunctions = ['and', 'or'] as const;
 
 export type Conjunction = (typeof filterConjunctions)[number];
 
-export interface Condition<RecordRow extends BaseDataRow> {
+export type Condition<RecordRow extends BaseDataRow> = {
   fieldId: keyof RecordRow;
   operator?: FilterOperator;
   value?: string | number | (string | number)[];
-}
+} & Record<string, any>;
 
 export interface ConditionGroup<RecordRow extends BaseDataRow> {
   conjunction: Conjunction;

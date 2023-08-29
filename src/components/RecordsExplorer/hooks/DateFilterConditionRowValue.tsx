@@ -128,6 +128,7 @@ export const DateFilterConditionRowValue = forwardRef<
 
   if (condition.operator) {
     const conditionValue = condition.value as DateFilterOperatorValue;
+    const { numberOfDays, selectedDate } = condition;
     return (
       <>
         <TableCell ref={ref} {...rest} className={clsx(classes.root)}>
@@ -157,10 +158,24 @@ export const DateFilterConditionRowValue = forwardRef<
           switch (conditionValue) {
             case 'number of days ago':
             case 'number of days from now':
+            case 'the next number of days':
+            case 'the past number of days':
               return (
                 <TableCell ref={ref} {...rest} className={clsx(classes.root)}>
                   <NumberInputField
                     placeholder="Enter days"
+                    value={numberOfDays}
+                    decimalPlaces={0}
+                    onChange={(event) => {
+                      if (event.target.value) {
+                        nextSelectedConditionGroup.conditions[
+                          index
+                        ].numberOfDays = event.target.value as any;
+                        onChangeSelectedConditionGroup(
+                          nextSelectedConditionGroup
+                        );
+                      }
+                    }}
                     sx={{
                       width: 120,
                     }}
@@ -172,6 +187,17 @@ export const DateFilterConditionRowValue = forwardRef<
                 <TableCell ref={ref} {...rest} className={clsx(classes.root)}>
                   <DateInputField
                     placeholder="Select a date"
+                    value={selectedDate}
+                    onChange={(event) => {
+                      if (event.target.value) {
+                        nextSelectedConditionGroup.conditions[
+                          index
+                        ].selectedDate = event.target.value as any;
+                        onChangeSelectedConditionGroup(
+                          nextSelectedConditionGroup
+                        );
+                      }
+                    }}
                     sx={{
                       width: 150,
                     }}
