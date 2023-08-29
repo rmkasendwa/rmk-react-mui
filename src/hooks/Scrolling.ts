@@ -25,8 +25,9 @@ export interface DragToScrollProps {
 }
 
 /**
- * Custom hook to enable drag-to-scroll functionality for an element.
- * @param {DragToScrollProps} props - The properties for the useDragToScroll hook.
+ * Hook to enable drag-to-scroll functionality for an element.
+ *
+ * @param props The properties for the useDragToScroll hook.
  */
 export const useDragToScroll = ({
   targetElement,
@@ -142,18 +143,20 @@ export const useDragToScroll = ({
         //#endregion
       };
 
-      // Add event listeners
+      //#region Add event listeners
       targetElement.addEventListener('mousedown', mouseDownEventCallback);
       window.addEventListener('mouseleave', mouseLeaveEventCallback);
       window.addEventListener('mousemove', mouseMoveEventCallback);
+      //#endregion
 
-      // Clean up event listeners when the component is unmounted
+      //#region Clean up event listeners when the component is unmounted
       return () => {
         targetElement.removeEventListener('mousedown', mouseDownEventCallback);
         window.removeEventListener('mouseup', mouseUpEventCallback);
         window.removeEventListener('mouseleave', mouseLeaveEventCallback);
         window.removeEventListener('mousemove', mouseMoveEventCallback);
       };
+      //#endregion
     }
   }, [enableDragToScroll, scrollableElement, targetElement]);
 };

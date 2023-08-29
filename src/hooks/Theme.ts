@@ -3,6 +3,11 @@ import { useCallback, useEffect } from 'react';
 
 import { useAppThemeProperty } from '../contexts/AppThemeContext';
 
+/**
+ * Hook to toggle dark mode.
+ *
+ * @returns The dark mode toggle function.
+ */
 export const useDarkMode = () => {
   const [darkMode, setDarkMode] = useAppThemeProperty('darkMode');
 

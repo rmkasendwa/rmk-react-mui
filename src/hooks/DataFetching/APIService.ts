@@ -26,7 +26,7 @@ export type APIServiceLoadFunction<Data> = (
 
 export interface APIServiceState<Data> {
   /**
-   * Calls an API function and sets the record loading state.
+   * Calls an API function and sets the data loading state.
    *
    * @param apiFunction The API function to call
    * @param polling Whether the API function is being called for polling
@@ -35,17 +35,17 @@ export interface APIServiceState<Data> {
   load: APIServiceLoadFunction<Data>;
 
   /**
-   * Whether the record is being loaded.
+   * Whether the data is being loaded.
    */
   loading: boolean;
 
   /**
-   * Whether the record has been loaded.
+   * Whether the data has been loaded.
    */
   loaded: boolean;
 
   /**
-   * Sets the record of the API service.
+   * Sets the data loaded state.
    */
   setLoaded: Dispatch<SetStateAction<boolean>>;
 
@@ -60,17 +60,17 @@ export interface APIServiceState<Data> {
   setErrorMessage: Dispatch<SetStateAction<string>>;
 
   /**
-   * The record of the API service.
+   * The data returned by the API service.
    */
   record: Data;
 
   /**
-   * Sets the record of the API service.
+   * Sets the data of the API service.
    */
   setRecord: Dispatch<SetStateAction<Data>>;
 
   /**
-   * Resets the record loading state.
+   * Resets the data loading state.
    */
   reset: () => void;
 }
