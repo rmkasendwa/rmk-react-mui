@@ -106,6 +106,56 @@ export type EnumFilterOperator = (typeof enumFilterOperators)[number];
 export const numericFilterOperators = ['=', '≠', '<', '>', '≤', '≥'] as const;
 export type NumericFilterOperator = (typeof numericFilterOperators)[number];
 
+//#region Date filter operators
+export const dateFilterOperators = [
+  'is',
+  'is within',
+  'is before',
+  'is after',
+  'is on or before',
+  'is on or after',
+  'is not',
+] as const;
+export type DateFilterOperator = (typeof dateFilterOperators)[number];
+
+export const dateStaticFilterOperatorValues = [
+  'today',
+  'tomorrow',
+  'yesterday',
+  'one week ago',
+  'one week from now',
+  'one month ago',
+  'one month from now',
+  'number of days ago',
+  'number of days from now',
+  'exact date',
+] as const;
+
+export const dateRangeFilterOperatorValues = [
+  'the past week',
+  'the past month',
+  'the past year',
+  'the next week',
+  'the next month',
+  'the next year',
+  'the next number of days',
+  'the past number of days',
+] as const;
+
+export const dateFilterOperatorToValueOptionsMap: Record<
+  DateFilterOperator,
+  typeof dateStaticFilterOperatorValues | typeof dateRangeFilterOperatorValues
+> = {
+  is: dateStaticFilterOperatorValues,
+  'is within': dateRangeFilterOperatorValues,
+  'is before': dateStaticFilterOperatorValues,
+  'is after': dateStaticFilterOperatorValues,
+  'is on or before': dateStaticFilterOperatorValues,
+  'is on or after': dateStaticFilterOperatorValues,
+  'is not': dateStaticFilterOperatorValues,
+};
+//#endregion
+
 export const contentExistenceFilterOperator = [
   'is empty',
   'is not empty',
@@ -117,12 +167,14 @@ export const filterOperators = [
   ...enumFilterOperators,
   ...textFilterOperators,
   ...numericFilterOperators,
+  ...dateFilterOperators,
   ...contentExistenceFilterOperator,
 ] as const;
 export type FilterOperator =
   | EnumFilterOperator
   | TextFilterOperator
   | NumericFilterOperator
+  | DateFilterOperator
   | ContentExistenceFilterOperator;
 
 export const filterConjunctions = ['and', 'or'] as const;

@@ -37,11 +37,13 @@ import {
   DataMultiSelectDropdownFilterField,
   EnumFilterOperator,
   contentExistenceFilterOperator,
+  dateFilterOperators,
   enumFilterOperators,
   filterConjunctions,
   numericFilterOperators,
   textFilterOperators,
 } from '../models';
+import DateFilterConditionRowValue from './DateFilterConditionRowValue';
 
 //#region Adding theme prop types
 declare module '@mui/material/styles/props' {
@@ -235,8 +237,9 @@ export const useFilterTool = <RecordRow extends BaseDataRow>(
                         case 'enum':
                           return MULTI_SELECT_DROPDOWN_OPERATORS;
                         case 'number':
-                        case 'date':
                           return numericFilterOperators;
+                        case 'date':
+                          return dateFilterOperators;
                       }
                       return textFilterOperators;
                     })();
@@ -396,112 +399,126 @@ export const useFilterTool = <RecordRow extends BaseDataRow>(
                         </TableCell>
 
                         {/* Filter Value */}
-                        <TableCell>
-                          {selectedOperator ? (
-                            (() => {
-                              if (
-                                textFilterOperators.includes(
-                                  selectedOperator as any
-                                )
-                              ) {
-                                return (
-                                  <TextField
-                                    placeholder="Enter a value"
-                                    value={condition.value as any}
-                                    onChange={(event) => {
-                                      if (event.target.value) {
-                                        nextSelectedConditionGroup.conditions[
-                                          index
-                                        ].value = event.target.value as any;
-                                        onChangeSelectedConditionGroup(
-                                          nextSelectedConditionGroup
-                                        );
-                                      }
-                                    }}
-                                    size="small"
-                                    fullWidth
-                                  />
-                                );
-                              } else if (
-                                numericFilterOperators.includes(
-                                  selectedOperator as any
-                                )
-                              ) {
-                                return (
-                                  <NumberInputField
-                                    placeholder="Enter a value"
-                                    value={condition.value as any}
-                                    onChange={(event) => {
-                                      if (event.target.value) {
-                                        nextSelectedConditionGroup.conditions[
-                                          index
-                                        ].value = event.target.value as any;
-                                        onChangeSelectedConditionGroup(
-                                          nextSelectedConditionGroup
-                                        );
-                                      }
-                                    }}
-                                    size="small"
-                                    fullWidth
-                                  />
-                                );
-                              } else if (
-                                MULTI_SELECT_DROPDOWN_OPERATORS.includes(
-                                  selectedOperator as any
-                                )
-                              ) {
-                                const {
-                                  label,
-                                  type = MULTI_SELECT_DROPDOWN_TYPE,
-                                  ...rest
-                                } = field;
-                                const fieldProps: Partial<DataDropdownFieldProps> =
-                                  {};
-                                if (
-                                  type === MULTI_SELECT_DROPDOWN_TYPE &&
-                                  !DROPDOWN_OPERATORS.includes(
-                                    selectedOperator as any
-                                  )
-                                ) {
-                                  fieldProps.SelectProps = {
-                                    multiple: true,
-                                  };
-                                }
-                                return (
-                                  <DataDropdownField
-                                    placeholder={label}
-                                    value={condition.value as any}
-                                    optionVariant="check"
-                                    sortOptions
-                                    {...fieldProps}
-                                    {...omit(
-                                      rest,
-                                      'getFilterValue',
-                                      'title',
-                                      'getFieldOptionLabel',
-                                      'id'
-                                    )}
-                                    onChange={(event) => {
-                                      nextSelectedConditionGroup.conditions[
-                                        index
-                                      ].value = event.target.value as any;
-                                      onChangeSelectedConditionGroup(
-                                        nextSelectedConditionGroup
-                                      );
-                                    }}
-                                    size="small"
-                                    fullWidth
-                                    sx={{
-                                      minWidth: 150,
-                                    }}
-                                  />
-                                );
-                              }
-                            })()
-                          ) : (
-                            <>&nbsp;</>
-                          )}
-                        </TableCell>
+                        {(() => {
+                          if (type === 'date') {
+                            if (selectedOperator) {
+                              return (
+                                <DateFilterConditionRowValue
+                                  condition={condition}
+                                />
+                              );
+                            }
+                            return null;
+                          }
+                          return (
+                            <TableCell>
+                              {selectedOperator ? (
+                                (() => {
+                                  if (
+                                    textFilterOperators.includes(
+                                      selectedOperator as any
+                                    )
+                                  ) {
+                                    return (
+                                      <TextField
+                                        placeholder="Enter a value"
+                                        value={condition.value as any}
+                                        onChange={(event) => {
+                                          if (event.target.value) {
+                                            nextSelectedConditionGroup.conditions[
+                                              index
+                                            ].value = event.target.value as any;
+                                            onChangeSelectedConditionGroup(
+                                              nextSelectedConditionGroup
+                                            );
+                                          }
+                                        }}
+                                        size="small"
+                                        fullWidth
+                                      />
+                                    );
+                                  } else if (
+                                    numericFilterOperators.includes(
+                                      selectedOperator as any
+                                    )
+                                  ) {
+                                    return (
+                                      <NumberInputField
+                                        placeholder="Enter a value"
+                                        value={condition.value as any}
+                                        onChange={(event) => {
+                                          if (event.target.value) {
+                                            nextSelectedConditionGroup.conditions[
+                                              index
+                                            ].value = event.target.value as any;
+                                            onChangeSelectedConditionGroup(
+                                              nextSelectedConditionGroup
+                                            );
+                                          }
+                                        }}
+                                        size="small"
+                                        fullWidth
+                                      />
+                                    );
+                                  } else if (
+                                    MULTI_SELECT_DROPDOWN_OPERATORS.includes(
+                                      selectedOperator as any
+                                    )
+                                  ) {
+                                    const {
+                                      label,
+                                      type = MULTI_SELECT_DROPDOWN_TYPE,
+                                      ...rest
+                                    } = field;
+                                    const fieldProps: Partial<DataDropdownFieldProps> =
+                                      {};
+                                    if (
+                                      type === MULTI_SELECT_DROPDOWN_TYPE &&
+                                      !DROPDOWN_OPERATORS.includes(
+                                        selectedOperator as any
+                                      )
+                                    ) {
+                                      fieldProps.SelectProps = {
+                                        multiple: true,
+                                      };
+                                    }
+                                    return (
+                                      <DataDropdownField
+                                        placeholder={label}
+                                        value={condition.value as any}
+                                        optionVariant="check"
+                                        sortOptions
+                                        {...fieldProps}
+                                        {...omit(
+                                          rest,
+                                          'getFilterValue',
+                                          'title',
+                                          'getFieldOptionLabel',
+                                          'id'
+                                        )}
+                                        onChange={(event) => {
+                                          nextSelectedConditionGroup.conditions[
+                                            index
+                                          ].value = event.target.value as any;
+                                          onChangeSelectedConditionGroup(
+                                            nextSelectedConditionGroup
+                                          );
+                                        }}
+                                        size="small"
+                                        fullWidth
+                                        sx={{
+                                          minWidth: 150,
+                                        }}
+                                      />
+                                    );
+                                  }
+                                })()
+                              ) : (
+                                <>&nbsp;</>
+                              )}
+                            </TableCell>
+                          );
+                        })()}
 
                         {/* Clear Filter Condition */}
                         <TableCell
