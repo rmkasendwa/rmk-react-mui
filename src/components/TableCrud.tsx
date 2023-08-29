@@ -44,7 +44,6 @@ import {
 } from 'react-router-dom';
 
 import { LoadingContext, LoadingProvider } from '../contexts/LoadingContext';
-import { useReactRouterDOMSearchParams } from '../hooks/ReactRouterDOM';
 import {
   PaginatedRecordsOptions,
   useCreate,
@@ -52,7 +51,8 @@ import {
   usePaginatedRecords,
   useRecord,
   useUpdate,
-} from '../hooks/Utils';
+} from '../hooks/DataFetching';
+import { useReactRouterDOMSearchParams } from '../hooks/ReactRouterDOM';
 import { CrudMode, PaginatedResponseData } from '../models/Utils';
 import IconLoadingScreen from './IconLoadingScreen';
 import ModalForm, {

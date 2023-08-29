@@ -19,7 +19,7 @@ export interface PaginatedResponseData<DataRow> {
   loadedPageKey?: number;
 }
 
-export type TAPIFunction<T = any> = (...args: any) => Promise<T>;
+export type APIFunction<T = any> = (...args: any) => Promise<T>;
 
 export interface RequestController {
   cancelRequest: () => void;

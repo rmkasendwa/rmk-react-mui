@@ -11,11 +11,11 @@ import {
   useState,
 } from 'react';
 
-import { TAPIFunction } from '../models/Utils';
+import { APIFunction } from '../models/Utils';
 import { REDIRECTION_ERROR_MESSAGES } from '../utils/JWT';
 
 export interface IAPIContext {
-  call: <T extends TAPIFunction>(func: T) => Promise<ReturnType<T>>;
+  call: <T extends APIFunction>(func: T) => Promise<ReturnType<T>>;
   sessionExpired: boolean;
   setSessionExpired: Dispatch<SetStateAction<boolean>>;
 }
@@ -30,7 +30,7 @@ export const APIProvider: FC<{
   onSessionExpiredRef.current = onSessionExpired;
 
   const [sessionExpired, setSessionExpired] = useState(false);
-  const call = useCallback(async (apiCallback: TAPIFunction) => {
+  const call = useCallback(async (apiCallback: APIFunction) => {
     return apiCallback().catch((err) => {
       if (
         REDIRECTION_ERROR_MESSAGES.some((message) => {

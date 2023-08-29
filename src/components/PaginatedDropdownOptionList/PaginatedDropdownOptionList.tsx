@@ -37,7 +37,7 @@ import {
 import {
   PaginatedRecordsFinderOptions,
   usePaginatedRecords,
-} from '../../hooks/Utils';
+} from '../../hooks/DataFetching';
 import {
   DropdownOption as BaseDropdownOption,
   PaginatedResponseData,

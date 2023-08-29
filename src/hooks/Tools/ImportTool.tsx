@@ -28,7 +28,7 @@ import {
 import { ButtonTool } from '../../components/SearchSyncToolbar';
 import { TableColumn } from '../../components/Table';
 import { DropdownOption } from '../../models/Utils';
-import { useMutation } from '../Utils';
+import { useMutation } from '../DataFetching';
 
 export const importSteps = [
   'Upload a file',

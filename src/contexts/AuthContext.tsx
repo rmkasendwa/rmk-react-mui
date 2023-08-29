@@ -10,9 +10,9 @@ import {
   useState,
 } from 'react';
 
-import { useAPIService } from '../hooks/Utils';
+import { useAPIService } from '../hooks/DataFetching';
 import { PermissionCode } from '../models/Users';
-import { TAPIFunction } from '../models/Utils';
+import { APIFunction } from '../models/Utils';
 import { useAPIContext } from './APIContext';
 import { useLocalStorageData } from './LocalStorageDataContext';
 
@@ -22,7 +22,7 @@ export interface LoggedInUser {
 }
 
 export interface AuthContext {
-  login: (loginFunction: TAPIFunction<LoggedInUser>) => Promise<void>;
+  login: (loginFunction: APIFunction<LoggedInUser>) => Promise<void>;
   logout: (logout?: () => void) => Promise<void>;
   loggedInUser: LoggedInUser | null;
   updateLoggedInUser: (user: LoggedInUser) => void;
@@ -84,7 +84,7 @@ export const AuthProvider: FC<{
   }, []);
 
   const login = useCallback(
-    async (loginFunction: TAPIFunction<LoggedInUser>) => {
+    async (loginFunction: APIFunction<LoggedInUser>) => {
       clearLoggedInUserSession();
       load(loginFunction);
     },

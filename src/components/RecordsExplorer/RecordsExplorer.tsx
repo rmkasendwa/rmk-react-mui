@@ -48,10 +48,6 @@ import { useAuth } from '../../contexts/AuthContext';
 import { LoadingContext, LoadingProvider } from '../../contexts/LoadingContext';
 import { useMessagingContext } from '../../contexts/MessagingContext';
 import {
-  ParamStorage,
-  useReactRouterDOMSearchParams,
-} from '../../hooks/ReactRouterDOM';
-import {
   CacheableDataFinderOptions,
   PaginatedRecordsFinderOptions,
   PaginatedRecordsOptions,
@@ -59,7 +55,11 @@ import {
   useCreate,
   usePaginatedRecords,
   useUpdate,
-} from '../../hooks/Utils';
+} from '../../hooks/DataFetching';
+import {
+  ParamStorage,
+  useReactRouterDOMSearchParams,
+} from '../../hooks/ReactRouterDOM';
 import {
   SelectedSortOption,
   SortBy,
@@ -2553,7 +2553,6 @@ const BaseRecordsExplorer = <
 
   const groupTool = useGroupTool({
     groupableFields,
-    getGroupableData,
     selectedGroupParams,
     onChangeSelectedGroupParams: (groupParams) => {
       setSearchParams(
