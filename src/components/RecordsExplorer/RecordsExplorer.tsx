@@ -108,6 +108,7 @@ import Timeline, {
   useTimeScaleTool,
 } from '../Timeline';
 import Tooltip from '../Tooltip';
+import { useDataFilter } from './hooks/DataFilter';
 import { useFilterTool } from './hooks/FilterTool';
 import { useGroupTool } from './hooks/GroupTool';
 import { useSortTool } from './hooks/SortTool';
@@ -1459,117 +1460,13 @@ const BaseRecordsExplorer = <
   })();
 
   //#region Filtering data
+  const { filter } = useDataFilter({
+    data,
+    filterFields,
+  });
   const filteredData = useMemo(() => {
     // Filtering data
-    const dataFilteredByFilterFields = (() => {
-      if (filterFields) {
-        if (
-          selectedConditionGroup &&
-          selectedConditionGroup.conditions.length > 0
-        ) {
-          const emptyfilterOperators: FilterOperator[] = [
-            'is empty',
-            'is not empty',
-          ];
-          return data.filter((row) => {
-            return selectedConditionGroup.conditions
-              .filter(({ operator, value }) => {
-                return (
-                  operator &&
-                  (emptyfilterOperators.includes(operator) ||
-                    (value != null && String(value).length > 0))
-                );
-              })
-              [selectedConditionGroup.conjunction === 'and' ? 'every' : 'some'](
-                ({ operator, value, fieldId }) => {
-                  const filterValues: any[] = (() => {
-                    const rawFieldValue = result(row, fieldId);
-                    const filterField = filterFields!.find(
-                      ({ id }) => id === fieldId
-                    );
-                    if (filterField?.getFilterValue) {
-                      return [filterField.getFilterValue(row)];
-                    }
-                    return [rawFieldValue];
-                  })();
-                  return filterValues.some((fieldValue) => {
-                    switch (operator) {
-                      case 'is':
-                        return Array.isArray(fieldValue)
-                          ? fieldValue.some(
-                              (fieldValueItem) =>
-                                fieldValueItem === (value as any)
-                            )
-                          : fieldValue === (value as any);
-                      case 'is not':
-                        return Array.isArray(fieldValue)
-                          ? fieldValue.some(
-                              (fieldValueItem) =>
-                                fieldValueItem !== (value as any)
-                            )
-                          : fieldValue !== (value as any);
-                      case 'is any of':
-                        return (
-                          Array.isArray(value) &&
-                          ((Array.isArray(fieldValue) &&
-                            fieldValue.some((filterValue) =>
-                              value.includes(filterValue as any)
-                            )) ||
-                            value.includes(fieldValue as any))
-                        );
-                      case 'is none of':
-                        return (
-                          Array.isArray(value) &&
-                          ((Array.isArray(fieldValue) &&
-                            fieldValue.some(
-                              (fieldValueItem) =>
-                                !value.includes(fieldValueItem as any)
-                            )) ||
-                            !value.includes(fieldValue as any))
-                        );
-                      case 'is empty':
-                        return (
-                          (Array.isArray(fieldValue) &&
-                            fieldValue.length <= 0) ||
-                          !fieldValue
-                        );
-                      case 'is not empty':
-                        return (
-                          (Array.isArray(fieldValue) &&
-                            fieldValue.length > 0) ||
-                          fieldValue
-                        );
-                      case 'contains':
-                        return String(fieldValue)
-                          .toLowerCase()
-                          .match(String(value).toLowerCase());
-                      case 'does not contain':
-                        return !String(fieldValue)
-                          .toLowerCase()
-                          .match(String(value).toLowerCase());
-                      case '=':
-                        return fieldValue === value;
-                      case '≠':
-                        return fieldValue !== value;
-                      case '<':
-                        return value != null && fieldValue < value;
-                      case '>':
-                        return value != null && fieldValue > value;
-                      case '≤':
-                        return value != null && fieldValue <= value;
-                      case '≥':
-                        return value != null && fieldValue >= value;
-                      default:
-                        return false;
-                    }
-                  });
-                }
-              );
-          });
-        }
-      }
-      return data;
-    })();
+    const dataFilteredByFilterFields = filter({ selectedConditionGroup });
 
     const filteredData = (() => {
       if (searchTerm && searchTerm.length > 0) {
@@ -1617,8 +1514,7 @@ const BaseRecordsExplorer = <
 
     return sortedData;
   }, [
-    data,
-    filterFields,
+    filter,
     searchTerm,
     searchableFields,
     selectedConditionGroup,
