@@ -17,7 +17,10 @@ import { forwardRef, useEffect, useRef, useState } from 'react';
 import { mergeRefs } from 'react-merge-refs';
 import { Link as RouterLink } from 'react-router-dom';
 
-import { CacheableDataFinderOptions, useCacheableData } from '../hooks/Utils';
+import {
+  CacheableDataFinderOptions,
+  useCacheableData,
+} from '../hooks/DataFetching';
 import Card, { CardProps } from './Card';
 import LoadingTypography, { LoadingTypographyProps } from './LoadingTypography';
 

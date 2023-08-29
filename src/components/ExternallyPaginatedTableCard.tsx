@@ -12,7 +12,10 @@ import {
 import clsx from 'clsx';
 import { forwardRef, useEffect, useState } from 'react';
 
-import { PaginatedRecordsOptions, usePaginatedRecords } from '../hooks/Utils';
+import {
+  PaginatedRecordsOptions,
+  usePaginatedRecords,
+} from '../hooks/DataFetching';
 import { PaginatedResponseData } from '../models/Utils';
 import Card, { CardProps } from './Card';
 import IconLoadingScreen from './IconLoadingScreen';

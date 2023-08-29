@@ -25,7 +25,7 @@ import * as Yup from 'yup';
 import {
   PaginatedRecordsFinderOptions,
   usePaginatedRecords,
-} from '../hooks/Utils';
+} from '../hooks/DataFetching';
 import { isDescendant } from '../utils/html';
 import TextField from './InputFields/TextField';
 import PaginatedDropdownOptionList, {

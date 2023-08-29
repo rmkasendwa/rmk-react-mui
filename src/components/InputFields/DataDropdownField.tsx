@@ -45,7 +45,7 @@ import {
 import {
   CacheableDataFinderOptions,
   useCacheableData,
-} from '../../hooks/Utils';
+} from '../../hooks/DataFetching';
 import { PaginatedResponseData } from '../../models/Utils';
 import { isDescendant } from '../../utils/html';
 import FieldValueDisplay from '../FieldValueDisplay';

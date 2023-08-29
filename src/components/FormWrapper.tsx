@@ -34,7 +34,7 @@ import {
   CacheableDataFinderOptions,
   useCacheableData,
   useMutation,
-} from '../hooks/Utils';
+} from '../hooks/DataFetching';
 import { CrudMode } from '../models/Utils';
 import ErrorAlert from './ErrorAlert';
 import FixedHeaderContentArea from './FixedHeaderContentArea';
