@@ -6,13 +6,37 @@ const WINDOW_BLUR_THRESHOLD = 60 * 1000;
 export type LoadFunction = () => void;
 
 export interface PollingProps {
+  /**
+   * Whether to automatically sync data.
+   */
   autoSync?: boolean;
+
+  /**
+   * The error message to display when the data fails to load.
+   */
   errorMessage?: string;
+
+  /**
+   * Whether the data is loading.
+   */
   loading?: boolean;
+
+  /**
+   * The interval in milliseconds at which to refresh the data.
+   */
   refreshInterval?: number;
+
+  /**
+   * The function to load the data.
+   */
   load: LoadFunction;
 }
 
+/**
+ * A hook to automatically sync data.
+ *
+ * @param param0 The options of the hook.
+ */
 export const usePolling = ({
   autoSync,
   errorMessage,

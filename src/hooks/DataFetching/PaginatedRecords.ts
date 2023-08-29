@@ -1,4 +1,3 @@
-import hashIt from 'hash-it';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import {
@@ -105,6 +104,16 @@ export const usePaginatedRecords = <
     refreshInterval,
   } = inProps;
 
+  const {
+    load: loadFromAPIService,
+    loading,
+    record: responseData,
+    reset: baseReset,
+    errorMessage,
+    setRecord,
+    ...rest
+  } = useAPIService<PaginatedResponseData<DataRow> | null>(null, loadOnMount);
+
   //#region Ref
   const isInitialMountRef = useRef(true);
   const pendingRecordRequestControllers = useRef<
@@ -122,35 +131,26 @@ export const usePaginatedRecords = <
   offsetRef.current = offset;
   const searchTermRef = useRef(searchTerm);
   searchTermRef.current = searchTerm;
-  const allPageRecordsRef = useRef<DataRow[]>([]);
+
+  const loadedPages = useMemo(() => {
+    return loadedPagesMapRef.current || new Map<number, DataRow[]>();
+  }, []);
+  const allPageRecordsRef = useRef<DataRow[]>(
+    (() => {
+      if (isInitialMountRef.current) {
+        return [...loadedPages.keys()]
+          .sort((a, b) => a - b)
+          .map((key) => loadedPages.get(key)!)
+          .flat();
+      }
+      return [];
+    })()
+  );
 
   const lastLoadedPageRef = useRef<
     ResponsePage<DataRow, PaginatedResponseDataExtensions> | undefined
   >(undefined);
   //#endregion
-
-  const {
-    load: loadFromAPIService,
-    loading,
-    record: responseData,
-    reset: baseReset,
-    errorMessage,
-    setRecord,
-    ...rest
-  } = useAPIService<PaginatedResponseData<DataRow> | null>(
-    null,
-    loadOnMount,
-    String(
-      hashIt({
-        ...inProps,
-        recordFinder,
-      })
-    )
-  );
-
-  const loadedPages = useMemo(() => {
-    return loadedPagesMapRef.current || new Map<number, DataRow[]>();
-  }, []);
 
   type LoadOptions = PaginatedRequestParams & {
     isLoadingNextPage?: boolean;
