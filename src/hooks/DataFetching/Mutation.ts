@@ -3,8 +3,14 @@ import { useCallback, useRef } from 'react';
 import { APIFunction } from '../../models/Utils';
 import { useAPIService } from './APIService';
 
+/**
+ * Hook that can be used to mutate a record.
+ *
+ * @param mutateFunction The function that will be used to mutate the data.
+ * @returns The record mutation state.
+ */
 export const useMutation = <MutateFunction extends APIFunction>(
-  inputMutate: MutateFunction
+  mutateFunction: MutateFunction
 ) => {
   const {
     load: baseMutate,
@@ -15,8 +21,8 @@ export const useMutation = <MutateFunction extends APIFunction>(
     ...rest
   } = useAPIService<Awaited<ReturnType<MutateFunction>> | null>(null);
 
-  const inputMutateRef = useRef(inputMutate);
-  inputMutateRef.current = inputMutate;
+  const inputMutateRef = useRef(mutateFunction);
+  inputMutateRef.current = mutateFunction;
 
   const mutate = useCallback(
     (...args: any) => {

@@ -1,8 +1,14 @@
 import { APIFunction } from '../../models/Utils';
 import { useMutation } from './Mutation';
 
+/**
+ * Hook that can be used to update a record.
+ *
+ * @param updateFunction The API function that will be used to update the record.
+ * @returns The record update state.
+ */
 export const useUpdate = <UpdateFunction extends APIFunction>(
-  inputUpdate: UpdateFunction
+  updateFunction: UpdateFunction
 ) => {
   const {
     mutate: update,
@@ -11,7 +17,7 @@ export const useUpdate = <UpdateFunction extends APIFunction>(
     setMutated: setUpdated,
     mutatedRecord: updatedRecord,
     ...rest
-  } = useMutation(inputUpdate);
+  } = useMutation(updateFunction);
 
   return {
     update,
