@@ -12,9 +12,26 @@ import { GetStaleWhileRevalidateFunction, QueryOptions } from './models';
 export type PaginatedRecordsFinderOptions<
   PaginatedResponseDataExtensions extends Record<string, any> = any
 > = PaginatedRequestParams & {
+  /**
+   * Function that can be used to retrieve the request controller of the data request.
+   *
+   * @param controller The request controller that can be used to cancel the request.
+   */
   getRequestController?: (controller: RecordFinderRequestController) => void;
+
+  /**
+   * Function that can be used to retrieve stale data while the request is being made.
+   */
   getStaleWhileRevalidate?: GetStaleWhileRevalidateFunction<any>;
+
+  /**
+   * The last loaded page.
+   */
   lastLoadedPage?: ResponsePage<any, PaginatedResponseDataExtensions>;
+
+  /**
+   * Whether the request is loading the next page.
+   */
   isLoadingNextPage?: boolean;
 };
 
@@ -34,17 +51,37 @@ export type PaginatedRecordsFinder<
 
 export const PAGINATION_RECORDS_BASE_REFRESH_INTERVAL = 5000;
 
-export interface PaginatedRecordsOptions<DataRow = any>
+export interface PaginatedRecordsProps<DataRow = any>
   extends PaginatedRequestParams,
     QueryOptions {
   /**
    * The revalidation key. If revalidationKey changes and autoSync is set to true. The records will synchronize
    */
   revalidationKey?: string;
+
+  /**
+   * The default loaded pages map. This can be used to cache the loaded pages.
+   */
   loadedPagesMap?: Map<number, DataRow[]>;
+
+  /**
+   * Whether the next page can be loaded.
+   */
   canLoadNextPage?: boolean;
+
+  /**
+   * The refresh interval in milliseconds. If set, the records will be refreshed every refreshInterval milliseconds.
+   */
   refreshInterval?: number;
 }
+
+/**
+ * Hook that can be used to find paginated records.
+ *
+ * @param recordFinder The function that will be used to find the records.
+ * @param options The options for the hook.
+ * @returns The records loading state.
+ */
 export const usePaginatedRecords = <
   DataRow,
   PaginatedResponseDataExtensions extends Record<string, any>
@@ -63,7 +100,7 @@ export const usePaginatedRecords = <
     autoSync = true,
     canLoadNextPage = true,
     refreshInterval,
-  }: PaginatedRecordsOptions<DataRow> = {}
+  }: PaginatedRecordsProps<DataRow> = {}
 ) => {
   //#region Ref
   const isInitialMountRef = useRef(true);

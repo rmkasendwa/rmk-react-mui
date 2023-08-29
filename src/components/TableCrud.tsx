@@ -45,7 +45,7 @@ import {
 
 import { LoadingContext, LoadingProvider } from '../contexts/LoadingContext';
 import {
-  PaginatedRecordsOptions,
+  PaginatedRecordsProps,
   useCreate,
   useDelete,
   usePaginatedRecords,
@@ -127,7 +127,7 @@ export interface TableCrudProps<
       >
     >,
     Pick<PageTitleProps, 'tools'>,
-    Pick<PaginatedRecordsOptions<RecordRow>, 'revalidationKey' | 'autoSync'> {
+    Pick<PaginatedRecordsProps<RecordRow>, 'revalidationKey' | 'autoSync'> {
   title?: ReactNode;
   postCreateButtonTools?: Tool[];
   children?:
@@ -143,7 +143,7 @@ export interface TableCrudProps<
   description?: ReactNode;
   recordsFinder: (
     options: Pick<
-      PaginatedRecordsOptions<RecordRow>,
+      PaginatedRecordsProps<RecordRow>,
       'limit' | 'offset' | 'searchTerm'
     >
   ) => Promise<PaginatedResponseData<RecordRow>>;
