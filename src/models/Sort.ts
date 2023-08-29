@@ -12,7 +12,7 @@ export interface SortOption<RecordRow = any> {
   type?: PrimitiveDataType;
   sortDirection?: SortDirection;
   sortLabels?: [ReactNode, ReactNode];
-  getSortValue?: (row: RecordRow) => string | number | boolean;
+  getSortValue?: (row: RecordRow) => string | number | boolean | undefined;
 }
 
 export interface SelectedSortOption<RecordRow = any>

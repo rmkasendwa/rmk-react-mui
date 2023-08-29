@@ -1001,8 +1001,7 @@ const BaseRecordsExplorer = <
                           getColumnValue
                             ? getColumnValue
                             : undefined),
-                        getFilterValue:
-                          getFilterValue || (getColumnValue as any),
+                        getFilterValue,
                         options,
                         sortOptions,
                       };
@@ -1057,11 +1056,11 @@ const BaseRecordsExplorer = <
                     )
                   );
                 })
-                .map(({ id, label, getFilterValue, getColumnValue }) => {
+                .map(({ id, label, getFilterValue }) => {
                   return {
                     id,
                     label: label as string,
-                    getFilterValue: getFilterValue || (getColumnValue as any),
+                    getFilterValue,
                   };
                 })
             );
@@ -1483,95 +1482,87 @@ const BaseRecordsExplorer = <
               })
               [selectedConditionGroup.conjunction === 'and' ? 'every' : 'some'](
                 ({ operator, value, fieldId }) => {
-                  const { rawFieldValue, formattedFieldValue }: any = (() => {
+                  const filterValues: any[] = (() => {
                     const rawFieldValue = result(row, fieldId);
                     const filterField = filterFields!.find(
                       ({ id }) => id === fieldId
                     );
-                    if (filterField && filterField.getFilterValue) {
-                      return {
-                        rawFieldValue,
-                        formattedFieldValue: filterField.getFilterValue(row),
-                      };
+                    if (filterField?.getFilterValue) {
+                      return [filterField.getFilterValue(row)];
                     }
-                    return {
-                      rawFieldValue,
-                      formattedFieldValue: rawFieldValue,
-                    };
+                    return [rawFieldValue];
                   })();
-                  return [rawFieldValue, formattedFieldValue].some(
-                    (fieldValue) => {
-                      switch (operator) {
-                        case 'is':
-                          return Array.isArray(fieldValue)
-                            ? fieldValue.some(
-                                (fieldValueItem) =>
-                                  fieldValueItem === (value as any)
-                              )
-                            : fieldValue === (value as any);
-                        case 'is not':
-                          return Array.isArray(fieldValue)
-                            ? fieldValue.some(
-                                (fieldValueItem) =>
-                                  fieldValueItem !== (value as any)
-                              )
-                            : fieldValue !== (value as any);
-                        case 'is any of':
-                          return (
-                            Array.isArray(value) &&
-                            ((Array.isArray(fieldValue) &&
-                              fieldValue.some((filterValue) =>
-                                value.includes(filterValue as any)
-                              )) ||
-                              value.includes(fieldValue as any))
-                          );
-                        case 'is none of':
-                          return (
-                            Array.isArray(value) &&
-                            ((Array.isArray(fieldValue) &&
-                              fieldValue.some(
-                                (fieldValueItem) =>
-                                  !value.includes(fieldValueItem as any)
-                              )) ||
-                              !value.includes(fieldValue as any))
-                          );
-                        case 'is empty':
-                          return (
-                            (Array.isArray(fieldValue) &&
-                              fieldValue.length <= 0) ||
-                            !fieldValue
-                          );
-                        case 'is not empty':
-                          return (
-                            (Array.isArray(fieldValue) &&
-                              fieldValue.length > 0) ||
-                            fieldValue
-                          );
-                        case 'contains':
-                          return String(fieldValue)
-                            .toLowerCase()
-                            .match(String(value).toLowerCase());
-                        case 'does not contain':
-                          return !String(fieldValue)
-                            .toLowerCase()
-                            .match(String(value).toLowerCase());
-                        case '=':
-                          return fieldValue === value;
-                        case '≠':
-                          return fieldValue !== value;
-                        case '<':
-                          return value && fieldValue < value;
-                        case '>':
-                          return value && fieldValue > value;
-                        case '≤':
-                          return value && fieldValue <= value;
-                        case '≥':
-                          return value && fieldValue >= value;
-                        default:
-                          return false;
-                      }
+                  return filterValues.some((fieldValue) => {
+                    switch (operator) {
+                      case 'is':
+                        return Array.isArray(fieldValue)
+                          ? fieldValue.some(
+                              (fieldValueItem) =>
+                                fieldValueItem === (value as any)
+                            )
+                          : fieldValue === (value as any);
+                      case 'is not':
+                        return Array.isArray(fieldValue)
+                          ? fieldValue.some(
+                              (fieldValueItem) =>
+                                fieldValueItem !== (value as any)
+                            )
+                          : fieldValue !== (value as any);
+                      case 'is any of':
+                        return (
+                          Array.isArray(value) &&
+                          ((Array.isArray(fieldValue) &&
+                            fieldValue.some((filterValue) =>
+                              value.includes(filterValue as any)
+                            )) ||
+                            value.includes(fieldValue as any))
+                        );
+                      case 'is none of':
+                        return (
+                          Array.isArray(value) &&
+                          ((Array.isArray(fieldValue) &&
+                            fieldValue.some(
+                              (fieldValueItem) =>
+                                !value.includes(fieldValueItem as any)
+                            )) ||
+                            !value.includes(fieldValue as any))
+                        );
+                      case 'is empty':
+                        return (
+                          (Array.isArray(fieldValue) &&
+                            fieldValue.length <= 0) ||
+                          !fieldValue
+                        );
+                      case 'is not empty':
+                        return (
+                          (Array.isArray(fieldValue) &&
+                            fieldValue.length > 0) ||
+                          fieldValue
+                        );
+                      case 'contains':
+                        return String(fieldValue)
+                          .toLowerCase()
+                          .match(String(value).toLowerCase());
+                      case 'does not contain':
+                        return !String(fieldValue)
+                          .toLowerCase()
+                          .match(String(value).toLowerCase());
+                      case '=':
+                        return fieldValue === value;
+                      case '≠':
+                        return fieldValue !== value;
+                      case '<':
+                        return value != null && fieldValue < value;
+                      case '>':
+                        return value != null && fieldValue > value;
+                      case '≤':
+                        return value != null && fieldValue <= value;
+                      case '≥':
+                        return value != null && fieldValue >= value;
+                      default:
+                        return false;
                     }
-                  );
+                  });
                 }
               );
           });

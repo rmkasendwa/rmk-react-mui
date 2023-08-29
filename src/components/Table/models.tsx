@@ -148,7 +148,7 @@ export interface TableColumn<
   locked?: boolean;
   defaultColumnValue?: ReactNode;
   getColumnValue?: GetColumnValue<DataRow, ColumnType>;
-  getFilterValue?: (row: DataRow) => string;
+  getFilterValue?: (row: DataRow) => any | undefined;
   getEditableColumnValue?: GetEditableColumnValue<DataRow, ColumnType>;
   getEditField?: GetEditField<DataRow, ColumnType>;
   fieldValueEditor?: FieldValueEditor<DataRow, ColumnType>;
