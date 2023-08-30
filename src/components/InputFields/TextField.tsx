@@ -310,7 +310,7 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
                         {showClearButton &&
                         inputValue.length > 0 &&
                         !disabled ? (
-                          <Tooltip title="Clear">
+                          <Tooltip title="Clear" disableInteractive>
                             <IconButton
                               className="text-input-clear-button"
                               onClick={(event) => {
@@ -335,10 +335,10 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
             }}
             sx={{
               '& .text-input-clear-button': {
-                visibility: 'hidden',
+                display: 'none',
               },
               '&:hover .text-input-clear-button': {
-                visibility: 'visible',
+                display: 'inline-flex',
               },
               ...sx,
             }}

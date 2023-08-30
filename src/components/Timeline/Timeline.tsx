@@ -1169,7 +1169,11 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         dateAtMousePosition,
         dateFormat!
       );
-      if (scrollingAncenstorElement!.clientWidth - localX < 200) {
+      const { clientWidth } = scrollingAncenstorElement!;
+      if (
+        clientWidth - localX <
+        (clientWidth - timelineViewPortLeftOffset) / 2
+      ) {
         dateAtCursorMarkerLabelElement.style.right = '100%';
         dateAtCursorMarkerLabelElement.style.left = '';
         dateAtCursorMarkerLabelElement.style.borderBottomRightRadius = '';

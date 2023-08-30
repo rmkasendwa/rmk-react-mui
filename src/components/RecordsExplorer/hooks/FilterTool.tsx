@@ -364,9 +364,16 @@ export const useFilterTool = <RecordRow extends BaseDataRow>(
                                   nextSelectedConditionGroup.conditions[
                                     index
                                   ].fieldId = event.target.value as any;
-                                  delete nextSelectedConditionGroup.conditions[
-                                    index
-                                  ].value;
+                                  Object.keys(
+                                    nextSelectedConditionGroup.conditions[index]
+                                  )
+                                    .filter((key) => {
+                                      return key !== 'fieldId';
+                                    })
+                                    .forEach((key) => {
+                                      delete nextSelectedConditionGroup
+                                        .conditions[index][key];
+                                    });
                                   onChangeSelectedConditionGroup(
                                     nextSelectedConditionGroup
                                   );
@@ -462,17 +469,23 @@ export const useFilterTool = <RecordRow extends BaseDataRow>(
                                         placeholder="Enter a value"
                                         value={condition.value as any}
                                         onChange={(event) => {
-                                          if (event.target.value) {
+                                          if (event.target.value != null) {
                                             nextSelectedConditionGroup.conditions[
                                               index
                                             ].value = event.target.value as any;
-                                            onChangeSelectedConditionGroup(
-                                              nextSelectedConditionGroup
-                                            );
+                                          } else {
+                                            delete nextSelectedConditionGroup
+                                              .conditions[index].value;
                                           }
+                                          onChangeSelectedConditionGroup(
+                                            nextSelectedConditionGroup
+                                          );
                                         }}
                                         size="small"
                                         fullWidth
+                                        sx={{
+                                          width: 115,
+                                        }}
                                       />
                                     );
                                   } else if (
@@ -485,17 +498,23 @@ export const useFilterTool = <RecordRow extends BaseDataRow>(
                                         placeholder="Enter a value"
                                         value={condition.value as any}
                                         onChange={(event) => {
-                                          if (event.target.value) {
+                                          if (event.target.value != null) {
                                             nextSelectedConditionGroup.conditions[
                                               index
                                             ].value = event.target.value as any;
-                                            onChangeSelectedConditionGroup(
-                                              nextSelectedConditionGroup
-                                            );
+                                          } else {
+                                            delete nextSelectedConditionGroup
+                                              .conditions[index].value;
                                           }
+                                          onChangeSelectedConditionGroup(
+                                            nextSelectedConditionGroup
+                                          );
                                         }}
                                         size="small"
                                         fullWidth
+                                        sx={{
+                                          width: 115,
+                                        }}
                                       />
                                     );
                                   } else if (
