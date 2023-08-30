@@ -134,7 +134,7 @@ export const TableBodyColumn = forwardRef<any, TableBodyColumnProps<any>>(
       defaultCountryCode,
       noWrap,
       enableSmallScreenOptimization = false,
-      showBodyContent = true,
+      showBodyContent: showBodyContentProp = true,
       colSpan,
       isGroupHeaderColumn = false,
       opaque,
@@ -174,6 +174,12 @@ export const TableBodyColumn = forwardRef<any, TableBodyColumnProps<any>>(
     }, [editModeProp]);
 
     const { baseColumnValue, formattedColumnValue } = (() => {
+      const showBodyContent = (() => {
+        if (typeof showBodyContentProp === 'function') {
+          return showBodyContentProp(row, column);
+        }
+        return showBodyContentProp;
+      })();
       if (!showBodyContent) {
         return {
           baseColumnValue: null,
