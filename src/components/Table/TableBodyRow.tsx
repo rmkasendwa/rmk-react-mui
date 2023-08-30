@@ -7,6 +7,7 @@ import {
   Grid,
   Stack,
   Typography,
+  badgeClasses,
   unstable_composeClasses as composeClasses,
   darken,
   generateUtilityClass,
@@ -206,7 +207,7 @@ export const TableBodyRow = <T extends BaseDataRow>(
                       badgeContent={childrenCount}
                       max={999}
                       sx={{
-                        '&>.MuiBadge-badge': {
+                        [`&>.${badgeClasses.badge}`]: {
                           position: 'relative',
                           transform: 'none',
                           bgcolor: (palette.mode === 'dark' ? lighten : darken)(

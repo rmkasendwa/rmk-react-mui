@@ -182,14 +182,16 @@ export const NumberInputField = forwardRef<
   );
 
   const triggerChangeEvent = useCallback(() => {
-    const numericValue = +extractNumericValue(inputValue);
+    const numericValue = parseFloat(extractNumericValue(inputValue));
     const event: any = new Event('change', { bubbles: true });
     Object.defineProperty(event, 'target', {
       writable: false,
       value: {
         name,
         id,
-        value: (isNaN(numericValue) ? 0 : numericValue) / valueScaleFactor,
+        value: isNaN(numericValue)
+          ? undefined
+          : numericValue / valueScaleFactor,
       },
     });
     onChangeProp && onChangeProp(event);
@@ -380,10 +382,10 @@ export const NumberInputField = forwardRef<
       }
       sx={{
         '& .number-input-field-step-tools': {
-          visibility: 'hidden',
+          display: 'none',
         },
         '&:hover .number-input-field-step-tools': {
-          visibility: 'visible',
+          display: 'inline-flex',
         },
         ...sx,
       }}
