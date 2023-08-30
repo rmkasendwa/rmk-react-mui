@@ -183,7 +183,8 @@ export const getToolNodes = (
                 const { label, icon, title, popupElement, sx, ...rest } = omit(
                   tool,
                   'type',
-                  'extraToolProps'
+                  'extraToolProps',
+                  'getToolElement'
                 );
                 return (
                   <>
@@ -206,7 +207,8 @@ export const getToolNodes = (
                 const { label, icon, title, sx, popupElement, ...rest } = omit(
                   tool,
                   'type',
-                  'extraToolProps'
+                  'extraToolProps',
+                  'getToolElement'
                 );
                 const buttonElement = (() => {
                   if (index >= tools.length - collapsedWidthToolIndex) {
@@ -511,7 +513,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
 
     const updateCollapsedWidthToolIndex = useCallback(
       (anchorElement: HTMLDivElement) => {
-        if (allTools?.length != null) {
+        if (allTools?.length != null && anchorElement.firstChild != null) {
           const toolsWithActualWidths = [...allToolsRef.current];
           const toolMaxWidths = toolsWithActualWidths.map((tool, index) => {
             const actualToolElementWidth =
@@ -553,8 +555,9 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
             };
           });
 
-          let containerToolsMaxWidth =
-            anchorElement.clientWidth - (isSmallScreenSize ? 16 : 24) * 2;
+          let containerToolsMaxWidth = (
+            anchorElement.firstChild as HTMLDivElement
+          ).clientWidth;
           if (shouldRenderSyncTool) {
             containerToolsMaxWidth -= 32;
           }
@@ -667,9 +670,8 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
         }
       },
       [
-        allTools.length,
+        allTools?.length,
         hasSearchTool,
-        isSmallScreenSize,
         maxSearchFieldWidth,
         maxTitleWidth,
         shouldRenderSyncTool,

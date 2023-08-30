@@ -233,8 +233,11 @@ export type RecordsExplorerRowField<RecordRow extends BaseDataRow = any> =
       >
     > & {
       searchable?: boolean;
+      filterType?: PrimitiveDataType;
       sortable?: boolean;
+      sortType?: PrimitiveDataType;
       groupable?: boolean;
+      groupType?: PrimitiveDataType;
     };
 
 export const recordsExplorerSearchParamValidationSpec = {
