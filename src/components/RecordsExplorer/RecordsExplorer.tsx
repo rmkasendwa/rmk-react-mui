@@ -780,6 +780,7 @@ const BaseRecordsExplorer = <
                 id,
                 label,
                 type = 'string',
+                groupType,
                 getSortValue,
                 getFilterValue,
                 getGroupLabel,
@@ -795,7 +796,8 @@ const BaseRecordsExplorer = <
                   groupableFields.push({
                     id,
                     label: String(label),
-                    type: type as PrimitiveDataType,
+                    type:
+                      groupType || mapTableColumnTypeToPrimitiveDataType(type),
                     getSortValue: getSortValue || (getFilterValue as any),
                     getGroupLabel,
                     sortLabels,
@@ -874,6 +876,7 @@ const BaseRecordsExplorer = <
                 id,
                 label,
                 type = 'string',
+                sortType,
                 getSortValue,
                 getFilterValue,
                 sortable,
@@ -888,7 +891,8 @@ const BaseRecordsExplorer = <
                   sortableFields.push({
                     id,
                     label: String(label),
-                    type: mapTableColumnTypeToPrimitiveDataType(type),
+                    type:
+                      sortType || mapTableColumnTypeToPrimitiveDataType(type),
                     getSortValue: getSortValue || (getFilterValue as any),
                     sortLabels,
                   });
@@ -984,6 +988,7 @@ const BaseRecordsExplorer = <
                       id,
                       label,
                       type = 'string',
+                      filterType,
                       getFilterValue,
                       getColumnValue,
                       getFieldOptionLabel,
@@ -993,9 +998,9 @@ const BaseRecordsExplorer = <
                       return {
                         id,
                         label: String(label),
-                        type: mapTableColumnTypeToPrimitiveDataType(
-                          type
-                        ) as any,
+                        type:
+                          filterType ||
+                          (mapTableColumnTypeToPrimitiveDataType(type) as any),
                         getFieldOptionLabel:
                           getFieldOptionLabel ||
                           (ENUM_TABLE_COLUMN_TYPES.includes(type) &&
@@ -1025,7 +1030,7 @@ const BaseRecordsExplorer = <
         }
         if (fieldsRef.current) {
           fieldsRef.current.forEach(
-            ({ id, label, type, getFilterValue, searchable }) => {
+            ({ id, label, type, filterType, getFilterValue, searchable }) => {
               if (
                 searchable &&
                 !filterFields.find(
@@ -1035,7 +1040,9 @@ const BaseRecordsExplorer = <
                 filterFields.push({
                   id,
                   label: String(label),
-                  type: mapTableColumnTypeToPrimitiveDataType(type) as any,
+                  type:
+                    filterType ||
+                    (mapTableColumnTypeToPrimitiveDataType(type) as any),
                   getFilterValue,
                 });
               }
