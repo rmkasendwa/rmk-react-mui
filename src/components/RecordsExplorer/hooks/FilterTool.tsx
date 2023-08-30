@@ -237,7 +237,38 @@ export const useFilterTool = <RecordRow extends BaseDataRow>(
                         case 'enum':
                           return MULTI_SELECT_DROPDOWN_OPERATORS;
                         case 'number':
-                          return numericFilterOperators;
+                          return [
+                            {
+                              label: '=',
+                              value: '=',
+                              description: 'is equal to',
+                            },
+                            {
+                              label: '≠',
+                              value: '≠',
+                              description: 'is not equal to',
+                            },
+                            {
+                              label: '<',
+                              value: '<',
+                              description: 'is less than',
+                            },
+                            {
+                              label: '>',
+                              value: '>',
+                              description: 'is greater than',
+                            },
+                            {
+                              label: '≤',
+                              value: '≤',
+                              description: 'is less than or equal to',
+                            },
+                            {
+                              label: '≥',
+                              value: '≥',
+                              description: 'is greater than or equal to',
+                            },
+                          ] as DropdownOption[];
                         case 'date':
                           return dateFilterOperators;
                       }
@@ -385,11 +416,14 @@ export const useFilterTool = <RecordRow extends BaseDataRow>(
                               options={[
                                 ...operatorOptions,
                                 ...contentExistenceFilterOperator,
-                              ].map((label) => {
-                                return {
-                                  label,
-                                  value: label,
-                                };
+                              ].map((option) => {
+                                if (typeof option === 'string') {
+                                  return {
+                                    label: option,
+                                    value: option,
+                                  };
+                                }
+                                return option;
                               })}
                               showClearButton={false}
                               size="small"
