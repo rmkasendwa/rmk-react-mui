@@ -116,6 +116,11 @@ export type GetToolTipWrappedColumnNodeFunction<DataRow> = (
   row: DataRow
 ) => ReactElement;
 
+export type ShowColumnBodyContentFunction<
+  DataRow extends BaseDataRow = any,
+  ColumnType extends TableColumnType = TableColumnType
+> = (row: DataRow, column: TableColumn<DataRow, ColumnType>) => boolean;
+
 export interface TableColumn<
   DataRow extends BaseDataRow = any,
   ColumnType extends TableColumnType = TableColumnType
@@ -166,8 +171,18 @@ export interface TableColumn<
   wrapColumnContentInFieldValue?: boolean;
   decimalPlaces?: number;
   textTransform?: boolean;
+
+  /**
+   * Whether to show the header text of the column.
+   */
   showHeaderText?: boolean;
-  showBodyContent?: boolean;
+
+  /**
+   * Whether to show the body content of the column.
+   */
+  showBodyContent?:
+    | boolean
+    | ShowColumnBodyContentFunction<DataRow, ColumnType>;
   dateFormat?: string;
   dateTimeFormat?: string;
   defaultCountryCode?: CountryCode;
