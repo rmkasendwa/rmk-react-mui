@@ -10,7 +10,7 @@ import {
   useThemeProps,
 } from '@mui/material';
 import clsx from 'clsx';
-import { forwardRef, useEffect, useRef } from 'react';
+import { forwardRef, useEffect, useRef, useState } from 'react';
 
 export interface TooltipClasses {
   /** Styles applied to the root element. */
@@ -89,6 +89,8 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(
       })()
     );
 
+    const [open, setOpen] = useState(false);
+
     const lastMouseEventRef = useRef<MouseEvent | null>(null);
     const mouseCoordinatesRef = useRef<{ x: number; y: number }>({
       x: 0,
@@ -109,7 +111,7 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(
       <MuiTooltip
         ref={ref}
         {...rest}
-        {...{ followCursor, enterDelay, enterNextDelay }}
+        {...{ followCursor, enterDelay, enterNextDelay, open }}
         className={clsx(classes.root)}
         PopperProps={{
           ...(() => {
@@ -137,7 +139,15 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(
               y: lastMouseEventRef.current.clientY,
             };
           }
+          setOpen(true);
           return rest.onOpen?.(...args);
+        }}
+        onClose={(...args) => {
+          const [event] = args;
+          if (event?.type === 'mouseleave') {
+            setOpen(false);
+          }
+          return rest.onClose?.(...args);
         }}
       >
         {children}

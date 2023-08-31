@@ -137,9 +137,30 @@ export interface TableColumn<
         | 'validationRules'
       >
     > {
-  secondaryHeaderRowContent?: ReactNode;
+  /**
+   * The id of the column. This is used to identify the column in the table.
+   * It is also used as the key of the column in the table. If `getColumnValue`
+   * is not provided, the column id is used to get the value of the column from
+   * the row object.
+   */
   id: keyof DataRow;
+
+  /**
+   * The label of the column. This is used as the secondary row header text of the column.
+   */
+  secondaryHeaderRowContent?: ReactNode;
+
+  /**
+   * The type of the column. This is used to determine how to render the column. If not provided,
+   * the column will be a text column. The column type also doubles as the column data type in most
+   * cases.
+   */
   type?: ColumnType;
+
+  /**
+   * The alignment of the body content of the column. This does not affect the alignment of the
+   * header text of the column.
+   */
   align?: 'left' | 'center' | 'right';
   setDefaultWidth?: boolean;
   width?: number;
