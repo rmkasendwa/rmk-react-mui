@@ -1,3 +1,4 @@
+import { createDateWithoutTimezoneOffset } from '@infinite-debugger/rmk-utils/dates';
 import {
   ComponentsProps,
   ComponentsVariants,
@@ -145,9 +146,14 @@ export const useDataFilter = <RecordRow extends BaseDataRow>(
                         getDateInstanceFromFilterConditionRef.current(
                           condition
                         );
-                      const valueDate = new Date(fieldValue);
+                      const valueDate = (() => {
+                        if (fieldValue != null) {
+                          return createDateWithoutTimezoneOffset(fieldValue);
+                        }
+                      })();
                       if (
                         conditionValueDate &&
+                        valueDate &&
                         !isNaN(conditionValueDate.getTime()) &&
                         !isNaN(valueDate.getTime())
                       ) {
