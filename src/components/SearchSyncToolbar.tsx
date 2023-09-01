@@ -511,9 +511,11 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
       }
     );
 
+    const hasTitle = Boolean(title);
+
     const updateCollapsedWidthToolIndex = useCallback(
       (anchorElement: HTMLDivElement) => {
-        if (allTools?.length != null && anchorElement.firstChild != null) {
+        if (allTools?.length != null) {
           const toolsWithActualWidths = [...allToolsRef.current];
           const toolMaxWidths = toolsWithActualWidths.map((tool, index) => {
             const actualToolElementWidth =
@@ -555,15 +557,17 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
             };
           });
 
-          let containerToolsMaxWidth = (
-            anchorElement.firstChild as HTMLDivElement
-          ).clientWidth;
+          const { paddingLeft, paddingRight } = getComputedStyle(anchorElement);
+
+          let containerToolsMaxWidth =
+            anchorElement.clientWidth -
+            (parseFloat(paddingLeft) + parseFloat(paddingRight));
           if (shouldRenderSyncTool) {
             containerToolsMaxWidth -= 32;
           }
           const searchFieldAndTitleSpaceWidth = (() => {
             let width = 0;
-            if (title) {
+            if (hasTitle) {
               width += maxTitleWidth;
             }
             if (hasSearchTool) {
@@ -572,7 +576,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
             return width;
           })();
           let toolsCount = toolsWithActualWidths.length;
-          title && (toolsCount += 1);
+          hasTitle && (toolsCount += 1);
           hasSearchTool && (toolsCount += 1);
           shouldRenderSyncTool && (toolsCount += 1);
           const cummulativeToolsGapWidth = (toolsCount - 1) * 8;
@@ -634,7 +638,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                 },
                 (() => {
                   let baseGapWidth = 0;
-                  title && hasSearchTool && (baseGapWidth += 4);
+                  hasTitle && hasSearchTool && (baseGapWidth += 4);
                   const ellipsisTools = getEllipsisToolsRef.current(
                     toolsWithActualWidths.slice(-i)
                   );
@@ -652,7 +656,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
               setCollapsedIntoEllipsisToolIndex(i);
               return;
             } else if (!isSearchFieldCollapsed) {
-              if (title && hasSearchTool) {
+              if (hasTitle && hasSearchTool) {
                 setIsSearchFieldCollapsed(true);
                 isSearchFieldCollapsed = true;
                 collapsedSearchFieldAndTitleSpaceWidth = maxTitleWidth + 32;
@@ -672,10 +676,10 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
       [
         allTools?.length,
         hasSearchTool,
+        hasTitle,
         maxSearchFieldWidth,
         maxTitleWidth,
         shouldRenderSyncTool,
-        title,
       ]
     );
 
@@ -749,15 +753,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
 
     return (
       <Box
-        ref={mergeRefs([
-          (anchorElement: HTMLDivElement | null) => {
-            if (anchorElement) {
-              updateCollapsedWidthToolIndex(anchorElement);
-            }
-          },
-          anchorElementRef,
-          ref,
-        ])}
+        ref={mergeRefs([anchorElementRef, ref])}
         {...rest}
         className={clsx(classes.root)}
         sx={{

@@ -120,14 +120,13 @@ export const CountCard = forwardRef<HTMLDivElement, CountCardProps>(
     useEffect(() => {
       if (cardElementRef.current) {
         const cardElement = cardElementRef.current;
-        const windowResizeCallback = () => {
+        const observer = new ResizeObserver(() => {
           const { offsetHeight, offsetWidth } = cardElement;
           setCardElementDimension(Math.min(offsetHeight, offsetWidth));
-        };
-        window.addEventListener('resize', windowResizeCallback);
-        windowResizeCallback();
+        });
+        observer.observe(cardElement);
         return () => {
-          window.removeEventListener('resize', windowResizeCallback);
+          observer.unobserve(cardElement);
         };
       } else {
         setCardElementDimension(0);
