@@ -76,7 +76,7 @@ export const useCacheableData = <Data>(
           pendingDataRequestControllerRef.current = null;
         }
 
-        const responseData = await recordFinderRef
+        return recordFinderRef
           .current({
             getRequestController: (requestController) => {
               pendingDataRequestControllerRef.current = requestController;
@@ -88,8 +88,6 @@ export const useCacheableData = <Data>(
           .finally(() => {
             pendingDataRequestControllerRef.current = null;
           });
-
-        return responseData;
       }
     });
   }, [baseLoad, setRecord]);

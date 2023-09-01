@@ -535,6 +535,7 @@ export const useFilterTool = <RecordRow extends BaseDataRow>(
                                         selectedOperator as any
                                       )
                                     ) {
+                                      fieldProps.optionVariant = 'check';
                                       fieldProps.SelectProps = {
                                         multiple: true,
                                       };
@@ -543,7 +544,6 @@ export const useFilterTool = <RecordRow extends BaseDataRow>(
                                       <DataDropdownField
                                         placeholder={label}
                                         value={condition.value as any}
-                                        optionVariant="check"
                                         sortOptions
                                         {...fieldProps}
                                         {...omit(
