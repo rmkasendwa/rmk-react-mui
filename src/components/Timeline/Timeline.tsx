@@ -952,7 +952,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     );
   }, [customDateRange, isCustomDatesSelected]);
 
-  const { timeScaleRows, unitTimeScaleWidth, timeScaleWidth } =
+  const { timeScaleRows, scaledUnitTimeScaleWidth, scaledTimeScaleWidth } =
     useTimeScaleMeterConfiguration({
       selectedTimeScale,
       minCalendarDate,
@@ -962,28 +962,9 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       totalNumberOfHours,
       customDateRange,
       isCustomDatesSelected,
+      scrollingAncenstorElement,
+      timelineViewPortLeftOffset,
     });
-
-  //#region Unit time scaling
-  const [timelineWidthScaleFactor, setTimelineWidthScaleFactor] = useState(
-    () => {
-      if (scrollingAncenstorElement) {
-        return (
-          (scrollingAncenstorElement.clientWidth - timelineViewPortLeftOffset) /
-          unitTimeScaleWidth
-        );
-      }
-      return 1;
-    }
-  );
-
-  const { scaledUnitTimeScaleWidth, scaledTimeScaleWidth } = useMemo(() => {
-    return {
-      scaledUnitTimeScaleWidth: unitTimeScaleWidth * timelineWidthScaleFactor,
-      scaledTimeScaleWidth: timeScaleWidth * timelineWidthScaleFactor,
-    };
-  }, [timeScaleWidth, timelineWidthScaleFactor, unitTimeScaleWidth]);
-  //#endregion
 
   defaultViewResetFunctionRef &&
     (defaultViewResetFunctionRef.current = () => {
@@ -1189,78 +1170,88 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   const updateDateAtCursorRef = useRef(updateDateAtCursor);
   updateDateAtCursorRef.current = updateDateAtCursor;
 
-  useEffect(() => {
+  const updateDatesAtTimelinePoints = () => {
     const parentElement = scrollingAncenstorElement;
     const timelineMeterContainer = scrollingAncenstorElement?.querySelector(
       `.${classes.timelineMeterContainer}`
     ) as HTMLElement;
-
-    // Check if the required elements are present before attaching the scroll event listener.
     if (parentElement && timelineMeterContainer) {
+      const { scrollLeft, clientWidth: parentElementClientWidth } =
+        parentElement;
+      if (!isScrollingToTimelineCenterRef.current) {
+        isTimelineScrolledRef.current = true;
+      }
+      isScrollingToTimelineCenterRef.current = false;
+      const { offsetWidth } = timelineMeterContainer;
+
+      const startX = scrollLeft / offsetWidth;
+      const dateAtStart = addHours(
+        minCalendarDate,
+        totalNumberOfHours * startX
+      );
+      currentDateAtStartRef.current = dateAtStart;
+      currentDateAtStartRefProp &&
+        (currentDateAtStartRefProp.current = dateAtStart);
+
+      // Hide or show the "today" markder based on whether it is before or after the date at the beginning of the timeline viewport.
+      if (todayMarkerRef.current) {
+        if (isBefore(new Date(), dateAtStart)) {
+          todayMarkerRef.current.style.display = 'none';
+        } else {
+          todayMarkerRef.current.style.display = '';
+        }
+      }
+
+      const centerX =
+        (scrollLeft +
+          (parentElementClientWidth - timelineViewPortLeftOffset) / 2) /
+        offsetWidth;
+      const dateAtCenter = addHours(
+        minCalendarDate,
+        totalNumberOfHours * centerX
+      );
+      currentDateAtCenterPositionLeftOffsetRef.current = centerX;
+      currentDateAtCenterRef.current = dateAtCenter;
+      currentDateAtCenterRefProp &&
+        (currentDateAtCenterRefProp.current = dateAtCenter);
+
+      const endX =
+        (scrollLeft + parentElementClientWidth - timelineViewPortLeftOffset) /
+        offsetWidth;
+      const dateAtEnd = addHours(minCalendarDate, totalNumberOfHours * endX);
+      currentDateAtEndRef.current = dateAtEnd;
+      currentDateAtEndRefProp && (currentDateAtEndRefProp.current = dateAtEnd);
+
+      // Call the provided callback function to notify about the updated date at the center.
+      onChangeCurrentDateAtCenterRef.current?.(dateAtCenter);
+
+      // Calibrate date cursor elements in the timeline container if available.
+      if (timelineContainerElement) {
+        caliberateDateCursorElementsRef.current(timelineContainerElement);
+      }
+      updateDateAtCursorRef.current();
+
+      // console.log({
+      //   start: currentDateAtStartRef.current,
+      //   center: currentDateAtCenterRef.current,
+      //   end: currentDateAtEndRef.current,
+      // });
+    }
+  };
+  const updateDatesAtTimelinePointsRef = useRef(updateDatesAtTimelinePoints);
+  updateDatesAtTimelinePointsRef.current = updateDatesAtTimelinePoints;
+
+  useEffect(() => {
+    if (scrollingAncenstorElement) {
       const scrollEventCallback = () => {
-        const { scrollLeft, clientWidth: parentElementClientWidth } =
-          parentElement;
-        if (!isScrollingToTimelineCenterRef.current) {
-          isTimelineScrolledRef.current = true;
-        }
-        isScrollingToTimelineCenterRef.current = false;
-        const { offsetWidth } = timelineMeterContainer;
-
-        const startX = scrollLeft / offsetWidth;
-        const dateAtStart = addHours(
-          minCalendarDate,
-          totalNumberOfHours * startX
-        );
-        currentDateAtStartRef.current = dateAtStart;
-        currentDateAtStartRefProp &&
-          (currentDateAtStartRefProp.current = dateAtStart);
-
-        // Hide or show the "today" markder based on whether it is before or after the date at the beginning of the timeline viewport.
-        if (todayMarkerRef.current) {
-          if (isBefore(new Date(), dateAtStart)) {
-            todayMarkerRef.current.style.display = 'none';
-          } else {
-            todayMarkerRef.current.style.display = '';
-          }
-        }
-
-        const centerX =
-          (scrollLeft +
-            (parentElementClientWidth - timelineViewPortLeftOffset) / 2) /
-          offsetWidth;
-        const dateAtCenter = addHours(
-          minCalendarDate,
-          totalNumberOfHours * centerX
-        );
-        currentDateAtCenterPositionLeftOffsetRef.current = centerX;
-        currentDateAtCenterRef.current = dateAtCenter;
-        currentDateAtCenterRefProp &&
-          (currentDateAtCenterRefProp.current = dateAtCenter);
-
-        const endX =
-          (scrollLeft + parentElementClientWidth - timelineViewPortLeftOffset) /
-          offsetWidth;
-        const dateAtEnd = addHours(minCalendarDate, totalNumberOfHours * endX);
-        currentDateAtEndRef.current = dateAtEnd;
-        currentDateAtEndRefProp &&
-          (currentDateAtEndRefProp.current = dateAtEnd);
-
-        // Call the provided callback function to notify about the updated date at the center.
-        onChangeCurrentDateAtCenterRef.current?.(dateAtCenter);
-
-        // Calibrate date cursor elements in the timeline container if available.
-        if (timelineContainerElement) {
-          caliberateDateCursorElementsRef.current(timelineContainerElement);
-        }
-        updateDateAtCursorRef.current();
+        updateDatesAtTimelinePointsRef.current();
       };
-
-      // Attach the scroll event listener to the parentElement.
-      parentElement.addEventListener('scroll', scrollEventCallback);
-
-      // Remove the scroll event listener when the component is unmounted.
+      scrollingAncenstorElement.addEventListener('scroll', scrollEventCallback);
       return () => {
-        return parentElement.removeEventListener('scroll', scrollEventCallback);
+        return scrollingAncenstorElement!.removeEventListener(
+          'scroll',
+          scrollEventCallback
+        );
       };
     }
   }, [
@@ -1308,6 +1299,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
             );
           }
         }
+        updateDatesAtTimelinePointsRef.current();
       });
       observer.observe(timelineContainerElement);
       return () => {
@@ -1322,31 +1314,6 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     isCustomDatesSelected,
     isMasterTimeline,
     timelineContainerElement,
-  ]);
-
-  useEffect(() => {
-    if (scrollingAncenstorElement) {
-      const observer = new ResizeObserver(() => {
-        setTimelineWidthScaleFactor(() => {
-          if (scrollingAncenstorElement) {
-            return (
-              (scrollingAncenstorElement.clientWidth -
-                timelineViewPortLeftOffset) /
-              unitTimeScaleWidth
-            );
-          }
-          return 1;
-        });
-      });
-      observer.observe(scrollingAncenstorElement);
-      return () => {
-        observer.disconnect();
-      };
-    }
-  }, [
-    scrollingAncenstorElement,
-    timelineViewPortLeftOffset,
-    unitTimeScaleWidth,
   ]);
 
   useEffect(() => {
