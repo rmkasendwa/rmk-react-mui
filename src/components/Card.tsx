@@ -228,10 +228,15 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(function Card(
           return (
             <ReloadIconButton
               {...{ load, loading, errorMessage }}
+              IconButtonProps={{
+                sx: {
+                  p: 0.5,
+                },
+              }}
               sx={{
                 position: 'absolute',
                 top: spacing(1),
-                right: spacing(1),
+                right: isSmallScreenSize ? spacing(2) : spacing(3),
                 zIndex: 1,
               }}
             />
