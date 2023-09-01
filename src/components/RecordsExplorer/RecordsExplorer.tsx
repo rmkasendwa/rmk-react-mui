@@ -26,7 +26,6 @@ import {
 } from '@mui/material';
 import { BoxProps } from '@mui/material/Box';
 import clsx from 'clsx';
-import formatDate from 'date-fns/format';
 import { FormikValues } from 'formik';
 import hashIt from 'hash-it';
 import { omit, result } from 'lodash';
@@ -1945,19 +1944,7 @@ const BaseRecordsExplorer = <
     supportedTimeScales:
       timelineView?.supportedTimeScales ||
       TimelineViewProps?.supportedTimeScales,
-    selectedCustomDates: (() => {
-      if (
-        !customDateRange &&
-        currentDateAtStartRef.current &&
-        currentDateAtEndRef.current
-      ) {
-        return {
-          startDate: formatDate(currentDateAtStartRef.current, 'yyyy-MM-dd'),
-          endDate: formatDate(currentDateAtEndRef.current, 'yyyy-MM-dd'),
-        };
-      }
-      return customDateRange;
-    })(),
+    selectedCustomDates: customDateRange,
     startDateRef: currentDateAtStartRef,
     endDateRef: currentDateAtEndRef,
   });

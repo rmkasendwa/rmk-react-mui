@@ -6,7 +6,7 @@ import differenceInHours from 'date-fns/differenceInHours';
 import formatDate from 'date-fns/format';
 import getDaysInMonth from 'date-fns/getDaysInMonth';
 import { uniqueId } from 'lodash';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import {
   TimeScaleConfiguration,
@@ -29,6 +29,8 @@ export interface TimeScaleConfigurationProps {
   timelineYears: number[];
   totalNumberOfDays: number;
   totalNumberOfHours: number;
+  scrollingAncenstorElement?: HTMLElement | null;
+  timelineViewPortLeftOffset: number;
 }
 export const useTimeScaleMeterConfiguration = ({
   selectedTimeScale,
@@ -39,8 +41,28 @@ export const useTimeScaleMeterConfiguration = ({
   totalNumberOfHours,
   customDateRange,
   isCustomDatesSelected,
+  timelineViewPortLeftOffset,
+  scrollingAncenstorElement,
 }: TimeScaleConfigurationProps) => {
   const { palette } = useTheme();
+  const [
+    scrollingAncenstorElementClientWidth,
+    setScrollingAncenstorElementClientWidth,
+  ] = useState(scrollingAncenstorElement?.clientWidth);
+
+  useEffect(() => {
+    if (scrollingAncenstorElement) {
+      const observer = new ResizeObserver(() => {
+        setScrollingAncenstorElementClientWidth(
+          scrollingAncenstorElement.clientWidth
+        );
+      });
+      observer.observe(scrollingAncenstorElement);
+      return () => {
+        observer.disconnect();
+      };
+    }
+  }, [scrollingAncenstorElement]);
 
   return useMemo(() => {
     const {
@@ -450,10 +472,22 @@ export const useTimeScaleMeterConfiguration = ({
       };
     })();
 
+    const timelineWidthScaleFactor =
+      scrollingAncenstorElementClientWidth != null
+        ? (scrollingAncenstorElementClientWidth - timelineViewPortLeftOffset) /
+          unitTimeScaleWidth
+        : 1;
+    const scaledUnitTimeScaleWidth =
+      unitTimeScaleWidth * timelineWidthScaleFactor;
+    const scaledTimeScaleWidth = timeScaleWidth * timelineWidthScaleFactor;
+
     return {
       timeScaleRows,
       unitTimeScaleWidth,
       timeScaleWidth,
+      timelineWidthScaleFactor,
+      scaledUnitTimeScaleWidth,
+      scaledTimeScaleWidth,
     };
   }, [
     TimeScaleMeterPropsVariant,
@@ -462,7 +496,9 @@ export const useTimeScaleMeterConfiguration = ({
     isCustomDatesSelected,
     minCalendarDate,
     palette.text.primary,
+    scrollingAncenstorElementClientWidth,
     selectedTimeScale,
+    timelineViewPortLeftOffset,
     timelineYears,
     totalNumberOfDays,
     totalNumberOfHours,
