@@ -11,7 +11,7 @@ import {
 } from '@mui/material';
 import Box from '@mui/material/Box';
 import clsx from 'clsx';
-import { forwardRef, useEffect, useRef } from 'react';
+import { MutableRefObject, forwardRef, useEffect, useRef } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { mergeRefs } from 'react-merge-refs';
 
@@ -70,7 +70,9 @@ export const timelineElementClasses: TimelineElementClasses =
   );
 
 export interface TimelineElementProps extends TimelineElementType {
-  scrollingAncenstorElement?: HTMLElement | null;
+  scrollingAncenstorElementRef?: MutableRefObject<
+    HTMLElement | null | undefined
+  >;
 }
 
 export const TimelineElement = forwardRef<HTMLDivElement, TimelineElementProps>(
@@ -81,7 +83,7 @@ export const TimelineElement = forwardRef<HTMLDivElement, TimelineElementProps>(
       sx,
       label,
       TooltipProps = {},
-      scrollingAncenstorElement,
+      scrollingAncenstorElementRef,
       percentage = 0,
       offsetPercentage = 0,
       timelineContainerWidth = 0,
@@ -117,6 +119,7 @@ export const TimelineElement = forwardRef<HTMLDivElement, TimelineElementProps>(
     const baseRightEdgeOffset = baseLeftEdgeOffset + width;
 
     const updateStickyContentPosition = () => {
+      const scrollingAncenstorElement = scrollingAncenstorElementRef?.current;
       if (timelineElementRef.current && scrollingAncenstorElement) {
         const timelineElement = timelineElementRef.current;
         const scrollingAncenstorElementLeftEdgeOffset = 0;
@@ -142,6 +145,7 @@ export const TimelineElement = forwardRef<HTMLDivElement, TimelineElementProps>(
     updateStickyContentPositionRef.current = updateStickyContentPosition;
 
     useEffect(() => {
+      const scrollingAncenstorElement = scrollingAncenstorElementRef?.current;
       if (
         isVisible &&
         scrollingAncenstorElement &&
@@ -171,7 +175,7 @@ export const TimelineElement = forwardRef<HTMLDivElement, TimelineElementProps>(
       baseRightEdgeOffset,
       classes.leftEdgeIntersecting,
       isVisible,
-      scrollingAncenstorElement,
+      scrollingAncenstorElementRef,
     ]);
 
     const timelineElementNode = (

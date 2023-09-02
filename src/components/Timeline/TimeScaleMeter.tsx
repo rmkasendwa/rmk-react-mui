@@ -14,7 +14,7 @@ import {
 import Box from '@mui/material/Box';
 import clsx from 'clsx';
 import { omit } from 'lodash';
-import { forwardRef, useMemo, useState } from 'react';
+import { MutableRefObject, forwardRef, useMemo, useState } from 'react';
 
 import { useLoadOnScrollToBottom } from '../../hooks/InfiniteScroller';
 import { TimeScaleRow } from './models';
@@ -75,7 +75,9 @@ export const timeScaleMeterClasses: TimeScaleMeterClasses =
 export interface TimeScaleMeterProps extends Partial<StackProps> {
   timeScaleRows: [TimeScaleRow[], TimeScaleRow[], TimeScaleRow[]];
   timeScaleWidth: number;
-  scrollingElement?: HTMLElement | null;
+  scrollingAncenstorElementRef?: MutableRefObject<
+    HTMLElement | null | undefined
+  >;
   leftOffset?: number;
   variant?: 'default' | 'compact';
 }
@@ -87,7 +89,7 @@ export const TimeScaleMeter = forwardRef<HTMLDivElement, TimeScaleMeterProps>(
       className,
       timeScaleRows,
       timeScaleWidth,
-      scrollingElement,
+      scrollingAncenstorElementRef,
       leftOffset = 0,
       variant = 'default',
       sx,
@@ -209,7 +211,7 @@ export const TimeScaleMeter = forwardRef<HTMLDivElement, TimeScaleMeterProps>(
     });
 
     useLoadOnScrollToBottom({
-      element: scrollingElement,
+      elementRef: scrollingAncenstorElementRef,
       onChangeScrollLength({ scrollLeft }) {
         const scrollOffset = Math.max(scrollLeft - leftOffset, 0);
         setOffsets({
@@ -229,18 +231,21 @@ export const TimeScaleMeter = forwardRef<HTMLDivElement, TimeScaleMeterProps>(
 
     const [timeScaleLevel1Limit, timeScaleLevel2Limit, timeScaleLevel3Limit] =
       useMemo(() => {
+        const scrollingAncenstorElement = scrollingAncenstorElementRef?.current;
         return [
           timeScaleLevel1TickWidth,
           timeScaleLevel2TickWidth,
           timeScaleLevel3TickWidth,
         ].map((tickWidth) => {
-          if (scrollingElement?.offsetWidth && tickWidth) {
-            return Math.ceil(scrollingElement.offsetWidth / tickWidth) + 1;
+          if (scrollingAncenstorElement?.offsetWidth && tickWidth) {
+            return (
+              Math.ceil(scrollingAncenstorElement.offsetWidth / tickWidth) + 1
+            );
           }
           return 1;
         });
       }, [
-        scrollingElement?.offsetWidth,
+        scrollingAncenstorElementRef,
         timeScaleLevel1TickWidth,
         timeScaleLevel2TickWidth,
         timeScaleLevel3TickWidth,

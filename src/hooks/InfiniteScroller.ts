@@ -1,9 +1,16 @@
-import { ReactNode, useEffect, useRef, useState } from 'react';
+import {
+  MutableRefObject,
+  ReactNode,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
 const LOAD_NEXT_BOUNDARY_THRESHOLD = 80;
 
 export interface UseLoadOnScrollToBottomOptions {
   element?: HTMLElement | null;
+  elementRef?: MutableRefObject<HTMLElement | null | undefined>;
   bottomThreshold?: number;
   load?: () => void;
   onChangeScrollLength?: (scrollLength: {
@@ -29,7 +36,8 @@ export interface UseLoadOnScrollToBottomOptions {
  * Calls the load function when an element is scrolled to bottom
  */
 export const useLoadOnScrollToBottom = ({
-  element,
+  elementRef,
+  element: elementProp,
   bottomThreshold = LOAD_NEXT_BOUNDARY_THRESHOLD,
   load,
   onChangeScrollLength,
@@ -69,6 +77,7 @@ export const useLoadOnScrollToBottom = ({
   const limit = (() => {
     return (
       (() => {
+        const element = elementProp ?? elementRef?.current;
         if (element?.offsetHeight && dataElementLength) {
           return Math.ceil(element.offsetHeight / dataElementLength);
         }
@@ -105,6 +114,8 @@ export const useLoadOnScrollToBottom = ({
         keyboardFocusElements.push(keyboardFocusElementProp);
       }
     }
+
+    const element = elementProp ?? elementRef?.current;
     if (element) {
       keyboardFocusElements.push(element);
     }
@@ -186,12 +197,14 @@ export const useLoadOnScrollToBottom = ({
   }, [
     dataElementLength,
     dataElements,
-    element,
+    elementProp,
+    elementRef,
     enableKeyboardNavigationWrapping,
     keyboardFocusElementProp,
   ]);
 
   useEffect(() => {
+    const element = elementProp ?? elementRef?.current;
     if (element && shouldLoadOnScroll) {
       revalidationKey;
       const scrollEventCallback = () => {
@@ -258,7 +271,8 @@ export const useLoadOnScrollToBottom = ({
   }, [
     bottomThreshold,
     dataElementLength,
-    element,
+    elementProp,
+    elementRef,
     invertScrollDirection,
     orientation,
     revalidationKey,
