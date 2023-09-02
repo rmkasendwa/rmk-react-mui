@@ -75,7 +75,7 @@ export type ScrollToDateFunctionOptions = {
 };
 
 export type ScrollToDateFunction = (
-  date: Date,
+  date: Date | number | string,
   scrollBehaviour?: ScrollBehavior | ScrollToDateFunctionOptions
 ) => void;
 

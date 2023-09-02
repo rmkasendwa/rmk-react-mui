@@ -758,70 +758,69 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   const getPercentageAtDateRef = useRef(getPercentageAtDate);
   getPercentageAtDateRef.current = getPercentageAtDate;
 
-  /**
-   * Function to scroll the timeline to a specific date.
-   *
-   * @param date - The date to which the timeline should be scrolled.
-   * @param options - Optional. The scroll behavior to be used, defaults to 'smooth'.
-   */
   const scrollToDate: ScrollToDateFunction = useCallback(
-    (date, options = 'smooth') => {
-      const scrollingAncenstorElement = scrollingAncenstorElementRef?.current;
-      const scrollBehaviour: ScrollBehavior = (() => {
-        if (typeof options === 'string') {
-          return options;
-        }
-        if (typeof options === 'object' && options.scrollBehaviour) {
-          return options.scrollBehaviour;
-        }
-        return 'smooth';
-      })();
-      const { dateAlignment = 'center' } = ((): ScrollToDateFunctionOptions => {
-        if (typeof options === 'string') {
-          return {};
-        }
-        return options;
-      })();
-      // Get the container element for the timeline meter container
-      const timelineMeterContainerContainer =
-        scrollingAncenstorElement?.querySelector(
-          `.${classes.timelineMeterContainer}`
-        ) as HTMLElement;
+    (inDate, options = 'smooth') => {
+      const date = new Date(inDate);
+      if (!isNaN(date.getTime())) {
+        const scrollingAncenstorElement = scrollingAncenstorElementRef?.current;
+        const scrollBehaviour: ScrollBehavior = (() => {
+          if (typeof options === 'string') {
+            return options;
+          }
+          if (typeof options === 'object' && options.scrollBehaviour) {
+            return options.scrollBehaviour;
+          }
+          return 'smooth';
+        })();
+        const { dateAlignment = 'center' } =
+          ((): ScrollToDateFunctionOptions => {
+            if (typeof options === 'string') {
+              return {};
+            }
+            return options;
+          })();
+        // Get the container element for the timeline meter container
+        const timelineMeterContainerContainer =
+          scrollingAncenstorElement?.querySelector(
+            `.${classes.timelineMeterContainer}`
+          ) as HTMLElement;
 
-      // Check if the necessary elements are available and the date is within the valid range
-      if (
-        scrollingAncenstorElement &&
-        timelineMeterContainerContainer &&
-        isAfter(date, minCalendarDate) &&
-        isBefore(date, maxCalendarDate)
-      ) {
-        cancelMomentumTrackingRef.current?.();
-        // Calculate the percentage offset of the date within the timeline
-        const offsetPercentage = getPercentageAtDateRef.current(date);
+        // Check if the necessary elements are available and the date is within the valid range
+        if (
+          scrollingAncenstorElement &&
+          timelineMeterContainerContainer &&
+          isAfter(date, minCalendarDate) &&
+          isBefore(date, maxCalendarDate)
+        ) {
+          cancelMomentumTrackingRef.current?.();
+          // Calculate the percentage offset of the date within the timeline
+          const offsetPercentage = getPercentageAtDateRef.current(date);
 
-        // Get the width of the scrolling ancestor element and the timeline meter container
-        const { clientWidth: scrollingAncenstorElementOffsetWidth } =
-          scrollingAncenstorElement;
-        const { clientWidth } = timelineMeterContainerContainer;
-        let dateScrollLeftPosition = clientWidth * offsetPercentage;
-        switch (dateAlignment) {
-          case 'center':
-            dateScrollLeftPosition -=
-              (scrollingAncenstorElementOffsetWidth -
-                timelineViewPortLeftOffset) /
-              2;
-            break;
-          case 'end':
-            dateScrollLeftPosition -=
-              scrollingAncenstorElementOffsetWidth - timelineViewPortLeftOffset;
-            break;
+          // Get the width of the scrolling ancestor element and the timeline meter container
+          const { clientWidth: scrollingAncenstorElementOffsetWidth } =
+            scrollingAncenstorElement;
+          const { clientWidth } = timelineMeterContainerContainer;
+          let dateScrollLeftPosition = clientWidth * offsetPercentage;
+          switch (dateAlignment) {
+            case 'center':
+              dateScrollLeftPosition -=
+                (scrollingAncenstorElementOffsetWidth -
+                  timelineViewPortLeftOffset) /
+                2;
+              break;
+            case 'end':
+              dateScrollLeftPosition -=
+                scrollingAncenstorElementOffsetWidth -
+                timelineViewPortLeftOffset;
+              break;
+          }
+
+          // Scroll to the appropriate position within the timeline
+          scrollingAncenstorElement.scrollTo({
+            left: dateScrollLeftPosition,
+            behavior: scrollBehaviour,
+          });
         }
-
-        // Scroll to the appropriate position within the timeline
-        scrollingAncenstorElement.scrollTo({
-          left: dateScrollLeftPosition,
-          behavior: scrollBehaviour,
-        });
       }
     },
     // Dependencies for the callback function
@@ -1707,6 +1706,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                 timelineViewPortContainerWidth,
                 currentDateAtEndPositionLeftOffsetRef,
                 currentDateAtStartPositionLeftOffsetRef,
+                scrollToDate,
               }}
               timelineElements={timelineElements.map(
                 (timelineElement, index) => {
