@@ -186,6 +186,8 @@ export const TimelineRowDataNavigationButtonsContainer = forwardRef<
       scrollingAncenstorElement.addEventListener('scroll', scrollEventCallback);
       scrollEventCallback();
       return () => {
+        leftButtonElement.style.display = '';
+        rightButtonElement.style.display = '';
         scrollingAncenstorElement.removeEventListener(
           'scroll',
           scrollEventCallback
@@ -209,17 +211,15 @@ export const TimelineRowDataNavigationButtonsContainer = forwardRef<
         position: 'relative',
         zIndex: 2,
         width: timelineViewPortContainerWidth,
-        opacity: 0.5,
-        '&:hover': {
-          opacity: 1,
-        },
         [`.${classes.navigationButton}`]: {
           minWidth: 'auto',
           pointerEvents: 'auto',
           p: 0,
           borderColor: palette.divider,
           display: 'none',
+          opacity: 0.5,
           '&:hover': {
+            opacity: 1,
             bgcolor: palette.primary.main,
             color: palette.getContrastText(palette.primary.main),
           },
