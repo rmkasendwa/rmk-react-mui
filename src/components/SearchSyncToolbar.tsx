@@ -32,7 +32,6 @@ import {
   ReactNode,
   forwardRef,
   isValidElement,
-  useCallback,
   useEffect,
   useRef,
   useState,
@@ -513,179 +512,171 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
 
     const hasTitle = Boolean(title);
 
-    const updateCollapsedWidthToolIndex = useCallback(
-      (anchorElement: HTMLDivElement) => {
-        if (allTools?.length != null) {
-          const toolsWithActualWidths = [...allToolsRef.current];
-          const toolMaxWidths = toolsWithActualWidths.map((tool, index) => {
-            const actualToolElementWidth =
-              actualToolsWidthsRef.current.get(index)?.elementMaxWidth;
-            if (tool && typeof tool === 'object') {
-              if ('type' in tool) {
-                switch (tool.type) {
-                  case 'button':
-                    return {
-                      elementMaxWidth:
-                        actualToolElementWidth ?? MAX_BUTTON_WIDTH,
-                      collapsedElementWidth: (tool as ButtonTool).endIcon
-                        ? 54
-                        : 36,
-                    };
-                  case 'icon-button':
-                    return {
-                      elementMaxWidth: actualToolElementWidth ?? 32,
-                      collapsedElementWidth: 32,
-                    };
-                  case 'divider':
-                    return {
-                      elementMaxWidth: actualToolElementWidth ?? 33,
-                      collapsedElementWidth: 33,
-                    };
-                }
-              }
-              if ('element' in tool) {
-                return {
-                  elementMaxWidth:
-                    actualToolElementWidth ?? tool.elementMaxWidth,
-                  collapsedElementWidth: tool.collapsedElementMaxWidth,
-                };
+    const updateCollapsedWidthToolIndex = (anchorElement: HTMLDivElement) => {
+      if (allTools?.length != null) {
+        const toolsWithActualWidths = [...allToolsRef.current];
+        const toolMaxWidths = toolsWithActualWidths.map((tool, index) => {
+          const actualToolElementWidth =
+            actualToolsWidthsRef.current.get(index)?.elementMaxWidth;
+          if (tool && typeof tool === 'object') {
+            if ('type' in tool) {
+              switch (tool.type) {
+                case 'button':
+                  return {
+                    elementMaxWidth: actualToolElementWidth ?? MAX_BUTTON_WIDTH,
+                    collapsedElementWidth: (tool as ButtonTool).endIcon
+                      ? 54
+                      : 36,
+                  };
+                case 'icon-button':
+                  return {
+                    elementMaxWidth: actualToolElementWidth ?? 32,
+                    collapsedElementWidth: 32,
+                  };
+                case 'divider':
+                  return {
+                    elementMaxWidth: actualToolElementWidth ?? 33,
+                    collapsedElementWidth: 33,
+                  };
               }
             }
-            return {
-              elementMaxWidth: actualToolElementWidth ?? MAX_ELEMENT_TOOL_WIDTH,
-              collapsedElementWidth: 36,
-            };
-          });
-
-          const { paddingLeft, paddingRight } = getComputedStyle(anchorElement);
-
-          let containerToolsMaxWidth =
-            anchorElement.clientWidth -
-            (parseFloat(paddingLeft) + parseFloat(paddingRight));
-          if (shouldRenderSyncTool) {
-            containerToolsMaxWidth -= 32;
-          }
-          const searchFieldAndTitleSpaceWidth = (() => {
-            let width = 0;
-            if (hasTitle) {
-              width += maxTitleWidth;
-            }
-            if (hasSearchTool) {
-              width += maxSearchFieldWidth;
-            }
-            return width;
-          })();
-          let toolsCount = toolsWithActualWidths.length;
-          hasTitle && (toolsCount += 1);
-          hasSearchTool && (toolsCount += 1);
-          shouldRenderSyncTool && (toolsCount += 1);
-          const cummulativeToolsGapWidth = (toolsCount - 1) * 8;
-
-          for (let i = 0; i < toolsWithActualWidths.length; i++) {
-            const fullWidthToolsWidth = toolMaxWidths
-              .slice(0, toolMaxWidths.length - i)
-              .reduce((a, { elementMaxWidth }) => a + elementMaxWidth, 0);
-            const collapsedWidthToolsWidth =
-              i > 0
-                ? toolMaxWidths
-                    .slice(-i)
-                    .reduce(
-                      (a, { collapsedElementWidth }) =>
-                        a + collapsedElementWidth,
-                      0
-                    )
-                : 0;
-
-            if (
-              containerToolsMaxWidth -
-                (fullWidthToolsWidth +
-                  collapsedWidthToolsWidth +
-                  cummulativeToolsGapWidth) >=
-              searchFieldAndTitleSpaceWidth
-            ) {
-              setCollapsedWidthToolIndex(i);
-              setCollapsedIntoEllipsisToolIndex(null);
-              setIsSearchFieldCollapsed(false);
-              return;
+            if ('element' in tool) {
+              return {
+                elementMaxWidth: actualToolElementWidth ?? tool.elementMaxWidth,
+                collapsedElementWidth: tool.collapsedElementMaxWidth,
+              };
             }
           }
-          setIsSearchFieldCollapsed(false);
-          setCollapsedWidthToolIndex(toolsWithActualWidths.length);
+          return {
+            elementMaxWidth: actualToolElementWidth ?? MAX_ELEMENT_TOOL_WIDTH,
+            collapsedElementWidth: 36,
+          };
+        });
 
-          let collapsedSearchFieldAndTitleSpaceWidth =
-            searchFieldAndTitleSpaceWidth;
-          let isSearchFieldCollapsed = false;
-          for (let i = 0; i < toolsWithActualWidths.length; i++) {
-            const collapsedWidthToolsWidth = toolMaxWidths
-              .filter((_, index) => {
-                const tool = toolsWithActualWidths[index];
-                return (
-                  index < toolMaxWidths.length - i ||
-                  (tool &&
-                    typeof tool === 'object' &&
-                    'alwaysShowOn' in tool &&
-                    (
-                      [
-                        'All Screens',
-                        'Small Screen',
-                      ] as (typeof tool.alwaysShowOn)[]
-                    ).includes(tool.alwaysShowOn))
-                );
-              })
-              .reduce(
-                (a, { collapsedElementWidth }) => {
-                  return a + 4 + collapsedElementWidth;
-                },
-                (() => {
-                  let baseGapWidth = 0;
-                  hasTitle && hasSearchTool && (baseGapWidth += 4);
-                  const ellipsisTools = getEllipsisToolsRef.current(
-                    toolsWithActualWidths.slice(-i)
-                  );
-                  i > 0 &&
-                    ellipsisTools.length > 0 &&
-                    (baseGapWidth += 4 + ELLIPSIS_MENU_TOOL_WIDTH);
-                  return baseGapWidth;
-                })()
+        const { paddingLeft, paddingRight } = getComputedStyle(anchorElement);
+
+        let containerToolsMaxWidth =
+          anchorElement.clientWidth -
+          (parseFloat(paddingLeft) + parseFloat(paddingRight));
+        if (shouldRenderSyncTool) {
+          containerToolsMaxWidth -= 32;
+        }
+        const searchFieldAndTitleSpaceWidth = (() => {
+          let width = 0;
+          if (hasTitle) {
+            width += maxTitleWidth;
+          }
+          if (hasSearchTool) {
+            width += maxSearchFieldWidth;
+          }
+          return width;
+        })();
+        let toolsCount = toolsWithActualWidths.length;
+        hasTitle && (toolsCount += 1);
+        hasSearchTool && (toolsCount += 1);
+        shouldRenderSyncTool && (toolsCount += 1);
+        const cummulativeToolsGapWidth = (toolsCount - 1) * 8;
+
+        for (let i = 0; i < toolsWithActualWidths.length; i++) {
+          const fullWidthToolsWidth = toolMaxWidths
+            .slice(0, toolMaxWidths.length - i)
+            .reduce((a, { elementMaxWidth }) => a + elementMaxWidth, 0);
+          const collapsedWidthToolsWidth =
+            i > 0
+              ? toolMaxWidths
+                  .slice(-i)
+                  .reduce(
+                    (a, { collapsedElementWidth }) => a + collapsedElementWidth,
+                    0
+                  )
+              : 0;
+
+          if (
+            containerToolsMaxWidth -
+              (fullWidthToolsWidth +
+                collapsedWidthToolsWidth +
+                cummulativeToolsGapWidth) >=
+            searchFieldAndTitleSpaceWidth
+          ) {
+            setCollapsedWidthToolIndex(i);
+            setCollapsedIntoEllipsisToolIndex(null);
+            setIsSearchFieldCollapsed(false);
+            return;
+          }
+        }
+        setIsSearchFieldCollapsed(false);
+        setCollapsedWidthToolIndex(toolsWithActualWidths.length);
+
+        let collapsedSearchFieldAndTitleSpaceWidth =
+          searchFieldAndTitleSpaceWidth;
+        let isSearchFieldCollapsed = false;
+        for (let i = 0; i < toolsWithActualWidths.length; i++) {
+          const collapsedWidthToolsWidth = toolMaxWidths
+            .filter((_, index) => {
+              const tool = toolsWithActualWidths[index];
+              return (
+                index < toolMaxWidths.length - i ||
+                (tool &&
+                  typeof tool === 'object' &&
+                  'alwaysShowOn' in tool &&
+                  (
+                    [
+                      'All Screens',
+                      'Small Screen',
+                    ] as (typeof tool.alwaysShowOn)[]
+                  ).includes(tool.alwaysShowOn))
               );
+            })
+            .reduce(
+              (a, { collapsedElementWidth }) => {
+                return a + 4 + collapsedElementWidth;
+              },
+              (() => {
+                let baseGapWidth = 0;
+                hasTitle && hasSearchTool && (baseGapWidth += 4);
+                const ellipsisTools = getEllipsisToolsRef.current(
+                  toolsWithActualWidths.slice(-i)
+                );
+                i > 0 &&
+                  ellipsisTools.length > 0 &&
+                  (baseGapWidth += 4 + ELLIPSIS_MENU_TOOL_WIDTH);
+                return baseGapWidth;
+              })()
+            );
 
+          if (
+            containerToolsMaxWidth - collapsedWidthToolsWidth >=
+            collapsedSearchFieldAndTitleSpaceWidth
+          ) {
+            setCollapsedIntoEllipsisToolIndex(i);
+            return;
+          } else if (!isSearchFieldCollapsed) {
+            if (hasTitle && hasSearchTool) {
+              setIsSearchFieldCollapsed(true);
+              isSearchFieldCollapsed = true;
+              collapsedSearchFieldAndTitleSpaceWidth = maxTitleWidth + 32;
+            }
             if (
               containerToolsMaxWidth - collapsedWidthToolsWidth >=
               collapsedSearchFieldAndTitleSpaceWidth
             ) {
               setCollapsedIntoEllipsisToolIndex(i);
               return;
-            } else if (!isSearchFieldCollapsed) {
-              if (hasTitle && hasSearchTool) {
-                setIsSearchFieldCollapsed(true);
-                isSearchFieldCollapsed = true;
-                collapsedSearchFieldAndTitleSpaceWidth = maxTitleWidth + 32;
-              }
-              if (
-                containerToolsMaxWidth - collapsedWidthToolsWidth >=
-                collapsedSearchFieldAndTitleSpaceWidth
-              ) {
-                setCollapsedIntoEllipsisToolIndex(i);
-                return;
-              }
             }
           }
-          setCollapsedIntoEllipsisToolIndex(toolsWithActualWidths.length);
         }
-      },
-      [
-        allTools?.length,
-        hasSearchTool,
-        hasTitle,
-        maxSearchFieldWidth,
-        maxTitleWidth,
-        shouldRenderSyncTool,
-      ]
+        setCollapsedIntoEllipsisToolIndex(toolsWithActualWidths.length);
+      }
+    };
+    const updateCollapsedWidthToolIndexRef = useRef(
+      updateCollapsedWidthToolIndex
     );
+    updateCollapsedWidthToolIndexRef.current = updateCollapsedWidthToolIndex;
 
     useEffect(() => {
       let anchorElementObserver: ResizeObserver;
       let anchorElement: HTMLDivElement;
+      let gridElement: HTMLDivElement;
       let toolsContainerElementObserver: ResizeObserver;
       let toolsContainerElement: HTMLDivElement;
       if (toolsContainerElementRef.current) {
@@ -710,16 +701,17 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
         });
         toolsContainerElementObserver.observe(toolsContainerElement);
       }
-      if (anchorElementRef.current) {
+      if (anchorElementRef.current?.firstChild) {
         anchorElement = anchorElementRef.current;
+        gridElement = anchorElement.firstChild as HTMLDivElement;
         anchorElementObserver = new ResizeObserver(() => {
-          updateCollapsedWidthToolIndex(anchorElement);
+          updateCollapsedWidthToolIndexRef.current(anchorElement);
         });
-        anchorElementObserver.observe(anchorElement);
+        anchorElementObserver.observe(gridElement);
       }
       return () => {
-        if (anchorElementObserver && anchorElement) {
-          anchorElementObserver.unobserve(anchorElement);
+        if (anchorElementObserver && gridElement) {
+          anchorElementObserver.unobserve(gridElement);
           anchorElementObserver.disconnect();
         }
         if (toolsContainerElementObserver && toolsContainerElement) {
@@ -727,7 +719,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
           toolsContainerElementObserver.disconnect();
         }
       };
-    }, [classes.fullWidthToolWrapper, updateCollapsedWidthToolIndex]);
+    }, [classes.fullWidthToolWrapper]);
 
     useEffect(() => {
       isInitialMountRef.current = false;
@@ -786,6 +778,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
             height: 50,
             alignItems: 'center',
             columnGap: collapsedWidthToolIndex < tools.length ? 1 : 0.5,
+            flexWrap: 'nowrap',
           }}
         >
           {(() => {
