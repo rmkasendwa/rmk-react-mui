@@ -18,7 +18,7 @@ import { MutableRefObject, forwardRef, useEffect, useRef } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { mergeRefs } from 'react-merge-refs';
 
-import { TimelineElement } from './models';
+import { ScrollToDateFunction, TimelineElement } from './models';
 
 export interface TimelineRowDataNavigationButtonsContainerClasses {
   /** Styles applied to the root element. */
@@ -93,6 +93,7 @@ export interface TimelineRowDataNavigationButtonsContainerProps
   >;
   currentDateAtStartPositionLeftOffsetRef: MutableRefObject<number | undefined>;
   currentDateAtEndPositionLeftOffsetRef: MutableRefObject<number | undefined>;
+  scrollToDate: ScrollToDateFunction;
 }
 
 export const TimelineRowDataNavigationButtonsContainer = forwardRef<
@@ -110,6 +111,7 @@ export const TimelineRowDataNavigationButtonsContainer = forwardRef<
     scrollingAncenstorElementRef,
     currentDateAtEndPositionLeftOffsetRef,
     currentDateAtStartPositionLeftOffsetRef,
+    scrollToDate,
     sx,
     ...rest
   } = props;
@@ -152,16 +154,13 @@ export const TimelineRowDataNavigationButtonsContainer = forwardRef<
           const startPosition = currentDateAtStartPositionLeftOffsetRef.current;
           const endPosition = currentDateAtEndPositionLeftOffsetRef.current;
           const shouldShowLeftButton = Boolean(
-            timelineElementsRef.current.find(
-              ({ offsetPercentage, percentage }) => {
-                return (
-                  offsetPercentage != null &&
-                  percentage != null &&
-                  startPosition != null &&
-                  offsetPercentage + percentage < startPosition
-                );
-              }
-            )
+            timelineElementsRef.current.find(({ offsetPercentage }) => {
+              return (
+                offsetPercentage != null &&
+                startPosition != null &&
+                offsetPercentage < startPosition
+              );
+            })
           );
           const shouldShowRightButton = Boolean(
             timelineElementsRef.current.find(({ offsetPercentage }) => {
@@ -210,12 +209,20 @@ export const TimelineRowDataNavigationButtonsContainer = forwardRef<
         position: 'relative',
         zIndex: 2,
         width: timelineViewPortContainerWidth,
+        opacity: 0.5,
+        '&:hover': {
+          opacity: 1,
+        },
         [`.${classes.navigationButton}`]: {
           minWidth: 'auto',
           pointerEvents: 'auto',
           p: 0,
           borderColor: palette.divider,
           display: 'none',
+          '&:hover': {
+            bgcolor: palette.primary.main,
+            color: palette.getContrastText(palette.primary.main),
+          },
         },
       }}
     >
@@ -226,6 +233,34 @@ export const TimelineRowDataNavigationButtonsContainer = forwardRef<
             classes.navigationButton,
             classes.navigationLeftButton
           )}
+          onClick={() => {
+            const startPosition =
+              currentDateAtStartPositionLeftOffsetRef.current;
+            const timelineElement = timelineElements
+              .sort(
+                (
+                  { offsetPercentage: aOffsetPercentage },
+                  { offsetPercentage: bOffsetPercentage }
+                ) => {
+                  if (aOffsetPercentage != null && bOffsetPercentage != null) {
+                    return bOffsetPercentage - aOffsetPercentage;
+                  }
+                  return 0;
+                }
+              )
+              .find(({ offsetPercentage }) => {
+                return (
+                  offsetPercentage != null &&
+                  startPosition != null &&
+                  offsetPercentage < startPosition
+                );
+              });
+            if (timelineElement?.startDate) {
+              scrollToDate(timelineElement.startDate, {
+                dateAlignment: 'start',
+              });
+            }
+          }}
           variant="outlined"
           color="inherit"
         >
@@ -246,6 +281,33 @@ export const TimelineRowDataNavigationButtonsContainer = forwardRef<
           )}
           variant="outlined"
           color="inherit"
+          onClick={() => {
+            const endPosition = currentDateAtEndPositionLeftOffsetRef.current;
+            const timelineElement = timelineElements
+              .sort(
+                (
+                  { offsetPercentage: aOffsetPercentage },
+                  { offsetPercentage: bOffsetPercentage }
+                ) => {
+                  if (aOffsetPercentage != null && bOffsetPercentage != null) {
+                    return aOffsetPercentage - bOffsetPercentage;
+                  }
+                  return 0;
+                }
+              )
+              .find(({ offsetPercentage }) => {
+                return (
+                  offsetPercentage != null &&
+                  endPosition != null &&
+                  offsetPercentage > endPosition
+                );
+              });
+            if (timelineElement?.startDate) {
+              scrollToDate(timelineElement.startDate, {
+                dateAlignment: 'center',
+              });
+            }
+          }}
         >
           <KeyboardArrowRightIcon
             sx={{

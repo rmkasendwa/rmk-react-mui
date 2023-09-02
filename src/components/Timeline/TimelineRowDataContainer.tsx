@@ -95,6 +95,7 @@ export interface TimelineRowDataContainerProps
       TimelineRowDataNavigationButtonsContainerProps,
       | 'currentDateAtStartPositionLeftOffsetRef'
       | 'currentDateAtEndPositionLeftOffsetRef'
+      | 'scrollToDate'
     > {
   timelineElements: TimelineElementType[];
   minCalendarDate: Date;
@@ -128,6 +129,7 @@ export const TimelineRowDataContainer = forwardRef<
     timelineViewPortContainerWidth,
     currentDateAtEndPositionLeftOffsetRef,
     currentDateAtStartPositionLeftOffsetRef,
+    scrollToDate,
     sx,
     ...rest
   } = props;
@@ -286,6 +288,7 @@ export const TimelineRowDataContainer = forwardRef<
                 timelineElements,
                 currentDateAtEndPositionLeftOffsetRef,
                 currentDateAtStartPositionLeftOffsetRef,
+                scrollToDate,
               }}
             />
             {timelineElements
