@@ -44,7 +44,6 @@ import {
   useEffect,
   useMemo,
   useRef,
-  useState,
 } from 'react';
 import { mergeRefs } from 'react-merge-refs';
 import scrollIntoView from 'scroll-into-view-if-needed';
@@ -487,17 +486,18 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   const currentDateAtEndRef = useRef<Date | null>(null);
 
   const currentDateAtCenterPositionLeftOffsetRef = useRef<number | null>(null);
-  const [timelineContainerElement, setTimelineContainerElement] =
-    useState<HTMLTableElement | null>(null);
-  const timelineMeterContainerElement = timelineContainerElement?.querySelector(
-    `.${classes.timelineMeterContainer}`
-  ) as HTMLElement;
+  const timelineContainerElementRef = useRef<HTMLTableElement | null>(null);
+  const timelineMeterContainerElement =
+    timelineContainerElementRef.current?.querySelector(
+      `.${classes.timelineMeterContainer}`
+    ) as HTMLElement;
   const dateAtCursorMarkerLabelElement =
-    timelineContainerElement?.querySelector(
+    timelineContainerElementRef.current?.querySelector(
       `.${classes.dateAtCursorMarker}>.${classes.dateAtCursorMarkerLabel}`
     ) as HTMLElement;
-  if (!scrollingAncenstorElement && timelineContainerElement) {
-    scrollingAncenstorElement = timelineContainerElement?.parentElement;
+  if (!scrollingAncenstorElement && timelineContainerElementRef.current) {
+    scrollingAncenstorElement =
+      timelineContainerElementRef.current?.parentElement;
   }
 
   const todayMarkerRef = useRef<HTMLDivElement>(null);
@@ -570,7 +570,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   });
 
   useDragToScroll({
-    targetElement: timelineContainerElement,
+    targetElement: timelineContainerElementRef.current,
     scrollableElement: scrollingAncenstorElement,
     ...DragToScrollPropsRest,
     cancelMomentumTrackingRef,
@@ -1121,7 +1121,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       lastMouseEventRef.current &&
       timelineMeterContainerElement &&
       scrollingAncenstorElement &&
-      timelineContainerElement &&
+      timelineContainerElementRef.current &&
       dateAtCursorMarkerLabelElement
     ) {
       const event = lastMouseEventRef.current;
@@ -1141,7 +1141,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       const dateAtMousePosition = getDateAtPercentageRef.current(
         percentageAtMousePosition
       );
-      timelineContainerElement
+      timelineContainerElementRef.current
         ?.querySelectorAll(`.${classes.dateAtCursorMarker}`)
         .forEach((dateAtCursorMarkerElement: any) => {
           dateAtCursorMarkerElement.style.left = `${timelineX}px`;
@@ -1226,8 +1226,10 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       onChangeCurrentDateAtCenterRef.current?.(dateAtCenter);
 
       // Calibrate date cursor elements in the timeline container if available.
-      if (timelineContainerElement) {
-        caliberateDateCursorElementsRef.current(timelineContainerElement);
+      if (timelineContainerElementRef.current) {
+        caliberateDateCursorElementsRef.current(
+          timelineContainerElementRef.current
+        );
       }
       updateDateAtCursorRef.current();
 
@@ -1240,6 +1242,8 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   };
   const updateDatesAtTimelinePointsRef = useRef(updateDatesAtTimelinePoints);
   updateDatesAtTimelinePointsRef.current = updateDatesAtTimelinePoints;
+
+  // console.log('Rendering');
 
   useEffect(() => {
     if (scrollingAncenstorElement) {
@@ -1261,13 +1265,12 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     currentDateAtStartRefProp,
     minCalendarDate,
     scrollingAncenstorElement,
-    timelineContainerElement,
     timelineViewPortLeftOffset,
     totalNumberOfHours,
   ]);
 
   useEffect(() => {
-    if (isMasterTimeline && timelineContainerElement) {
+    if (isMasterTimeline && timelineContainerElementRef.current) {
       const observer = new ResizeObserver(() => {
         if (
           !newTimelineElementIdsRef.current ||
@@ -1301,7 +1304,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         }
         updateDatesAtTimelinePointsRef.current();
       });
-      observer.observe(timelineContainerElement);
+      observer.observe(timelineContainerElementRef.current);
       return () => {
         observer.disconnect();
       };
@@ -1313,7 +1316,6 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     defaultTimelineCenter,
     isCustomDatesSelected,
     isMasterTimeline,
-    timelineContainerElement,
   ]);
 
   useEffect(() => {
@@ -2054,15 +2056,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         </Box>
       ) : null}
       <Table
-        ref={mergeRefs([
-          ref,
-          (rootElement: HTMLTableElement | null) => {
-            if (rootElement) {
-              caliberateDateCursorElements(rootElement);
-            }
-            setTimelineContainerElement(rootElement);
-          },
-        ])}
+        ref={mergeRefs([ref, timelineContainerElementRef])}
         className={clsx(className, classes.root)}
         {...rest}
         controlZIndex={false}
