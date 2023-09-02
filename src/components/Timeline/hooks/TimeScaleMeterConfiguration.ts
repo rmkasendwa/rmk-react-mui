@@ -475,10 +475,11 @@ export const useTimeScaleMeterConfiguration = ({
       };
     })();
 
+    const timelineViewPortContainerWidth =
+      (scrollingAncenstorElementClientWidth ?? 0) - timelineViewPortLeftOffset;
     const timelineWidthScaleFactor =
-      scrollingAncenstorElementClientWidth != null
-        ? (scrollingAncenstorElementClientWidth - timelineViewPortLeftOffset) /
-          unitTimeScaleWidth
+      timelineViewPortContainerWidth > 0
+        ? timelineViewPortContainerWidth / unitTimeScaleWidth
         : 1;
     const scaledUnitTimeScaleWidth =
       unitTimeScaleWidth * timelineWidthScaleFactor;
@@ -491,6 +492,7 @@ export const useTimeScaleMeterConfiguration = ({
       timelineWidthScaleFactor,
       scaledUnitTimeScaleWidth,
       scaledTimeScaleWidth,
+      timelineViewPortContainerWidth,
     };
   }, [
     TimeScaleMeterPropsVariant,
