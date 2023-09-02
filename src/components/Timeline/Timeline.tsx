@@ -1,7 +1,4 @@
-import {
-  createDateWithoutTimezoneOffset,
-  dateStringHasTimeComponent,
-} from '@infinite-debugger/rmk-utils/dates';
+import { createDateWithoutTimezoneOffset } from '@infinite-debugger/rmk-utils/dates';
 import {
   Box,
   BoxProps,
@@ -9,7 +6,6 @@ import {
   ComponentsProps,
   ComponentsVariants,
   Grid,
-  Stack,
   Typography,
   TypographyProps,
   alpha,
@@ -24,17 +20,13 @@ import {
 } from '@mui/material';
 import clsx from 'clsx';
 import addHours from 'date-fns/addHours';
-import addYears from 'date-fns/addYears';
 import differenceInDays from 'date-fns/differenceInDays';
 import differenceInHours from 'date-fns/differenceInHours';
 import formatDate from 'date-fns/format';
 import isAfter from 'date-fns/isAfter';
 import isBefore from 'date-fns/isBefore';
-import maxDate from 'date-fns/max';
-import minDate from 'date-fns/min';
 import { omit, result } from 'lodash';
 import {
-  Fragment,
   MutableRefObject,
   ReactElement,
   ReactNode,
@@ -76,7 +68,9 @@ import {
   timeScaleOptions,
   timelineSearchParamValidationSpec,
 } from './models';
-import TimelineElement from './TimelineElement';
+import TimelineRowDataContainer, {
+  timelineRowDataContainerClasses,
+} from './TimelineRowDataContainer';
 import TimeScaleMeter, {
   TimeScaleMeterProps,
   timeScaleMeterClasses,
@@ -92,9 +86,7 @@ export interface TimelineClasses {
   dateAtCursorMarkerLabel: string;
   emptyTimelineRowPlaceholder: string;
   customDateRangeBlocker: string;
-  newTimelineElement: string;
   flicker: string;
-  timelineElementsSwimLane: string;
 }
 
 export type TimelineClassKey = keyof TimelineClasses;
@@ -140,9 +132,7 @@ const slots: Record<TimelineClassKey, [TimelineClassKey]> = {
   dateAtCursorMarkerLabel: ['dateAtCursorMarkerLabel'],
   emptyTimelineRowPlaceholder: ['emptyTimelineRowPlaceholder'],
   customDateRangeBlocker: ['customDateRangeBlocker'],
-  newTimelineElement: ['newTimelineElement'],
   flicker: ['flicker'],
-  timelineElementsSwimLane: ['timelineElementsSwimLane'],
 };
 
 export const timelineClasses: TimelineClasses = generateUtilityClasses(
@@ -594,8 +584,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     cancelMomentumTrackingRef,
   });
 
-  const { dateFormat: globalDateFormat, dateTimeFormat: globalDateTimeFormat } =
-    useGlobalConfiguration();
+  const { dateTimeFormat: globalDateTimeFormat } = useGlobalConfiguration();
 
   dateFormat || (dateFormat = globalDateTimeFormat);
 
@@ -1015,140 +1004,6 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       );
     });
 
-  const timelineElementNodes = useMemo(() => {
-    return new Map<
-      string,
-      {
-        element: HTMLElement;
-        leftEdgeOffset: number;
-        rightEdgeOffset: number;
-        width: number;
-      }
-    >();
-  }, []);
-
-  /**
-   * Generates a timeline element node based on the provided start and end dates, label, and other props.
-   * @param TimelineElement - Object containing the properties for the timeline element.
-   * @returns ReactNode - The generated timeline element node.
-   */
-  const getTimelineElementNode = ({
-    id,
-    startDate: startDateValue,
-    endDate: endDateValue,
-    label,
-    TooltipProps = {},
-    sx,
-    ...rest
-  }: TimelineElementType & {
-    id: string;
-  }) => {
-    const startDate = startDateValue
-      ? createDateWithoutTimezoneOffset(startDateValue)
-      : minCalendarDate;
-
-    // Check if the provided start date is a valid date.
-    if (!isNaN(startDate.getTime())) {
-      const endDate = (() => {
-        if (endDateValue) {
-          const endDate = createDateWithoutTimezoneOffset(endDateValue);
-
-          // Check if the provided end date is a valid date.
-          if (!isNaN(endDate.getTime())) {
-            // If the end date is provided as a string without a time component, set the time to 23:59:59.999.
-            if (
-              typeof endDateValue === 'string' &&
-              !dateStringHasTimeComponent(endDateValue)
-            ) {
-              endDate.setHours(23, 59, 59, 999);
-            }
-            return endDate;
-          }
-        }
-        // If no valid end date is provided, use the maximum calendar date as the end date.
-        return maxCalendarDate;
-      })();
-
-      // Check if the end date is after the start date.
-      if (isAfter(endDate, startDate)) {
-        const numberOfHours = differenceInHours(endDate, startDate);
-        const offsetPercentage =
-          differenceInHours(startDate, minCalendarDate) / totalNumberOfHours;
-        const percentage = numberOfHours / totalNumberOfHours;
-
-        // Create the base label for the timeline element using the start and end dates.
-        const baseTimelineElementLabel = `${formatDate(
-          startDate,
-          globalDateFormat
-        )} - ${formatDate(endDate, globalDateFormat)}`;
-
-        // Determine the final timeline element label to be displayed.
-        const timelineElementLabel = (() => {
-          if (label) {
-            return label;
-          }
-          return baseTimelineElementLabel;
-        })();
-
-        const { ...TooltipPropsRest } = TooltipProps;
-
-        return (
-          <TimelineElement
-            {...rest}
-            ref={(element) => {
-              if (element) {
-                timelineElementNodes.set(id, {
-                  element,
-                  leftEdgeOffset: offsetPercentage * scaledTimeScaleWidth,
-                  rightEdgeOffset:
-                    (offsetPercentage + percentage) * scaledTimeScaleWidth,
-                  width: percentage * scaledTimeScaleWidth,
-                });
-              }
-            }}
-            className={clsx(
-              newTimelineElementIdsRef.current &&
-                newTimelineElementIdsRef.current.includes(id) &&
-                classes.newTimelineElement
-            )}
-            label={timelineElementLabel}
-            {...{ scrollingAncenstorElementRef, percentage, offsetPercentage }}
-            timelineContainerWidth={scaledTimeScaleWidth}
-            TooltipProps={{
-              title: baseTimelineElementLabel,
-              ...TooltipPropsRest,
-            }}
-            sx={{
-              ...sx,
-              position: 'absolute',
-              top: 0,
-              width: `${percentage * 100}%`,
-              left: `${offsetPercentage * 100}%`,
-              ...(() => {
-                if (!startDateValue) {
-                  return {
-                    borderTopLeftRadius: 0,
-                    borderBottomLeftRadius: 0,
-                    borderLeft: 'none',
-                  };
-                }
-              })(),
-              ...(() => {
-                if (!endDateValue) {
-                  return {
-                    borderTopRightRadius: 0,
-                    borderBottomRightRadius: 0,
-                    borderRight: 'none',
-                  };
-                }
-              })(),
-            }}
-          />
-        );
-      }
-    }
-  };
-
   const updateDateAtCursor = () => {
     const scrollingAncenstorElement = scrollingAncenstorElementRef?.current;
     if (
@@ -1364,7 +1219,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     ) {
       const newTimelineElementNodes =
         scrollingAncenstorElement.querySelectorAll(
-          `.${classes.newTimelineElement}`
+          `.${timelineRowDataContainerClasses.newTimelineElement}`
         );
       if (newTimelineElementNodes.length > 0) {
         const anchorElement = document.createElement('div');
@@ -1394,7 +1249,6 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     }
   }, [
     classes.flicker,
-    classes.newTimelineElement,
     rows,
     scrollingAncenstorElementRef,
     timelineViewPortLeftOffset,
@@ -1813,117 +1667,27 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
             ] as TimelineElementType[];
           }
         })();
-        if (timelineElements && timelineElements.length > 0) {
-          const timelineElementsSwimLanes = (() => {
-            const timelineElementsToRender = [...timelineElements];
-            const swimLanes = [timelineElementsToRender.splice(0, 1)];
 
-            //#region Compute overlaps
-            while (timelineElementsToRender.length > 0) {
-              const timelineElementToRender = timelineElementsToRender.shift()!;
-              const valueStartDate = (() => {
-                if (timelineElementToRender.startDate) {
-                  return new Date(timelineElementToRender.startDate);
-                }
-                return addYears(new Date(), -1000);
-              })();
-              const valueEndDate = (() => {
-                if (timelineElementToRender.endDate) {
-                  return new Date(timelineElementToRender.endDate);
-                }
-                return addYears(new Date(), 1000);
-              })();
-              const idealSwimLane = (() => {
-                for (let i = 0; i < swimLanes.length; i++) {
-                  if (
-                    swimLanes[i].every(
-                      ({
-                        startDate: startDateString,
-                        endDate: endDateString,
-                      }) => {
-                        const startDate = (() => {
-                          if (startDateString) {
-                            return new Date(startDateString);
-                          }
-                          return addYears(new Date(), -1000);
-                        })();
-                        const endDate = (() => {
-                          if (endDateString) {
-                            return new Date(endDateString);
-                          }
-                          return addYears(new Date(), 1000);
-                        })();
-                        //#region Check that the timeline element to render does not overlap with the timeline element in the swim lane
-                        return !(
-                          maxDate([valueStartDate, startDate]) <
-                          minDate([valueEndDate, endDate])
-                        );
-                        //#endregion
-                      }
-                    )
-                  ) {
-                    return swimLanes[i];
-                  }
-                }
-                const newSwimLane: (typeof swimLanes)[number] = [];
-                swimLanes.push(newSwimLane);
-                return newSwimLane;
-              })();
-              idealSwimLane.push(timelineElementToRender);
-            }
-            //#endregion
-            return swimLanes;
-          })();
+        if (timelineElements && timelineElements.length > 0) {
           return (
-            <Stack
-              sx={{
-                width: '100%',
-                gap: 0.5,
+            <TimelineRowDataContainer
+              {...{
+                minCalendarDate,
+                maxCalendarDate,
+                totalNumberOfHours,
+                scaledTimeScaleWidth,
+                scrollingAncenstorElementRef,
+                newTimelineElementIds,
               }}
-            >
-              {timelineElementsSwimLanes.map((timelineElements, index) => {
-                return (
-                  <Box
-                    key={index}
-                    className={clsx(classes.timelineElementsSwimLane)}
-                    sx={{
-                      position: 'relative',
-                      height: 42,
-                    }}
-                  >
-                    {timelineElements
-                      .sort(
-                        (
-                          { startDate: aStartDate },
-                          { startDate: bStartDate }
-                        ) => {
-                          if (aStartDate && bStartDate) {
-                            return (
-                              createDateWithoutTimezoneOffset(
-                                aStartDate
-                              ).getTime() -
-                              createDateWithoutTimezoneOffset(
-                                bStartDate
-                              ).getTime()
-                            );
-                          }
-                          return 0;
-                        }
-                      )
-                      .map((timelineElement, index) => {
-                        return (
-                          <Fragment key={index}>
-                            {getTimelineElementNode({
-                              ...timelineElement,
-                              id: timelineElement.id || String(row.id + index),
-                            })}
-                          </Fragment>
-                        );
-                      })}
-                  </Box>
-                );
-              })}
-            </Stack>
+              timelineElements={timelineElements.map(
+                (timelineElement, index) => {
+                  return {
+                    ...timelineElement,
+                    id: timelineElement.id || String(row.id + index),
+                  };
+                }
+              )}
+            />
           );
         }
 
