@@ -10,7 +10,7 @@ import {
 } from '@mui/material';
 import Box from '@mui/material/Box';
 import clsx from 'clsx';
-import { forwardRef } from 'react';
+import { ReactElement, Ref, forwardRef } from 'react';
 
 export interface ${1:${TM_FILENAME_BASE}}Classes {
   /** Styles applied to the root element. */
@@ -61,9 +61,14 @@ export const ${2:${TM_FILENAME_BASE/(\w)/${1:/downcase}/}}Classes: ${1:${TM_FILE
     Object.keys(slots) as ${1:${TM_FILENAME_BASE}}ClassKey[]
   );
 
-export interface ${1:${TM_FILENAME_BASE}}Props extends Partial<BoxProps> {}
+export interface ${1:${TM_FILENAME_BASE}}Props<T = any> extends Partial<BoxProps> {
+  prop1?: T;
+}
 
-export const ${1:${TM_FILENAME_BASE}} = forwardRef<HTMLDivElement, ${1:${TM_FILENAME_BASE}}Props>(function ${1:${TM_FILENAME_BASE}}(inProps, ref) {
+export const Base${1:${TM_FILENAME_BASE}} = <T,>(
+  inProps: ${1:${TM_FILENAME_BASE}}Props<T>,
+  ref: Ref<HTMLDivElement>
+) => {
   const props = useThemeProps({ props: inProps, name: 'Mui${1:${TM_FILENAME_BASE}}' });
   const { className, ...rest } = props;
 
@@ -82,6 +87,10 @@ export const ${1:${TM_FILENAME_BASE}} = forwardRef<HTMLDivElement, ${1:${TM_FILE
   return (
     <Box ref={ref} {...rest} className={clsx(classes.root)}></Box>
   );
-});
+};
+
+export const ${1:${TM_FILENAME_BASE}} = forwardRef(Base${1:${TM_FILENAME_BASE}}) as <T>(
+  p: ${1:${TM_FILENAME_BASE}}Props<T> & { ref?: Ref<HTMLDivElement> }
+) => ReactElement;
 
 export default ${1:${TM_FILENAME_BASE}};
