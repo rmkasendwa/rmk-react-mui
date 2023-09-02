@@ -482,7 +482,15 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   const currentDateAtCenterRef = useRef<Date | null>(null);
   const currentDateAtEndRef = useRef<Date | null>(null);
 
-  const currentDateAtCenterPositionLeftOffsetRef = useRef<number | null>(null);
+  const currentDateAtStartPositionLeftOffsetRef = useRef<number | undefined>(
+    undefined
+  );
+  const currentDateAtCenterPositionLeftOffsetRef = useRef<number | undefined>(
+    undefined
+  );
+  const currentDateAtEndPositionLeftOffsetRef = useRef<number | undefined>(
+    undefined
+  );
   const timelineContainerElementRef = useRef<HTMLTableElement | null>(null);
   const timelineMeterContainerElement =
     timelineContainerElementRef.current?.querySelector(
@@ -952,6 +960,18 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         });
     }
 
+    if (currentDateAtStartPositionLeftOffsetRef.current) {
+      timelineContainerElement
+        .querySelectorAll(
+          `.${timelineRowDataContainerClasses.navigationButtonsContainer}`
+        )
+        .forEach((placeholderElement) => {
+          (placeholderElement as HTMLDivElement).style.left = `${
+            currentDateAtStartPositionLeftOffsetRef.current! * 100
+          }%`;
+        });
+    }
+
     timelineContainerElement
       .querySelectorAll(`.${classes.customDateRangeBlocker}`)
       .forEach((customDateRangeBlockerElement) => {
@@ -974,19 +994,23 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     );
   }, [customDateRange, isCustomDatesSelected]);
 
-  const { timeScaleRows, scaledUnitTimeScaleWidth, scaledTimeScaleWidth } =
-    useTimeScaleMeterConfiguration({
-      selectedTimeScale,
-      minCalendarDate,
-      timelineYears,
-      TimeScaleMeterPropsVariant,
-      totalNumberOfDays,
-      totalNumberOfHours,
-      customDateRange,
-      isCustomDatesSelected,
-      scrollingAncenstorElementRef,
-      timelineViewPortLeftOffset,
-    });
+  const {
+    timeScaleRows,
+    scaledUnitTimeScaleWidth,
+    scaledTimeScaleWidth,
+    timelineViewPortContainerWidth,
+  } = useTimeScaleMeterConfiguration({
+    selectedTimeScale,
+    minCalendarDate,
+    timelineYears,
+    TimeScaleMeterPropsVariant,
+    totalNumberOfDays,
+    totalNumberOfHours,
+    customDateRange,
+    isCustomDatesSelected,
+    scrollingAncenstorElementRef,
+    timelineViewPortLeftOffset,
+  });
 
   defaultViewResetFunctionRef &&
     (defaultViewResetFunctionRef.current = () => {
@@ -1074,6 +1098,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       const { offsetWidth } = timelineMeterContainer;
 
       const startX = scrollLeft / offsetWidth;
+      currentDateAtStartPositionLeftOffsetRef.current = startX;
       const dateAtStart = addHours(
         minCalendarDate,
         totalNumberOfHours * startX
@@ -1107,6 +1132,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       const endX =
         (scrollLeft + parentElementClientWidth - timelineViewPortLeftOffset) /
         offsetWidth;
+      currentDateAtEndPositionLeftOffsetRef.current = endX;
       const dateAtEnd = addHours(minCalendarDate, totalNumberOfHours * endX);
       currentDateAtEndRef.current = dateAtEnd;
       currentDateAtEndRefProp && (currentDateAtEndRefProp.current = dateAtEnd);
@@ -1678,6 +1704,9 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                 scaledTimeScaleWidth,
                 scrollingAncenstorElementRef,
                 newTimelineElementIds,
+                timelineViewPortContainerWidth,
+                currentDateAtEndPositionLeftOffsetRef,
+                currentDateAtStartPositionLeftOffsetRef,
               }}
               timelineElements={timelineElements.map(
                 (timelineElement, index) => {

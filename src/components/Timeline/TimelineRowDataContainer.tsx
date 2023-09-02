@@ -21,17 +21,21 @@ import formatDate from 'date-fns/format';
 import isAfter from 'date-fns/isAfter';
 import maxDate from 'date-fns/max';
 import minDate from 'date-fns/min';
-import { Fragment, MutableRefObject, forwardRef } from 'react';
+import { Fragment, MutableRefObject, forwardRef, useMemo } from 'react';
 
 import { useGlobalConfiguration } from '../../contexts/GlobalConfigurationContext';
 import { TimelineElement as TimelineElementType } from './models';
 import TimelineElement from './TimelineElement';
+import TimelineRowDataNavigationButtonsContainer, {
+  TimelineRowDataNavigationButtonsContainerProps,
+} from './TimelineRowDataNavigationButtonsContainer';
 
 export interface TimelineRowDataContainerClasses {
   /** Styles applied to the root element. */
   root: string;
   timelineElementsSwimLane: string;
   newTimelineElement: string;
+  navigationButtonsContainer: string;
 }
 
 export type TimelineRowDataContainerClassKey =
@@ -76,6 +80,7 @@ const slots: Record<
   root: ['root'],
   timelineElementsSwimLane: ['timelineElementsSwimLane'],
   newTimelineElement: ['newTimelineElement'],
+  navigationButtonsContainer: ['navigationButtonsContainer'],
 };
 
 export const timelineRowDataContainerClasses: TimelineRowDataContainerClasses =
@@ -84,12 +89,19 @@ export const timelineRowDataContainerClasses: TimelineRowDataContainerClasses =
     Object.keys(slots) as TimelineRowDataContainerClassKey[]
   );
 
-export interface TimelineRowDataContainerProps extends Partial<StackProps> {
+export interface TimelineRowDataContainerProps
+  extends Partial<StackProps>,
+    Pick<
+      TimelineRowDataNavigationButtonsContainerProps,
+      | 'currentDateAtStartPositionLeftOffsetRef'
+      | 'currentDateAtEndPositionLeftOffsetRef'
+    > {
   timelineElements: TimelineElementType[];
   minCalendarDate: Date;
   maxCalendarDate: Date;
   totalNumberOfHours: number;
   scaledTimeScaleWidth: number;
+  timelineViewPortContainerWidth: number;
   scrollingAncenstorElementRef?: MutableRefObject<
     HTMLElement | null | undefined
   >;
@@ -113,6 +125,9 @@ export const TimelineRowDataContainer = forwardRef<
     scaledTimeScaleWidth,
     scrollingAncenstorElementRef,
     newTimelineElementIds,
+    timelineViewPortContainerWidth,
+    currentDateAtEndPositionLeftOffsetRef,
+    currentDateAtStartPositionLeftOffsetRef,
     sx,
     ...rest
   } = props;
@@ -131,8 +146,62 @@ export const TimelineRowDataContainer = forwardRef<
 
   const { dateFormat: globalDateFormat } = useGlobalConfiguration();
 
+  const timelineElementsWithComputedProperties = useMemo(() => {
+    return timelineElements.map((timelineElement) => {
+      const { startDate: startDateValue, endDate: endDateValue } =
+        timelineElement;
+      return {
+        ...timelineElement,
+        ...(() => {
+          const startDate = startDateValue
+            ? createDateWithoutTimezoneOffset(startDateValue)
+            : minCalendarDate;
+
+          // Check if the provided start date is a valid date.
+          if (!isNaN(startDate.getTime())) {
+            const endDate = (() => {
+              if (endDateValue) {
+                const endDate = createDateWithoutTimezoneOffset(endDateValue);
+
+                // Check if the provided end date is a valid date.
+                if (!isNaN(endDate.getTime())) {
+                  // If the end date is provided as a string without a time component, set the time to 23:59:59.999.
+                  if (
+                    typeof endDateValue === 'string' &&
+                    !dateStringHasTimeComponent(endDateValue)
+                  ) {
+                    endDate.setHours(23, 59, 59, 999);
+                  }
+                  return endDate;
+                }
+              }
+              // If no valid end date is provided, use the maximum calendar date as the end date.
+              return maxCalendarDate;
+            })();
+
+            // Check if the end date is after the start date.
+            if (isAfter(endDate, startDate)) {
+              const numberOfHours = differenceInHours(endDate, startDate);
+              const offsetPercentage =
+                differenceInHours(startDate, minCalendarDate) /
+                totalNumberOfHours;
+              const percentage = numberOfHours / totalNumberOfHours;
+
+              return {
+                offsetPercentage,
+                percentage,
+              };
+            }
+          }
+        })(),
+      };
+    });
+  }, [maxCalendarDate, minCalendarDate, timelineElements, totalNumberOfHours]);
+
   const timelineElementsSwimLanes = (() => {
-    const timelineElementsToRender = [...timelineElements];
+    const timelineElementsToRender = [
+      ...timelineElementsWithComputedProperties,
+    ];
     const swimLanes = [timelineElementsToRender.splice(0, 1)];
 
     //#region Compute overlaps
@@ -188,6 +257,7 @@ export const TimelineRowDataContainer = forwardRef<
     //#endregion
     return swimLanes;
   })();
+
   return (
     <Stack
       ref={ref}
@@ -208,6 +278,16 @@ export const TimelineRowDataContainer = forwardRef<
               height: 42,
             }}
           >
+            <TimelineRowDataNavigationButtonsContainer
+              className={clsx(classes.navigationButtonsContainer)}
+              {...{
+                scrollingAncenstorElementRef,
+                timelineViewPortContainerWidth,
+                timelineElements,
+                currentDateAtEndPositionLeftOffsetRef,
+                currentDateAtStartPositionLeftOffsetRef,
+              }}
+            />
             {timelineElements
               .sort(({ startDate: aStartDate }, { startDate: bStartDate }) => {
                 if (aStartDate && bStartDate) {
@@ -226,6 +306,8 @@ export const TimelineRowDataContainer = forwardRef<
                     endDate: endDateValue,
                     label,
                     TooltipProps = {},
+                    offsetPercentage,
+                    percentage,
                     sx,
                     ...rest
                   },
@@ -239,7 +321,11 @@ export const TimelineRowDataContainer = forwardRef<
                           : minCalendarDate;
 
                         // Check if the provided start date is a valid date.
-                        if (!isNaN(startDate.getTime())) {
+                        if (
+                          !isNaN(startDate.getTime()) &&
+                          offsetPercentage != null &&
+                          percentage != null
+                        ) {
                           const endDate = (() => {
                             if (endDateValue) {
                               const endDate =
@@ -263,16 +349,6 @@ export const TimelineRowDataContainer = forwardRef<
 
                           // Check if the end date is after the start date.
                           if (isAfter(endDate, startDate)) {
-                            const numberOfHours = differenceInHours(
-                              endDate,
-                              startDate
-                            );
-                            const offsetPercentage =
-                              differenceInHours(startDate, minCalendarDate) /
-                              totalNumberOfHours;
-                            const percentage =
-                              numberOfHours / totalNumberOfHours;
-
                             // Create the base label for the timeline element using the start and end dates.
                             const baseTimelineElementLabel = `${formatDate(
                               startDate,
