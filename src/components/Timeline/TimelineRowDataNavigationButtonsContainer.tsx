@@ -233,7 +233,8 @@ export const TimelineRowDataNavigationButtonsContainer = forwardRef<
             classes.navigationButton,
             classes.navigationLeftButton
           )}
-          onClick={() => {
+          onClick={(event) => {
+            event.stopPropagation();
             const startPosition =
               currentDateAtStartPositionLeftOffsetRef.current;
             const timelineElement = timelineElements
@@ -281,7 +282,8 @@ export const TimelineRowDataNavigationButtonsContainer = forwardRef<
           )}
           variant="outlined"
           color="inherit"
-          onClick={() => {
+          onClick={(event) => {
+            event.stopPropagation();
             const endPosition = currentDateAtEndPositionLeftOffsetRef.current;
             const timelineElement = timelineElements
               .sort(
