@@ -16,7 +16,13 @@ import {
 } from '@mui/material';
 import formatDate from 'date-fns/format';
 import { omit } from 'lodash';
-import { MutableRefObject, ReactNode, useEffect, useRef } from 'react';
+import {
+  MutableRefObject,
+  ReactNode,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
 import { PopupToolOptions, usePopupTool } from '../../../hooks/Tools/PopupTool';
 import DatePicker from '../../DatePicker';
@@ -63,6 +69,10 @@ export type SelectCustomDatesTimeScaleCallbackFunction = (
   selectedCustomDates?: SelectCustomDates
 ) => void;
 
+export type SetDynamicallySelectedTimeScaleFunctionRef = MutableRefObject<
+  ((selectedTimeScale: TimeScaleOption) => void) | undefined
+>;
+
 export interface TimeScaleToolProps {
   selectedTimeScale?: TimeScaleOption;
   supportedTimeScales?: TimeScaleOption[];
@@ -87,12 +97,13 @@ export interface TimeScaleToolProps {
   maxDate?: string | number | Date;
   startDateRef?: MutableRefObject<Date | null>;
   endDateRef?: MutableRefObject<Date | null>;
+  setDynamicallySelectedTimeScaleFunctionRef?: SetDynamicallySelectedTimeScaleFunctionRef;
 }
 
 export const useTimeScaleTool = (inProps: TimeScaleToolProps) => {
   const props = useThemeProps({ props: inProps, name: 'MuiTimeScaleTool' });
   const {
-    selectedTimeScale,
+    selectedTimeScale: selectedTimeScaleProp,
     supportedTimeScales = [...timeScaleOptions],
     label = 'Timescale',
     wrapStartDatePickerNode,
@@ -114,9 +125,21 @@ export const useTimeScaleTool = (inProps: TimeScaleToolProps) => {
     maxDate,
     startDateRef,
     endDateRef,
+    setDynamicallySelectedTimeScaleFunctionRef,
   } = props;
   const shouldOpenFromDatePickerRef = useRef(false);
   const { palette } = useTheme();
+
+  const [dynamicallySelectedTimeScale, setDynamicallySelectedTimeScale] =
+    useState(selectedTimeScaleProp);
+
+  if (setDynamicallySelectedTimeScaleFunctionRef) {
+    setDynamicallySelectedTimeScaleFunctionRef.current =
+      setDynamicallySelectedTimeScale;
+  }
+
+  const selectedTimeScale =
+    selectedTimeScaleProp ?? dynamicallySelectedTimeScale;
 
   const startDate = (() => {
     if (startDateString) {
