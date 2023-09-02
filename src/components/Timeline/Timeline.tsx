@@ -60,6 +60,7 @@ import {
   ScrollTimelineToolsProps,
   SelectCustomDatesTimeScaleCallbackFunction,
   SelectTimeScaleCallbackFunction,
+  SetDynamicallySelectedTimeScaleFunctionRef,
   TimeScaleToolProps,
   useScrollTimelineTools,
   useTimeScaleTool,
@@ -375,6 +376,8 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
    * list and highlight the elements in the list.
    */
   newTimelineElementIds?: string[];
+
+  setDynamicallySelectedTimeScaleFunctionRef?: SetDynamicallySelectedTimeScaleFunctionRef;
 }
 
 export const BaseTimeline = <RecordRow extends BaseDataRow>(
@@ -437,6 +440,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     isMasterTimeline = true,
     onChangeTimelineComputedProperties,
     newTimelineElementIds,
+    setDynamicallySelectedTimeScaleFunctionRef,
     sx,
     ...rest
   } = omit(
@@ -855,6 +859,19 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     }
     return optimalTimeScale;
   })();
+
+  useEffect(() => {
+    if (
+      selectedTimeScale === optimalTimeScale &&
+      setDynamicallySelectedTimeScaleFunctionRef?.current
+    ) {
+      setDynamicallySelectedTimeScaleFunctionRef.current(optimalTimeScale);
+    }
+  }, [
+    optimalTimeScale,
+    selectedTimeScale,
+    setDynamicallySelectedTimeScaleFunctionRef,
+  ]);
 
   /**
    * A function to adjust the visual elements related to the date cursor.

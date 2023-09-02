@@ -100,6 +100,7 @@ import Timeline, {
   ScrollToDateFunction,
   SelectCustomDatesTimeScaleCallbackFunction,
   SelectTimeScaleCallbackFunction,
+  SetDynamicallySelectedTimeScaleFunctionRef,
   TimeScaleOption,
   TimelineProps,
   timelineSearchParamValidationSpec,
@@ -1926,6 +1927,8 @@ const BaseRecordsExplorer = <
   const currentDateAtStartRef = useRef<Date | null>(null);
   const currentDateAtCenterRef = useRef<Date | null>(null);
   const currentDateAtEndRef = useRef<Date | null>(null);
+  const setDynamicallySelectedTimeScaleFunctionRef: SetDynamicallySelectedTimeScaleFunctionRef =
+    useRef();
 
   const timelineView = views?.find(({ type }) => type === 'Timeline') as
     | TimelineView<RecordRow>
@@ -1953,6 +1956,7 @@ const BaseRecordsExplorer = <
     selectedCustomDates: customDateRange,
     startDateRef: currentDateAtStartRef,
     endDateRef: currentDateAtEndRef,
+    setDynamicallySelectedTimeScaleFunctionRef,
   });
 
   const scrollTimelineTools = useScrollTimelineTools({
@@ -2014,6 +2018,7 @@ const BaseRecordsExplorer = <
           }
           return {
             onChangeMinWidth,
+            setDynamicallySelectedTimeScaleFunctionRef,
             ...selectedViewProps,
             ...TimelineViewProps,
             ...viewProps,
