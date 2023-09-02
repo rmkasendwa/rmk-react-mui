@@ -265,7 +265,7 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
       TimeScaleMeterProps,
       | 'timeScaleRows'
       | 'timeScaleWidth'
-      | 'scrollingElement'
+      | 'scrollingAncenstorElementRef'
       | 'leftOffset'
       | 'ref'
     >
@@ -308,7 +308,9 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
   showPlaceholderWhenStaticRowIsEmpty?: boolean;
 
   /** The HTMLElement or null that is the ancestor of the scrolling element. */
-  scrollingAncenstorElement?: HTMLElement | null;
+  scrollingAncenstorElementRef?: MutableRefObject<
+    HTMLElement | null | undefined
+  >;
 
   /** The date format to be used in the timeline. */
   dateFormat?: string;
@@ -440,11 +442,12 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   } = omit(
     props,
     'parentBackgroundColor',
-    'scrollingAncenstorElement',
+    'scrollingAncenstorElementRef',
     'dateFormat'
   );
 
-  let { parentBackgroundColor, scrollingAncenstorElement, dateFormat } = props;
+  let { parentBackgroundColor, scrollingAncenstorElementRef, dateFormat } =
+    props;
 
   const classes = composeClasses(
     slots,
@@ -495,10 +498,6 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     timelineContainerElementRef.current?.querySelector(
       `.${classes.dateAtCursorMarker}>.${classes.dateAtCursorMarkerLabel}`
     ) as HTMLElement;
-  if (!scrollingAncenstorElement && timelineContainerElementRef.current) {
-    scrollingAncenstorElement =
-      timelineContainerElementRef.current?.parentElement;
-  }
 
   const todayMarkerRef = useRef<HTMLDivElement>(null);
 
@@ -537,7 +536,22 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   }, [rows]);
 
   const cancelMomentumTrackingRef = useRef<(() => void) | undefined>(undefined);
+  const localScrollingAncenstorElementRef = useRef<
+    HTMLTableElement | null | undefined
+  >(null);
+  scrollingAncenstorElementRef ??
+    (scrollingAncenstorElementRef = localScrollingAncenstorElementRef);
   //#endregion
+
+  useEffect(() => {
+    if (
+      scrollingAncenstorElementRef &&
+      !scrollingAncenstorElementRef?.current
+    ) {
+      scrollingAncenstorElementRef.current =
+        timelineContainerElementRef.current?.parentElement;
+    }
+  }, [scrollingAncenstorElementRef]);
 
   const { palette, breakpoints } = useTheme();
   const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
@@ -570,8 +584,8 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   });
 
   useDragToScroll({
-    targetElement: timelineContainerElementRef.current,
-    scrollableElement: scrollingAncenstorElement,
+    targetElementRef: timelineContainerElementRef,
+    scrollableElementRef: scrollingAncenstorElementRef,
     ...DragToScrollPropsRest,
     cancelMomentumTrackingRef,
   });
@@ -633,6 +647,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
             timelineDifferenceInHours: number;
           }
     ): TimeScaleOption => {
+      const scrollingAncenstorElement = scrollingAncenstorElementRef?.current;
       const timelineDifferenceInDays = (() => {
         if ('timelineDifferenceInDays' in options) {
           return options.timelineDifferenceInDays;
@@ -684,7 +699,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       }
       return '5 year'; // If none of the conditions match, the ideal optimal time scale is set to '5 year'.
     },
-    [scrollingAncenstorElement?.offsetWidth, timelineViewPortLeftOffset]
+    [scrollingAncenstorElementRef, timelineViewPortLeftOffset]
   );
   const getIdealOptimalTimeScaleRef = useRef(getIdealOptimalTimeScale);
   getIdealOptimalTimeScaleRef.current = getIdealOptimalTimeScale;
@@ -750,6 +765,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
    */
   const scrollToDate: ScrollToDateFunction = useCallback(
     (date, options = 'smooth') => {
+      const scrollingAncenstorElement = scrollingAncenstorElementRef?.current;
       const scrollBehaviour: ScrollBehavior = (() => {
         if (typeof options === 'string') {
           return options;
@@ -812,7 +828,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       classes.timelineMeterContainer,
       maxCalendarDate,
       minCalendarDate,
-      scrollingAncenstorElement,
+      scrollingAncenstorElementRef,
       timelineViewPortLeftOffset,
     ]
   );
@@ -962,7 +978,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       totalNumberOfHours,
       customDateRange,
       isCustomDatesSelected,
-      scrollingAncenstorElement,
+      scrollingAncenstorElementRef,
       timelineViewPortLeftOffset,
     });
 
@@ -1079,7 +1095,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                 classes.newTimelineElement
             )}
             label={timelineElementLabel}
-            {...{ scrollingAncenstorElement, percentage, offsetPercentage }}
+            {...{ scrollingAncenstorElementRef, percentage, offsetPercentage }}
             timelineContainerWidth={scaledTimeScaleWidth}
             TooltipProps={{
               title: baseTimelineElementLabel,
@@ -1117,6 +1133,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   };
 
   const updateDateAtCursor = () => {
+    const scrollingAncenstorElement = scrollingAncenstorElementRef?.current;
     if (
       lastMouseEventRef.current &&
       timelineMeterContainerElement &&
@@ -1171,13 +1188,13 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   updateDateAtCursorRef.current = updateDateAtCursor;
 
   const updateDatesAtTimelinePoints = () => {
-    const parentElement = scrollingAncenstorElement;
+    const scrollingAncenstorElement = scrollingAncenstorElementRef?.current;
     const timelineMeterContainer = scrollingAncenstorElement?.querySelector(
       `.${classes.timelineMeterContainer}`
     ) as HTMLElement;
-    if (parentElement && timelineMeterContainer) {
+    if (scrollingAncenstorElement && timelineMeterContainer) {
       const { scrollLeft, clientWidth: parentElementClientWidth } =
-        parentElement;
+        scrollingAncenstorElement;
       if (!isScrollingToTimelineCenterRef.current) {
         isTimelineScrolledRef.current = true;
       }
@@ -1243,9 +1260,10 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   const updateDatesAtTimelinePointsRef = useRef(updateDatesAtTimelinePoints);
   updateDatesAtTimelinePointsRef.current = updateDatesAtTimelinePoints;
 
-  // console.log('Rendering');
+  // console.log('Rendering Timeline');
 
   useEffect(() => {
+    const scrollingAncenstorElement = scrollingAncenstorElementRef?.current;
     if (scrollingAncenstorElement) {
       const scrollEventCallback = () => {
         updateDatesAtTimelinePointsRef.current();
@@ -1264,7 +1282,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     currentDateAtEndRefProp,
     currentDateAtStartRefProp,
     minCalendarDate,
-    scrollingAncenstorElement,
+    scrollingAncenstorElementRef,
     timelineViewPortLeftOffset,
     totalNumberOfHours,
   ]);
@@ -1319,6 +1337,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
   ]);
 
   useEffect(() => {
+    const scrollingAncenstorElement = scrollingAncenstorElementRef?.current;
     if (
       scrollingAncenstorElement &&
       newTimelineElementIdsRef.current &&
@@ -1360,12 +1379,13 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     classes.flicker,
     classes.newTimelineElement,
     rows,
-    scrollingAncenstorElement,
+    scrollingAncenstorElementRef,
     timelineViewPortLeftOffset,
   ]);
 
   //#region Track date at cursor
   useEffect(() => {
+    const scrollingAncenstorElement = scrollingAncenstorElementRef?.current;
     if (scrollingAncenstorElement) {
       const mouseMoveEventCallback = (event: MouseEvent) => {
         lastMouseEventRef.current = event;
@@ -1382,7 +1402,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         );
       };
     }
-  }, [scrollingAncenstorElement]);
+  }, [scrollingAncenstorElementRef]);
   //#endregion
 
   //#region TimeScale Tool
@@ -1508,22 +1528,24 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     (jumpToOptimalTimeScaleFunctionRef.current = jumpToOptimalTimeScale);
 
   const jumpToPreviousUnitTimeScale = useCallback(() => {
+    const scrollingAncenstorElement = scrollingAncenstorElementRef?.current;
     scrollingAncenstorElement?.scrollBy({
       left: -scaledUnitTimeScaleWidth,
       behavior: 'smooth',
     });
-  }, [scrollingAncenstorElement, scaledUnitTimeScaleWidth]);
+  }, [scaledUnitTimeScaleWidth, scrollingAncenstorElementRef]);
 
   jumpToPreviousUnitTimeScaleFunctionRef &&
     (jumpToPreviousUnitTimeScaleFunctionRef.current =
       jumpToPreviousUnitTimeScale);
 
   const jumpToNextUnitTimeScale = useCallback(() => {
+    const scrollingAncenstorElement = scrollingAncenstorElementRef?.current;
     scrollingAncenstorElement?.scrollBy({
       left: scaledUnitTimeScaleWidth,
       behavior: 'smooth',
     });
-  }, [scrollingAncenstorElement, scaledUnitTimeScaleWidth]);
+  }, [scaledUnitTimeScaleWidth, scrollingAncenstorElementRef]);
 
   jumpToNextUnitTimeScaleFunctionRef &&
     (jumpToNextUnitTimeScaleFunctionRef.current = jumpToNextUnitTimeScale);
@@ -1564,7 +1586,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
             {...TimeScaleMeterPropsRest}
             timeScaleRows={timeScaleRows}
             timeScaleWidth={scaledTimeScaleWidth}
-            scrollingElement={scrollingAncenstorElement}
+            scrollingAncenstorElementRef={scrollingAncenstorElementRef}
             leftOffset={timelineViewPortLeftOffset}
             variant={TimeScaleMeterPropsVariant}
             sx={{

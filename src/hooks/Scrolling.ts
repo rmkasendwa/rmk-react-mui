@@ -7,13 +7,13 @@ export interface DragToScrollProps {
   /**
    * The element to which the drag-to-scroll functionality is applied.
    */
-  targetElement?: HTMLElement | null;
+  targetElementRef?: MutableRefObject<HTMLElement | null | undefined>;
 
   /**
    * The scrollable element where the content should be scrolled.
    * If not provided, the targetElement will be used as the scrollable element.
    */
-  scrollableElement?: HTMLElement | null;
+  scrollableElementRef?: MutableRefObject<HTMLElement | null | undefined>;
 
   /**
    * Flag to enable or disable the drag-to-scroll functionality.
@@ -30,8 +30,8 @@ export interface DragToScrollProps {
  * @param props The properties for the useDragToScroll hook.
  */
 export const useDragToScroll = ({
-  targetElement,
-  scrollableElement = targetElement,
+  targetElementRef,
+  scrollableElementRef,
   enableDragToScroll = true,
   cancelMomentumTrackingRef: cancelMomentumTrackingRefProp,
 }: DragToScrollProps) => {
@@ -69,6 +69,8 @@ export const useDragToScroll = ({
 
   // Function to handle the momentum animation loop
   const momentumLoop = () => {
+    const scrollableElement =
+      scrollableElementRef?.current || targetElementRef?.current;
     if (scrollableElement) {
       scrollableElement.scrollLeft += velXRef.current;
       scrollableElement.scrollTop += velYRef.current;
@@ -84,6 +86,9 @@ export const useDragToScroll = ({
   //#endregion
 
   useEffect(() => {
+    const scrollableElement =
+      scrollableElementRef?.current || targetElementRef?.current;
+    const targetElement = targetElementRef?.current;
     if (enableDragToScroll && targetElement && scrollableElement) {
       // Function to handle the mouse down event
       const mouseDownEventCallback = (event: MouseEvent) => {
@@ -158,5 +163,5 @@ export const useDragToScroll = ({
       };
       //#endregion
     }
-  }, [enableDragToScroll, scrollableElement, targetElement]);
+  }, [enableDragToScroll, scrollableElementRef, targetElementRef]);
 };

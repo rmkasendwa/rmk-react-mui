@@ -1437,7 +1437,10 @@ const BaseRecordsExplorer = <
     },
     {
       revalidationKey,
-      loadOnMount: renderExplorerElement,
+      loadOnMount: Boolean(
+        renderExplorerElement &&
+          (recordsFinder || selectedDataPreset?.recordsFinder)
+      ),
       refreshInterval,
       ...PaginatedRecordsOptions,
     }
@@ -1673,6 +1676,7 @@ const BaseRecordsExplorer = <
     },
     {
       revalidationKey: selectedRecordId,
+      loadOnMount: Boolean(recordDetailsFinder && selectedRecordId),
     }
   );
 
@@ -1894,9 +1898,11 @@ const BaseRecordsExplorer = <
   });
 
   const deleteFunctionRef = useRef((record: RecordRow) => {
-    console.log({ record });
+    record;
     // TODO: Implement Delete function
   });
+
+  // console.log('Rendering Records Explorer...');
 
   const isEditable = Boolean(recordEditor || pathToEdit || getPathToEdit);
   const isDeletable = Boolean(recordDeletor);

@@ -6,7 +6,7 @@ import differenceInHours from 'date-fns/differenceInHours';
 import formatDate from 'date-fns/format';
 import getDaysInMonth from 'date-fns/getDaysInMonth';
 import { uniqueId } from 'lodash';
-import { useEffect, useMemo, useState } from 'react';
+import { MutableRefObject, useEffect, useMemo, useState } from 'react';
 
 import {
   TimeScaleConfiguration,
@@ -29,7 +29,9 @@ export interface TimeScaleConfigurationProps {
   timelineYears: number[];
   totalNumberOfDays: number;
   totalNumberOfHours: number;
-  scrollingAncenstorElement?: HTMLElement | null;
+  scrollingAncenstorElementRef?: MutableRefObject<
+    HTMLElement | null | undefined
+  >;
   timelineViewPortLeftOffset: number;
 }
 export const useTimeScaleMeterConfiguration = ({
@@ -42,15 +44,16 @@ export const useTimeScaleMeterConfiguration = ({
   customDateRange,
   isCustomDatesSelected,
   timelineViewPortLeftOffset,
-  scrollingAncenstorElement,
+  scrollingAncenstorElementRef,
 }: TimeScaleConfigurationProps) => {
   const { palette } = useTheme();
   const [
     scrollingAncenstorElementClientWidth,
     setScrollingAncenstorElementClientWidth,
-  ] = useState(scrollingAncenstorElement?.clientWidth);
+  ] = useState(scrollingAncenstorElementRef?.current?.clientWidth);
 
   useEffect(() => {
+    const scrollingAncenstorElement = scrollingAncenstorElementRef?.current;
     if (scrollingAncenstorElement) {
       const observer = new ResizeObserver(() => {
         setScrollingAncenstorElementClientWidth(
@@ -62,7 +65,7 @@ export const useTimeScaleMeterConfiguration = ({
         observer.disconnect();
       };
     }
-  }, [scrollingAncenstorElement]);
+  }, [scrollingAncenstorElementRef]);
 
   return useMemo(() => {
     const {
