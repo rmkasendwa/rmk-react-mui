@@ -492,14 +492,6 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     undefined
   );
   const timelineContainerElementRef = useRef<HTMLTableElement | null>(null);
-  const timelineMeterContainerElement =
-    timelineContainerElementRef.current?.querySelector(
-      `.${classes.timelineMeterContainer}`
-    ) as HTMLElement;
-  const dateAtCursorMarkerLabelElement =
-    timelineContainerElementRef.current?.querySelector(
-      `.${classes.dateAtCursorMarker}>.${classes.dateAtCursorMarkerLabel}`
-    ) as HTMLElement;
 
   const todayMarkerRef = useRef<HTMLDivElement>(null);
 
@@ -596,9 +588,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
 
   dateFormat || (dateFormat = globalDateTimeFormat);
 
-  /**
-   * Memoized calculation of various timeline-related values and properties.
-   */
+  //#region Memoized calculation of various timeline-related values and properties.
   const timelineDataComputedProperties = useTimelineDataComputedProperties({
     rows,
     endDateProperty,
@@ -607,6 +597,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     maxDate: maxDateProp,
     getTimelineDates,
   });
+  //#endregion
 
   const {
     minCalendarDate,
@@ -719,11 +710,8 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     });
   }, [allDates.length, timelineDifferenceInDays, timelineDifferenceInHours]);
 
-  /**
-   * Calculates the final optimal time scale for the timeline based on the ideal optimal time scale and supported time scales.
-   */
+  //#region Find fallback time scale if ideal timescale is not supported
   const optimalTimeScale = (() => {
-    // If the ideal optimal time scale is not supported, choose the nearest supported time scale.
     if (!supportedTimeScalesRef.current.includes(idealOptimalTimeScale)) {
       const lastSupportedTimeScale =
         supportedTimeScalesRef.current[
@@ -737,8 +725,9 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       }
       return supportedTimeScalesRef.current[0];
     }
-    return idealOptimalTimeScale; // If the ideal optimal time scale is supported, use it as the final optimal time scale.
+    return idealOptimalTimeScale;
   })();
+  //#endregion
 
   const getDateAtPercentage = useCallback(
     (percentage: number) => {
@@ -1030,11 +1019,18 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
 
   const updateDateAtCursor = () => {
     const scrollingAncenstorElement = scrollingAncenstorElementRef?.current;
+    const timelineMeterContainerElement =
+      timelineContainerElementRef.current?.querySelector(
+        `.${classes.timelineMeterContainer}`
+      ) as HTMLElement;
+    const dateAtCursorMarkerLabelElement =
+      timelineContainerElementRef.current?.querySelector(
+        `.${classes.dateAtCursorMarker}>.${classes.dateAtCursorMarkerLabel}`
+      ) as HTMLElement;
     if (
       lastMouseEventRef.current &&
       timelineMeterContainerElement &&
       scrollingAncenstorElement &&
-      timelineContainerElementRef.current &&
       dateAtCursorMarkerLabelElement
     ) {
       const event = lastMouseEventRef.current;
@@ -1151,18 +1147,10 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         );
       }
       updateDateAtCursorRef.current();
-
-      // console.log({
-      //   start: currentDateAtStartRef.current,
-      //   center: currentDateAtCenterRef.current,
-      //   end: currentDateAtEndRef.current,
-      // });
     }
   };
   const updateDatesAtTimelinePointsRef = useRef(updateDatesAtTimelinePoints);
   updateDatesAtTimelinePointsRef.current = updateDatesAtTimelinePoints;
-
-  // console.log('Rendering Timeline');
 
   useEffect(() => {
     const scrollingAncenstorElement = scrollingAncenstorElementRef?.current;
@@ -1178,16 +1166,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         );
       };
     }
-  }, [
-    classes.timelineMeterContainer,
-    currentDateAtCenterRefProp,
-    currentDateAtEndRefProp,
-    currentDateAtStartRefProp,
-    minCalendarDate,
-    scrollingAncenstorElementRef,
-    timelineViewPortLeftOffset,
-    totalNumberOfHours,
-  ]);
+  }, [scrollingAncenstorElementRef]);
 
   useEffect(() => {
     if (isMasterTimeline && timelineContainerElementRef.current) {
