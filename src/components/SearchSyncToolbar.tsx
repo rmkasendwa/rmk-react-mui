@@ -674,14 +674,15 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
     updateCollapsedWidthToolIndexRef.current = updateCollapsedWidthToolIndex;
 
     useEffect(() => {
-      let anchorElementObserver: ResizeObserver;
+      let anchorElementResizeObserver: ResizeObserver;
+      let anchorElementMutationObserver: MutationObserver;
       let anchorElement: HTMLDivElement;
       let gridElement: HTMLDivElement;
-      let toolsContainerElementObserver: ResizeObserver;
+      let toolsContainerElementMutationObserver: MutationObserver;
       let toolsContainerElement: HTMLDivElement;
       if (toolsContainerElementRef.current) {
         toolsContainerElement = toolsContainerElementRef.current;
-        toolsContainerElementObserver = new ResizeObserver(() => {
+        toolsContainerElementMutationObserver = new MutationObserver(() => {
           toolsContainerElement
             .querySelectorAll(`.${classes.fullWidthToolWrapper}`)
             .forEach((element, index) => {
@@ -699,24 +700,34 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
               actualToolsWidthsRef.current.set(index, actualToolsWidthsItem);
             });
         });
-        toolsContainerElementObserver.observe(toolsContainerElement);
+        toolsContainerElementMutationObserver.observe(toolsContainerElement, {
+          childList: true,
+          subtree: true,
+        });
       }
       if (anchorElementRef.current?.firstChild) {
         anchorElement = anchorElementRef.current;
         gridElement = anchorElement.firstChild as HTMLDivElement;
-        anchorElementObserver = new ResizeObserver(() => {
+        anchorElementResizeObserver = new ResizeObserver(() => {
           updateCollapsedWidthToolIndexRef.current(anchorElement);
         });
-        anchorElementObserver.observe(gridElement);
+        anchorElementResizeObserver.observe(gridElement);
+
+        anchorElementMutationObserver = new MutationObserver(() => {
+          updateCollapsedWidthToolIndexRef.current(anchorElement);
+        });
+        anchorElementMutationObserver.observe(gridElement, {
+          childList: true,
+          subtree: true,
+        });
       }
       return () => {
-        if (anchorElementObserver && gridElement) {
-          anchorElementObserver.unobserve(gridElement);
-          anchorElementObserver.disconnect();
+        if (anchorElementResizeObserver && gridElement) {
+          anchorElementResizeObserver.disconnect();
+          anchorElementMutationObserver.disconnect();
         }
-        if (toolsContainerElementObserver && toolsContainerElement) {
-          toolsContainerElementObserver.unobserve(toolsContainerElement);
-          toolsContainerElementObserver.disconnect();
+        if (toolsContainerElementMutationObserver && toolsContainerElement) {
+          toolsContainerElementMutationObserver.disconnect();
         }
       };
     }, [classes.fullWidthToolWrapper]);
@@ -779,6 +790,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
             alignItems: 'center',
             columnGap: collapsedWidthToolIndex < tools.length ? 1 : 0.5,
             flexWrap: 'nowrap',
+            whiteSpace: 'nowrap',
           }}
         >
           {(() => {

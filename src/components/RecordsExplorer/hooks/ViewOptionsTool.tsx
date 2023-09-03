@@ -193,8 +193,16 @@ export const useViewOptionsTool = <ViewType extends string = string>(
                         <Grid item sx={{ display: 'flex' }}>
                           {icon}
                         </Grid>
-                        <Grid item xs>
-                          <Typography variant="body2">{label}</Typography>
+                        <Grid
+                          item
+                          xs
+                          sx={{
+                            minWidth: 0,
+                          }}
+                        >
+                          <Typography variant="body2" noWrap>
+                            {label}
+                          </Typography>
                         </Grid>
                       </Grid>
                     </Button>
