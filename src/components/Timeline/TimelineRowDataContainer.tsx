@@ -212,13 +212,17 @@ export const TimelineRowDataContainer = forwardRef<
       const timelineElementToRender = timelineElementsToRender.shift()!;
       const valueStartDate = (() => {
         if (timelineElementToRender.startDate) {
-          return new Date(timelineElementToRender.startDate);
+          return createDateWithoutTimezoneOffset(
+            timelineElementToRender.startDate
+          );
         }
         return addYears(new Date(), -1000);
       })();
       const valueEndDate = (() => {
         if (timelineElementToRender.endDate) {
-          return new Date(timelineElementToRender.endDate);
+          return createDateWithoutTimezoneOffset(
+            timelineElementToRender.endDate
+          );
         }
         return addYears(new Date(), 1000);
       })();

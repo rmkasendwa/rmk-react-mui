@@ -7,6 +7,7 @@ import {
   ComponentsVariants,
   Grid,
   GridProps,
+  alpha,
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
   generateUtilityClasses,
@@ -217,6 +218,7 @@ export const TimelineRowDataNavigationButtonsContainer = forwardRef<
           p: 0,
           borderColor: palette.divider,
           display: 'none',
+          bgcolor: alpha(palette.background.paper, 0.3),
           '&:hover': {
             bgcolor: palette.primary.main,
             color: palette.getContrastText(palette.primary.main),
