@@ -217,9 +217,7 @@ export const TimelineRowDataNavigationButtonsContainer = forwardRef<
           p: 0,
           borderColor: palette.divider,
           display: 'none',
-          opacity: 0.5,
           '&:hover': {
-            opacity: 1,
             bgcolor: palette.primary.main,
             color: palette.getContrastText(palette.primary.main),
           },
