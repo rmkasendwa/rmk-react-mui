@@ -1903,8 +1903,6 @@ const BaseRecordsExplorer = <
     // TODO: Implement Delete function
   });
 
-  // console.log('Rendering Records Explorer...');
-
   const isEditable = Boolean(recordEditor || pathToEdit || getPathToEdit);
   const isDeletable = Boolean(recordDeletor);
 
