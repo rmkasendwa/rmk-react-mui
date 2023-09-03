@@ -1,13 +1,6 @@
 import { getMemorySize } from '@infinite-debugger/rmk-utils/data';
 import StorageManager from '@infinite-debugger/rmk-utils/StorageManager';
-import {
-  FC,
-  ReactNode,
-  createContext,
-  useCallback,
-  useContext,
-  useState,
-} from 'react';
+import { FC, ReactNode, createContext, useCallback, useContext } from 'react';
 
 const CACHED_DATA_PREFIX = 'cached-data';
 const MAX_DATA_MEMORY_SIZE = 15 * 1024; // 15KB
@@ -89,21 +82,18 @@ export interface LocalStorageDataProviderProps {
 export const LocalStorageDataProvider: FC<LocalStorageDataProviderProps> = ({
   children,
 }) => {
-  const [data, setData] = useState(baseData);
-
   const updateLocalData = useCallback((data: Record<string, any>) => {
-    setData({ ...updateData(data) });
+    updateData(data);
   }, []);
 
   const localReset = useCallback(() => {
     reset();
-    setData({ ...baseData });
   }, []);
 
   return (
     <LocalStorageDataContext.Provider
       value={{
-        data,
+        data: baseData,
         updateData: updateLocalData,
         reset: localReset,
       }}
