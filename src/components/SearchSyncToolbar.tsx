@@ -756,15 +756,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
 
     return (
       <Box
-        ref={mergeRefs([
-          (anchorElement: HTMLDivElement | null) => {
-            if (anchorElement) {
-              updateCollapsedWidthToolIndex(anchorElement);
-            }
-          },
-          anchorElementRef,
-          ref,
-        ])}
+        ref={mergeRefs([anchorElementRef, ref])}
         {...rest}
         className={clsx(classes.root)}
         sx={{

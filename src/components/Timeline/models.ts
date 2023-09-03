@@ -70,10 +70,30 @@ export const timelineSearchParamValidationSpec = {
 };
 
 export type ScrollToDateFunctionOptions = {
+  /**
+   * The scroll behaviour to use when scrolling to the date.
+   */
   scrollBehaviour?: ScrollBehavior;
+
+  /**
+   * The alignment of the date in the timeline. This is used to anchor the date in the timeline when scrolling to it.
+   *
+   * @default 'center'
+   */
   dateAlignment?: 'start' | 'center' | 'end';
+
+  /**
+   * The offset in pixels to apply to the scroll position when scrolling to the date.
+   */
+  scrollOffset?: number;
 };
 
+/**
+ * A function that scrolls the timeline to the specified date.
+ *
+ * @param date The date to scroll to.
+ * @param scrollBehaviour The scroll behaviour to use when scrolling to the date or an object containing additional options.
+ */
 export type ScrollToDateFunction = (
   date: Date | number | string,
   scrollBehaviour?: ScrollBehavior | ScrollToDateFunctionOptions

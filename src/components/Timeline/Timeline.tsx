@@ -772,7 +772,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           }
           return 'smooth';
         })();
-        const { dateAlignment = 'center' } =
+        const { dateAlignment = 'center', scrollOffset = 0 } =
           ((): ScrollToDateFunctionOptions => {
             if (typeof options === 'string') {
               return {};
@@ -800,7 +800,8 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
           const { clientWidth: scrollingAncenstorElementOffsetWidth } =
             scrollingAncenstorElement;
           const { clientWidth } = timelineMeterContainerContainer;
-          let dateScrollLeftPosition = clientWidth * offsetPercentage;
+          let dateScrollLeftPosition =
+            clientWidth * offsetPercentage + scrollOffset;
           switch (dateAlignment) {
             case 'center':
               dateScrollLeftPosition -=
