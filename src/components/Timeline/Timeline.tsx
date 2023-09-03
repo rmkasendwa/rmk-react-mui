@@ -664,7 +664,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
 
       // Calculate the width of the timeline viewport.
       const timelineViewPortWidth =
-        (scrollingAncenstorElement?.offsetWidth || window.innerWidth) -
+        (scrollingAncenstorElement?.clientWidth || window.innerWidth) -
         timelineViewPortLeftOffset;
 
       // Determine the ideal optimal time scale based on the timeline's data and viewport width.
@@ -1037,7 +1037,8 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       dateAtCursorMarkerLabelElement
     ) {
       const event = lastMouseEventRef.current;
-      const { offsetWidth } = timelineMeterContainerElement;
+      const { clientWidth: timelineMeterContainerElementClientWidth } =
+        timelineMeterContainerElement;
       const { left } = scrollingAncenstorElement!.getBoundingClientRect();
       const { clientX } = event;
       const localX = clientX - left;
@@ -1047,9 +1048,11 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         scrollingAncenstorElement!.scrollLeft;
 
       timelineX > 0 || (timelineX = 0);
-      timelineX < offsetWidth || (timelineX = offsetWidth);
+      timelineX < timelineMeterContainerElementClientWidth ||
+        (timelineX = timelineMeterContainerElementClientWidth);
 
-      const percentageAtMousePosition = timelineX / offsetWidth;
+      const percentageAtMousePosition =
+        timelineX / timelineMeterContainerElementClientWidth;
       const dateAtMousePosition = getDateAtPercentageRef.current(
         percentageAtMousePosition
       );
@@ -1062,10 +1065,11 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         dateAtMousePosition,
         dateFormat!
       );
-      const { clientWidth } = scrollingAncenstorElement!;
+      const { clientWidth: scrollingAncenstorElementClientWidth } =
+        scrollingAncenstorElement!;
       if (
-        clientWidth - localX <
-        (clientWidth - timelineViewPortLeftOffset) / 2
+        scrollingAncenstorElementClientWidth - localX <
+        (scrollingAncenstorElementClientWidth - timelineViewPortLeftOffset) / 2
       ) {
         dateAtCursorMarkerLabelElement.style.right = '100%';
         dateAtCursorMarkerLabelElement.style.left = '';
@@ -1094,9 +1098,9 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         isTimelineScrolledRef.current = true;
       }
       isScrollingToTimelineCenterRef.current = false;
-      const { offsetWidth } = timelineMeterContainer;
+      const { clientWidth } = timelineMeterContainer;
 
-      const startX = scrollLeft / offsetWidth;
+      const startX = scrollLeft / clientWidth;
       currentDateAtStartPositionLeftOffsetRef.current = startX;
       const dateAtStart = addHours(
         minCalendarDate,
@@ -1118,7 +1122,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       const centerX =
         (scrollLeft +
           (parentElementClientWidth - timelineViewPortLeftOffset) / 2) /
-        offsetWidth;
+        clientWidth;
       const dateAtCenter = addHours(
         minCalendarDate,
         totalNumberOfHours * centerX
@@ -1130,7 +1134,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
 
       const endX =
         (scrollLeft + parentElementClientWidth - timelineViewPortLeftOffset) /
-        offsetWidth;
+        clientWidth;
       currentDateAtEndPositionLeftOffsetRef.current = endX;
       const dateAtEnd = addHours(minCalendarDate, totalNumberOfHours * endX);
       currentDateAtEndRef.current = dateAtEnd;
