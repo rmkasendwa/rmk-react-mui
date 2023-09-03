@@ -28,6 +28,7 @@ import { TimelineElement as TimelineElementType } from './models';
 import TimelineElement from './TimelineElement';
 import TimelineRowDataNavigationButtonsContainer, {
   TimelineRowDataNavigationButtonsContainerProps,
+  timelineRowDataNavigationButtonsContainerClasses,
 } from './TimelineRowDataNavigationButtonsContainer';
 
 export interface TimelineRowDataContainerClasses {
@@ -278,6 +279,13 @@ export const TimelineRowDataContainer = forwardRef<
             sx={{
               position: 'relative',
               height: 42,
+              [`.${timelineRowDataNavigationButtonsContainerClasses.root}`]: {
+                opacity: 0.5,
+              },
+              [`&:hover .${timelineRowDataNavigationButtonsContainerClasses.root}`]:
+                {
+                  opacity: 1,
+                },
             }}
           >
             <TimelineRowDataNavigationButtonsContainer

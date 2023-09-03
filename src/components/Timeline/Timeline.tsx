@@ -760,7 +760,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
 
   const scrollToDate: ScrollToDateFunction = useCallback(
     (inDate, options = 'smooth') => {
-      const date = new Date(inDate);
+      const date = createDateWithoutTimezoneOffset(inDate);
       if (!isNaN(date.getTime())) {
         const scrollingAncenstorElement = scrollingAncenstorElementRef?.current;
         const scrollBehaviour: ScrollBehavior = (() => {
