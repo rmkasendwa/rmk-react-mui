@@ -226,7 +226,12 @@ export const TimelineRowDataNavigationButtonsContainer = forwardRef<
         },
       }}
     >
-      <Grid item>
+      <Grid
+        item
+        sx={{
+          display: 'flex',
+        }}
+      >
         <Button
           ref={leftButtonElementRef}
           className={clsx(
@@ -273,7 +278,12 @@ export const TimelineRowDataNavigationButtonsContainer = forwardRef<
         </Button>
       </Grid>
       <Grid item xs />
-      <Grid item>
+      <Grid
+        item
+        sx={{
+          display: 'flex',
+        }}
+      >
         <Button
           ref={rightButtonElementRef}
           className={clsx(
