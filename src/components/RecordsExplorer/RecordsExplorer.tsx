@@ -31,6 +31,7 @@ import hashIt from 'hash-it';
 import { omit, result } from 'lodash';
 import { singular } from 'pluralize';
 import {
+  MutableRefObject,
   ReactElement,
   ReactNode,
   Ref,
@@ -283,6 +284,15 @@ export type RecordsExplorerFunctionEditorForm<
   }
 >;
 
+/**
+ * Adds search params to path.
+ *
+ * @param pathName The path to add search params to.
+ */
+export type AddRecordsExplorerSearchParamsToPathFunction = (
+  pathName: string
+) => string;
+
 export type RecordsFinder<RecordRow extends BaseDataRow = BaseDataRow> = (
   options: PaginatedRecordsFinderOptions
 ) => Promise<PaginatedResponseData<RecordRow> | RecordRow[]>;
@@ -434,6 +444,7 @@ export interface RecordsExplorerProps<
   description?: ReactNode;
   recordsFinder?: RecordsFinder<RecordRow>;
   getRecordLoadFunction?: (loadFunction: () => void) => void;
+  selectedRecordId?: string;
   recordDetailsFinder?: (
     selectedRecordId: string,
     cacheableDataFinderOptions: CacheableDataFinderOptions
@@ -509,6 +520,9 @@ export interface RecordsExplorerProps<
   enableViewSelectedRecordModalPopup?: boolean;
   resetToDefaultView?: () => void;
   showModalForm?: boolean;
+  addSearchParamsToPathRef?: MutableRefObject<
+    AddRecordsExplorerSearchParamsToPathFunction | undefined
+  >;
 }
 
 const BaseRecordsExplorer = <
@@ -620,6 +634,8 @@ const BaseRecordsExplorer = <
     resetToDefaultView: resetToDefaultViewProp,
     onChangeMinWidth,
     showModalForm = true,
+    selectedRecordId: selectedRecordIdProp,
+    addSearchParamsToPathRef,
     ...rest
   } = omit(
     props,
@@ -1158,6 +1174,12 @@ const BaseRecordsExplorer = <
       clearSearchStateOnUnmount,
     });
 
+  if (addSearchParamsToPathRef) {
+    addSearchParamsToPathRef.current = (pathName) => {
+      return addSearchParamsToPath(pathName);
+    };
+  }
+
   const {
     view: searchParamView,
     groupBy: searchParamGroupBy,
@@ -1169,7 +1191,7 @@ const BaseRecordsExplorer = <
     expandedGroupsInverted: searchParamExpandedGroupsInverted,
     modifiedKeys: modifiedStateKeys,
     createNewRecord: searchParamCreateNewRecord,
-    selectedRecord: selectedRecordId,
+    selectedRecord: searchParamSelectedRecordId,
     editRecord,
     selectedDataPreset: searchParamSelectedDataPreset,
     timeScale: searchParamsSelectedTimeScale,
@@ -1659,6 +1681,8 @@ const BaseRecordsExplorer = <
     errorMessage: createErrorMessage,
     reset: resetCreation,
   } = useCreate(recordCreator!);
+
+  const selectedRecordId = selectedRecordIdProp || searchParamSelectedRecordId;
 
   const {
     load: loadRecordDetails,
