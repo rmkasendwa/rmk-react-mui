@@ -30,7 +30,7 @@ export type AddSearchParamsToPathOptions = {
 
 export type AddSearchParamsToPath<SearchParams = BaseSearchParams> = (
   pathname: string,
-  searchParams: SearchParams,
+  searchParams?: SearchParams,
   options?: AddSearchParamsToPathOptions
 ) => string;
 
@@ -244,7 +244,7 @@ export function useReactRouterDOMSearchParams<
   const addSearchParamsToPath = useCallback<AddSearchParamsToPath>(
     (
       pathname,
-      searchParams,
+      searchParams = {},
       { ignoreUnspecifiedParams = ignoreUnspecifiedParamsProp } = {}
     ) => {
       return addSearchParams(
