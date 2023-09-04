@@ -407,8 +407,8 @@ export const TableBodyColumn = forwardRef<any, TableBodyColumnProps<any>>(
             opaque && classes.opaque,
           ])}
           onClick={(event) => {
-            onClickColumn && onClickColumn(row, column);
-            onClick && onClick(event);
+            onClickColumn?.(row, column);
+            onClick?.(event);
           }}
           sx={{
             py: 1,

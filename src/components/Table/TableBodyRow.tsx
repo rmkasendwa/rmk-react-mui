@@ -24,6 +24,7 @@ import clsx from 'clsx';
 import { result } from 'lodash';
 import { useRef } from 'react';
 
+import { isElementInteractive } from '../../utils/html';
 import {
   BaseDataRow,
   DEFAULT_GROUP_LABEL,
@@ -317,8 +318,12 @@ export const TableBodyRow = <T extends BaseDataRow>(
           isGroupHeader && classes.groupHeaderRow
         )}
         container
-        onClick={() => {
-          if (isClickable && onClickRow) {
+        onClick={(event) => {
+          if (
+            isClickable &&
+            onClickRow &&
+            !isElementInteractive(event.target as HTMLElement)
+          ) {
             onClickRow(row);
           }
         }}
@@ -355,10 +360,11 @@ export const TableBodyRow = <T extends BaseDataRow>(
               opaque: opaque ?? rowPropsOpaque,
             }}
             {...column}
-            onClick={() => {
+            onClick={(event) => {
               if (
                 isClickable &&
                 onClickRow &&
+                !isElementInteractive(event.target as HTMLElement) &&
                 shouldPropagateClickToParentRowClickEvent
               ) {
                 onClickRow(row);
@@ -420,10 +426,11 @@ export const TableBodyRow = <T extends BaseDataRow>(
                   }}
                   {...ellipsisMenuToolColumn}
                   column={ellipsisMenuToolColumn}
-                  onClick={() => {
+                  onClick={(event) => {
                     if (
                       isClickable &&
                       onClickRow &&
+                      !isElementInteractive(event.target as HTMLElement) &&
                       shouldPropagateClickToParentRowClickEvent
                     ) {
                       onClickRow(row);
@@ -620,10 +627,11 @@ export const TableBodyRow = <T extends BaseDataRow>(
             }}
             opaque={opaque ?? rowPropsOpaque}
             {...column}
-            onClick={() => {
+            onClick={(event) => {
               if (
                 isClickable &&
                 onClickRow &&
+                !isElementInteractive(event.target as HTMLElement) &&
                 shouldPropagateClickToParentRowClickEvent
               ) {
                 onClickRow(row);
