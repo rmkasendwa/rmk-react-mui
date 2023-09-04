@@ -13,7 +13,7 @@ import KanbanBoard from '../components/KanbanBoard';
 import { KanbanBoardLaneProps } from '../components/KanbanBoard/KanbanBoardLane';
 
 export default {
-  title: 'Components/KanbanBoard',
+  title: 'Components/Kanban Board',
   component: KanbanBoard,
 } as Meta<typeof KanbanBoard>;
 

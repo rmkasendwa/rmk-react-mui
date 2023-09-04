@@ -16,6 +16,7 @@ import { alpha } from '@mui/system/colorManipulator';
 import clsx from 'clsx';
 import { forwardRef } from 'react';
 
+import { isElementInteractive } from '../../utils/html';
 import EllipsisMenuIconButton from '../EllipsisMenuIconButton';
 import Tooltip from '../Tooltip';
 import { useKanbanBoardContext } from './KanbanBoardContext';
@@ -112,11 +113,7 @@ export const KanbanBoardCard = forwardRef<any, KanbanBoardCardProps>(
         onClick={
           onCardClick
             ? (event: any) => {
-                if (
-                  (event.target as HTMLElement)?.classList.contains(
-                    classes.root
-                  )
-                ) {
+                if (!isElementInteractive(event.target as HTMLElement)) {
                   onCardClick(id, laneId);
                 }
               }

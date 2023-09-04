@@ -2728,7 +2728,11 @@ const BaseRecordsExplorer = <
                 }
                 resetCreation();
                 if (defaultPath) {
-                  navigate(defaultPath);
+                  navigate(
+                    addSearchParamsToPath(defaultPath, {
+                      createNewRecord: null,
+                    })
+                  );
                 } else {
                   setSearchParams({
                     createNewRecord: null,
@@ -2766,6 +2770,10 @@ const BaseRecordsExplorer = <
                 load: loadRecordDetails,
                 locked: !editRecord,
               };
+              const viewModalProps = {
+                ...ViewModalFormPropsRest,
+                ...modalFormProps,
+              };
               return (
                 <LoadingProvider value={loadingState}>
                   <ModalForm
@@ -2796,8 +2804,7 @@ const BaseRecordsExplorer = <
                       </Grid>
                     }
                     submitButtonText={`Update ${recordLabelSingular}`}
-                    {...ViewModalFormPropsRest}
-                    {...modalFormProps}
+                    {...viewModalProps}
                     editableFields={editableFields}
                     validationSchema={editValidationSchema || validationSchema}
                     initialValues={editInitialValues || {}}
@@ -2823,7 +2830,12 @@ const BaseRecordsExplorer = <
                       resetUpdate();
                       resetSelectedRecordState();
                       if (defaultPath) {
-                        navigate(defaultPath);
+                        navigate(
+                          addSearchParamsToPath(defaultPath, {
+                            selectedRecord: null,
+                            editRecord: null,
+                          })
+                        );
                       } else {
                         setSearchParams({
                           selectedRecord: null,
@@ -2855,6 +2867,7 @@ const BaseRecordsExplorer = <
                       navigate(pathToEditRecord);
                     }}
                     viewModeTools={[
+                      ...(viewModalProps.viewModeTools || []),
                       ...(() => {
                         if (isDeletable && selectedRecord) {
                           return [

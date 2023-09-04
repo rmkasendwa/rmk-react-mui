@@ -121,7 +121,7 @@ export interface ModalFormProps<Values extends FormikValues = any>
   showEditButton?: boolean;
   showFormActionButtons?: boolean;
   showForm?: boolean;
-  viewModeTools?: ReactNode | ReactNode[];
+  viewModeTools?: ReactNode[];
   /**
    * Determines if the submit button should be locked when the user doesn't perform any changes on the form.
    */
