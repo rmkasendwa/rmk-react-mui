@@ -69,6 +69,7 @@ import {
   timelineSearchParamValidationSpec,
 } from './models';
 import TimelineRowDataContainer, {
+  TimelineRowDataContainerProps,
   timelineRowDataContainerClasses,
 } from './TimelineRowDataContainer';
 import TimeScaleMeter, {
@@ -368,6 +369,8 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
   newTimelineElementIds?: string[];
 
   setDynamicallySelectedTimeScaleFunctionRef?: SetDynamicallySelectedTimeScaleFunctionRef;
+
+  TimelineRowDataContainerProps?: Partial<TimelineRowDataContainerProps>;
 }
 
 export const BaseTimeline = <RecordRow extends BaseDataRow>(
@@ -431,6 +434,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     onChangeTimelineComputedProperties,
     newTimelineElementIds,
     setDynamicallySelectedTimeScaleFunctionRef,
+    TimelineRowDataContainerProps = {},
     sx,
     ...rest
   } = omit(
@@ -470,6 +474,8 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     ...DateAtCursorMarkerLabelPropsRest
   } = DateAtCursorMarkerLabelProps;
   const { ...DragToScrollPropsRest } = DragToScrollProps;
+  const { ...TimelineRowDataContainerPropsRest } =
+    TimelineRowDataContainerProps;
   //#endregion
 
   //#region Refs
@@ -1680,6 +1686,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         if (timelineElements && timelineElements.length > 0) {
           return (
             <TimelineRowDataContainer
+              {...TimelineRowDataContainerPropsRest}
               {...{
                 minCalendarDate,
                 maxCalendarDate,
