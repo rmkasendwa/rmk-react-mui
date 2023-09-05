@@ -15,7 +15,13 @@ import {
   useThemeProps,
 } from '@mui/material';
 import clsx from 'clsx';
-import { MutableRefObject, forwardRef, useEffect, useRef } from 'react';
+import {
+  MutableRefObject,
+  forwardRef,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { useInView } from 'react-intersection-observer';
 import { mergeRefs } from 'react-merge-refs';
 
@@ -137,58 +143,47 @@ export const TimelineRowDataNavigationButtonsContainer = forwardRef<
   const { palette } = useTheme();
   const { ref: observerRef, inView: isVisible } = useInView();
 
+  const [showLeftButton, setShowLeftButton] = useState(false);
+  const [showRightButton, setShowRightButton] = useState(false);
+
   useEffect(() => {
     const scrollingAncenstorElement = scrollingAncenstorElementRef?.current;
-    const leftButtonElement = leftButtonElementRef.current;
-    const rightButtonElement = rightButtonElementRef.current;
-    if (
-      scrollingAncenstorElement &&
-      leftButtonElement &&
-      rightButtonElement &&
-      isVisible
-    ) {
+    if (scrollingAncenstorElement && isVisible) {
       const scrollEventCallback = () => {
         if (
           currentDateAtStartPositionLeftOffsetRef != null &&
           currentDateAtEndPositionLeftOffsetRef?.current != null
         ) {
           const startPosition = currentDateAtStartPositionLeftOffsetRef.current;
+          setShowLeftButton(
+            Boolean(
+              timelineElementsRef.current.find(({ offsetPercentage }) => {
+                return (
+                  offsetPercentage != null &&
+                  startPosition != null &&
+                  offsetPercentage < startPosition
+                );
+              })
+            )
+          );
+
           const endPosition = currentDateAtEndPositionLeftOffsetRef.current;
-          const shouldShowLeftButton = Boolean(
-            timelineElementsRef.current.find(({ offsetPercentage }) => {
-              return (
-                offsetPercentage != null &&
-                startPosition != null &&
-                offsetPercentage < startPosition
-              );
-            })
+          setShowRightButton(
+            Boolean(
+              timelineElementsRef.current.find(({ offsetPercentage }) => {
+                return (
+                  offsetPercentage != null &&
+                  endPosition != null &&
+                  offsetPercentage > endPosition
+                );
+              })
+            )
           );
-          const shouldShowRightButton = Boolean(
-            timelineElementsRef.current.find(({ offsetPercentage }) => {
-              return (
-                offsetPercentage != null &&
-                endPosition != null &&
-                offsetPercentage > endPosition
-              );
-            })
-          );
-          if (shouldShowLeftButton) {
-            leftButtonElement.style.display = 'inline-flex';
-          } else {
-            leftButtonElement.style.display = 'none';
-          }
-          if (shouldShowRightButton) {
-            rightButtonElement.style.display = 'inline-flex';
-          } else {
-            rightButtonElement.style.display = 'none';
-          }
         }
       };
       scrollingAncenstorElement.addEventListener('scroll', scrollEventCallback);
       scrollEventCallback();
       return () => {
-        leftButtonElement.style.display = '';
-        rightButtonElement.style.display = '';
         scrollingAncenstorElement.removeEventListener(
           'scroll',
           scrollEventCallback
@@ -217,7 +212,6 @@ export const TimelineRowDataNavigationButtonsContainer = forwardRef<
           pointerEvents: 'auto',
           p: 0,
           borderColor: palette.divider,
-          display: 'none',
           bgcolor: alpha(palette.background.paper, 0.3),
           '&:hover': {
             bgcolor: palette.primary.main,
@@ -226,108 +220,118 @@ export const TimelineRowDataNavigationButtonsContainer = forwardRef<
         },
       }}
     >
-      <Grid
-        item
-        sx={{
-          display: 'flex',
-        }}
-      >
-        <Button
-          ref={leftButtonElementRef}
-          className={clsx(
-            classes.navigationButton,
-            classes.navigationLeftButton
-          )}
-          onClick={(event) => {
-            event.stopPropagation();
-            const startPosition =
-              currentDateAtStartPositionLeftOffsetRef.current;
-            const timelineElement = timelineElements
-              .sort(
-                (
-                  { offsetPercentage: aOffsetPercentage },
-                  { offsetPercentage: bOffsetPercentage }
-                ) => {
-                  if (aOffsetPercentage != null && bOffsetPercentage != null) {
-                    return bOffsetPercentage - aOffsetPercentage;
-                  }
-                  return 0;
-                }
-              )
-              .find(({ offsetPercentage }) => {
-                return (
-                  offsetPercentage != null &&
-                  startPosition != null &&
-                  offsetPercentage < startPosition
-                );
-              });
-            if (timelineElement?.startDate) {
-              scrollToDate(timelineElement.startDate, {
-                dateAlignment: 'start',
-              });
-            }
+      {showLeftButton ? (
+        <Grid
+          item
+          sx={{
+            display: 'flex',
           }}
-          variant="outlined"
-          color="inherit"
         >
-          <KeyboardArrowLeftIcon
-            sx={{
-              fontSize: 14,
+          <Button
+            ref={leftButtonElementRef}
+            className={clsx(
+              classes.navigationButton,
+              classes.navigationLeftButton
+            )}
+            onClick={(event) => {
+              event.stopPropagation();
+              const startPosition =
+                currentDateAtStartPositionLeftOffsetRef.current;
+              const timelineElement = timelineElements
+                .sort(
+                  (
+                    { offsetPercentage: aOffsetPercentage },
+                    { offsetPercentage: bOffsetPercentage }
+                  ) => {
+                    if (
+                      aOffsetPercentage != null &&
+                      bOffsetPercentage != null
+                    ) {
+                      return bOffsetPercentage - aOffsetPercentage;
+                    }
+                    return 0;
+                  }
+                )
+                .find(({ offsetPercentage }) => {
+                  return (
+                    offsetPercentage != null &&
+                    startPosition != null &&
+                    offsetPercentage < startPosition
+                  );
+                });
+              if (timelineElement?.startDate) {
+                scrollToDate(timelineElement.startDate, {
+                  dateAlignment: 'start',
+                });
+              }
             }}
-          />
-        </Button>
-      </Grid>
+            variant="outlined"
+            color="inherit"
+          >
+            <KeyboardArrowLeftIcon
+              sx={{
+                fontSize: 14,
+              }}
+            />
+          </Button>
+        </Grid>
+      ) : null}
       <Grid item xs />
-      <Grid
-        item
-        sx={{
-          display: 'flex',
-        }}
-      >
-        <Button
-          ref={rightButtonElementRef}
-          className={clsx(
-            classes.navigationButton,
-            classes.navigationRightButton
-          )}
-          variant="outlined"
-          color="inherit"
-          onClick={(event) => {
-            event.stopPropagation();
-            const endPosition = currentDateAtEndPositionLeftOffsetRef.current;
-            const timelineElement = timelineElements
-              .sort(
-                (
-                  { offsetPercentage: aOffsetPercentage },
-                  { offsetPercentage: bOffsetPercentage }
-                ) => {
-                  if (aOffsetPercentage != null && bOffsetPercentage != null) {
-                    return aOffsetPercentage - bOffsetPercentage;
-                  }
-                  return 0;
-                }
-              )
-              .find(({ offsetPercentage }) => {
-                return (
-                  offsetPercentage != null &&
-                  endPosition != null &&
-                  offsetPercentage > endPosition
-                );
-              });
-            if (timelineElement?.startDate) {
-              scrollToDate(timelineElement.startDate, {
-                dateAlignment: 'center',
-              });
-            }
+      {showRightButton ? (
+        <Grid
+          item
+          sx={{
+            display: 'flex',
           }}
         >
-          <KeyboardArrowRightIcon
-            sx={{
-              fontSize: 14,
+          <Button
+            ref={rightButtonElementRef}
+            className={clsx(
+              classes.navigationButton,
+              classes.navigationRightButton
+            )}
+            variant="outlined"
+            color="inherit"
+            onClick={(event) => {
+              event.stopPropagation();
+              const endPosition = currentDateAtEndPositionLeftOffsetRef.current;
+              const timelineElement = timelineElements
+                .sort(
+                  (
+                    { offsetPercentage: aOffsetPercentage },
+                    { offsetPercentage: bOffsetPercentage }
+                  ) => {
+                    if (
+                      aOffsetPercentage != null &&
+                      bOffsetPercentage != null
+                    ) {
+                      return aOffsetPercentage - bOffsetPercentage;
+                    }
+                    return 0;
+                  }
+                )
+                .find(({ offsetPercentage }) => {
+                  return (
+                    offsetPercentage != null &&
+                    endPosition != null &&
+                    offsetPercentage > endPosition
+                  );
+                });
+              if (timelineElement?.startDate) {
+                scrollToDate(timelineElement.startDate, {
+                  dateAlignment: 'center',
+                });
+              }
             }}
-          />
-        </Button>
-      </Grid>
+          >
+            <KeyboardArrowRightIcon
+              sx={{
+                fontSize: 14,
+              }}
+            />
+          </Button>
+        </Grid>
+      ) : null}
     </Grid>
   );
 });

@@ -108,10 +108,11 @@ export interface TimelineRowDataContainerProps
     HTMLElement | null | undefined
   >;
   newTimelineElementIds?: string[];
+  showNavigationButtons?: 'never' | 'always' | 'hover';
 }
 
 export const TimelineRowDataContainer = forwardRef<
-  HTMLDivElement,
+  any,
   TimelineRowDataContainerProps
 >(function TimelineRowDataContainer(inProps, ref) {
   const props = useThemeProps({
@@ -131,6 +132,7 @@ export const TimelineRowDataContainer = forwardRef<
     currentDateAtEndPositionLeftOffsetRef,
     currentDateAtStartPositionLeftOffsetRef,
     scrollToDate,
+    showNavigationButtons = 'always',
     sx,
     ...rest
   } = props;
@@ -290,19 +292,36 @@ export const TimelineRowDataContainer = forwardRef<
                 {
                   opacity: 1,
                 },
+              ...(() => {
+                switch (showNavigationButtons) {
+                  case 'hover':
+                    return {
+                      [`.${timelineRowDataNavigationButtonsContainerClasses.root}`]:
+                        {
+                          display: 'none',
+                        },
+                      [`&:hover .${timelineRowDataNavigationButtonsContainerClasses.root}`]:
+                        {
+                          display: 'flex',
+                        },
+                    };
+                }
+              })(),
             }}
           >
-            <TimelineRowDataNavigationButtonsContainer
-              className={clsx(classes.navigationButtonsContainer)}
-              {...{
-                scrollingAncenstorElementRef,
-                timelineViewPortContainerWidth,
-                timelineElements,
-                currentDateAtEndPositionLeftOffsetRef,
-                currentDateAtStartPositionLeftOffsetRef,
-                scrollToDate,
-              }}
-            />
+            {showNavigationButtons !== 'never' ? (
+              <TimelineRowDataNavigationButtonsContainer
+                className={clsx(classes.navigationButtonsContainer)}
+                {...{
+                  scrollingAncenstorElementRef,
+                  timelineViewPortContainerWidth,
+                  timelineElements,
+                  currentDateAtEndPositionLeftOffsetRef,
+                  currentDateAtStartPositionLeftOffsetRef,
+                  scrollToDate,
+                }}
+              />
+            ) : null}
             {timelineElements
               .sort(({ startDate: aStartDate }, { startDate: bStartDate }) => {
                 if (aStartDate && bStartDate) {
