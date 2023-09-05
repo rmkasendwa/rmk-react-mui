@@ -11,7 +11,6 @@ import {
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import useTheme from '@mui/material/styles/useTheme';
-import Typography from '@mui/material/Typography';
 import { alpha } from '@mui/system/colorManipulator';
 import clsx from 'clsx';
 import { forwardRef, useRef } from 'react';
@@ -19,7 +18,7 @@ import { mergeRefs } from 'react-merge-refs';
 
 import { isElementInteractive } from '../../utils/html';
 import EllipsisMenuIconButton from '../EllipsisMenuIconButton';
-import Tooltip from '../Tooltip';
+import LoadingTypography from '../LoadingTypography';
 import { useKanbanBoardContext } from './KanbanBoardContext';
 import { Card } from './models';
 
@@ -149,14 +148,12 @@ export const KanbanBoardCard = forwardRef<any, KanbanBoardCardProps>(
             {(() => {
               if (typeof title === 'string') {
                 return (
-                  <Tooltip title={title}>
-                    <Typography sx={{ fontSize: 14 }} noWrap>
-                      {title}
-                    </Typography>
-                  </Tooltip>
+                  <LoadingTypography sx={{ fontSize: 14 }} noWrap>
+                    {title}
+                  </LoadingTypography>
                 );
               }
-              return <>{title}</>;
+              return title;
             })()}
           </Grid>
           {(() => {
