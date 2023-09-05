@@ -13,7 +13,6 @@ import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
 import Grid from '@mui/material/Grid';
 import useTheme from '@mui/material/styles/useTheme';
-import Typography from '@mui/material/Typography';
 import { alpha, darken } from '@mui/system/colorManipulator';
 import clsx from 'clsx';
 import { forwardRef, useEffect, useRef } from 'react';
@@ -24,6 +23,7 @@ import {
 import scrollIntoView from 'scroll-into-view-if-needed';
 
 import EllipsisMenuIconButton from '../EllipsisMenuIconButton';
+import LoadingTypography from '../LoadingTypography';
 import RenderIfVisible from '../RenderIfVisible';
 import Tooltip from '../Tooltip';
 import KanbanBoardCard from './KanbanBoardCard';
@@ -215,14 +215,12 @@ export const KanbanBoardLane = forwardRef<any, KanbanBoardLaneProps>(
                 {(() => {
                   if (typeof title === 'string') {
                     return (
-                      <Tooltip title={title}>
-                        <Typography
-                          sx={{ fontWeight: 'bold', fontSize: 15 }}
-                          noWrap
-                        >
-                          {title}
-                        </Typography>
-                      </Tooltip>
+                      <LoadingTypography
+                        sx={{ fontWeight: 'bold', fontSize: 15 }}
+                        noWrap
+                      >
+                        {title}
+                      </LoadingTypography>
                     );
                   }
                   return <>{title}</>;
