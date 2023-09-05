@@ -14,9 +14,8 @@ import useTheme from '@mui/material/styles/useTheme';
 import Typography from '@mui/material/Typography';
 import { alpha } from '@mui/system/colorManipulator';
 import clsx from 'clsx';
-import { forwardRef, useEffect, useRef } from 'react';
+import { forwardRef, useRef } from 'react';
 import { mergeRefs } from 'react-merge-refs';
-import scrollIntoView from 'scroll-into-view-if-needed';
 
 import { isElementInteractive } from '../../utils/html';
 import EllipsisMenuIconButton from '../EllipsisMenuIconButton';
@@ -111,17 +110,6 @@ export const KanbanBoardCard = forwardRef<any, KanbanBoardCardProps>(
 
     const { palette } = useTheme();
     const { onCardClick } = useKanbanBoardContext();
-
-    useEffect(() => {
-      if (selected && cardElementRef.current) {
-        scrollIntoView(cardElementRef.current, {
-          scrollMode: 'if-needed',
-          block: 'nearest',
-          inline: 'nearest',
-          behavior: 'smooth',
-        });
-      }
-    }, [selected]);
 
     return (
       <Box

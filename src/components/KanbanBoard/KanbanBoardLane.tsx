@@ -16,11 +16,12 @@ import useTheme from '@mui/material/styles/useTheme';
 import Typography from '@mui/material/Typography';
 import { alpha, darken } from '@mui/system/colorManipulator';
 import clsx from 'clsx';
-import { forwardRef } from 'react';
+import { forwardRef, useEffect, useRef } from 'react';
 import {
   Container as BaseContainer,
   Draggable as BaseDraggable,
 } from 'react-smooth-dnd';
+import scrollIntoView from 'scroll-into-view-if-needed';
 
 import EllipsisMenuIconButton from '../EllipsisMenuIconButton';
 import RenderIfVisible from '../RenderIfVisible';
@@ -112,6 +113,8 @@ export const KanbanBoardLane = forwardRef<any, KanbanBoardLaneProps>(
       })()
     );
 
+    const laneContentContainerRef = useRef<HTMLDivElement | null>(null);
+
     const { palette } = useTheme();
     const {
       setToLaneId,
@@ -121,6 +124,28 @@ export const KanbanBoardLane = forwardRef<any, KanbanBoardLaneProps>(
       toLaneId,
       onCardMoveAcrossLanes,
     } = useKanbanBoardContext();
+
+    useEffect(() => {
+      const selectedCardIndex = cards.findIndex(({ selected }) => selected);
+      const containerElement = laneContentContainerRef.current?.querySelector(
+        '.smooth-dnd-container'
+      );
+      if (
+        selectedCardIndex >= 0 &&
+        containerElement &&
+        containerElement.childNodes[selectedCardIndex]
+      ) {
+        scrollIntoView(
+          containerElement.childNodes[selectedCardIndex] as HTMLElement,
+          {
+            scrollMode: 'if-needed',
+            block: 'nearest',
+            inline: 'nearest',
+            behavior: 'smooth',
+          }
+        );
+      }
+    }, [cards]);
 
     return (
       <Box
@@ -135,6 +160,7 @@ export const KanbanBoardLane = forwardRef<any, KanbanBoardLaneProps>(
         }}
       >
         <Box
+          ref={laneContentContainerRef}
           component="section"
           sx={{
             bgcolor: darken(
