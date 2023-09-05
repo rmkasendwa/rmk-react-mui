@@ -472,6 +472,7 @@ export interface RecordsExplorerProps<
   pathToView?: string;
   getPathToView?: (record: RecordRow) => string;
   getViewFormTitle?: (record: RecordRow) => ReactNode;
+  getViewFormTools?: (record: RecordRow) => ReactNode[];
   getEditFormTitle?: (record: RecordRow) => ReactNode;
 
   // Edit Path
@@ -588,6 +589,7 @@ const BaseRecordsExplorer = <
     editableFields,
     editValidationSchema,
     getViewFormTitle,
+    getViewFormTools,
     getEditFormTitle,
     onEditRecord,
     pathToEdit,
@@ -2868,6 +2870,12 @@ const BaseRecordsExplorer = <
                     }}
                     viewModeTools={[
                       ...(viewModalProps.viewModeTools || []),
+                      ...(() => {
+                        if (getViewFormTools && selectedRecord) {
+                          return getViewFormTools(selectedRecord);
+                        }
+                        return [];
+                      })(),
                       ...(() => {
                         if (isDeletable && selectedRecord) {
                           return [

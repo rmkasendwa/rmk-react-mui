@@ -14,7 +14,9 @@ import useTheme from '@mui/material/styles/useTheme';
 import Typography from '@mui/material/Typography';
 import { alpha } from '@mui/system/colorManipulator';
 import clsx from 'clsx';
-import { forwardRef } from 'react';
+import { forwardRef, useEffect, useRef } from 'react';
+import { mergeRefs } from 'react-merge-refs';
+import scrollIntoView from 'scroll-into-view-if-needed';
 
 import { isElementInteractive } from '../../utils/html';
 import EllipsisMenuIconButton from '../EllipsisMenuIconButton';
@@ -25,6 +27,9 @@ import { Card } from './models';
 export interface KanbanBoardCardClasses {
   /** Styles applied to the root element. */
   root: string;
+
+  /** Styles applied to the selected root element */
+  selected: string;
 }
 
 export type KanbanBoardCardClassKey = keyof KanbanBoardCardClasses;
@@ -63,6 +68,7 @@ export const getKanbanBoardCardUtilityClass = (slot: string) => {
 
 const slots: Record<KanbanBoardCardClassKey, [KanbanBoardCardClassKey]> = {
   root: ['root'],
+  selected: ['selected'],
 };
 
 export const kanbanBoardCardClasses: KanbanBoardCardClasses =
@@ -76,8 +82,18 @@ export interface KanbanBoardCardProps extends Card {}
 export const KanbanBoardCard = forwardRef<any, KanbanBoardCardProps>(
   function KanbanBoardCard(inProps, ref) {
     const props = useThemeProps({ props: inProps, name: 'MuiKanbanBoardCard' });
-    const { className, id, laneId, title, description, sx, tools, ...rest } =
-      props;
+    const {
+      className,
+      id,
+      laneId,
+      title,
+      description,
+      selected,
+      onClick,
+      sx,
+      tools,
+      ...rest
+    } = props;
 
     const classes = composeClasses(
       slots,
@@ -91,15 +107,28 @@ export const KanbanBoardCard = forwardRef<any, KanbanBoardCardProps>(
       })()
     );
 
+    const cardElementRef = useRef<HTMLDivElement | null>(null);
+
     const { palette } = useTheme();
     const { onCardClick } = useKanbanBoardContext();
+
+    useEffect(() => {
+      if (selected && cardElementRef.current) {
+        scrollIntoView(cardElementRef.current, {
+          scrollMode: 'if-needed',
+          block: 'nearest',
+          inline: 'nearest',
+          behavior: 'smooth',
+        });
+      }
+    }, [selected]);
 
     return (
       <Box
         component="article"
-        ref={ref}
+        ref={mergeRefs([ref, cardElementRef])}
         {...rest}
-        className={clsx(classes.root)}
+        className={clsx(classes.root, selected && classes.selected)}
         sx={{
           border: `1px solid ${alpha(palette.text.primary, 0.2)}`,
           backgroundColor: palette.background.default,
@@ -108,6 +137,13 @@ export const KanbanBoardCard = forwardRef<any, KanbanBoardCardProps>(
           px: 2,
           cursor: onCardClick ? 'pointer' : '',
           minWidth: 250,
+          ...(() => {
+            if (selected) {
+              return {
+                bgcolor: alpha(palette.primary.main, 0.3),
+              };
+            }
+          })(),
           ...sx,
         }}
         onClick={
@@ -117,7 +153,7 @@ export const KanbanBoardCard = forwardRef<any, KanbanBoardCardProps>(
                   onCardClick(id, laneId);
                 }
               }
-            : undefined
+            : onClick
         }
       >
         <Grid container component="header" sx={{ pb: 1, alignItems: 'center' }}>
