@@ -13,8 +13,9 @@ export interface CardIdentifier {
 export interface Card extends CardIdentifier, Omit<BoxProps, 'title' | 'id'> {
   title: ReactNode;
   description: ReactNode;
-  draggable?: boolean;
   tools?: DropdownOption[];
+  draggable?: boolean;
+  selected?: boolean;
 }
 
 export interface Lane extends Omit<BoxProps, 'title' | 'id'> {
