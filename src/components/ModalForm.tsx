@@ -586,10 +586,21 @@ export const BaseModalForm = <Values extends FormikValues>(
                                         variant="text"
                                         color="inherit"
                                         {...ActionButtonPropsRest}
+                                        {...CloseActionButtonPropsRest}
                                         onClick={() => onClose()}
-                                        sx={ActionButtonPropsSx}
+                                        sx={
+                                          {
+                                            color: alpha(
+                                              palette.text.primary,
+                                              0.5
+                                            ),
+                                            ...ActionButtonPropsSx,
+                                            ...CloseActionButtonPropsSx,
+                                          } as any
+                                        }
                                       >
-                                        Close
+                                        {CloseActionButtonPropsChildren ??
+                                          'Close'}
                                       </Button>
                                     </Grid>
                                   );
@@ -686,10 +697,21 @@ export const BaseModalForm = <Values extends FormikValues>(
                                             variant="text"
                                             color="inherit"
                                             {...ActionButtonPropsRest}
+                                            {...CloseActionButtonPropsRest}
                                             onClick={() => onClose()}
-                                            sx={ActionButtonPropsSx}
+                                            sx={
+                                              {
+                                                color: alpha(
+                                                  palette.text.primary,
+                                                  0.5
+                                                ),
+                                                ...ActionButtonPropsSx,
+                                                ...CloseActionButtonPropsSx,
+                                              } as any
+                                            }
                                           >
-                                            Close
+                                            {CloseActionButtonPropsChildren ??
+                                              'Close'}
                                           </Button>
                                         </Grid>
                                       );
