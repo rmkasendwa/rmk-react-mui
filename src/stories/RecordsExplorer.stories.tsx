@@ -39,9 +39,9 @@ const baseArgs = {
     {
       type: 'List',
       columns: tableColumns,
-      onClickRow: (contact) => {
-        console.log({ contact });
-      },
+      // onClickRow: (contact) => {
+      //   console.log({ contact });
+      // },
       ...contactTableProps,
     },
     {

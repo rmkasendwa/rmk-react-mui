@@ -1,5 +1,6 @@
 import { diff } from '@infinite-debugger/rmk-utils/data';
 import {
+  Box,
   ComponentsOverrides,
   ComponentsProps,
   ComponentsVariants,
@@ -21,6 +22,7 @@ import FormikErrorFieldHighlighter, {
 export interface FormikFormClasses {
   /** Styles applied to the root element. */
   root: string;
+  formFieldsWrapper: string;
 }
 
 export type FormikFormClassKey = keyof FormikFormClasses;
@@ -59,6 +61,7 @@ export const getFormikFormUtilityClass = (slot: string) => {
 
 const slots: Record<FormikFormClassKey, [FormikFormClassKey]> = {
   root: ['root'],
+  formFieldsWrapper: ['formFieldsWrapper'],
 };
 
 export const formikFormClasses: FormikFormClasses = generateUtilityClasses(
@@ -85,9 +88,25 @@ export interface FormikFormProps<
     >,
     Required<Pick<FormikConfig<Values>, 'validationSchema' | 'onSubmit'>>,
     Pick<FormikConfig<Values>, 'enableReinitialize'> {
+  /**
+   * The initial values of the form.
+   */
   initialValues: Values;
+
+  /**
+   * The children to render.
+   */
   children: FormikFormFunctionChildren<Values, ExtraProps> | ReactNode;
+
+  /**
+   * The props to pass to the Formik component.
+   */
   FormikProps?: Partial<FormikConfig<Values>>;
+
+  /**
+   * If true, the children will be wrapped in a `<Form>` component.
+   */
+  wrapChildrenInForm?: boolean;
 }
 
 const BaseFormikForm = <Values extends FormikValues>(
@@ -103,6 +122,7 @@ const BaseFormikForm = <Values extends FormikValues>(
     enableReinitialize,
     children,
     FormikProps = {},
+    wrapChildrenInForm = true,
     ...rest
   } = props;
 
@@ -126,26 +146,38 @@ const BaseFormikForm = <Values extends FormikValues>(
       {({ values, ...formProps }) => {
         const changedValues = diff(values, initialValues, true);
         const formHasChanges = !isEmpty(changedValues);
+        const formElementsNode = (
+          <FormikErrorFieldHighlighter
+            ref={ref}
+            {...rest}
+            className={clsx(classes.root)}
+          >
+            {({ ...fieldHighlighterProps }) => {
+              return typeof children === 'function'
+                ? children({
+                    values,
+                    formHasChanges,
+                    changedValues,
+                    ...fieldHighlighterProps,
+                    ...formProps,
+                  })
+                : children;
+            }}
+          </FormikErrorFieldHighlighter>
+        );
+
+        if (wrapChildrenInForm) {
+          return (
+            <Form className={clsx(classes.formFieldsWrapper)} noValidate>
+              {formElementsNode}
+            </Form>
+          );
+        }
+
         return (
-          <Form noValidate>
-            <FormikErrorFieldHighlighter
-              ref={ref}
-              {...rest}
-              className={clsx(classes.root)}
-            >
-              {({ ...fieldHighlighterProps }) => {
-                return typeof children === 'function'
-                  ? children({
-                      values,
-                      formHasChanges,
-                      changedValues,
-                      ...fieldHighlighterProps,
-                      ...formProps,
-                    })
-                  : children;
-              }}
-            </FormikErrorFieldHighlighter>
-          </Form>
+          <Box className={clsx(classes.formFieldsWrapper)}>
+            {formElementsNode}
+          </Box>
         );
       }}
     </Formik>

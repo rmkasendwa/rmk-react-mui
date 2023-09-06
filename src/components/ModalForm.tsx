@@ -42,6 +42,7 @@ import { formikErrorFieldHighlighterClasses } from './FormikErrorFieldHighlighte
 import FormikForm, {
   FormikFormFunctionChildren,
   FormikFormProps,
+  formikFormClasses,
 } from './FormikForm';
 import ModalPopup, { ModalPopupProps } from './ModalPopup';
 import SearchSyncToolbar from './SearchSyncToolbar';
@@ -316,18 +317,20 @@ export const BaseModalForm = <Values extends FormikValues>(
         maxHeight: '80%',
         ...placementCardPropsSx,
         ...CardPropsSx,
-        [`form, .${formikErrorFieldHighlighterClasses.root}`]: {
-          display: 'flex',
-          flexDirection: 'column',
-          flex: 1,
-          minHeight: 0,
-        },
+        [`.${formikFormClasses.formFieldsWrapper}, .${formikErrorFieldHighlighterClasses.root}`]:
+          {
+            display: 'flex',
+            flexDirection: 'column',
+            flex: 1,
+            minHeight: 0,
+          },
       }}
     >
       <FormikForm
         {...{ validationSchema, onSubmit, FormikProps }}
         initialValues={initialDraft || initialValues}
         enableReinitialize
+        wrapChildrenInForm={editMode}
       >
         {({ isSubmitting, values, isValid, ...rest }) => {
           const formHasChanges = !isEmpty(
