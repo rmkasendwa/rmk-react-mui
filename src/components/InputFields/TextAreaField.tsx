@@ -67,6 +67,7 @@ export const textAreaFieldClasses: TextAreaFieldClasses =
 
 export interface TextAreaFieldProps extends TextFieldProps {
   value?: string;
+  showTextCount?: boolean;
 }
 
 export const TextAreaField = forwardRef<HTMLDivElement, TextAreaFieldProps>(
@@ -78,6 +79,10 @@ export const TextAreaField = forwardRef<HTMLDivElement, TextAreaFieldProps>(
       onChange,
       inputProps,
       InputProps = {},
+      minRows = 4,
+      maxRows,
+      rows,
+      showTextCount = true,
       ...rest
     } = props;
 
@@ -113,7 +118,15 @@ export const TextAreaField = forwardRef<HTMLDivElement, TextAreaFieldProps>(
           setInputValue(event.target.value);
           onChange && onChange(event);
         }}
-        minRows={4}
+        rows={rows}
+        {...(() => {
+          if (!rows) {
+            return {
+              minRows,
+              maxRows,
+            };
+          }
+        })()}
         {...{ inputProps }}
         {...rest}
         InputProps={{
@@ -124,7 +137,7 @@ export const TextAreaField = forwardRef<HTMLDivElement, TextAreaFieldProps>(
             ...InputPropsSx,
           },
           endAdornment: (() => {
-            if (inputValue.length > 0) {
+            if (showTextCount && inputValue.length > 0) {
               return (
                 <Box
                   sx={{
