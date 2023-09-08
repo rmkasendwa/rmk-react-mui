@@ -7,7 +7,7 @@ import {
 import { omit } from 'lodash';
 import { ReactNode } from 'react';
 
-import { PopupToolOptions, usePopupTool } from '../../../hooks/Tools/PopupTool';
+import { PopupToolProps, usePopupTool } from '../../../hooks/Tools/PopupTool';
 import DatePicker, { DatePickerProps } from '../../DatePicker';
 
 //#region Adding theme prop types
@@ -31,7 +31,7 @@ declare module '@mui/material/styles/components' {
 
 export interface JumpToDateToolProps
   extends Partial<Pick<DatePickerProps, 'minDate' | 'maxDate' | 'onChange'>>,
-    Partial<Omit<PopupToolOptions, 'onChange'>> {
+    Partial<Omit<PopupToolProps, 'onChange'>> {
   selectedDate?: DatePickerProps['selected'];
   wrapDatePickerNode?: (datePickerNode: ReactNode) => ReactNode;
 }

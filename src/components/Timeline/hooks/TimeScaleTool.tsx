@@ -24,7 +24,7 @@ import {
   useState,
 } from 'react';
 
-import { PopupToolOptions, usePopupTool } from '../../../hooks/Tools/PopupTool';
+import { PopupToolProps, usePopupTool } from '../../../hooks/Tools/PopupTool';
 import DatePicker from '../../DatePicker';
 import DataDropdownField, {
   DataDropdownFieldProps,
@@ -92,7 +92,7 @@ export interface TimeScaleToolProps {
   >;
 
   selectedCustomDates?: SelectCustomDates;
-  DatePickerToolProps?: Partial<Omit<PopupToolOptions, 'onChange'>>;
+  DatePickerToolProps?: Partial<Omit<PopupToolProps, 'onChange'>>;
   minDate?: string | number | Date;
   maxDate?: string | number | Date;
   startDateRef?: MutableRefObject<Date | null>;
