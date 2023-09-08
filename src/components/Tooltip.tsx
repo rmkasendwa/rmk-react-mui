@@ -74,6 +74,7 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(
       enterAtCursorPosition = true,
       enterDelay = 1000,
       enterNextDelay = 500,
+      open: openProp,
       ...rest
     } = props;
 
@@ -111,7 +112,8 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(
       <MuiTooltip
         ref={ref}
         {...rest}
-        {...{ followCursor, enterDelay, enterNextDelay, open }}
+        {...{ followCursor, enterDelay, enterNextDelay }}
+        open={open || openProp}
         className={clsx(classes.root)}
         PopperProps={{
           ...(() => {
