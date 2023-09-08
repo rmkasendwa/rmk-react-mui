@@ -23,7 +23,7 @@ import { FC, ReactNode, useEffect, useRef, useState } from 'react';
 import { DndProvider, useDrag, useDragLayer, useDrop } from 'react-dnd';
 import { HTML5Backend, getEmptyImage } from 'react-dnd-html5-backend';
 
-import { PopupToolOptions, usePopupTool } from '../../../hooks/Tools/PopupTool';
+import { PopupToolProps, usePopupTool } from '../../../hooks/Tools/PopupTool';
 import {
   OnSelectSortOption,
   SelectedSortOption,
@@ -377,7 +377,7 @@ const DraggableSortedFieldsContainer = <RecordRow extends BaseDataRow>({
 
 export interface SortOperationFieldSelectorToolProps<
   RecordRow extends BaseDataRow = any
-> extends Partial<PopupToolOptions> {
+> extends Partial<PopupToolProps> {
   sortableFields: SortableFields<RecordRow>;
   onSelectSortOption?: OnSelectSortOption<RecordRow>;
   title?: string;

@@ -17,7 +17,7 @@ import { ReactNode, useRef, useState } from 'react';
 import ModalPopup from '../../components/ModalPopup';
 import { ButtonTool } from '../../components/SearchSyncToolbar';
 
-export interface PopupToolOptions extends Partial<ButtonTool> {
+export interface PopupToolProps extends Partial<ButtonTool> {
   bodyContent: ReactNode;
   label: ReactNode;
   popupCardTitle?: ReactNode;
@@ -34,7 +34,7 @@ export const usePopupTool = ({
   footerContent,
   wrapBodyContentInCard = true,
   ...rest
-}: PopupToolOptions): ButtonTool & {
+}: PopupToolProps): ButtonTool & {
   extraToolProps: {
     closePopup: () => void;
   };

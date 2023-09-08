@@ -20,7 +20,7 @@ import {
 import { omit, result } from 'lodash';
 import { useEffect, useMemo, useRef } from 'react';
 
-import { PopupToolOptions, usePopupTool } from '../../../hooks/Tools/PopupTool';
+import { PopupToolProps, usePopupTool } from '../../../hooks/Tools/PopupTool';
 import { PrimitiveDataType } from '../../../models/Utils';
 import DataDropdownField, {
   DataDropdownFieldProps,
@@ -72,7 +72,7 @@ export const DROPDOWN_OPERATORS: EnumFilterOperator[] = ['is', 'is not'];
 export const MULTI_SELECT_DROPDOWN_OPERATORS = enumFilterOperators;
 
 export interface FilterToolProps<RecordRow extends BaseDataRow = any>
-  extends Partial<PopupToolOptions> {
+  extends Partial<PopupToolProps> {
   data: RecordRow[];
   filterFields: DataFilterField<RecordRow>[];
   selectedConditionGroup?: ConditionGroup<RecordRow>;
