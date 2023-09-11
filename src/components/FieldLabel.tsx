@@ -1,5 +1,6 @@
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import {
+  Box,
   ComponentsOverrides,
   ComponentsProps,
   ComponentsVariants,
@@ -146,35 +147,27 @@ export const FieldLabel = forwardRef<HTMLElement, FieldLabelProps>(
             }}
           >
             {children}
+            {(() => {
+              if (required) {
+                return (
+                  <Box
+                    component="span"
+                    sx={{
+                      fontWeight: 500,
+                      ...((components?.MuiFieldLabel?.styleOverrides
+                        ?.root as any) || {}),
+                      ...sx,
+                      ml: 1,
+                      color: palette.error.main,
+                    }}
+                  >
+                    *
+                  </Box>
+                );
+              }
+            })()}
           </LabelComponent>
         </Grid>
-        {(() => {
-          if (required) {
-            return (
-              <Grid
-                item
-                sx={{
-                  display: 'flex',
-                }}
-              >
-                <LabelComponent
-                  {...{ component: 'div' }}
-                  variant="body2"
-                  sx={{
-                    fontWeight: 500,
-                    ...((components?.MuiFieldLabel?.styleOverrides
-                      ?.root as any) || {}),
-                    ...sx,
-                    ml: 1,
-                    color: palette.error.main,
-                  }}
-                >
-                  *
-                </LabelComponent>
-              </Grid>
-            );
-          }
-        })()}
         {(() => {
           if (helpTip) {
             return (
