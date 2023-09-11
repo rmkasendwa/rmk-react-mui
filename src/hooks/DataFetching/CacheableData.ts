@@ -11,12 +11,12 @@ export type CacheableDataFinderOptions = {
    *
    * @param controller The request controller that can be used to cancel the request.
    */
-  getRequestController?: (controller: RecordFinderRequestController) => void;
+  getRequestController: (controller: RecordFinderRequestController) => void;
 
   /**
    * Function that can be used to retrieve stale data while the request is being made.
    */
-  getStaleWhileRevalidate?: GetStaleWhileRevalidateFunction<any>;
+  getStaleWhileRevalidate: GetStaleWhileRevalidateFunction<any>;
 };
 
 /**
@@ -31,6 +31,13 @@ export interface CacheableDataProps<Data> extends QueryOptions {
    * The default value of the data.
    */
   defaultValue?: Data;
+
+  /**
+   * Whether the load state should be reset when the revalidation key changes.
+   *
+   * @default false
+   */
+  resetStateOnRevalidation?: boolean;
 }
 
 /**
@@ -44,7 +51,12 @@ export const useCacheableData = <Data>(
   recordFinder?: CacheableDataFinder<Data>,
   inProps: CacheableDataProps<Data> = {}
 ) => {
-  const { defaultValue, loadOnMount = true, revalidationKey } = inProps;
+  const {
+    defaultValue,
+    loadOnMount = true,
+    revalidationKey,
+    resetStateOnRevalidation = false,
+  } = inProps;
   //#region Refs
   const isInitialMountRef = useRef(true);
 
@@ -61,6 +73,7 @@ export const useCacheableData = <Data>(
     errorMessage,
     record,
     setRecord,
+    reset,
     ...rest
   } = useAPIService(
     defaultValue,
@@ -100,9 +113,10 @@ export const useCacheableData = <Data>(
 
   useEffect(() => {
     if (!isInitialMountRef.current && revalidationKey) {
+      resetStateOnRevalidation && reset();
       load();
     }
-  }, [load, revalidationKey]);
+  }, [load, reset, resetStateOnRevalidation, revalidationKey]);
 
   useEffect(() => {
     isInitialMountRef.current = false;
@@ -117,6 +131,7 @@ export const useCacheableData = <Data>(
     errorMessage,
     data: record,
     setData: setRecord,
+    reset,
     ...rest,
   };
 };
