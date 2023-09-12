@@ -1,7 +1,6 @@
 import { ClickAwayListener } from '@mui/base';
+import { LoadingButton, LoadingButtonProps } from '@mui/lab';
 import {
-  Button,
-  ButtonProps,
   ComponentsOverrides,
   ComponentsProps,
   ComponentsVariants,
@@ -66,7 +65,7 @@ export const buttonPopupClasses: TooltipPopupButtonClasses =
   );
 
 export interface TooltipPopupButtonProps
-  extends Omit<ButtonProps, 'title'>,
+  extends Omit<LoadingButtonProps, 'title'>,
     Pick<TooltipProps, 'title'> {
   TooltipProps?: Partial<TooltipProps>;
   openTooltipRef?: MutableRefObject<(() => void) | undefined>;
@@ -135,14 +134,14 @@ export const TooltipPopupButton = forwardRef<
           enterAtCursorPosition={false}
           title={title}
         >
-          <Button
+          <LoadingButton
             ref={ref}
             className={clsx(classes.root)}
             {...rest}
             onClick={handleTooltipOpen}
           >
             {children}
-          </Button>
+          </LoadingButton>
         </Tooltip>
       </span>
     </ClickAwayListener>
