@@ -244,12 +244,13 @@ export const BaseModalForm = <Values extends FormikValues>(
   const { sx: placementCardPropsSx, ...placementCardPropsRest } =
     placementCardProps;
 
-  // Refs
+  //#region Refs
   const onSubmitSuccessRef = useRef(onSubmitSuccess);
   onSubmitSuccessRef.current = onSubmitSuccess;
   const draftManagerRef = useRef(draftManager);
   draftManagerRef.current = draftManager;
   const formHasChangesRef = useRef(false);
+  //#endregion
 
   const [isClosingWithChanges, setIsClosingWithChanges] = useState(false);
 
@@ -332,7 +333,7 @@ export const BaseModalForm = <Values extends FormikValues>(
         enableReinitialize
         wrapChildrenInForm={editMode}
       >
-        {({ isSubmitting, values, isValid, ...rest }) => {
+        {({ values, isValid, ...rest }) => {
           const formHasChanges = !isEmpty(
             (() => {
               if (editableFields && editableFields.length > 0) {
@@ -448,7 +449,7 @@ export const BaseModalForm = <Values extends FormikValues>(
                 {...SearchSyncToolbarPropsRest}
                 title={title}
                 {...(() => {
-                  if (showCloseIconButton && !isSubmitting) {
+                  if (showCloseIconButton && !loading) {
                     return {
                       postSyncButtonTools: [
                         {
@@ -531,7 +532,6 @@ export const BaseModalForm = <Values extends FormikValues>(
                         }
                         return typeof children === 'function'
                           ? children({
-                              isSubmitting,
                               values,
                               isValid,
                               formHasChanges,
@@ -617,7 +617,7 @@ export const BaseModalForm = <Values extends FormikValues>(
                                         {...ActionButtonPropsRest}
                                         {...SubmitButtonPropsRest}
                                         type="submit"
-                                        loading={loading || isSubmitting}
+                                        loading={loading}
                                         disabled={(() => {
                                           if (lockSubmitIfNoChange) {
                                             return !formHasChanges;
@@ -631,7 +631,7 @@ export const BaseModalForm = <Values extends FormikValues>(
                                         {submitButtonText}
                                       </LoadingButton>
                                     </Grid>
-                                    {!isSubmitting && !loading ? (
+                                    {!loading ? (
                                       <Grid item>
                                         <Button
                                           variant="text"

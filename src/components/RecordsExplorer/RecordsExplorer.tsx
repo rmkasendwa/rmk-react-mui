@@ -443,7 +443,7 @@ export interface RecordsExplorerProps<
     | ReactNode;
   description?: ReactNode;
   recordsFinder?: RecordsFinder<RecordRow>;
-  getRecordLoadFunction?: (loadFunction: () => void) => void;
+  loadRecordsRef?: MutableRefObject<(() => void) | undefined>;
   selectedRecordId?: string;
   recordDetailsFinder?: (
     selectedRecordId: string,
@@ -615,7 +615,6 @@ const BaseRecordsExplorer = <
     getCreateFunction,
     getPathToAddNewRecord,
     getViewFunction,
-    getRecordLoadFunction,
     getRecordDetailsLoadFunction,
     refreshInterval,
     PaginatedRecordsOptions,
@@ -638,6 +637,7 @@ const BaseRecordsExplorer = <
     showModalForm = true,
     selectedRecordId: selectedRecordIdProp,
     addSearchParamsToPathRef,
+    loadRecordsRef,
     ...rest
   } = omit(
     props,
@@ -721,9 +721,6 @@ const BaseRecordsExplorer = <
 
   const getViewFunctionRef = useRef(getViewFunction);
   getViewFunctionRef.current = getViewFunction;
-
-  const getRecordLoadFunctionRef = useRef(getRecordLoadFunction);
-  getRecordLoadFunctionRef.current = getRecordLoadFunction;
 
   const getRecordDetailsLoadFunctionRef = useRef(getRecordDetailsLoadFunction);
   getRecordDetailsLoadFunctionRef.current = getRecordDetailsLoadFunction;
@@ -1482,9 +1479,9 @@ const BaseRecordsExplorer = <
     }
   }, [load, selectedDataPresetIndex]);
 
-  useEffect(() => {
-    getRecordLoadFunctionRef.current?.(load);
-  }, [load]);
+  if (loadRecordsRef) {
+    loadRecordsRef.current = load;
+  }
 
   const data = (() => {
     if ((recordsFinder || dataPresets) && asyncData.length > 0) {
