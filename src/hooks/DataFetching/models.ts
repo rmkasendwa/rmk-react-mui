@@ -7,6 +7,8 @@ export interface QueryOptions {
   /**
    * Whether the API function should automatically be called when the
    * `revalidationKey` value changes.
+   *
+   * @default true
    */
   autoSync?: boolean;
 
