@@ -56,6 +56,7 @@ export const useCacheableData = <Data>(
     loadOnMount = true,
     revalidationKey,
     resetStateOnRevalidation = false,
+    autoSync = true,
   } = inProps;
   //#region Refs
   const isInitialMountRef = useRef(true);
@@ -114,9 +115,9 @@ export const useCacheableData = <Data>(
   useEffect(() => {
     if (!isInitialMountRef.current && revalidationKey) {
       resetStateOnRevalidation && reset();
-      load();
+      autoSync && load();
     }
-  }, [load, reset, resetStateOnRevalidation, revalidationKey]);
+  }, [autoSync, load, reset, resetStateOnRevalidation, revalidationKey]);
 
   useEffect(() => {
     isInitialMountRef.current = false;
