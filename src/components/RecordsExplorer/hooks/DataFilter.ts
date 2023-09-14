@@ -63,7 +63,7 @@ export const useDataFilter = <RecordRow extends BaseDataRow>(
         case 'today':
           return new Date();
         case 'tomorrow':
-          return addDays(new Date(), -1);
+          return addDays(new Date(), 1);
         case 'yesterday':
           return addDays(new Date(), -1);
         case 'one week ago':
