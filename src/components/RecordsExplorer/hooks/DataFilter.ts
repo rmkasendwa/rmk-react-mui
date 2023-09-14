@@ -24,7 +24,7 @@ import {
   DataFilterField,
   DateFilterOperator,
   DateFilterOperatorValue,
-  contentExistenceFilterOperator,
+  contentExistenceFilterOperators,
 } from '../models';
 
 //#region Adding theme prop types
@@ -110,7 +110,7 @@ export const useDataFilter = <RecordRow extends BaseDataRow>(
               .filter(({ operator, value, numberOfDays, selectedDate }) => {
                 return (
                   operator &&
-                  (contentExistenceFilterOperator.includes(
+                  (contentExistenceFilterOperators.includes(
                     operator as ContentExistenceFilterOperator
                   ) ||
                     (() => {
@@ -141,6 +141,26 @@ export const useDataFilter = <RecordRow extends BaseDataRow>(
                     return [rawFieldValue];
                   })();
                   return filterValues.some((fieldValue) => {
+                    if (
+                      contentExistenceFilterOperators.includes(
+                        operator as ContentExistenceFilterOperator
+                      )
+                    ) {
+                      switch (operator as ContentExistenceFilterOperator) {
+                        case 'is empty':
+                          return (
+                            (Array.isArray(fieldValue) &&
+                              fieldValue.length <= 0) ||
+                            !fieldValue
+                          );
+                        case 'is not empty':
+                          return (
+                            (Array.isArray(fieldValue) &&
+                              fieldValue.length > 0) ||
+                            fieldValue
+                          );
+                      }
+                    }
                     if (filterField?.type === 'date') {
                       const conditionValueDate =
                         getDateInstanceFromFilterConditionRef.current(
@@ -240,18 +260,6 @@ export const useDataFilter = <RecordRow extends BaseDataRow>(
                                 !value.includes(fieldValueItem as any)
                             )) ||
                             !value.includes(fieldValue as any))
-                        );
-                      case 'is empty':
-                        return (
-                          (Array.isArray(fieldValue) &&
-                            fieldValue.length <= 0) ||
-                          !fieldValue
-                        );
-                      case 'is not empty':
-                        return (
-                          (Array.isArray(fieldValue) &&
-                            fieldValue.length > 0) ||
-                          fieldValue
                         );
                       case 'contains':
                         return String(fieldValue)

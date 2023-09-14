@@ -36,7 +36,7 @@ import {
   DataFilterField,
   DataMultiSelectDropdownFilterField,
   EnumFilterOperator,
-  contentExistenceFilterOperator,
+  contentExistenceFilterOperators,
   dateFilterOperators,
   enumFilterOperators,
   filterConjunctions,
@@ -422,7 +422,7 @@ export const useFilterTool = <RecordRow extends BaseDataRow>(
                               }}
                               options={[
                                 ...operatorOptions,
-                                ...contentExistenceFilterOperator,
+                                ...contentExistenceFilterOperators,
                               ].map((option) => {
                                 if (typeof option === 'string') {
                                   return {
@@ -442,7 +442,12 @@ export const useFilterTool = <RecordRow extends BaseDataRow>(
                         {/* Filter Value */}
                         {(() => {
                           if (type === 'date') {
-                            if (selectedOperator) {
+                            if (
+                              selectedOperator &&
+                              !contentExistenceFilterOperators.includes(
+                                selectedOperator as any
+                              )
+                            ) {
                               return (
                                 <DateFilterConditionRowValue
                                   {...{
