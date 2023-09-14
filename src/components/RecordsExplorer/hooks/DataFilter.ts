@@ -89,7 +89,7 @@ export const useDataFilter = <RecordRow extends BaseDataRow>(
         case 'the next number of days':
           return addDays(new Date(), numberOfDays);
         case 'exact date':
-          return new Date(selectedDate);
+          return createDateWithoutTimezoneOffset(selectedDate);
       }
     }
   );

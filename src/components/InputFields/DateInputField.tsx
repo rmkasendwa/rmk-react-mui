@@ -198,7 +198,7 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
     }, [maxDateProp, minDateProp]);
 
     useEffect(() => {
-      setSelectedDate(value ? new Date(value) : null);
+      setSelectedDate(value ? createDateWithoutTimezoneOffset(value) : null);
     }, [value]);
 
     if (enableLoadingState && locked) {
