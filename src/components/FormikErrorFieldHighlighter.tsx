@@ -14,7 +14,9 @@ import clsx from 'clsx';
 import { useFormikContext } from 'formik';
 import { ReactNode, forwardRef, useCallback, useEffect, useRef } from 'react';
 import { mergeRefs } from 'react-merge-refs';
-import scrollIntoView from 'scroll-into-view-if-needed';
+import scrollIntoView, {
+  StandardBehaviorOptions,
+} from 'scroll-into-view-if-needed';
 
 export interface FormikErrorFieldHighlighterClasses {
   /** Styles applied to the root element. */
@@ -95,6 +97,7 @@ export type FormikErrorFieldHighlighterFunctionChildren = (
 export interface FormikErrorFieldHighlighterProps
   extends Partial<Omit<BoxProps, 'children'>> {
   children: FormikErrorFieldHighlighterFunctionChildren | ReactNode;
+  ScrollIntoViewProps?: Partial<StandardBehaviorOptions>;
 }
 
 export const FormikErrorFieldHighlighter = forwardRef<
@@ -105,7 +108,7 @@ export const FormikErrorFieldHighlighter = forwardRef<
     props: inProps,
     name: 'MuiFormikErrorFieldHighlighter',
   });
-  const { className, children, sx, ...rest } = props;
+  const { className, children, ScrollIntoViewProps = {}, sx, ...rest } = props;
 
   const classes = composeClasses(
     slots,
@@ -119,7 +122,12 @@ export const FormikErrorFieldHighlighter = forwardRef<
     })()
   );
 
+  //#region Refs
   const formElementsWrapperRef = useRef<HTMLDivElement>();
+  const ScrollIntoViewPropsRef = useRef(ScrollIntoViewProps);
+  ScrollIntoViewPropsRef.current = ScrollIntoViewProps;
+  //#endregion
+
   const { isValid, submitCount } = useFormikContext();
 
   const scrollToErrorFields = useCallback(() => {
@@ -132,6 +140,7 @@ export const FormikErrorFieldHighlighter = forwardRef<
           behavior: 'smooth',
           block: 'center',
           inline: 'center',
+          ...ScrollIntoViewPropsRef.current,
         });
         fieldsWithError.forEach((field) => {
           field.classList.add(classes.flicker);
