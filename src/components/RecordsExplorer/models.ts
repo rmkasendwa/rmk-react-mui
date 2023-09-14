@@ -164,19 +164,19 @@ export const dateFilterOperatorToValueOptionsMap: Record<
 };
 //#endregion
 
-export const contentExistenceFilterOperator = [
+export const contentExistenceFilterOperators = [
   'is empty',
   'is not empty',
 ] as const;
 export type ContentExistenceFilterOperator =
-  (typeof contentExistenceFilterOperator)[number];
+  (typeof contentExistenceFilterOperators)[number];
 
 export const filterOperators = [
   ...enumFilterOperators,
   ...textFilterOperators,
   ...numericFilterOperators,
   ...dateFilterOperators,
-  ...contentExistenceFilterOperator,
+  ...contentExistenceFilterOperators,
 ] as const;
 export type FilterOperator =
   | EnumFilterOperator

@@ -136,9 +136,11 @@ export const DateFilterConditionRowValue = forwardRef<
             placeholder="Select"
             variant="text"
             value={conditionValue}
-            options={dateFilterOperatorToValueOptionsMap[
-              condition.operator as DateFilterOperator
-            ].map((label) => {
+            options={(
+              dateFilterOperatorToValueOptionsMap[
+                condition.operator as DateFilterOperator
+              ] || []
+            ).map((label) => {
               return {
                 label,
                 value: label,
