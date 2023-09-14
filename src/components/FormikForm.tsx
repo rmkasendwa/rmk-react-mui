@@ -107,6 +107,13 @@ export interface FormikFormProps<
    * If true, the children will be wrapped in a `<Form>` component.
    */
   wrapChildrenInForm?: boolean;
+
+  /**
+   * The props to pass to the `<FormikErrorFieldHighlighter>` component.
+   */
+  FormikErrorFieldHighlighterProps?: Partial<
+    Omit<FormikErrorFieldHighlighterProps, 'ref'>
+  >;
 }
 
 const BaseFormikForm = <Values extends FormikValues>(
@@ -123,6 +130,7 @@ const BaseFormikForm = <Values extends FormikValues>(
     children,
     FormikProps = {},
     wrapChildrenInForm = true,
+    FormikErrorFieldHighlighterProps = {},
     ...rest
   } = props;
 
@@ -150,6 +158,7 @@ const BaseFormikForm = <Values extends FormikValues>(
           <FormikErrorFieldHighlighter
             ref={ref}
             {...rest}
+            {...FormikErrorFieldHighlighterProps}
             className={clsx(classes.root)}
           >
             {({ ...fieldHighlighterProps }) => {
