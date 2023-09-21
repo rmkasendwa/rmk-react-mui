@@ -1274,7 +1274,10 @@ export const useTable = <DataRow extends BaseDataRow>(
                     ...(() => {
                       if (controlZIndex) {
                         return {
-                          zIndex: 2,
+                          zIndex: 1,
+                          '&:first-of-type': {
+                            zIndex: 2,
+                          },
                         };
                       }
                     })(),
