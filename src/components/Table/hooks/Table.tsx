@@ -899,10 +899,10 @@ export const useTable = <DataRow extends BaseDataRow>(
                       display: 'flex',
                       alignItems: 'center',
                       pl: (() => {
-                        if (isGroupedTable) {
-                          return 1;
-                        }
                         if (index <= 0) {
+                          if (isGroupedTable) {
+                            return 1;
+                          }
                           return 3;
                         }
                         return 1.5;
