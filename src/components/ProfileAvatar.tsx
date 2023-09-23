@@ -187,11 +187,8 @@ export const ProfileAvatar = forwardRef<HTMLDivElement, ProfileAvatarProps>(
         ref={ref}
         sx={{
           fontSize: Math.round(size / 2.5),
-          ...(() => {
-            if (!rest.src) {
-              return { bgcolor, color };
-            }
-          })(),
+          bgcolor,
+          color,
           width: size,
           height: size,
           ...sx,
