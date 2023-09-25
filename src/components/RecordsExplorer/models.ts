@@ -1,14 +1,12 @@
 import { TextFieldProps } from '@mui/material';
 import { ReactNode } from 'react';
-import * as Yup from 'yup';
 
-import { SortDirection, SortOption, sortDirections } from '../../models/Sort';
+import { SortOption } from '../../models/Sort';
 import { PrimitiveDataType } from '../../models/Utils';
 import { DataDropdownFieldProps } from '../InputFields/DataDropdownField';
 import { DateInputFieldProps } from '../InputFields/DateInputField';
 import { NumberInputFieldProps } from '../InputFields/NumberInputField';
 import { BaseDataRow, TableColumn } from '../Table';
-import { timelineSearchParamValidationSpec } from '../Timeline';
 
 // Search term filter types
 export type FilterBySearchTerm<RecordRow extends BaseDataRow> = (
@@ -239,45 +237,3 @@ export type RecordsExplorerRowField<RecordRow extends BaseDataRow = any> =
       groupable?: boolean;
       groupType?: PrimitiveDataType;
     };
-
-export const recordsExplorerSearchParamValidationSpec = {
-  ...timelineSearchParamValidationSpec,
-  view: Yup.string(),
-  groupBy: Yup.array().of(
-    Yup.object({
-      id: Yup.mixed().required(),
-      sortDirection: Yup.mixed<SortDirection>()
-        .required()
-        .oneOf([...sortDirections]),
-    })
-  ),
-  expandedGroups: Yup.mixed<'All' | 'None' | string[]>(),
-  expandedGroupsInverted: Yup.boolean(),
-  sortBy: Yup.array().of(
-    Yup.object({
-      id: Yup.mixed().required(),
-      sortDirection: Yup.mixed<SortDirection>()
-        .required()
-        .oneOf([...sortDirections]),
-    })
-  ),
-  filterBy: Yup.object({
-    conjunction: Yup.mixed<Conjunction>().oneOf([...filterConjunctions]),
-    conditions: Yup.array()
-      .of(
-        Yup.object({
-          fieldId: Yup.mixed().required(),
-          operator: Yup.mixed<FilterOperator>().oneOf([...filterOperators]),
-          value: Yup.mixed<string | number | (string | number)[]>(),
-        })
-      )
-      .required(),
-  }).default(undefined),
-  search: Yup.string(),
-  selectedColumns: Yup.array().of(Yup.string().required()),
-  modifiedKeys: Yup.array().of(Yup.string().required()),
-  createNewRecord: Yup.boolean(),
-  selectedRecord: Yup.string(),
-  editRecord: Yup.boolean(),
-  selectedDataPreset: Yup.mixed<string | number>(),
-} as const;
