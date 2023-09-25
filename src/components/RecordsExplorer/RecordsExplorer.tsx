@@ -1109,7 +1109,7 @@ const BaseRecordsExplorer = <
   }, []);
 
   const { searchParams, setSearchParams, addSearchParamsToPath } =
-    useRecordsExplorerNavigationState({
+    useRecordsExplorerNavigationState<RecordRow>({
       id,
       paramStorage: stateStorage,
       clearSearchStateOnUnmount,
