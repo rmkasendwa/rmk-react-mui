@@ -280,4 +280,4 @@ export const recordsExplorerSearchParamValidationSpec = {
   selectedRecord: Yup.string(),
   editRecord: Yup.boolean(),
   selectedDataPreset: Yup.mixed<string | number>(),
-};
+} as const;

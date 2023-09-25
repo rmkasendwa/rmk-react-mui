@@ -42,7 +42,6 @@ import {
 } from 'react';
 import { mergeRefs } from 'react-merge-refs';
 import { Link as RouterLink, useLocation, useNavigate } from 'react-router-dom';
-import * as Yup from 'yup';
 
 import { useAuth } from '../../contexts/AuthContext';
 import { LoadingContext, LoadingProvider } from '../../contexts/LoadingContext';
@@ -56,17 +55,8 @@ import {
   usePaginatedRecords,
   useUpdate,
 } from '../../hooks/DataFetching';
-import {
-  ParamStorage,
-  useReactRouterDOMSearchParams,
-} from '../../hooks/ReactRouterDOM';
-import {
-  SelectedSortOption,
-  SortBy,
-  SortDirection,
-  SortableFields,
-  sortDirections,
-} from '../../models/Sort';
+import { ParamStorage } from '../../hooks/ReactRouterDOM';
+import { SelectedSortOption, SortBy, SortableFields } from '../../models/Sort';
 import { PermissionCode } from '../../models/Users';
 import {
   CrudMode,
@@ -104,11 +94,11 @@ import Timeline, {
   SetDynamicallySelectedTimeScaleFunctionRef,
   TimeScaleOption,
   TimelineProps,
-  timelineSearchParamValidationSpec,
   useScrollTimelineTools,
   useTimeScaleTool,
 } from '../Timeline';
 import Tooltip from '../Tooltip';
+import { useRecordsExplorerNavigationState } from './hooks';
 import { useDataFilter } from './hooks/DataFilter';
 import { useFilterTool } from './hooks/FilterTool';
 import { useGroupTool } from './hooks/GroupTool';
@@ -120,17 +110,13 @@ import {
 } from './hooks/ViewOptionsTool';
 import {
   ConditionGroup,
-  Conjunction,
   DataFilterField,
   DataGroup,
   FilterBySearchTerm,
-  FilterOperator,
   GroupableField,
   NestedDataGroup,
   RecordsExplorerRowField,
   SearchableProperty,
-  filterConjunctions,
-  filterOperators,
 } from './models';
 
 export interface RecordsExplorerClasses {
@@ -1123,51 +1109,7 @@ const BaseRecordsExplorer = <
   }, []);
 
   const { searchParams, setSearchParams, addSearchParamsToPath } =
-    useReactRouterDOMSearchParams({
-      mode: 'json',
-      spec: {
-        ...timelineSearchParamValidationSpec,
-        view: Yup.string(),
-        groupBy: Yup.array().of(
-          Yup.object({
-            id: Yup.mixed<keyof RecordRow>().required(),
-            sortDirection: Yup.mixed<SortDirection>()
-              .required()
-              .oneOf([...sortDirections]),
-          })
-        ),
-        expandedGroups: Yup.mixed<'All' | 'None' | string[]>(),
-        expandedGroupsInverted: Yup.boolean(),
-        sortBy: Yup.array().of(
-          Yup.object({
-            id: Yup.mixed<keyof RecordRow>().required(),
-            sortDirection: Yup.mixed<SortDirection>()
-              .required()
-              .oneOf([...sortDirections]),
-          })
-        ),
-        filterBy: Yup.object({
-          conjunction: Yup.mixed<Conjunction>().oneOf([...filterConjunctions]),
-          conditions: Yup.array()
-            .of(
-              Yup.object({
-                fieldId: Yup.mixed<keyof RecordRow>().required(),
-                operator: Yup.mixed<FilterOperator>().oneOf([
-                  ...filterOperators,
-                ]),
-                value: Yup.mixed<string | number | (string | number)[]>(),
-              })
-            )
-            .required(),
-        }).default(undefined),
-        search: Yup.string(),
-        selectedColumns: Yup.array().of(Yup.string().required()),
-        modifiedKeys: Yup.array().of(Yup.string().required()),
-        createNewRecord: Yup.boolean(),
-        selectedRecord: Yup.string(),
-        editRecord: Yup.boolean(),
-        selectedDataPreset: Yup.mixed<string | number>(),
-      },
+    useRecordsExplorerNavigationState({
       id,
       paramStorage: stateStorage,
       clearSearchStateOnUnmount,
@@ -1277,7 +1219,7 @@ const BaseRecordsExplorer = <
       {} as Record<keyof RecordRow, (typeof groupableFields)[number]>
     );
 
-    return (() => {
+    return ((): SortBy<RecordRow> => {
       if (
         groupByProp &&
         (!searchParamGroupBy || searchParamGroupBy.length <= 0)
@@ -1309,7 +1251,7 @@ const BaseRecordsExplorer = <
       return accumulator;
     }, {} as Record<keyof RecordRow, (typeof sortableFields)[number]>);
 
-    return (() => {
+    return ((): SortBy<RecordRow> => {
       if (
         sortByPropRef.current &&
         !modifiedStateKeys?.includes(getHashedSearchParamKey('sortBy')) &&

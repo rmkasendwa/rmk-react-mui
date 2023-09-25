@@ -29,10 +29,6 @@ declare module '@mui/material/styles/components' {
 }
 //#endregion
 
-export const expandedGroupsOptions = ['All', 'None'] as const;
-
-export type ExpandedGroupsOption = (typeof expandedGroupsOptions)[number];
-
 export interface GroupToolProps<RecordRow extends BaseDataRow = any> {
   groupableFields: GroupableField<RecordRow>[];
   selectedGroupParams: SelectedSortOption<RecordRow>[];
