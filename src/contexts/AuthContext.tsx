@@ -43,7 +43,7 @@ export const AuthProvider: FC<{
 }> = ({ children, value }) => {
   const [loggedInUser, setLoggedInUser] = useState<LoggedInUser | null>(null);
   const [loadingCurrentSession, setLoadingCurrentSession] = useState(true);
-  const { setSessionExpired } = useAPIContext();
+  const { sessionExpired, setSessionExpired } = useAPIContext();
   const { reset: resetCachedData } = useLocalStorageData();
   const {
     record: user,
@@ -53,22 +53,26 @@ export const AuthProvider: FC<{
   } = useAPIService(loggedInUser);
 
   useEffect(() => {
-    const focusCallback = async () => {
-      setLoggedInUser((prevLoggedInUser) => {
-        const sessionUser = StorageManager.get('user');
-        if (JSON.stringify(sessionUser) !== JSON.stringify(prevLoggedInUser)) {
-          return sessionUser;
-        }
-        return prevLoggedInUser;
-      });
-      setLoadingCurrentSession(false);
-    };
-    window.addEventListener('focus', focusCallback);
-    focusCallback();
-    return () => {
-      window.removeEventListener('focus', focusCallback);
-    };
-  }, []);
+    if (!sessionExpired) {
+      const focusCallback = async () => {
+        setLoggedInUser((prevLoggedInUser) => {
+          const sessionUser = StorageManager.get('user');
+          if (
+            JSON.stringify(sessionUser) !== JSON.stringify(prevLoggedInUser)
+          ) {
+            return sessionUser;
+          }
+          return prevLoggedInUser;
+        });
+        setLoadingCurrentSession(false);
+      };
+      window.addEventListener('focus', focusCallback);
+      focusCallback();
+      return () => {
+        window.removeEventListener('focus', focusCallback);
+      };
+    }
+  }, [sessionExpired]);
 
   const updateLoggedInUserSession = useCallback(
     (user: LoggedInUser) => {
