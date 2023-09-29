@@ -79,7 +79,7 @@ export const useCacheableData = <Data>(
   } = useAPIService(
     defaultValue,
     loadOnMount,
-    String(hashIt({ ...inProps, recordFinder }))
+    String(hashIt({ ...inProps, recordFinder: String(recordFinder) }))
   );
 
   const load = useCallback(() => {
