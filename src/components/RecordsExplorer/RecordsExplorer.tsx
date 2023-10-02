@@ -337,6 +337,7 @@ export interface RecordsExplorerProps<
    */
   data?: RecordRow[];
   groupedData?: NestedDataGroup<RecordRow>[];
+
   /**
    * The label to be used when reporting display stats for multiple records.
    *
@@ -346,6 +347,17 @@ export interface RecordsExplorerProps<
    * @default "Records"
    */
   recordLabelPlural?: string;
+
+  /**
+   * The label to be used when reporting display stats for multiple records in lowercase.
+   *
+   * @example
+   * "records", "things", "people"
+   *
+   * @default "records"
+   */
+  lowercaseRecordLabelPlural?: string;
+
   /**
    * The label to be used when reporting display stats for a single record. If not specifies, the recordLabelPlural property will be used with any trailing 's' removed.
    *
@@ -353,6 +365,15 @@ export interface RecordsExplorerProps<
    * "Record", "Thing", "Person"
    */
   recordLabelSingular?: string;
+
+  /**
+   * The label to be used when reporting display stats for a single record in lowercase. If not specifies, the lowercaseRecordLabelPlural property will be used with any trailing 's' removed.
+   *
+   * @example
+   * "record", "thing", "person"
+   */
+  lowercaseRecordLabelSingular?: string;
+
   /**
    * Extra props to be assigned to the ViewOptionsTool component.
    */
@@ -628,12 +649,20 @@ const BaseRecordsExplorer = <
   } = omit(
     props,
     'recordLabelPlural',
+    'lowercaseRecordLabelPlural',
     'recordLabelSingular',
+    'lowercaseRecordLabelSingular',
     'permissionToViewDetails',
     'addNewButtonLabel'
   );
 
-  let { recordLabelPlural, recordLabelSingular, addNewButtonLabel } = props;
+  let {
+    recordLabelPlural,
+    lowercaseRecordLabelPlural,
+    recordLabelSingular,
+    lowercaseRecordLabelSingular,
+    addNewButtonLabel,
+  } = props;
 
   const classes = composeClasses(
     slots,
@@ -656,8 +685,10 @@ const BaseRecordsExplorer = <
   }
 
   recordLabelSingular || (recordLabelSingular = singular(recordLabelPlural));
-  const lowercaseRecordLabelPlural = recordLabelPlural.toLowerCase();
-  const lowercaseRecordLabelSingular = recordLabelSingular.toLowerCase();
+  lowercaseRecordLabelPlural ||
+    (lowercaseRecordLabelPlural = recordLabelPlural.toLowerCase());
+  lowercaseRecordLabelSingular ||
+    (lowercaseRecordLabelSingular = singular(lowercaseRecordLabelPlural));
 
   addNewButtonLabel || (addNewButtonLabel = `Add New ${recordLabelSingular}`);
 
