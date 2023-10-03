@@ -121,3 +121,7 @@ export const useRecordsExplorerNavigationState = <
     ignoreUnspecifiedParams,
   });
 };
+
+export type RecordsExplorerNavigationState = ReturnType<
+  typeof useRecordsExplorerNavigationState
+>;
