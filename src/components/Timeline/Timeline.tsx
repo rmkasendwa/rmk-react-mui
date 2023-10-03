@@ -368,6 +368,12 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
    */
   newTimelineElementIds?: string[];
 
+  /**
+   * Ref to track the ids of the timeline elements that have just been added and scrolled to. This is used to prevent
+   * the timeline from scrolling to the same elements multiple times.
+   */
+  lastNewTimelineElementIdsRef?: MutableRefObject<string[] | undefined>;
+
   setDynamicallySelectedTimeScaleFunctionRef?: SetDynamicallySelectedTimeScaleFunctionRef;
 
   TimelineRowDataContainerProps?: Partial<TimelineRowDataContainerProps>;
@@ -433,6 +439,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     isMasterTimeline = true,
     onChangeTimelineComputedProperties,
     newTimelineElementIds,
+    lastNewTimelineElementIdsRef,
     setDynamicallySelectedTimeScaleFunctionRef,
     TimelineRowDataContainerProps = {},
     sx,
@@ -1180,7 +1187,10 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         if (
           !newTimelineElementIdsRef.current ||
           newTimelineElementIdsRef.current.length === 0 ||
-          hasScrolledToNewTimelineElementsRef.current
+          hasScrolledToNewTimelineElementsRef.current ||
+          (lastNewTimelineElementIdsRef &&
+            JSON.stringify(lastNewTimelineElementIdsRef.current) ===
+              JSON.stringify(newTimelineElementIdsRef.current))
         ) {
           const hasCustomDatesSelected =
             isCustomDatesSelected &&
@@ -1221,17 +1231,25 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     defaultTimelineCenter,
     isCustomDatesSelected,
     isMasterTimeline,
+    lastNewTimelineElementIdsRef,
   ]);
 
+  //#region Scroll to new timeline elements
   useEffect(() => {
     const scrollingAncenstorElement = scrollingAncenstorElementRef?.current;
     if (
+      rows &&
       scrollingAncenstorElement &&
       newTimelineElementIdsRef.current &&
       newTimelineElementIdsRef.current.length > 0 &&
       !hasScrolledToNewTimelineElementsRef.current &&
-      rows
+      (!lastNewTimelineElementIdsRef ||
+        JSON.stringify(lastNewTimelineElementIdsRef.current) !==
+          JSON.stringify(newTimelineElementIdsRef.current))
     ) {
+      lastNewTimelineElementIdsRef &&
+        (lastNewTimelineElementIdsRef.current =
+          newTimelineElementIdsRef.current);
       const newTimelineElementNodes =
         scrollingAncenstorElement.querySelectorAll(
           `.${timelineRowDataContainerClasses.newTimelineElement}`
@@ -1264,10 +1282,12 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     }
   }, [
     classes.flicker,
+    lastNewTimelineElementIdsRef,
     rows,
     scrollingAncenstorElementRef,
     timelineViewPortLeftOffset,
   ]);
+  //#endregion
 
   //#region Track date at cursor
   useEffect(() => {
