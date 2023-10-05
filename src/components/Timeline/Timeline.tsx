@@ -1607,7 +1607,6 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
                   top: 0,
                   bgcolor,
                   zIndex: 3,
-                  backdropFilter: 'blur(5px)',
                   boxSizing: 'border-box',
                 };
                 return (
