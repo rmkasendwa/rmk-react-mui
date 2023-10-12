@@ -1,7 +1,12 @@
 import RefreshIcon from '@mui/icons-material/Refresh';
 import {
+  Box,
   ComponentsProps,
   ComponentsVariants,
+  Stack,
+  Typography,
+  alpha,
+  useTheme,
   useThemeProps,
 } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
@@ -36,28 +41,67 @@ export interface RetryErrorMessageProps {
 export const RetryErrorMessage: FC<RetryErrorMessageProps> = (inProps) => {
   const props = useThemeProps({ props: inProps, name: 'MuiRetryErrorMessage' });
   const { message, retry } = props;
+  const { palette } = useTheme();
+
+  const { shortMessage, longMessage } = ((): {
+    shortMessage: string;
+    longMessage?: string;
+  } => {
+    if (message.length > 100 || message.match(/\n/)) {
+      return {
+        shortMessage: 'An error occurred.',
+        longMessage: message,
+      };
+    }
+    return {
+      shortMessage: message,
+    };
+  })();
 
   return (
-    <>
-      {message}
-      {retry && (
-        <>
-          {' '}
-          <Tooltip title="Try again">
-            <IconButton
-              onClick={() => retry()}
-              size="small"
-              sx={{ width: 12, height: 12 }}
-            >
-              <RefreshIcon
-                color="inherit"
-                sx={{ display: 'block', width: 18, height: 18 }}
-              />
-            </IconButton>
-          </Tooltip>
-        </>
+    <Stack
+      sx={{
+        maxWidth: 400,
+      }}
+    >
+      <Typography component="div" variant="inherit">
+        {shortMessage}
+        {retry && (
+          <>
+            {' '}
+            <Tooltip title="Try again">
+              <IconButton
+                onClick={() => retry()}
+                size="small"
+                sx={{ width: 12, height: 12 }}
+              >
+                <RefreshIcon
+                  color="inherit"
+                  sx={{ display: 'block', width: 18, height: 18 }}
+                />
+              </IconButton>
+            </Tooltip>
+          </>
+        )}
+      </Typography>
+      {longMessage && (
+        <Box
+          sx={{
+            maxHeight: 200,
+            overflow: 'auto',
+            bgcolor: alpha(palette.error.main, 0.06),
+            py: 0.5,
+            px: 1,
+            borderRadius: 1,
+            boxShadow: `rgba(0, 0, 0, 0.06) 0px 2px 4px 0px inset`,
+          }}
+        >
+          <Typography component="div" variant="caption">
+            {longMessage}
+          </Typography>
+        </Box>
       )}
-    </>
+    </Stack>
   );
 };
 

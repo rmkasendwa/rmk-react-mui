@@ -1,6 +1,6 @@
 {
   "name": "@infinite-debugger/react-mui",
-  "version": "0.7.0-alpha.365",
+  "version": "0.7.0-alpha.366",
   "description": "RMK React MUI is a React UI library of utility components, hooks and contexts",
   "keywords": [
     "react",
@@ -146,7 +146,7 @@
     "import-sort-style-module": "^6.0.0",
     "lorem-ipsum": "^2.0.8",
     "next": "^13.0.2",
-    "node-sass": "^7.0.3",
+    "node-sass": "^9.0.0",
     "pluralize": "^8.0.0",
     "prettier": "^2.7.1",
     "prettier-plugin-import-sort": "0.0.7",
