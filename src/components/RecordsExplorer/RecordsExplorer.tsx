@@ -2113,6 +2113,7 @@ const BaseRecordsExplorer = <
 
             const baseTableProps: typeof viewProps = {
               startStickyColumnIndex: 0,
+              bordersVariant: 'square',
               ...viewProps,
               ...ListViewProps,
               paging: false,
@@ -2121,7 +2122,6 @@ const BaseRecordsExplorer = <
               enableCheckboxRowSelectors,
               enableSmallScreenOptimization,
               showRowNumber,
-              bordersVariant: 'square',
               selectedColumnIds,
               ...(() => {
                 if (isEditable || isDeletable || getRecordTools) {
