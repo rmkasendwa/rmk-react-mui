@@ -993,6 +993,7 @@ const BaseDataDropdownField = <Entity,>(
               startAdornment,
               enableLoadingState,
             }}
+            showClearButton={!focused}
             {...rest}
             {...(() => {
               if (rest.multiline) {
@@ -1148,6 +1149,7 @@ const BaseDataDropdownField = <Entity,>(
                                   },
                                 },
                               }}
+                              enableLoadingState={false}
                             />
                           </Box>
                         );
@@ -1183,7 +1185,6 @@ const BaseDataDropdownField = <Entity,>(
                 })(),
               },
             }}
-            showClearButton={!focused}
             sx={{
               '& .data-dropdown-input-clear-button': {
                 visibility: 'hidden',
