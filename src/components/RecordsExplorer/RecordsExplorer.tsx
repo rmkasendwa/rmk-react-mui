@@ -1484,8 +1484,15 @@ const BaseRecordsExplorer = <
           return dataFilteredByFilterFields.filter((row) => {
             return searchableFields.some(({ id, getFilterValue }) => {
               const searchValues: string[] = [];
-              if (typeof result(row, id) === 'string') {
-                searchValues.push(result(row, id) as any);
+              const rawSearchValue = result(row, id);
+              if (typeof rawSearchValue === 'string') {
+                searchValues.push(rawSearchValue as any);
+              } else if (Array.isArray(rawSearchValue)) {
+                searchValues.push(
+                  ...rawSearchValue.filter((value) => {
+                    return typeof value === 'string';
+                  })
+                );
               }
               if (getFilterValue) {
                 const filterValue = getFilterValue(row);
