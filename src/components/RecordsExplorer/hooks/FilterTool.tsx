@@ -113,18 +113,25 @@ export const useFilterTool = <RecordRow extends BaseDataRow>(
         const options: DropdownOption[] = [];
         data.forEach((row) => {
           const fieldValue = result(row, field.id) as any;
-          if (
-            fieldValue &&
-            !options.find(({ value }) => {
-              return value === fieldValue;
-            })
-          ) {
-            options.push({
-              label: getFieldOptionLabel
-                ? getFieldOptionLabel(row)
-                : fieldValue,
-              searchableLabel: fieldValue,
-              value: fieldValue,
+          if (fieldValue) {
+            const fieldValueOptions = Array.isArray(fieldValue)
+              ? fieldValue
+              : [fieldValue];
+            fieldValueOptions.forEach((fieldValueOption) => {
+              if (
+                fieldValueOption &&
+                !options.find(({ value }) => {
+                  return value === fieldValueOption;
+                })
+              ) {
+                options.push({
+                  label: getFieldOptionLabel
+                    ? getFieldOptionLabel(row)
+                    : fieldValueOption,
+                  searchableLabel: fieldValueOption,
+                  value: fieldValueOption,
+                });
+              }
             });
           }
         });
