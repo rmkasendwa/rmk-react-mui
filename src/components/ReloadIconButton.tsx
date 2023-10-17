@@ -124,7 +124,7 @@ export const ReloadIconButton = forwardRef<
           <Tooltip title="Refresh">
             <IconButton
               {...IconButtonPropsRest}
-              onClick={() => load && load()}
+              onClick={() => load?.()}
               sx={{
                 color: 'inherit !important',
                 ...IconButtonPropsSx,
@@ -149,7 +149,7 @@ export const ReloadIconButton = forwardRef<
                   <ErrorIcon color="error" />
                 </Tooltip>
               </Grid>
-              <Grid item>{refreshButton}</Grid>
+              {load ? <Grid item>{refreshButton}</Grid> : null}
             </Grid>
           );
         }
