@@ -23,14 +23,7 @@ import {
 import { BoxProps } from '@mui/material/Box';
 import clsx from 'clsx';
 import { omit } from 'lodash';
-import {
-  Children,
-  ReactElement,
-  ReactNode,
-  forwardRef,
-  useEffect,
-  useRef,
-} from 'react';
+import { ReactElement, ReactNode, forwardRef, useEffect, useRef } from 'react';
 
 import ErrorAlert from './ErrorAlert';
 import SearchSyncToolbar, { SearchSyncToolbarProps } from './SearchSyncToolbar';
@@ -91,7 +84,8 @@ export interface ModalPopupProps
   loading?: boolean;
   errorMessage?: string;
   open: boolean;
-  actionButtons?: ReactNode | ReactNode[];
+  actionButtons?: ReactNode[];
+  actionAreaTools?: ReactNode[];
   onClose?: () => void;
   SearchSyncToolbarProps?: Partial<SearchSyncToolbarProps>;
   CardProps?: Partial<CardProps>;
@@ -117,6 +111,7 @@ export const ModalPopup = forwardRef<HTMLDivElement, ModalPopupProps>(
       open,
       onClose,
       actionButtons,
+      actionAreaTools,
       SearchSyncToolbarProps = {},
       CardProps = {},
       CardBodyProps = {},
@@ -302,15 +297,13 @@ export const ModalPopup = forwardRef<HTMLDivElement, ModalPopupProps>(
               >
                 {(() => {
                   if (actionButtons) {
-                    return Children.toArray(actionButtons).map(
-                      (tool, index) => {
-                        return (
-                          <Grid item key={index} sx={{ minWidth: 0 }}>
-                            {tool}
-                          </Grid>
-                        );
-                      }
-                    );
+                    return actionButtons.map((tool, index) => {
+                      return (
+                        <Grid item key={index} sx={{ minWidth: 0 }}>
+                          {tool}
+                        </Grid>
+                      );
+                    });
                   }
                 })()}
                 {(() => {
@@ -333,13 +326,21 @@ export const ModalPopup = forwardRef<HTMLDivElement, ModalPopupProps>(
                     );
                   }
                 })()}
+                <Grid item xs />
+                {(() => {
+                  if (actionAreaTools) {
+                    return actionAreaTools.map((tool, index) => {
+                      return (
+                        <Grid item key={index} sx={{ minWidth: 0 }}>
+                          {tool}
+                        </Grid>
+                      );
+                    });
+                  }
+                })()}
                 {(() => {
                   if (popupStatsElement) {
-                    return (
-                      <Grid item xs>
-                        {popupStatsElement}
-                      </Grid>
-                    );
+                    return <Grid item>{popupStatsElement}</Grid>;
                   }
                 })()}
               </Grid>

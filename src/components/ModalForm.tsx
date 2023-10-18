@@ -180,6 +180,7 @@ export const BaseModalForm = <Values extends FormikValues>(
     showCloseActionButton = true,
     loading,
     actionButtons,
+    actionAreaTools,
     CloseActionButtonProps = {},
     editableFields,
     placement = 'center',
@@ -730,15 +731,13 @@ export const BaseModalForm = <Values extends FormikValues>(
                     <>
                       {(() => {
                         if (actionButtons) {
-                          return Children.toArray(actionButtons).map(
-                            (tool, index) => {
-                              return (
-                                <Grid item key={index} sx={{ minWidth: 0 }}>
-                                  {tool}
-                                </Grid>
-                              );
-                            }
-                          );
+                          return actionButtons.map((tool, index) => {
+                            return (
+                              <Grid item key={index} sx={{ minWidth: 0 }}>
+                                {tool}
+                              </Grid>
+                            );
+                          });
                         }
                       })()}
                       {(() => {
@@ -767,6 +766,18 @@ export const BaseModalForm = <Values extends FormikValues>(
                       })()}
                     </>
                   );
+                })()}
+                <Grid item xs />
+                {(() => {
+                  if (actionAreaTools) {
+                    return actionAreaTools.map((tool, index) => {
+                      return (
+                        <Grid item key={index} sx={{ minWidth: 0 }}>
+                          {tool}
+                        </Grid>
+                      );
+                    });
+                  }
                 })()}
               </Grid>
             </>
