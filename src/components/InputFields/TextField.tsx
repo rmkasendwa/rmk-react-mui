@@ -93,6 +93,7 @@ export interface TextFieldProps
   endChildren?: ReactNode;
   WrapperProps?: Partial<BoxProps>;
   showClearButton?: boolean;
+  onClickClearButton?: () => void;
   enableLoadingState?: boolean;
 }
 
@@ -127,6 +128,7 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
       showClearButton = true,
       labelWrappedPlaceholderFallback = false,
       FieldValueDisplayProps = {},
+      onClickClearButton,
       sx,
       ...rest
     } = props;
@@ -319,6 +321,7 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
                                   setLocalInputValue('');
                                 }
                                 triggerChangeEvent('');
+                                onClickClearButton?.();
                               }}
                               sx={{ p: 0.4 }}
                             >
