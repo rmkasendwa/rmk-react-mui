@@ -17,7 +17,7 @@ export const useAggregatedFormikContext = ({
   helperText,
   error,
 }: UseAggregatedFormikContextProps) => {
-  const { values, handleBlur, setFieldValue, touched, errors } =
+  const { values, handleBlur, setFieldValue, touched, errors, ...rest } =
     (useFormikContext() as FormikContextType<any>) || {};
 
   const setFieldValueRef = useRef(setFieldValue);
@@ -95,5 +95,10 @@ export const useAggregatedFormikContext = ({
           return get(errors, propertyPath);
         }
       })()) as typeof helperText,
+    handleBlur,
+    setFieldValue,
+    touched,
+    errors,
+    ...rest,
   };
 };
