@@ -5,14 +5,12 @@ import {
   Alert,
   Box,
   Button,
-  ButtonProps,
   Card,
   ComponentsOverrides,
   ComponentsProps,
   ComponentsVariants,
   Divider,
   Grid,
-  GridProps,
   Typography,
   alpha,
   unstable_composeClasses as composeClasses,
@@ -134,8 +132,6 @@ export interface ModalFormProps<Values extends FormikValues = any>
   onSubmitSuccess?: () => void;
   onClickEdit?: () => void;
   SubmitButtonProps?: Partial<LoadingButtonProps>;
-  ActionButtonProps?: Partial<ButtonProps>;
-  ActionButtonAreaProps?: Partial<GridProps>;
   editableFields?: (keyof Values)[];
   draftManager?: DraftsManager;
   draft?: Pick<Draft, 'id' | 'draftMessage' | 'draftUrl'>;
@@ -573,6 +569,7 @@ export const BaseModalForm = <Values extends FormikValues>(
                     }
                   })(),
                   flexDirection: 'row-reverse',
+                  alignItems: 'center',
                   ...ActionButtonAreaPropsSx,
                 }}
               >
