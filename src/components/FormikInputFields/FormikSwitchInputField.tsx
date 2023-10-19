@@ -78,7 +78,7 @@ export const FormikSwitchInputField = forwardRef<
     props: inProps,
     name: 'MuiFormikSwitchInputField',
   });
-  const { className, name, value: valueProp, ...rest } = props;
+  const { className, id, name, value: valueProp, ...rest } = props;
 
   const classes = composeClasses(
     slots,
@@ -105,7 +105,9 @@ export const FormikSwitchInputField = forwardRef<
       {...{ name, value }}
       checked={Boolean(value)}
       onChange={(event) => {
-        setFieldValue('enabled', event.target.checked);
+        if (name || id) {
+          setFieldValue(String(name || id), event.target.checked);
+        }
       }}
     />
   );

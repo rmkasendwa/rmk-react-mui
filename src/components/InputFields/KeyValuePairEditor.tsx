@@ -1,12 +1,14 @@
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import {
-  BoxProps,
   Button,
   ButtonProps,
   ComponentsOverrides,
   ComponentsProps,
   ComponentsVariants,
   Divider,
+  FormControl,
+  FormControlProps,
+  FormHelperText,
   Grid,
   IconButton,
   Tooltip,
@@ -92,7 +94,7 @@ export interface KeyValuePair {
 }
 
 export interface KeyValuePairEditorProps
-  extends Partial<Omit<BoxProps, 'onChange'>>,
+  extends Partial<Omit<FormControlProps, 'onChange'>>,
     Partial<Pick<TextFieldProps, 'error' | 'helperText'>> {
   enableLoadingState?: boolean;
   valueCanHaveMultipleLines?: boolean;
@@ -114,7 +116,6 @@ export const KeyValuePairEditor = forwardRef<any, KeyValuePairEditorProps>(
     });
     const {
       className,
-      sx,
       enableLoadingState = true,
       valueCanHaveMultipleLines = false,
       keyFieldPlaceholder = 'Key',
@@ -124,6 +125,8 @@ export const KeyValuePairEditor = forwardRef<any, KeyValuePairEditorProps>(
       id,
       name,
       value,
+      error,
+      helperText,
       ...rest
     } = props;
 
@@ -217,13 +220,12 @@ export const KeyValuePairEditor = forwardRef<any, KeyValuePairEditorProps>(
     }, []);
 
     return (
-      <Box
+      <FormControl
         ref={ref}
         {...rest}
         className={clsx(classes.root)}
-        sx={{
-          ...sx,
-        }}
+        fullWidth
+        error={error}
       >
         {items.map(({ key, value }, index) => {
           return (
@@ -384,7 +386,8 @@ export const KeyValuePairEditor = forwardRef<any, KeyValuePairEditorProps>(
             {AddRowButtonPropsChildren}
           </Button>
         </Box>
-      </Box>
+        {helperText && <FormHelperText>{helperText}</FormHelperText>}
+      </FormControl>
     );
   }
 );
