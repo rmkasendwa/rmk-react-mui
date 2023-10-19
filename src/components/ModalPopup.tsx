@@ -10,6 +10,7 @@ import {
   ComponentsVariants,
   Divider,
   Grid,
+  GridProps,
   Modal,
   ModalProps,
   alpha,
@@ -91,6 +92,8 @@ export interface ModalPopupProps
   CardProps?: Partial<CardProps>;
   CardBodyProps?: Partial<BoxProps>;
   CloseActionButtonProps?: Partial<ButtonProps>;
+  ActionButtonProps?: Partial<ButtonProps>;
+  ActionButtonAreaProps?: Partial<GridProps>;
   showCloseIconButton?: boolean;
   showCloseActionButton?: boolean;
   showActionsToolbar?: boolean;
@@ -117,6 +120,7 @@ export const ModalPopup = forwardRef<HTMLDivElement, ModalPopupProps>(
       CardBodyProps = {},
       loading = false,
       CloseActionButtonProps = {},
+      ActionButtonAreaProps = {},
       sx,
       className,
       showHeaderToolbar = true,
@@ -152,6 +156,8 @@ export const ModalPopup = forwardRef<HTMLDivElement, ModalPopupProps>(
     const { sx: SearchSyncToolbarPropsSx, ...SearchSyncToolbarPropsRest } =
       SearchSyncToolbarProps;
     const { sx: CardPropsSx, ...CardPropsRest } = CardProps;
+    const { sx: ActionButtonAreaPropsSx, ...ActionButtonAreaPropsRest } =
+      ActionButtonAreaProps;
     const {
       children: closeActionButtonPropsChildren,
       sx: closeActionButtonPropsSx,
@@ -280,6 +286,7 @@ export const ModalPopup = forwardRef<HTMLDivElement, ModalPopupProps>(
               <Grid
                 container
                 spacing={2}
+                {...ActionButtonAreaPropsRest}
                 sx={{
                   py: 2,
                   px: 3,
@@ -291,8 +298,9 @@ export const ModalPopup = forwardRef<HTMLDivElement, ModalPopupProps>(
                       };
                     }
                   })(),
-                  flexDirection: 'row-reverse',
                   alignItems: 'center',
+                  flexDirection: 'row-reverse',
+                  ...ActionButtonAreaPropsSx,
                 }}
               >
                 {(() => {
