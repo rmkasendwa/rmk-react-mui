@@ -92,7 +92,7 @@ export interface TextFieldProps
   endAdornment?: ReactNode;
   endChildren?: ReactNode;
   WrapperProps?: Partial<BoxProps>;
-  showClearButton?: boolean;
+  showClearButton?: boolean | 'always' | 'hover';
   onClickClearButton?: () => void;
   enableLoadingState?: boolean;
 }
@@ -303,46 +303,46 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
             }}
             InputProps={{
               startAdornment,
-              endAdornment:
-                endAdornment ??
-                (() => {
-                  if (inputValue.length > 0 || endAdornmentProp) {
-                    return (
-                      <>
-                        {showClearButton &&
-                        inputValue.length > 0 &&
-                        !disabled ? (
-                          <Tooltip title="Clear" disableInteractive>
-                            <IconButton
-                              className="text-input-clear-button"
-                              onClick={(event) => {
-                                event.preventDefault();
-                                if (!onChangeRef.current || value == null) {
-                                  setLocalInputValue('');
-                                }
-                                triggerChangeEvent('');
-                                onClickClearButton?.();
-                              }}
-                              sx={{ p: 0.4 }}
-                            >
-                              <CloseIcon />
-                            </IconButton>
-                          </Tooltip>
-                        ) : null}
-                        {endAdornmentProp ? endAdornmentProp : null}
-                      </>
-                    );
-                  }
-                })(),
+              endAdornment: endAdornment ?? (
+                <>
+                  {showClearButton != null &&
+                  (inputValue.length > 0 || showClearButton === 'always') &&
+                  !disabled ? (
+                    <Tooltip title="Clear" disableInteractive>
+                      <IconButton
+                        className="text-input-clear-button"
+                        onClick={(event) => {
+                          event.preventDefault();
+                          if (!onChangeRef.current || value == null) {
+                            setLocalInputValue('');
+                          }
+                          triggerChangeEvent('');
+                          onClickClearButton?.();
+                        }}
+                        sx={{ p: 0.4 }}
+                      >
+                        <CloseIcon />
+                      </IconButton>
+                    </Tooltip>
+                  ) : null}
+                  {endAdornmentProp ? endAdornmentProp : null}
+                </>
+              ),
               ...restInputProps,
             }}
             sx={{
-              '& .text-input-clear-button': {
-                display: 'none',
-              },
-              '&:hover .text-input-clear-button': {
-                display: 'inline-flex',
-              },
+              ...(() => {
+                if (showClearButton !== 'always') {
+                  return {
+                    '& .text-input-clear-button': {
+                      display: 'none',
+                    },
+                    '&:hover .text-input-clear-button': {
+                      display: 'inline-flex',
+                    },
+                  };
+                }
+              })(),
               ...sx,
             }}
           />
