@@ -127,6 +127,7 @@ export const KeyValuePairEditor = forwardRef<any, KeyValuePairEditorProps>(
       value,
       error,
       helperText,
+      sx,
       ...rest
     } = props;
 
@@ -224,8 +225,12 @@ export const KeyValuePairEditor = forwardRef<any, KeyValuePairEditorProps>(
         ref={ref}
         {...rest}
         className={clsx(classes.root)}
-        fullWidth
         error={error}
+        sx={{
+          display: 'flex',
+          width: 'auto',
+          ...sx,
+        }}
       >
         {items.map(({ key, value }, index) => {
           return (
