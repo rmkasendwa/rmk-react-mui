@@ -1,13 +1,15 @@
 import { TextFieldProps } from '@mui/material';
 import { FormikContextType, useFormikContext } from 'formik';
 import { get, isEmpty } from 'lodash';
-import { useCallback, useMemo, useRef } from 'react';
+import { ChangeEventHandler, useCallback, useMemo, useRef } from 'react';
 
-interface UseAggregatedFormikContextProps
+export interface UseAggregatedFormikContextProps
   extends Pick<
     TextFieldProps,
-    'value' | 'name' | 'onChange' | 'onBlur' | 'helperText' | 'error'
-  > {}
+    'value' | 'name' | 'onBlur' | 'helperText' | 'error'
+  > {
+  onChange?: ChangeEventHandler<any>;
+}
 
 export const useAggregatedFormikContext = ({
   value,
