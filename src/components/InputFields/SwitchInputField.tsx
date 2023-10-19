@@ -14,6 +14,8 @@ import {
 import clsx from 'clsx';
 import { ReactNode, forwardRef } from 'react';
 
+import { useLoadingContext } from '../../contexts/LoadingContext';
+
 export interface SwitchInputFieldClasses {
   /** Styles applied to the root element. */
   root: string;
@@ -68,6 +70,7 @@ export interface SwitchInputFieldProps
     Pick<SwitchProps, 'checked' | 'onChange'> {
   label: ReactNode;
   SwitchProps?: Partial<SwitchProps>;
+  enableLoadingState?: boolean;
 }
 
 export const SwitchInputField = forwardRef<any, SwitchInputFieldProps>(
@@ -76,7 +79,14 @@ export const SwitchInputField = forwardRef<any, SwitchInputFieldProps>(
       props: inProps,
       name: 'MuiSwitchInputField',
     });
-    const { className, checked, onChange, SwitchProps = {}, ...rest } = props;
+    const {
+      className,
+      checked,
+      onChange,
+      SwitchProps = {},
+      enableLoadingState = true,
+      ...rest
+    } = props;
 
     const classes = composeClasses(
       slots,
@@ -92,6 +102,8 @@ export const SwitchInputField = forwardRef<any, SwitchInputFieldProps>(
 
     const { ...SwitchPropsRest } = SwitchProps;
 
+    const { locked } = useLoadingContext();
+
     return (
       <FormControlLabel
         ref={ref}
@@ -103,11 +115,15 @@ export const SwitchInputField = forwardRef<any, SwitchInputFieldProps>(
             color="success"
             {...SwitchPropsRest}
             {...{ checked, onChange }}
+            disabled={enableLoadingState && locked}
           />
         }
+        disabled={enableLoadingState && locked}
         componentsProps={{
+          ...rest.componentsProps,
           typography: {
             variant: 'body2',
+            ...rest.componentsProps?.typography,
           },
         }}
       />
