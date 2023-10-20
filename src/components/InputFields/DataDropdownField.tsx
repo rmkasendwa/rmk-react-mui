@@ -279,6 +279,7 @@ const BaseDataDropdownField = <Entity,>(
   const [focused, setFocused] = useState(false);
   const [selectedOptionsWrapperElement, setSelectedOptionsWrapperElement] =
     useState<HTMLDivElement | null>(null);
+  const [newOptions, setNewOptions] = useState<DropdownOption[]>([]);
 
   //#region Selected Options
   const onChangeSelectedOptionsRef = useRef(onChangeSelectedOptionsProp);
@@ -310,8 +311,6 @@ const BaseDataDropdownField = <Entity,>(
       return [];
     }
   );
-
-  const [newOptions, setNewOptions] = useState<DropdownOption[]>([]);
 
   const allOptions = useMemo(() => {
     return [...newOptions, ...options];
