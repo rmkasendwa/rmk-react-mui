@@ -128,6 +128,7 @@ export interface DataDropdownFieldProps<Entity = any>
         | 'defaultOptions'
         | 'onChangeSelectedOptions'
         | 'multiple'
+        | 'enableAddNewOption'
       >
     > {
   onChangeSelectedOption?: (selectedOption?: DropdownOption<Entity>) => void;
@@ -199,6 +200,7 @@ const BaseDataDropdownField = <Entity,>(
     onChangeSelectedOption,
     multiple: multipleProp,
     selectedOptionRevalidationKey,
+    enableAddNewOption = false,
     ...rest
   } = props;
 
@@ -292,7 +294,7 @@ const BaseDataDropdownField = <Entity,>(
 
       const selectedOptions = selectedValue
         .map((value) => {
-          return [...(defaultOptions || []), ...options].find(
+          return [...newOptions, ...(defaultOptions || []), ...options].find(
             ({ value: optionValue }) => value === optionValue
           )!;
         })
@@ -308,6 +310,12 @@ const BaseDataDropdownField = <Entity,>(
       return [];
     }
   );
+
+  const [newOptions, setNewOptions] = useState<DropdownOption[]>([]);
+
+  const allOptions = useMemo(() => {
+    return [...newOptions, ...options];
+  }, [newOptions, options]);
 
   useEffect(() => {
     if (multiple) {
@@ -372,11 +380,13 @@ const BaseDataDropdownField = <Entity,>(
             const options = Array.isArray(dropdownOptionsResponse)
               ? dropdownOptionsResponse
               : dropdownOptionsResponse.records;
-            return [...(defaultOptions || []), ...options].filter(
-              ({ value }) => {
-                return selectedValue.includes(String(value));
-              }
-            );
+            return [
+              ...newOptions,
+              ...(defaultOptions || []),
+              ...options,
+            ].filter(({ value }) => {
+              return selectedValue.includes(String(value));
+            });
           };
           const dropdownOptionsResponse = await getDropdownOptions({
             getStaleWhileRevalidate: (dropdownOptionsResponse) => {
@@ -780,6 +790,25 @@ const BaseDataDropdownField = <Entity,>(
     </Stack>
   );
 
+  const addNewOption = () => {
+    if (enableAddNewOption && searchTerm.length > 0) {
+      const newOption = {
+        label: searchTerm,
+        value: searchTerm,
+      };
+      setNewOptions((prevNewOptions) => {
+        return [newOption, ...prevNewOptions];
+      });
+      setSelectedOptions((prevSelectedOptions) => {
+        if (multiple) {
+          return [...prevSelectedOptions, newOption];
+        }
+        return [newOption];
+      });
+      setSearchTerm('');
+    }
+  };
+
   return (
     <>
       {(() => {
@@ -897,6 +926,11 @@ const BaseDataDropdownField = <Entity,>(
               if (searchable) {
                 setSearchTerm(event.target.value);
                 onChangeSearchTerm && onChangeSearchTerm(event.target.value);
+              }
+            }}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                addNewOption();
               }
             }}
             InputProps={{
@@ -1139,6 +1173,11 @@ const BaseDataDropdownField = <Entity,>(
                                 setSearchTerm(event.target.value);
                                 onChangeSearchTerm?.(event.target.value);
                               }}
+                              onKeyDown={(event) => {
+                                if (event.key === 'Enter') {
+                                  addNewOption();
+                                }
+                              }}
                               inputProps={{
                                 ref: searchFieldRef,
                               }}
@@ -1227,7 +1266,7 @@ const BaseDataDropdownField = <Entity,>(
               multiple,
               onSelectOption,
               searchTerm,
-              options,
+              options: allOptions,
               defaultOptions,
               selectedOptions,
               getDropdownOptions,
@@ -1250,10 +1289,23 @@ const BaseDataDropdownField = <Entity,>(
             onClose={() => {
               setOpen(false);
             }}
-            onChangeSelectedOptions={(options) => {
+            onChangeSelectedOptions={(selectedOptions) => {
+              //#region Find New Options
+              const selectedNewOptions = selectedOptions.filter(
+                ({ value }) =>
+                  !allOptions.some(
+                    ({ value: optionValue }) => optionValue === value
+                  )
+              );
+              if (selectedNewOptions.length > 0) {
+                setNewOptions((prevNewOptions) => {
+                  return [...selectedNewOptions, ...prevNewOptions];
+                });
+              }
+              //#endregion
               setSearchTerm('');
-              setSelectedOptions(options);
-              triggerChangeEvent(options);
+              setSelectedOptions(selectedOptions);
+              triggerChangeEvent(selectedOptions);
               if (rest.multiline) {
                 searchFieldRef.current?.focus();
               } else {
@@ -1264,6 +1316,25 @@ const BaseDataDropdownField = <Entity,>(
             onChangeAsyncOptionPagesMap={(asyncOptionPagesMap) => {
               asyncOptionPagesMapRef.current = asyncOptionPagesMap;
             }}
+            enableAddNewOption={
+              enableAddNewOption &&
+              !allOptions.some(({ label, searchableLabel }) => {
+                if (typeof label === 'string') {
+                  return (
+                    label.trim().toLowerCase() ===
+                    searchTerm.trim().toLowerCase()
+                  );
+                }
+                if (searchableLabel) {
+                  return (
+                    searchableLabel.trim().toLowerCase() ===
+                    searchTerm.trim().toLowerCase()
+                  );
+                }
+                return false;
+              })
+            }
+            newOptionLabel={searchTerm}
           />
         );
         if (isSmallScreenSize) {

@@ -1,3 +1,4 @@
+import AddIcon from '@mui/icons-material/Add';
 import ErrorIcon from '@mui/icons-material/Error';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import {
@@ -148,6 +149,8 @@ export interface PaginatedDropdownOptionListProps<Entity = any>
   ) => void;
   revalidationKey?: string;
   noOptionsText?: ReactNode;
+  enableAddNewOption?: boolean;
+  newOptionLabel?: string;
 }
 
 const BasePaginatedDropdownOptionList = <Entity,>(
@@ -186,6 +189,8 @@ const BasePaginatedDropdownOptionList = <Entity,>(
     showNoOptionsFoundMessage = true,
     revalidationKey,
     noOptionsText = 'No options found',
+    enableAddNewOption,
+    newOptionLabel,
     sx,
     ...rest
   } = omit(props, 'limit', 'minWidth');
@@ -535,79 +540,103 @@ const BasePaginatedDropdownOptionList = <Entity,>(
           loadNextAsyncOptions();
         }}
         dataElements={(() => {
-          if (filteredOptions.length > 0) {
-            return filteredOptions.map((option) => {
-              const {
-                value,
-                label,
-                icon,
-                description,
-                selectable = true,
-                isDropdownOption = true,
-                isDropdownOptionWrapped = true,
-                onClick,
-                component,
-                ref,
-                sx,
-              } = option;
-              if (isDropdownOption && isDropdownOptionWrapped) {
-                const isFocused =
-                  filteredOptions.indexOf(option) === focusedOptionIndex;
-                const dropdownOptionElement = (
-                  <DropdownOption
-                    className={clsx({
-                      ['Mui-focusVisible']: isFocused && selectable,
-                    })}
-                    value={value}
-                    key={value}
-                    onClick={(event) => {
-                      if (selectable) {
-                        triggerChangeEvent(option);
-                        onClick && onClick(event);
-                        onSelectOption && onSelectOption(option);
-                      }
-                    }}
-                    selected={(() => {
-                      const selectedOptionValues = selectedOptions.map(
-                        ({ value }) => value
-                      );
-                      return selectedOptionValues.includes(value);
-                    })()}
-                    tabIndex={isFocused ? 0 : -1}
-                    height={optionHeight}
-                    variant={optionVariant}
-                    ref={ref as any}
-                    {...{ selectable, component, icon, sx }}
-                  >
-                    {label}
-                  </DropdownOption>
-                );
-                if (description) {
-                  return (
-                    <Tooltip
-                      title={description}
-                      key={value}
-                      placement="left"
-                      disableInteractive
-                    >
-                      {dropdownOptionElement}
-                    </Tooltip>
-                  );
-                }
-                return dropdownOptionElement;
-              }
-              return <Fragment key={value}>{label}</Fragment>;
-            });
+          const dataElements: ReactNode[] = [];
+          if (enableAddNewOption && newOptionLabel) {
+            dataElements.push(
+              <DropdownOption
+                onClick={(event) => {
+                  event.stopPropagation();
+                  const newOption = {
+                    label: newOptionLabel,
+                    value: newOptionLabel,
+                  };
+                  if (!onChangeSelectedOptions || !selectedOptionsProp) {
+                    setLocalSelectedOptions([newOption]);
+                  }
+                  onChangeSelectedOptions &&
+                    onChangeSelectedOptions([newOption]);
+                  !multiple && onClose && onClose();
+                }}
+                height={optionHeight}
+                icon={<AddIcon />}
+              >
+                Add {newOptionLabel}
+              </DropdownOption>
+            );
           }
-          if (
+          if (filteredOptions.length > 0) {
+            dataElements.push(
+              ...filteredOptions.map((option) => {
+                const {
+                  value,
+                  label,
+                  icon,
+                  description,
+                  selectable = true,
+                  isDropdownOption = true,
+                  isDropdownOptionWrapped = true,
+                  onClick,
+                  component,
+                  ref,
+                  sx,
+                } = option;
+                if (isDropdownOption && isDropdownOptionWrapped) {
+                  const isFocused =
+                    filteredOptions.indexOf(option) === focusedOptionIndex;
+                  const dropdownOptionElement = (
+                    <DropdownOption
+                      className={clsx({
+                        ['Mui-focusVisible']: isFocused && selectable,
+                      })}
+                      value={value}
+                      key={value}
+                      onClick={(event) => {
+                        if (selectable) {
+                          triggerChangeEvent(option);
+                          onClick && onClick(event);
+                          onSelectOption && onSelectOption(option);
+                        }
+                      }}
+                      selected={(() => {
+                        const selectedOptionValues = selectedOptions.map(
+                          ({ value }) => value
+                        );
+                        return selectedOptionValues.includes(value);
+                      })()}
+                      tabIndex={isFocused ? 0 : -1}
+                      height={optionHeight}
+                      variant={optionVariant}
+                      ref={ref as any}
+                      {...{ selectable, component, icon, sx }}
+                    >
+                      {label}
+                    </DropdownOption>
+                  );
+                  if (description) {
+                    return (
+                      <Tooltip
+                        title={description}
+                        key={value}
+                        placement="left"
+                        disableInteractive
+                      >
+                        {dropdownOptionElement}
+                      </Tooltip>
+                    );
+                  }
+                  return dropdownOptionElement;
+                }
+                return <Fragment key={value}>{label}</Fragment>;
+              })
+            );
+          } else if (
             showNoOptionsFoundMessage &&
             !loading &&
             !loadingProp &&
             (!getDropdownOptions || isAsyncOptionsLoaded)
           ) {
-            return [
+            dataElements.push(
               <Box
-                key={0}
                 sx={{
                   display: 'flex',
                   alignItems: 'center',
@@ -618,10 +647,10 @@ const BasePaginatedDropdownOptionList = <Entity,>(
                 <Typography variant="body2" color={palette.error.main}>
                   {noOptionsText}
                 </Typography>
-              </Box>,
-            ];
+              </Box>
+            );
           }
-          return [];
+          return dataElements;
         })()}
         dataElementLength={(() => {
           if (paging) {
