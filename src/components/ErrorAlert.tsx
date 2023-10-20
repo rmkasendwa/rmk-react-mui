@@ -61,12 +61,15 @@ export const errorAlertClasses: ErrorAlertClasses = generateUtilityClasses(
   Object.keys(slots) as ErrorAlertClassKey[]
 );
 
-export interface ErrorAlertProps extends RetryErrorMessageProps, AlertProps {}
+export interface ErrorAlertProps extends RetryErrorMessageProps, AlertProps {
+  dismissErrorMessage?: () => void;
+}
 
 export const ErrorAlert = forwardRef<HTMLDivElement, ErrorAlertProps>(
   function ErrorAlert(inProps, ref) {
     const props = useThemeProps({ props: inProps, name: 'MuiErrorAlert' });
-    const { className, message, retry, sx, ...rest } = props;
+    const { className, message, dismissErrorMessage, retry, sx, ...rest } =
+      props;
 
     const classes = composeClasses(
       slots,
@@ -84,6 +87,13 @@ export const ErrorAlert = forwardRef<HTMLDivElement, ErrorAlertProps>(
       <Alert
         ref={ref}
         {...rest}
+        {...(() => {
+          if (dismissErrorMessage) {
+            return {
+              onClose: dismissErrorMessage,
+            };
+          }
+        })()}
         className={clsx(classes.root)}
         severity="error"
         sx={{

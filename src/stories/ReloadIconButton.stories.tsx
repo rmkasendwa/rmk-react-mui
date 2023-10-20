@@ -22,4 +22,7 @@ Default.args = {
   load: () => {
     console.log('Loading...');
   },
+  dismissErrorMessage: () => {
+    console.log('Dismissing error message...');
+  },
 } as ReloadIconButtonProps;
