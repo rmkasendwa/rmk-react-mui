@@ -74,17 +74,16 @@ export const useLoadOnScrollToBottom = ({
   onCloseRef.current = onClose;
   //#endregion
 
-  const limit = (() => {
-    return (
-      (() => {
-        const element = elementProp ?? elementRef?.current;
-        if (element?.offsetHeight && dataElementLength) {
-          return Math.ceil(element.offsetHeight / dataElementLength);
-        }
-        return dataElementLength ?? 0;
-      })() + 1
-    );
-  })();
+  const limit = Math.max(
+    25,
+    (() => {
+      const element = elementProp ?? elementRef?.current;
+      if (element?.offsetHeight && dataElementLength) {
+        return Math.ceil(element.offsetHeight / dataElementLength);
+      }
+      return dataElementLength ?? 0;
+    })()
+  );
 
   const [offset, setOffset] = useState(0);
 
