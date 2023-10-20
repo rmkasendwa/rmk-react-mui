@@ -806,6 +806,7 @@ const BaseDataDropdownField = <Entity,>(
         return [newOption];
       });
       setSearchTerm('');
+      triggerChangeEvent(selectedOptions);
     }
   };
 
