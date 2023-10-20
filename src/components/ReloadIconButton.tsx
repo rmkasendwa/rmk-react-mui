@@ -16,6 +16,7 @@ import IconButton, { IconButtonProps } from '@mui/material/IconButton';
 import clsx from 'clsx';
 import { forwardRef } from 'react';
 
+import ErrorAlert from './ErrorAlert';
 import Tooltip from './Tooltip';
 
 export interface ReloadIconButtonClasses {
@@ -72,6 +73,7 @@ export interface ReloadIconButtonProps
   loading?: boolean;
   errorMessage?: string;
   load?: () => void;
+  dismissErrorMessage?: () => void;
   IconButtonProps?: Partial<Omit<IconButtonProps, 'onClick'>>;
 }
 
@@ -85,6 +87,7 @@ export const ReloadIconButton = forwardRef<
     loading = false,
     load,
     errorMessage,
+    dismissErrorMessage,
     IconButtonProps = {},
     ...rest
   } = props;
@@ -145,7 +148,23 @@ export const ReloadIconButton = forwardRef<
               }}
             >
               <Grid item display="flex">
-                <Tooltip title={errorMessage}>
+                <Tooltip
+                  title={
+                    <ErrorAlert
+                      message={errorMessage}
+                      dismissErrorMessage={dismissErrorMessage}
+                    />
+                  }
+                  componentsProps={{
+                    tooltip: {
+                      sx: {
+                        p: '1px',
+                        maxWidth: 'none',
+                      },
+                    },
+                  }}
+                  enterAtCursorPosition={false}
+                >
                   <ErrorIcon color="error" />
                 </Tooltip>
               </Grid>
