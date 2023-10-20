@@ -13,6 +13,7 @@ import clsx from 'clsx';
 import { forwardRef, useCallback, useRef } from 'react';
 
 import CodeEditor, { CodeEditorProps } from '../CodeEditor';
+import FieldSet from '../FieldSet';
 import { TextFieldProps } from './TextField';
 
 export interface CodeEditorInputFieldClasses {
@@ -70,7 +71,10 @@ export const codeEditorInputFieldClasses: CodeEditorInputFieldClasses =
 export interface CodeEditorInputFieldProps
   extends Partial<Omit<CodeEditorProps, 'onChange'>>,
     Partial<
-      Pick<TextFieldProps, 'onChange' | 'error' | 'helperText' | 'name' | 'id'>
+      Pick<
+        TextFieldProps,
+        'onChange' | 'error' | 'helperText' | 'name' | 'id' | 'variant'
+      >
     > {}
 
 export const CodeEditorInputField = forwardRef<any, CodeEditorInputFieldProps>(
@@ -79,8 +83,17 @@ export const CodeEditorInputField = forwardRef<any, CodeEditorInputFieldProps>(
       props: inProps,
       name: 'MuiCodeEditorInputField',
     });
-    const { className, onChange, id, name, error, helperText, sx, ...rest } =
-      props;
+    const {
+      className,
+      variant,
+      onChange,
+      id,
+      name,
+      error,
+      helperText,
+      sx,
+      ...rest
+    } = props;
 
     const classes = composeClasses(
       slots,
@@ -117,6 +130,15 @@ export const CodeEditorInputField = forwardRef<any, CodeEditorInputFieldProps>(
       [id, name]
     );
 
+    const codeEditorElement = (
+      <CodeEditor
+        {...rest}
+        onChange={(code) => {
+          triggerChangeEvent(code);
+        }}
+      />
+    );
+
     return (
       <FormControl
         ref={ref}
@@ -128,12 +150,22 @@ export const CodeEditorInputField = forwardRef<any, CodeEditorInputFieldProps>(
           ...sx,
         }}
       >
-        <CodeEditor
-          {...rest}
-          onChange={(code) => {
-            triggerChangeEvent(code);
-          }}
-        />
+        {(() => {
+          if (variant === 'outlined') {
+            return (
+              <FieldSet
+                error={error}
+                sx={{
+                  p: 0,
+                  overflow: 'hidden',
+                }}
+              >
+                {codeEditorElement}
+              </FieldSet>
+            );
+          }
+          return codeEditorElement;
+        })()}
         {helperText && <FormHelperText>{helperText}</FormHelperText>}
       </FormControl>
     );
