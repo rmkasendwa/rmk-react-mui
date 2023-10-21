@@ -127,6 +127,7 @@ export interface DataDropdownFieldProps<Entity = any>
         | 'options'
         | 'defaultOptions'
         | 'onChangeSelectedOptions'
+        | 'showNoOptionsFoundMessage'
         | 'multiple'
         | 'enableAddNewOption'
       >
@@ -201,6 +202,7 @@ const BaseDataDropdownField = <Entity,>(
     multiple: multipleProp,
     selectedOptionRevalidationKey,
     enableAddNewOption = false,
+    showNoOptionsFoundMessage,
     ...rest
   } = props;
 
@@ -798,14 +800,13 @@ const BaseDataDropdownField = <Entity,>(
       setNewOptions((prevNewOptions) => {
         return [newOption, ...prevNewOptions];
       });
-      setSelectedOptions((prevSelectedOptions) => {
-        if (multiple) {
-          return [...prevSelectedOptions, newOption];
-        }
-        return [newOption];
-      });
+
+      const nextSelectedOptions = multiple
+        ? [...selectedOptions, newOption]
+        : [newOption];
+      setSelectedOptions(nextSelectedOptions);
       setSearchTerm('');
-      triggerChangeEvent(selectedOptions);
+      triggerChangeEvent(nextSelectedOptions);
     }
   };
 
@@ -1273,6 +1274,7 @@ const BaseDataDropdownField = <Entity,>(
               revalidationKey,
               noOptionsText,
               externallyPaginated,
+              showNoOptionsFoundMessage,
               limit,
               sortOptions,
             }}
