@@ -112,12 +112,8 @@ export const useAPIService = <Data>(
         const response = await call(apiFunction)
           .then(async (payload) => {
             const response = await payload;
-            if (response != null) {
-              if (isComponentMountedRef.current) {
-                setRecord(response);
-              }
-            }
             if (isComponentMountedRef.current) {
+              setRecord(response);
               setLoaded(true);
             }
             return payload;
