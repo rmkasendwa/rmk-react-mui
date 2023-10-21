@@ -16,11 +16,14 @@ import Box from '@mui/material/Box';
 import clsx from 'clsx';
 import { ReactNode, forwardRef } from 'react';
 
+import FieldLabel, { FieldLabelProps } from './FieldLabel';
+
 export interface FieldSetClasses {
   /** Styles applied to the root element. */
   root: string;
   removeButton: string;
   error: string;
+  disabled: string;
 }
 
 export type FieldSetClassKey = keyof FieldSetClasses;
@@ -61,6 +64,7 @@ const slots: Record<FieldSetClassKey, [FieldSetClassKey]> = {
   root: ['root'],
   removeButton: ['removeButton'],
   error: ['error'],
+  disabled: ['disabled'],
 };
 
 export const fieldSetClasses: FieldSetClasses = generateUtilityClasses(
@@ -68,11 +72,23 @@ export const fieldSetClasses: FieldSetClasses = generateUtilityClasses(
   Object.keys(slots) as FieldSetClassKey[]
 );
 
-export interface FieldSetProps extends Partial<Omit<BoxProps, 'title'>> {
-  title?: ReactNode;
+export interface FieldSetProps
+  extends Partial<BoxProps>,
+    Partial<
+      Pick<
+        FieldLabelProps,
+        | 'required'
+        | 'enableLoadingState'
+        | 'labelSuffix'
+        | 'helpTip'
+        | 'disabled'
+      >
+    > {
+  label?: ReactNode;
   removable?: boolean;
   onClickRemoveButton?: () => void;
   error?: boolean;
+  FieldLabelProps?: Partial<FieldLabelProps>;
 }
 
 export const FieldSet = forwardRef<any, FieldSetProps>(function FieldSet(
@@ -84,10 +100,16 @@ export const FieldSet = forwardRef<any, FieldSetProps>(function FieldSet(
     className,
     removable = false,
     onClickRemoveButton,
-    title,
+    label,
     sx,
     children,
     error,
+    required,
+    enableLoadingState,
+    labelSuffix,
+    helpTip,
+    disabled,
+    FieldLabelProps = {},
     ...rest
   } = props;
 
@@ -103,13 +125,20 @@ export const FieldSet = forwardRef<any, FieldSetProps>(function FieldSet(
     })()
   );
 
+  const { ...FieldLabelPropsRest } = FieldLabelProps;
+
   const { palette } = useTheme();
 
   return (
     <Box
       ref={ref}
       {...rest}
-      className={clsx(classes.root, error && classes.error, className)}
+      className={clsx(
+        classes.root,
+        error && classes.error,
+        disabled && classes.disabled,
+        className
+      )}
       component="fieldset"
       sx={{
         border: `1px solid ${palette.divider}`,
@@ -120,21 +149,37 @@ export const FieldSet = forwardRef<any, FieldSetProps>(function FieldSet(
         [`&.${classes.error}`]: {
           borderColor: palette.error.main,
         },
-        [`&:not(.${classes.error}):hover`]: {
+        [`&:not(.${classes.error}):not(.${classes.disabled}):hover`]: {
           borderColor: alpha(palette.divider, 0.87),
         },
-        [`&:hover`]: {
+        [`&:not(.${classes.disabled}):hover`]: {
           [`&>.${classes.removeButton}`]: {
             display: 'inline-flex',
           },
         },
       }}
     >
-      {title != null ? <legend>{title}</legend> : null}
+      {label != null ? (
+        <legend>
+          <FieldLabel
+            {...{
+              required,
+              enableLoadingState,
+              labelSuffix,
+              helpTip,
+              disabled,
+              ...FieldLabelPropsRest,
+            }}
+          >
+            {label}
+          </FieldLabel>
+        </legend>
+      ) : null}
       {removable ? (
         <IconButton
           className={clsx(classes.removeButton)}
           onClick={onClickRemoveButton}
+          {...{ disabled }}
           sx={{
             p: 0.5,
             '&,&:hover': {
@@ -142,7 +187,7 @@ export const FieldSet = forwardRef<any, FieldSetProps>(function FieldSet(
               color: palette.error.contrastText,
             },
             position: 'absolute',
-            top: title != null ? -21 : -11,
+            top: label != null ? -21 : -11,
             right: -10,
             display: 'none',
           }}
