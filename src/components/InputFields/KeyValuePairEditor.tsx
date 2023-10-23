@@ -168,18 +168,11 @@ export const KeyValuePairEditor = forwardRef<any, KeyValuePairEditorProps>(
             value: {
               name,
               id,
-              value: (() => {
-                const filteredItems = items.filter(({ key }) => {
-                  return key.trim().length > 0;
-                });
-                if (filteredItems.length > 0) {
-                  return Object.fromEntries(
-                    filteredItems.map(({ key, value }) => {
-                      return [key, value];
-                    })
-                  );
-                }
-              })(),
+              value: Object.fromEntries(
+                items.map(({ key, value }) => {
+                  return [key, value];
+                })
+              ),
             },
           });
           onChangeRef.current(event);
