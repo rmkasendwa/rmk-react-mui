@@ -24,6 +24,8 @@ import {
   DataFilterField,
   DateFilterOperator,
   DateFilterOperatorValue,
+  FilterBySearchTerm,
+  SearchableProperty,
   contentExistenceFilterOperators,
 } from '../models';
 
@@ -49,13 +51,31 @@ declare module '@mui/material/styles/components' {
 export interface DataFilterProps<RecordRow extends BaseDataRow = any> {
   data: RecordRow[];
   filterFields?: DataFilterField<RecordRow>[];
+  searchTerm?: string;
+  searchableFields?: SearchableProperty<RecordRow>[];
+
+  /**
+   * Function to be called when user searches.
+   */
+  filterBySearchTerm?: FilterBySearchTerm<RecordRow>;
 }
 
 export const useDataFilter = <RecordRow extends BaseDataRow>(
   inProps: DataFilterProps<RecordRow>
 ) => {
   const props = useThemeProps({ props: inProps, name: 'MuiDataFilter' });
-  const { data, filterFields } = props;
+  const {
+    data,
+    filterFields,
+    searchTerm,
+    searchableFields,
+    filterBySearchTerm,
+  } = props;
+
+  //#region Refs
+  const filterBySearchTermRef = useRef(filterBySearchTerm);
+  filterBySearchTermRef.current = filterBySearchTerm;
+  //#endregion
 
   const getDateInstanceFromFilterConditionRef = useRef(
     ({ value, numberOfDays, selectedDate }: Condition<RecordRow>) => {
@@ -100,35 +120,39 @@ export const useDataFilter = <RecordRow extends BaseDataRow>(
     }: {
       selectedConditionGroup?: ConditionGroup<RecordRow>;
     }) => {
-      if (filterFields) {
-        if (
-          selectedConditionGroup &&
-          selectedConditionGroup.conditions.length > 0
-        ) {
-          return data.filter((row) => {
-            return selectedConditionGroup.conditions
-              .filter(({ operator, value, numberOfDays, selectedDate }) => {
-                return (
-                  operator &&
-                  (contentExistenceFilterOperators.includes(
-                    operator as ContentExistenceFilterOperator
-                  ) ||
-                    (() => {
-                      switch (value as DateFilterOperatorValue) {
-                        case 'number of days ago':
-                        case 'the past number of days':
-                        case 'number of days from now':
-                        case 'the next number of days':
-                          return Boolean(numberOfDays);
-                        case 'exact date':
-                          return Boolean(selectedDate);
-                      }
-                      return value != null && String(value).length > 0;
-                    })())
-                );
-              })
-              [selectedConditionGroup.conjunction === 'and' ? 'every' : 'some'](
-                (condition) => {
+      const dataFilteredByFilterFields = (() => {
+        if (filterFields) {
+          if (
+            selectedConditionGroup &&
+            selectedConditionGroup.conditions.length > 0
+          ) {
+            return data.filter((row) => {
+              return selectedConditionGroup.conditions
+                .filter(({ operator, value, numberOfDays, selectedDate }) => {
+                  return (
+                    operator &&
+                    (contentExistenceFilterOperators.includes(
+                      operator as ContentExistenceFilterOperator
+                    ) ||
+                      (() => {
+                        switch (value as DateFilterOperatorValue) {
+                          case 'number of days ago':
+                          case 'the past number of days':
+                          case 'number of days from now':
+                          case 'the next number of days':
+                            return Boolean(numberOfDays);
+                          case 'exact date':
+                            return Boolean(selectedDate);
+                        }
+                        return value != null && String(value).length > 0;
+                      })())
+                  );
+                })
+                [
+                  selectedConditionGroup.conjunction === 'and'
+                    ? 'every'
+                    : 'some'
+                ]((condition) => {
                   const { fieldId, operator, value } = condition;
                   const filterField = filterFields.find(
                     ({ id }) => id === fieldId
@@ -273,14 +297,57 @@ export const useDataFilter = <RecordRow extends BaseDataRow>(
                         return false;
                     }
                   });
-                }
-              );
-          });
+                });
+            });
+          }
         }
-      }
-      return data;
+        return data;
+      })();
+
+      const filteredData = (() => {
+        if (searchTerm && searchTerm.length > 0) {
+          if (filterBySearchTermRef.current) {
+            return dataFilteredByFilterFields.filter((row) =>
+              filterBySearchTermRef.current!(searchTerm, row)
+            );
+          }
+          if (searchableFields) {
+            const lowercaseSearchTerm = searchTerm.toLowerCase();
+            return dataFilteredByFilterFields.filter((row) => {
+              return searchableFields.some(({ id, getFilterValue }) => {
+                const searchValues: string[] = [];
+                const rawSearchValue = result(row, id);
+                if (typeof rawSearchValue === 'string') {
+                  searchValues.push(rawSearchValue as any);
+                } else if (Array.isArray(rawSearchValue)) {
+                  searchValues.push(
+                    ...rawSearchValue.filter((value) => {
+                      return typeof value === 'string';
+                    })
+                  );
+                }
+                if (getFilterValue) {
+                  const filterValue = getFilterValue(row);
+                  if (typeof filterValue === 'string') {
+                    searchValues.push(filterValue);
+                  }
+                }
+                return (
+                  searchValues.length > 0 &&
+                  searchValues.some((value) => {
+                    return value.toLowerCase().match(lowercaseSearchTerm);
+                  })
+                );
+              });
+            });
+          }
+        }
+        return dataFilteredByFilterFields;
+      })();
+
+      return filteredData;
     },
-    [data, filterFields]
+    [data, filterFields, searchTerm, searchableFields]
   );
 
   return { filter };

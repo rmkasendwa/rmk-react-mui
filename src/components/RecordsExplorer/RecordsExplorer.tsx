@@ -1467,53 +1467,16 @@ const BaseRecordsExplorer = <
   const { filter } = useDataFilter({
     data,
     filterFields,
+    searchTerm,
+    searchableFields,
+    filterBySearchTerm,
   });
   const filteredData = useMemo(() => {
-    // Filtering data
-    const dataFilteredByFilterFields = filter({ selectedConditionGroup });
+    //#region Filtering data
+    const filteredData = filter({ selectedConditionGroup });
+    //#endregion
 
-    const filteredData = (() => {
-      if (searchTerm && searchTerm.length > 0) {
-        if (filterBySearchTermRef.current) {
-          return dataFilteredByFilterFields.filter((row) =>
-            filterBySearchTermRef.current!(searchTerm, row)
-          );
-        }
-        if (searchableFields) {
-          const lowercaseSearchTerm = searchTerm.toLowerCase();
-          return dataFilteredByFilterFields.filter((row) => {
-            return searchableFields.some(({ id, getFilterValue }) => {
-              const searchValues: string[] = [];
-              const rawSearchValue = result(row, id);
-              if (typeof rawSearchValue === 'string') {
-                searchValues.push(rawSearchValue as any);
-              } else if (Array.isArray(rawSearchValue)) {
-                searchValues.push(
-                  ...rawSearchValue.filter((value) => {
-                    return typeof value === 'string';
-                  })
-                );
-              }
-              if (getFilterValue) {
-                const filterValue = getFilterValue(row);
-                if (typeof filterValue === 'string') {
-                  searchValues.push(filterValue);
-                }
-              }
-              return (
-                searchValues.length > 0 &&
-                searchValues.some((value) => {
-                  return value.toLowerCase().match(lowercaseSearchTerm);
-                })
-              );
-            });
-          });
-        }
-      }
-      return dataFilteredByFilterFields;
-    })();
-
-    // Sorting data
+    //#region Sorting data
     const sortedData = (() => {
       if (selectedSortParams && selectedSortParams.length > 0) {
         return [...filteredData].sort((a, b) => {
@@ -1522,15 +1485,10 @@ const BaseRecordsExplorer = <
       }
       return filteredData;
     })();
+    //#endregion
 
     return sortedData;
-  }, [
-    filter,
-    searchTerm,
-    searchableFields,
-    selectedConditionGroup,
-    selectedSortParams,
-  ]);
+  }, [filter, selectedConditionGroup, selectedSortParams]);
   //#endregion
 
   //#region Grouping data
