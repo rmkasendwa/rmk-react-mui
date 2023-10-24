@@ -320,11 +320,9 @@ const BaseDataDropdownField = <Entity,>(
 
   useEffect(() => {
     if (multiple) {
-      onChangeSelectedOptionsRef.current &&
-        onChangeSelectedOptionsRef.current(selectedOptions);
+      onChangeSelectedOptionsRef.current?.(selectedOptions);
     } else {
-      onChangeSelectedOptionRef.current &&
-        onChangeSelectedOptionRef.current(selectedOptions[0]);
+      onChangeSelectedOptionRef.current?.(selectedOptions[0]);
     }
   }, [multiple, selectedOptions]);
   //#endregion
@@ -444,7 +442,7 @@ const BaseDataDropdownField = <Entity,>(
         writable: false,
         value: { id, name, value: selectedOptionValue },
       });
-      onChangeRef.current && onChangeRef.current(event);
+      onChangeRef.current?.(event);
     },
     [multiple, id, name]
   );
@@ -807,6 +805,7 @@ const BaseDataDropdownField = <Entity,>(
       setSelectedOptions(nextSelectedOptions);
       setSearchTerm('');
       triggerChangeEvent(nextSelectedOptions);
+      onSelectOption?.(newOption);
     }
   };
 
@@ -903,7 +902,7 @@ const BaseDataDropdownField = <Entity,>(
                   setOpen(true);
                 }
                 setFocused(true);
-                onFocus && onFocus(event);
+                onFocus?.(event);
               }
             }}
             onBlur={() => {
@@ -926,7 +925,7 @@ const BaseDataDropdownField = <Entity,>(
             onChange={(event) => {
               if (searchable) {
                 setSearchTerm(event.target.value);
-                onChangeSearchTerm && onChangeSearchTerm(event.target.value);
+                onChangeSearchTerm?.(event.target.value);
               }
             }}
             onKeyDown={(event) => {
@@ -1150,7 +1149,7 @@ const BaseDataDropdownField = <Entity,>(
                                   setOpen(true);
                                 }
                                 setFocused(true);
-                                onFocus && onFocus(event);
+                                onFocus?.(event);
                               }}
                               onBlur={() => {
                                 setFocused(false);

@@ -422,6 +422,7 @@ const BasePaginatedDropdownOptionList = <Entity,>(
     const { value } = option;
     const nextOptions = (() => {
       if (multiple) {
+        //#region Toggle option existence
         const localOptions = [...selectedOptions];
         const selectedOption = localOptions.find(
           ({ value: selectedOptionValue }) => {
@@ -442,6 +443,7 @@ const BasePaginatedDropdownOptionList = <Entity,>(
           }
           return 0;
         });
+        //#endregion
       }
       return [option];
     })();
@@ -544,18 +546,13 @@ const BasePaginatedDropdownOptionList = <Entity,>(
           if (enableAddNewOption && newOptionLabel) {
             dataElements.push(
               <DropdownOption
-                onClick={(event) => {
-                  event.stopPropagation();
+                onClick={() => {
                   const newOption = {
                     label: newOptionLabel,
                     value: newOptionLabel,
                   };
-                  if (!onChangeSelectedOptions || !selectedOptionsProp) {
-                    setLocalSelectedOptions([newOption]);
-                  }
-                  onChangeSelectedOptions &&
-                    onChangeSelectedOptions([newOption]);
-                  !multiple && onClose && onClose();
+                  triggerChangeEvent(newOption);
+                  onSelectOption?.(newOption);
                 }}
                 height={optionHeight}
                 icon={<AddIcon />}
@@ -593,8 +590,8 @@ const BasePaginatedDropdownOptionList = <Entity,>(
                       onClick={(event) => {
                         if (selectable) {
                           triggerChangeEvent(option);
-                          onClick && onClick(event);
-                          onSelectOption && onSelectOption(option);
+                          onClick?.(event);
+                          onSelectOption?.(option);
                         }
                       }}
                       selected={(() => {
@@ -664,8 +661,7 @@ const BasePaginatedDropdownOptionList = <Entity,>(
         onSelectDataElement={(focusedOptionIndex) => {
           const selectedOption = filteredOptions[focusedOptionIndex];
           if (selectedOption?.selectable) {
-            onSelectOptionRef.current &&
-              onSelectOptionRef.current(selectedOption);
+            onSelectOptionRef.current?.(selectedOption);
             triggerChangeEvent(selectedOption);
           }
         }}
