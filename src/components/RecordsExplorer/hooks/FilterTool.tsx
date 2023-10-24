@@ -112,7 +112,12 @@ export const useFilterTool = <RecordRow extends BaseDataRow>(
         const { getFieldOptionLabel } = dropdownField;
         const options: DropdownOption[] = [];
         data.forEach((row) => {
-          const fieldValue = result(row, field.id) as any;
+          const fieldValue = (() => {
+            if (baseField.getFilterValue) {
+              return baseField.getFilterValue(row);
+            }
+            return result(row, field.id) as any;
+          })();
           if (fieldValue) {
             const fieldValueOptions = Array.isArray(fieldValue)
               ? fieldValue
