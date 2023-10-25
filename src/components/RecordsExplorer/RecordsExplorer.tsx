@@ -851,7 +851,9 @@ const BaseRecordsExplorer = <
                       !groupableFields.find(
                         ({ id: groupableFieldId }) => groupableFieldId === id
                       ) &&
-                      (groupable || ENUM_TABLE_COLUMN_TYPES.includes(type))
+                      (groupable ||
+                        (ENUM_TABLE_COLUMN_TYPES.includes(type) &&
+                          groupable !== false))
                     );
                   })
                   .map(
