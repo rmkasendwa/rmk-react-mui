@@ -34,6 +34,7 @@ import { Fragment, ReactNode, Ref, useEffect, useRef, useState } from 'react';
 
 import { useGlobalConfiguration } from '../../../contexts/GlobalConfigurationContext';
 import { SortDirection, SortOptions } from '../../../models/Sort';
+import { BLACK_COLOR } from '../../../theme';
 import { sort } from '../../../utils/Sort';
 import DataTablePagination from '../../DataTablePagination';
 import EllipsisMenuIconButton from '../../EllipsisMenuIconButton';
@@ -317,7 +318,7 @@ export const useTable = <DataRow extends BaseDataRow>(
   parentBackgroundColor || (parentBackgroundColor = palette.background.paper);
 
   // Setting default column properties
-  const allColumns = (() => {
+  const { allColumns, stickyColumnWidths } = (() => {
     const computedColumns: typeof columnsProp = [];
     const { columns: allColumns } = getComputedTableProps(props);
     const stickyColumnWidths: number[] = [];
@@ -479,90 +480,93 @@ export const useTable = <DataRow extends BaseDataRow>(
         });
     }
 
-    return expandTableColumnWidths(computedColumns, {
-      enableColumnDisplayToggle,
-    }).map((column) => {
-      const nextColumn = { ...column } as typeof column;
-      const { setDefaultWidth = true } = column;
-      nextColumn.type || (nextColumn.type = 'string');
-      nextColumn.className = clsx(
-        `MuiTableCell-${nextColumn.type}`,
-        nextColumn.className
-      );
-      switch (nextColumn.type) {
-        case 'currency':
-        case 'percentage':
-        case 'number':
-          nextColumn.align = 'right';
-          if (!nextColumn.noHeaderTextSuffix) {
-            switch (nextColumn.type) {
-              case 'currency':
-                if (currencyCode) {
-                  nextColumn.headerTextSuffix = ` (${currencyCode})`;
-                }
-                break;
-              case 'percentage':
-                nextColumn.headerTextSuffix = ' (%)';
-                break;
+    return {
+      allColumns: expandTableColumnWidths(computedColumns, {
+        enableColumnDisplayToggle,
+      }).map((column) => {
+        const nextColumn = { ...column } as typeof column;
+        const { setDefaultWidth = true } = column;
+        nextColumn.type || (nextColumn.type = 'string');
+        nextColumn.className = clsx(
+          `MuiTableCell-${nextColumn.type}`,
+          nextColumn.className
+        );
+        switch (nextColumn.type) {
+          case 'currency':
+          case 'percentage':
+          case 'number':
+            nextColumn.align = 'right';
+            if (!nextColumn.noHeaderTextSuffix) {
+              switch (nextColumn.type) {
+                case 'currency':
+                  if (currencyCode) {
+                    nextColumn.headerTextSuffix = ` (${currencyCode})`;
+                  }
+                  break;
+                case 'percentage':
+                  nextColumn.headerTextSuffix = ' (%)';
+                  break;
+              }
             }
-          }
-          break;
-        case 'boolean':
-          nextColumn.align = 'center';
-          nextColumn.enumValues = ['Yes', 'No'];
-          nextColumn.searchKeyMapper ||
-            (nextColumn.searchKeyMapper = (searchValue) =>
-              searchValue === 'Yes');
-          break;
-        case 'id':
-          nextColumn.align = 'center';
-          break;
-        case 'phoneNumber':
-          nextColumn.columnClassName = 'phone-number-column';
-          !nextColumn.width && setDefaultWidth && (nextColumn.width = 220);
-          break;
-        case 'currencyInput':
-          nextColumn.align = 'right';
-          if (currencyCode) {
-            nextColumn.headerTextSuffix = ` (${currencyCode})`;
-          }
-          break;
-        case 'tool':
-        case 'checkbox':
-          nextColumn.locked = true;
-          nextColumn.align = 'center';
-          break;
-      }
+            break;
+          case 'boolean':
+            nextColumn.align = 'center';
+            nextColumn.enumValues = ['Yes', 'No'];
+            nextColumn.searchKeyMapper ||
+              (nextColumn.searchKeyMapper = (searchValue) =>
+                searchValue === 'Yes');
+            break;
+          case 'id':
+            nextColumn.align = 'center';
+            break;
+          case 'phoneNumber':
+            nextColumn.columnClassName = 'phone-number-column';
+            !nextColumn.width && setDefaultWidth && (nextColumn.width = 220);
+            break;
+          case 'currencyInput':
+            nextColumn.align = 'right';
+            if (currencyCode) {
+              nextColumn.headerTextSuffix = ` (${currencyCode})`;
+            }
+            break;
+          case 'tool':
+          case 'checkbox':
+            nextColumn.locked = true;
+            nextColumn.align = 'center';
+            break;
+        }
 
-      // Date columns
-      switch (nextColumn.type) {
-        case 'date':
-        case 'timestamp':
-          !nextColumn.width && setDefaultWidth && (nextColumn.width = 220);
-          break;
-      }
+        // Date columns
+        switch (nextColumn.type) {
+          case 'date':
+          case 'timestamp':
+            !nextColumn.width && setDefaultWidth && (nextColumn.width = 220);
+            break;
+        }
 
-      // Nowrap state
-      switch (nextColumn.type) {
-        case 'boolean':
-        case 'checkbox':
-        case 'currency':
-        case 'date':
-        case 'dateTime':
-        case 'email':
-        case 'enum':
-        case 'id':
-        case 'number':
-        case 'percentage':
-        case 'string':
-        case 'time':
-        case 'timestamp':
-          nextColumn.noWrap ?? (nextColumn.noWrap = true);
-          break;
-      }
+        // Nowrap state
+        switch (nextColumn.type) {
+          case 'boolean':
+          case 'checkbox':
+          case 'currency':
+          case 'date':
+          case 'dateTime':
+          case 'email':
+          case 'enum':
+          case 'id':
+          case 'number':
+          case 'percentage':
+          case 'string':
+          case 'time':
+          case 'timestamp':
+            nextColumn.noWrap ?? (nextColumn.noWrap = true);
+            break;
+        }
 
-      return nextColumn;
-    });
+        return nextColumn;
+      }),
+      stickyColumnWidths,
+    };
   })();
 
   const selectedColumns = [
@@ -661,7 +665,7 @@ export const useTable = <DataRow extends BaseDataRow>(
       ...(() => {
         if (highlightRowOnHover) {
           return {
-            [`.${tableCellClasses.root}:before`]: {
+            [`.${tableCellClasses.root}:after`]: {
               bgcolor: alpha(palette.primary.main, 0.1),
             },
           };
@@ -1619,6 +1623,36 @@ export const useTable = <DataRow extends BaseDataRow>(
         <>
           {columnDisplayToggle}
           {baseTableElement}
+          {(() => {
+            if (startStickyColumnIndex != null) {
+              return (
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    height: '100%',
+                    left: 0,
+                    top: 0,
+                    zIndex: 99,
+                    pointerEvents: 'none',
+                    minWidth,
+                  }}
+                >
+                  <Box
+                    sx={{
+                      position: 'sticky',
+                      top: 0,
+                      left: 0,
+                      height: '100%',
+                      width: stickyColumnWidths.reduce((a, b) => a + b, 0),
+                      pointerEvents: 'none',
+                      borderRight: `1px solid ${palette.divider}`,
+                      boxShadow: `2px 0 10px -1px ${alpha(BLACK_COLOR, 0.2)}`,
+                    }}
+                  />
+                </Box>
+              );
+            }
+          })()}
         </>
       );
     }
