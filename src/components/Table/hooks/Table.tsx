@@ -1618,7 +1618,10 @@ export const useTable = <DataRow extends BaseDataRow>(
       );
     }
 
-    if (showHeaderRow && enableColumnDisplayToggle) {
+    if (
+      showHeaderRow &&
+      (enableColumnDisplayToggle || startStickyColumnIndex != null)
+    ) {
       return (
         <>
           {columnDisplayToggle}
