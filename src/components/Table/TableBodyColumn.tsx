@@ -416,7 +416,7 @@ export const TableBodyColumn = forwardRef<any, TableBodyColumnProps<any>>(
             cursor: onClickColumn ? 'pointer' : 'inherit',
             position: 'relative',
             overflow: 'hidden',
-            ['&:before']: {
+            ['&:after']: {
               content: '""',
               position: 'absolute',
               top: 0,
