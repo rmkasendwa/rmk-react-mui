@@ -531,6 +531,7 @@ export interface RecordsExplorerProps<
   addSearchParamsToPathRef?: MutableRefObject<
     AddRecordsExplorerSearchParamsToPathFunction | undefined
   >;
+  subHeaderElement?: ReactNode;
 }
 
 const BaseRecordsExplorer = <
@@ -645,6 +646,7 @@ const BaseRecordsExplorer = <
     selectedRecordId: selectedRecordIdProp,
     addSearchParamsToPathRef,
     loadRecordsRef,
+    subHeaderElement,
     ...rest
   } = omit(
     props,
@@ -2942,6 +2944,7 @@ const BaseRecordsExplorer = <
         />
         <Divider />
       </Paper>
+      {subHeaderElement}
       <Box
         {...BodyPropsRest}
         ref={mergeRefs([bodyElementRef, BodyPropsRest.ref as any])}
