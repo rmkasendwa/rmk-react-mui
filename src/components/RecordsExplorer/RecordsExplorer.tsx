@@ -2237,7 +2237,7 @@ const BaseRecordsExplorer = <
                   columns={baseTableColumns}
                   rows={flattenedGroupedData}
                   {...groupedDataViewProps}
-                  scrollableElement={bodyElementRef.current}
+                  scrollableElementRef={bodyElementRef}
                   stickyHeader
                   sx={{
                     [`

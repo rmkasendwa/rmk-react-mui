@@ -62,6 +62,8 @@ export interface TableClasses {
   /** Styles applied to the root element. */
   root: string;
   columnDisplayToggle: string;
+  startStickyColumnDivider: string;
+  startStickyColumnDividerActive: string;
 }
 
 export type TableClassKey = keyof TableClasses;
@@ -101,6 +103,8 @@ export const getTableUtilityClass = (slot: string) => {
 const slots: Record<TableClassKey, [TableClassKey]> = {
   root: ['root'],
   columnDisplayToggle: ['columnDisplayToggle'],
+  startStickyColumnDivider: ['startStickyColumnDivider'],
+  startStickyColumnDividerActive: ['startStickyColumnDividerActive'],
 };
 
 export const tableClasses: TableClasses = generateUtilityClasses(
@@ -180,6 +184,7 @@ export const useTable = <DataRow extends BaseDataRow>(
     lazyRows = rows.length > LAZY_ROWS_BUFFER_SIZE,
     controlZIndex = true,
     highlightRowOnHover = true,
+    scrollableElementRef,
     sx,
     ...rest
   } = props;
@@ -233,6 +238,7 @@ export const useTable = <DataRow extends BaseDataRow>(
   onChangeCheckedRowIdsRef.current = onChangeCheckedRowIdsProp;
   const onChangeMinWidthRef = useRef(onChangeMinWidth);
   onChangeMinWidthRef.current = onChangeMinWidth;
+  const startStickyColumnDividerElementRef = useRef<HTMLDivElement | null>();
   //#endregion
 
   const { palette, breakpoints } = useTheme();
@@ -651,6 +657,31 @@ export const useTable = <DataRow extends BaseDataRow>(
       });
     }
   }, [sortByProp]);
+
+  //#region Track scrollable ancestor
+  useEffect(() => {
+    if (scrollableElementRef?.current) {
+      const scrollableElement = scrollableElementRef.current;
+      const scrollEventCallback = () => {
+        if (startStickyColumnDividerElementRef.current) {
+          if (scrollableElement.scrollLeft > 0) {
+            startStickyColumnDividerElementRef.current.classList.add(
+              classes.startStickyColumnDividerActive
+            );
+          } else {
+            startStickyColumnDividerElementRef.current.classList.remove(
+              classes.startStickyColumnDividerActive
+            );
+          }
+        }
+      };
+      scrollableElement.addEventListener('scroll', scrollEventCallback);
+      return () => {
+        scrollableElement.removeEventListener('scroll', scrollEventCallback);
+      };
+    }
+  }, [classes.startStickyColumnDividerActive, scrollableElementRef]);
+  //#endregion
 
   const handleChangePage = (e: any, newPage: number) => {
     setPageIndex(newPage);
@@ -1531,7 +1562,6 @@ export const useTable = <DataRow extends BaseDataRow>(
           'parentBackgroundColor',
           'currencyCode',
           'emptyRowsLabel',
-          'scrollableElement',
           'lowercaseLabelPlural',
           'parentBackgroundColor',
           'emptyRowsLabel',
@@ -1643,15 +1673,19 @@ export const useTable = <DataRow extends BaseDataRow>(
                   }}
                 >
                   <Box
+                    ref={startStickyColumnDividerElementRef}
+                    className={clsx(classes.startStickyColumnDivider)}
                     sx={{
                       position: 'sticky',
                       top: 0,
                       left: 0,
                       height: '100%',
-                      width: stickyColumnWidths.reduce((a, b) => a + b, 0),
                       pointerEvents: 'none',
-                      borderRight: `1px solid ${palette.divider}`,
-                      boxShadow: `2px 0 10px -1px ${alpha(BLACK_COLOR, 0.2)}`,
+                      [`&.${classes.startStickyColumnDividerActive}`]: {
+                        width: stickyColumnWidths.reduce((a, b) => a + b, 0),
+                        borderRight: `1px solid ${palette.divider}`,
+                        boxShadow: `2px 0 10px -1px ${alpha(BLACK_COLOR, 0.2)}`,
+                      },
                     }}
                   />
                 </Box>
