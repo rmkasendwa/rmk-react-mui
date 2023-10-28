@@ -2,9 +2,9 @@ import '../../components/FormikInputFields/FormikPhoneNumberInputField';
 
 import PhoneIcon from '@mui/icons-material/Phone';
 import ShareIcon from '@mui/icons-material/Share';
+import { getExample } from 'awesome-phonenumber';
 import { countries } from 'countries-list';
 import randomEmail from 'random-email';
-import createMobilePhoneNumber from 'random-mobile-numbers';
 import React from 'react';
 import { names, uniqueNamesGenerator } from 'unique-names-generator';
 import * as Yup from 'yup';
@@ -56,19 +56,30 @@ export const contacts = Array.from({ length: 1000 }).map((_, index) => {
   leftAtDate.setMonth(Math.floor(Math.random() * 11));
   leftAtDate.setDate(Math.floor(Math.random() * 28));
 
+  const countryCode =
+    countryCodes[Math.floor(Math.random() * countryCodes.length)];
+
+  const phoneNumber = (() => {
+    try {
+      return getExample(countryCode, 'mobile').number?.international;
+    } catch (err) {
+      err;
+    }
+  })();
+
   return {
     id: String(index),
     name: uniqueNamesGenerator({
       dictionaries: [names, names],
       separator: ' ',
     }),
-    phoneNumber: createMobilePhoneNumber('UK'),
+    phoneNumber,
     status:
       contactStatuses[Math.floor(Math.random() * (contactStatuses.length + 1))],
     email: randomEmail(),
     accountBalance: Math.round(Math.random() * 1000_000),
     source: contactSources[Math.floor(Math.random() * contactSources.length)],
-    countryCode: countryCodes[Math.floor(Math.random() * countryCodes.length)],
+    countryCode,
     ...(() => {
       if (!(index % 5 === 0 && Math.random() > 0.9)) {
         return {
