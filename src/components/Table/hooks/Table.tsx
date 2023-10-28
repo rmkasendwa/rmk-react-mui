@@ -174,6 +174,7 @@ export const useTable = <DataRow extends BaseDataRow>(
     TableGroupingProps,
     getToolTipWrappedColumnNode,
     startStickyColumnIndex,
+    showStartStickyColumnDivider = false,
     staticRows,
     onChangeMinWidth,
     lazyRows = rows.length > LAZY_ROWS_BUFFER_SIZE,
@@ -1620,7 +1621,8 @@ export const useTable = <DataRow extends BaseDataRow>(
 
     if (
       showHeaderRow &&
-      (enableColumnDisplayToggle || startStickyColumnIndex != null)
+      (enableColumnDisplayToggle ||
+        (showStartStickyColumnDivider && startStickyColumnIndex != null))
     ) {
       return (
         <>

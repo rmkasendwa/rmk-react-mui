@@ -2085,6 +2085,7 @@ const BaseRecordsExplorer = <
 
             const baseTableProps: typeof viewProps = {
               startStickyColumnIndex: 0,
+              showStartStickyColumnDivider: true,
               bordersVariant: 'square',
               ...viewProps,
               ...ListViewProps,

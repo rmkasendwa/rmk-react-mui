@@ -151,6 +151,7 @@ export interface PaginatedDropdownOptionListProps<Entity = any>
   noOptionsText?: ReactNode;
   enableAddNewOption?: boolean;
   newOptionLabel?: string;
+  footerContent?: ReactNode;
 }
 
 const BasePaginatedDropdownOptionList = <Entity,>(
@@ -191,6 +192,7 @@ const BasePaginatedDropdownOptionList = <Entity,>(
     noOptionsText = 'No options found',
     enableAddNewOption,
     newOptionLabel,
+    footerContent,
     sx,
     ...rest
   } = omit(props, 'limit', 'minWidth');
@@ -792,6 +794,7 @@ const BasePaginatedDropdownOptionList = <Entity,>(
           </DropdownOption>
         </>
       ) : null}
+      {footerContent}
     </Card>
   );
 };
