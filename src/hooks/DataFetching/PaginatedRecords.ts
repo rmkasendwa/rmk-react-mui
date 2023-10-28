@@ -1,5 +1,8 @@
+import hashIt from 'hash-it';
+import omit from 'lodash/omit';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 
+import { useLocalStorageData } from '../../contexts/LocalStorageDataContext';
 import {
   PaginatedRequestParams,
   PaginatedResponseData,
@@ -114,6 +117,14 @@ export const usePaginatedRecords = <
     ...rest
   } = useAPIService<PaginatedResponseData<DataRow> | null>(null, loadOnMount);
 
+  const cacheKey = String(
+    hashIt({ ...omit(inProps, 'loadedPagesMap'), recordFinder })
+  );
+  const { data, updateData } = useLocalStorageData();
+  const cachedLoadedPagesRef = useRef<{ key: number; value: DataRow[] }[]>(
+    data[cacheKey]
+  );
+
   //#region Ref
   const isInitialMountRef = useRef(true);
   const pendingRecordRequestControllers = useRef<
@@ -133,8 +144,19 @@ export const usePaginatedRecords = <
   searchTermRef.current = searchTerm;
 
   const loadedPages = useMemo(() => {
-    return loadedPagesMapRef.current || new Map<number, DataRow[]>();
+    if (loadedPagesMapRef.current) {
+      return loadedPagesMapRef.current;
+    }
+
+    const loadedPagesMap = new Map<number, DataRow[]>();
+    if (cachedLoadedPagesRef.current) {
+      cachedLoadedPagesRef.current.forEach((cachedLoadedPage) => {
+        loadedPagesMap.set(cachedLoadedPage.key, cachedLoadedPage.value);
+      });
+    }
+    return loadedPagesMap;
   }, []);
+
   const allPageRecordsRef = useRef<DataRow[]>(
     (() => {
       if (isInitialMountRef.current) {
@@ -152,11 +174,12 @@ export const usePaginatedRecords = <
   >(undefined);
   //#endregion
 
-  type LoadOptions = PaginatedRequestParams & {
-    isLoadingNextPage?: boolean;
-  };
   const load = useCallback(
-    (params: LoadOptions = {}) => {
+    (
+      params: PaginatedRequestParams & {
+        isLoadingNextPage?: boolean;
+      } = {}
+    ) => {
       params = { ...params };
       params.offset || (params.offset = offsetRef.current);
       params.limit || (params.limit = limitRef.current);
@@ -221,6 +244,12 @@ export const usePaginatedRecords = <
             );
           })();
           setRecord(paginatedResponseData);
+          updateData({
+            [cacheKey]: [...loadedPages.entries()].map(([key, value]) => ({
+              key,
+              value,
+            })),
+          });
         };
 
         const responseData = await recordFinderRef
@@ -265,7 +294,7 @@ export const usePaginatedRecords = <
         return responseData;
       });
     },
-    [loadFromAPIService, loadedPages, setRecord]
+    [cacheKey, loadFromAPIService, loadedPages, setRecord, updateData]
   );
   const loadRef = useRef(load);
   loadRef.current = load;
