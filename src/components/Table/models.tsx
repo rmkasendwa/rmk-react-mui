@@ -7,7 +7,7 @@ import { TableProps as MuiBaseTableProps } from '@mui/material/Table';
 import { TableCellProps } from '@mui/material/TableCell';
 import { TablePaginationProps } from '@mui/material/TablePagination';
 import { TableRowProps as MuiTableRowProps } from '@mui/material/TableRow';
-import { ReactElement, ReactNode } from 'react';
+import { ReactElement, ReactNode, RefObject } from 'react';
 
 import { CountryCode } from '../../models/Countries';
 import { SortBy, SortOptions } from '../../models/Sort';
@@ -326,19 +326,21 @@ export interface TableProps<DataRow extends BaseDataRow = any>
   isGroupedTable?: boolean;
   TableGroupingProps?: TableGroupingProps;
   allPropsComputed?: boolean;
-  scrollableElement?: HTMLElement | null;
+  scrollableElementRef?: RefObject<HTMLElement | null>;
 
-  // Sort props
+  //#region Sort props
   sortable?: boolean;
   handleSortOperations?: boolean;
   sortBy?: SortBy<DataRow>;
   onChangeSortBy?: (sortOptions: SortOptions<DataRow>) => void;
+  //#endregion
 
-  // Removable columns
+  //#region Removable columns
   enableColumnDisplayToggle?: boolean;
   ColumnDisplayToggleProps?: Partial<BoxProps>;
+  //#endregion
 
-  // Checkboxes
+  //#region Checkboxes
   enableCheckboxRowSelectors?: boolean;
   enableCheckboxAllRowSelector?: boolean;
   allRowsChecked?: boolean;
@@ -347,6 +349,7 @@ export interface TableProps<DataRow extends BaseDataRow = any>
     checkedRowIds: string[],
     allRowsChecked: boolean
   ) => void;
+  //#endregion
 
   //#region Sticky columns
   startStickyColumnIndex?: number;
