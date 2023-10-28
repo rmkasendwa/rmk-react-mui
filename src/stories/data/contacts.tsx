@@ -168,14 +168,12 @@ export const tableColumns: TableColumn<Contact>[] = [
     id: 'joinedAt',
     label: 'Joined',
     type: 'timestamp',
-    showHeaderText: false,
     textTransform: true,
   },
   {
     id: 'leftAt',
     label: 'Left',
     type: 'timestamp',
-    showHeaderText: false,
     textTransform: true,
   },
 ];

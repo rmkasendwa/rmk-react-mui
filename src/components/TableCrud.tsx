@@ -357,7 +357,7 @@ const BaseTableCrud = <
       {
         limit,
         offset,
-        revalidationKey: `${revalidationKey}${searchTerm}`,
+        revalidationKey: `${revalidationKey}${searchTerm}:${recordsFinder.toString()}`,
         loadOnMount: showRecords,
         autoSync,
       }
