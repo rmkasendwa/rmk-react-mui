@@ -348,8 +348,11 @@ export interface TableProps<DataRow extends BaseDataRow = any>
     allRowsChecked: boolean
   ) => void;
 
-  // Sticky columns
+  //#region Sticky columns
   startStickyColumnIndex?: number;
+  showStartStickyColumnDivider?: boolean;
+  //#endregion
+
   staticRows?: DataRow[];
   onChangeMinWidth?: (minWidth?: number) => void;
 

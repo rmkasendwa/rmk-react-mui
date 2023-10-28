@@ -119,7 +119,7 @@ Timeline.args = {
 export const WithExtraViewOptions = Template.bind({});
 WithExtraViewOptions.args = {
   ...baseArgs,
-  ViewOptionsButtonProps: {
+  ViewOptionsToolProps: {
     viewOptions: [
       {
         label: 'Map',
