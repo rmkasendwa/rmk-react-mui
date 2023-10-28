@@ -711,20 +711,20 @@ const BaseRecordsExplorer = <
   filterBySearchTermRef.current = filterBySearchTerm;
   const searchableFieldsRef = useRef(searchableFieldsProp);
   searchableFieldsRef.current = searchableFieldsProp;
-  const filterFieldsRef = useRef(filterFieldsProp);
-  filterFieldsRef.current = filterFieldsProp;
-  const sortableFieldsRef = useRef(sortableFieldsProp);
-  sortableFieldsRef.current = sortableFieldsProp;
-  const groupableFieldsRef = useRef(groupableFieldsProp);
-  groupableFieldsRef.current = groupableFieldsProp;
+  const filterFieldsPropRef = useRef(filterFieldsProp);
+  filterFieldsPropRef.current = filterFieldsProp;
+  const sortableFieldsPropRef = useRef(sortableFieldsProp);
+  sortableFieldsPropRef.current = sortableFieldsProp;
+  const groupableFieldsPropRef = useRef(groupableFieldsProp);
+  groupableFieldsPropRef.current = groupableFieldsProp;
   const fieldsRef = useRef(fields);
   fieldsRef.current = fields;
   const sortByPropRef = useRef(sortByProp);
   sortByPropRef.current = sortByProp;
   const getGroupableDataRef = useRef(getGroupableData);
   getGroupableDataRef.current = getGroupableData;
-  const viewsRef = useRef(views);
-  viewsRef.current = views;
+  const viewsPropRef = useRef(views);
+  viewsPropRef.current = views;
   const filterByPropRef = useRef(filterByProp);
   filterByPropRef.current = filterByProp;
   const getEditableRecordInitialValuesRef = useRef(
@@ -798,336 +798,9 @@ const BaseRecordsExplorer = <
     }
   })();
 
-  //#region Resolving data operation fields
-  const { filterFields, sortableFields, groupableFields, searchableFields } =
-    useMemo(() => {
-      //#region Resolving groupable fields
-      const groupableFields =
-        (() => {
-          const groupableFields: typeof groupableFieldsRef.current = [];
-          if (groupableFieldsRef.current) {
-            groupableFields.push(...groupableFieldsRef.current);
-          }
-          if (fieldsRef.current) {
-            fieldsRef.current.forEach(
-              ({
-                id,
-                label,
-                type = 'string',
-                groupType,
-                getSortValue,
-                getFilterValue,
-                getGroupLabel,
-                groupable,
-                sortLabels,
-              }) => {
-                if (
-                  groupable &&
-                  !groupableFields.find(
-                    ({ id: groupableFieldId }) => groupableFieldId === id
-                  )
-                ) {
-                  groupableFields.push({
-                    id,
-                    label: String(label),
-                    type:
-                      groupType || mapTableColumnTypeToPrimitiveDataType(type),
-                    getSortValue: getSortValue || (getFilterValue as any),
-                    getGroupLabel,
-                    sortLabels,
-                  });
-                }
-              }
-            );
-          }
-          if (viewsRef.current) {
-            const listView = viewsRef.current.find(
-              ({ type }) => type === 'List'
-            ) as ListView<RecordRow> | null;
-            if (listView) {
-              groupableFields.push(
-                ...listView.columns
-                  .filter(({ id, label, type = 'string', groupable }) => {
-                    return (
-                      typeof label === 'string' &&
-                      !groupableFields.find(
-                        ({ id: groupableFieldId }) => groupableFieldId === id
-                      ) &&
-                      (groupable ||
-                        (ENUM_TABLE_COLUMN_TYPES.includes(type) &&
-                          groupable !== false))
-                    );
-                  })
-                  .map(
-                    ({
-                      id,
-                      label,
-                      type = 'enum',
-                      getFilterValue,
-                      getColumnValue,
-                      getSortValue,
-                      getGroupLabel,
-                      sortLabels,
-                    }) => {
-                      return {
-                        id,
-                        label: String(label),
-                        type: type as PrimitiveDataType,
-                        getSortValue: getSortValue || (getFilterValue as any),
-                        sortLabels,
-                        getGroupLabel: getGroupLabel || (getColumnValue as any),
-                      };
-                    }
-                  )
-              );
-              groupableFields.forEach((groupableField) => {
-                const { id: groupableFieldId } = groupableField;
-                if (!groupableField.getGroupLabel) {
-                  const column = listView.columns.find(
-                    ({ id }) => id === groupableFieldId
-                  );
-                  if (column && column.getColumnValue) {
-                    groupableField.getGroupLabel = column.getColumnValue as any;
-                  }
-                }
-              });
-            }
-          }
-          if (groupableFields.length > 0) {
-            return groupableFields;
-          }
-        })() || [];
-      //#endregion
-
-      //#region Resolving sortable fields
-      const sortableFields =
-        (() => {
-          const sortableFields: typeof sortableFieldsRef.current = [];
-          if (sortableFieldsRef.current) {
-            sortableFields.push(...sortableFieldsRef.current);
-          }
-          if (fieldsRef.current) {
-            fieldsRef.current.forEach(
-              ({
-                id,
-                label,
-                type = 'string',
-                sortType,
-                getSortValue,
-                getFilterValue,
-                sortable,
-                sortLabels,
-              }) => {
-                if (
-                  sortable &&
-                  !sortableFields.find(
-                    ({ id: sortableFieldId }) => sortableFieldId === id
-                  )
-                ) {
-                  sortableFields.push({
-                    id,
-                    label: String(label),
-                    type:
-                      sortType || mapTableColumnTypeToPrimitiveDataType(type),
-                    getSortValue: getSortValue || (getFilterValue as any),
-                    sortLabels,
-                  });
-                }
-              }
-            );
-          }
-          if (viewsRef.current) {
-            const listView = viewsRef.current.find(
-              ({ type }) => type === 'List'
-            ) as ListView<RecordRow> | null;
-            if (listView) {
-              sortableFields.push(
-                ...listView.columns
-                  .filter(({ id, label }) => {
-                    return (
-                      typeof label === 'string' &&
-                      !sortableFields.find(
-                        ({ id: sortableFieldId }) => sortableFieldId === id
-                      )
-                    );
-                  })
-                  .map(
-                    ({
-                      id,
-                      label,
-                      type = 'string',
-                      getFilterValue,
-                      getSortValue,
-                      sortLabels,
-                    }) => {
-                      return {
-                        id,
-                        label: String(label),
-                        type: mapTableColumnTypeToPrimitiveDataType(type),
-                        getSortValue: getSortValue || (getFilterValue as any),
-                        sortLabels,
-                      };
-                    }
-                  )
-              );
-            }
-          }
-          if (sortableFields.length > 0) {
-            return sortableFields;
-          }
-        })() || [];
-      //#endregion
-
-      //#region Resolving filter fields
-      const filterFields =
-        (() => {
-          const filterFields: typeof filterFieldsRef.current = [];
-          if (filterFieldsRef.current) {
-            filterFields.push(...filterFieldsRef.current);
-          }
-          if (fieldsRef.current) {
-            fieldsRef.current.forEach(
-              ({ id, label, type, getFilterValue, searchable }) => {
-                if (
-                  searchable &&
-                  !filterFields.find(
-                    ({ id: filterFieldId }) => filterFieldId === id
-                  )
-                ) {
-                  filterFields.push({
-                    id,
-                    label: String(label),
-                    type: mapTableColumnTypeToPrimitiveDataType(type) as any,
-                    getFilterValue,
-                  });
-                }
-              }
-            );
-          }
-          if (viewsRef.current) {
-            const listView = viewsRef.current.find(
-              ({ type }) => type === 'List'
-            ) as ListView<RecordRow> | null;
-            if (listView) {
-              filterFields.push(
-                ...listView.columns
-                  .filter(({ id, label }) => {
-                    return (
-                      typeof label === 'string' &&
-                      !filterFields.find(
-                        ({ id: filterFieldId }) => filterFieldId === id
-                      )
-                    );
-                  })
-                  .map(
-                    ({
-                      id,
-                      label,
-                      type = 'string',
-                      filterType,
-                      getFilterValue,
-                      getColumnValue,
-                      getFieldOptionLabel,
-                      options,
-                      sortOptions,
-                    }) => {
-                      return {
-                        id,
-                        label: String(label),
-                        type:
-                          filterType ||
-                          (mapTableColumnTypeToPrimitiveDataType(type) as any),
-                        getFieldOptionLabel:
-                          getFieldOptionLabel ||
-                          (ENUM_TABLE_COLUMN_TYPES.includes(type) &&
-                          getColumnValue
-                            ? getColumnValue
-                            : undefined),
-                        getFilterValue,
-                        options,
-                        sortOptions,
-                      };
-                    }
-                  )
-              );
-            }
-          }
-          if (filterFields.length > 0) {
-            return filterFields;
-          }
-        })() || [];
-      //#endregion
-
-      //#region Resolving filter fields
-      const searchableFields = (() => {
-        const searchableFields: typeof searchableFieldsRef.current = [];
-        if (searchableFieldsRef.current) {
-          searchableFields.push(...searchableFieldsRef.current);
-        }
-        if (fieldsRef.current) {
-          fieldsRef.current.forEach(
-            ({ id, label, type, filterType, getFilterValue, searchable }) => {
-              if (
-                searchable &&
-                !filterFields.find(
-                  ({ id: filterFieldId }) => filterFieldId === id
-                )
-              ) {
-                filterFields.push({
-                  id,
-                  label: String(label),
-                  type:
-                    filterType ||
-                    (mapTableColumnTypeToPrimitiveDataType(type) as any),
-                  getFilterValue,
-                });
-              }
-            }
-          );
-        }
-        if (viewsRef.current) {
-          const listView = viewsRef.current.find(
-            ({ type }) => type === 'List'
-          ) as ListView<RecordRow> | null;
-          if (listView) {
-            searchableFields.push(
-              ...listView.columns
-                .filter(({ id, label }) => {
-                  return (
-                    typeof label === 'string' &&
-                    !searchableFields.find(
-                      ({ id: filterFieldId }) => filterFieldId === id
-                    )
-                  );
-                })
-                .map(({ id, label, getFilterValue }) => {
-                  return {
-                    id,
-                    label: label as string,
-                    getFilterValue,
-                  };
-                })
-            );
-          }
-        }
-        if (searchableFields.length > 0) {
-          return searchableFields;
-        }
-      })();
-      //#endregion
-
-      return {
-        filterFields,
-        sortableFields,
-        groupableFields,
-        searchableFields,
-      };
-    }, []);
-  //#endregion
-
   const baseSelectedColumnIds = useMemo(() => {
-    if (viewsRef.current) {
-      const listView = viewsRef.current.find(
+    if (viewsPropRef.current) {
+      const listView = viewsPropRef.current.find(
         ({ type }) => type === 'List'
       ) as ListView<RecordRow> | null;
       if (listView) {
@@ -1244,92 +917,6 @@ const BaseRecordsExplorer = <
     }
     return 'List' as View;
   })();
-
-  const selectedGroupParams = useMemo(() => {
-    const groupByParams = groupableFields.reduce(
-      (accumulator, groupByParam) => {
-        accumulator[groupByParam.id] = groupByParam;
-        return accumulator;
-      },
-      {} as Record<keyof RecordRow, (typeof groupableFields)[number]>
-    );
-
-    return ((): SortBy<RecordRow> => {
-      if (
-        groupByProp &&
-        (!searchParamGroupBy || searchParamGroupBy.length <= 0)
-      ) {
-        return groupByProp;
-      }
-      return searchParamGroupBy || [];
-    })()
-      .filter(({ id }) => {
-        return result(groupByParams, id);
-      })
-      .map((groupByParam) => {
-        return {
-          ...groupByParam,
-          ...(result(groupByParams, groupByParam.id) as any),
-        };
-      })
-      .map((groupByParam) => {
-        return {
-          ...groupByParam,
-          sortDirection: groupByParam.sortDirection || 'ASC',
-        };
-      });
-  }, [groupByProp, groupableFields, searchParamGroupBy]);
-
-  const selectedSortParams = useMemo(() => {
-    const sortByParams = sortableFields.reduce((accumulator, sortByParam) => {
-      accumulator[sortByParam.id] = sortByParam;
-      return accumulator;
-    }, {} as Record<keyof RecordRow, (typeof sortableFields)[number]>);
-
-    return ((): SortBy<RecordRow> => {
-      if (
-        sortByPropRef.current &&
-        !modifiedStateKeys?.includes(getHashedSearchParamKey('sortBy')) &&
-        (!searchParamSortBy || searchParamSortBy.length <= 0)
-      ) {
-        return sortByPropRef.current;
-      }
-      return searchParamSortBy || [];
-    })()
-      .filter(({ id }) => {
-        return result(sortByParams, id);
-      })
-      .map((sortByParam) => {
-        return {
-          ...sortByParam,
-          ...(result(sortByParams, sortByParam.id) as any),
-        };
-      })
-      .map((sortByParams) => {
-        return {
-          ...sortByParams,
-          sortDirection: sortByParams.sortDirection || 'ASC',
-        };
-      });
-  }, [modifiedStateKeys, searchParamSortBy, sortableFields]);
-
-  const selectedConditionGroup = useMemo(() => {
-    if (searchParamFilterBy) {
-      return {
-        ...searchParamFilterBy,
-        conjunction: searchParamFilterBy.conjunction || 'and',
-      } as ConditionGroup<RecordRow>;
-    }
-    if (
-      filterByPropRef.current &&
-      !modifiedStateKeys?.includes(getHashedSearchParamKey('filterBy'))
-    ) {
-      return {
-        ...filterByPropRef.current,
-        conjunction: filterByPropRef.current.conjunction || 'and',
-      };
-    }
-  }, [modifiedStateKeys, searchParamFilterBy]);
 
   const selectedDataPresetIndex = (() => {
     if (dataPresets && dataPresets.length > 0) {
@@ -1466,6 +1053,422 @@ const BaseRecordsExplorer = <
     }
     return dataProp || [];
   })();
+
+  //#region Resolving data operation fields
+  const { filterFields, sortableFields, groupableFields, searchableFields } =
+    useMemo(() => {
+      data;
+      //#region Resolving groupable fields
+      const groupableFields =
+        (() => {
+          const groupableFields: typeof groupableFieldsPropRef.current = [];
+          if (groupableFieldsPropRef.current) {
+            groupableFields.push(...groupableFieldsPropRef.current);
+          }
+          if (fieldsRef.current) {
+            fieldsRef.current.forEach(
+              ({
+                id,
+                label,
+                type = 'string',
+                groupType,
+                getSortValue,
+                getFilterValue,
+                getGroupLabel,
+                groupable,
+                sortLabels,
+              }) => {
+                if (
+                  groupable &&
+                  !groupableFields.find(
+                    ({ id: groupableFieldId }) => groupableFieldId === id
+                  )
+                ) {
+                  groupableFields.push({
+                    id,
+                    label: String(label),
+                    type:
+                      groupType || mapTableColumnTypeToPrimitiveDataType(type),
+                    getSortValue: getSortValue || (getFilterValue as any),
+                    getGroupLabel,
+                    sortLabels,
+                  });
+                }
+              }
+            );
+          }
+          if (viewsPropRef.current) {
+            const listView = viewsPropRef.current.find(
+              ({ type }) => type === 'List'
+            ) as ListView<RecordRow> | null;
+            if (listView) {
+              groupableFields.push(
+                ...listView.columns
+                  .filter(({ id, label, type = 'string', groupable }) => {
+                    return (
+                      typeof label === 'string' &&
+                      !groupableFields.find(
+                        ({ id: groupableFieldId }) => groupableFieldId === id
+                      ) &&
+                      (groupable ||
+                        (ENUM_TABLE_COLUMN_TYPES.includes(type) &&
+                          groupable !== false))
+                    );
+                  })
+                  .map(
+                    ({
+                      id,
+                      label,
+                      type = 'enum',
+                      getFilterValue,
+                      getColumnValue,
+                      getSortValue,
+                      getGroupLabel,
+                      sortLabels,
+                    }) => {
+                      return {
+                        id,
+                        label: String(label),
+                        type: type as PrimitiveDataType,
+                        getSortValue: getSortValue || (getFilterValue as any),
+                        sortLabels,
+                        getGroupLabel: getGroupLabel || (getColumnValue as any),
+                      };
+                    }
+                  )
+              );
+              groupableFields.forEach((groupableField) => {
+                const { id: groupableFieldId } = groupableField;
+                if (!groupableField.getGroupLabel) {
+                  const column = listView.columns.find(
+                    ({ id }) => id === groupableFieldId
+                  );
+                  if (column && column.getColumnValue) {
+                    groupableField.getGroupLabel = column.getColumnValue as any;
+                  }
+                }
+              });
+            }
+          }
+          if (groupableFields.length > 0) {
+            return groupableFields;
+          }
+        })() || [];
+      //#endregion
+
+      //#region Resolving sortable fields
+      const sortableFields =
+        (() => {
+          const sortableFields: typeof sortableFieldsPropRef.current = [];
+          if (sortableFieldsPropRef.current) {
+            sortableFields.push(...sortableFieldsPropRef.current);
+          }
+          if (fieldsRef.current) {
+            fieldsRef.current.forEach(
+              ({
+                id,
+                label,
+                type = 'string',
+                sortType,
+                getSortValue,
+                getFilterValue,
+                sortable,
+                sortLabels,
+              }) => {
+                if (
+                  sortable &&
+                  !sortableFields.find(
+                    ({ id: sortableFieldId }) => sortableFieldId === id
+                  )
+                ) {
+                  sortableFields.push({
+                    id,
+                    label: String(label),
+                    type:
+                      sortType || mapTableColumnTypeToPrimitiveDataType(type),
+                    getSortValue: getSortValue || (getFilterValue as any),
+                    sortLabels,
+                  });
+                }
+              }
+            );
+          }
+          if (viewsPropRef.current) {
+            const listView = viewsPropRef.current.find(
+              ({ type }) => type === 'List'
+            ) as ListView<RecordRow> | null;
+            if (listView) {
+              sortableFields.push(
+                ...listView.columns
+                  .filter(({ id, label }) => {
+                    return (
+                      typeof label === 'string' &&
+                      !sortableFields.find(
+                        ({ id: sortableFieldId }) => sortableFieldId === id
+                      )
+                    );
+                  })
+                  .map(
+                    ({
+                      id,
+                      label,
+                      type = 'string',
+                      getFilterValue,
+                      getSortValue,
+                      sortLabels,
+                    }) => {
+                      return {
+                        id,
+                        label: String(label),
+                        type: mapTableColumnTypeToPrimitiveDataType(type),
+                        getSortValue: getSortValue || (getFilterValue as any),
+                        sortLabels,
+                      };
+                    }
+                  )
+              );
+            }
+          }
+          if (sortableFields.length > 0) {
+            return sortableFields;
+          }
+        })() || [];
+      //#endregion
+
+      //#region Resolving filter fields
+      const filterFields =
+        (() => {
+          const filterFields: typeof filterFieldsPropRef.current = [];
+          if (filterFieldsPropRef.current) {
+            filterFields.push(...filterFieldsPropRef.current);
+          }
+          if (fieldsRef.current) {
+            fieldsRef.current.forEach(
+              ({ id, label, type, getFilterValue, searchable }) => {
+                if (
+                  searchable &&
+                  !filterFields.find(
+                    ({ id: filterFieldId }) => filterFieldId === id
+                  )
+                ) {
+                  filterFields.push({
+                    id,
+                    label: String(label),
+                    type: mapTableColumnTypeToPrimitiveDataType(type) as any,
+                    getFilterValue,
+                  });
+                }
+              }
+            );
+          }
+          if (viewsPropRef.current) {
+            const listView = viewsPropRef.current.find(
+              ({ type }) => type === 'List'
+            ) as ListView<RecordRow> | null;
+            if (listView) {
+              filterFields.push(
+                ...listView.columns
+                  .filter(({ id, label }) => {
+                    return (
+                      typeof label === 'string' &&
+                      !filterFields.find(
+                        ({ id: filterFieldId }) => filterFieldId === id
+                      )
+                    );
+                  })
+                  .map(
+                    ({
+                      id,
+                      label,
+                      type = 'string',
+                      filterType,
+                      getFilterValue,
+                      getColumnValue,
+                      getFieldOptionLabel,
+                      options,
+                      sortOptions,
+                    }) => {
+                      return {
+                        id,
+                        label: String(label),
+                        type:
+                          filterType ||
+                          (mapTableColumnTypeToPrimitiveDataType(type) as any),
+                        getFieldOptionLabel:
+                          getFieldOptionLabel ||
+                          (ENUM_TABLE_COLUMN_TYPES.includes(type) &&
+                          getColumnValue
+                            ? getColumnValue
+                            : undefined),
+                        getFilterValue,
+                        options,
+                        sortOptions,
+                      };
+                    }
+                  )
+              );
+            }
+          }
+          if (filterFields.length > 0) {
+            return filterFields;
+          }
+        })() || [];
+      //#endregion
+
+      //#region Resolving filter fields
+      const searchableFields = (() => {
+        const searchableFields: typeof searchableFieldsRef.current = [];
+        if (searchableFieldsRef.current) {
+          searchableFields.push(...searchableFieldsRef.current);
+        }
+        if (fieldsRef.current) {
+          fieldsRef.current.forEach(
+            ({ id, label, type, filterType, getFilterValue, searchable }) => {
+              if (
+                searchable &&
+                !filterFields.find(
+                  ({ id: filterFieldId }) => filterFieldId === id
+                )
+              ) {
+                filterFields.push({
+                  id,
+                  label: String(label),
+                  type:
+                    filterType ||
+                    (mapTableColumnTypeToPrimitiveDataType(type) as any),
+                  getFilterValue,
+                });
+              }
+            }
+          );
+        }
+        if (viewsPropRef.current) {
+          const listView = viewsPropRef.current.find(
+            ({ type }) => type === 'List'
+          ) as ListView<RecordRow> | null;
+          if (listView) {
+            searchableFields.push(
+              ...listView.columns
+                .filter(({ id, label }) => {
+                  return (
+                    typeof label === 'string' &&
+                    !searchableFields.find(
+                      ({ id: filterFieldId }) => filterFieldId === id
+                    )
+                  );
+                })
+                .map(({ id, label, getFilterValue }) => {
+                  return {
+                    id,
+                    label: label as string,
+                    getFilterValue,
+                  };
+                })
+            );
+          }
+        }
+        if (searchableFields.length > 0) {
+          return searchableFields;
+        }
+      })();
+      //#endregion
+
+      return {
+        filterFields,
+        sortableFields,
+        groupableFields,
+        searchableFields,
+      };
+    }, [data]);
+
+  const groupableFieldsRef = useRef(groupableFields);
+  //#endregion
+
+  const selectedGroupParams = useMemo(() => {
+    const groupByParams = groupableFieldsRef.current.reduce(
+      (accumulator, groupByParam) => {
+        accumulator[groupByParam.id] = groupByParam;
+        return accumulator;
+      },
+      {} as Record<keyof RecordRow, (typeof groupableFieldsRef.current)[number]>
+    );
+
+    return ((): SortBy<RecordRow> => {
+      if (
+        groupByProp &&
+        (!searchParamGroupBy || searchParamGroupBy.length <= 0)
+      ) {
+        return groupByProp;
+      }
+      return searchParamGroupBy || [];
+    })()
+      .filter(({ id }) => {
+        return result(groupByParams, id);
+      })
+      .map((groupByParam) => {
+        return {
+          ...groupByParam,
+          ...(result(groupByParams, groupByParam.id) as any),
+        };
+      })
+      .map((groupByParam) => {
+        return {
+          ...groupByParam,
+          sortDirection: groupByParam.sortDirection || 'ASC',
+        };
+      });
+  }, [groupByProp, searchParamGroupBy]);
+
+  const selectedSortParams = useMemo(() => {
+    const sortByParams = sortableFields.reduce((accumulator, sortByParam) => {
+      accumulator[sortByParam.id] = sortByParam;
+      return accumulator;
+    }, {} as Record<keyof RecordRow, (typeof sortableFields)[number]>);
+
+    return ((): SortBy<RecordRow> => {
+      if (
+        sortByPropRef.current &&
+        !modifiedStateKeys?.includes(getHashedSearchParamKey('sortBy')) &&
+        (!searchParamSortBy || searchParamSortBy.length <= 0)
+      ) {
+        return sortByPropRef.current;
+      }
+      return searchParamSortBy || [];
+    })()
+      .filter(({ id }) => {
+        return result(sortByParams, id);
+      })
+      .map((sortByParam) => {
+        return {
+          ...sortByParam,
+          ...(result(sortByParams, sortByParam.id) as any),
+        };
+      })
+      .map((sortByParams) => {
+        return {
+          ...sortByParams,
+          sortDirection: sortByParams.sortDirection || 'ASC',
+        };
+      });
+  }, [modifiedStateKeys, searchParamSortBy, sortableFields]);
+
+  const selectedConditionGroup = useMemo(() => {
+    if (searchParamFilterBy) {
+      return {
+        ...searchParamFilterBy,
+        conjunction: searchParamFilterBy.conjunction || 'and',
+      } as ConditionGroup<RecordRow>;
+    }
+    if (
+      filterByPropRef.current &&
+      !modifiedStateKeys?.includes(getHashedSearchParamKey('filterBy'))
+    ) {
+      return {
+        ...filterByPropRef.current,
+        conjunction: filterByPropRef.current.conjunction || 'and',
+      };
+    }
+  }, [modifiedStateKeys, searchParamFilterBy]);
 
   //#region Filtering data
   const { filter } = useDataFilter({

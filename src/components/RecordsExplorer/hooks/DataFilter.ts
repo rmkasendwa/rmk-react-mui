@@ -75,6 +75,10 @@ export const useDataFilter = <RecordRow extends BaseDataRow>(
   //#region Refs
   const filterBySearchTermRef = useRef(filterBySearchTerm);
   filterBySearchTermRef.current = filterBySearchTerm;
+  const filterFieldsRef = useRef(filterFields);
+  filterFieldsRef.current = filterFields;
+  const searchableFieldsRef = useRef(searchableFields);
+  searchableFieldsRef.current = searchableFields;
   //#endregion
 
   const getDateInstanceFromFilterConditionRef = useRef(
@@ -121,7 +125,7 @@ export const useDataFilter = <RecordRow extends BaseDataRow>(
       selectedConditionGroup?: ConditionGroup<RecordRow>;
     }) => {
       const dataFilteredByFilterFields = (() => {
-        if (filterFields) {
+        if (filterFieldsRef.current) {
           if (
             selectedConditionGroup &&
             selectedConditionGroup.conditions.length > 0
@@ -154,7 +158,7 @@ export const useDataFilter = <RecordRow extends BaseDataRow>(
                     : 'some'
                 ]((condition) => {
                   const { fieldId, operator, value } = condition;
-                  const filterField = filterFields.find(
+                  const filterField = filterFieldsRef.current!.find(
                     ({ id }) => id === fieldId
                   );
                   const filterValues: any[] = (() => {
@@ -311,34 +315,36 @@ export const useDataFilter = <RecordRow extends BaseDataRow>(
               filterBySearchTermRef.current!(searchTerm, row)
             );
           }
-          if (searchableFields) {
+          if (searchableFieldsRef.current) {
             const lowercaseSearchTerm = searchTerm.toLowerCase();
             return dataFilteredByFilterFields.filter((row) => {
-              return searchableFields.some(({ id, getFilterValue }) => {
-                const searchValues: string[] = [];
-                const rawSearchValue = result(row, id);
-                if (typeof rawSearchValue === 'string') {
-                  searchValues.push(rawSearchValue as any);
-                } else if (Array.isArray(rawSearchValue)) {
-                  searchValues.push(
-                    ...rawSearchValue.filter((value) => {
-                      return typeof value === 'string';
+              return searchableFieldsRef.current!.some(
+                ({ id, getFilterValue }) => {
+                  const searchValues: string[] = [];
+                  const rawSearchValue = result(row, id);
+                  if (typeof rawSearchValue === 'string') {
+                    searchValues.push(rawSearchValue as any);
+                  } else if (Array.isArray(rawSearchValue)) {
+                    searchValues.push(
+                      ...rawSearchValue.filter((value) => {
+                        return typeof value === 'string';
+                      })
+                    );
+                  }
+                  if (getFilterValue) {
+                    const filterValue = getFilterValue(row);
+                    if (typeof filterValue === 'string') {
+                      searchValues.push(filterValue);
+                    }
+                  }
+                  return (
+                    searchValues.length > 0 &&
+                    searchValues.some((value) => {
+                      return value.toLowerCase().match(lowercaseSearchTerm);
                     })
                   );
                 }
-                if (getFilterValue) {
-                  const filterValue = getFilterValue(row);
-                  if (typeof filterValue === 'string') {
-                    searchValues.push(filterValue);
-                  }
-                }
-                return (
-                  searchValues.length > 0 &&
-                  searchValues.some((value) => {
-                    return value.toLowerCase().match(lowercaseSearchTerm);
-                  })
-                );
-              });
+              );
             });
           }
         }
@@ -347,7 +353,7 @@ export const useDataFilter = <RecordRow extends BaseDataRow>(
 
       return filteredData;
     },
-    [data, filterFields, searchTerm, searchableFields]
+    [data, searchTerm]
   );
 
   return { filter };
