@@ -1022,7 +1022,10 @@ const BaseRecordsExplorer = <
       return [];
     },
     {
-      revalidationKey,
+      revalidationKey: `${revalidationKey}:${
+        recordsFinder?.toString() ||
+        selectedDataPreset?.recordsFinder.toString()
+      }`,
       loadOnMount: Boolean(
         renderExplorerElement &&
           (recordsFinder || selectedDataPreset?.recordsFinder)

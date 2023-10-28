@@ -163,6 +163,7 @@ export const EmailAddressSelector = forwardRef<
       return { records: [], recordsTotalCount: 0 };
     },
     {
+      revalidationKey: getEmailAddressHolders?.toString(),
       loadOnMount: false,
       autoSync: false,
       limit: 11,

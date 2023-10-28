@@ -313,7 +313,7 @@ const BasePaginatedDropdownOptionList = <Entity,>(
         }
       })(),
       canLoadNextPage: externallyPaginated,
-      revalidationKey,
+      revalidationKey: `${revalidationKey}:${getDropdownOptions?.toString()}`,
     }
   );
   const loadAsyncOptionsRef = useRef(loadAsyncOptions);

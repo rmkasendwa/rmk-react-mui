@@ -161,7 +161,7 @@ export const ExternallyPaginatedTableCard = forwardRef<
       {
         limit,
         offset,
-        revalidationKey: `${revalidationKey}${searchTerm}`,
+        revalidationKey: `${revalidationKey}${searchTerm}:${recordsFinder.toString()}`,
       }
     );
 
