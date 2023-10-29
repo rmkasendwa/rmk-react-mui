@@ -33,6 +33,7 @@ import { omit } from 'lodash';
 import { Fragment, ReactNode, Ref, useEffect, useRef, useState } from 'react';
 
 import { useGlobalConfiguration } from '../../../contexts/GlobalConfigurationContext';
+import { useLoadOnScrollToBottom } from '../../../hooks/InfiniteScroller';
 import { SortDirection, SortOptions } from '../../../models/Sort';
 import { BLACK_COLOR } from '../../../theme';
 import { sort } from '../../../utils/Sort';
@@ -187,7 +188,15 @@ export const useTable = <DataRow extends BaseDataRow>(
     scrollableElementRef,
     sx,
     ...rest
-  } = props;
+  } = omit(
+    props,
+    'lowercaseLabelPlural',
+    'parentBackgroundColor',
+    'emptyRowsLabel',
+    'defaultDateFormat',
+    'defaultDateTimeFormat',
+    'tableBodyRowHeight'
+  ) as typeof props;
 
   let {
     lowercaseLabelPlural,
@@ -195,6 +204,7 @@ export const useTable = <DataRow extends BaseDataRow>(
     emptyRowsLabel,
     defaultDateFormat,
     defaultDateTimeFormat,
+    tableBodyRowHeight,
   } = props;
 
   const classes = composeClasses(
@@ -208,6 +218,10 @@ export const useTable = <DataRow extends BaseDataRow>(
       }
     })()
   );
+
+  //#region Reset tableRowHeight to disable scroll paging *For Now*
+  tableBodyRowHeight = undefined;
+  //#endregion
 
   const {
     sx: TableBodyRowPlaceholderPropsSx,
@@ -682,6 +696,24 @@ export const useTable = <DataRow extends BaseDataRow>(
     }
   }, [classes.startStickyColumnDividerActive, scrollableElementRef]);
   //#endregion
+
+  const [offset, setOffset] = useState(0);
+  const limit = (() => {
+    if (scrollableElementRef?.current?.offsetHeight && tableBodyRowHeight) {
+      return Math.ceil(
+        scrollableElementRef.current.offsetHeight / tableBodyRowHeight
+      );
+    }
+  })();
+  useLoadOnScrollToBottom({
+    elementRef: scrollableElementRef,
+    onChangeScrollLength({ scrollTop }) {
+      if (tableBodyRowHeight) {
+        setOffset(Math.floor(scrollTop / tableBodyRowHeight));
+      }
+    },
+    revalidationKey: `${tableBodyRowHeight}`,
+  });
 
   const handleChangePage = (e: any, newPage: number) => {
     setPageIndex(newPage);
@@ -1268,7 +1300,12 @@ export const useTable = <DataRow extends BaseDataRow>(
           return accumulator;
         }, [] as { id: string; element: ReactNode }[]);
       }
-      return pageRows.reduce((accumulator, row, index) => {
+      return (() => {
+        if (tableBodyRowHeight) {
+          return pageRows.slice(offset, offset + (limit ?? 0));
+        }
+        return pageRows;
+      })().reduce((accumulator, row, index) => {
         const rowNumber = rowStartIndex + 1 + index;
         const { GroupingProps } = row;
         const compositeId = (() => {
@@ -1319,6 +1356,13 @@ export const useTable = <DataRow extends BaseDataRow>(
                     })(),
                   },
                 },
+                ...(() => {
+                  if (tableBodyRowHeight) {
+                    return {
+                      height: tableBodyRowHeight,
+                    };
+                  }
+                })(),
               }}
             />
           ),
@@ -1598,7 +1642,23 @@ export const useTable = <DataRow extends BaseDataRow>(
                 <TableBody>
                   {(() => {
                     if (tableBodyRows.length > 0) {
-                      return getTableBodyRowElements();
+                      return (
+                        <>
+                          {getTableBodyRowElements()}
+                          {(() => {
+                            if (tableBodyRowHeight) {
+                              return (
+                                <TableRow
+                                  sx={{
+                                    height:
+                                      pageRows.length * tableBodyRowHeight,
+                                  }}
+                                />
+                              );
+                            }
+                          })()}
+                        </>
+                      );
                     }
                     return (
                       <TableRow>

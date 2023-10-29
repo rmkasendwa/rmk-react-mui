@@ -361,4 +361,6 @@ export interface TableProps<DataRow extends BaseDataRow = any>
 
   lazyRows?: boolean;
   highlightRowOnHover?: boolean;
+
+  tableBodyRowHeight?: number;
 }
