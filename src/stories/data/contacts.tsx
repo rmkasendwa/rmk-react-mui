@@ -188,6 +188,7 @@ export const contactTableProps = {
     };
   },
   minColumnWidth: 220,
+  tableBodyRowHeight: 41,
 } as Partial<TableProps<Contact>>;
 
 export const createContactFormValidationSchema = Yup.object({
