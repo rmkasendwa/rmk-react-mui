@@ -1025,7 +1025,9 @@ const BaseRecordsExplorer = <
       revalidationKey: `${revalidationKey}:${
         recordsFinder?.toString() ||
         selectedDataPreset?.recordsFinder.toString()
-      }`,
+      }:${hashIt({
+        recordLabelPlural,
+      })}`,
       loadOnMount: Boolean(
         renderExplorerElement &&
           (recordsFinder || selectedDataPreset?.recordsFinder)
