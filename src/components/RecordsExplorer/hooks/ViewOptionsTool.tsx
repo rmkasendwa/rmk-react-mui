@@ -17,7 +17,14 @@ import {
   useTheme,
   useThemeProps,
 } from '@mui/material';
-import { ReactNode, useMemo, useRef, useState } from 'react';
+import {
+  FC,
+  MutableRefObject,
+  ReactNode,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 import TimelineIcon from '../../Icons/TimelineIcon';
 import ModalPopup from '../../ModalPopup';
@@ -65,9 +72,125 @@ const defaultViewOptions: ViewOption[] = [
 
 const DEFAULT_VIEW_OPTIONS_TYPES = defaultViewOptions.map(({ label }) => label);
 
-export interface ViewOptionsToolProps<ViewType extends string = string> {
+//#region View Options Tool Popover
+export interface ViewOptionsToolPopoverProps {
+  anchorRef: React.MutableRefObject<HTMLButtonElement | null>;
+  options: DropdownOption[];
+  selectedOptions: DropdownOption[];
+  onChangeViewType?: (viewType: ViewOptionType) => void;
+  togglePopupFunctionRef: MutableRefObject<
+    ((open: boolean) => void) | undefined
+  >;
+}
+
+export const ViewOptionsToolPopover: FC<ViewOptionsToolPopoverProps> = ({
+  anchorRef,
+  options,
+  selectedOptions,
+  onChangeViewType,
+  togglePopupFunctionRef,
+}) => {
+  const { breakpoints } = useTheme();
+  const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
+
+  const [open, setOpen] = useState(false);
+  togglePopupFunctionRef.current = (open) => {
+    setOpen(open);
+  };
+
+  const optionsElement = (
+    <PaginatedDropdownOptionList
+      options={options}
+      minWidth={anchorRef.current ? anchorRef.current.offsetWidth : undefined}
+      onClose={() => {
+        setOpen(false);
+      }}
+      selectedOptions={selectedOptions}
+      onChangeSelectedOptions={(selectableOptions) => {
+        onChangeViewType?.(selectableOptions[0].value as any);
+      }}
+      searchable={options.length > 5}
+      {...{
+        ...(() => {
+          if (isSmallScreenSize) {
+            return {
+              optionHeight: 50,
+              maxHeight: window.innerHeight - 240,
+              sx: {
+                border: 'none',
+              },
+            };
+          }
+        })(),
+      }}
+    />
+  );
+
+  if (isSmallScreenSize) {
+    return (
+      <ModalPopup
+        {...{ open }}
+        onClose={() => {
+          setOpen(false);
+        }}
+        CardProps={{
+          sx: {
+            maxHeight: 'none',
+          },
+        }}
+        CardBodyProps={{
+          sx: {
+            p: 0,
+          },
+        }}
+        disableEscapeKeyDown={false}
+        disableAutoFocus={false}
+        showHeaderToolbar={false}
+        enableCloseOnBackdropClick
+        sx={{
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        {optionsElement}
+      </ModalPopup>
+    );
+  }
+  return (
+    <Popper
+      open={open}
+      anchorEl={anchorRef.current}
+      transition
+      placement="bottom-start"
+      tabIndex={-1}
+      sx={{
+        zIndex: 9999,
+      }}
+    >
+      {({ TransitionProps }) => {
+        return (
+          <Grow {...TransitionProps}>
+            <Box tabIndex={-1}>
+              <ClickAwayListener
+                onClickAway={() => {
+                  setOpen(false);
+                }}
+              >
+                {optionsElement}
+              </ClickAwayListener>
+            </Box>
+          </Grow>
+        );
+      }}
+    </Popper>
+  );
+};
+//#endregion
+
+//#region View Options Tool
+export interface ViewOptionsToolProps<ViewType extends string = string>
+  extends Pick<ViewOptionsToolPopoverProps, 'onChangeViewType'> {
   viewOptions?: ViewOption<ViewType>[];
-  onChangeViewType?: (viewType: ViewOptionType<ViewType>) => void;
   viewType?: ViewOptionType<ViewType>;
   viewOptionTypes?: ViewOptionType<ViewType>[];
   expandedIfHasLessOptions?: boolean;
@@ -95,12 +218,12 @@ export const useViewOptionsTool = <ViewType extends string = string>(
   const { breakpoints } = useTheme();
   const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
 
-  // Refs
+  //#region Refs
   const anchorRef = useRef<HTMLButtonElement>(null);
   const viewOptionsRef = useRef(viewOptions);
   viewOptionsRef.current = viewOptions;
-
-  const [open, setOpen] = useState(false);
+  const togglePopupFunctionRef = useRef<(open: boolean) => void>();
+  //#endregion
 
   const options = useMemo(() => {
     return [
@@ -144,8 +267,6 @@ export const useViewOptionsTool = <ViewType extends string = string>(
       }),
     };
   }, [options, viewType]);
-
-  const handleClose = () => setOpen(false);
 
   if (options.length <= 1) {
     return null;
@@ -255,33 +376,6 @@ export const useViewOptionsTool = <ViewType extends string = string>(
           collapsedElementMaxWidth: 64,
         };
       }
-      const optionsElement = (
-        <PaginatedDropdownOptionList
-          options={options}
-          minWidth={
-            anchorRef.current ? anchorRef.current.offsetWidth : undefined
-          }
-          onClose={handleClose}
-          selectedOptions={selectedOptions}
-          onChangeSelectedOptions={(selectableOptions) => {
-            onChangeViewType?.(selectableOptions[0].value as any);
-          }}
-          searchable={options.length > 5}
-          {...{
-            ...(() => {
-              if (isSmallScreenSize) {
-                return {
-                  optionHeight: 50,
-                  maxHeight: window.innerHeight - 240,
-                  sx: {
-                    border: 'none',
-                  },
-                };
-              }
-            })(),
-          }}
-        />
-      );
       return {
         color: 'inherit',
         ref: anchorRef,
@@ -290,65 +384,21 @@ export const useViewOptionsTool = <ViewType extends string = string>(
         endIcon: <ExpandMoreIcon />,
         type: 'button',
         onClick: () => {
-          setOpen(true);
+          togglePopupFunctionRef.current?.(true);
         },
-        popupElement: (() => {
-          if (isSmallScreenSize) {
-            return (
-              <ModalPopup
-                {...{ open }}
-                onClose={() => {
-                  setOpen(false);
-                }}
-                CardProps={{
-                  sx: {
-                    maxHeight: 'none',
-                  },
-                }}
-                CardBodyProps={{
-                  sx: {
-                    p: 0,
-                  },
-                }}
-                disableEscapeKeyDown={false}
-                disableAutoFocus={false}
-                showHeaderToolbar={false}
-                enableCloseOnBackdropClick
-                sx={{
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                {optionsElement}
-              </ModalPopup>
-            );
-          }
-          return (
-            <Popper
-              open={open}
-              anchorEl={anchorRef.current}
-              transition
-              placement="bottom-start"
-              tabIndex={-1}
-              sx={{
-                zIndex: 9999,
-              }}
-            >
-              {({ TransitionProps }) => {
-                return (
-                  <Grow {...TransitionProps}>
-                    <Box tabIndex={-1}>
-                      <ClickAwayListener onClickAway={handleClose}>
-                        {optionsElement}
-                      </ClickAwayListener>
-                    </Box>
-                  </Grow>
-                );
-              }}
-            </Popper>
-          );
-        })(),
+        popupElement: (
+          <ViewOptionsToolPopover
+            {...{
+              anchorRef,
+              options,
+              selectedOptions,
+              onChangeViewType,
+              togglePopupFunctionRef,
+            }}
+          />
+        ),
       };
     })(),
   } as Tool;
 };
+//#endregion

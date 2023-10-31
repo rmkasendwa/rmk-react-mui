@@ -135,14 +135,17 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(
           },
         }}
         onOpen={(...args) => {
-          if (lastMouseEventRef.current) {
-            mouseCoordinatesRef.current = {
-              x: lastMouseEventRef.current.clientX,
-              y: lastMouseEventRef.current.clientY,
-            };
+          const [event] = args;
+          if ((event.target as HTMLElement)?.isConnected) {
+            if (lastMouseEventRef.current) {
+              mouseCoordinatesRef.current = {
+                x: lastMouseEventRef.current.clientX,
+                y: lastMouseEventRef.current.clientY,
+              };
+            }
+            setOpen(true);
+            return rest.onOpen?.(...args);
           }
-          setOpen(true);
-          return rest.onOpen?.(...args);
         }}
         onClose={(...args) => {
           const [event] = args;

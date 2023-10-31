@@ -187,7 +187,11 @@ export const getToolNodes = (
                 );
                 return (
                   <>
-                    <Tooltip title={title || label} disableInteractive>
+                    <Tooltip
+                      title={title || label}
+                      disableInteractive
+                      enterAtCursorPosition={false}
+                    >
                       <IconButton
                         {...rest}
                         sx={{
@@ -213,7 +217,11 @@ export const getToolNodes = (
                   if (index >= tools.length - collapsedWidthToolIndex) {
                     return (
                       <>
-                        <Tooltip title={title || label} disableInteractive>
+                        <Tooltip
+                          title={title || label}
+                          disableInteractive
+                          enterAtCursorPosition={false}
+                        >
                           <Button
                             {...rest}
                             sx={{
@@ -238,7 +246,11 @@ export const getToolNodes = (
                   }
                   return (
                     <>
-                      <Tooltip title={label} disableInteractive>
+                      <Tooltip
+                        title={label}
+                        disableInteractive
+                        enterAtCursorPosition={false}
+                      >
                         <Button
                           startIcon={icon}
                           {...rest}
@@ -258,7 +270,11 @@ export const getToolNodes = (
                 })();
                 if (title) {
                   return (
-                    <Tooltip {...{ title }} disableInteractive>
+                    <Tooltip
+                      {...{ title }}
+                      disableInteractive
+                      enterAtCursorPosition={false}
+                    >
                       {buttonElement}
                     </Tooltip>
                   );
@@ -967,6 +983,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                                 <Tooltip
                                   title={searchFieldPlaceholder}
                                   disableInteractive
+                                  enterAtCursorPosition={false}
                                 >
                                   {textField}
                                 </Tooltip>
@@ -977,7 +994,11 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                           );
                         })()
                       ) : (
-                        <Tooltip title="Search" disableInteractive>
+                        <Tooltip
+                          title="Search"
+                          disableInteractive
+                          enterAtCursorPosition={false}
+                        >
                           <IconButton
                             onClick={() => setSearchFieldOpen(true)}
                             sx={{
