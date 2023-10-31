@@ -153,6 +153,8 @@ export const useTimeScaleTool = (inProps: TimeScaleToolProps) => {
     }
   })();
 
+  const [fromButtonPopupElementOpen, setFromButtonPopupElementOpen] =
+    useState(false);
   const startDatePickerNode = (
     <DatePicker
       selected={startDate}
@@ -187,7 +189,6 @@ export const useTimeScaleTool = (inProps: TimeScaleToolProps) => {
   const {
     popupElement: fromButtonPopupElement,
     ref: fromButtonAnchorRef,
-    open: fromButtonPopupElementOpen,
     setOpen: fromButtonPopupElementSetOpen,
     ...fromButtonPropsRest
   } = usePopupTool({
@@ -198,8 +199,13 @@ export const useTimeScaleTool = (inProps: TimeScaleToolProps) => {
     bodyContent: wrapStartDatePickerNode
       ? wrapStartDatePickerNode(startDatePickerNode)
       : startDatePickerNode,
+    onTogglePopup: (open) => {
+      setFromButtonPopupElementOpen(open);
+    },
   });
 
+  const [toButtonPopupElementOpen, setToButtonPopupElementOpen] =
+    useState(false);
   const endDatePickerNode = (
     <DatePicker
       selected={endDate}
@@ -236,7 +242,6 @@ export const useTimeScaleTool = (inProps: TimeScaleToolProps) => {
   const {
     popupElement: toButtonPopupElement,
     ref: toButtonAnchorRef,
-    open: toButtonPopupElementOpen,
     ...toButtonPropsRest
   } = usePopupTool({
     label: 'To',
@@ -246,6 +251,9 @@ export const useTimeScaleTool = (inProps: TimeScaleToolProps) => {
     bodyContent: wrapEndDatePickerNode
       ? wrapEndDatePickerNode(endDatePickerNode)
       : endDatePickerNode,
+    onTogglePopup: (open) => {
+      setToButtonPopupElementOpen(open);
+    },
   });
 
   const dataDropdownProps: DataDropdownFieldProps = {
