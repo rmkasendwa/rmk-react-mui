@@ -12,42 +12,48 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material';
-import { ReactNode, useRef, useState } from 'react';
+import {
+  FC,
+  MutableRefObject,
+  ReactNode,
+  useCallback,
+  useRef,
+  useState,
+} from 'react';
 
 import ModalPopup from '../../components/ModalPopup';
 import { ButtonTool } from '../../components/SearchSyncToolbar';
 
-export interface PopupToolProps extends Partial<ButtonTool> {
-  bodyContent: ReactNode;
-  label: ReactNode;
+//#region Popup Tool Popover
+export interface PopupToolPopoverProps {
+  anchorRef: React.MutableRefObject<HTMLButtonElement | null>;
+  wrapBodyContentInCard?: boolean;
   popupCardTitle?: ReactNode;
   BodyContentProps?: Partial<CardContentProps>;
+  bodyContent: ReactNode;
   footerContent?: ReactNode;
-  icon?: ReactNode;
-  wrapBodyContentInCard?: boolean;
+  togglePopupFunctionRef: MutableRefObject<
+    ((open: boolean) => void) | undefined
+  >;
 }
 
-export const usePopupTool = ({
+export const PopupToolPopover: FC<PopupToolPopoverProps> = ({
+  anchorRef,
+  wrapBodyContentInCard,
   popupCardTitle,
-  bodyContent,
   BodyContentProps = {},
+  bodyContent,
   footerContent,
-  wrapBodyContentInCard = true,
-  ...rest
-}: PopupToolProps): ButtonTool & {
-  extraToolProps: {
-    closePopup: () => void;
-  };
-  open: boolean;
-  setOpen: (open: boolean) => void;
-} => {
+  togglePopupFunctionRef,
+}) => {
   const { sx: BodyContentPropsSx, ...BodyContentPropsRest } = BodyContentProps;
-  const anchorRef = useRef<HTMLButtonElement | null>(null);
-
   const { palette, breakpoints } = useTheme();
   const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
 
   const [open, setOpen] = useState(false);
+  togglePopupFunctionRef.current = (open) => {
+    setOpen(open);
+  };
 
   const bodyContentElement = (() => {
     if (wrapBodyContentInCard) {
@@ -108,75 +114,133 @@ export const usePopupTool = ({
     return bodyContent;
   })();
 
+  if (isSmallScreenSize) {
+    return (
+      <ModalPopup
+        {...{ open }}
+        onClose={() => {
+          setOpen(false);
+        }}
+        CardProps={{
+          sx: {
+            maxHeight: 'none',
+          },
+        }}
+        CardBodyProps={{
+          sx: {
+            p: 0,
+          },
+        }}
+        disableEscapeKeyDown={false}
+        disableAutoFocus={false}
+        showHeaderToolbar={false}
+        enableCloseOnBackdropClick
+        sx={{
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        {bodyContentElement}
+      </ModalPopup>
+    );
+  }
+  return (
+    <Popper
+      open={open}
+      anchorEl={anchorRef.current}
+      transition
+      placement="bottom-start"
+      sx={{
+        zIndex: 9999,
+      }}
+    >
+      {({ TransitionProps }) => {
+        return (
+          <Grow {...TransitionProps}>
+            <Box>
+              <ClickAwayListener onClickAway={() => setOpen(false)}>
+                <Box>{bodyContentElement}</Box>
+              </ClickAwayListener>
+            </Box>
+          </Grow>
+        );
+      }}
+    </Popper>
+  );
+};
+//#endregion
+
+//#region Popup Tool
+export interface PopupToolProps
+  extends Partial<ButtonTool>,
+    Pick<
+      PopupToolPopoverProps,
+      | 'wrapBodyContentInCard'
+      | 'popupCardTitle'
+      | 'BodyContentProps'
+      | 'bodyContent'
+      | 'footerContent'
+    > {
+  label: ReactNode;
+  icon?: ReactNode;
+  onTogglePopup?: (open: boolean) => void;
+}
+
+export const usePopupTool = ({
+  popupCardTitle,
+  bodyContent,
+  BodyContentProps = {},
+  footerContent,
+  wrapBodyContentInCard = true,
+  onTogglePopup,
+  ...rest
+}: PopupToolProps): ButtonTool & {
+  extraToolProps: {
+    closePopup: () => void;
+  };
+  setOpen: (open: boolean) => void;
+} => {
+  //#region Refs
+  const anchorRef = useRef<HTMLButtonElement | null>(null);
+  const togglePopupFunctionRef = useRef<(open: boolean) => void>();
+  const togglePopupRef = useRef(onTogglePopup);
+  togglePopupRef.current = onTogglePopup;
+  //#endregion
+
+  const setOpen = useCallback((open: boolean) => {
+    togglePopupFunctionRef.current?.(open);
+    togglePopupRef.current?.(open);
+  }, []);
+
   return {
     color: 'inherit',
     ...rest,
     ref: anchorRef,
     type: 'button',
     onClick: () => {
-      setOpen(true);
+      togglePopupFunctionRef.current?.(true);
+      togglePopupRef.current?.(true);
     },
-    popupElement: (() => {
-      if (isSmallScreenSize) {
-        return (
-          <ModalPopup
-            {...{ open }}
-            onClose={() => {
-              setOpen(false);
-            }}
-            CardProps={{
-              sx: {
-                maxHeight: 'none',
-              },
-            }}
-            CardBodyProps={{
-              sx: {
-                p: 0,
-              },
-            }}
-            disableEscapeKeyDown={false}
-            disableAutoFocus={false}
-            showHeaderToolbar={false}
-            enableCloseOnBackdropClick
-            sx={{
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            {bodyContentElement}
-          </ModalPopup>
-        );
-      }
-      return (
-        <Popper
-          open={open}
-          anchorEl={anchorRef.current}
-          transition
-          placement="bottom-start"
-          sx={{
-            zIndex: 9999,
-          }}
-        >
-          {({ TransitionProps }) => {
-            return (
-              <Grow {...TransitionProps}>
-                <Box>
-                  <ClickAwayListener onClickAway={() => setOpen(false)}>
-                    <Box>{bodyContentElement}</Box>
-                  </ClickAwayListener>
-                </Box>
-              </Grow>
-            );
-          }}
-        </Popper>
-      );
-    })(),
+    popupElement: (
+      <PopupToolPopover
+        {...{
+          anchorRef,
+          wrapBodyContentInCard,
+          popupCardTitle,
+          BodyContentProps,
+          bodyContent,
+          footerContent,
+          togglePopupFunctionRef,
+        }}
+      />
+    ),
     extraToolProps: {
       closePopup: () => {
-        setOpen(false);
+        togglePopupFunctionRef.current?.(false);
+        togglePopupRef.current?.(false);
       },
     },
-    open,
     setOpen,
   };
 };
+//#endregion
