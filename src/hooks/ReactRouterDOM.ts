@@ -117,7 +117,8 @@ export function useReactRouterDOMSearchParams<
   const getSearchParams = useCallback(
     (
       searchParams: BaseSearchParams,
-      ignoreUnspecifiedParams = ignoreUnspecifiedParamsProp
+      ignoreUnspecifiedParams = ignoreUnspecifiedParamsProp,
+      localHashedId = hashedId
     ) => {
       const existingSearchParams: Record<string, string> = (() => {
         switch (paramStorage) {
@@ -166,8 +167,8 @@ export function useReactRouterDOMSearchParams<
               return keys.reduce<Record<string, string | null>>(
                 (accumulator, key) => {
                   const searchParamKey = (() => {
-                    if (hashedId) {
-                      return `${key}:${hashedId}`;
+                    if (localHashedId) {
+                      return `${key}:${localHashedId}`;
                     }
                     return key;
                   })();
