@@ -26,6 +26,7 @@ export type SetSearchParams<SearchParams = BaseSearchParams> = (
 
 export type AddSearchParamsToPathOptions = {
   ignoreUnspecifiedParams?: boolean;
+  id?: string;
 };
 
 export type AddSearchParamsToPath<SearchParams = BaseSearchParams> = (
@@ -246,14 +247,25 @@ export function useReactRouterDOMSearchParams<
     (
       pathname,
       searchParams = {},
-      { ignoreUnspecifiedParams = ignoreUnspecifiedParamsProp } = {}
+      {
+        ignoreUnspecifiedParams = ignoreUnspecifiedParamsProp,
+        id: localId = id,
+      } = {}
     ) => {
       return addSearchParams(
         pathname,
-        getSearchParams(searchParams, ignoreUnspecifiedParams).nextSearchParams
+        getSearchParams(
+          searchParams,
+          ignoreUnspecifiedParams,
+          (() => {
+            if (localId) {
+              return hashIt(localId).toString(36).slice(0, 3);
+            }
+          })()
+        ).nextSearchParams
       );
     },
-    [getSearchParams, ignoreUnspecifiedParamsProp]
+    [getSearchParams, id, ignoreUnspecifiedParamsProp]
   );
 
   useEffect(() => {
