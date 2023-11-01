@@ -8,6 +8,7 @@ import { TableCellProps } from '@mui/material/TableCell';
 import { TablePaginationProps } from '@mui/material/TablePagination';
 import { TableRowProps as MuiTableRowProps } from '@mui/material/TableRow';
 import { ReactElement, ReactNode, RefObject } from 'react';
+import * as Yup from 'yup';
 
 import { CountryCode } from '../../models/Countries';
 import { SortBy, SortOptions } from '../../models/Sort';
@@ -363,4 +364,14 @@ export interface TableProps<DataRow extends BaseDataRow = any>
   highlightRowOnHover?: boolean;
 
   tableBodyRowHeight?: number;
+
+  /** An optional ID for the table component. */
+  id?: string;
+
+  /** A boolean indicating whether to clear the search state when the component unmounts. */
+  clearSearchStateOnUnmount?: boolean;
 }
+
+export const tableSearchParamValidationSpec = {
+  selectedColumns: Yup.array().of(Yup.string().required()),
+};
