@@ -11,7 +11,7 @@ import {
   useReactRouterDOMSearchParams,
 } from '../../../hooks/ReactRouterDOM';
 import { SortDirection, sortDirections } from '../../../models/Sort';
-import { BaseDataRow } from '../../Table';
+import { BaseDataRow, tableSearchParamValidationSpec } from '../../Table';
 import { timelineSearchParamValidationSpec } from '../../Timeline';
 import {
   Conjunction,
@@ -69,6 +69,7 @@ export const useRecordsExplorerNavigationState = <
 
   const baseSpec = {
     ...timelineSearchParamValidationSpec,
+    ...tableSearchParamValidationSpec,
     view: Yup.string(),
     groupBy: Yup.array().of(
       Yup.object({
@@ -101,7 +102,6 @@ export const useRecordsExplorerNavigationState = <
         .required(),
     }).default(undefined),
     search: Yup.string(),
-    selectedColumns: Yup.array().of(Yup.string().required()),
     modifiedKeys: Yup.array().of(Yup.string().required()),
     createNewRecord: Yup.boolean(),
     selectedRecord: Yup.string(),

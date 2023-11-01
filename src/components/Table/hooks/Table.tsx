@@ -30,10 +30,19 @@ import { alpha, darken, lighten } from '@mui/system/colorManipulator';
 import { SxProps } from '@mui/system/styleFunctionSx';
 import clsx from 'clsx';
 import { omit } from 'lodash';
-import { Fragment, ReactNode, Ref, useEffect, useRef, useState } from 'react';
+import {
+  Fragment,
+  ReactNode,
+  Ref,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 import { useGlobalConfiguration } from '../../../contexts/GlobalConfigurationContext';
 import { useLoadOnScrollToBottom } from '../../../hooks/InfiniteScroller';
+import { useReactRouterDOMSearchParams } from '../../../hooks/ReactRouterDOM';
 import { SortDirection, SortOptions } from '../../../models/Sort';
 import { BLACK_COLOR } from '../../../theme';
 import { sort } from '../../../utils/Sort';
@@ -46,6 +55,7 @@ import {
   ELLIPSIS_MENU_TOOL_COLUMN_ID,
   ROW_NUMBER_COLUMN_ID,
   TableProps,
+  tableSearchParamValidationSpec,
 } from '../models';
 import { tableBodyColumnClasses } from '../TableBodyColumn';
 import TableBodyRow, { tableBodyRowClasses } from '../TableBodyRow';
@@ -186,6 +196,8 @@ export const useTable = <DataRow extends BaseDataRow>(
     controlZIndex = true,
     highlightRowOnHover = true,
     scrollableElementRef,
+    id,
+    clearSearchStateOnUnmount,
     sx,
     ...rest
   } = omit(
@@ -244,8 +256,6 @@ export const useTable = <DataRow extends BaseDataRow>(
 
   //#region Refs
   const tableHeaderElementRef = useRef<HTMLTableSectionElement | null>(null);
-  const columnsRef = useRef(columnsProp);
-  columnsRef.current = columnsProp;
   const onChangeSelectedColumnIdsRef = useRef(onChangeSelectedColumnIds);
   onChangeSelectedColumnIdsRef.current = onChangeSelectedColumnIds;
   const onChangeCheckedRowIdsRef = useRef(onChangeCheckedRowIdsProp);
@@ -254,6 +264,26 @@ export const useTable = <DataRow extends BaseDataRow>(
   onChangeMinWidthRef.current = onChangeMinWidth;
   const startStickyColumnDividerElementRef = useRef<HTMLDivElement | null>();
   //#endregion
+
+  const {
+    searchParams: { selectedColumns: searchParamSelectedColumns },
+    setSearchParams,
+  } = useReactRouterDOMSearchParams({
+    mode: 'json',
+    spec: tableSearchParamValidationSpec,
+    id,
+    clearSearchStateOnUnmount,
+  });
+
+  const serializedColumnIds = JSON.stringify(
+    selectedColumnIdsProp || columnsProp.map(({ id }) => id)
+  );
+  const selectedColumnIds = useMemo(() => {
+    if (searchParamSelectedColumns) {
+      return searchParamSelectedColumns;
+    }
+    return JSON.parse(serializedColumnIds);
+  }, [searchParamSelectedColumns, serializedColumnIds]);
 
   const { palette, breakpoints } = useTheme();
   const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
@@ -264,6 +294,7 @@ export const useTable = <DataRow extends BaseDataRow>(
   const [pageIndex, setPageIndex] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(rowsPerPageProp);
   const [sortBy, setSortBy] = useState<SortOptions<DataRow>>([]);
+
   const [tableHeaderHeight, setTableHeaderHeight] = useState(49);
   useEffect(() => {
     if (tableHeaderElementRef.current) {
@@ -303,37 +334,9 @@ export const useTable = <DataRow extends BaseDataRow>(
       onChangeCheckedRowIdsRef.current(checkedRowIds, allRowsChecked);
   }, [allRowsChecked, checkedRowIds]);
 
-  const baseSelectedColumnIds = (() => {
-    if (selectedColumnIdsProp) {
-      return selectedColumnIdsProp;
-    }
-    return columnsProp.map(({ id }) => String(id) as any);
-  })();
-
-  const [localSelectedColumnIds, setLocalSelectedColumnIds] = useState<
-    NonNullable<typeof selectedColumnIdsProp>
-  >(baseSelectedColumnIds);
-
-  const serializedLocalSelectedColumnIds = JSON.stringify(
-    localSelectedColumnIds
-  );
-  const serializedBaseSelectedColumnIds = JSON.stringify(baseSelectedColumnIds);
   useEffect(() => {
-    if (serializedLocalSelectedColumnIds !== serializedBaseSelectedColumnIds) {
-      setLocalSelectedColumnIds(JSON.parse(serializedBaseSelectedColumnIds));
-    }
-  }, [serializedBaseSelectedColumnIds, serializedLocalSelectedColumnIds]);
-
-  const selectedColumnIds = (() => {
-    if (onChangeSelectedColumnIdsRef.current && selectedColumnIdsProp) {
-      return selectedColumnIdsProp;
-    }
-    return localSelectedColumnIds;
-  })();
-
-  useEffect(() => {
-    onChangeSelectedColumnIdsRef.current &&
-      onChangeSelectedColumnIdsRef.current(selectedColumnIds);
+    selectedColumnIds &&
+      onChangeSelectedColumnIdsRef.current?.(selectedColumnIds);
   }, [selectedColumnIds]);
 
   parentBackgroundColor || (parentBackgroundColor = palette.background.paper);
@@ -1416,14 +1419,10 @@ export const useTable = <DataRow extends BaseDataRow>(
                 {...{ selectedColumnIds }}
                 columns={selectableColumns}
                 onChangeSelectedColumnIds={(selectedColumnIds) => {
-                  if (
-                    !onChangeSelectedColumnIds ||
-                    selectedColumnIdsProp == null
-                  ) {
-                    setLocalSelectedColumnIds(selectedColumnIds);
-                  }
-                  onChangeSelectedColumnIds &&
-                    onChangeSelectedColumnIds(selectedColumnIds);
+                  setSearchParams({
+                    selectedColumns: selectedColumnIds,
+                  });
+                  onChangeSelectedColumnIds?.(selectedColumnIds);
                 }}
                 sx={{
                   borderTopRightRadius: 0,

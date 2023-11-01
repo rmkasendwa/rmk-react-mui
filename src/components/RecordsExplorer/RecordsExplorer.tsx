@@ -798,24 +798,6 @@ const BaseRecordsExplorer = <
     }
   })();
 
-  const baseSelectedColumnIds = useMemo(() => {
-    if (viewsPropRef.current) {
-      const listView = viewsPropRef.current.find(
-        ({ type }) => type === 'List'
-      ) as ListView<RecordRow> | null;
-      if (listView) {
-        const { selectedColumnIds } = {
-          ...listView,
-          ...ListViewPropsRef.current,
-        };
-        if (selectedColumnIds) {
-          return selectedColumnIds;
-        }
-        return listView.columns.map(({ id }) => String(id) as any);
-      }
-    }
-  }, []);
-
   const { searchParams, setSearchParams, addSearchParamsToPath } =
     useRecordsExplorerNavigationState<RecordRow>({
       id,
@@ -971,8 +953,26 @@ const BaseRecordsExplorer = <
     }
   })();
 
-  const selectedColumnIds =
-    searchParamSelectedColumns || baseSelectedColumnIds || [];
+  const selectedColumnIds = useMemo(() => {
+    if (searchParamSelectedColumns) {
+      return searchParamSelectedColumns;
+    }
+    if (viewsPropRef.current) {
+      const listView = viewsPropRef.current.find(
+        ({ type }) => type === 'List'
+      ) as ListView<RecordRow> | null;
+      if (listView) {
+        const { selectedColumnIds } = {
+          ...listView,
+          ...ListViewPropsRef.current,
+        };
+        if (selectedColumnIds) {
+          return selectedColumnIds;
+        }
+        return listView.columns.map(({ id }) => String(id) as any);
+      }
+    }
+  }, [searchParamSelectedColumns]);
 
   const searchTerm = (() => {
     if (searchParamSearchTerm) {
@@ -2100,7 +2100,8 @@ const BaseRecordsExplorer = <
               enableCheckboxRowSelectors,
               enableSmallScreenOptimization,
               showRowNumber,
-              selectedColumnIds,
+              clearSearchStateOnUnmount,
+              id,
               ...(() => {
                 if (isEditable || isDeletable || getRecordTools) {
                   return {
@@ -2209,23 +2210,6 @@ const BaseRecordsExplorer = <
                     }
                   );
                   updateChangedSearchParamKeys('sortBy');
-                }
-              },
-              onChangeSelectedColumnIds: (localSelectedColumnIds) => {
-                if (selectedColumnIds !== localSelectedColumnIds) {
-                  setSearchParams(
-                    {
-                      selectedColumns: localSelectedColumnIds.map(
-                        (selectedColumnId) => {
-                          return String(selectedColumnId);
-                        }
-                      ),
-                    },
-                    {
-                      replace: true,
-                    }
-                  );
-                  updateChangedSearchParamKeys('selectedColumns');
                 }
               },
             };
