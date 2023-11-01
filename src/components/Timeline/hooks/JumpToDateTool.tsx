@@ -33,6 +33,7 @@ export interface JumpToDateToolProps
   extends Partial<Pick<DatePickerProps, 'minDate' | 'maxDate' | 'onChange'>>,
     Partial<Omit<PopupToolProps, 'onChange'>> {
   selectedDate?: DatePickerProps['selected'];
+  selectedDateRef?: React.MutableRefObject<DatePickerProps['selected']>;
   wrapDatePickerNode?: (datePickerNode: ReactNode) => ReactNode;
 }
 
@@ -43,26 +44,29 @@ export const useJumpToDateTool = (inProps: JumpToDateToolProps = {}) => {
     maxDate,
     onChange,
     selectedDate,
+    selectedDateRef,
     wrapDatePickerNode,
     ...rest
   } = props;
-  const datePickerNode = (
-    <DatePicker
-      {...{ minDate, maxDate }}
-      selected={selectedDate}
-      onChange={(...args) => {
-        onChange?.(...args);
-      }}
-    />
-  );
   const tool = usePopupTool({
     label: 'Jump to date',
     icon: <CalendarTodayIcon />,
     wrapBodyContentInCard: false,
     ...rest,
-    bodyContent: wrapDatePickerNode
-      ? wrapDatePickerNode(datePickerNode)
-      : datePickerNode,
+    getBodyContent: () => {
+      const datePickerNode = (
+        <DatePicker
+          {...{ minDate, maxDate }}
+          selected={selectedDate || selectedDateRef?.current}
+          onChange={(...args) => {
+            onChange?.(...args);
+          }}
+        />
+      );
+      return wrapDatePickerNode
+        ? wrapDatePickerNode(datePickerNode)
+        : datePickerNode;
+    },
   });
   return omit(tool, 'open', 'setOpen');
 };

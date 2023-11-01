@@ -30,7 +30,8 @@ export interface PopupToolPopoverProps {
   wrapBodyContentInCard?: boolean;
   popupCardTitle?: ReactNode;
   BodyContentProps?: Partial<CardContentProps>;
-  bodyContent: ReactNode;
+  bodyContent?: ReactNode;
+  getBodyContent?: () => ReactNode;
   footerContent?: ReactNode;
   togglePopupFunctionRef: MutableRefObject<
     ((open: boolean) => void) | undefined
@@ -43,6 +44,7 @@ export const PopupToolPopover: FC<PopupToolPopoverProps> = ({
   popupCardTitle,
   BodyContentProps = {},
   bodyContent,
+  getBodyContent,
   footerContent,
   togglePopupFunctionRef,
 }) => {
@@ -95,7 +97,7 @@ export const PopupToolPopover: FC<PopupToolPopoverProps> = ({
               ...BodyContentPropsSx,
             }}
           >
-            {bodyContent}
+            {getBodyContent?.() ?? bodyContent}
           </CardContent>
           {footerContent ? (
             <CardActions
@@ -111,7 +113,7 @@ export const PopupToolPopover: FC<PopupToolPopoverProps> = ({
         </Card>
       );
     }
-    return bodyContent;
+    return getBodyContent?.() ?? bodyContent;
   })();
 
   if (isSmallScreenSize) {
@@ -179,6 +181,7 @@ export interface PopupToolProps
       | 'popupCardTitle'
       | 'BodyContentProps'
       | 'bodyContent'
+      | 'getBodyContent'
       | 'footerContent'
     > {
   label: ReactNode;
@@ -188,6 +191,7 @@ export interface PopupToolProps
 
 export const usePopupTool = ({
   popupCardTitle,
+  getBodyContent,
   bodyContent,
   BodyContentProps = {},
   footerContent,
@@ -229,6 +233,7 @@ export const usePopupTool = ({
           popupCardTitle,
           BodyContentProps,
           bodyContent,
+          getBodyContent,
           footerContent,
           togglePopupFunctionRef,
         }}
