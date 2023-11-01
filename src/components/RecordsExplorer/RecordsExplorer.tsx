@@ -42,6 +42,7 @@ import {
 } from 'react';
 import { mergeRefs } from 'react-merge-refs';
 import { Link as RouterLink, useLocation, useNavigate } from 'react-router-dom';
+import { ObjectShape } from 'yup/lib/object';
 
 import { useAuth } from '../../contexts/AuthContext';
 import { LoadingContext, LoadingProvider } from '../../contexts/LoadingContext';
@@ -532,6 +533,7 @@ export interface RecordsExplorerProps<
     AddRecordsExplorerSearchParamsToPathFunction | undefined
   >;
   subHeaderElement?: ReactNode;
+  navigationStateExtension?: ObjectShape;
 }
 
 const BaseRecordsExplorer = <
@@ -647,6 +649,7 @@ const BaseRecordsExplorer = <
     addSearchParamsToPathRef,
     loadRecordsRef,
     subHeaderElement,
+    navigationStateExtension,
     ...rest
   } = omit(
     props,
@@ -803,6 +806,7 @@ const BaseRecordsExplorer = <
       id,
       paramStorage: stateStorage,
       clearSearchStateOnUnmount,
+      spec: navigationStateExtension,
     });
 
   if (addSearchParamsToPathRef) {
@@ -1601,15 +1605,18 @@ const BaseRecordsExplorer = <
   const resetToDefaultView = () => {
     setSearchParams(
       {
-        view: null,
-        sortBy: null,
-        groupBy: null,
-        search: null,
-        selectedColumns: null,
-        expandedGroups: null,
-        expandedGroupsInverted: null,
-        filterBy: null,
-        selectedDataPreset: null,
+        ...Object.fromEntries(
+          [
+            ...new Set([
+              ...(modifiedStateKeys || []),
+              ...Object.keys(searchParams).filter((key) => {
+                return !unTrackableSearchParams.includes(key);
+              }),
+            ]),
+          ].map((key) => {
+            return [key, null];
+          })
+        ),
         modifiedKeys: null,
       },
       {
