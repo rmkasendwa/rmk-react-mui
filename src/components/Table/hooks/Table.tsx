@@ -158,6 +158,7 @@ export const useTable = <DataRow extends BaseDataRow>(
     PaginationProps = {},
     stickyHeader = false,
     TableBodyRowPlaceholderProps = {},
+    TableHeadProps = {},
     PaginatedTableWrapperProps = {},
     ColumnDisplayToggleProps = {},
     defaultColumnValue,
@@ -235,6 +236,7 @@ export const useTable = <DataRow extends BaseDataRow>(
   tableBodyRowHeight = undefined;
   //#endregion
 
+  const { sx: TableHeadPropsSx, ...TableHeadPropsRest } = TableHeadProps;
   const {
     sx: TableBodyRowPlaceholderPropsSx,
     ...TableBodyRowPlaceholderPropsRest
@@ -1627,9 +1629,11 @@ export const useTable = <DataRow extends BaseDataRow>(
       >
         {tableHeaderRow ? (
           <TableHead
+            {...TableHeadPropsRest}
             ref={tableHeaderElementRef}
             sx={{
               bgcolor: alpha(palette.text.primary, TABLE_HEAD_ALPHA),
+              ...TableHeadPropsSx,
             }}
           >
             {tableHeaderRow}

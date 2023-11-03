@@ -1,6 +1,6 @@
 import '@infinite-debugger/rmk-js-extensions/Object';
 
-import { Typography } from '@mui/material';
+import { TableHeadProps, Typography } from '@mui/material';
 import { BoxProps } from '@mui/material/Box';
 import { PaginationProps } from '@mui/material/Pagination';
 import { TableProps as MuiBaseTableProps } from '@mui/material/Table';
@@ -314,6 +314,7 @@ export interface TableProps<DataRow extends BaseDataRow = any>
   PaginationProps?: PaginationProps;
   stickyHeader?: boolean;
   TableBodyRowPlaceholderProps?: Partial<RenderIfVisibleProps>;
+  TableHeadProps?: Partial<TableHeadProps>;
   PaginatedTableWrapperProps?: Partial<BoxProps>;
   parentBackgroundColor?: string;
   enableSmallScreenOptimization?: boolean;
