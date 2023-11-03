@@ -75,6 +75,7 @@ export interface TableClasses {
   columnDisplayToggle: string;
   startStickyColumnDivider: string;
   startStickyColumnDividerActive: string;
+  emptyRowsCell: string;
 }
 
 export type TableClassKey = keyof TableClasses;
@@ -116,6 +117,7 @@ const slots: Record<TableClassKey, [TableClassKey]> = {
   columnDisplayToggle: ['columnDisplayToggle'],
   startStickyColumnDivider: ['startStickyColumnDivider'],
   startStickyColumnDividerActive: ['startStickyColumnDividerActive'],
+  emptyRowsCell: ['emptyRowsCell'],
 };
 
 export const tableClasses: TableClasses = generateUtilityClasses(
@@ -1666,6 +1668,7 @@ export const useTable = <DataRow extends BaseDataRow>(
                     return (
                       <TableRow>
                         <TableCell
+                          className={classes.emptyRowsCell}
                           colSpan={displayingColumns.length}
                           align="center"
                         >
