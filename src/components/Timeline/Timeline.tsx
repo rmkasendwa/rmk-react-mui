@@ -1904,7 +1904,6 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         controlZIndex={false}
         parentBackgroundColor={parentBackgroundColor}
         {...{ columns, rows }}
-        paging={false}
         bordersVariant="square"
         {...(() => {
           if (!isSmallScreenSize) {

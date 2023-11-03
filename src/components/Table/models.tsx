@@ -2,10 +2,8 @@ import '@infinite-debugger/rmk-js-extensions/Object';
 
 import { TableHeadProps, Typography } from '@mui/material';
 import { BoxProps } from '@mui/material/Box';
-import { PaginationProps } from '@mui/material/Pagination';
 import { TableProps as MuiBaseTableProps } from '@mui/material/Table';
 import { TableCellProps } from '@mui/material/TableCell';
-import { TablePaginationProps } from '@mui/material/TablePagination';
 import { TableRowProps as MuiTableRowProps } from '@mui/material/TableRow';
 import { ReactElement, ReactNode, RefObject } from 'react';
 import * as Yup from 'yup';
@@ -287,31 +285,21 @@ export interface TableProps<DataRow extends BaseDataRow = any>
         TableColumnToggleIconButtonProps<DataRow>,
         'selectedColumnIds' | 'onChangeSelectedColumnIds'
       >
-    >,
-    Partial<Pick<TablePaginationProps, 'rowsPerPageOptions'>> {
+    > {
   rows?: DataRow[];
   rowStartIndex?: number;
-  rowsPerPage?: number;
-  pageIndex?: number;
-  filterdRowCount?: number;
-  totalRowCount?: number;
   labelPlural?: string;
   labelSingular?: string;
   lowercaseLabelPlural?: string;
   emptyRowsLabel?: ReactNode;
   variant?: TableVariant;
   bordersVariant?: TableBordersVariant;
-  onChangePage?: (pageIndex: number) => void;
-  onRowsPerPageChange?: (rowsPerPage: number) => void;
   forEachRowProps?: GetRowProps<DataRow>;
-  paging?: boolean;
   showHeaderRow?: boolean;
   showDataRows?: boolean;
   HeaderRowProps?: Partial<MuiTableRowProps>;
   SecondaryHeaderRowProps?: Partial<MuiTableRowProps>;
   currencyCode?: string;
-  paginationType?: 'default' | 'classic';
-  PaginationProps?: PaginationProps;
   stickyHeader?: boolean;
   TableBodyRowPlaceholderProps?: Partial<RenderIfVisibleProps>;
   TableHeadProps?: Partial<TableHeadProps>;

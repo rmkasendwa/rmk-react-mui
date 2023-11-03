@@ -17,6 +17,7 @@ export interface UseLoadOnScrollToBottomOptions {
     scrollTop: number;
     scrollLeft: number;
   }) => void;
+  changeEventCallbackTimeout?: number;
   shouldLoadOnScroll?: boolean;
   invertScrollDirection?: boolean;
   paging?: boolean;
@@ -41,6 +42,7 @@ export const useLoadOnScrollToBottom = ({
   bottomThreshold = LOAD_NEXT_BOUNDARY_THRESHOLD,
   load,
   onChangeScrollLength,
+  changeEventCallbackTimeout = 0,
   shouldLoadOnScroll = true,
   invertScrollDirection = false,
   dataElementLength,
@@ -63,6 +65,7 @@ export const useLoadOnScrollToBottom = ({
 
   const onChangeScrollLengthRef = useRef(onChangeScrollLength);
   onChangeScrollLengthRef.current = onChangeScrollLength;
+  const changeEventCallbackTimeoutRef = useRef<NodeJS.Timeout>();
 
   const onChangeFocusedDataElementRef = useRef(onChangeFocusedDataElement);
   onChangeFocusedDataElementRef.current = onChangeFocusedDataElement;
@@ -253,10 +256,13 @@ export const useLoadOnScrollToBottom = ({
             }
             break;
         }
-        onChangeScrollLengthRef.current?.({
-          scrollTop,
-          scrollLeft,
-        });
+        clearTimeout(changeEventCallbackTimeoutRef.current);
+        changeEventCallbackTimeoutRef.current = setTimeout(() => {
+          onChangeScrollLengthRef.current?.({
+            scrollTop,
+            scrollLeft,
+          });
+        }, changeEventCallbackTimeout);
         if (dataElementLength) {
           setOffset(Math.floor(scrollTop / dataElementLength));
         }
@@ -269,6 +275,7 @@ export const useLoadOnScrollToBottom = ({
     }
   }, [
     bottomThreshold,
+    changeEventCallbackTimeout,
     dataElementLength,
     elementProp,
     elementRef,
