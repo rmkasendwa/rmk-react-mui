@@ -3,6 +3,7 @@ export * from './DateFilterConditionRowValue';
 export * from './FilterTool';
 export * from './GroupTool';
 export * from './NavigationState';
+export * from './RecordsExplorerFields';
 export * from './SortOperationFieldSelectorTool';
 export * from './SortTool';
 export * from './ViewOptionsTool';

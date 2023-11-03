@@ -33,6 +33,7 @@ import PaginatedDropdownOptionList, {
 } from '../../PaginatedDropdownOptionList';
 import { Tool } from '../../SearchSyncToolbar';
 import Tooltip from '../../Tooltip';
+import { ViewOptionType } from '../models';
 
 //#region Adding theme prop types
 declare module '@mui/material/styles/props' {
@@ -52,12 +53,6 @@ declare module '@mui/material/styles/components' {
   }
 }
 //#endregion
-
-export const viewOptionTypes = ['Timeline', 'Grid', 'List'] as const;
-
-export type ViewOptionType<ViewType extends string = string> =
-  | (typeof viewOptionTypes)[number]
-  | ViewType;
 
 export interface ViewOption<ViewType extends string = string> {
   label: ViewOptionType<ViewType>;

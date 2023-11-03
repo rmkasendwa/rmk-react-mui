@@ -6,7 +6,13 @@ import { PrimitiveDataType } from '../../models/Utils';
 import { DataDropdownFieldProps } from '../InputFields/DataDropdownField';
 import { DateInputFieldProps } from '../InputFields/DateInputField';
 import { NumberInputFieldProps } from '../InputFields/NumberInputField';
-import { BaseDataRow, TableColumn } from '../Table';
+import {
+  BaseDataRow,
+  TableColumn,
+  TableColumnType,
+  TableProps,
+} from '../Table';
+import { TimelineProps } from '../Timeline';
 
 // Search term filter types
 export type FilterBySearchTerm<RecordRow extends BaseDataRow> = (
@@ -237,3 +243,35 @@ export type RecordsExplorerRowField<RecordRow extends BaseDataRow = any> =
       groupable?: boolean;
       groupType?: PrimitiveDataType;
     };
+
+export const viewOptionTypes = ['Timeline', 'Grid', 'List'] as const;
+
+export type ViewOptionType<ViewType extends string = string> =
+  | (typeof viewOptionTypes)[number]
+  | ViewType;
+
+export interface BaseDataView {
+  type: ViewOptionType;
+  minWidth?: number;
+  mergeTools?: boolean;
+  renderView?: boolean;
+}
+
+export interface ListView<RecordRow extends BaseDataRow>
+  extends BaseDataView,
+    Partial<Omit<TableProps<RecordRow>, 'rows' | 'columns' | 'minWidth'>> {
+  type: 'List';
+  columns: RecordsExplorerRowField<RecordRow>[];
+}
+
+export interface TimelineView<RecordRow extends BaseDataRow>
+  extends BaseDataView,
+    Partial<Omit<TimelineProps<RecordRow>, 'rows'>> {
+  type: 'Timeline';
+}
+
+export type DataView<RecordRow extends BaseDataRow> =
+  | ListView<RecordRow>
+  | TimelineView<RecordRow>;
+
+export const ENUM_TABLE_COLUMN_TYPES: TableColumnType[] = ['enum'];
