@@ -100,7 +100,7 @@ import Timeline, {
 } from '../Timeline';
 import Tooltip from '../Tooltip';
 import { useRecordsExplorerNavigationState } from './hooks';
-import { useDataFilter } from './hooks/DataFilter';
+import { DataFilterProps, useDataFilter } from './hooks/DataFilter';
 import { useFilterTool } from './hooks/FilterTool';
 import { useGroupTool } from './hooks/GroupTool';
 import { useSortTool } from './hooks/SortTool';
@@ -314,7 +314,8 @@ export interface RecordsExplorerProps<
     Pick<
       PaginatedRecordsProps<RecordRow>,
       'revalidationKey' | 'autoSync' | 'refreshInterval'
-    > {
+    >,
+    Pick<DataFilterProps<RecordRow>, 'filter' | 'filterRevalidationKey'> {
   getTitle?: RecordsExplorerFunctionChildren<
     RecordsExplorerChildrenOptions<RecordRow, View, InitialValues>
   >;
@@ -422,6 +423,7 @@ export interface RecordsExplorerProps<
    * Function to be called when user searches.
    */
   filterBySearchTerm?: FilterBySearchTerm<RecordRow>;
+
   /**
    * The searchable properties on the input data set records.
    */
@@ -574,6 +576,8 @@ const BaseRecordsExplorer = <
     hideAddNewButtonOnNoFilteredData = false,
     children,
     filterBySearchTerm,
+    filter: filterProp,
+    filterRevalidationKey,
     searchableFields: searchableFieldsProp,
     getGroupableData,
     SearchSyncToolBarProps = {},
@@ -1209,9 +1213,10 @@ const BaseRecordsExplorer = <
             if (listView) {
               sortableFields.push(
                 ...listView.columns
-                  .filter(({ id, label }) => {
+                  .filter(({ id, label, sortable }) => {
                     return (
                       typeof label === 'string' &&
+                      sortable !== false &&
                       !sortableFields.find(
                         ({ id: sortableFieldId }) => sortableFieldId === id
                       )
@@ -1277,9 +1282,10 @@ const BaseRecordsExplorer = <
             if (listView) {
               filterFields.push(
                 ...listView.columns
-                  .filter(({ id, label }) => {
+                  .filter(({ id, label, searchable }) => {
                     return (
                       typeof label === 'string' &&
+                      searchable !== false &&
                       !filterFields.find(
                         ({ id: filterFieldId }) => filterFieldId === id
                       )
@@ -1324,7 +1330,7 @@ const BaseRecordsExplorer = <
         })() || [];
       //#endregion
 
-      //#region Resolving filter fields
+      //#region Resolving searchable fields
       const searchableFields = (() => {
         const searchableFields: typeof searchableFieldsRef.current = [];
         if (searchableFieldsRef.current) {
@@ -1358,9 +1364,10 @@ const BaseRecordsExplorer = <
           if (listView) {
             searchableFields.push(
               ...listView.columns
-                .filter(({ id, label }) => {
+                .filter(({ id, label, searchable }) => {
                   return (
                     typeof label === 'string' &&
+                    searchable !== false &&
                     !searchableFields.find(
                       ({ id: filterFieldId }) => filterFieldId === id
                     )
@@ -1480,31 +1487,30 @@ const BaseRecordsExplorer = <
   }, [modifiedStateKeys, searchParamFilterBy]);
 
   //#region Filtering data
-  const { filter } = useDataFilter({
+  const { filteredData: baseFilteredData } = useDataFilter({
     data,
     filterFields,
     searchTerm,
     searchableFields,
     filterBySearchTerm,
+    filter: filterProp,
+    filterRevalidationKey,
+    selectedConditionGroup,
   });
   const filteredData = useMemo(() => {
-    //#region Filtering data
-    const filteredData = filter({ selectedConditionGroup });
-    //#endregion
-
     //#region Sorting data
     const sortedData = (() => {
       if (selectedSortParams && selectedSortParams.length > 0) {
-        return [...filteredData].sort((a, b) => {
+        return [...baseFilteredData].sort((a, b) => {
           return sort(a, b, selectedSortParams);
         });
       }
-      return filteredData;
+      return baseFilteredData;
     })();
     //#endregion
 
     return sortedData;
-  }, [filter, selectedConditionGroup, selectedSortParams]);
+  }, [baseFilteredData, selectedSortParams]);
   //#endregion
 
   //#region Grouping data

@@ -14,7 +14,7 @@ import isSameDay from 'date-fns/isSameDay';
 import max from 'date-fns/max';
 import min from 'date-fns/min';
 import { result } from 'lodash';
-import { useCallback, useRef } from 'react';
+import { useMemo, useRef } from 'react';
 
 import { BaseDataRow } from '../../Table';
 import {
@@ -49,15 +49,48 @@ declare module '@mui/material/styles/components' {
 //#endregion
 
 export interface DataFilterProps<RecordRow extends BaseDataRow = any> {
+  /**
+   * Data to be filtered.
+   */
   data: RecordRow[];
+
+  /**
+   * Fields to be used for filtering.
+   */
   filterFields?: DataFilterField<RecordRow>[];
+
+  /**
+   * Search term to be used for filtering.
+   */
   searchTerm?: string;
+
+  /**
+   * Fields to be used for searching.
+   */
   searchableFields?: SearchableProperty<RecordRow>[];
 
   /**
    * Function to be called when user searches.
    */
   filterBySearchTerm?: FilterBySearchTerm<RecordRow>;
+
+  /**
+   * Function to be called when filtering data.
+   *
+   * @param data The input date to be filtered.
+   * @returns The filtered data.
+   */
+  filter?: (data: RecordRow[]) => RecordRow[];
+
+  /**
+   * Key to control revalidation of filter.
+   */
+  filterRevalidationKey?: string;
+
+  /**
+   * Condition group to be used for filtering.
+   */
+  selectedConditionGroup?: ConditionGroup<RecordRow>;
 }
 
 export const useDataFilter = <RecordRow extends BaseDataRow>(
@@ -70,6 +103,9 @@ export const useDataFilter = <RecordRow extends BaseDataRow>(
     searchTerm,
     searchableFields,
     filterBySearchTerm,
+    filter: filterProp,
+    filterRevalidationKey,
+    selectedConditionGroup,
   } = props;
 
   //#region Refs
@@ -79,6 +115,8 @@ export const useDataFilter = <RecordRow extends BaseDataRow>(
   filterFieldsRef.current = filterFields;
   const searchableFieldsRef = useRef(searchableFields);
   searchableFieldsRef.current = searchableFields;
+  const filterRef = useRef(filterProp);
+  filterRef.current = filterProp;
   //#endregion
 
   const getDateInstanceFromFilterConditionRef = useRef(
@@ -118,45 +156,38 @@ export const useDataFilter = <RecordRow extends BaseDataRow>(
     }
   );
 
-  const filter = useCallback(
-    ({
-      selectedConditionGroup,
-    }: {
-      selectedConditionGroup?: ConditionGroup<RecordRow>;
-    }) => {
-      const dataFilteredByFilterFields = (() => {
-        if (filterFieldsRef.current) {
-          if (
-            selectedConditionGroup &&
-            selectedConditionGroup.conditions.length > 0
-          ) {
-            return data.filter((row) => {
-              return selectedConditionGroup.conditions
-                .filter(({ operator, value, numberOfDays, selectedDate }) => {
-                  return (
-                    operator &&
-                    (contentExistenceFilterOperators.includes(
-                      operator as ContentExistenceFilterOperator
-                    ) ||
-                      (() => {
-                        switch (value as DateFilterOperatorValue) {
-                          case 'number of days ago':
-                          case 'the past number of days':
-                          case 'number of days from now':
-                          case 'the next number of days':
-                            return Boolean(numberOfDays);
-                          case 'exact date':
-                            return Boolean(selectedDate);
-                        }
-                        return value != null && String(value).length > 0;
-                      })())
-                  );
-                })
-                [
-                  selectedConditionGroup.conjunction === 'and'
-                    ? 'every'
-                    : 'some'
-                ]((condition) => {
+  const filteredData = useMemo(() => {
+    filterRevalidationKey;
+    const dataFilteredByFilterFields = (() => {
+      if (filterFieldsRef.current) {
+        if (
+          selectedConditionGroup &&
+          selectedConditionGroup.conditions.length > 0
+        ) {
+          return data.filter((row) => {
+            return selectedConditionGroup.conditions
+              .filter(({ operator, value, numberOfDays, selectedDate }) => {
+                return (
+                  operator &&
+                  (contentExistenceFilterOperators.includes(
+                    operator as ContentExistenceFilterOperator
+                  ) ||
+                    (() => {
+                      switch (value as DateFilterOperatorValue) {
+                        case 'number of days ago':
+                        case 'the past number of days':
+                        case 'number of days from now':
+                        case 'the next number of days':
+                          return Boolean(numberOfDays);
+                        case 'exact date':
+                          return Boolean(selectedDate);
+                      }
+                      return value != null && String(value).length > 0;
+                    })())
+                );
+              })
+              [selectedConditionGroup.conjunction === 'and' ? 'every' : 'some'](
+                (condition) => {
                   const { fieldId, operator, value } = condition;
                   const filterField = filterFieldsRef.current!.find(
                     ({ id }) => id === fieldId
@@ -301,60 +332,59 @@ export const useDataFilter = <RecordRow extends BaseDataRow>(
                         return false;
                     }
                   });
-                });
-            });
-          }
+                }
+              );
+          });
         }
-        return data;
-      })();
+      }
+      return data;
+    })();
 
-      const filteredData = (() => {
-        if (searchTerm && searchTerm.length > 0) {
-          if (filterBySearchTermRef.current) {
-            return dataFilteredByFilterFields.filter((row) =>
-              filterBySearchTermRef.current!(searchTerm, row)
-            );
-          }
-          if (searchableFieldsRef.current) {
-            const lowercaseSearchTerm = searchTerm.toLowerCase();
-            return dataFilteredByFilterFields.filter((row) => {
-              return searchableFieldsRef.current!.some(
-                ({ id, getFilterValue }) => {
-                  const searchValues: string[] = [];
-                  const rawSearchValue = result(row, id);
-                  if (typeof rawSearchValue === 'string') {
-                    searchValues.push(rawSearchValue as any);
-                  } else if (Array.isArray(rawSearchValue)) {
-                    searchValues.push(
-                      ...rawSearchValue.filter((value) => {
-                        return typeof value === 'string';
-                      })
-                    );
-                  }
-                  if (getFilterValue) {
-                    const filterValue = getFilterValue(row);
-                    if (typeof filterValue === 'string') {
-                      searchValues.push(filterValue);
-                    }
-                  }
-                  return (
-                    searchValues.length > 0 &&
-                    searchValues.some((value) => {
-                      return value.toLowerCase().match(lowercaseSearchTerm);
+    const filteredData = (() => {
+      if (searchTerm && searchTerm.length > 0) {
+        if (filterBySearchTermRef.current) {
+          return dataFilteredByFilterFields.filter((row) =>
+            filterBySearchTermRef.current!(searchTerm, row)
+          );
+        }
+        if (searchableFieldsRef.current) {
+          const lowercaseSearchTerm = searchTerm.toLowerCase();
+          return dataFilteredByFilterFields.filter((row) => {
+            return searchableFieldsRef.current!.some(
+              ({ id, getFilterValue }) => {
+                const searchValues: string[] = [];
+                const rawSearchValue = result(row, id);
+                if (typeof rawSearchValue === 'string') {
+                  searchValues.push(rawSearchValue as any);
+                } else if (Array.isArray(rawSearchValue)) {
+                  searchValues.push(
+                    ...rawSearchValue.filter((value) => {
+                      return typeof value === 'string';
                     })
                   );
                 }
-              );
-            });
-          }
+                if (getFilterValue) {
+                  const filterValue = getFilterValue(row);
+                  if (typeof filterValue === 'string') {
+                    searchValues.push(filterValue);
+                  }
+                }
+                return (
+                  searchValues.length > 0 &&
+                  searchValues.some((value) => {
+                    return value.toLowerCase().match(lowercaseSearchTerm);
+                  })
+                );
+              }
+            );
+          });
         }
-        return dataFilteredByFilterFields;
-      })();
+      }
+      return dataFilteredByFilterFields;
+    })();
 
-      return filteredData;
-    },
-    [data, searchTerm]
-  );
+    return filterRef.current ? filterRef.current(filteredData) : filteredData;
+  }, [data, filterRevalidationKey, searchTerm, selectedConditionGroup]);
 
-  return { filter };
+  return { filteredData };
 };
