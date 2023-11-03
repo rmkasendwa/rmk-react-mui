@@ -523,7 +523,7 @@ export const useTable = <DataRow extends BaseDataRow>(
           case 'currency':
           case 'percentage':
           case 'number':
-            nextColumn.align = 'right';
+            nextColumn.align ?? (nextColumn.align = 'right');
             if (!nextColumn.noHeaderTextSuffix) {
               switch (nextColumn.type) {
                 case 'currency':
@@ -538,8 +538,8 @@ export const useTable = <DataRow extends BaseDataRow>(
             }
             break;
           case 'boolean':
-            nextColumn.align = 'center';
-            nextColumn.enumValues = ['Yes', 'No'];
+            nextColumn.align ?? (nextColumn.align = 'center');
+            nextColumn.enumValues ?? (nextColumn.enumValues = ['Yes', 'No']);
             nextColumn.searchKeyMapper ||
               (nextColumn.searchKeyMapper = (searchValue) =>
                 searchValue === 'Yes');
