@@ -44,6 +44,25 @@ Default.args = {
   paging: false,
 } as TableProps;
 
+export const WithoutRows = Template.bind({});
+WithoutRows.args = {
+  columns: [
+    {
+      id: 'accountNumber',
+      label: 'Account Number',
+      type: 'id',
+      width: 160,
+    },
+    { id: 'name', label: 'Name' },
+    {
+      id: 'outstandingBalance',
+      label: 'Balance',
+      type: 'currency',
+      opaque: true,
+    },
+  ],
+} as TableProps;
+
 export const WithoutPaging = Template.bind({});
 WithoutPaging.args = {
   columns: [
