@@ -273,7 +273,12 @@ export const TableBodyColumn = forwardRef<any, TableBodyColumnProps<any>>(
             );
             break;
           case 'number':
-            formattedColumnValue = addThousandCommas(formattedColumnValue);
+            if (
+              textTransform !== false &&
+              typeof formattedColumnValue === 'number'
+            ) {
+              formattedColumnValue = addThousandCommas(formattedColumnValue);
+            }
             break;
           case 'phoneNumber':
             if (typeof formattedColumnValue === 'string') {
