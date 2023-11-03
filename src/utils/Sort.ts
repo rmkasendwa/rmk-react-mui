@@ -25,7 +25,19 @@ export const sort = <RecordRow = any>(
   const sortWeight = (() => {
     const aSortValue = getSortValue ? getSortValue(a) : result(a, id);
     const bSortValue = getSortValue ? getSortValue(b) : result(b, id);
-    if (typeof aSortValue === type && typeof bSortValue === type) {
+    const [aMatchesDataType, bMatchesDataType] = [aSortValue, bSortValue].map(
+      (sortValue) => {
+        if (
+          baseType === 'date' &&
+          (sortValue instanceof Date || typeof sortValue === 'number')
+        ) {
+          return true;
+        }
+        return typeof sortValue === type;
+      }
+    );
+
+    if (aMatchesDataType && bMatchesDataType) {
       switch (type) {
         case 'number':
           return (aSortValue as number) - (bSortValue as number);
