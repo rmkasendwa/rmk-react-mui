@@ -1745,7 +1745,6 @@ const BaseRecordsExplorer = <
               bordersVariant: 'square',
               ...viewProps,
               ...ListViewProps,
-              paging: false,
               enableColumnDisplayToggle,
               enableCheckboxAllRowSelector,
               enableCheckboxRowSelectors,

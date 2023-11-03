@@ -87,7 +87,7 @@ export const useRecordsExplorerFields = <RecordRow extends BaseDataRow>(
   return useMemo(() => {
     filterRevalidationKey; // Regenerate filter fields when filterRevalidationKey changes
     //#region Resolving groupable fields
-    const groupableFields =
+    const groupableFields = (
       (() => {
         const groupableFields: typeof groupableFieldsPropRef.current = [];
         if (groupableFieldsPropRef.current) {
@@ -181,11 +181,14 @@ export const useRecordsExplorerFields = <RecordRow extends BaseDataRow>(
         if (groupableFields.length > 0) {
           return groupableFields;
         }
-      })() || [];
+      })() || []
+    ).sort(({ label: aLabel }, { label: bLabel }) => {
+      return aLabel.localeCompare(bLabel);
+    });
     //#endregion
 
     //#region Resolving sortable fields
-    const sortableFields =
+    const sortableFields = (
       (() => {
         const sortableFields: typeof sortableFieldsPropRef.current = [];
         if (sortableFieldsPropRef.current) {
@@ -260,11 +263,14 @@ export const useRecordsExplorerFields = <RecordRow extends BaseDataRow>(
         if (sortableFields.length > 0) {
           return sortableFields;
         }
-      })() || [];
+      })() || []
+    ).sort(({ label: aLabel }, { label: bLabel }) => {
+      return aLabel.localeCompare(bLabel);
+    });
     //#endregion
 
     //#region Resolving filter fields
-    const filterFields =
+    const filterFields = (
       (() => {
         const filterFields: typeof filterFieldsPropRef.current = [];
         if (filterFieldsPropRef.current) {
@@ -341,7 +347,10 @@ export const useRecordsExplorerFields = <RecordRow extends BaseDataRow>(
         if (filterFields.length > 0) {
           return filterFields;
         }
-      })() || [];
+      })() || []
+    ).sort(({ label: aLabel }, { label: bLabel }) => {
+      return aLabel.localeCompare(bLabel);
+    });
     //#endregion
 
     //#region Resolving searchable fields

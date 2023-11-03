@@ -5,7 +5,6 @@ import {
   ComponentsOverrides,
   ComponentsProps,
   ComponentsVariants,
-  Divider,
   Stack,
   Tooltip,
   unstable_composeClasses as composeClasses,
@@ -18,37 +17,23 @@ import Box from '@mui/material/Box';
 import { Theme } from '@mui/material/styles/createTheme';
 import useTheme from '@mui/material/styles/useTheme';
 import MuiBaseTable from '@mui/material/Table';
-import TableBody, { tableBodyClasses } from '@mui/material/TableBody';
+import { tableBodyClasses } from '@mui/material/TableBody';
 import TableCell, { tableCellClasses } from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
-import TablePagination, {
-  TablePaginationProps,
-} from '@mui/material/TablePagination';
 import TableRow, { tableRowClasses } from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 import { alpha, darken, lighten } from '@mui/system/colorManipulator';
 import { SxProps } from '@mui/system/styleFunctionSx';
 import clsx from 'clsx';
 import { omit } from 'lodash';
-import {
-  Fragment,
-  ReactNode,
-  Ref,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { Ref, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useGlobalConfiguration } from '../../../contexts/GlobalConfigurationContext';
-import { useLoadOnScrollToBottom } from '../../../hooks/InfiniteScroller';
 import { useReactRouterDOMSearchParams } from '../../../hooks/ReactRouterDOM';
 import { SortDirection, SortOptions } from '../../../models/Sort';
 import { BLACK_COLOR } from '../../../theme';
 import { sort } from '../../../utils/Sort';
-import DataTablePagination from '../../DataTablePagination';
 import EllipsisMenuIconButton from '../../EllipsisMenuIconButton';
-import RenderIfVisible from '../../RenderIfVisible';
 import {
   BaseDataRow,
   CHECKBOX_COLUMN_ID,
@@ -57,8 +42,9 @@ import {
   TableProps,
   tableSearchParamValidationSpec,
 } from '../models';
+import TableBody from '../TableBody';
 import { tableBodyColumnClasses } from '../TableBodyColumn';
-import TableBodyRow, { tableBodyRowClasses } from '../TableBodyRow';
+import { tableBodyRowClasses } from '../TableBodyRow';
 import TableColumnToggleIconButton from '../TableColumnToggleIconButton';
 import TableGroupCollapseTool from '../TableGroupCollapseTool';
 import {
@@ -126,7 +112,6 @@ export const tableClasses: TableClasses = generateUtilityClasses(
 );
 
 const TABLE_HEAD_ALPHA = 0.05;
-const LAZY_ROWS_BUFFER_SIZE = 20;
 
 export const useTable = <DataRow extends BaseDataRow>(
   inProps: TableProps<DataRow>,
@@ -137,31 +122,20 @@ export const useTable = <DataRow extends BaseDataRow>(
     onClickRow,
     columns: columnsProp,
     rows = [],
-    filterdRowCount,
-    totalRowCount,
     rowStartIndex = 0,
     labelPlural = 'Records',
-    labelSingular,
-    rowsPerPage: rowsPerPageProp = 10,
-    pageIndex: pageIndexProp = 0,
-    onChangePage,
-    onRowsPerPageChange,
     forEachRowProps,
     variant = 'plain',
     bordersVariant = 'rows',
-    paging = true,
     showHeaderRow = true,
     showDataRows = true,
     HeaderRowProps = {},
     SecondaryHeaderRowProps = {},
     decimalPlaces,
     textTransform,
-    paginationType = 'default',
-    PaginationProps = {},
     stickyHeader = false,
     TableBodyRowPlaceholderProps = {},
     TableHeadProps = {},
-    PaginatedTableWrapperProps = {},
     ColumnDisplayToggleProps = {},
     defaultColumnValue,
     columnTypographyProps,
@@ -180,7 +154,6 @@ export const useTable = <DataRow extends BaseDataRow>(
     allRowsChecked: allRowsCheckedProp = false,
     checkedRowIds: checkedRowIdsProp,
     onChangeCheckedRowIds: onChangeCheckedRowIdsProp,
-    rowsPerPageOptions: rowsPerPageOptionsProp = [10, 25, 50, 100],
     enableSmallScreenOptimization = false,
     showRowNumber = false,
     defaultCountryCode,
@@ -195,7 +168,7 @@ export const useTable = <DataRow extends BaseDataRow>(
     showStartStickyColumnDivider = false,
     staticRows,
     onChangeMinWidth,
-    lazyRows = rows.length > LAZY_ROWS_BUFFER_SIZE,
+    lazyRows,
     controlZIndex = true,
     highlightRowOnHover = true,
     scrollableElementRef,
@@ -235,18 +208,10 @@ export const useTable = <DataRow extends BaseDataRow>(
   );
 
   //#region Reset tableRowHeight to disable scroll paging *For Now*
-  tableBodyRowHeight = undefined;
+  tableBodyRowHeight ?? (tableBodyRowHeight = undefined);
   //#endregion
 
   const { sx: TableHeadPropsSx, ...TableHeadPropsRest } = TableHeadProps;
-  const {
-    sx: TableBodyRowPlaceholderPropsSx,
-    ...TableBodyRowPlaceholderPropsRest
-  } = TableBodyRowPlaceholderProps;
-  const {
-    sx: PaginatedTableWrapperPropsSx,
-    ...PaginatedTableWrapperPropsRest
-  } = PaginatedTableWrapperProps;
   const { sx: ColumnDisplayTogglePropsSx, ...ColumnDisplayTogglePropsRest } =
     ColumnDisplayToggleProps;
   lowercaseLabelPlural || (lowercaseLabelPlural = labelPlural.toLowerCase());
@@ -295,8 +260,6 @@ export const useTable = <DataRow extends BaseDataRow>(
   const { sx: HeaderRowPropsSx, ...HeaderRowPropsRest } = HeaderRowProps;
   const { sx: SecondaryHeaderRowPropsSx, ...SecondaryHeaderRowPropsRest } =
     SecondaryHeaderRowProps;
-  const [pageIndex, setPageIndex] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(rowsPerPageProp);
   const [sortBy, setSortBy] = useState<SortOptions<DataRow>>([]);
 
   const [tableHeaderHeight, setTableHeaderHeight] = useState(49);
@@ -427,9 +390,7 @@ export const useTable = <DataRow extends BaseDataRow>(
         computedColumns.push({
           ...numberColumn,
           getColumnValue: (record) => {
-            return `${
-              1 + rowStartIndex + pageRows.indexOf(record) + pageIndex
-            }.`;
+            return `${1 + rowStartIndex + sortedRows.indexOf(record)}.`;
           },
         });
       }
@@ -631,7 +592,7 @@ export const useTable = <DataRow extends BaseDataRow>(
     onChangeMinWidthRef.current?.(minWidth);
   }, [minWidth]);
 
-  const pageRows: typeof rows = [
+  const sortedRows: typeof rows = [
     ...(staticRows || []),
     ...(() => {
       const sortedRows = (() => {
@@ -643,22 +604,9 @@ export const useTable = <DataRow extends BaseDataRow>(
         return rows;
       })();
 
-      return totalRowCount || !paging
-        ? sortedRows
-        : sortedRows.slice(
-            pageIndex * rowsPerPage,
-            pageIndex * rowsPerPage + rowsPerPage
-          );
+      return sortedRows;
     })(),
   ];
-
-  useEffect(() => {
-    setPageIndex(pageIndexProp);
-  }, [pageIndexProp]);
-
-  useEffect(() => {
-    setRowsPerPage(rowsPerPageProp);
-  }, [rowsPerPageProp]);
 
   useEffect(() => {
     if (sortByProp) {
@@ -703,29 +651,6 @@ export const useTable = <DataRow extends BaseDataRow>(
     }
   }, [classes.startStickyColumnDividerActive, scrollableElementRef]);
   //#endregion
-
-  const [offset, setOffset] = useState(0);
-  const limit = (() => {
-    if (scrollableElementRef?.current?.offsetHeight && tableBodyRowHeight) {
-      return Math.ceil(
-        scrollableElementRef.current.offsetHeight / tableBodyRowHeight
-      );
-    }
-  })();
-  useLoadOnScrollToBottom({
-    elementRef: scrollableElementRef,
-    onChangeScrollLength({ scrollTop }) {
-      if (tableBodyRowHeight) {
-        setOffset(Math.floor(scrollTop / tableBodyRowHeight));
-      }
-    },
-    revalidationKey: `${tableBodyRowHeight}`,
-  });
-
-  const handleChangePage = (e: any, newPage: number) => {
-    setPageIndex(newPage);
-    onChangePage && onChangePage(newPage);
-  };
 
   //#region Variants
   const variantStyles: SxProps<Theme> = {
@@ -1246,139 +1171,6 @@ export const useTable = <DataRow extends BaseDataRow>(
     }
   })();
 
-  const tableBodyRows = (() => {
-    if (showDataRows) {
-      if (optimizeForSmallScreen) {
-        return pageRows.reduce((accumulator, row, index) => {
-          const rowNumber = rowStartIndex + 1 + index;
-          const { GroupingProps } = row;
-          const compositeId = (() => {
-            if (GroupingProps && 'isGroupHeader' in GroupingProps) {
-              return GroupingProps.groupId;
-            }
-            return row.id;
-          })();
-          accumulator.push({
-            id: compositeId,
-            element: (
-              <Fragment key={compositeId}>
-                {index > 0 ? <Divider /> : null}
-                <TableBodyRow
-                  {...{
-                    columnTypographyProps,
-                    decimalPlaces,
-                    defaultColumnValue,
-                    defaultCountryCode,
-                    defaultDateFormat,
-                    defaultDateTimeFormat,
-                    editable,
-                    minColumnWidth,
-                    noWrap,
-                    onClickRow,
-                    row,
-                    textTransform,
-                    enableSmallScreenOptimization,
-                    getToolTipWrappedColumnNode,
-                  }}
-                  columns={displayingColumns}
-                  getRowProps={forEachRowProps}
-                  className={clsx(rowNumber % 2 === 0 ? 'even' : 'odd')}
-                  applyCellWidthParameters={!showHeaderRow}
-                  sx={{
-                    [`&.${tableBodyRowClasses.groupHeaderRow}`]: {
-                      boxShadow: `0 -1px 2px -1px ${palette.divider}`,
-                      td: {
-                        position: 'sticky',
-                        top: tableHeaderHeight,
-                        ...(() => {
-                          if (controlZIndex) {
-                            return {
-                              zIndex: 2,
-                            };
-                          }
-                        })(),
-                      },
-                    },
-                  }}
-                />
-              </Fragment>
-            ),
-          });
-          return accumulator;
-        }, [] as { id: string; element: ReactNode }[]);
-      }
-      return (() => {
-        if (tableBodyRowHeight) {
-          return pageRows.slice(offset, offset + (limit ?? 0));
-        }
-        return pageRows;
-      })().reduce((accumulator, row, index) => {
-        const rowNumber = rowStartIndex + 1 + index;
-        const { GroupingProps } = row;
-        const compositeId = (() => {
-          if (GroupingProps && 'isGroupHeader' in GroupingProps) {
-            return GroupingProps.groupId;
-          }
-          return row.id;
-        })();
-        accumulator.push({
-          id: compositeId,
-          element: (
-            <TableBodyRow
-              {...{
-                columnTypographyProps,
-                decimalPlaces,
-                defaultColumnValue,
-                defaultCountryCode,
-                defaultDateFormat,
-                defaultDateTimeFormat,
-                editable,
-                minColumnWidth,
-                noWrap,
-                onClickRow,
-                row,
-                textTransform,
-                getToolTipWrappedColumnNode,
-              }}
-              key={compositeId}
-              columns={displayingColumns}
-              getRowProps={forEachRowProps}
-              className={clsx(rowNumber % 2 === 0 ? 'even' : 'odd')}
-              applyCellWidthParameters={!showHeaderRow}
-              sx={{
-                [`&.${tableBodyRowClasses.groupHeaderRow}`]: {
-                  boxShadow: `0 -1px 2px -1px ${palette.divider}`,
-                  td: {
-                    position: 'sticky',
-                    top: tableHeaderHeight,
-                    ...(() => {
-                      if (controlZIndex) {
-                        return {
-                          zIndex: 1,
-                          '&:first-of-type': {
-                            zIndex: 2,
-                          },
-                        };
-                      }
-                    })(),
-                  },
-                },
-                ...(() => {
-                  if (tableBodyRowHeight) {
-                    return {
-                      height: tableBodyRowHeight,
-                    };
-                  }
-                })(),
-              }}
-            />
-          ),
-        });
-        return accumulator;
-      }, [] as { id: string; element: ReactNode }[]);
-    }
-  })();
-
   const columnDisplayToggle = (() => {
     if (showHeaderRow && enableColumnDisplayToggle && !optimizeForSmallScreen) {
       const selectableColumns = allColumns.filter(({ id }) => {
@@ -1440,134 +1232,8 @@ export const useTable = <DataRow extends BaseDataRow>(
     }
   })();
 
-  const paginationElement = (() => {
-    if (paging) {
-      const filteredCount = filterdRowCount || totalRowCount || rows.length;
-      if (filteredCount >= 0) {
-        const paginationProps: Pick<
-          TablePaginationProps,
-          'onRowsPerPageChange' | 'page' | 'rowsPerPage' | 'rowsPerPageOptions'
-        > = {
-          page: pageIndex,
-          rowsPerPageOptions: [
-            ...new Set([...rowsPerPageOptionsProp, rowsPerPageProp]),
-          ].sort((a, b) => {
-            if (typeof a === 'number' && typeof b === 'number') {
-              return a - b;
-            }
-            return 0;
-          }),
-          rowsPerPage,
-          onRowsPerPageChange: (event) => {
-            handleChangePage(null, 0);
-            setRowsPerPage(+event.target.value);
-            onRowsPerPageChange && onRowsPerPageChange(+event.target.value);
-          },
-        };
-        if (paginationType === 'classic') {
-          return (
-            <DataTablePagination
-              {...{
-                labelPlural,
-                labelSingular,
-                lowercaseLabelPlural,
-                filteredCount,
-              }}
-              totalCount={totalRowCount || rows.length}
-              {...paginationProps}
-              PaginationProps={{
-                ...PaginationProps,
-                onChange: (e, pageNumber) => {
-                  handleChangePage(e, pageNumber - 1);
-                },
-              }}
-              postCountTools={[
-                ...(() => {
-                  if (checkedRowIds.length > 0) {
-                    return [
-                      <Typography
-                        key="selectedItems"
-                        variant="body2"
-                        sx={{ fontSize: 'inherit' }}
-                      >
-                        {checkedRowIds.length} selected
-                      </Typography>,
-                    ];
-                  }
-                  return [];
-                })(),
-              ]}
-            />
-          );
-        }
-        return (
-          <TablePagination
-            component="div"
-            count={totalRowCount || rows.length}
-            {...paginationProps}
-            onPageChange={handleChangePage}
-            showFirstButton
-            showLastButton
-          />
-        );
-      }
-    }
-  })();
-
-  const getTableBodyRowElements = () => {
-    if (tableBodyRows) {
-      if (!lazyRows) {
-        return tableBodyRows.map(({ element }) => element);
-      }
-      const pageRowElementsToProcess = [...tableBodyRows];
-      const pageRowElementPlaceholders: ReactNode[] = [];
-      while (pageRowElementsToProcess.length > 0) {
-        const bufferedPageRows = pageRowElementsToProcess.splice(
-          0,
-          LAZY_ROWS_BUFFER_SIZE
-        );
-        const bufferedPageRowElements = bufferedPageRows.map(({ element }) => {
-          return element;
-        });
-        const placeholderElementKey = bufferedPageRows
-          .map(({ id }) => {
-            return id;
-          })
-          .join(';');
-        const baseHeight = (() => {
-          if (
-            typeof (TableBodyRowPlaceholderPropsSx as any)?.height === 'number'
-          ) {
-            return (TableBodyRowPlaceholderPropsSx as any).height;
-          }
-          return optimizeForSmallScreen ? 65 : 41;
-        })();
-        pageRowElementPlaceholders.push(
-          <RenderIfVisible
-            {...TableBodyRowPlaceholderPropsRest}
-            key={placeholderElementKey}
-            component={optimizeForSmallScreen ? 'div' : 'tr'}
-            displayPlaceholder={false}
-            unWrapChildrenIfVisible
-            initialVisible={pageRowElementPlaceholders.length === 0}
-            sx={{
-              ...TableBodyRowPlaceholderPropsSx,
-              height: baseHeight * bufferedPageRowElements.length,
-            }}
-          >
-            {bufferedPageRowElements}
-          </RenderIfVisible>
-        );
-      }
-      return pageRowElementPlaceholders;
-    }
-  };
-
   const baseTableElement = (() => {
     if (optimizeForSmallScreen) {
-      if (!tableBodyRows) {
-        return null;
-      }
       return (
         <Box
           sx={{
@@ -1582,22 +1248,15 @@ export const useTable = <DataRow extends BaseDataRow>(
             })(),
           }}
         >
-          {(() => {
-            if (tableBodyRows.length > 0) {
-              return getTableBodyRowElements();
-            }
-            return (
-              <Box
-                sx={{
-                  p: 2,
-                }}
-              >
-                <Typography variant="body2" align="center">
-                  {emptyRowsLabel}
-                </Typography>
-              </Box>
-            );
-          })()}
+          <Box
+            sx={{
+              p: 2,
+            }}
+          >
+            <Typography variant="body2" align="center">
+              {emptyRowsLabel}
+            </Typography>
+          </Box>
         </Box>
       );
     }
@@ -1641,80 +1300,46 @@ export const useTable = <DataRow extends BaseDataRow>(
             {tableHeaderRow}
           </TableHead>
         ) : null}
-        {tableBodyRows
-          ? (() => {
-              return (
-                <TableBody>
-                  {(() => {
-                    if (tableBodyRows.length > 0) {
-                      return (
-                        <>
-                          {getTableBodyRowElements()}
-                          {(() => {
-                            if (tableBodyRowHeight) {
-                              return (
-                                <TableRow
-                                  sx={{
-                                    height:
-                                      pageRows.length * tableBodyRowHeight,
-                                  }}
-                                />
-                              );
-                            }
-                          })()}
-                        </>
-                      );
-                    }
-                    return (
-                      <TableRow>
-                        <TableCell
-                          className={classes.emptyRowsCell}
-                          colSpan={displayingColumns.length}
-                          align="center"
-                        >
-                          <Typography variant="body2">
-                            {emptyRowsLabel}
-                          </Typography>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })()}
-                </TableBody>
-              );
-            })()
-          : null}
+        {showDataRows ? (
+          <TableBody
+            {...{
+              optimizeForSmallScreen,
+              rowStartIndex,
+              tableHeaderHeight,
+              displayingColumns,
+              columnTypographyProps,
+              decimalPlaces,
+              defaultColumnValue,
+              defaultCountryCode,
+              defaultDateFormat,
+              defaultDateTimeFormat,
+              editable,
+              minColumnWidth,
+              noWrap,
+              onClickRow,
+              textTransform,
+              enableSmallScreenOptimization,
+              getToolTipWrappedColumnNode,
+              forEachRowProps,
+              showHeaderRow,
+              tableBodyRowHeight,
+              controlZIndex,
+              emptyRowsLabel,
+              scrollableElementRef,
+              lazyRows,
+              TableBodyRowPlaceholderProps,
+            }}
+            rows={sortedRows}
+            EmptyRowsCellProps={{
+              className: classes.emptyRowsCell,
+            }}
+          />
+        ) : null}
       </MuiBaseTable>
     );
   })();
 
   const tableElement = (() => {
-    if (paging && !optimizeForSmallScreen) {
-      return (
-        <Box
-          {...PaginatedTableWrapperPropsRest}
-          sx={{
-            ...PaginatedTableWrapperPropsSx,
-            display: 'flex',
-            flexDirection: 'column',
-          }}
-        >
-          <Box
-            sx={{
-              overflow: 'auto',
-              flex: 1,
-              minHeight: 0,
-              position: 'relative',
-            }}
-          >
-            {columnDisplayToggle}
-            {baseTableElement}
-          </Box>
-          {stickyHeader ? <Divider /> : null}
-          {paginationElement}
-        </Box>
-      );
-    }
-
     if (
       showHeaderRow &&
       (enableColumnDisplayToggle ||
@@ -1767,8 +1392,6 @@ export const useTable = <DataRow extends BaseDataRow>(
   return {
     columnDisplayToggle,
     tableHeaderRow,
-    tableBodyRows,
-    paginationElement,
     baseTableElement,
     tableElement,
   };
