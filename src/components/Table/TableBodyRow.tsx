@@ -330,15 +330,6 @@ export const TableBodyRow = <T extends BaseDataRow>(
         sx={{
           alignItems: 'center',
           cursor: isClickable ? 'pointer' : 'inherit',
-          py: 1,
-          pl: `calc(${spacing(2)} + ${indentLevel * 24}px)`,
-          ...(() => {
-            if (!ellipsisMenuToolColumn) {
-              return {
-                pr: 1,
-              };
-            }
-          })(),
         }}
       >
         <Grid
@@ -346,6 +337,8 @@ export const TableBodyRow = <T extends BaseDataRow>(
           xs
           sx={{
             minWidth: 0,
+            py: 1,
+            pl: `calc(${spacing(2)} + ${indentLevel * 24}px)`,
           }}
         >
           <TableBodyColumn
