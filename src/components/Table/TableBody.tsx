@@ -153,7 +153,7 @@ export const BaseTableBody = <DataRow extends BaseDataRow>(
     emptyRowsLabel,
     scrollableElementRef,
     displayingColumns,
-    lazyRows = rows.length > LAZY_ROWS_BUFFER_SIZE && !tableHeaderHeight,
+    lazyRows = rows.length > LAZY_ROWS_BUFFER_SIZE && !tableBodyRowHeight,
     TableBodyRowPlaceholderProps = {},
     EmptyRowsCellProps = {},
     ...rest
