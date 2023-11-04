@@ -35,6 +35,7 @@ import {
   TableProps,
   TableRowProps,
 } from './models';
+import { tableBodyColumnClasses } from './TableBodyColumn';
 import TableBodyRow, { tableBodyRowClasses } from './TableBodyRow';
 
 export interface TableBodyClasses {
@@ -275,6 +276,32 @@ export const BaseTableBody = <DataRow extends BaseDataRow>(
 
   const rowElements = (() => {
     if (pageRows.length > 0) {
+      const placeholderTableCells = (() => {
+        if (tableBodyRowHeight && !optimizeForSmallScreen) {
+          return displayingColumns.map(
+            ({ className, opaque, id, width, sx, bodySx }) => {
+              return (
+                <TableCell
+                  className={clsx([
+                    className,
+                    opaque && tableBodyColumnClasses.opaque,
+                  ])}
+                  key={String(id)}
+                  sx={
+                    {
+                      ...sx,
+                      ...bodySx,
+                      width,
+                      p: 0,
+                      borderBottom: 'none',
+                    } as any
+                  }
+                />
+              );
+            }
+          );
+        }
+      })();
       return (
         <>
           {tableBodyRowHeight ? (
@@ -283,7 +310,9 @@ export const BaseTableBody = <DataRow extends BaseDataRow>(
               style={{
                 height: `${offset * tableBodyRowHeight}px`,
               }}
-            />
+            >
+              {placeholderTableCells}
+            </Box>
           ) : null}
           {(() => {
             if (!lazyRows) {
@@ -344,7 +373,9 @@ export const BaseTableBody = <DataRow extends BaseDataRow>(
                   (rows.length - (offset + limit)) * tableBodyRowHeight
                 }px`,
               }}
-            />
+            >
+              {placeholderTableCells}
+            </Box>
           ) : null}
         </>
       );
