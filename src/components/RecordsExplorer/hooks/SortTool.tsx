@@ -1,8 +1,6 @@
 import {
   ComponentsProps,
   ComponentsVariants,
-  FormControlLabel,
-  Switch,
   useThemeProps,
 } from '@mui/material';
 
@@ -51,16 +49,5 @@ export const useSortTool = <RecordRow extends BaseDataRow>(
 
   return useSortOperationFieldSelectorTool({
     ...rest,
-    footerContent: (
-      <FormControlLabel
-        control={<Switch defaultChecked disabled color="success" />}
-        label="Keep sorted"
-        componentsProps={{
-          typography: {
-            sx: { fontSize: 14 },
-          },
-        }}
-      />
-    ),
   });
 };
