@@ -564,6 +564,20 @@ export const useSortOperationFieldSelectorTool = <
           return `${sortLabel}ed by ${selectedSortParams.length} fields`;
         })()
       : sortLabel,
+    title: hasSortParams
+      ? (() => {
+          const sortedByFieldLabels = selectedSortParams.map(
+            ({ label, searchableLabel }) => {
+              return String(searchableLabel || label);
+            }
+          );
+          let title = `${sortLabel}ed by ${sortedByFieldLabels.shift()}`;
+          sortedByFieldLabels.forEach((label) => {
+            title += ` then by ${label}`;
+          });
+          return title;
+        })()
+      : `Not ${sortLabel}ed`,
     popupCardTitle: (
       <Grid
         container

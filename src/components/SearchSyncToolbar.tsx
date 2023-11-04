@@ -12,7 +12,6 @@ import {
   DividerProps,
   IconButton,
   IconButtonProps,
-  Typography,
   alpha,
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
@@ -216,70 +215,61 @@ export const getToolNodes = (
                 const buttonElement = (() => {
                   if (index >= tools.length - collapsedWidthToolIndex) {
                     return (
-                      <>
-                        <Tooltip
-                          title={title || label}
-                          disableInteractive
-                          enterAtCursorPosition={false}
-                        >
-                          <Button
-                            {...rest}
-                            sx={{
-                              ...sx,
-                              minWidth: 'auto',
-                              maxWidth: MAX_BUTTON_WIDTH,
-                              px: 1,
-                              '&>svg': {
-                                fontSize: 20,
-                              },
-                              [`.${buttonClasses.endIcon}`]: {
-                                m: 0,
-                              },
-                            }}
-                          >
-                            {icon}
-                          </Button>
-                        </Tooltip>
-                        {popupElement}
-                      </>
+                      <Button
+                        {...rest}
+                        sx={{
+                          ...sx,
+                          minWidth: 'auto',
+                          maxWidth: MAX_BUTTON_WIDTH,
+                          px: 1,
+                          '&>svg': {
+                            fontSize: 20,
+                          },
+                          [`.${buttonClasses.endIcon}`]: {
+                            m: 0,
+                          },
+                        }}
+                      >
+                        {icon}
+                      </Button>
                     );
                   }
                   return (
-                    <>
+                    <Button
+                      startIcon={icon}
+                      {...rest}
+                      sx={{
+                        maxWidth: MAX_BUTTON_WIDTH,
+                        ...sx,
+                      }}
+                    >
+                      <LoadingTypography
+                        component="div"
+                        variant="inherit"
+                        noWrap
+                        showTooltipOnOverflow={Boolean(!title)}
+                      >
+                        {label}
+                      </LoadingTypography>
+                    </Button>
+                  );
+                })();
+                return (
+                  <>
+                    {title ? (
                       <Tooltip
-                        title={label}
+                        {...{ title }}
                         disableInteractive
                         enterAtCursorPosition={false}
                       >
-                        <Button
-                          startIcon={icon}
-                          {...rest}
-                          sx={{
-                            maxWidth: MAX_BUTTON_WIDTH,
-                            ...sx,
-                          }}
-                        >
-                          <Typography component="div" variant="inherit" noWrap>
-                            {label}
-                          </Typography>
-                        </Button>
+                        {buttonElement}
                       </Tooltip>
-                      {popupElement}
-                    </>
-                  );
-                })();
-                if (title) {
-                  return (
-                    <Tooltip
-                      {...{ title }}
-                      disableInteractive
-                      enterAtCursorPosition={false}
-                    >
-                      {buttonElement}
-                    </Tooltip>
-                  );
-                }
-                return buttonElement;
+                    ) : (
+                      buttonElement
+                    )}
+                    {popupElement}
+                  </>
+                );
               }
               case 'divider': {
                 return (
