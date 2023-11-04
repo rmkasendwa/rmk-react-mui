@@ -415,7 +415,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
       TitleProps = {},
       searchFieldOpen: searchFieldOpenProp,
       SearchFieldProps = {},
-      searchVelocity = 'slow',
+      searchVelocity,
       alignTools = 'end',
       maxTitleWidth = MAX_TITLE_WIDTH,
       maxSearchFieldWidth = MAX_SEARCH_FIELD_WIDTH,

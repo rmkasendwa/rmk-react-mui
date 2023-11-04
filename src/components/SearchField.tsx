@@ -9,7 +9,7 @@ import {
   useThemeProps,
 } from '@mui/material';
 import clsx from 'clsx';
-import { forwardRef, useState } from 'react';
+import { forwardRef, useRef, useState } from 'react';
 
 import TextField, { TextFieldProps } from './InputFields/TextField';
 
@@ -65,7 +65,7 @@ export interface SearchFieldProps extends TextFieldProps {
   searchTerm?: string;
   onChangeSearchTerm?: (searchTerm: string) => void;
   onSearch?: (searchTerm: string) => void;
-  searchVelocity?: 'slow' | 'fast';
+  searchVelocity?: 'slow' | 'fast' | number;
 }
 
 export const SearchField = forwardRef<HTMLDivElement, SearchFieldProps>(
@@ -95,6 +95,10 @@ export const SearchField = forwardRef<HTMLDivElement, SearchFieldProps>(
         }
       })()
     );
+
+    //#region Refs
+    const searchTimeoutRef = useRef<NodeJS.Timeout>();
+    //#endregion
 
     const { sx: InputPropsSx, ...InputPropsRest } = InputProps;
     const [localSearchTerm, setLocalSearchTerm] = useState(
@@ -132,11 +136,15 @@ export const SearchField = forwardRef<HTMLDivElement, SearchFieldProps>(
             setLocalSearchTerm(event.target.value);
           }
           onChangeSearchTerm && onChangeSearchTerm(event.target.value);
-          if (
-            onSearch &&
-            (searchVelocity === 'fast' || event.target.value.length <= 0)
-          ) {
-            onSearch(event.target.value);
+          if (onSearch) {
+            if (searchVelocity === 'fast' || event.target.value.length <= 0) {
+              onSearch(event.target.value);
+            } else if (typeof searchVelocity === 'number') {
+              clearTimeout(searchTimeoutRef.current);
+              searchTimeoutRef.current = setTimeout(() => {
+                onSearch(event.target.value);
+              }, searchVelocity);
+            }
           }
           onChange && onChange(event);
         }}
