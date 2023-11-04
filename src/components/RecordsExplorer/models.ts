@@ -21,25 +21,31 @@ export type FilterBySearchTerm<RecordRow extends BaseDataRow> = (
 ) => boolean;
 
 export interface SearchableProperty<RecordRow extends BaseDataRow> {
-  label: string;
   id: keyof RecordRow;
+  label: ReactNode;
+  searchableLabel?: string;
   getFilterValue?: (row: RecordRow) => any;
 }
 
 export interface BaseDataFilterField<RecordRow extends BaseDataRow> {
-  type: PrimitiveDataType;
-  /**
-   * The placeholder/field label of the filter field.
-   */
-  label: string;
-  /**
-   * The title of the field tooltip.
-   */
-  title?: string;
   /**
    * The field id used in the query string and during data filtering.
    */
   id: keyof RecordRow;
+
+  type: PrimitiveDataType;
+
+  /**
+   * The placeholder/field label of the filter field.
+   */
+  label: ReactNode;
+  searchableLabel?: string;
+
+  /**
+   * The title of the field tooltip.
+   */
+  title?: string;
+
   /**
    * The filter function to be called when the user provides input in the filter field.
    */
@@ -49,7 +55,7 @@ export interface BaseDataFilterField<RecordRow extends BaseDataRow> {
 export interface DataMultiSelectDropdownFilterField<
   RecordRow extends BaseDataRow
 > extends Omit<BaseDataFilterField<RecordRow>, 'filter'>,
-    Omit<DataDropdownFieldProps, 'id' | 'label'> {
+    Omit<DataDropdownFieldProps, 'id' | 'label' | 'searchableLabel'> {
   /**
    * The type of the filter field.
    */
@@ -65,7 +71,7 @@ export interface DataMultiSelectDropdownFilterField<
 
 export interface DataDateFilterField<RecordRow extends BaseDataRow>
   extends BaseDataFilterField<RecordRow>,
-    Omit<DateInputFieldProps, 'id' | 'label'> {
+    Omit<DateInputFieldProps, 'id' | 'label' | 'searchableLabel'> {
   /**
    * The type of the filter field.
    */
@@ -74,7 +80,7 @@ export interface DataDateFilterField<RecordRow extends BaseDataRow>
 
 export interface NumberFilterField<RecordRow extends BaseDataRow>
   extends BaseDataFilterField<RecordRow>,
-    Omit<NumberInputFieldProps, 'id' | 'label'> {
+    Omit<NumberInputFieldProps, 'id' | 'label' | 'searchableLabel'> {
   /**
    * The type of the filter field.
    */
@@ -83,7 +89,7 @@ export interface NumberFilterField<RecordRow extends BaseDataRow>
 
 export interface TextFilterField<RecordRow extends BaseDataRow>
   extends BaseDataFilterField<RecordRow>,
-    Omit<TextFieldProps, 'id' | 'label'> {
+    Omit<TextFieldProps, 'id' | 'label' | 'searchableLabel'> {
   /**
    * The type of the filter field.
    */
@@ -207,6 +213,7 @@ export interface ConditionGroup<RecordRow extends BaseDataRow> {
 export type BaseDataGroup<RecordRow> = {
   groupName?: string;
   label?: ReactNode;
+  searchableLabel?: string;
   childrenCount: number;
 } & RecordRow;
 

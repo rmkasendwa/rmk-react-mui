@@ -98,6 +98,7 @@ export const useRecordsExplorerFields = <RecordRow extends BaseDataRow>(
             ({
               id,
               label,
+              searchableLabel,
               type = 'string',
               groupType,
               getSortValue,
@@ -114,7 +115,8 @@ export const useRecordsExplorerFields = <RecordRow extends BaseDataRow>(
               ) {
                 groupableFields.push({
                   id,
-                  label: String(label),
+                  label,
+                  searchableLabel,
                   type:
                     groupType || mapTableColumnTypeToPrimitiveDataType(type),
                   getSortValue: getSortValue || (getFilterValue as any),
@@ -132,9 +134,8 @@ export const useRecordsExplorerFields = <RecordRow extends BaseDataRow>(
           if (listView) {
             groupableFields.push(
               ...listView.columns
-                .filter(({ id, label, type = 'string', groupable }) => {
+                .filter(({ id, type = 'string', groupable }) => {
                   return (
-                    typeof label === 'string' &&
                     !groupableFields.find(
                       ({ id: groupableFieldId }) => groupableFieldId === id
                     ) &&
@@ -147,6 +148,7 @@ export const useRecordsExplorerFields = <RecordRow extends BaseDataRow>(
                   ({
                     id,
                     label,
+                    searchableLabel,
                     type = 'enum',
                     getFilterValue,
                     getColumnValue,
@@ -156,7 +158,8 @@ export const useRecordsExplorerFields = <RecordRow extends BaseDataRow>(
                   }) => {
                     return {
                       id,
-                      label: String(label),
+                      label,
+                      searchableLabel,
                       type: type as PrimitiveDataType,
                       getSortValue: getSortValue || (getFilterValue as any),
                       sortLabels,
@@ -182,9 +185,16 @@ export const useRecordsExplorerFields = <RecordRow extends BaseDataRow>(
           return groupableFields;
         }
       })() || []
-    ).sort(({ label: aLabel }, { label: bLabel }) => {
-      return aLabel.localeCompare(bLabel);
-    });
+    ).sort(
+      (
+        { label: aBaseLabel, searchableLabel: aSearchableLabel },
+        { label: bBaseLabel, searchableLabel: bSearchableLabel }
+      ) => {
+        const aLabel = String(aSearchableLabel || aBaseLabel);
+        const bLabel = String(bSearchableLabel || bBaseLabel);
+        return aLabel.localeCompare(bLabel);
+      }
+    );
     //#endregion
 
     //#region Resolving sortable fields
@@ -199,6 +209,7 @@ export const useRecordsExplorerFields = <RecordRow extends BaseDataRow>(
             ({
               id,
               label,
+              searchableLabel,
               type = 'string',
               sortType,
               getSortValue,
@@ -214,7 +225,8 @@ export const useRecordsExplorerFields = <RecordRow extends BaseDataRow>(
               ) {
                 sortableFields.push({
                   id,
-                  label: String(label),
+                  label,
+                  searchableLabel,
                   type: sortType || mapTableColumnTypeToPrimitiveDataType(type),
                   getSortValue: getSortValue || (getFilterValue as any),
                   sortLabels,
@@ -230,9 +242,8 @@ export const useRecordsExplorerFields = <RecordRow extends BaseDataRow>(
           if (listView) {
             sortableFields.push(
               ...listView.columns
-                .filter(({ id, label, sortable }) => {
+                .filter(({ id, sortable }) => {
                   return (
-                    typeof label === 'string' &&
                     sortable !== false &&
                     !sortableFields.find(
                       ({ id: sortableFieldId }) => sortableFieldId === id
@@ -243,6 +254,7 @@ export const useRecordsExplorerFields = <RecordRow extends BaseDataRow>(
                   ({
                     id,
                     label,
+                    searchableLabel,
                     type = 'string',
                     getFilterValue,
                     getSortValue,
@@ -250,7 +262,8 @@ export const useRecordsExplorerFields = <RecordRow extends BaseDataRow>(
                   }) => {
                     return {
                       id,
-                      label: String(label),
+                      label,
+                      searchableLabel,
                       type: mapTableColumnTypeToPrimitiveDataType(type),
                       getSortValue: getSortValue || (getFilterValue as any),
                       sortLabels,
@@ -264,9 +277,16 @@ export const useRecordsExplorerFields = <RecordRow extends BaseDataRow>(
           return sortableFields;
         }
       })() || []
-    ).sort(({ label: aLabel }, { label: bLabel }) => {
-      return aLabel.localeCompare(bLabel);
-    });
+    ).sort(
+      (
+        { label: aBaseLabel, searchableLabel: aSearchableLabel },
+        { label: bBaseLabel, searchableLabel: bSearchableLabel }
+      ) => {
+        const aLabel = String(aSearchableLabel || aBaseLabel);
+        const bLabel = String(bSearchableLabel || bBaseLabel);
+        return aLabel.localeCompare(bLabel);
+      }
+    );
     //#endregion
 
     //#region Resolving filter fields
@@ -278,7 +298,14 @@ export const useRecordsExplorerFields = <RecordRow extends BaseDataRow>(
         }
         if (fieldsRef.current) {
           fieldsRef.current.forEach(
-            ({ id, label, type, getFilterValue, searchable }) => {
+            ({
+              id,
+              label,
+              searchableLabel,
+              type,
+              getFilterValue,
+              searchable,
+            }) => {
               if (
                 searchable &&
                 !filterFields.find(
@@ -287,7 +314,8 @@ export const useRecordsExplorerFields = <RecordRow extends BaseDataRow>(
               ) {
                 filterFields.push({
                   id,
-                  label: String(label),
+                  label,
+                  searchableLabel,
                   type: mapTableColumnTypeToPrimitiveDataType(type) as any,
                   getFilterValue,
                 });
@@ -302,9 +330,8 @@ export const useRecordsExplorerFields = <RecordRow extends BaseDataRow>(
           if (listView) {
             filterFields.push(
               ...listView.columns
-                .filter(({ id, label, searchable }) => {
+                .filter(({ id, searchable }) => {
                   return (
-                    typeof label === 'string' &&
                     searchable !== false &&
                     !filterFields.find(
                       ({ id: filterFieldId }) => filterFieldId === id
@@ -315,6 +342,7 @@ export const useRecordsExplorerFields = <RecordRow extends BaseDataRow>(
                   ({
                     id,
                     label,
+                    searchableLabel,
                     type = 'string',
                     filterType,
                     getFilterValue,
@@ -325,7 +353,8 @@ export const useRecordsExplorerFields = <RecordRow extends BaseDataRow>(
                   }) => {
                     return {
                       id,
-                      label: String(label),
+                      label,
+                      searchableLabel,
                       type:
                         filterType ||
                         (mapTableColumnTypeToPrimitiveDataType(type) as any),
@@ -348,9 +377,16 @@ export const useRecordsExplorerFields = <RecordRow extends BaseDataRow>(
           return filterFields;
         }
       })() || []
-    ).sort(({ label: aLabel }, { label: bLabel }) => {
-      return aLabel.localeCompare(bLabel);
-    });
+    ).sort(
+      (
+        { label: aBaseLabel, searchableLabel: aSearchableLabel },
+        { label: bBaseLabel, searchableLabel: bSearchableLabel }
+      ) => {
+        const aLabel = String(aSearchableLabel || aBaseLabel);
+        const bLabel = String(bSearchableLabel || bBaseLabel);
+        return aLabel.localeCompare(bLabel);
+      }
+    );
     //#endregion
 
     //#region Resolving searchable fields
@@ -361,7 +397,15 @@ export const useRecordsExplorerFields = <RecordRow extends BaseDataRow>(
       }
       if (fieldsRef.current) {
         fieldsRef.current.forEach(
-          ({ id, label, type, filterType, getFilterValue, searchable }) => {
+          ({
+            id,
+            label,
+            searchableLabel,
+            type,
+            filterType,
+            getFilterValue,
+            searchable,
+          }) => {
             if (
               searchable &&
               !filterFields.find(
@@ -370,7 +414,8 @@ export const useRecordsExplorerFields = <RecordRow extends BaseDataRow>(
             ) {
               filterFields.push({
                 id,
-                label: String(label),
+                label,
+                searchableLabel,
                 type:
                   filterType ||
                   (mapTableColumnTypeToPrimitiveDataType(type) as any),
@@ -387,19 +432,19 @@ export const useRecordsExplorerFields = <RecordRow extends BaseDataRow>(
         if (listView) {
           searchableFields.push(
             ...listView.columns
-              .filter(({ id, label, searchable }) => {
+              .filter(({ id, searchable }) => {
                 return (
-                  typeof label === 'string' &&
                   searchable !== false &&
                   !searchableFields.find(
                     ({ id: filterFieldId }) => filterFieldId === id
                   )
                 );
               })
-              .map(({ id, label, getFilterValue }) => {
+              .map(({ id, label, searchableLabel, getFilterValue }) => {
                 return {
                   id,
-                  label: label as string,
+                  label,
+                  searchableLabel,
                   getFilterValue,
                 };
               })

@@ -485,12 +485,15 @@ export const useSortOperationFieldSelectorTool = <
       const paginatedDropdownOptionsListProps: PaginatedDropdownOptionListProps =
         {
           searchable: unselectedSortableFields.length > 5,
-          options: unselectedSortableFields.map(({ id, label }) => {
-            return {
-              label,
-              value: String(id),
-            };
-          }),
+          options: unselectedSortableFields.map(
+            ({ id, label, searchableLabel }) => {
+              return {
+                label,
+                searchableLabel,
+                value: String(id),
+              };
+            }
+          ),
           onChangeSelectedOptions: (selectedOptions) => {
             const selectedSortParam = unselectedSortableFields.find(
               ({ id }) => id === selectedOptions[0].value

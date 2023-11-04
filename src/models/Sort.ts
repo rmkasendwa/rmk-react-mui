@@ -8,7 +8,8 @@ export type SortDirection = (typeof sortDirections)[number];
 
 export interface SortOption<RecordRow = any> {
   id: keyof RecordRow;
-  label: string;
+  label: ReactNode;
+  searchableLabel?: string;
   type?: PrimitiveDataType;
   sortDirection?: SortDirection;
   sortLabels?: [ReactNode, ReactNode];

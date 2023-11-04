@@ -542,6 +542,7 @@ export const useFilterTool = <RecordRow extends BaseDataRow>(
                                   ) {
                                     const {
                                       label,
+                                      searchableLabel,
                                       type = MULTI_SELECT_DROPDOWN_TYPE,
                                       ...rest
                                     } = field;
@@ -560,7 +561,11 @@ export const useFilterTool = <RecordRow extends BaseDataRow>(
                                     }
                                     return (
                                       <DataDropdownField
-                                        placeholder={label}
+                                        placeholder={
+                                          typeof label === 'string'
+                                            ? label
+                                            : searchableLabel
+                                        }
                                         value={condition.value as any}
                                         sortOptions
                                         {...fieldProps}
