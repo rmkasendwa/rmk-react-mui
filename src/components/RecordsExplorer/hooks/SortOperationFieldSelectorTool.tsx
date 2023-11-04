@@ -387,18 +387,146 @@ const DraggableSortedFieldsContainer = <RecordRow extends BaseDataRow>({
   );
 };
 
-export interface SortOperationFieldSelectorToolProps<
-  RecordRow extends BaseDataRow = any
-> extends Partial<PopupToolProps> {
+//#region Sort Field Selector
+export interface SortFieldSelectorProps<RecordRow extends BaseDataRow = any>
+  extends Partial<PopupToolProps> {
   sortableFields: SortableFields<RecordRow>;
-  onSelectSortOption?: OnSelectSortOption<RecordRow>;
-  title?: string;
   addFieldText?: string;
   sortLabel?: string;
   selectedSortParams: SelectedSortOption<RecordRow>[];
   onChangeSelectedSortParams: (
     selectedSortParams: SelectedSortOption<RecordRow>[]
   ) => void;
+}
+
+export const SortFieldSelector: FC<SortFieldSelectorProps> = ({
+  sortableFields,
+  addFieldText,
+  sortLabel = 'Sort',
+  selectedSortParams,
+  onChangeSelectedSortParams,
+}) => {
+  const unselectedSortableFieldsAnchorRef = useRef<HTMLButtonElement | null>(
+    null
+  );
+  const sortableFieldsRef = useRef(sortableFields);
+  sortableFieldsRef.current = sortableFields;
+
+  const [openUnselectedSortableFields, setOpenUnselectedSortableFields] =
+    useState(false);
+
+  const unselectedSortableFields = (() => {
+    const selectedSortParamIds = selectedSortParams.map(({ id }) => id);
+    return sortableFields.filter(({ id }) => {
+      return !selectedSortParamIds.includes(id);
+    });
+  })();
+
+  const paginatedDropdownOptionsListProps: PaginatedDropdownOptionListProps = {
+    searchable: unselectedSortableFields.length > 5,
+    options: unselectedSortableFields.map(({ id, label, searchableLabel }) => {
+      return {
+        label,
+        searchableLabel,
+        value: String(id),
+      };
+    }),
+    onChangeSelectedOptions: (selectedOptions) => {
+      const selectedSortParam = unselectedSortableFields.find(
+        ({ id }) => id === selectedOptions[0].value
+      );
+      if (selectedSortParam) {
+        onChangeSelectedSortParams([
+          ...selectedSortParams,
+          {
+            ...selectedSortParam,
+            sortDirection: selectedSortParam.sortDirection || 'ASC',
+          },
+        ]);
+      }
+      setOpenUnselectedSortableFields(false);
+    },
+  };
+  if (selectedSortParams.length > 0) {
+    return (
+      <DndProvider backend={HTML5Backend}>
+        <DraggableSortedFieldsContainer
+          {...{
+            sortLabel,
+            selectedSortParams,
+            onChangeSelectedSortParams,
+            sortableFields,
+            unselectedSortableFields,
+          }}
+        />
+        {unselectedSortableFields.length > 0 ? (
+          <>
+            <Button
+              startIcon={<AddIcon />}
+              endIcon={<ArrowDropDownIcon />}
+              ref={unselectedSortableFieldsAnchorRef}
+              color="inherit"
+              onClick={() => {
+                setOpenUnselectedSortableFields(true);
+              }}
+            >
+              {addFieldText}
+            </Button>
+            <Popper
+              open={openUnselectedSortableFields}
+              anchorEl={unselectedSortableFieldsAnchorRef.current}
+              transition
+              placement="bottom-start"
+              sx={{
+                zIndex: 9999,
+              }}
+            >
+              {({ TransitionProps }) => {
+                return (
+                  <Grow {...TransitionProps}>
+                    <Box>
+                      <ClickAwayListener
+                        onClickAway={() => {
+                          setOpenUnselectedSortableFields(false);
+                        }}
+                      >
+                        <Box>
+                          <PaginatedDropdownOptionList
+                            {...paginatedDropdownOptionsListProps}
+                          />
+                        </Box>
+                      </ClickAwayListener>
+                    </Box>
+                  </Grow>
+                );
+              }}
+            </Popper>
+          </>
+        ) : null}
+      </DndProvider>
+    );
+  }
+  return (
+    <PaginatedDropdownOptionList
+      {...paginatedDropdownOptionsListProps}
+      variant="elevation"
+      elevation={0}
+      sx={{
+        border: 'none',
+        mx: -2,
+        my: -1,
+      }}
+    />
+  );
+};
+//#endregion
+
+//#region SortOperationFieldSelectorTool
+export interface SortOperationFieldSelectorToolProps<
+  RecordRow extends BaseDataRow = any
+> extends SortFieldSelectorProps<RecordRow> {
+  title?: string;
+  onSelectSortOption?: OnSelectSortOption<RecordRow>;
 }
 
 export const useSortOperationFieldSelectorTool = <
@@ -424,29 +552,7 @@ export const useSortOperationFieldSelectorTool = <
   let { title } = props;
   title || (title = sortLabel);
 
-  const unselectedSortableFieldsAnchorRef = useRef<HTMLButtonElement | null>(
-    null
-  );
-  const sortableFieldsRef = useRef(sortableFields);
-  sortableFieldsRef.current = sortableFields;
-
-  const [openUnselectedSortableFields, setOpenUnselectedSortableFields] =
-    useState(false);
-
-  const unselectedSortableFields = (() => {
-    const selectedSortParamIds = selectedSortParams.map(({ id }) => id);
-    return sortableFields.filter(({ id }) => {
-      return !selectedSortParamIds.includes(id);
-    });
-  })();
-
   const hasSortParams = selectedSortParams.length > 0;
-  const variant = (() => {
-    if (hasSortParams) {
-      return 'contained';
-    }
-    return 'text';
-  })();
 
   const tool = usePopupTool({
     ...rest,
@@ -493,111 +599,23 @@ export const useSortOperationFieldSelectorTool = <
         ) : null}
       </Grid>
     ),
-    bodyContent: (() => {
-      const paginatedDropdownOptionsListProps: PaginatedDropdownOptionListProps =
-        {
-          searchable: unselectedSortableFields.length > 5,
-          options: unselectedSortableFields.map(
-            ({ id, label, searchableLabel }) => {
-              return {
-                label,
-                searchableLabel,
-                value: String(id),
-              };
-            }
-          ),
-          onChangeSelectedOptions: (selectedOptions) => {
-            const selectedSortParam = unselectedSortableFields.find(
-              ({ id }) => id === selectedOptions[0].value
-            );
-            if (selectedSortParam) {
-              onChangeSelectedSortParams([
-                ...selectedSortParams,
-                {
-                  ...selectedSortParam,
-                  sortDirection: selectedSortParam.sortDirection || 'ASC',
-                },
-              ]);
-            }
-            setOpenUnselectedSortableFields(false);
-          },
-        };
-      if (selectedSortParams.length > 0) {
-        return (
-          <DndProvider backend={HTML5Backend}>
-            <DraggableSortedFieldsContainer
-              {...{
-                sortLabel,
-                selectedSortParams,
-                onChangeSelectedSortParams,
-                sortableFields,
-                unselectedSortableFields,
-              }}
-            />
-            {unselectedSortableFields.length > 0 ? (
-              <>
-                <Button
-                  startIcon={<AddIcon />}
-                  endIcon={<ArrowDropDownIcon />}
-                  ref={unselectedSortableFieldsAnchorRef}
-                  color="inherit"
-                  onClick={() => {
-                    setOpenUnselectedSortableFields(true);
-                  }}
-                >
-                  {addFieldText}
-                </Button>
-                <Popper
-                  open={openUnselectedSortableFields}
-                  anchorEl={unselectedSortableFieldsAnchorRef.current}
-                  transition
-                  placement="bottom-start"
-                  sx={{
-                    zIndex: 9999,
-                  }}
-                >
-                  {({ TransitionProps }) => {
-                    return (
-                      <Grow {...TransitionProps}>
-                        <Box>
-                          <ClickAwayListener
-                            onClickAway={() => {
-                              setOpenUnselectedSortableFields(false);
-                            }}
-                          >
-                            <Box>
-                              <PaginatedDropdownOptionList
-                                {...paginatedDropdownOptionsListProps}
-                              />
-                            </Box>
-                          </ClickAwayListener>
-                        </Box>
-                      </Grow>
-                    );
-                  }}
-                </Popper>
-              </>
-            ) : null}
-          </DndProvider>
-        );
-      }
-      return (
-        <PaginatedDropdownOptionList
-          {...paginatedDropdownOptionsListProps}
-          variant="elevation"
-          elevation={0}
-          sx={{
-            border: 'none',
-            mx: -2,
-            my: -1,
-          }}
-        />
-      );
-    })(),
+    bodyContent: (
+      <SortFieldSelector
+        {...{
+          sortLabel,
+          title,
+          addFieldText,
+          sortableFields,
+          selectedSortParams,
+          onChangeSelectedSortParams,
+        }}
+      />
+    ),
     icon,
     footerContent,
-    variant,
+    variant: hasSortParams ? 'contained' : 'text',
   });
 
   return omit(tool, 'open', 'setOpen');
 };
+//#endregion
