@@ -42,7 +42,7 @@ import {
   TableProps,
   tableSearchParamValidationSpec,
 } from '../models';
-import TableBody from '../TableBody';
+import TableBody, { TableBodyProps } from '../TableBody';
 import { tableBodyColumnClasses } from '../TableBodyColumn';
 import { tableBodyRowClasses } from '../TableBodyRow';
 import TableColumnToggleIconButton from '../TableColumnToggleIconButton';
@@ -1227,33 +1227,42 @@ export const useTable = <DataRow extends BaseDataRow>(
     }
   })();
 
+  const tableBodyProps: TableBodyProps<DataRow> = {
+    optimizeForSmallScreen,
+    rowStartIndex,
+    tableHeaderHeight,
+    displayingColumns,
+    columnTypographyProps,
+    decimalPlaces,
+    defaultColumnValue,
+    defaultCountryCode,
+    defaultDateFormat,
+    defaultDateTimeFormat,
+    editable,
+    minColumnWidth,
+    noWrap,
+    onClickRow,
+    textTransform,
+    enableSmallScreenOptimization,
+    getToolTipWrappedColumnNode,
+    forEachRowProps,
+    showHeaderRow,
+    tableBodyRowHeight,
+    controlZIndex,
+    emptyRowsLabel,
+    scrollableElementRef,
+    lazyRows,
+    TableBodyRowPlaceholderProps,
+    highlightRowOnHover,
+    rows: sortedRows,
+    EmptyRowsCellProps: {
+      className: classes.emptyRowsCell,
+    },
+  };
+
   const baseTableElement = (() => {
     if (optimizeForSmallScreen) {
-      return (
-        <Box
-          sx={{
-            ...(() => {
-              if (highlightRowOnHover) {
-                return {
-                  [`.${tableBodyRowClasses.root}:hover`]: {
-                    bgcolor: alpha(palette.primary.main, 0.1),
-                  },
-                };
-              }
-            })(),
-          }}
-        >
-          <Box
-            sx={{
-              p: 2,
-            }}
-          >
-            <Typography variant="body2" align="center">
-              {emptyRowsLabel}
-            </Typography>
-          </Box>
-        </Box>
-      );
+      return showDataRows ? <TableBody {...tableBodyProps} /> : null;
     }
     return (
       <MuiBaseTable
@@ -1295,41 +1304,7 @@ export const useTable = <DataRow extends BaseDataRow>(
             {tableHeaderRow}
           </TableHead>
         ) : null}
-        {showDataRows ? (
-          <TableBody
-            {...{
-              optimizeForSmallScreen,
-              rowStartIndex,
-              tableHeaderHeight,
-              displayingColumns,
-              columnTypographyProps,
-              decimalPlaces,
-              defaultColumnValue,
-              defaultCountryCode,
-              defaultDateFormat,
-              defaultDateTimeFormat,
-              editable,
-              minColumnWidth,
-              noWrap,
-              onClickRow,
-              textTransform,
-              enableSmallScreenOptimization,
-              getToolTipWrappedColumnNode,
-              forEachRowProps,
-              showHeaderRow,
-              tableBodyRowHeight,
-              controlZIndex,
-              emptyRowsLabel,
-              scrollableElementRef,
-              lazyRows,
-              TableBodyRowPlaceholderProps,
-            }}
-            rows={sortedRows}
-            EmptyRowsCellProps={{
-              className: classes.emptyRowsCell,
-            }}
-          />
-        ) : null}
+        {showDataRows ? <TableBody {...tableBodyProps} /> : null}
       </MuiBaseTable>
     );
   })();
@@ -1337,6 +1312,7 @@ export const useTable = <DataRow extends BaseDataRow>(
   const tableElement = (() => {
     if (
       showHeaderRow &&
+      !optimizeForSmallScreen &&
       (enableColumnDisplayToggle ||
         (showStartStickyColumnDivider && startStickyColumnIndex != null))
     ) {

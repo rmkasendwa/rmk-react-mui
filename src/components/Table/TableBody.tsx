@@ -1,4 +1,5 @@
 import {
+  Box,
   ComponentsOverrides,
   ComponentsProps,
   ComponentsVariants,
@@ -8,6 +9,7 @@ import {
   TableCellProps,
   TableRow,
   Typography,
+  alpha,
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
   generateUtilityClasses,
@@ -112,6 +114,7 @@ export interface TableBodyProps<DataRow extends BaseDataRow = BaseDataRow>
       | 'TableBodyRowPlaceholderProps'
       | 'rowStartIndex'
       | 'rows'
+      | 'highlightRowOnHover'
     > {
   optimizeForSmallScreen: boolean;
   tableHeaderHeight: number;
@@ -156,6 +159,7 @@ export const BaseTableBody = <DataRow extends BaseDataRow>(
     lazyRows = rows.length > LAZY_ROWS_BUFFER_SIZE && !tableBodyRowHeight,
     TableBodyRowPlaceholderProps = {},
     EmptyRowsCellProps = {},
+    highlightRowOnHover,
     ...rest
   } = props;
 
@@ -182,11 +186,16 @@ export const BaseTableBody = <DataRow extends BaseDataRow>(
   const [baseLimit, setBaseLimit] = useState(20);
   useEffect(() => {
     if (scrollableElementRef?.current?.offsetHeight && tableBodyRowHeight) {
-      setBaseLimit(
-        Math.ceil(
-          scrollableElementRef.current.offsetHeight / tableBodyRowHeight
-        )
-      );
+      const scrollableElement = scrollableElementRef.current;
+      const observer = new ResizeObserver(() => {
+        setBaseLimit(
+          Math.ceil(scrollableElement.offsetHeight / tableBodyRowHeight)
+        );
+      });
+      observer.observe(scrollableElement);
+      return () => {
+        observer.disconnect();
+      };
     }
   }, [scrollableElementRef, tableBodyRowHeight]);
   useLoadOnScrollToBottom({
@@ -264,94 +273,137 @@ export const BaseTableBody = <DataRow extends BaseDataRow>(
     };
   });
 
+  const rowElements = (() => {
+    if (pageRows.length > 0) {
+      return (
+        <>
+          {tableBodyRowHeight ? (
+            <Box
+              component={optimizeForSmallScreen ? 'div' : 'tr'}
+              style={{
+                height: `${offset * tableBodyRowHeight}px`,
+              }}
+            />
+          ) : null}
+          {(() => {
+            if (!lazyRows) {
+              return pageRows.map(({ compositeId, props }) => {
+                return <TableBodyRow key={compositeId} {...props} />;
+              });
+            }
+            const rowsToProcess = [...pageRows];
+            const pageRowElementPlaceholders: ReactNode[] = [];
+            while (rowsToProcess.length > 0) {
+              const bufferedPageRows = rowsToProcess.splice(
+                0,
+                LAZY_ROWS_BUFFER_SIZE
+              );
+              const bufferedPageRowElements = bufferedPageRows.map(
+                ({ compositeId, props }) => {
+                  return <TableBodyRow key={compositeId} {...props} />;
+                }
+              );
+              const placeholderElementKey = bufferedPageRows
+                .map(({ compositeId }) => {
+                  return compositeId;
+                })
+                .join(';');
+              const baseHeight = (() => {
+                if (
+                  typeof (TableBodyRowPlaceholderPropsSx as any)?.height ===
+                  'number'
+                ) {
+                  return (TableBodyRowPlaceholderPropsSx as any).height;
+                }
+                return optimizeForSmallScreen ? 65 : 41;
+              })();
+              pageRowElementPlaceholders.push(
+                <RenderIfVisible
+                  {...TableBodyRowPlaceholderPropsRest}
+                  key={placeholderElementKey}
+                  component={optimizeForSmallScreen ? 'div' : 'tr'}
+                  displayPlaceholder={false}
+                  unWrapChildrenIfVisible
+                  initialVisible={pageRowElementPlaceholders.length === 0}
+                  sx={{
+                    ...TableBodyRowPlaceholderPropsSx,
+                    height: baseHeight * bufferedPageRowElements.length,
+                  }}
+                >
+                  {bufferedPageRowElements}
+                </RenderIfVisible>
+              );
+            }
+            return pageRowElementPlaceholders;
+          })()}
+          {tableBodyRowHeight ? (
+            <Box
+              component={optimizeForSmallScreen ? 'div' : 'tr'}
+              style={{
+                height: `${
+                  (rows.length - (offset + limit)) * tableBodyRowHeight
+                }px`,
+              }}
+            />
+          ) : null}
+        </>
+      );
+    }
+    if (optimizeForSmallScreen) {
+      return (
+        <Box
+          sx={{
+            p: 2,
+          }}
+        >
+          <Typography variant="body2" align="center">
+            {emptyRowsLabel}
+          </Typography>
+        </Box>
+      );
+    }
+    return (
+      <TableRow>
+        <TableCell
+          {...EmptyRowsCellPropsRest}
+          colSpan={displayingColumns.length}
+          align="center"
+        >
+          <Typography variant="body2">{emptyRowsLabel}</Typography>
+        </TableCell>
+      </TableRow>
+    );
+  })();
+
+  if (optimizeForSmallScreen) {
+    return (
+      <Box
+        ref={ref}
+        {...rest}
+        className={clsx(classes.root)}
+        sx={{
+          [`.${tableBodyRowClasses.root}`]: {
+            borderBottom: `1px solid ${palette.divider}`,
+          },
+          ...(() => {
+            if (highlightRowOnHover) {
+              return {
+                [`.${tableBodyRowClasses.root}:hover`]: {
+                  bgcolor: alpha(palette.primary.main, 0.1),
+                },
+              };
+            }
+          })(),
+        }}
+      >
+        {rowElements}
+      </Box>
+    );
+  }
+
   return (
     <MuiTableBody ref={ref} {...rest} className={clsx(classes.root)}>
-      {(() => {
-        if (pageRows.length > 0) {
-          return (
-            <>
-              {tableBodyRowHeight ? (
-                <TableRow
-                  style={{
-                    height: `${offset * tableBodyRowHeight}px`,
-                  }}
-                />
-              ) : null}
-              {(() => {
-                if (!lazyRows) {
-                  return pageRows.map(({ compositeId, props }) => {
-                    return <TableBodyRow key={compositeId} {...props} />;
-                  });
-                }
-                const rowsToProcess = [...pageRows];
-                const pageRowElementPlaceholders: ReactNode[] = [];
-                while (rowsToProcess.length > 0) {
-                  const bufferedPageRows = rowsToProcess.splice(
-                    0,
-                    LAZY_ROWS_BUFFER_SIZE
-                  );
-                  const bufferedPageRowElements = bufferedPageRows.map(
-                    ({ compositeId, props }) => {
-                      return <TableBodyRow key={compositeId} {...props} />;
-                    }
-                  );
-                  const placeholderElementKey = bufferedPageRows
-                    .map(({ compositeId }) => {
-                      return compositeId;
-                    })
-                    .join(';');
-                  const baseHeight = (() => {
-                    if (
-                      typeof (TableBodyRowPlaceholderPropsSx as any)?.height ===
-                      'number'
-                    ) {
-                      return (TableBodyRowPlaceholderPropsSx as any).height;
-                    }
-                    return optimizeForSmallScreen ? 65 : 41;
-                  })();
-                  pageRowElementPlaceholders.push(
-                    <RenderIfVisible
-                      {...TableBodyRowPlaceholderPropsRest}
-                      key={placeholderElementKey}
-                      component={optimizeForSmallScreen ? 'div' : 'tr'}
-                      displayPlaceholder={false}
-                      unWrapChildrenIfVisible
-                      initialVisible={pageRowElementPlaceholders.length === 0}
-                      sx={{
-                        ...TableBodyRowPlaceholderPropsSx,
-                        height: baseHeight * bufferedPageRowElements.length,
-                      }}
-                    >
-                      {bufferedPageRowElements}
-                    </RenderIfVisible>
-                  );
-                }
-                return pageRowElementPlaceholders;
-              })()}
-              {tableBodyRowHeight ? (
-                <TableRow
-                  style={{
-                    height: `${
-                      (rows.length - (offset + limit)) * tableBodyRowHeight
-                    }px`,
-                  }}
-                />
-              ) : null}
-            </>
-          );
-        }
-        return (
-          <TableRow>
-            <TableCell
-              {...EmptyRowsCellPropsRest}
-              colSpan={displayingColumns.length}
-              align="center"
-            >
-              <Typography variant="body2">{emptyRowsLabel}</Typography>
-            </TableCell>
-          </TableRow>
-        );
-      })()}
+      {rowElements}
     </MuiTableBody>
   );
 };
