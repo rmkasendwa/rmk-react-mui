@@ -2540,6 +2540,7 @@ const BaseRecordsExplorer = <
           searchFieldPlaceholder={`Filter ${lowercaseRecordLabelPlural}`}
           hasSearchTool={isSearchable}
           searchFieldOpen
+          searchVelocity={300}
           {...SearchSyncToolBarPropsRest}
           title={(() => {
             if (title) {
@@ -2564,7 +2565,7 @@ const BaseRecordsExplorer = <
           loading={loadingProp ?? loading}
           errorMessage={errorMessageProp ?? errorMessage}
           tools={tools}
-          onChangeSearchTerm={(searchTerm: string) => {
+          onSearch={(searchTerm: string) => {
             if (isSearchable) {
               setSearchParams(
                 {

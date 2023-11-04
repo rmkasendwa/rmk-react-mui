@@ -6,7 +6,6 @@ import {
   ComponentsProps,
   ComponentsVariants,
   Stack,
-  Tooltip,
   unstable_composeClasses as composeClasses,
   generateUtilityClass,
   generateUtilityClasses,
@@ -34,6 +33,7 @@ import { SortDirection, SortOptions } from '../../../models/Sort';
 import { BLACK_COLOR } from '../../../theme';
 import { sort } from '../../../utils/Sort';
 import EllipsisMenuIconButton from '../../EllipsisMenuIconButton';
+import Tooltip from '../../Tooltip';
 import {
   BaseDataRow,
   CHECKBOX_COLUMN_ID,
@@ -842,6 +842,7 @@ export const useTable = <DataRow extends BaseDataRow>(
                 getColumnValue,
                 showHeaderText = true,
                 wrapColumnContentInFieldValue = true,
+                description,
               } = column;
               const isLastColumn = index === displayingColumns.length - 1;
               let label = column.label;
@@ -851,7 +852,7 @@ export const useTable = <DataRow extends BaseDataRow>(
                     {label} {column.headerTextSuffix}
                   </>
                 ));
-              return (
+              const tableCell = (
                 <TableCell
                   key={String(id)}
                   className={clsx(
@@ -1082,6 +1083,21 @@ export const useTable = <DataRow extends BaseDataRow>(
                   </Box>
                 </TableCell>
               );
+
+              if (description) {
+                return (
+                  <Tooltip
+                    key={String(id)}
+                    title={description}
+                    enterAtCursorPosition={false}
+                    disableInteractive
+                  >
+                    {tableCell}
+                  </Tooltip>
+                );
+              }
+
+              return tableCell;
             })}
           </TableRow>
           {(() => {
@@ -1205,7 +1221,11 @@ export const useTable = <DataRow extends BaseDataRow>(
               right: 0,
             }}
           >
-            <Tooltip title="Edit columns" disableInteractive>
+            <Tooltip
+              title="Edit columns"
+              enterAtCursorPosition={false}
+              disableInteractive
+            >
               <TableColumnToggleIconButton
                 {...{ selectedColumnIds }}
                 columns={selectableColumns}
