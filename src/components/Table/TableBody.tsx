@@ -178,11 +178,11 @@ export const BaseTableBody = <DataRow extends BaseDataRow>(
   const { ...EmptyRowsCellPropsRest } = EmptyRowsCellProps;
 
   const { palette } = useTheme();
-  const [offset, setOffset] = useState(0);
-  const [limit, setLimit] = useState(20);
+  const [baseOffset, setBaseOffset] = useState(0);
+  const [baseLimit, setBaseLimit] = useState(20);
   useEffect(() => {
     if (scrollableElementRef?.current?.offsetHeight && tableBodyRowHeight) {
-      setLimit(
+      setBaseLimit(
         Math.ceil(
           scrollableElementRef.current.offsetHeight / tableBodyRowHeight
         )
@@ -193,12 +193,19 @@ export const BaseTableBody = <DataRow extends BaseDataRow>(
     elementRef: scrollableElementRef,
     onChangeScrollLength({ scrollTop }) {
       if (tableBodyRowHeight) {
-        setOffset(Math.floor(scrollTop / tableBodyRowHeight));
+        setBaseOffset(Math.floor(scrollTop / tableBodyRowHeight));
       }
     },
     changeEventCallbackTimeout: 50,
     revalidationKey: `${tableBodyRowHeight}`,
   });
+
+  const viewPortElementMargin = Math.ceil(baseLimit / 2);
+  const offset = Math.max(0, baseOffset - viewPortElementMargin);
+  const limit = Math.min(
+    rows.length,
+    baseLimit + (baseOffset - offset) + viewPortElementMargin
+  );
 
   const pageRows = (() => {
     if (tableBodyRowHeight) {

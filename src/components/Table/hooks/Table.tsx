@@ -175,6 +175,7 @@ export const useTable = <DataRow extends BaseDataRow>(
     id,
     clearSearchStateOnUnmount,
     sx,
+    tableBodyRowHeight,
     ...rest
   } = omit(
     props,
@@ -182,8 +183,7 @@ export const useTable = <DataRow extends BaseDataRow>(
     'parentBackgroundColor',
     'emptyRowsLabel',
     'defaultDateFormat',
-    'defaultDateTimeFormat',
-    'tableBodyRowHeight'
+    'defaultDateTimeFormat'
   ) as typeof props;
 
   let {
@@ -192,7 +192,6 @@ export const useTable = <DataRow extends BaseDataRow>(
     emptyRowsLabel,
     defaultDateFormat,
     defaultDateTimeFormat,
-    tableBodyRowHeight,
   } = props;
 
   const classes = composeClasses(
@@ -206,10 +205,6 @@ export const useTable = <DataRow extends BaseDataRow>(
       }
     })()
   );
-
-  //#region Reset tableRowHeight to disable scroll paging *For Now*
-  tableBodyRowHeight ?? (tableBodyRowHeight = undefined);
-  //#endregion
 
   const { sx: TableHeadPropsSx, ...TableHeadPropsRest } = TableHeadProps;
   const { sx: ColumnDisplayTogglePropsSx, ...ColumnDisplayTogglePropsRest } =
