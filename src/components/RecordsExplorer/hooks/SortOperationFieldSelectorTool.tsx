@@ -190,11 +190,13 @@ const DraggableSortedField: FC<{
 };
 
 const DraggableSortedFieldsContainer = <RecordRow extends BaseDataRow>({
+  sortLabel,
   sortableFields,
   selectedSortParams: selectedSortParamsProp,
   unselectedSortableFields,
   onChangeSelectedSortParams,
 }: {
+  sortLabel: string;
   sortableFields: SortableFields<RecordRow>;
   selectedSortParams: SelectedSortOption<RecordRow>[];
   unselectedSortableFields: SortOption<RecordRow>[];
@@ -248,6 +250,16 @@ const DraggableSortedFieldsContainer = <RecordRow extends BaseDataRow>({
                 onChangeSelectedSortParams(selectedSortParams);
               }}
             >
+              <Grid
+                item
+                sx={{
+                  width: 70,
+                }}
+              >
+                <Typography variant="body2" align="right" noWrap>
+                  {index > 0 ? 'Then' : sortLabel} by
+                </Typography>
+              </Grid>
               <Grid item xs>
                 <DataDropdownField
                   value={String(id)}
@@ -410,7 +422,7 @@ export const useSortOperationFieldSelectorTool = <
   } = omit(props, 'title');
 
   let { title } = props;
-  title || (title = `${sortLabel} by`);
+  title || (title = sortLabel);
 
   const unselectedSortableFieldsAnchorRef = useRef<HTMLButtonElement | null>(
     null
@@ -515,6 +527,7 @@ export const useSortOperationFieldSelectorTool = <
           <DndProvider backend={HTML5Backend}>
             <DraggableSortedFieldsContainer
               {...{
+                sortLabel,
                 selectedSortParams,
                 onChangeSelectedSortParams,
                 sortableFields,
