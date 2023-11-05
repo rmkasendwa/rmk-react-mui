@@ -344,6 +344,8 @@ export interface TableProps<DataRow extends BaseDataRow = any>
   //#region Sticky columns
   startStickyColumnIndex?: number;
   showStartStickyColumnDivider?: boolean;
+  endStickyColumnIndex?: number;
+  showEndStickyColumnDivider?: boolean;
   //#endregion
 
   staticRows?: DataRow[];
