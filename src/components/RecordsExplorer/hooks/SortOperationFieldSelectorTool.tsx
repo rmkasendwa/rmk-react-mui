@@ -566,14 +566,30 @@ export const useSortOperationFieldSelectorTool = <
       : sortLabel,
     title: hasSortParams
       ? (() => {
-          const sortedByFieldLabels = selectedSortParams.map(
-            ({ label, searchableLabel }) => {
-              return String(searchableLabel || label);
-            }
-          );
-          let title = `${sortLabel}ed by ${sortedByFieldLabels.shift()}`;
-          sortedByFieldLabels.forEach((label) => {
-            title += ` then by ${label}`;
+          const sortedByFields = [...selectedSortParams];
+          const firstSortedByField = sortedByFields.shift();
+          const title = [
+            <>
+              {sortLabel}ed by{' '}
+              <strong>
+                {firstSortedByField?.label}{' '}
+                {firstSortedByField?.sortDirection === 'DESC'
+                  ? 'Descending'
+                  : 'Ascending'}
+              </strong>
+            </>,
+          ];
+          sortedByFields.forEach(({ label, sortDirection }) => {
+            title.push(
+              <>
+                {' '}
+                then by{' '}
+                <strong>
+                  {label}{' '}
+                  {sortDirection === 'DESC' ? 'Descending' : 'Ascending'}
+                </strong>
+              </>
+            );
           });
           return title;
         })()
