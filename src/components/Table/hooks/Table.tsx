@@ -725,6 +725,7 @@ export const useTable = <DataRow extends BaseDataRow>(
       scrollEventCallback();
 
       const observer = new ResizeObserver(() => {
+        scrollEventCallback();
         if (endStickyColumnDividerElementRef.current) {
           endStickyColumnDividerElementRef.current.style.height = `${scrollableElement.clientHeight}px`;
         }
