@@ -6,6 +6,7 @@ import {
   Button,
   ComponentsProps,
   ComponentsVariants,
+  Divider,
   Grid,
   IconButton,
   Stack,
@@ -18,7 +19,7 @@ import {
   useThemeProps,
 } from '@mui/material';
 import { omit, result } from 'lodash';
-import { useMemo, useRef } from 'react';
+import { Fragment, useMemo, useRef } from 'react';
 
 import { PopupToolProps, usePopupTool } from '../../../hooks/Tools/PopupTool';
 import { PrimitiveDataType } from '../../../models/Utils';
@@ -147,22 +148,15 @@ export const useFilterTool = <RecordRow extends BaseDataRow>(
   }, [data]);
   //#endregion
 
-  const hasSearchFilters = Boolean(
-    selectedConditionGroup && selectedConditionGroup?.conditions.length > 0
-  );
-
-  const variant = (() => {
-    if (hasSearchFilters) {
-      return 'contained';
-    }
-    return 'text';
-  })();
+  const getFieldLabelById = (fieldId: keyof RecordRow) => {
+    return filterFields.find(({ id }) => id === fieldId)?.label ?? fieldId;
+  };
 
   const tool = usePopupTool({
     icon: <FilterAltOutlinedIcon />,
     ...rest,
     label: (() => {
-      if (hasSearchFilters && selectedConditionGroup) {
+      if (selectedConditionGroup?.conditions?.length) {
         const { label } =
           filterFields.find(
             ({ id }) => id === selectedConditionGroup.conditions[0].fieldId
@@ -673,7 +667,34 @@ export const useFilterTool = <RecordRow extends BaseDataRow>(
         </Grid>
       </Stack>
     ),
-    variant,
+    title: selectedConditionGroup?.conditions?.length
+      ? (() => {
+          const { conjunction, conditions } = selectedConditionGroup;
+          return (
+            <Stack
+              sx={{
+                gap: 1,
+              }}
+            >
+              <Typography variant="body2">Where</Typography>
+              <Divider />
+              {conditions.map(({ fieldId, operator, value }, index) => {
+                const label = getFieldLabelById(fieldId);
+                return (
+                  <Fragment key={index}>
+                    {index > 0 ? <Divider>{conjunction}</Divider> : null}
+                    <Typography variant="body2">
+                      <strong>{String(label)}</strong> {operator}{' '}
+                      <strong>{value}</strong>
+                    </Typography>
+                  </Fragment>
+                );
+              })}
+            </Stack>
+          );
+        })()
+      : 'Not Filtered',
+    variant: selectedConditionGroup?.conditions?.length ? 'contained' : 'text',
   });
 
   return omit(tool, 'open', 'setOpen');
