@@ -452,6 +452,7 @@ export const useTable = <DataRow extends BaseDataRow>(
           computedColumns
             .slice(0, localStartStickyColumnIndex + 1)
             .forEach((column, index) => {
+              column.locked = true;
               const baseSx = { ...column.sx };
               const baseHeaderSx = { ...column.headerSx };
               const baseBodySx = { ...column.bodySx };
@@ -492,6 +493,7 @@ export const useTable = <DataRow extends BaseDataRow>(
           computedColumns
             .slice(-localEndStickyColumnIndex - 1)
             .forEach((column, index) => {
+              column.locked = true;
               const baseSx = { ...column.sx };
               const baseHeaderSx = { ...column.headerSx };
               const baseBodySx = { ...column.bodySx };
