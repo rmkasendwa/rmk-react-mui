@@ -61,6 +61,8 @@ export interface TableClasses {
   columnDisplayToggle: string;
   startStickyColumnDivider: string;
   startStickyColumnDividerActive: string;
+  endStickyColumnDivider: string;
+  endStickyColumnDividerActive: string;
   emptyRowsCell: string;
 }
 
@@ -103,6 +105,8 @@ const slots: Record<TableClassKey, [TableClassKey]> = {
   columnDisplayToggle: ['columnDisplayToggle'],
   startStickyColumnDivider: ['startStickyColumnDivider'],
   startStickyColumnDividerActive: ['startStickyColumnDividerActive'],
+  endStickyColumnDivider: ['endStickyColumnDivider'],
+  endStickyColumnDividerActive: ['endStickyColumnDividerActive'],
   emptyRowsCell: ['emptyRowsCell'],
 };
 
@@ -166,6 +170,8 @@ export const useTable = <DataRow extends BaseDataRow>(
     getToolTipWrappedColumnNode,
     startStickyColumnIndex,
     showStartStickyColumnDivider = false,
+    endStickyColumnIndex,
+    showEndStickyColumnDivider = false,
     staticRows,
     onChangeMinWidth,
     lazyRows,
@@ -227,6 +233,7 @@ export const useTable = <DataRow extends BaseDataRow>(
   const onChangeMinWidthRef = useRef(onChangeMinWidth);
   onChangeMinWidthRef.current = onChangeMinWidth;
   const startStickyColumnDividerElementRef = useRef<HTMLDivElement | null>();
+  const endStickyColumnDividerElementRef = useRef<HTMLDivElement | null>();
   //#endregion
 
   const {
@@ -304,44 +311,25 @@ export const useTable = <DataRow extends BaseDataRow>(
   parentBackgroundColor || (parentBackgroundColor = palette.background.paper);
 
   // Setting default column properties
-  const { allColumns, stickyColumnWidths } = (() => {
-    const computedColumns: typeof columnsProp = [];
-    const { columns: allColumns } = getComputedTableProps(props);
-    const stickyColumnWidths: number[] = [];
-    let localStartStickyColumnIndex = startStickyColumnIndex;
+  const { allColumns, startStickyColumnWidths, endStickyColumnWidths } =
+    (() => {
+      const computedColumns: typeof columnsProp = [];
+      const { columns: allColumns } = getComputedTableProps(props);
+      const startStickyColumnWidths: number[] = [];
+      const endStickyColumnWidths: number[] = [];
+      let localStartStickyColumnIndex = startStickyColumnIndex;
 
-    if (enableCheckboxRowSelectors) {
-      const checkboxColumn = allColumns.find(
-        ({ id }) => id === CHECKBOX_COLUMN_ID
-      );
-      if (checkboxColumn) {
-        localStartStickyColumnIndex ?? (localStartStickyColumnIndex = 0);
-        localStartStickyColumnIndex += 1;
-        stickyColumnWidths.push(checkboxColumn.width || 60);
-        computedColumns.push({
-          ...checkboxColumn,
-          label: enableCheckboxAllRowSelector ? (
-            <Box
-              sx={{
-                width: 60,
-                display: 'flex',
-                justifyContent: 'center',
-              }}
-            >
-              <Checkbox
-                checked={allRowsChecked}
-                onChange={(event) => {
-                  setAllRowsChecked(event.target.checked);
-                  setCheckedRowIds([]);
-                }}
-                color="default"
-              />
-            </Box>
-          ) : null,
-          getColumnValue: ({ id: baseId }) => {
-            const id = String(baseId);
-            const checked = allRowsChecked || checkedRowIds.includes(id);
-            return (
+      if (enableCheckboxRowSelectors) {
+        const checkboxColumn = allColumns.find(
+          ({ id }) => id === CHECKBOX_COLUMN_ID
+        );
+        if (checkboxColumn) {
+          localStartStickyColumnIndex ?? (localStartStickyColumnIndex = 0);
+          localStartStickyColumnIndex += 1;
+          startStickyColumnWidths.push(checkboxColumn.width || 60);
+          computedColumns.push({
+            ...checkboxColumn,
+            label: enableCheckboxAllRowSelector ? (
               <Box
                 sx={{
                   width: 60,
@@ -350,208 +338,231 @@ export const useTable = <DataRow extends BaseDataRow>(
                 }}
               >
                 <Checkbox
-                  {...{ checked }}
-                  color="default"
-                  onChange={() => {
-                    setCheckedRowIds((prevCheckedRowIds) => {
-                      const nextCheckedRowIds = [...prevCheckedRowIds];
-                      if (nextCheckedRowIds.includes(id)) {
-                        nextCheckedRowIds.splice(
-                          nextCheckedRowIds.indexOf(id),
-                          1
-                        );
-                      } else {
-                        nextCheckedRowIds.push(id);
-                      }
-                      return nextCheckedRowIds;
-                    });
+                  checked={allRowsChecked}
+                  onChange={(event) => {
+                    setAllRowsChecked(event.target.checked);
+                    setCheckedRowIds([]);
                   }}
+                  color="default"
                 />
               </Box>
-            );
-          },
-        });
-      }
-    }
-
-    if (showRowNumber) {
-      const numberColumn = allColumns.find(
-        ({ id }) => id === ROW_NUMBER_COLUMN_ID
-      );
-      if (numberColumn) {
-        localStartStickyColumnIndex ?? (localStartStickyColumnIndex = 0);
-        localStartStickyColumnIndex += 1;
-        stickyColumnWidths.push(numberColumn.width || 60);
-        computedColumns.push({
-          ...numberColumn,
-          getColumnValue: (record) => {
-            return `${1 + rowStartIndex + sortedRows.indexOf(record)}.`;
-          },
-        });
-      }
-    }
-
-    if (startStickyColumnIndex != null) {
-      stickyColumnWidths.push(
-        ...columnsProp
-          .slice(0, startStickyColumnIndex + 1)
-          .map(({ width, minWidth }) => {
-            return width ?? minWidth ?? minColumnWidth ?? 0;
-          })
-      );
-    }
-
-    computedColumns.push(...columnsProp);
-
-    if (getEllipsisMenuToolProps) {
-      const ellipsisMenuToolColumn = allColumns.find(
-        ({ id }) => id === ELLIPSIS_MENU_TOOL_COLUMN_ID
-      );
-      if (ellipsisMenuToolColumn) {
-        computedColumns.push({
-          ...ellipsisMenuToolColumn,
-          getColumnValue: (row) => {
-            const ellipsisMenuToolProps = getEllipsisMenuToolProps(row);
-            if (ellipsisMenuToolProps) {
+            ) : null,
+            getColumnValue: ({ id: baseId }) => {
+              const id = String(baseId);
+              const checked = allRowsChecked || checkedRowIds.includes(id);
               return (
-                <Box>
-                  <EllipsisMenuIconButton {...ellipsisMenuToolProps} />
+                <Box
+                  sx={{
+                    width: 60,
+                    display: 'flex',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Checkbox
+                    {...{ checked }}
+                    color="default"
+                    onChange={() => {
+                      setCheckedRowIds((prevCheckedRowIds) => {
+                        const nextCheckedRowIds = [...prevCheckedRowIds];
+                        if (nextCheckedRowIds.includes(id)) {
+                          nextCheckedRowIds.splice(
+                            nextCheckedRowIds.indexOf(id),
+                            1
+                          );
+                        } else {
+                          nextCheckedRowIds.push(id);
+                        }
+                        return nextCheckedRowIds;
+                      });
+                    }}
+                  />
                 </Box>
               );
-            }
-          },
-        });
+            },
+          });
+        }
       }
-    }
 
-    if (localStartStickyColumnIndex != null && !isSmallScreenSize) {
-      computedColumns
-        .slice(0, localStartStickyColumnIndex + 1)
-        .forEach((column, index) => {
-          const baseSx = { ...column.sx };
-          const baseHeaderSx = { ...column.headerSx };
-          const baseBodySx = { ...column.bodySx };
-          column.sx = {
-            ...baseSx,
-            position: 'sticky',
-            left: stickyColumnWidths
-              .slice(0, index)
-              .reduce((accumulator, width) => {
-                return accumulator + width;
-              }, 0),
-          };
-          column.headerSx = {
-            ...(() => {
-              if (controlZIndex) {
-                return {
-                  zIndex: 5,
-                };
-              }
-            })(),
-            ...baseHeaderSx,
-          };
-          column.bodySx = {
-            ...(() => {
-              if (controlZIndex) {
-                return {
-                  zIndex: 1,
-                };
-              }
-            })(),
-            ...baseBodySx,
-          };
-          column.opaque = true;
-        });
-    }
-
-    return {
-      allColumns: expandTableColumnWidths(computedColumns, {
-        enableColumnDisplayToggle,
-      }).map((column) => {
-        const nextColumn = { ...column } as typeof column;
-        const { setDefaultWidth = true } = column;
-        nextColumn.type || (nextColumn.type = 'string');
-        nextColumn.className = clsx(
-          `MuiTableCell-${nextColumn.type}`,
-          nextColumn.className
+      if (showRowNumber) {
+        const numberColumn = allColumns.find(
+          ({ id }) => id === ROW_NUMBER_COLUMN_ID
         );
-        switch (nextColumn.type) {
-          case 'currency':
-          case 'percentage':
-          case 'number':
-            nextColumn.align ?? (nextColumn.align = 'right');
-            if (!nextColumn.noHeaderTextSuffix) {
-              switch (nextColumn.type) {
-                case 'currency':
-                  if (currencyCode) {
-                    nextColumn.headerTextSuffix = ` (${currencyCode})`;
-                  }
-                  break;
-                case 'percentage':
-                  nextColumn.headerTextSuffix = ' (%)';
-                  break;
+        if (numberColumn) {
+          localStartStickyColumnIndex ?? (localStartStickyColumnIndex = 0);
+          localStartStickyColumnIndex += 1;
+          startStickyColumnWidths.push(numberColumn.width || 60);
+          computedColumns.push({
+            ...numberColumn,
+            getColumnValue: (record) => {
+              return `${1 + rowStartIndex + sortedRows.indexOf(record)}.`;
+            },
+          });
+        }
+      }
+
+      if (startStickyColumnIndex != null) {
+        startStickyColumnWidths.push(
+          ...columnsProp
+            .slice(0, startStickyColumnIndex + 1)
+            .map(({ width, minWidth }) => {
+              return width ?? minWidth ?? minColumnWidth ?? 0;
+            })
+        );
+      }
+
+      computedColumns.push(...columnsProp);
+
+      if (getEllipsisMenuToolProps) {
+        const ellipsisMenuToolColumn = allColumns.find(
+          ({ id }) => id === ELLIPSIS_MENU_TOOL_COLUMN_ID
+        );
+        if (ellipsisMenuToolColumn) {
+          endStickyColumnWidths.push(ellipsisMenuToolColumn.width || 40);
+          computedColumns.push({
+            ...ellipsisMenuToolColumn,
+            getColumnValue: (row) => {
+              const ellipsisMenuToolProps = getEllipsisMenuToolProps(row);
+              if (ellipsisMenuToolProps) {
+                return (
+                  <Box>
+                    <EllipsisMenuIconButton {...ellipsisMenuToolProps} />
+                  </Box>
+                );
               }
-            }
-            break;
-          case 'boolean':
-            nextColumn.align ?? (nextColumn.align = 'center');
-            nextColumn.enumValues ?? (nextColumn.enumValues = ['Yes', 'No']);
-            nextColumn.searchKeyMapper ||
-              (nextColumn.searchKeyMapper = (searchValue) =>
-                searchValue === 'Yes');
-            break;
-          case 'id':
-            nextColumn.align = 'center';
-            break;
-          case 'phoneNumber':
-            nextColumn.columnClassName = 'phone-number-column';
-            !nextColumn.width && setDefaultWidth && (nextColumn.width = 220);
-            break;
-          case 'currencyInput':
-            nextColumn.align = 'right';
-            if (currencyCode) {
-              nextColumn.headerTextSuffix = ` (${currencyCode})`;
-            }
-            break;
-          case 'tool':
-          case 'checkbox':
-            nextColumn.locked = true;
-            nextColumn.align = 'center';
-            break;
+            },
+          });
         }
+      }
 
-        // Date columns
-        switch (nextColumn.type) {
-          case 'date':
-          case 'timestamp':
-            !nextColumn.width && setDefaultWidth && (nextColumn.width = 220);
-            break;
-        }
+      if (localStartStickyColumnIndex != null && !isSmallScreenSize) {
+        computedColumns
+          .slice(0, localStartStickyColumnIndex + 1)
+          .forEach((column, index) => {
+            const baseSx = { ...column.sx };
+            const baseHeaderSx = { ...column.headerSx };
+            const baseBodySx = { ...column.bodySx };
+            column.sx = {
+              ...baseSx,
+              position: 'sticky',
+              left: startStickyColumnWidths
+                .slice(0, index)
+                .reduce((accumulator, width) => {
+                  return accumulator + width;
+                }, 0),
+            };
+            column.headerSx = {
+              ...(() => {
+                if (controlZIndex) {
+                  return {
+                    zIndex: 5,
+                  };
+                }
+              })(),
+              ...baseHeaderSx,
+            };
+            column.bodySx = {
+              ...(() => {
+                if (controlZIndex) {
+                  return {
+                    zIndex: 1,
+                  };
+                }
+              })(),
+              ...baseBodySx,
+            };
+            column.opaque = true;
+          });
+      }
 
-        // Nowrap state
-        switch (nextColumn.type) {
-          case 'boolean':
-          case 'checkbox':
-          case 'currency':
-          case 'date':
-          case 'dateTime':
-          case 'email':
-          case 'enum':
-          case 'id':
-          case 'number':
-          case 'percentage':
-          case 'string':
-          case 'time':
-          case 'timestamp':
-            nextColumn.noWrap ?? (nextColumn.noWrap = true);
-            break;
-        }
+      return {
+        allColumns: expandTableColumnWidths(computedColumns, {
+          enableColumnDisplayToggle,
+        }).map((column) => {
+          const nextColumn = { ...column } as typeof column;
+          const { setDefaultWidth = true } = column;
+          nextColumn.type || (nextColumn.type = 'string');
+          nextColumn.className = clsx(
+            `MuiTableCell-${nextColumn.type}`,
+            nextColumn.className
+          );
+          switch (nextColumn.type) {
+            case 'currency':
+            case 'percentage':
+            case 'number':
+              nextColumn.align ?? (nextColumn.align = 'right');
+              if (!nextColumn.noHeaderTextSuffix) {
+                switch (nextColumn.type) {
+                  case 'currency':
+                    if (currencyCode) {
+                      nextColumn.headerTextSuffix = ` (${currencyCode})`;
+                    }
+                    break;
+                  case 'percentage':
+                    nextColumn.headerTextSuffix = ' (%)';
+                    break;
+                }
+              }
+              break;
+            case 'boolean':
+              nextColumn.align ?? (nextColumn.align = 'center');
+              nextColumn.enumValues ?? (nextColumn.enumValues = ['Yes', 'No']);
+              nextColumn.searchKeyMapper ||
+                (nextColumn.searchKeyMapper = (searchValue) =>
+                  searchValue === 'Yes');
+              break;
+            case 'id':
+              nextColumn.align = 'center';
+              break;
+            case 'phoneNumber':
+              nextColumn.columnClassName = 'phone-number-column';
+              !nextColumn.width && setDefaultWidth && (nextColumn.width = 220);
+              break;
+            case 'currencyInput':
+              nextColumn.align = 'right';
+              if (currencyCode) {
+                nextColumn.headerTextSuffix = ` (${currencyCode})`;
+              }
+              break;
+            case 'tool':
+            case 'checkbox':
+              nextColumn.locked = true;
+              nextColumn.align = 'center';
+              break;
+          }
 
-        return nextColumn;
-      }),
-      stickyColumnWidths,
-    };
-  })();
+          // Date columns
+          switch (nextColumn.type) {
+            case 'date':
+            case 'timestamp':
+              !nextColumn.width && setDefaultWidth && (nextColumn.width = 220);
+              break;
+          }
+
+          // Nowrap state
+          switch (nextColumn.type) {
+            case 'boolean':
+            case 'checkbox':
+            case 'currency':
+            case 'date':
+            case 'dateTime':
+            case 'email':
+            case 'enum':
+            case 'id':
+            case 'number':
+            case 'percentage':
+            case 'string':
+            case 'time':
+            case 'timestamp':
+              nextColumn.noWrap ?? (nextColumn.noWrap = true);
+              break;
+          }
+
+          return nextColumn;
+        }),
+        startStickyColumnWidths,
+        endStickyColumnWidths,
+      };
+    })();
 
   const selectedColumns = [
     CHECKBOX_COLUMN_ID,
@@ -638,13 +649,42 @@ export const useTable = <DataRow extends BaseDataRow>(
             );
           }
         }
+        if (endStickyColumnDividerElementRef.current) {
+          if (
+            scrollableElement.scrollWidth -
+              scrollableElement.clientWidth -
+              scrollableElement.scrollLeft >
+            0
+          ) {
+            endStickyColumnDividerElementRef.current.classList.add(
+              classes.endStickyColumnDividerActive
+            );
+          } else {
+            endStickyColumnDividerElementRef.current.classList.remove(
+              classes.endStickyColumnDividerActive
+            );
+          }
+        }
       };
       scrollableElement.addEventListener('scroll', scrollEventCallback);
+      scrollEventCallback();
+
+      const observer = new ResizeObserver(() => {
+        if (endStickyColumnDividerElementRef.current) {
+          endStickyColumnDividerElementRef.current.style.height = `${scrollableElement.clientHeight}px`;
+        }
+      });
+      observer.observe(scrollableElement);
       return () => {
+        observer.disconnect();
         scrollableElement.removeEventListener('scroll', scrollEventCallback);
       };
     }
-  }, [classes.startStickyColumnDividerActive, scrollableElementRef]);
+  }, [
+    classes.endStickyColumnDividerActive,
+    classes.startStickyColumnDividerActive,
+    scrollableElementRef,
+  ]);
   //#endregion
 
   //#region Variants
@@ -1334,14 +1374,55 @@ export const useTable = <DataRow extends BaseDataRow>(
       showHeaderRow &&
       !optimizeForSmallScreen &&
       (enableColumnDisplayToggle ||
-        (showStartStickyColumnDivider && startStickyColumnIndex != null))
+        (showStartStickyColumnDivider && startStickyColumnIndex != null) ||
+        (showEndStickyColumnDivider && endStickyColumnIndex != null))
     ) {
       return (
         <>
           {columnDisplayToggle}
+          {(() => {
+            if (endStickyColumnWidths.length > 0) {
+              return (
+                <Box
+                  sx={{
+                    position: 'sticky',
+                    left: 0,
+                    top: 0,
+                    height: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'end',
+                    zIndex: 99,
+                    pointerEvents: 'none',
+                    minWidth,
+                  }}
+                >
+                  <Box
+                    ref={endStickyColumnDividerElementRef}
+                    className={clsx(classes.endStickyColumnDivider)}
+                    sx={{
+                      position: 'sticky',
+                      top: 0,
+                      right: 0,
+                      height: '100%',
+                      alignSelf: 'flex-start',
+                      [`&.${classes.endStickyColumnDividerActive}`]: {
+                        width: endStickyColumnWidths.reduce((a, b) => a + b, 0),
+                        borderLeft: `1px solid ${palette.divider}`,
+                        boxShadow: `-2px 0 10px -1px ${alpha(
+                          BLACK_COLOR,
+                          0.2
+                        )}`,
+                      },
+                    }}
+                  />
+                </Box>
+              );
+            }
+          })()}
           {baseTableElement}
           {(() => {
-            if (startStickyColumnIndex != null) {
+            if (startStickyColumnWidths.length > 0) {
               return (
                 <Box
                   sx={{
@@ -1362,9 +1443,11 @@ export const useTable = <DataRow extends BaseDataRow>(
                       top: 0,
                       left: 0,
                       height: '100%',
-                      pointerEvents: 'none',
                       [`&.${classes.startStickyColumnDividerActive}`]: {
-                        width: stickyColumnWidths.reduce((a, b) => a + b, 0),
+                        width: startStickyColumnWidths.reduce(
+                          (a, b) => a + b,
+                          0
+                        ),
                         borderRight: `1px solid ${palette.divider}`,
                         boxShadow: `2px 0 10px -1px ${alpha(BLACK_COLOR, 0.2)}`,
                       },
