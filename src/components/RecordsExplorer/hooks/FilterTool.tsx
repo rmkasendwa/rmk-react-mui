@@ -1,3 +1,4 @@
+import { addThousandCommas } from '@infinite-debugger/rmk-utils/numbers';
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
 import FilterAltOutlinedIcon from '@mui/icons-material/FilterAltOutlined';
@@ -32,6 +33,7 @@ import { DropdownOption } from '../../PaginatedDropdownOptionList';
 import { BaseDataRow } from '../../Table';
 import Tooltip from '../../Tooltip';
 import {
+  Condition,
   ConditionGroup,
   Conjunction,
   DataFilterField,
@@ -150,6 +152,49 @@ export const useFilterTool = <RecordRow extends BaseDataRow>(
 
   const getFieldLabelById = (fieldId: keyof RecordRow) => {
     return filterFields.find(({ id }) => id === fieldId)?.label ?? fieldId;
+  };
+
+  const getFormattedFilterValue = ({
+    fieldId,
+    value,
+    operator,
+  }: Condition<RecordRow>) => {
+    const field = filterFieldsWithOptions.find(({ id }) => id === fieldId);
+    if (field) {
+      const { type } = field;
+      switch (type) {
+        case 'enum':
+          if (enumFilterOperators.includes(operator as any)) {
+            const { options } =
+              field as DataMultiSelectDropdownFilterField<RecordRow>;
+            if (Array.isArray(value)) {
+              return (
+                <Grid
+                  container
+                  sx={{
+                    gap: 1,
+                  }}
+                >
+                  {value.map((value, index) => {
+                    return (
+                      <Grid item key={index}>
+                        {options?.find((option) => option.value === value)
+                          ?.label ?? value}
+                      </Grid>
+                    );
+                  })}
+                </Grid>
+              );
+            }
+            return (
+              options?.find((option) => option.value === value)?.label ?? value
+            );
+          }
+        case 'number':
+          return typeof value === 'number' ? addThousandCommas(value) : value;
+      }
+    }
+    return value;
   };
 
   const tool = usePopupTool({
@@ -678,14 +723,15 @@ export const useFilterTool = <RecordRow extends BaseDataRow>(
             >
               <Typography variant="body2">Where</Typography>
               <Divider />
-              {conditions.map(({ fieldId, operator, value }, index) => {
+              {conditions.map((condition, index) => {
+                const { fieldId, operator } = condition;
                 const label = getFieldLabelById(fieldId);
                 return (
                   <Fragment key={index}>
                     {index > 0 ? <Divider>{conjunction}</Divider> : null}
-                    <Typography variant="body2">
+                    <Typography component="div" variant="body2">
                       <strong>{String(label)}</strong> {operator}{' '}
-                      <strong>{value}</strong>
+                      <strong>{getFormattedFilterValue(condition)}</strong>
                     </Typography>
                   </Fragment>
                 );
