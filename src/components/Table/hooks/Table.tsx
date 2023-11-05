@@ -316,8 +316,9 @@ export const useTable = <DataRow extends BaseDataRow>(
       const computedColumns: typeof columnsProp = [];
       const { columns: allColumns } = getComputedTableProps(props);
       const startStickyColumnWidths: number[] = [];
-      const endStickyColumnWidths: number[] = [];
       let localStartStickyColumnIndex = startStickyColumnIndex;
+      const endStickyColumnWidths: number[] = [];
+      let localEndStickyColumnIndex = endStickyColumnIndex;
 
       if (enableCheckboxRowSelectors) {
         const checkboxColumn = allColumns.find(
@@ -410,6 +411,16 @@ export const useTable = <DataRow extends BaseDataRow>(
         );
       }
 
+      if (endStickyColumnIndex != null) {
+        endStickyColumnWidths.push(
+          ...columnsProp
+            .slice(-endStickyColumnIndex - 1)
+            .map(({ width, minWidth }) => {
+              return width ?? minWidth ?? minColumnWidth ?? 0;
+            })
+        );
+      }
+
       computedColumns.push(...columnsProp);
 
       if (getEllipsisMenuToolProps) {
@@ -417,6 +428,8 @@ export const useTable = <DataRow extends BaseDataRow>(
           ({ id }) => id === ELLIPSIS_MENU_TOOL_COLUMN_ID
         );
         if (ellipsisMenuToolColumn) {
+          localEndStickyColumnIndex ?? (localEndStickyColumnIndex = 0);
+          localEndStickyColumnIndex += 1;
           endStickyColumnWidths.push(ellipsisMenuToolColumn.width || 40);
           computedColumns.push({
             ...ellipsisMenuToolColumn,
@@ -434,44 +447,86 @@ export const useTable = <DataRow extends BaseDataRow>(
         }
       }
 
-      if (localStartStickyColumnIndex != null && !isSmallScreenSize) {
-        computedColumns
-          .slice(0, localStartStickyColumnIndex + 1)
-          .forEach((column, index) => {
-            const baseSx = { ...column.sx };
-            const baseHeaderSx = { ...column.headerSx };
-            const baseBodySx = { ...column.bodySx };
-            column.sx = {
-              ...baseSx,
-              position: 'sticky',
-              left: startStickyColumnWidths
-                .slice(0, index)
-                .reduce((accumulator, width) => {
-                  return accumulator + width;
-                }, 0),
-            };
-            column.headerSx = {
-              ...(() => {
-                if (controlZIndex) {
-                  return {
-                    zIndex: 5,
-                  };
-                }
-              })(),
-              ...baseHeaderSx,
-            };
-            column.bodySx = {
-              ...(() => {
-                if (controlZIndex) {
-                  return {
-                    zIndex: 1,
-                  };
-                }
-              })(),
-              ...baseBodySx,
-            };
-            column.opaque = true;
-          });
+      if (!isSmallScreenSize) {
+        if (localStartStickyColumnIndex != null) {
+          computedColumns
+            .slice(0, localStartStickyColumnIndex + 1)
+            .forEach((column, index) => {
+              const baseSx = { ...column.sx };
+              const baseHeaderSx = { ...column.headerSx };
+              const baseBodySx = { ...column.bodySx };
+              column.sx = {
+                ...baseSx,
+                position: 'sticky',
+                left: startStickyColumnWidths
+                  .slice(0, index)
+                  .reduce((accumulator, width) => {
+                    return accumulator + width;
+                  }, 0),
+              };
+              column.headerSx = {
+                ...(() => {
+                  if (controlZIndex) {
+                    return {
+                      zIndex: 5,
+                    };
+                  }
+                })(),
+                ...baseHeaderSx,
+              };
+              column.bodySx = {
+                ...(() => {
+                  if (controlZIndex) {
+                    return {
+                      zIndex: 1,
+                    };
+                  }
+                })(),
+                ...baseBodySx,
+              };
+              column.opaque = true;
+            });
+        }
+
+        if (localEndStickyColumnIndex != null) {
+          computedColumns
+            .slice(-localEndStickyColumnIndex - 1)
+            .forEach((column, index) => {
+              const baseSx = { ...column.sx };
+              const baseHeaderSx = { ...column.headerSx };
+              const baseBodySx = { ...column.bodySx };
+              column.sx = {
+                ...baseSx,
+                position: 'sticky',
+                right: endStickyColumnWidths
+                  .slice(index + 1, endStickyColumnWidths.length)
+                  .reduce((accumulator, width) => {
+                    return accumulator + width;
+                  }, 0),
+              };
+              column.headerSx = {
+                ...(() => {
+                  if (controlZIndex) {
+                    return {
+                      zIndex: 5,
+                    };
+                  }
+                })(),
+                ...baseHeaderSx,
+              };
+              column.bodySx = {
+                ...(() => {
+                  if (controlZIndex) {
+                    return {
+                      zIndex: 1,
+                    };
+                  }
+                })(),
+                ...baseBodySx,
+              };
+              column.opaque = true;
+            });
+        }
       }
 
       return {
