@@ -372,7 +372,9 @@ export const useDataFilter = <RecordRow extends BaseDataRow>(
                 return (
                   searchValues.length > 0 &&
                   searchValues.some((value) => {
-                    return value.toLowerCase().match(lowercaseSearchTerm);
+                    return value
+                      .toLowerCase()
+                      .match(RegExp.escape(lowercaseSearchTerm));
                   })
                 );
               }
