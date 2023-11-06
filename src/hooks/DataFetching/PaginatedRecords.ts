@@ -175,11 +175,13 @@ export const usePaginatedRecords = <
   //#endregion
 
   const load = useCallback(
-    (
-      params: PaginatedRequestParams & {
-        isLoadingNextPage?: boolean;
-      } = {}
-    ) => {
+    ({
+      polling,
+      ...params
+    }: PaginatedRequestParams & {
+      isLoadingNextPage?: boolean;
+      polling?: boolean;
+    } = {}) => {
       params = { ...params };
       params.offset || (params.offset = offsetRef.current);
       params.limit || (params.limit = limitRef.current);
@@ -292,7 +294,7 @@ export const usePaginatedRecords = <
 
         processResponseData(responseData);
         return responseData;
-      });
+      }, polling);
     },
     [cacheKey, loadFromAPIService, loadedPages, setRecord, updateData]
   );
@@ -371,7 +373,7 @@ export const usePaginatedRecords = <
   }, [autoSync, limit, offset, revalidationKey, searchTerm]);
 
   usePolling({
-    load,
+    load: () => load({ polling: true }),
     autoSync,
     errorMessage,
     loading,
