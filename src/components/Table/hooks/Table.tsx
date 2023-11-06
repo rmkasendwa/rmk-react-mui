@@ -26,6 +26,7 @@ import { SxProps } from '@mui/system/styleFunctionSx';
 import clsx from 'clsx';
 import { omit } from 'lodash';
 import { Ref, useEffect, useMemo, useRef, useState } from 'react';
+import { mergeRefs } from 'react-merge-refs';
 
 import { useGlobalConfiguration } from '../../../contexts/GlobalConfigurationContext';
 import { useReactRouterDOMSearchParams } from '../../../hooks/ReactRouterDOM';
@@ -225,6 +226,7 @@ export const useTable = <DataRow extends BaseDataRow>(
   defaultDateTimeFormat || (defaultDateTimeFormat = globalDateTimeFormat);
 
   //#region Refs
+  const tableElementRef = useRef<HTMLTableElement | null>(null);
   const tableHeaderElementRef = useRef<HTMLTableSectionElement | null>(null);
   const onChangeSelectedColumnIdsRef = useRef(onChangeSelectedColumnIds);
   onChangeSelectedColumnIdsRef.current = onChangeSelectedColumnIds;
@@ -731,11 +733,16 @@ export const useTable = <DataRow extends BaseDataRow>(
 
       const observer = new ResizeObserver(() => {
         scrollEventCallback();
-        if (endStickyColumnDividerElementRef.current) {
-          endStickyColumnDividerElementRef.current.style.height = `${scrollableElement.clientHeight}px`;
+        if (
+          endStickyColumnDividerElementRef.current &&
+          tableElementRef.current
+        ) {
+          endStickyColumnDividerElementRef.current.style.height = `${tableElementRef.current.clientHeight}px`;
         }
       });
-      observer.observe(scrollableElement);
+      if (tableElementRef.current) {
+        observer.observe(tableElementRef.current);
+      }
       return () => {
         observer.disconnect();
         scrollableElement.removeEventListener('scroll', scrollEventCallback);
@@ -1399,7 +1406,7 @@ export const useTable = <DataRow extends BaseDataRow>(
           'defaultDateFormat',
           'defaultDateTimeFormat'
         )}
-        ref={ref}
+        ref={mergeRefs([tableElementRef, ref])}
         className={clsx(classes.root, `Mui-table-${variant}`)}
         sx={{
           tableLayout: 'fixed',
@@ -1470,7 +1477,7 @@ export const useTable = <DataRow extends BaseDataRow>(
                       [`&.${classes.endStickyColumnDividerActive}`]: {
                         width: endStickyColumnWidths.reduce((a, b) => a + b, 0),
                         borderLeft: `1px solid ${palette.divider}`,
-                        boxShadow: `-2px 0 10px -1px ${alpha(
+                        boxShadow: `-2px -9px 10px -1px ${alpha(
                           BLACK_COLOR,
                           0.2
                         )}`,
@@ -1510,7 +1517,10 @@ export const useTable = <DataRow extends BaseDataRow>(
                           0
                         ),
                         borderRight: `1px solid ${palette.divider}`,
-                        boxShadow: `2px 0 10px -1px ${alpha(BLACK_COLOR, 0.2)}`,
+                        boxShadow: `2px -9px 10px -1px ${alpha(
+                          BLACK_COLOR,
+                          0.2
+                        )}`,
                       },
                     }}
                   />
