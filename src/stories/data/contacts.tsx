@@ -40,6 +40,7 @@ export type Contact = {
   countryCode: CountryCode;
   joinedAt?: string;
   leftAt?: string;
+  isCloseFriend?: boolean;
 };
 
 export const contacts = Array.from({ length: 1000 }).map((_, index) => {
@@ -80,6 +81,7 @@ export const contacts = Array.from({ length: 1000 }).map((_, index) => {
     accountBalance: Math.round(Math.random() * 1000_000),
     source: contactSources[Math.floor(Math.random() * contactSources.length)],
     countryCode,
+    isCloseFriend: Math.random() > 0.5,
     ...(() => {
       if (!(index % 5 === 0 && Math.random() > 0.9)) {
         return {
@@ -174,6 +176,12 @@ export const tableColumns: TableColumn<Contact>[] = [
     id: 'leftAt',
     label: 'Left',
     type: 'timestamp',
+    textTransform: true,
+  },
+  {
+    id: 'isCloseFriend',
+    label: 'Close Friend',
+    type: 'boolean',
     textTransform: true,
   },
 ];

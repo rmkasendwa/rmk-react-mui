@@ -87,6 +87,23 @@ export interface NumberFilterField<RecordRow extends BaseDataRow>
   type: 'number';
 }
 
+export interface BooleanFilterField<RecordRow extends BaseDataRow>
+  extends Omit<BaseDataFilterField<RecordRow>, 'filter'>,
+    Omit<DataDropdownFieldProps, 'id' | 'label' | 'searchableLabel'> {
+  /**
+   * The type of the filter field.
+   */
+  type: 'boolean';
+
+  /**
+   * The function called while generating each field option label.
+   * Note: Only provide if you need to customize the field option labels.
+   *
+   * @param row - An item in the input data set
+   */
+  getFieldOptionLabel?: (row: RecordRow) => ReactNode;
+}
+
 export interface TextFilterField<RecordRow extends BaseDataRow>
   extends BaseDataFilterField<RecordRow>,
     Omit<TextFieldProps, 'id' | 'label' | 'searchableLabel'> {
@@ -100,6 +117,7 @@ export type DataFilterField<RecordRow extends BaseDataRow> =
   | DataMultiSelectDropdownFilterField<RecordRow>
   | DataDateFilterField<RecordRow>
   | NumberFilterField<RecordRow>
+  | BooleanFilterField<RecordRow>
   | TextFilterField<RecordRow>;
 
 export const textFilterOperators = ['contains', 'does not contain'] as const;
@@ -174,6 +192,10 @@ export const dateFilterOperatorToValueOptionsMap: Record<
 };
 //#endregion
 
+//#region Boolean filter operators
+export const booleanFilterOperators = ['is'] as const;
+export type BooleanFilterOperator = (typeof booleanFilterOperators)[number];
+
 export const contentExistenceFilterOperators = [
   'is empty',
   'is not empty',
@@ -186,6 +208,7 @@ export const filterOperators = [
   ...textFilterOperators,
   ...numericFilterOperators,
   ...dateFilterOperators,
+  ...booleanFilterOperators,
   ...contentExistenceFilterOperators,
 ] as const;
 export type FilterOperator =
@@ -193,6 +216,7 @@ export type FilterOperator =
   | TextFilterOperator
   | NumericFilterOperator
   | DateFilterOperator
+  | BooleanFilterOperator
   | ContentExistenceFilterOperator;
 
 export const filterConjunctions = ['and', 'or'] as const;
@@ -202,7 +226,7 @@ export type Conjunction = (typeof filterConjunctions)[number];
 export type Condition<RecordRow extends BaseDataRow> = {
   fieldId: keyof RecordRow;
   operator?: FilterOperator;
-  value?: string | number | (string | number)[];
+  value?: string | number | boolean | (string | number)[];
 } & Record<string, any>;
 
 export interface ConditionGroup<RecordRow extends BaseDataRow> {
