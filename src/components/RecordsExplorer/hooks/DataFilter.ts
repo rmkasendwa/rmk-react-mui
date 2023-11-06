@@ -210,13 +210,13 @@ export const useDataFilter = <RecordRow extends BaseDataRow>(
                           return (
                             (Array.isArray(fieldValue) &&
                               fieldValue.length <= 0) ||
-                            !fieldValue
+                            fieldValue == null
                           );
                         case 'is not empty':
                           return (
                             (Array.isArray(fieldValue) &&
                               fieldValue.length > 0) ||
-                            fieldValue
+                            fieldValue != null
                           );
                       }
                     }

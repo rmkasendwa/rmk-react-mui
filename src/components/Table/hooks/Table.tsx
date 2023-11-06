@@ -325,8 +325,9 @@ export const useTable = <DataRow extends BaseDataRow>(
           ({ id }) => id === CHECKBOX_COLUMN_ID
         );
         if (checkboxColumn) {
-          localStartStickyColumnIndex ?? (localStartStickyColumnIndex = 0);
-          localStartStickyColumnIndex += 1;
+          typeof localStartStickyColumnIndex === 'number'
+            ? (localStartStickyColumnIndex += 1)
+            : (localStartStickyColumnIndex = 0);
           startStickyColumnWidths.push(checkboxColumn.width || 60);
           computedColumns.push({
             ...checkboxColumn,
@@ -389,8 +390,9 @@ export const useTable = <DataRow extends BaseDataRow>(
           ({ id }) => id === ROW_NUMBER_COLUMN_ID
         );
         if (numberColumn) {
-          localStartStickyColumnIndex ?? (localStartStickyColumnIndex = 0);
-          localStartStickyColumnIndex += 1;
+          typeof localStartStickyColumnIndex === 'number'
+            ? (localStartStickyColumnIndex += 1)
+            : (localStartStickyColumnIndex = 0);
           startStickyColumnWidths.push(numberColumn.width || 60);
           computedColumns.push({
             ...numberColumn,
@@ -428,8 +430,9 @@ export const useTable = <DataRow extends BaseDataRow>(
           ({ id }) => id === ELLIPSIS_MENU_TOOL_COLUMN_ID
         );
         if (ellipsisMenuToolColumn) {
-          localEndStickyColumnIndex ?? (localEndStickyColumnIndex = 0);
-          localEndStickyColumnIndex += 1;
+          typeof localEndStickyColumnIndex === 'number'
+            ? (localEndStickyColumnIndex += 1)
+            : (localEndStickyColumnIndex = 0);
           endStickyColumnWidths.push(ellipsisMenuToolColumn.width || 40);
           computedColumns.push({
             ...ellipsisMenuToolColumn,

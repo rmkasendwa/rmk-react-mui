@@ -5,6 +5,7 @@ import FilterAltOutlinedIcon from '@mui/icons-material/FilterAltOutlined';
 import {
   Box,
   Button,
+  Checkbox,
   ComponentsProps,
   ComponentsVariants,
   Divider,
@@ -39,6 +40,7 @@ import {
   DataFilterField,
   DataMultiSelectDropdownFilterField,
   EnumFilterOperator,
+  booleanFilterOperators,
   contentExistenceFilterOperators,
   dateFilterOperators,
   enumFilterOperators,
@@ -190,6 +192,8 @@ export const useFilterTool = <RecordRow extends BaseDataRow>(
               options?.find((option) => option.value === value)?.label ?? value
             );
           }
+        case 'boolean':
+          return <Checkbox checked={Boolean(value)} />;
         case 'number':
           return typeof value === 'number' ? addThousandCommas(value) : value;
       }
@@ -321,6 +325,8 @@ export const useFilterTool = <RecordRow extends BaseDataRow>(
                               description: 'is greater than or equal to',
                             },
                           ] as DropdownOption[];
+                        case 'boolean':
+                          return booleanFilterOperators;
                         case 'date':
                           return dateFilterOperators;
                       }
@@ -516,6 +522,27 @@ export const useFilterTool = <RecordRow extends BaseDataRow>(
                             <TableCell>
                               {selectedOperator ? (
                                 (() => {
+                                  if (
+                                    type === 'boolean' &&
+                                    booleanFilterOperators.includes(
+                                      selectedOperator as any
+                                    )
+                                  ) {
+                                    return (
+                                      <Checkbox
+                                        checked={Boolean(condition.value)}
+                                        onChange={(event) => {
+                                          nextSelectedConditionGroup.conditions[
+                                            index
+                                          ].value = event.target.checked;
+                                          onChangeSelectedConditionGroup(
+                                            nextSelectedConditionGroup
+                                          );
+                                        }}
+                                        size="medium"
+                                      />
+                                    );
+                                  }
                                   if (
                                     textFilterOperators.includes(
                                       selectedOperator as any
