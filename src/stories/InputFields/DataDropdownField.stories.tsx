@@ -1,3 +1,5 @@
+import '@infinite-debugger/rmk-js-extensions/RegExp';
+
 import AppleIcon from '@mui/icons-material/Apple';
 import { Stack, Typography } from '@mui/material';
 import { Meta, StoryFn } from '@storybook/react';
@@ -237,7 +239,9 @@ ExternallyPaginated.args = {
           ({ label }) => {
             return (
               !searchTerm ||
-              String(label).toLowerCase().match(searchTerm.toLowerCase())
+              String(label)
+                .toLowerCase()
+                .match(RegExp.escape(searchTerm.toLowerCase()))
             );
           }
         );

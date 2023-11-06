@@ -391,7 +391,9 @@ const BasePaginatedDropdownOptionList = <Entity,>(
           const searchableLabel = baseSearchableLabel || String(label);
           return (
             searchableLabel &&
-            searchableLabel.toLowerCase().match(searchTerm.toLowerCase())
+            searchableLabel
+              .toLowerCase()
+              .match(RegExp.escape(searchTerm.toLowerCase()))
           );
         }
       );
