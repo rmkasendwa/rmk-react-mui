@@ -207,17 +207,13 @@ export const useDataFilter = <RecordRow extends BaseDataRow>(
                     ) {
                       switch (operator as ContentExistenceFilterOperator) {
                         case 'is empty':
-                          return (
-                            (Array.isArray(fieldValue) &&
-                              fieldValue.length <= 0) ||
-                            fieldValue == null
-                          );
+                          return Array.isArray(fieldValue)
+                            ? fieldValue.length <= 0
+                            : fieldValue == null;
                         case 'is not empty':
-                          return (
-                            (Array.isArray(fieldValue) &&
-                              fieldValue.length > 0) ||
-                            fieldValue != null
-                          );
+                          return Array.isArray(fieldValue)
+                            ? fieldValue.length > 0
+                            : fieldValue != null;
                       }
                     }
                     if (filterField?.type === 'date') {
