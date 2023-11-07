@@ -19,7 +19,7 @@ import {
   useThemeProps,
 } from '@mui/material';
 import { omit } from 'lodash';
-import { FC, ReactNode, useEffect, useRef, useState } from 'react';
+import { FC, Fragment, ReactNode, useEffect, useRef, useState } from 'react';
 import { DndProvider, useDrag, useDragLayer, useDrop } from 'react-dnd';
 import { HTML5Backend, getEmptyImage } from 'react-dnd-html5-backend';
 
@@ -569,7 +569,7 @@ export const useSortOperationFieldSelectorTool = <
           const sortedByFields = [...selectedSortParams];
           const firstSortedByField = sortedByFields.shift();
           const title = [
-            <>
+            <Fragment key={0}>
               {sortLabel}ed by{' '}
               <strong>
                 {firstSortedByField?.label}{' '}
@@ -577,18 +577,18 @@ export const useSortOperationFieldSelectorTool = <
                   ? 'Descending'
                   : 'Ascending'}
               </strong>
-            </>,
+            </Fragment>,
           ];
-          sortedByFields.forEach(({ label, sortDirection }) => {
+          sortedByFields.forEach(({ label, sortDirection }, index) => {
             title.push(
-              <>
+              <Fragment key={index + 1}>
                 {' '}
                 then by{' '}
                 <strong>
                   {label}{' '}
                   {sortDirection === 'DESC' ? 'Descending' : 'Ascending'}
                 </strong>
-              </>
+              </Fragment>
             );
           });
           return title;

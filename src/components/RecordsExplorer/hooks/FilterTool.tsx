@@ -499,13 +499,13 @@ export const useFilterTool = <RecordRow extends BaseDataRow>(
 
                         {/* Filter Value */}
                         {(() => {
-                          if (type === 'date') {
-                            if (
-                              selectedOperator &&
-                              !contentExistenceFilterOperators.includes(
-                                selectedOperator as any
-                              )
-                            ) {
+                          if (
+                            selectedOperator &&
+                            !contentExistenceFilterOperators.includes(
+                              selectedOperator as any
+                            )
+                          ) {
+                            if (type === 'date') {
                               return (
                                 <DateFilterConditionRowValue
                                   {...{
@@ -516,154 +516,155 @@ export const useFilterTool = <RecordRow extends BaseDataRow>(
                                 />
                               );
                             }
-                            return null;
-                          }
-                          return (
-                            <TableCell>
-                              {selectedOperator ? (
-                                (() => {
-                                  if (
-                                    type === 'boolean' &&
-                                    booleanFilterOperators.includes(
-                                      selectedOperator as any
-                                    )
-                                  ) {
-                                    return (
-                                      <Checkbox
-                                        checked={Boolean(condition.value)}
-                                        onChange={(event) => {
-                                          nextSelectedConditionGroup.conditions[
-                                            index
-                                          ].value = event.target.checked;
-                                          onChangeSelectedConditionGroup(
-                                            nextSelectedConditionGroup
-                                          );
-                                        }}
-                                        size="medium"
-                                      />
-                                    );
-                                  }
-                                  if (
-                                    textFilterOperators.includes(
-                                      selectedOperator as any
-                                    )
-                                  ) {
-                                    return (
-                                      <TextField
-                                        placeholder="Enter a value"
-                                        value={condition.value as any}
-                                        onChange={(event) => {
-                                          if (event.target.value != null) {
-                                            nextSelectedConditionGroup.conditions[
-                                              index
-                                            ].value = event.target.value as any;
-                                          } else {
-                                            delete nextSelectedConditionGroup
-                                              .conditions[index].value;
-                                          }
-                                          onChangeSelectedConditionGroup(
-                                            nextSelectedConditionGroup
-                                          );
-                                        }}
-                                        size="small"
-                                        fullWidth
-                                        sx={{
-                                          width: 115,
-                                        }}
-                                      />
-                                    );
-                                  } else if (
-                                    numericFilterOperators.includes(
-                                      selectedOperator as any
-                                    )
-                                  ) {
-                                    return (
-                                      <NumberInputField
-                                        placeholder="Enter a value"
-                                        value={condition.value as any}
-                                        onChange={(event) => {
-                                          if (event.target.value != null) {
-                                            nextSelectedConditionGroup.conditions[
-                                              index
-                                            ].value = event.target.value as any;
-                                          } else {
-                                            delete nextSelectedConditionGroup
-                                              .conditions[index].value;
-                                          }
-                                          onChangeSelectedConditionGroup(
-                                            nextSelectedConditionGroup
-                                          );
-                                        }}
-                                        size="small"
-                                        fullWidth
-                                        sx={{
-                                          width: 115,
-                                        }}
-                                      />
-                                    );
-                                  } else if (
-                                    MULTI_SELECT_DROPDOWN_OPERATORS.includes(
-                                      selectedOperator as any
-                                    )
-                                  ) {
-                                    const {
-                                      label,
-                                      searchableLabel,
-                                      type = MULTI_SELECT_DROPDOWN_TYPE,
-                                      ...rest
-                                    } = field;
-                                    const fieldProps: Partial<DataDropdownFieldProps> =
-                                      {};
+                            return (
+                              <TableCell>
+                                {selectedOperator ? (
+                                  (() => {
                                     if (
-                                      type === MULTI_SELECT_DROPDOWN_TYPE &&
-                                      !DROPDOWN_OPERATORS.includes(
+                                      type === 'boolean' &&
+                                      booleanFilterOperators.includes(
                                         selectedOperator as any
                                       )
                                     ) {
-                                      fieldProps.optionVariant = 'check';
-                                      fieldProps.SelectProps = {
-                                        multiple: true,
-                                      };
+                                      return (
+                                        <Checkbox
+                                          checked={Boolean(condition.value)}
+                                          onChange={(event) => {
+                                            nextSelectedConditionGroup.conditions[
+                                              index
+                                            ].value = event.target.checked;
+                                            onChangeSelectedConditionGroup(
+                                              nextSelectedConditionGroup
+                                            );
+                                          }}
+                                          size="medium"
+                                        />
+                                      );
                                     }
-                                    return (
-                                      <DataDropdownField
-                                        placeholder={
-                                          typeof label === 'string'
-                                            ? label
-                                            : searchableLabel
-                                        }
-                                        value={condition.value as any}
-                                        sortOptions
-                                        {...fieldProps}
-                                        {...omit(
-                                          rest,
-                                          'getFilterValue',
-                                          'title',
-                                          'getFieldOptionLabel',
-                                          'id'
-                                        )}
-                                        onChange={(event) => {
-                                          nextSelectedConditionGroup.conditions[
-                                            index
-                                          ].value = event.target.value as any;
-                                          onChangeSelectedConditionGroup(
-                                            nextSelectedConditionGroup
-                                          );
-                                        }}
-                                        size="small"
-                                        fullWidth
-                                        sx={{
-                                          minWidth: 150,
-                                        }}
-                                      />
-                                    );
-                                  }
-                                })()
-                              ) : (
-                                <>&nbsp;</>
-                              )}
-                            </TableCell>
-                          );
+                                    if (
+                                      textFilterOperators.includes(
+                                        selectedOperator as any
+                                      )
+                                    ) {
+                                      return (
+                                        <TextField
+                                          placeholder="Enter a value"
+                                          value={condition.value as any}
+                                          onChange={(event) => {
+                                            if (event.target.value != null) {
+                                              nextSelectedConditionGroup.conditions[
+                                                index
+                                              ].value = event.target
+                                                .value as any;
+                                            } else {
+                                              delete nextSelectedConditionGroup
+                                                .conditions[index].value;
+                                            }
+                                            onChangeSelectedConditionGroup(
+                                              nextSelectedConditionGroup
+                                            );
+                                          }}
+                                          size="small"
+                                          fullWidth
+                                          sx={{
+                                            width: 115,
+                                          }}
+                                        />
+                                      );
+                                    } else if (
+                                      numericFilterOperators.includes(
+                                        selectedOperator as any
+                                      )
+                                    ) {
+                                      return (
+                                        <NumberInputField
+                                          placeholder="Enter a value"
+                                          value={condition.value as any}
+                                          onChange={(event) => {
+                                            if (event.target.value != null) {
+                                              nextSelectedConditionGroup.conditions[
+                                                index
+                                              ].value = event.target
+                                                .value as any;
+                                            } else {
+                                              delete nextSelectedConditionGroup
+                                                .conditions[index].value;
+                                            }
+                                            onChangeSelectedConditionGroup(
+                                              nextSelectedConditionGroup
+                                            );
+                                          }}
+                                          size="small"
+                                          fullWidth
+                                          sx={{
+                                            width: 115,
+                                          }}
+                                        />
+                                      );
+                                    } else if (
+                                      MULTI_SELECT_DROPDOWN_OPERATORS.includes(
+                                        selectedOperator as any
+                                      )
+                                    ) {
+                                      const {
+                                        label,
+                                        searchableLabel,
+                                        type = MULTI_SELECT_DROPDOWN_TYPE,
+                                        ...rest
+                                      } = field;
+                                      const fieldProps: Partial<DataDropdownFieldProps> =
+                                        {};
+                                      if (
+                                        type === MULTI_SELECT_DROPDOWN_TYPE &&
+                                        !DROPDOWN_OPERATORS.includes(
+                                          selectedOperator as any
+                                        )
+                                      ) {
+                                        fieldProps.optionVariant = 'check';
+                                        fieldProps.SelectProps = {
+                                          multiple: true,
+                                        };
+                                      }
+                                      return (
+                                        <DataDropdownField
+                                          placeholder={
+                                            typeof label === 'string'
+                                              ? label
+                                              : searchableLabel
+                                          }
+                                          value={condition.value as any}
+                                          sortOptions
+                                          {...fieldProps}
+                                          {...omit(
+                                            rest,
+                                            'getFilterValue',
+                                            'title',
+                                            'getFieldOptionLabel',
+                                            'id'
+                                          )}
+                                          onChange={(event) => {
+                                            nextSelectedConditionGroup.conditions[
+                                              index
+                                            ].value = event.target.value as any;
+                                            onChangeSelectedConditionGroup(
+                                              nextSelectedConditionGroup
+                                            );
+                                          }}
+                                          size="small"
+                                          fullWidth
+                                          sx={{
+                                            minWidth: 150,
+                                          }}
+                                        />
+                                      );
+                                    }
+                                  })()
+                                ) : (
+                                  <>&nbsp;</>
+                                )}
+                              </TableCell>
+                            );
+                          }
                         })()}
 
                         {/* Clear Filter Condition */}
