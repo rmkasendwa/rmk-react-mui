@@ -21,8 +21,8 @@ import TableRow, {
   TableRowProps as MuiTableRowProps,
 } from '@mui/material/TableRow';
 import clsx from 'clsx';
-import { result } from 'lodash';
-import { useRef } from 'react';
+import { omit, result } from 'lodash';
+import { memo, useRef } from 'react';
 
 import { isElementInteractive } from '../../utils/html';
 import {
@@ -95,7 +95,7 @@ export interface TableBodyRowProps<DataRow extends BaseDataRow = any>
   applyCellWidthParameters?: boolean;
 }
 
-export const TableBodyRow = <T extends BaseDataRow>(
+export const BaseTableBodyRow = <T extends BaseDataRow>(
   inProps: TableBodyRowProps<T>
 ) => {
   const props = useThemeProps({ props: inProps, name: 'MuiTableBodyRow' });
@@ -121,7 +121,7 @@ export const TableBodyRow = <T extends BaseDataRow>(
     opaque,
     applyCellWidthParameters = true,
     ...rest
-  } = props;
+  } = omit(props, 'optimizeRendering');
 
   const classes = composeClasses(
     slots,
@@ -651,5 +651,24 @@ export const TableBodyRow = <T extends BaseDataRow>(
     </TableRow>
   );
 };
+
+export const TableBodyRow = memo(BaseTableBodyRow, (prevProps, nextProps) => {
+  const { columns: prevColumns, row: prevRow } = prevProps;
+  const { columns: nextColumns, row: nextRow, optimizeRendering } = nextProps;
+  if (optimizeRendering) {
+    return (
+      JSON.stringify(prevRow) === JSON.stringify(nextRow) &&
+      JSON.stringify(prevColumns.map(({ id }) => id)) ===
+        JSON.stringify(nextColumns.map(({ id }) => id))
+    );
+  }
+  return (
+    JSON.stringify(Object.keys(prevProps)) ===
+      JSON.stringify(Object.keys(nextProps)) &&
+    Object.entries(nextProps).every(([key, value]) => {
+      return Object.is(value, (prevProps as any)[key]);
+    })
+  );
+}) as typeof BaseTableBodyRow;
 
 export default TableBodyRow;

@@ -183,6 +183,7 @@ export const useTable = <DataRow extends BaseDataRow>(
     clearSearchStateOnUnmount,
     sx,
     tableBodyRowHeight,
+    optimizeRendering,
     ...rest
   } = omit(
     props,
@@ -1382,6 +1383,7 @@ export const useTable = <DataRow extends BaseDataRow>(
     lazyRows,
     TableBodyRowPlaceholderProps,
     highlightRowOnHover,
+    optimizeRendering,
     rows: sortedRows,
     EmptyRowsCellProps: {
       className: classes.emptyRowsCell,

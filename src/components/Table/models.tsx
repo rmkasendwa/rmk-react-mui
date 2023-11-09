@@ -246,6 +246,11 @@ export interface TableRowProps<DataRow extends BaseDataRow = any>
   defaultDateFormat?: string;
   defaultDateTimeFormat?: string;
   controlZIndex?: boolean;
+
+  /**
+   * If true, the table row will be memoized
+   */
+  optimizeRendering?: boolean;
 }
 
 export type TableVariant =
@@ -361,6 +366,11 @@ export interface TableProps<DataRow extends BaseDataRow = any>
 
   /** A boolean indicating whether to clear the search state when the component unmounts. */
   clearSearchStateOnUnmount?: boolean;
+
+  /**
+   * If true, the table rows will be memoized
+   */
+  optimizeRendering?: boolean;
 }
 
 export const tableSearchParamValidationSpec = {
