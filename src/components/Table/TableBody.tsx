@@ -116,6 +116,7 @@ export interface TableBodyProps<DataRow extends BaseDataRow = BaseDataRow>
       | 'rowStartIndex'
       | 'rows'
       | 'highlightRowOnHover'
+      | 'optimizeRendering'
     > {
   optimizeForSmallScreen: boolean;
   tableHeaderHeight: number;
@@ -161,6 +162,7 @@ export const BaseTableBody = <DataRow extends BaseDataRow>(
     TableBodyRowPlaceholderProps = {},
     EmptyRowsCellProps = {},
     highlightRowOnHover,
+    optimizeRendering,
     ...rest
   } = props;
 
@@ -250,6 +252,7 @@ export const BaseTableBody = <DataRow extends BaseDataRow>(
         textTransform,
         enableSmallScreenOptimization,
         getToolTipWrappedColumnNode,
+        optimizeRendering,
         columns: displayingColumns,
         getRowProps: forEachRowProps,
         className: clsx(rowNumber % 2 === 0 ? 'even' : 'odd'),
