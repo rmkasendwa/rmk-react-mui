@@ -312,16 +312,19 @@ export interface SearchSyncToolbarProps
    * The title of the toolbar. It can accept a ReactNode to render custom content.
    */
   title?: ReactNode;
+
   /**
    * Determines whether the component should be rendered with a search tool.
    *
    * @default true
    */
   hasSearchTool?: boolean;
+
   /**
    * The placeholder text for the search field.
    */
   searchFieldPlaceholder?: string;
+
   /**
    * Determines whether the component should be rendered with a synchronize tool.
    * Note: The synchronize tool will not be rendered if the load function is not supplied regardless of whether this value is set to true.
@@ -329,21 +332,25 @@ export interface SearchSyncToolbarProps
    * @default true
    */
   hasSyncTool?: boolean;
+
   /**
    * An array of extra tools to be added to the toolbar.
    * These tools can be ReactNodes or Tool objects.
    */
   tools?: (ReactNode | Tool)[];
+
   /**
    * An array of extra tools to be added before the title in the toolbar.
    * These tools can be ReactNodes or Tool objects.
    */
   preTitleTools?: (ReactNode | Tool)[];
+
   /**
    * An array of extra tools to be added after the synchronize button in the toolbar.
    * These tools can be ReactNodes or Tool objects.
    */
   postSyncButtonTools?: (ReactNode | Tool)[];
+
   /**
    * Extra tools to be added to the toolbar.
    * Note: Tools will always overwrite children.
@@ -351,30 +358,36 @@ export interface SearchSyncToolbarProps
    * These tools can be ReactNodes or Tool objects.
    */
   children?: ReactNode;
+
   /**
    * Props for customizing the title component.
    * Accepts properties from LoadingTypographyProps interface with some properties omitted.
    */
   TitleProps?: Partial<Omit<LoadingTypographyProps, 'ref'>>;
+
   /**
    * Determines whether the search field should be open or closed.
    */
   searchFieldOpen?: boolean;
+
   /**
    * Props for customizing the search field component.
    * Accepts properties from SearchFieldProps interface.
    */
   SearchFieldProps?: Partial<SearchFieldProps>;
+
   /**
    * The alignment of the tools in the toolbar.
    *
    * @default 'end'
    */
   alignTools?: 'start' | 'end';
+
   /**
    * The maximum width of the title.
    */
   maxTitleWidth?: number;
+
   /**
    * The maximum width of the search field.
    */
@@ -573,7 +586,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
             width += maxTitleWidth;
           }
           if (hasSearchTool) {
-            width += maxSearchFieldWidth;
+            width += searchFieldOpenProp === false ? 32 : maxSearchFieldWidth;
           }
           return width;
         })();
@@ -849,7 +862,12 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
               />
             );
 
-            if (isSearchFieldCollapsed && hasSearchTool && searchFieldOpen) {
+            if (
+              isSearchFieldCollapsed &&
+              hasSearchTool &&
+              searchFieldOpen &&
+              isSmallScreenSize
+            ) {
               return (
                 <Grid
                   item
