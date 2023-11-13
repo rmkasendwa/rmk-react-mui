@@ -5,8 +5,8 @@ import { FC, ReactNode, createContext, useCallback, useContext } from 'react';
 const CACHED_DATA_PREFIX = 'cached-data';
 const MAX_DATA_MEMORY_SIZE = 15 * 1024; // 15KB
 const MAX_DATA_KEY_COUNT = 35;
-const dataKeys: string[] =
-  StorageManager.get(`${CACHED_DATA_PREFIX}-keys`) || [];
+let dataKeys: string[] = StorageManager.get(`${CACHED_DATA_PREFIX}-keys`) || [];
+Array.isArray(dataKeys) || (dataKeys = []);
 const baseData: Record<string, any> = StorageManager.get('data') || {};
 
 dataKeys.forEach((key) => {
