@@ -1,5 +1,3 @@
-import hashIt from 'hash-it';
-import omit from 'lodash/omit';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { useLocalStorageData } from '../../contexts/LocalStorageDataContext';
@@ -117,12 +115,9 @@ export const usePaginatedRecords = <
     ...rest
   } = useAPIService<PaginatedResponseData<DataRow> | null>(null, loadOnMount);
 
-  const cacheKey = String(
-    hashIt({ ...omit(inProps, 'loadedPagesMap'), recordFinder })
-  );
   const { data, updateData } = useLocalStorageData();
   const cachedLoadedPagesRef = useRef<{ key: number; value: DataRow[] }[]>(
-    data[cacheKey]
+    revalidationKey ? data[revalidationKey] : undefined
   );
 
   //#region Ref
@@ -246,12 +241,15 @@ export const usePaginatedRecords = <
             );
           })();
           setRecord(paginatedResponseData);
-          updateData({
-            [cacheKey]: [...loadedPages.entries()].map(([key, value]) => ({
-              key,
-              value,
-            })),
-          });
+          revalidationKey &&
+            updateData({
+              [revalidationKey]: [...loadedPages.entries()].map(
+                ([key, value]) => ({
+                  key,
+                  value,
+                })
+              ),
+            });
         };
 
         const responseData = await recordFinderRef
@@ -296,7 +294,7 @@ export const usePaginatedRecords = <
         return responseData;
       }, polling);
     },
-    [cacheKey, loadFromAPIService, loadedPages, setRecord, updateData]
+    [loadFromAPIService, loadedPages, revalidationKey, setRecord, updateData]
   );
   const loadRef = useRef(load);
   loadRef.current = load;

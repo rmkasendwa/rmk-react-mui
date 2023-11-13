@@ -1,4 +1,3 @@
-import hashIt from 'hash-it';
 import { useCallback, useEffect, useRef } from 'react';
 
 import { RecordFinderRequestController } from '../../models/Utils';
@@ -76,11 +75,7 @@ export const useCacheableData = <Data>(
     setRecord,
     reset,
     ...rest
-  } = useAPIService(
-    defaultValue,
-    loadOnMount,
-    String(hashIt({ ...inProps, recordFinder: String(recordFinder) }))
-  );
+  } = useAPIService(defaultValue, loadOnMount, revalidationKey);
 
   const load = useCallback(() => {
     return baseLoad(async () => {

@@ -19,6 +19,7 @@ import { Link as RouterLink } from 'react-router-dom';
 
 import {
   CacheableDataFinderOptions,
+  CacheableDataProps,
   useCacheableData,
 } from '../hooks/DataFetching';
 import Card, { CardProps } from './Card';
@@ -56,7 +57,12 @@ declare module '@mui/material/styles/components' {
   }
 }
 
-export interface CountCardProps extends Partial<CardProps> {
+export interface CountCardProps
+  extends Partial<CardProps>,
+    Pick<
+      Partial<CacheableDataProps<number>>,
+      'revalidationKey' | 'loadOnMount'
+    > {
   countFinder: (options: CacheableDataFinderOptions) => Promise<number>;
   labelPlural?: string;
   labelSingular?: string;
@@ -89,6 +95,8 @@ export const CountCard = forwardRef<HTMLDivElement, CountCardProps>(
       CountProps = {},
       LabelProps = {},
       pathToViewCountedRecords,
+      revalidationKey,
+      loadOnMount,
       sx,
       ...rest
     } = omit(props, 'labelPlural', 'labelSingular');
@@ -150,7 +158,10 @@ export const CountCard = forwardRef<HTMLDivElement, CountCardProps>(
       load,
       loading,
       errorMessage,
-    } = useCacheableData(countFinder);
+    } = useCacheableData(countFinder, {
+      revalidationKey,
+      loadOnMount,
+    });
 
     return (
       <Card
