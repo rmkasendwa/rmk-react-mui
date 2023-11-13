@@ -214,7 +214,7 @@ const BasePaginatedDropdownOptionList = <Entity,>(
 
   const { sx: SearchFieldPropsSx, ...SearchFieldPropsRest } = SearchFieldProps;
 
-  // Refs
+  //#region Refs
   const isInitialMountRef = useRef(true);
   const optionsRef = useRef(optionsProp);
   optionsRef.current = optionsProp;
@@ -246,6 +246,7 @@ const BasePaginatedDropdownOptionList = <Entity,>(
       return 0;
     }
   );
+  //#endregion
 
   const { palette, breakpoints, typography } = useTheme();
   const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
@@ -313,7 +314,7 @@ const BasePaginatedDropdownOptionList = <Entity,>(
         }
       })(),
       canLoadNextPage: externallyPaginated,
-      revalidationKey: `${revalidationKey}:${getDropdownOptions?.toString()}`,
+      revalidationKey,
     }
   );
   const loadAsyncOptionsRef = useRef(loadAsyncOptions);
