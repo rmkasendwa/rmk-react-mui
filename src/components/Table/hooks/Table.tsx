@@ -249,15 +249,26 @@ export const useTable = <DataRow extends BaseDataRow>(
     clearSearchStateOnUnmount,
   });
 
-  const serializedColumnIds = JSON.stringify(
-    selectedColumnIdsProp || columnsProp.map(({ id }) => id)
+  const serializedBaseColumnIds = JSON.stringify(
+    columnsProp.map(({ id }) => id)
   );
+  const serializedColumnIds = selectedColumnIdsProp
+    ? JSON.stringify(selectedColumnIdsProp)
+    : serializedBaseColumnIds;
   const selectedColumnIds = useMemo(() => {
+    if (!enableColumnDisplayToggle) {
+      return JSON.parse(serializedBaseColumnIds);
+    }
     if (searchParamSelectedColumns) {
       return searchParamSelectedColumns;
     }
     return JSON.parse(serializedColumnIds);
-  }, [searchParamSelectedColumns, serializedColumnIds]);
+  }, [
+    enableColumnDisplayToggle,
+    searchParamSelectedColumns,
+    serializedBaseColumnIds,
+    serializedColumnIds,
+  ]);
 
   const { palette, breakpoints } = useTheme();
   const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));

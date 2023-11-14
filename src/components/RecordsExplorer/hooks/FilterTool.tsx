@@ -343,7 +343,6 @@ export const useFilterTool = <RecordRow extends BaseDataRow>(
                         key={index}
                         sx={{
                           mb: 1,
-                          alignItems: 'center',
                           [`.${tableCellClasses.root}`]: {
                             px: 1,
                             '&:first-of-type': {
@@ -366,7 +365,12 @@ export const useFilterTool = <RecordRow extends BaseDataRow>(
                               switch (index) {
                                 case 0:
                                   return (
-                                    <Typography variant="body2">
+                                    <Typography
+                                      variant="body2"
+                                      sx={{
+                                        lineHeight: '24px',
+                                      }}
+                                    >
                                       Where
                                     </Typography>
                                   );
@@ -624,6 +628,10 @@ export const useFilterTool = <RecordRow extends BaseDataRow>(
                                         fieldProps.SelectProps = {
                                           multiple: true,
                                         };
+                                        fieldProps.multiline = true;
+                                        fieldProps.sx = {
+                                          minWidth: 250,
+                                        };
                                       }
                                       return (
                                         <DataDropdownField
@@ -654,6 +662,7 @@ export const useFilterTool = <RecordRow extends BaseDataRow>(
                                           fullWidth
                                           sx={{
                                             minWidth: 150,
+                                            ...fieldProps.sx,
                                           }}
                                         />
                                       );
@@ -665,6 +674,7 @@ export const useFilterTool = <RecordRow extends BaseDataRow>(
                               </TableCell>
                             );
                           }
+                          return <TableCell />;
                         })()}
 
                         {/* Clear Filter Condition */}
