@@ -75,7 +75,7 @@ export const useCacheableData = <Data>(
     setRecord,
     reset,
     ...rest
-  } = useAPIService(defaultValue, loadOnMount, revalidationKey);
+  } = useAPIService(defaultValue, loadOnMount);
 
   const load = useCallback(() => {
     return baseLoad(async () => {
