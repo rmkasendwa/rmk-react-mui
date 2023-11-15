@@ -1,4 +1,3 @@
-import hashIt from 'hash-it';
 import {
   Dispatch,
   SetStateAction,
@@ -44,11 +43,7 @@ export const useRecord = <LoadableRecord>(
     record,
     setRecord,
     ...rest
-  } = useAPIService(
-    defaultValue,
-    loadOnMount,
-    String(hashIt({ ...inProps, recordFinder }))
-  );
+  } = useAPIService(defaultValue, loadOnMount);
 
   const load = useCallback(
     (...args: any) => {

@@ -9,7 +9,6 @@ import {
 
 import { CANCELLED_API_REQUEST_MESSAGE } from '../../constants';
 import { useAPIContext } from '../../contexts/APIContext';
-import { useLocalStorageData } from '../../contexts/LocalStorageDataContext';
 import { APIFunction } from '../../models/Utils';
 
 /**
@@ -80,22 +79,15 @@ export interface APIServiceState<Data> {
  *
  * @param defaultValue The default value of the record
  * @param loadOnMount Whether to load the record on mount
- * @param cacheKey The cache key of the record. If provided, the record will be cached in local storage and will be loaded from local storage on mount.
  * @returns The record loading state of the API service
  */
 export const useAPIService = <Data>(
   defaultValue: Data,
-  loadOnMount = false,
-  cacheKey?: string
+  loadOnMount = false
 ): APIServiceState<Data> => {
   //#region Refs
   const isComponentMountedRef = useRef(true);
   //#endregion
-
-  const { data, updateData } = useLocalStorageData();
-  if (defaultValue == null && cacheKey && data[cacheKey]) {
-    defaultValue = data[cacheKey] as Data;
-  }
 
   const { call } = useAPIContext();
   const [record, setRecord] = useState<Data>(defaultValue);
@@ -129,15 +121,10 @@ export const useAPIService = <Data>(
         if (isComponentMountedRef.current) {
           setLoading(false);
         }
-        if (cacheKey && response) {
-          updateData({
-            [cacheKey]: response,
-          });
-        }
         return response;
       }
     },
-    [cacheKey, call, updateData]
+    [call]
   );
 
   const resetRef = useRef(() => {

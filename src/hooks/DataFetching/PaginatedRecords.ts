@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 
-import { useLocalStorageData } from '../../contexts/LocalStorageDataContext';
 import {
   PaginatedRequestParams,
   PaginatedResponseData,
@@ -115,11 +114,6 @@ export const usePaginatedRecords = <
     ...rest
   } = useAPIService<PaginatedResponseData<DataRow> | null>(null, loadOnMount);
 
-  const { data, updateData } = useLocalStorageData();
-  const cachedLoadedPagesRef = useRef<{ key: number; value: DataRow[] }[]>(
-    revalidationKey ? data[revalidationKey] : undefined
-  );
-
   //#region Ref
   const isInitialMountRef = useRef(true);
   const pendingRecordRequestControllers = useRef<
@@ -142,14 +136,7 @@ export const usePaginatedRecords = <
     if (loadedPagesMapRef.current) {
       return loadedPagesMapRef.current;
     }
-
-    const loadedPagesMap = new Map<number, DataRow[]>();
-    if (cachedLoadedPagesRef.current) {
-      cachedLoadedPagesRef.current.forEach((cachedLoadedPage) => {
-        loadedPagesMap.set(cachedLoadedPage.key, cachedLoadedPage.value);
-      });
-    }
-    return loadedPagesMap;
+    return new Map<number, DataRow[]>();
   }, []);
 
   const allPageRecordsRef = useRef<DataRow[]>(
@@ -241,15 +228,6 @@ export const usePaginatedRecords = <
             );
           })();
           setRecord(paginatedResponseData);
-          revalidationKey &&
-            updateData({
-              [revalidationKey]: [...loadedPages.entries()].map(
-                ([key, value]) => ({
-                  key,
-                  value,
-                })
-              ),
-            });
         };
 
         const responseData = await recordFinderRef
@@ -294,7 +272,7 @@ export const usePaginatedRecords = <
         return responseData;
       }, polling);
     },
-    [loadFromAPIService, loadedPages, revalidationKey, setRecord, updateData]
+    [loadFromAPIService, loadedPages, setRecord]
   );
   const loadRef = useRef(load);
   loadRef.current = load;
