@@ -21,7 +21,7 @@ import {
   useThemeProps,
 } from '@mui/material';
 import { omit, result } from 'lodash';
-import { Fragment, useMemo, useRef } from 'react';
+import { Fragment, useMemo } from 'react';
 
 import { PopupToolProps, usePopupTool } from '../../../hooks/Tools/PopupTool';
 import { PrimitiveDataType } from '../../../models/Utils';
@@ -98,14 +98,9 @@ export const useFilterTool = <RecordRow extends BaseDataRow>(
     ...rest
   } = props;
 
-  //#region Refs
-  const filterFieldsRef = useRef(filterFields);
-  filterFieldsRef.current = filterFields;
-  //#endregion
-
   //#region Generating field options
   const filterFieldsWithOptions = useMemo(() => {
-    return filterFieldsRef.current.map((baseField) => {
+    return filterFields.map((baseField) => {
       const field = { ...baseField };
       const { type = 'string' } = field;
       const dropdownField =
@@ -149,7 +144,7 @@ export const useFilterTool = <RecordRow extends BaseDataRow>(
       }
       return field;
     });
-  }, [data]);
+  }, [data, filterFields]);
   //#endregion
 
   const getFieldLabelById = (fieldId: keyof RecordRow) => {
