@@ -891,18 +891,18 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     ) as HTMLElement;
 
     const dateCursorHeight =
-      timelineContainerElement.offsetHeight -
-      (timelineMeterContainer?.offsetHeight ?? 0);
+      timelineContainerElement.clientHeight -
+      (timelineMeterContainer?.clientHeight ?? 0);
 
     // If the today marker element is present, perform calibration
     if (todayMarkerElement) {
       // Get the height of the timeline meter container
-      const timelineContainerHeight = timelineMeterContainer?.offsetHeight;
+      const timelineContainerHeight = timelineMeterContainer?.clientHeight;
 
       // Calculate the height and set it to the today marker element based on the todayMarkerVariant
       const height = (() => {
         if (todayMarkerVariant === 'foregroundFullSpan') {
-          return timelineContainerElement.offsetHeight;
+          return timelineContainerElement.clientHeight;
         }
         if (timelineContainerHeight != null) {
           return dateCursorHeight;
@@ -918,7 +918,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         ) {
           return (
             -timelineContainerHeight +
-            ((timelineMeterContainer.firstChild as HTMLElement).offsetHeight ||
+            ((timelineMeterContainer.firstChild as HTMLElement).clientHeight ||
               0)
           );
         }
@@ -940,7 +940,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         timelineContainerElement.querySelector(
           `.${classes.timelineMeterContainer}`
         ) as HTMLElement
-      )?.offsetHeight;
+      )?.clientHeight;
 
       // Set the height of the date at cursor marker element to match the timeline meter container height
       if (timelineContainerHeight) {
@@ -1172,6 +1172,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
         updateDatesAtTimelinePointsRef.current();
       };
       scrollingAncenstorElement.addEventListener('scroll', scrollEventCallback);
+      scrollEventCallback();
       return () => {
         return scrollingAncenstorElement!.removeEventListener(
           'scroll',
