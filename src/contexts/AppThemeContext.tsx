@@ -1,5 +1,11 @@
 import StorageManager from '@infinite-debugger/rmk-utils/StorageManager';
-import React, { createContext, useCallback, useContext, useState } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
 
 export interface AppThemeConfiguration {
   darkMode: boolean;
@@ -82,6 +88,37 @@ export const useAppThemeProperty = (property: keyof AppThemeConfiguration) => {
     },
     [property, setTheme]
   );
+
+  useEffect(() => {
+    let checkSessionThemeTimeout: NodeJS.Timeout;
+    const checkSessionTheme = () => {
+      const sessionTheme = StorageManager.get('theme');
+      if (
+        sessionTheme &&
+        JSON.stringify(sessionTheme) !== JSON.stringify(themeConfiguration)
+      ) {
+        setTheme({ ...sessionTheme });
+      }
+      checkSessionThemeTimeout = setTimeout(checkSessionTheme, 5000);
+    };
+    const visiblityChangeEventCallback = () => {
+      clearTimeout(checkSessionThemeTimeout);
+    };
+    const focusCallback = async () => {
+      checkSessionTheme();
+    };
+    window.addEventListener('focus', focusCallback);
+    document.addEventListener('visibilitychange', visiblityChangeEventCallback);
+    focusCallback();
+    return () => {
+      window.removeEventListener('focus', focusCallback);
+      document.removeEventListener(
+        'visibilitychange',
+        visiblityChangeEventCallback
+      );
+      clearTimeout(checkSessionThemeTimeout);
+    };
+  }, [setTheme]);
 
   return [value, setThemeValue] as [typeof value, typeof setThemeValue];
 };

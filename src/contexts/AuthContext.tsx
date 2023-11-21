@@ -54,7 +54,8 @@ export const AuthProvider: FC<{
 
   useEffect(() => {
     if (!sessionExpired) {
-      const focusCallback = async () => {
+      let checkSessionUserTimeout: NodeJS.Timeout;
+      const checkSessionUser = () => {
         setLoggedInUser((prevLoggedInUser) => {
           const sessionUser = StorageManager.get('user');
           if (
@@ -65,11 +66,27 @@ export const AuthProvider: FC<{
           return prevLoggedInUser;
         });
         setLoadingCurrentSession(false);
+        checkSessionUserTimeout = setTimeout(checkSessionUser, 5000);
+      };
+      const visiblityChangeEventCallback = () => {
+        clearTimeout(checkSessionUserTimeout);
+      };
+      const focusCallback = async () => {
+        checkSessionUser();
       };
       window.addEventListener('focus', focusCallback);
+      document.addEventListener(
+        'visibilitychange',
+        visiblityChangeEventCallback
+      );
       focusCallback();
       return () => {
         window.removeEventListener('focus', focusCallback);
+        document.removeEventListener(
+          'visibilitychange',
+          visiblityChangeEventCallback
+        );
+        clearTimeout(checkSessionUserTimeout);
       };
     }
   }, [sessionExpired]);
