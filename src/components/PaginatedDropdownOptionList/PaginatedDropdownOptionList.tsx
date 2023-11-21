@@ -621,6 +621,7 @@ const BasePaginatedDropdownOptionList = <Entity,>(
                         key={value}
                         placement="left"
                         disableInteractive
+                        enterAtCursorPosition={false}
                       >
                         {dropdownOptionElement}
                       </Tooltip>
