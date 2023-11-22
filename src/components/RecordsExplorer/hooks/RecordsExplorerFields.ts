@@ -397,28 +397,17 @@ export const useRecordsExplorerFields = <RecordRow extends BaseDataRow>(
       }
       if (fieldsRef.current) {
         fieldsRef.current.forEach(
-          ({
-            id,
-            label,
-            searchableLabel,
-            type,
-            filterType,
-            getFilterValue,
-            searchable,
-          }) => {
+          ({ id, label, searchableLabel, getFilterValue, searchable }) => {
             if (
               searchable &&
-              !filterFields.find(
+              !searchableFields.find(
                 ({ id: filterFieldId }) => filterFieldId === id
               )
             ) {
-              filterFields.push({
+              searchableFields.push({
                 id,
                 label,
                 searchableLabel,
-                type:
-                  filterType ||
-                  (mapTableColumnTypeToPrimitiveDataType(type) as any),
                 getFilterValue,
               });
             }
