@@ -97,6 +97,10 @@ export const useAppThemeProperty = (property: keyof AppThemeConfiguration) => {
         sessionTheme &&
         JSON.stringify(sessionTheme) !== JSON.stringify(themeConfiguration)
       ) {
+        Object.keys(themeConfiguration).forEach((key) => {
+          delete (themeConfiguration as any)[key];
+        });
+        Object.assign(themeConfiguration, sessionTheme);
         setTheme({ ...sessionTheme });
       }
       checkSessionThemeTimeout = setTimeout(checkSessionTheme, 5000);
