@@ -259,7 +259,7 @@ export type GroupableField<RecordRow extends BaseDataRow> =
 export type RecordsExplorerRowField<RecordRow extends BaseDataRow = any> =
   TableColumn<RecordRow> &
     Pick<SearchableProperty<RecordRow>, 'getFilterValue'> &
-    Pick<SortOption<RecordRow>, 'sortLabels' | 'getSortValue'> &
+    Pick<SortOption<RecordRow>, 'sortLabels' | 'getSortValue' | 'sort'> &
     Pick<GroupableField<RecordRow>, 'getGroupLabel'> &
     Partial<
       Pick<

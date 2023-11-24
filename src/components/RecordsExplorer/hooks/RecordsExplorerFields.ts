@@ -216,6 +216,7 @@ export const useRecordsExplorerFields = <RecordRow extends BaseDataRow>(
               getFilterValue,
               sortable,
               sortLabels,
+              sort,
             }) => {
               if (
                 sortable &&
@@ -230,6 +231,7 @@ export const useRecordsExplorerFields = <RecordRow extends BaseDataRow>(
                   type: sortType || mapTableColumnTypeToPrimitiveDataType(type),
                   getSortValue: getSortValue || (getFilterValue as any),
                   sortLabels,
+                  sort,
                 });
               }
             }
@@ -259,6 +261,7 @@ export const useRecordsExplorerFields = <RecordRow extends BaseDataRow>(
                     getFilterValue,
                     getSortValue,
                     sortLabels,
+                    sort,
                   }) => {
                     return {
                       id,
@@ -267,6 +270,7 @@ export const useRecordsExplorerFields = <RecordRow extends BaseDataRow>(
                       type: mapTableColumnTypeToPrimitiveDataType(type),
                       getSortValue: getSortValue || (getFilterValue as any),
                       sortLabels,
+                      sort,
                     };
                   }
                 )
