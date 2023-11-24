@@ -15,6 +15,7 @@ export const sort = <RecordRow = any>(
     id,
     sortDirection,
     getSortValue,
+    sort: fieldSort,
   } = currentSortParam;
   const type = (() => {
     if ((['date', 'enum'] as PrimitiveDataType[]).includes(baseType)) {
@@ -23,6 +24,9 @@ export const sort = <RecordRow = any>(
     return baseType;
   })();
   const sortWeight = (() => {
+    if (typeof fieldSort === 'function') {
+      return fieldSort(a, b);
+    }
     const aSortValue = getSortValue ? getSortValue(a) : result(a, id);
     const bSortValue = getSortValue ? getSortValue(b) : result(b, id);
     const [aMatchesDataType, bMatchesDataType] = [aSortValue, bSortValue].map(

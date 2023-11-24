@@ -14,6 +14,7 @@ export interface SortOption<RecordRow = any> {
   sortDirection?: SortDirection;
   sortLabels?: [ReactNode, ReactNode];
   getSortValue?: (row: RecordRow) => string | number | boolean | undefined;
+  sort?: (a: RecordRow, b: RecordRow) => number;
 }
 
 export interface SelectedSortOption<RecordRow = any>
@@ -29,7 +30,7 @@ export type SortableFields<T> = SortOption<T>[];
 
 export type SortOptions<T> = Pick<
   SelectedSortOption<T>,
-  'id' | 'type' | 'sortDirection' | 'getSortValue'
+  'id' | 'type' | 'sortDirection' | 'getSortValue' | 'sort'
 >[];
 
 export type SortBy<T> = (Pick<SelectedSortOption<T>, 'id'> &
