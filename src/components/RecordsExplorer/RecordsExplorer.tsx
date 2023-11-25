@@ -682,8 +682,6 @@ const BaseRecordsExplorer = <
 
   const headerElementRef = useRef<HTMLDivElement | null>(null);
   const bodyElementRef = useRef<HTMLDivElement | null>(null);
-  const sortByPropRef = useRef(sortByProp);
-  sortByPropRef.current = sortByProp;
   const getGroupableDataRef = useRef(getGroupableData);
   getGroupableDataRef.current = getGroupableData;
   const viewsPropRef = useRef(views);
@@ -1068,6 +1066,7 @@ const BaseRecordsExplorer = <
       });
   }, [groupByProp, searchParamGroupBy]);
 
+  const serializedSortByProp = JSON.stringify(sortByProp);
   const selectedSortParams = useMemo(() => {
     const sortByParams = sortableFields.reduce((accumulator, sortByParam) => {
       accumulator[sortByParam.id] = sortByParam;
@@ -1076,11 +1075,11 @@ const BaseRecordsExplorer = <
 
     return ((): SortBy<RecordRow> => {
       if (
-        sortByPropRef.current &&
+        serializedSortByProp &&
         !modifiedStateKeys?.includes(getHashedSearchParamKey('sortBy')) &&
         (!searchParamSortBy || searchParamSortBy.length <= 0)
       ) {
-        return sortByPropRef.current;
+        return JSON.parse(serializedSortByProp);
       }
       return searchParamSortBy || [];
     })()
@@ -1099,7 +1098,12 @@ const BaseRecordsExplorer = <
           sortDirection: sortByParams.sortDirection || 'ASC',
         };
       });
-  }, [modifiedStateKeys, searchParamSortBy, sortableFields]);
+  }, [
+    modifiedStateKeys,
+    searchParamSortBy,
+    serializedSortByProp,
+    sortableFields,
+  ]);
 
   const selectedConditionGroup = useMemo(() => {
     if (searchParamFilterBy) {
