@@ -65,8 +65,12 @@ export interface DataMultiSelectDropdownFilterField<
    * Note: Only provide if you need to customize the field option labels.
    *
    * @param row - An item in the input data set
+   * @param fieldOptionLabel - The default field option label
    */
-  getFieldOptionLabel?: (row: RecordRow) => ReactNode;
+  getFieldOptionLabel?: (
+    row: RecordRow,
+    fieldOptionLabel: ReactNode
+  ) => ReactNode;
 }
 
 export interface DataDateFilterField<RecordRow extends BaseDataRow>
