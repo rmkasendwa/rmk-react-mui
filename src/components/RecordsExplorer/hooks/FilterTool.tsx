@@ -131,7 +131,7 @@ export const useFilterTool = <RecordRow extends BaseDataRow>(
               ) {
                 options.push({
                   label: getFieldOptionLabel
-                    ? getFieldOptionLabel(row)
+                    ? getFieldOptionLabel(row, fieldValueOption)
                     : fieldValueOption,
                   searchableLabel: fieldValueOption,
                   value: fieldValueOption,
