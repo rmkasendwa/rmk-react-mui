@@ -497,7 +497,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
 
     const { sx: TitlePropsSx, ...TitlePropsRest } = TitleProps;
 
-    const { breakpoints, palette } = useTheme();
+    const { breakpoints, palette, spacing } = useTheme();
     const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
 
     const [collapsedWidthToolIndex, setCollapsedWidthToolIndex] = useState(
@@ -572,11 +572,9 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
           };
         });
 
-        const { paddingLeft, paddingRight } = getComputedStyle(anchorElement);
-
+        const paddingX = spacing((isSmallScreenSize ? 2 : 3) * 2);
         let containerToolsMaxWidth =
-          anchorElement.clientWidth -
-          (parseFloat(paddingLeft) + parseFloat(paddingRight));
+          anchorElement.clientWidth - parseFloat(paddingX);
         if (shouldRenderSyncTool) {
           containerToolsMaxWidth -= 32;
         }
