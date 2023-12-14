@@ -9,7 +9,7 @@ import {
   useThemeProps,
 } from '@mui/material';
 import clsx from 'clsx';
-import { forwardRef, useRef, useState } from 'react';
+import { forwardRef, useEffect, useRef, useState } from 'react';
 
 import TextField, { TextFieldProps } from './InputFields/TextField';
 
@@ -101,16 +101,16 @@ export const SearchField = forwardRef<HTMLDivElement, SearchFieldProps>(
     //#endregion
 
     const { sx: InputPropsSx, ...InputPropsRest } = InputProps;
-    const [localSearchTerm, setLocalSearchTerm] = useState(
-      searchTermProp || ''
-    );
+    const [searchTerm, setSearchTerm] = useState(searchTermProp || '');
 
-    const searchTerm = (() => {
-      if (searchTermProp != null && onChangeSearchTerm) {
-        return searchTermProp;
-      }
-      return localSearchTerm;
-    })();
+    useEffect(() => {
+      setSearchTerm((prevSearchTerm) => {
+        if (searchTermProp != null) {
+          return searchTermProp;
+        }
+        return prevSearchTerm;
+      });
+    }, [searchTermProp]);
 
     return (
       <TextField
@@ -133,7 +133,7 @@ export const SearchField = forwardRef<HTMLDivElement, SearchFieldProps>(
         value={searchTerm}
         onChange={(event) => {
           if (searchTermProp == null || !onChangeSearchTerm) {
-            setLocalSearchTerm(event.target.value);
+            setSearchTerm(event.target.value);
           }
           onChangeSearchTerm && onChangeSearchTerm(event.target.value);
           if (onSearch) {
