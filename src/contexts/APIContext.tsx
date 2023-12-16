@@ -40,9 +40,8 @@ export const APIProvider: FC<{
         })
       ) {
         setSessionExpired(true);
-      } else {
-        throw err;
       }
+      throw err;
     });
   }, []);
 
