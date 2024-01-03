@@ -7,7 +7,7 @@ import {
   useState,
 } from 'react';
 
-import { CANCELLED_API_REQUEST_MESSAGE } from '../../constants';
+import { CANCELLED_API_REQUEST_MESSAGES } from '../../constants';
 import { useAPIContext } from '../../contexts/APIContext';
 import { APIFunction } from '../../models/Utils';
 
@@ -112,7 +112,11 @@ export const useAPIService = <Data>(
           })
           .catch((err) => {
             if (
-              !String(err.message).match(CANCELLED_API_REQUEST_MESSAGE) &&
+              !CANCELLED_API_REQUEST_MESSAGES.some((message) => {
+                return String(err.message)
+                  .toLowerCase()
+                  .match(message.toLowerCase());
+              }) &&
               !polling
             ) {
               setErrorMessage(err.message);

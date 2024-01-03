@@ -9,6 +9,11 @@ export const DEFAULT_DATE_TIME_FORMAT = `${DEFAULT_DATE_FORMAT} ${DEFAULT_TIME_F
 
 export const NOT_APPLICABLE = 'n/a';
 
-export const CANCELLED_API_REQUEST_MESSAGE = 'Request Cancelled';
+export const CANCELLED_API_REQUEST_MESSAGES = [
+  'Request Cancelled',
+  'Aborted',
+  'Canceled',
+  'Cancelled',
+];
 
 export const GRAVATAR_URL = `https://secure.gravatar.com/avatar/:md5EmailHash`;
