@@ -195,7 +195,10 @@ export const useDataFilter = <RecordRow extends BaseDataRow>(
                   const filterValues: any[] = (() => {
                     const rawFieldValue = result(row, fieldId);
                     if (filterField?.getFilterValue) {
-                      return [filterField.getFilterValue(row)];
+                      const filterValue = filterField.getFilterValue(row);
+                      return Array.isArray(filterValue)
+                        ? filterValue
+                        : [filterValue];
                     }
                     return [rawFieldValue];
                   })();
