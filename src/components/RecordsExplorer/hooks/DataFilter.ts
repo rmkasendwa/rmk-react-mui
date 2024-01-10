@@ -366,6 +366,12 @@ export const useDataFilter = <RecordRow extends BaseDataRow>(
                   const filterValue = getFilterValue(row);
                   if (typeof filterValue === 'string') {
                     searchValues.push(filterValue);
+                  } else if (Array.isArray(filterValue)) {
+                    searchValues.push(
+                      ...filterValue.filter((value) => {
+                        return typeof value === 'string';
+                      })
+                    );
                   }
                 }
                 return (
