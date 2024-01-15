@@ -523,6 +523,8 @@ const BasePaginatedDropdownOptionList = <Entity,>(
                 }}
                 InputProps={{
                   disableUnderline: true,
+                  autoFocus: true,
+                  ...SearchFieldPropsRest?.InputProps,
                 }}
                 fullWidth
                 sx={{
