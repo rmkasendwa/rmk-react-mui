@@ -157,7 +157,7 @@ export const LoadingTypography = forwardRef<
       ref={mergeRefs([
         ref,
         (el) => {
-          if (hasTextOverflow && el && rest.noWrap) {
+          if (el) {
             setHasTextOverflow(
               el.offsetWidth < el.scrollWidth ||
                 el.offsetHeight < el.scrollHeight
