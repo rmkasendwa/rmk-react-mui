@@ -107,18 +107,66 @@ export type DropdownOptionValue = string | number;
 
 export interface DropdownOption<Entity = any>
   extends Partial<Pick<ButtonProps, 'onClick' | 'sx'>> {
+  /**
+   * The value of the option.
+   */
   value: DropdownOptionValue;
+
+  /**
+   * The label of the option.
+   */
   label: ReactNode;
+
+  /**
+   * The label of the option when it is selected.
+   * If not provided, the `label` will be used.
+   */
   selectedOptionLabel?: ReactNode;
-  description?: ReactNode;
-  icon?: ReactNode;
-  fieldValueLabel?: string;
+
+  /**
+   * The searchable label of the option.
+   * If not provided, the `label` will be used.
+   */
   searchableLabel?: string;
+
+  /**
+   * The label of the option when it matches the search term.
+   */
+  searchMatchLabel?: ReactNode;
+
+  /**
+   * The description of the option.
+   * It will be displayed in a tooltip when the option is hovered.
+   */
+  description?: ReactNode;
+
+  /**
+   * The icon to display before the label.
+   */
+  icon?: ReactNode;
+
+  /**
+   * Whether the option is selectable.
+   * @default true
+   */
   selectable?: boolean;
   isDropdownOption?: boolean;
   isDropdownOptionWrapped?: boolean;
+
+  /**
+   * The component or tag used to render the option.
+   * @default Button
+   */
   component?: ElementType;
+
+  /**
+   * The ref to be passed to the rendered option element.
+   */
   ref?: MutableRefObject<HTMLElement | null>;
+
+  /**
+   * The entity being represented by the option.
+   */
   entity?: Entity;
 }
 

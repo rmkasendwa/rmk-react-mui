@@ -53,6 +53,8 @@ import DropdownOption, { DropdownOptionVariant } from './DropdownOption';
 export interface PaginatedDropdownOptionListClasses {
   /** Styles applied to the root element. */
   root: string;
+  searchMatchLabel: string;
+  searchMatchLabelMatchedString: string;
 }
 
 export type PaginatedDropdownOptionListClassKey =
@@ -95,6 +97,8 @@ const slots: Record<
   [PaginatedDropdownOptionListClassKey]
 > = {
   root: ['root'],
+  searchMatchLabel: ['searchMatchLabel'],
+  searchMatchLabelMatchedString: ['searchMatchLabelMatchedString'],
 };
 
 export const paginatedDropdownOptionListClasses: PaginatedDropdownOptionListClasses =
@@ -387,22 +391,64 @@ const BasePaginatedDropdownOptionList = <Entity,>(
 
   const filteredOptions = (() => {
     if (searchTerm && !externallyPaginated) {
-      const regexString = searchTerm
+      const normalizedSearchTermCharacters = searchTerm
         .trim()
         .toLowerCase()
-        .split('')
+        .split('');
+      const regexString = normalizedSearchTermCharacters
         .map((character) => RegExp.escape(character))
         .join('.*?');
-      return options.filter(
-        ({ searchableLabel: baseSearchableLabel, label }) => {
+      return options
+        .map((option) => {
+          const { searchableLabel: baseSearchableLabel, label } = option;
           const searchableLabel = baseSearchableLabel || String(label);
           const match = new RegExp(regexString, 'gi').exec(
             searchableLabel.toLowerCase()
           );
-          // TODO: Implements search highlighting
+          return [
+            match,
+            {
+              ...option,
+              ...(() => {
+                if (match?.length && typeof label === 'string') {
+                  const matchedCharacters = [...normalizedSearchTermCharacters];
+                  const searchMatchLabel = label
+                    .split('')
+                    .map((char) => {
+                      if (char.toLowerCase() === matchedCharacters[0]) {
+                        matchedCharacters.shift();
+                        return `<strong class="${classes.searchMatchLabelMatchedString}">${char}</strong>`;
+                      }
+                      return char;
+                    })
+                    .join('');
+                  return {
+                    searchMatchLabel: (
+                      <Box
+                        className={classes.searchMatchLabel}
+                        component="span"
+                        dangerouslySetInnerHTML={{
+                          __html: searchMatchLabel,
+                        }}
+                        sx={{
+                          [`strong.${classes.searchMatchLabelMatchedString}`]: {
+                            color: palette.primary.main,
+                          },
+                        }}
+                      />
+                    ),
+                  };
+                }
+              })(),
+            },
+          ] as [typeof match, typeof option];
+        })
+        .filter(([match]) => {
           return match;
-        }
-      );
+        })
+        .map(([, option]) => {
+          return option;
+        });
     }
     return options;
   })();
@@ -578,6 +624,7 @@ const BasePaginatedDropdownOptionList = <Entity,>(
               ...filteredOptions.map((option) => {
                 const {
                   value,
+                  searchMatchLabel,
                   label,
                   icon,
                   description,
@@ -618,7 +665,7 @@ const BasePaginatedDropdownOptionList = <Entity,>(
                       ref={ref as any}
                       {...{ selectable, component, icon, sx }}
                     >
-                      {label}
+                      {searchMatchLabel ?? label}
                     </DropdownOption>
                   );
                   if (description) {
