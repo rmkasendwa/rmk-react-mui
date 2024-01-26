@@ -456,6 +456,12 @@ const BasePaginatedDropdownOptionList = <Entity,>(
         .filter(([match]) => {
           return match;
         })
+        .sort(([aMatch], [bMatch]) => {
+          return (
+            aMatch!.index - bMatch!.index ||
+            aMatch![0].length - bMatch![0].length
+          );
+        })
         .map(([, option]) => {
           return option;
         });
