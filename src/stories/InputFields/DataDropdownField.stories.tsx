@@ -337,3 +337,20 @@ WithPlaceholderOption.args = {
     ),
   },
 } as DataDropdownFieldProps;
+
+export const WithCustomDropdownOptionFilter = Template.bind({});
+WithCustomDropdownOptionFilter.args = {
+  label: 'Dropdown With Options',
+  required: true,
+  options: ['One', 'Two', 'Three'].map((value) => ({ label: value, value })),
+  placeholderOption: {
+    label: (
+      <FieldValue icon={<ProfileGravatar size={20} />}>Placeholder</FieldValue>
+    ),
+  },
+  filterOptionBySearchTerm: (option, searchTerm) => {
+    return Boolean(
+      String(option.label).toLowerCase().match(searchTerm.toLowerCase())
+    );
+  },
+} as DataDropdownFieldProps;
