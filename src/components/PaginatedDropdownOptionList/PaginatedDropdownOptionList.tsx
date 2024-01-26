@@ -387,15 +387,20 @@ const BasePaginatedDropdownOptionList = <Entity,>(
 
   const filteredOptions = (() => {
     if (searchTerm && !externallyPaginated) {
+      const regexString = searchTerm
+        .trim()
+        .toLowerCase()
+        .split('')
+        .map((character) => RegExp.escape(character))
+        .join('.*?');
       return options.filter(
         ({ searchableLabel: baseSearchableLabel, label }) => {
           const searchableLabel = baseSearchableLabel || String(label);
-          return (
-            searchableLabel &&
-            searchableLabel
-              .toLowerCase()
-              .match(RegExp.escape(searchTerm.toLowerCase()))
+          const match = new RegExp(regexString, 'gi').exec(
+            searchableLabel.toLowerCase()
           );
+          // TODO: Implements search highlighting
+          return match;
         }
       );
     }
