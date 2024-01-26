@@ -130,6 +130,7 @@ export interface DataDropdownFieldProps<Entity = any>
         | 'showNoOptionsFoundMessage'
         | 'multiple'
         | 'enableAddNewOption'
+        | 'filterOptionBySearchTerm'
       >
     > {
   onChangeSelectedOption?: (selectedOption?: DropdownOption<Entity>) => void;
@@ -203,6 +204,7 @@ const BaseDataDropdownField = <Entity,>(
     selectedOptionRevalidationKey,
     enableAddNewOption = false,
     showNoOptionsFoundMessage,
+    filterOptionBySearchTerm,
     ...rest
   } = props;
 
@@ -1276,6 +1278,7 @@ const BaseDataDropdownField = <Entity,>(
               showNoOptionsFoundMessage,
               limit,
               sortOptions,
+              filterOptionBySearchTerm,
             }}
             keyboardFocusElement={searchFieldRef.current}
             onChangeSearchTerm={(searchTerm) => {

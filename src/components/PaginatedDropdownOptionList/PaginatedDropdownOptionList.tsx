@@ -156,6 +156,10 @@ export interface PaginatedDropdownOptionListProps<Entity = any>
   enableAddNewOption?: boolean;
   newOptionLabel?: string;
   footerContent?: ReactNode;
+  filterOptionBySearchTerm?: (
+    option: DropdownOption<Entity>,
+    searchTerm: string
+  ) => boolean;
 }
 
 const BasePaginatedDropdownOptionList = <Entity,>(
@@ -197,6 +201,7 @@ const BasePaginatedDropdownOptionList = <Entity,>(
     enableAddNewOption,
     newOptionLabel,
     footerContent,
+    filterOptionBySearchTerm,
     sx,
     ...rest
   } = omit(props, 'limit', 'minWidth');
@@ -391,6 +396,11 @@ const BasePaginatedDropdownOptionList = <Entity,>(
 
   const filteredOptions = (() => {
     if (searchTerm && !externallyPaginated) {
+      if (filterOptionBySearchTerm) {
+        return options.filter((option) => {
+          return filterOptionBySearchTerm(option, searchTerm);
+        });
+      }
       const normalizedSearchTermCharacters = searchTerm
         .trim()
         .toLowerCase()
