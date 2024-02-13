@@ -309,6 +309,7 @@ export const useRecordsExplorerFields = <RecordRow extends BaseDataRow>(
               type,
               getFilterValue,
               searchable,
+              getFieldOptionLabel,
             }) => {
               if (
                 searchable &&
@@ -322,6 +323,7 @@ export const useRecordsExplorerFields = <RecordRow extends BaseDataRow>(
                   searchableLabel,
                   type: mapTableColumnTypeToPrimitiveDataType(type) as any,
                   getFilterValue,
+                  getFieldOptionLabel,
                 });
               }
             }
