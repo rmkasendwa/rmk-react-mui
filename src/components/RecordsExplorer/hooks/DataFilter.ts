@@ -208,15 +208,18 @@ export const useDataFilter = <RecordRow extends BaseDataRow>(
                         operator as ContentExistenceFilterOperator
                       )
                     ) {
+                      const isFieldEmpty = Array.isArray(fieldValue)
+                        ? fieldValue.length <= 0
+                        : typeof fieldValue === 'number'
+                        ? fieldValue === 0
+                        : typeof fieldValue === 'string'
+                        ? fieldValue.length <= 0
+                        : fieldValue == null;
                       switch (operator as ContentExistenceFilterOperator) {
                         case 'is empty':
-                          return Array.isArray(fieldValue)
-                            ? fieldValue.length <= 0
-                            : fieldValue == null;
+                          return isFieldEmpty;
                         case 'is not empty':
-                          return Array.isArray(fieldValue)
-                            ? fieldValue.length > 0
-                            : fieldValue != null;
+                          return !isFieldEmpty;
                       }
                     }
                     if (filterField?.type === 'date') {
