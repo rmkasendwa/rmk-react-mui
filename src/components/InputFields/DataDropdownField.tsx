@@ -1377,6 +1377,9 @@ const BaseDataDropdownField = <Entity,>(
             anchorEl={anchorRef.current}
             transition
             placement="bottom-start"
+            popperOptions={{
+              strategy: 'fixed',
+            }}
             sx={{
               zIndex: 9999,
             }}
