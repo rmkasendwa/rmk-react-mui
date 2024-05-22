@@ -443,7 +443,11 @@ export interface RecordsExplorerProps<
   getEditFunction?: (editFunction: (record: RecordRow) => void) => void;
   getDeleteFunction?: (editFunction: (record: RecordRow) => void) => void;
   onEditRecord?: (updatedRecord: RecordRow) => void;
-  getToolbarElement?: (toolbarElement: ReactElement) => ReactElement;
+  getToolbarElement?: (
+    state: {
+      baseToolbarElement: ReactElement;
+    } & RecordsExplorerChildrenOptions<RecordRow, View, InitialValues>
+  ) => ReactElement;
 
   // View Path
   templatePathToView?: string;
@@ -2503,6 +2507,64 @@ const BaseRecordsExplorer = <
     return <>{popupElements}</>;
   }
 
+  //#region Toobar Element
+  const toolbarElement = (
+    <>
+      <SearchSyncToolbar
+        searchFieldPlaceholder={`Filter ${lowercaseRecordLabelPlural}`}
+        hasSearchTool={isSearchable}
+        searchFieldOpen
+        searchVelocity={300}
+        title={(() => {
+          if (title) {
+            if (getWrappedTitle) {
+              return getWrappedTitle({
+                ...state,
+                title,
+              });
+            }
+            return title;
+          }
+        })()}
+        {...SearchSyncToolBarPropsRest}
+        searchTerm={searchParamSearchTerm || controlledSearchTerm || ''}
+        load={(() => {
+          if (loadProp) {
+            return loadProp;
+          }
+          if (recordsFinder || dataPresets) {
+            return load;
+          }
+        })()}
+        loading={loadingProp ?? loading}
+        errorMessage={errorMessageProp ?? errorMessage}
+        tools={tools}
+        onSearch={(searchTerm: string) => {
+          if (isSearchable) {
+            setSearchParams(
+              {
+                search: (() => {
+                  if (searchTerm) {
+                    return searchTerm;
+                  } else {
+                    return null;
+                  }
+                })(),
+              },
+              {
+                replace: true,
+              }
+            );
+            updateChangedSearchParamKeys('search');
+          }
+          onChangeSearchTerm && onChangeSearchTerm(searchTerm);
+        }}
+      />
+      <Divider />
+    </>
+  );
+  //#endregion
+
   //#region Explorer Element
   const explorerElement = (
     <Paper
@@ -2536,57 +2598,12 @@ const BaseRecordsExplorer = <
         component="header"
         sx={{ position: 'sticky', top: 0, zIndex: 100, ...HeaderPropsSx }}
       >
-        <SearchSyncToolbar
-          searchFieldPlaceholder={`Filter ${lowercaseRecordLabelPlural}`}
-          hasSearchTool={isSearchable}
-          searchFieldOpen
-          searchVelocity={300}
-          {...SearchSyncToolBarPropsRest}
-          title={(() => {
-            if (title) {
-              if (getWrappedTitle) {
-                return getWrappedTitle({
-                  ...state,
-                  title,
-                });
-              }
-              return title;
-            }
-          })()}
-          searchTerm={searchParamSearchTerm || controlledSearchTerm || ''}
-          load={(() => {
-            if (loadProp) {
-              return loadProp;
-            }
-            if (recordsFinder || dataPresets) {
-              return load;
-            }
-          })()}
-          loading={loadingProp ?? loading}
-          errorMessage={errorMessageProp ?? errorMessage}
-          tools={tools}
-          onSearch={(searchTerm: string) => {
-            if (isSearchable) {
-              setSearchParams(
-                {
-                  search: (() => {
-                    if (searchTerm) {
-                      return searchTerm;
-                    } else {
-                      return null;
-                    }
-                  })(),
-                },
-                {
-                  replace: true,
-                }
-              );
-              updateChangedSearchParamKeys('search');
-            }
-            onChangeSearchTerm && onChangeSearchTerm(searchTerm);
-          }}
-        />
-        <Divider />
+        {props.getToolbarElement
+          ? props.getToolbarElement({
+              ...state,
+              baseToolbarElement: toolbarElement,
+            })
+          : toolbarElement}
       </Paper>
       {subHeaderElement}
       <Box
