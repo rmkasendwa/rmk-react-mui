@@ -51,7 +51,10 @@ export const HtmlHead: FC<HtmlHeadProps> = (inProps) => {
 
   useEffect(() => {
     if (title) {
-      const history: PageHistory = StorageManager.get('page-history') || [];
+      const storagePageHistory = StorageManager.get('page-history');
+      const history: PageHistory = Array.isArray(storagePageHistory)
+        ? storagePageHistory
+        : [];
       history.unshift({
         title,
         pathName: window.location.pathname,

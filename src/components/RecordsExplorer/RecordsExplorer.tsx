@@ -177,6 +177,7 @@ export interface RecordsExplorerChildrenOptions<
     Omit<RecordsExplorerProps<RecordRow, View, InitialValues>, 'children'>
   > {
   data: RecordRow[];
+  filteredData: RecordRow[];
   groupedData?: NestedDataGroup<RecordRow>[];
   flattenedGroupedData: RecordRow[];
   selectedView: View;
@@ -185,6 +186,7 @@ export interface RecordsExplorerChildrenOptions<
   filterFields?: DataFilterField<RecordRow>[];
   filterBy?: Omit<ConditionGroup<RecordRow>, 'conjunction'> &
     Partial<Pick<ConditionGroup<RecordRow>, 'conjunction'>>;
+  search: (searchTerm: string) => void;
   sortableFields?: SortableFields<RecordRow>;
   sortBy?: SortBy<RecordRow>;
   groupableFields?: GroupableField<RecordRow>[];
@@ -1654,12 +1656,34 @@ const BaseRecordsExplorer = <
     return baseSelectedViewProps;
   })();
 
+  const search = (searchTerm: string) => {
+    if (isSearchable) {
+      setSearchParams(
+        {
+          search: (() => {
+            if (searchTerm) {
+              return searchTerm;
+            } else {
+              return null;
+            }
+          })(),
+        },
+        {
+          replace: true,
+        }
+      );
+      updateChangedSearchParamKeys('search');
+    }
+    onChangeSearchTerm && onChangeSearchTerm(searchTerm);
+  };
+
   //#region State
   const state: RecordsExplorerChildrenOptions<RecordRow, View, InitialValues> =
     {
       ...props,
       selectedView: selectedViewType,
-      data: filteredData,
+      data,
+      filteredData,
       flattenedGroupedData,
       groupedData,
       headerHeight: headerElementRef.current?.offsetHeight,
@@ -1675,6 +1699,7 @@ const BaseRecordsExplorer = <
       selectedDataPreset,
       selectedViewProps,
       selectedRecord,
+      search,
     };
   //#endregion
 
@@ -2539,26 +2564,7 @@ const BaseRecordsExplorer = <
         loading={loadingProp ?? loading}
         errorMessage={errorMessageProp ?? errorMessage}
         tools={tools}
-        onSearch={(searchTerm: string) => {
-          if (isSearchable) {
-            setSearchParams(
-              {
-                search: (() => {
-                  if (searchTerm) {
-                    return searchTerm;
-                  } else {
-                    return null;
-                  }
-                })(),
-              },
-              {
-                replace: true,
-              }
-            );
-            updateChangedSearchParamKeys('search');
-          }
-          onChangeSearchTerm && onChangeSearchTerm(searchTerm);
-        }}
+        onSearch={search}
       />
       <Divider />
     </>
