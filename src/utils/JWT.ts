@@ -4,4 +4,5 @@ export const REDIRECTION_ERROR_MESSAGES = [
   'Invalid token',
   'Session expired',
   'User session expired',
+  'Unauthorized',
 ];
