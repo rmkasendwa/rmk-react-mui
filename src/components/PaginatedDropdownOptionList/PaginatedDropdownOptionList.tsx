@@ -160,6 +160,7 @@ export interface PaginatedDropdownOptionListProps<Entity = any>
     option: DropdownOption<Entity>,
     searchTerm: string
   ) => boolean;
+  showSelectAllOption?: boolean;
 }
 
 const BasePaginatedDropdownOptionList = <Entity,>(
@@ -202,6 +203,7 @@ const BasePaginatedDropdownOptionList = <Entity,>(
     newOptionLabel,
     footerContent,
     filterOptionBySearchTerm,
+    showSelectAllOption = true,
     sx,
     ...rest
   } = omit(props, 'limit', 'minWidth');
@@ -750,7 +752,7 @@ const BasePaginatedDropdownOptionList = <Entity,>(
           overflowY: 'auto',
         }}
       />
-      {multiple && filteredOptions.length > 1 ? (
+      {showSelectAllOption && multiple && filteredOptions.length > 1 ? (
         <>
           <Divider />
           <DropdownOption

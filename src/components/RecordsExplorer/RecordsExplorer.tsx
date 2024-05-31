@@ -91,7 +91,7 @@ import Timeline, {
 import Tooltip from '../Tooltip';
 import { useRecordsExplorerNavigationState } from './hooks';
 import { DataFilterProps, useDataFilter } from './hooks/DataFilter';
-import { useFilterTool } from './hooks/FilterTool';
+import { FilterToolProps, useFilterTool } from './hooks/FilterTool';
 import { useGroupTool } from './hooks/GroupTool';
 import { useRecordsExplorerFields } from './hooks/RecordsExplorerFields';
 import { useSortTool } from './hooks/SortTool';
@@ -196,6 +196,8 @@ export interface RecordsExplorerChildrenOptions<
   searchParamSelectedDataPreset?: string | number;
   selectedDataPreset?: RecordsExplorerDataPreset<RecordRow>;
   selectedRecord?: RecordRow;
+  selectedConditionGroup: FilterToolProps<RecordRow>['selectedConditionGroup'];
+  onChangeSelectedConditionGroup: FilterToolProps<RecordRow>['onChangeSelectedConditionGroup'];
 }
 
 export type RecordsExplorerTools = Partial<
@@ -1129,6 +1131,17 @@ const BaseRecordsExplorer = <
     }
   }, [modifiedStateKeys, searchParamFilterBy]);
 
+  const onChangeSelectedConditionGroup: FilterToolProps<RecordRow>['onChangeSelectedConditionGroup'] =
+    (conditionGroup) => {
+      setSearchParams(
+        {
+          filterBy: conditionGroup as any,
+        },
+        { replace: true }
+      );
+      updateChangedSearchParamKeys('filterBy');
+    };
+
   //#region Filtering data
   const { filteredData: baseFilteredData } = useDataFilter({
     data,
@@ -1700,6 +1713,8 @@ const BaseRecordsExplorer = <
       selectedViewProps,
       selectedRecord,
       search,
+      selectedConditionGroup,
+      onChangeSelectedConditionGroup,
     };
   //#endregion
 
@@ -2126,20 +2141,14 @@ const BaseRecordsExplorer = <
     },
   });
 
+  //#region Filter Tool
   const filterTool = useFilterTool({
     data,
     filterFields,
     selectedConditionGroup,
-    onChangeSelectedConditionGroup: (conditionGroup) => {
-      setSearchParams(
-        {
-          filterBy: conditionGroup as any,
-        },
-        { replace: true }
-      );
-      updateChangedSearchParamKeys('filterBy');
-    },
+    onChangeSelectedConditionGroup,
   });
+  //#endregion
 
   const toolsLookup: RecordsExplorerTools = {};
 
