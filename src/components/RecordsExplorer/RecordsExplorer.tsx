@@ -630,6 +630,7 @@ const BaseRecordsExplorer = <
     loadRecordsRef,
     subHeaderElement,
     navigationStateExtension,
+    getToolbarElement,
     ...rest
   } = omit(
     props,
@@ -2613,8 +2614,8 @@ const BaseRecordsExplorer = <
         component="header"
         sx={{ position: 'sticky', top: 0, zIndex: 100, ...HeaderPropsSx }}
       >
-        {props.getToolbarElement
-          ? props.getToolbarElement({
+        {getToolbarElement
+          ? getToolbarElement({
               ...state,
               baseToolbarElement: toolbarElement,
             })
