@@ -106,8 +106,6 @@ export function useReactRouterDOMSearchParams<
   const [inMemorySearchParams, setInMemorySearchParams] = useState<
     Record<string, string>
   >({});
-  const inMemorySearchParamsRef = useRef(inMemorySearchParams);
-  inMemorySearchParamsRef.current = inMemorySearchParams;
 
   const baseSetSearchParamsRef = useRef(baseSetSearchParams);
   baseSetSearchParamsRef.current = baseSetSearchParams;
@@ -138,7 +136,7 @@ export function useReactRouterDOMSearchParams<
             return existingSearchParams;
           }
           case 'memory':
-            return inMemorySearchParamsRef.current;
+            return inMemorySearchParams;
         }
       })();
 
@@ -208,20 +206,29 @@ export function useReactRouterDOMSearchParams<
 
       return {
         existingSearchParams,
-        nextSearchParams: Object.keys(combinedSearchParams)
-          .filter((key) => {
-            return (
-              combinedSearchParams[key] != null &&
-              combinedSearchParams[key]!.length > 0
-            );
-          })
-          .reduce((accumulator, key) => {
-            accumulator[key] = combinedSearchParams[key]!;
-            return accumulator;
-          }, {} as Record<string, string>),
+        nextSearchParams:
+          paramStorage === 'memory'
+            ? (combinedSearchParams as Record<string, string>)
+            : Object.keys(combinedSearchParams)
+                .filter((key) => {
+                  return (
+                    combinedSearchParams[key] != null &&
+                    combinedSearchParams[key]!.length > 0
+                  );
+                })
+                .reduce<Record<string, string>>((accumulator, key) => {
+                  accumulator[key] = combinedSearchParams[key]!;
+                  return accumulator;
+                }, {}),
       };
     },
-    [hashedId, ignoreUnspecifiedParamsProp, mode, paramStorage]
+    [
+      hashedId,
+      ignoreUnspecifiedParamsProp,
+      inMemorySearchParams,
+      mode,
+      paramStorage,
+    ]
   );
 
   const setSearchParams = useCallback<SetSearchParams>(
@@ -235,7 +242,25 @@ export function useReactRouterDOMSearchParams<
             baseSetSearchParamsRef.current(nextSearchParams, navigateOptions);
             break;
           case 'memory':
-            setInMemorySearchParams(nextSearchParams);
+            setInMemorySearchParams((prevSearchParams) => {
+              const removedKeys = Object.entries(nextSearchParams)
+                .filter(([, value]) => {
+                  return value == null;
+                })
+                .map(([key]) => key);
+              return {
+                ...Object.fromEntries(
+                  Object.entries(prevSearchParams).filter(
+                    ([key]) => !removedKeys.includes(key)
+                  )
+                ),
+                ...Object.fromEntries(
+                  Object.entries(nextSearchParams).filter(
+                    ([key]) => !removedKeys.includes(key)
+                  )
+                ),
+              };
+            });
             break;
         }
       }
