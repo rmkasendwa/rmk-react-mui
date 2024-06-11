@@ -305,7 +305,7 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
               startAdornment,
               endAdornment: endAdornment ?? (
                 <>
-                  {showClearButton != null &&
+                  {showClearButton &&
                   (inputValue.length > 0 || showClearButton === 'always') &&
                   !disabled ? (
                     <Tooltip title="Clear" disableInteractive>

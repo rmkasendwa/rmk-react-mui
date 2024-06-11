@@ -101,6 +101,7 @@ export interface NumberInputFieldProps extends Omit<TextFieldProps, 'value'> {
   valuePrefix?: string;
   valueSuffix?: string;
   valueScaleFactor?: number;
+  showStepTools?: boolean;
 }
 
 export const NumberInputField = forwardRef<
@@ -126,6 +127,7 @@ export const NumberInputField = forwardRef<
     endAdornment,
     sx,
     valueScaleFactor = 1,
+    showStepTools = true,
     ...rest
   } = props;
 
@@ -354,7 +356,7 @@ export const NumberInputField = forwardRef<
         },
       }}
       endAdornment={
-        !disabled ? (
+        !disabled && showStepTools ? (
           <>
             <Stack className="number-input-field-step-tools">
               <IconButton
