@@ -13,7 +13,14 @@ import {
 import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import clsx from 'clsx';
-import { forwardRef, useCallback, useEffect, useRef, useState } from 'react';
+import {
+  ChangeEventHandler,
+  forwardRef,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
 import TextField, { TextFieldProps } from './TextField';
 
@@ -92,7 +99,8 @@ const getScaleFactor = (event: any) => {
   return 1;
 };
 
-export interface NumberInputFieldProps extends Omit<TextFieldProps, 'value'> {
+export interface NumberInputFieldProps
+  extends Omit<TextFieldProps, 'value' | 'onChange'> {
   value?: number;
   step?: number;
   decimalPlaces?: number;
@@ -102,6 +110,11 @@ export interface NumberInputFieldProps extends Omit<TextFieldProps, 'value'> {
   valueSuffix?: string;
   valueScaleFactor?: number;
   showStepTools?: boolean;
+  onChange?: ChangeEventHandler<
+    Omit<HTMLInputElement, 'value'> & {
+      value?: number;
+    }
+  >;
 }
 
 export const NumberInputField = forwardRef<
