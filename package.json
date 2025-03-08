@@ -32,27 +32,10 @@
     "build:esm": "tsc && copy-and-watch src/**/*.{png,jpg,css,scss,sass,json} lib",
     "eslint": "eslint --fix",
     "format": "prettier --write \"./**/*.{js,jsx,ts,tsx,html,htm,json,css,scss,md}\"",
-    "postinstall": "npm run prepare",
-    "prepare": "husky",
     "publish": "npm run build && npm publish ./lib/ --access=public",
     "snippets:update": "ts-node --project tsconfig-cjs.compile.json ./snippets/update-snippets",
-    "start": "concurrently --names \"Typescript,Assets\" -c \"blue.bold,magenta.bold\" \"tsc -w\" \"copy-and-watch --watch src/**/*.{png,jpg,css,scss,sass,json} lib\"",
     "storybook": "storybook dev -p 6006",
-    "test": "react-scripts test --watchAll=false",
-    "test:watch": "react-scripts test",
     "tsc": "tsc"
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
@@ -63,23 +46,9 @@
     "@infinite-debugger/rmk-js-extensions": "^0.1.0-alpha.28",
     "@infinite-debugger/rmk-utils": "^0.1.0-alpha.29",
     "@monaco-editor/react": "^4.7.0",
-    "@mui/base": "^5.0.0-beta.69",
     "@mui/icons-material": "^6.4.7",
-    "@mui/lab": "^6.0.0-beta.30",
     "@mui/material": "^6.4.7",
     "@mui/styles": "^6.4.7",
-    "@react-theming/storybook-addon": "^1.1.10",
-    "@storybook/addon-actions": "^8.6.4",
-    "@storybook/addon-essentials": "^8.6.4",
-    "@storybook/addon-links": "^8.6.4",
-    "@storybook/addon-mdx-gfm": "^8.6.4",
-    "@storybook/node-logger": "^8.6.4",
-    "@storybook/preset-create-react-app": "^8.6.4",
-    "@storybook/react": "^8.6.4",
-    "@storybook/react-webpack5": "^8.6.4",
-    "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/react": "^16.2.0",
-    "@testing-library/user-event": "^14.6.1",
     "@types/crypto-js": "^4.2.2",
     "@types/d3-geo": "^3.1.0",
     "@types/draft-convert": "^2.1.8",
@@ -132,14 +101,10 @@
     "react-file-icon": "^1.6.0",
     "react-intersection-observer": "^9.16.0",
     "react-merge-refs": "^2.1.1",
-    "react-router-dom": "^7.3.0",
-    "react-scripts": "^5.0.1",
     "react-side-effect": "^2.1.2",
     "react-smooth-dnd": "^0.11.1",
     "sass-loader": "^16.0.5",
     "scroll-into-view-if-needed": "^3.1.0",
-    "storybook": "^8.6.4",
-    "storybook-dark-mode": "^4.0.2",
     "style-loader": "^4.0.0",
     "topojson-client": "^3.1.0",
     "typescript": "^5.8.2",
@@ -147,11 +112,5 @@
     "unique-names-generator": "^4.7.1",
     "webpack": "^5.98.0",
     "yup": "^1.6.1"
-  },
-  "importSort": {
-    ".js, .jsx, .ts, .tsx": {
-      "style": "module",
-      "parser": "typescript"
-    }
   }
 }
