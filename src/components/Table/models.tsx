@@ -79,17 +79,17 @@ export type TableColumnType =
 
 export type GetColumnValue<
   DataRow extends BaseDataRow = any,
-  ColumnType extends TableColumnType = TableColumnType
+  ColumnType extends TableColumnType = TableColumnType,
 > = (row: DataRow, column: TableColumn<DataRow, ColumnType>) => ReactNode;
 
 export type GetEditField<
   DataRow extends BaseDataRow = any,
-  ColumnType extends TableColumnType = TableColumnType
+  ColumnType extends TableColumnType = TableColumnType,
 > = (row: DataRow, column: TableColumn<DataRow, ColumnType>) => ReactNode;
 
 export type GetEditableColumnValue<
   DataRow extends BaseDataRow = any,
-  ColumnType extends TableColumnType = TableColumnType
+  ColumnType extends TableColumnType = TableColumnType,
 > = (
   row: DataRow,
   column: TableColumn<DataRow, ColumnType>
@@ -98,7 +98,7 @@ export type GetEditableColumnValue<
 export type FieldValueEditor<
   DataRow extends BaseDataRow = any,
   ColumnType extends TableColumnType = TableColumnType,
-  UpdatedValue extends ReactNode = ReactNode
+  UpdatedValue extends ReactNode = ReactNode,
 > = (
   row: DataRow,
   updatedValue: UpdatedValue,
@@ -107,7 +107,7 @@ export type FieldValueEditor<
 
 export type OnClickColumn<
   DataRow extends BaseDataRow = any,
-  ColumnType extends TableColumnType = TableColumnType
+  ColumnType extends TableColumnType = TableColumnType,
 > = (row: DataRow, column: TableColumn<DataRow, ColumnType>) => void;
 
 export type GetToolTipWrappedColumnNodeFunction<DataRow> = (
@@ -117,12 +117,12 @@ export type GetToolTipWrappedColumnNodeFunction<DataRow> = (
 
 export type ShowColumnBodyContentFunction<
   DataRow extends BaseDataRow = any,
-  ColumnType extends TableColumnType = TableColumnType
+  ColumnType extends TableColumnType = TableColumnType,
 > = (row: DataRow, column: TableColumn<DataRow, ColumnType>) => boolean;
 
 export interface TableColumn<
   DataRow extends BaseDataRow = any,
-  ColumnType extends TableColumnType = TableColumnType
+  ColumnType extends TableColumnType = TableColumnType,
 > extends Partial<Omit<TableCellProps, 'defaultValue' | 'id'>>,
     Partial<Pick<DropdownOption, 'label' | 'searchableLabel' | 'description'>>,
     Partial<

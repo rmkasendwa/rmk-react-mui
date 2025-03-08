@@ -91,117 +91,116 @@ export interface FieldSetProps
   FieldLabelProps?: Partial<FieldLabelProps>;
 }
 
-export const FieldSet = forwardRef<any, FieldSetProps>(function FieldSet(
-  inProps,
-  ref
-) {
-  const props = useThemeProps({ props: inProps, name: 'MuiFieldSet' });
-  const {
-    className,
-    removable = false,
-    onClickRemoveButton,
-    label,
-    sx,
-    children,
-    error,
-    required,
-    enableLoadingState,
-    labelSuffix,
-    helpTip,
-    disabled,
-    FieldLabelProps = {},
-    ...rest
-  } = props;
+export const FieldSet = forwardRef<any, FieldSetProps>(
+  function FieldSet(inProps, ref) {
+    const props = useThemeProps({ props: inProps, name: 'MuiFieldSet' });
+    const {
+      className,
+      removable = false,
+      onClickRemoveButton,
+      label,
+      sx,
+      children,
+      error,
+      required,
+      enableLoadingState,
+      labelSuffix,
+      helpTip,
+      disabled,
+      FieldLabelProps = {},
+      ...rest
+    } = props;
 
-  const classes = composeClasses(
-    slots,
-    getFieldSetUtilityClass,
-    (() => {
-      if (className) {
-        return {
-          root: className,
-        };
-      }
-    })()
-  );
+    const classes = composeClasses(
+      slots,
+      getFieldSetUtilityClass,
+      (() => {
+        if (className) {
+          return {
+            root: className,
+          };
+        }
+      })()
+    );
 
-  const { ...FieldLabelPropsRest } = FieldLabelProps;
+    const { ...FieldLabelPropsRest } = FieldLabelProps;
 
-  const { palette } = useTheme();
+    const { palette } = useTheme();
 
-  return (
-    <Box
-      ref={ref}
-      {...rest}
-      className={clsx(
-        classes.root,
-        error && classes.error,
-        disabled && classes.disabled,
-        className
-      )}
-      component="fieldset"
-      sx={{
-        border: `1px solid ${palette.divider}`,
-        borderRadius: 1,
-        p: 2,
-        ...sx,
-        position: 'relative',
-        [`&.${classes.error}`]: {
-          borderColor: palette.error.main,
-        },
-        [`&:not(.${classes.error}):not(.${classes.disabled}):hover`]: {
-          borderColor: alpha(palette.divider, 0.87),
-        },
-        [`&:not(.${classes.disabled}):hover`]: {
-          [`&>.${classes.removeButton}`]: {
-            display: 'inline-flex',
+    return (
+      <Box
+        ref={ref}
+        {...rest}
+        className={clsx(
+          classes.root,
+          error && classes.error,
+          disabled && classes.disabled,
+          className
+        )}
+        component="fieldset"
+        sx={{
+          border: `1px solid ${palette.divider}`,
+          borderRadius: 1,
+          p: 2,
+          ...sx,
+          position: 'relative',
+          [`&.${classes.error}`]: {
+            borderColor: palette.error.main,
           },
-        },
-      }}
-    >
-      {label != null ? (
-        <legend>
-          <FieldLabel
-            {...{
-              required,
-              enableLoadingState,
-              labelSuffix,
-              helpTip,
-              disabled,
-              ...FieldLabelPropsRest,
+          [`&:not(.${classes.error}):not(.${classes.disabled}):hover`]: {
+            borderColor: alpha(palette.divider, 0.87),
+          },
+          [`&:not(.${classes.disabled}):hover`]: {
+            [`&>.${classes.removeButton}`]: {
+              display: 'inline-flex',
+            },
+          },
+        }}
+      >
+        {label != null ? (
+          <legend>
+            <FieldLabel
+              {...{
+                required,
+                enableLoadingState,
+                labelSuffix,
+                helpTip,
+                disabled,
+                ...FieldLabelPropsRest,
+              }}
+            >
+              {label}
+            </FieldLabel>
+          </legend>
+        ) : null}
+        {removable ? (
+          <IconButton
+            className={clsx(classes.removeButton)}
+            onClick={onClickRemoveButton}
+            {...{ disabled }}
+            sx={{
+              p: 0.5,
+              '&,&:hover': {
+                bgcolor: palette.error.main,
+                color: palette.error.contrastText,
+              },
+              position: 'absolute',
+              top: label != null ? -21 : -11,
+              right: -10,
+              display: 'none',
             }}
           >
-            {label}
-          </FieldLabel>
-        </legend>
-      ) : null}
-      {removable ? (
-        <IconButton
-          className={clsx(classes.removeButton)}
-          onClick={onClickRemoveButton}
-          {...{ disabled }}
-          sx={{
-            p: 0.5,
-            '&,&:hover': {
-              bgcolor: palette.error.main,
-              color: palette.error.contrastText,
-            },
-            position: 'absolute',
-            top: label != null ? -21 : -11,
-            right: -10,
-            display: 'none',
-          }}
-        >
-          <CloseIcon
-            sx={{
-              fontSize: 12,
-            }}
-          />
-        </IconButton>
-      ) : null}
-      {children}
-    </Box>
-  );
-});
+            <CloseIcon
+              sx={{
+                fontSize: 12,
+              }}
+            />
+          </IconButton>
+        ) : null}
+        {children}
+      </Box>
+    );
+  }
+);
 
 export default FieldSet;

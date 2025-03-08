@@ -277,7 +277,7 @@ export const useFilterTool = <RecordRow extends BaseDataRow>(
                     )!;
                     return [baseFilter, condition] as [
                       typeof baseFilter,
-                      typeof condition
+                      typeof condition,
                     ];
                   })
                   .filter(([field]) => field != null)

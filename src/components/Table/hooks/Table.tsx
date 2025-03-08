@@ -1026,8 +1026,8 @@ export const useTable = <DataRow extends BaseDataRow>(
                       pr: columnSortable
                         ? 3
                         : index < displayingColumns.length - 1
-                        ? 1.5
-                        : 3,
+                          ? 1.5
+                          : 3,
                       py: 1.5,
                       ...(() => {
                         if (enableColumnDisplayToggle && isLastColumn) {

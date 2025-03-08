@@ -45,10 +45,13 @@ export const useSetSearchParam = (baseSetSearchParams: SetSearchPrams) => {
             combinedSearchParams[key]!.length > 0
           );
         })
-        .reduce((accumulator, key) => {
-          accumulator[key] = combinedSearchParams[key]!;
-          return accumulator;
-        }, {} as Record<string, string | string[]>);
+        .reduce(
+          (accumulator, key) => {
+            accumulator[key] = combinedSearchParams[key]!;
+            return accumulator;
+          },
+          {} as Record<string, string | string[]>
+        );
 
       if (hashIt(nextSearchParams) !== hashIt(existingSearchParams)) {
         baseSetSearchParamsRef.current(nextSearchParams, navigateOptions);

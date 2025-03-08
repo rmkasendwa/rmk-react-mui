@@ -9,7 +9,7 @@ import { BaseDataRow } from '../../Table';
 import { TimelineDataComputedProperties } from '../models';
 
 export interface TimelineDataComputedPropertiesProps<
-  RecordRow extends BaseDataRow = any
+  RecordRow extends BaseDataRow = any,
 > {
   /** An array of rows to be displayed in the timeline. */
   rows: RecordRow[];

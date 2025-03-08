@@ -243,7 +243,12 @@ export const EmailAddressSelector = forwardRef<
     if (isFocused && searchTerm.length > 0) {
       loadEmailAddressHolders();
     }
-  }, [isFocused, loadEmailAddressHolders, resetEmailAddressHoldersState, searchTerm.length]);
+  }, [
+    isFocused,
+    loadEmailAddressHolders,
+    resetEmailAddressHoldersState,
+    searchTerm.length,
+  ]);
 
   useEffect(() => {
     if (!isInitialMountRef.current) {

@@ -93,7 +93,7 @@ export const formWrapperClasses: FormWrapperClasses = generateUtilityClasses(
 export interface FormWrapperProps<
   RecordRow = any,
   Values extends FormikValues = any,
-  LoadedRecord = RecordRow
+  LoadedRecord = RecordRow,
 > extends Partial<
       Omit<
         FormikFormProps<Values>,
@@ -347,7 +347,7 @@ const BaseFormWrapper = <RecordRow, Values extends FormikValues>(
 
 export const FormWrapper = forwardRef(BaseFormWrapper) as <
   RecordRow,
-  Values extends FormikValues
+  Values extends FormikValues,
 >(
   p: FormWrapperProps<RecordRow, Values> & { ref?: Ref<HTMLDivElement> }
 ) => ReactElement;

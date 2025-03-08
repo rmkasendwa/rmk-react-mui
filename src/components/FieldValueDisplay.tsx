@@ -79,7 +79,7 @@ export const fieldValueDisplayClasses: FieldValueDisplayClasses =
   );
 
 export interface FieldValueDisplayProps<
-  FieldValue extends ReactNode = ReactNode
+  FieldValue extends ReactNode = ReactNode,
 > extends Partial<BoxProps>,
     Pick<FieldLabelProps, 'required' | 'labelSuffix' | 'helpTip' | 'disabled'>,
     Pick<
@@ -308,7 +308,7 @@ export const BaseFieldValueDisplay = <FieldValue extends ReactNode>(
 };
 
 export const FieldValueDisplay = forwardRef(BaseFieldValueDisplay) as <
-  FieldValue extends ReactNode = ReactNode
+  FieldValue extends ReactNode = ReactNode,
 >(
   p: FieldValueDisplayProps<FieldValue> & { ref?: Ref<any> }
 ) => ReactElement;

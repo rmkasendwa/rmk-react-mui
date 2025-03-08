@@ -137,7 +137,7 @@ export const BaseEnumValueChip = <Value extends string = string>(
 };
 
 export const EnumValueChip = forwardRef(BaseEnumValueChip) as <
-  Value extends string = string
+  Value extends string = string,
 >(
   props: EnumValueChipProps<Value> & { ref?: Ref<HTMLDivElement> }
 ) => ReactElement;

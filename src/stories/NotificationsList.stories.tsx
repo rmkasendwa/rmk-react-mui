@@ -73,14 +73,13 @@ const sampleNotifications: Notification[] = [
           };
         }
       })(),
-      component: forwardRef<HTMLAnchorElement, any>(function ParentLink(
-        linkProps,
-        ref
-      ) {
-        return (
-          <RouterLink ref={ref} to={INDEX_PAGE_ROUTE_PATH} {...linkProps} />
-        );
-      }),
+      component: forwardRef<HTMLAnchorElement, any>(
+        function ParentLink(linkProps, ref) {
+          return (
+            <RouterLink ref={ref} to={INDEX_PAGE_ROUTE_PATH} {...linkProps} />
+          );
+        }
+      ),
     };
   });
 

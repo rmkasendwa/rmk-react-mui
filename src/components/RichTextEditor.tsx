@@ -454,47 +454,56 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
           label: 'Image',
           id: 'IMAGE',
         },
-        ...INLINE_STYLES.reduce((accumulator, { icon, style, label }) => {
-          accumulator[style] = {
-            icon,
-            isActive: currentInlineStyle.has(style),
-            onMouseDown: () => {
-              setEditorState((prevEditorState) => {
-                return RichUtils.toggleInlineStyle(prevEditorState, style);
-              });
-            },
-            label,
-            id: style,
-          };
-          return accumulator;
-        }, {} as Record<string, Tool>),
-        ...BLOCK_TYPES.reduce((accumulator, { icon, style, key, label }) => {
-          accumulator[key] = {
-            icon,
-            isActive: blockType === style,
-            onMouseDown: () => {
-              setEditorState((prevEditorState) => {
-                return RichUtils.toggleBlockType(prevEditorState, style);
-              });
-            },
-            label,
-            id: style,
-          };
-          return accumulator;
-        }, {} as Record<string, Tool>),
-        ...ALIGNMENTS.reduce((accumulator, { icon, alignment, label }) => {
-          const id = `ALIGN_${alignment.toUpperCase()}`;
-          accumulator[id] = {
-            icon,
-            isActive: textAlignment === alignment,
-            onMouseDown: () => {
-              setTextAlignment(alignment);
-            },
-            label,
-            id,
-          };
-          return accumulator;
-        }, {} as Record<string, Tool>),
+        ...INLINE_STYLES.reduce(
+          (accumulator, { icon, style, label }) => {
+            accumulator[style] = {
+              icon,
+              isActive: currentInlineStyle.has(style),
+              onMouseDown: () => {
+                setEditorState((prevEditorState) => {
+                  return RichUtils.toggleInlineStyle(prevEditorState, style);
+                });
+              },
+              label,
+              id: style,
+            };
+            return accumulator;
+          },
+          {} as Record<string, Tool>
+        ),
+        ...BLOCK_TYPES.reduce(
+          (accumulator, { icon, style, key, label }) => {
+            accumulator[key] = {
+              icon,
+              isActive: blockType === style,
+              onMouseDown: () => {
+                setEditorState((prevEditorState) => {
+                  return RichUtils.toggleBlockType(prevEditorState, style);
+                });
+              },
+              label,
+              id: style,
+            };
+            return accumulator;
+          },
+          {} as Record<string, Tool>
+        ),
+        ...ALIGNMENTS.reduce(
+          (accumulator, { icon, alignment, label }) => {
+            const id = `ALIGN_${alignment.toUpperCase()}`;
+            accumulator[id] = {
+              icon,
+              isActive: textAlignment === alignment,
+              onMouseDown: () => {
+                setTextAlignment(alignment);
+              },
+              label,
+              id,
+            };
+            return accumulator;
+          },
+          {} as Record<string, Tool>
+        ),
       } as RichTextEditorTools;
 
       if (getToolGroups) {

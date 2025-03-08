@@ -99,7 +99,7 @@ export const modalFormClasses: ModalFormClasses = generateUtilityClasses(
 
 export type ModalFormFunctionChildren<
   Values extends FormikValues = any,
-  ExtraProps = Record<string, unknown>
+  ExtraProps = Record<string, unknown>,
 > = FormikFormFunctionChildren<Values, ExtraProps>;
 
 export interface ModalFormProps<Values extends FormikValues = any>
@@ -795,7 +795,7 @@ export const BaseModalForm = <Values extends FormikValues>(
 };
 
 export const ModalForm = forwardRef(BaseModalForm) as <
-  Values extends FormikValues
+  Values extends FormikValues,
 >(
   p: ModalFormProps<Values> & { ref?: Ref<HTMLDivElement> }
 ) => ReactElement;

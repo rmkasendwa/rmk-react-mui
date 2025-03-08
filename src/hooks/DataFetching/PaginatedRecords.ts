@@ -10,7 +10,7 @@ import { useAPIService } from './APIService';
 import { GetStaleWhileRevalidateFunction, QueryOptions } from './models';
 
 export type PaginatedRecordsFinderOptions<
-  PaginatedResponseDataExtensions extends Record<string, any> = any
+  PaginatedResponseDataExtensions extends Record<string, any> = any,
 > = PaginatedRequestParams & {
   /**
    * Function that can be used to retrieve the request controller of the data request.
@@ -37,12 +37,12 @@ export type PaginatedRecordsFinderOptions<
 
 export type ResponsePage<
   DataRow,
-  PaginatedResponseDataExtensions extends Record<string, any> = any
+  PaginatedResponseDataExtensions extends Record<string, any> = any,
 > = PaginatedResponseData<DataRow> & PaginatedResponseDataExtensions;
 
 export type PaginatedRecordsFinder<
   DataRow,
-  PaginatedResponseDataExtensions extends Record<string, any> = any
+  PaginatedResponseDataExtensions extends Record<string, any> = any,
 > = (
   options: PaginatedRecordsFinderOptions<PaginatedResponseDataExtensions>
 ) => Promise<
@@ -84,7 +84,7 @@ export interface PaginatedRecordsProps<DataRow = any>
  */
 export const usePaginatedRecords = <
   DataRow,
-  PaginatedResponseDataExtensions extends Record<string, any>
+  PaginatedResponseDataExtensions extends Record<string, any>,
 >(
   recordFinder: PaginatedRecordsFinder<
     DataRow,

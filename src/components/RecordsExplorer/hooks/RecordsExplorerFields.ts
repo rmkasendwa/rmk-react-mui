@@ -42,7 +42,7 @@ declare module '@mui/material/styles/components' {
 //#endregion
 
 export interface RecordsExplorerFieldsProps<
-  RecordRow extends BaseDataRow = BaseDataRow
+  RecordRow extends BaseDataRow = BaseDataRow,
 > extends Pick<DataFilterProps<RecordRow>, 'filterRevalidationKey'> {
   searchableFields?: SearchableProperty<RecordRow>[];
   filterFields?: DataFilterField<RecordRow>[];

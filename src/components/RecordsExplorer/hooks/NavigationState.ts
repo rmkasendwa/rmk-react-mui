@@ -40,7 +40,7 @@ declare module '@mui/material/styles/components' {
 //#endregion
 
 export interface RecordsExplorerNavigationStateProps<
-  ValidationSpec extends ObjectShape = any
+  ValidationSpec extends ObjectShape = any,
 > {
   id?: string;
   paramStorage?: ParamStorage;
@@ -51,7 +51,7 @@ export interface RecordsExplorerNavigationStateProps<
 
 export const useRecordsExplorerNavigationState = <
   RecordRow extends BaseDataRow,
-  ValidationSpec extends ObjectShape = any
+  ValidationSpec extends ObjectShape = any,
 >(
   inProps: RecordsExplorerNavigationStateProps<ValidationSpec> = {}
 ) => {

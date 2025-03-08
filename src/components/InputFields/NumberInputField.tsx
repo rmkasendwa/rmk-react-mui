@@ -273,7 +273,15 @@ export const NumberInputField = forwardRef<
         });
       }
     }
-  }, [decimalPlaces, extractNumericValue, focused, max, min, value, valueScaleFactor]);
+  }, [
+    decimalPlaces,
+    extractNumericValue,
+    focused,
+    max,
+    min,
+    value,
+    valueScaleFactor,
+  ]);
 
   useEffect(() => {
     setInputValue((prevInputValue) => {

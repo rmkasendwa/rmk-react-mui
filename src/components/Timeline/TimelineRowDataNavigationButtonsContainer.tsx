@@ -190,7 +190,12 @@ export const TimelineRowDataNavigationButtonsContainer = forwardRef<
         );
       };
     }
-  }, [currentDateAtEndPositionLeftOffsetRef, currentDateAtStartPositionLeftOffsetRef, isVisible, scrollingAncenstorElementRef]);
+  }, [
+    currentDateAtEndPositionLeftOffsetRef,
+    currentDateAtStartPositionLeftOffsetRef,
+    isVisible,
+    scrollingAncenstorElementRef,
+  ]);
 
   return (
     <Grid

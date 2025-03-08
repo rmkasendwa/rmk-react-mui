@@ -53,7 +53,7 @@ export interface BaseDataFilterField<RecordRow extends BaseDataRow> {
 }
 
 export interface DataMultiSelectDropdownFilterField<
-  RecordRow extends BaseDataRow
+  RecordRow extends BaseDataRow,
 > extends Omit<BaseDataFilterField<RecordRow>, 'filter'>,
     Omit<DataDropdownFieldProps, 'id' | 'label' | 'searchableLabel'> {
   /**

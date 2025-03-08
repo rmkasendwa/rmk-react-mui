@@ -71,7 +71,7 @@ export const formikFormClasses: FormikFormClasses = generateUtilityClasses(
 
 export type FormikFormFunctionChildren<
   Values extends FormikValues = any,
-  ExtraProps = Record<string, unknown>
+  ExtraProps = Record<string, unknown>,
 > = (
   props: FormikProps<Values> &
     FormikErrorFieldHighlighterFunctionChildrenProps & {
@@ -82,7 +82,7 @@ export type FormikFormFunctionChildren<
 
 export interface FormikFormProps<
   Values extends FormikValues = any,
-  ExtraProps = Record<string, unknown>
+  ExtraProps = Record<string, unknown>,
 > extends Partial<
       Omit<FormikErrorFieldHighlighterProps, 'onSubmit' | 'children' | 'ref'>
     >,
@@ -194,7 +194,7 @@ const BaseFormikForm = <Values extends FormikValues>(
 };
 
 export const FormikForm = forwardRef(BaseFormikForm) as <
-  Values extends FormikValues
+  Values extends FormikValues,
 >(
   p: FormikFormProps<Values> & { ref?: Ref<HTMLDivElement> }
 ) => ReactElement;

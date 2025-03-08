@@ -211,10 +211,10 @@ export const useDataFilter = <RecordRow extends BaseDataRow>(
                       const isFieldEmpty = Array.isArray(fieldValue)
                         ? fieldValue.length <= 0
                         : typeof fieldValue === 'number'
-                        ? fieldValue === 0
-                        : typeof fieldValue === 'string'
-                        ? fieldValue.length <= 0
-                        : fieldValue == null;
+                          ? fieldValue === 0
+                          : typeof fieldValue === 'string'
+                            ? fieldValue.length <= 0
+                            : fieldValue == null;
                       switch (operator as ContentExistenceFilterOperator) {
                         case 'is empty':
                           return isFieldEmpty;

@@ -39,7 +39,7 @@ export function useReactRouterDOMSearchParams<
   ValidationSpec extends ObjectShape,
   SearchParamsObject = Yup.InferType<
     OptionalObjectSchema<ValidationSpec, AnyObject, TypeOfShape<ValidationSpec>>
-  >
+  >,
 >(options: {
   mode: 'json';
   spec: ValidationSpec;
@@ -80,7 +80,7 @@ export function useReactRouterDOMSearchParams<
   ValidationSpec extends ObjectShape,
   SearchParamsObject = Yup.InferType<
     OptionalObjectSchema<ValidationSpec, AnyObject, TypeOfShape<ValidationSpec>>
-  >
+  >,
 >({
   mode = 'string',
   spec,

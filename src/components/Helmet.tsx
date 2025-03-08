@@ -58,10 +58,13 @@ const HELMET_PROPS: Record<string, string> = {
   TITLE_TEMPLATE: 'titleTemplate',
 };
 
-const HTML_TAG_MAP = Object.keys(REACT_TAG_MAP).reduce((obj, key) => {
-  obj[REACT_TAG_MAP[key]] = key;
-  return obj;
-}, {} as Record<string, string>);
+const HTML_TAG_MAP = Object.keys(REACT_TAG_MAP).reduce(
+  (obj, key) => {
+    obj[REACT_TAG_MAP[key]] = key;
+    return obj;
+  },
+  {} as Record<string, string>
+);
 
 const SELF_CLOSING_TAGS = [
   TAG_NAMES.NOSCRIPT,

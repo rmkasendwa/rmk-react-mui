@@ -22,9 +22,7 @@ import ReactDOM from 'react-dom';
 import { FileUploader } from '@infinite-debugger/react-mui';
 
 function App() {
-  return (
-    <FileUploader />
-  );
+  return <FileUploader />;
 }
 
 ReactDOM.render(<App />, document.querySelector('#app'));

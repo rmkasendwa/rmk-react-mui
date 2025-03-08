@@ -446,7 +446,7 @@ export const BaseTableBody = <DataRow extends BaseDataRow>(
 };
 
 export const TableBody = forwardRef(BaseTableBody) as <
-  DataRow extends BaseDataRow
+  DataRow extends BaseDataRow,
 >(
   p: TableBodyProps<DataRow> & { ref?: Ref<any> }
 ) => ReactElement;

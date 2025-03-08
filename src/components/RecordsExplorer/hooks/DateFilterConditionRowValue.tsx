@@ -79,7 +79,7 @@ export const dateFilterConditionRowValueClasses: DateFilterConditionRowValueClas
   );
 
 export interface DateFilterConditionRowValueProps<
-  RecordRow extends BaseDataRow = any
+  RecordRow extends BaseDataRow = any,
 > extends Partial<TableCellProps> {
   condition: Condition<RecordRow>;
   selectedConditionGroup: ConditionGroup<RecordRow>;

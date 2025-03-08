@@ -523,14 +523,14 @@ export const SortFieldSelector: FC<SortFieldSelectorProps> = ({
 
 //#region SortOperationFieldSelectorTool
 export interface SortOperationFieldSelectorToolProps<
-  RecordRow extends BaseDataRow = any
+  RecordRow extends BaseDataRow = any,
 > extends SortFieldSelectorProps<RecordRow> {
   title?: string;
   onSelectSortOption?: OnSelectSortOption<RecordRow>;
 }
 
 export const useSortOperationFieldSelectorTool = <
-  RecordRow extends BaseDataRow
+  RecordRow extends BaseDataRow,
 >(
   inProps: SortOperationFieldSelectorToolProps<RecordRow>
 ) => {
