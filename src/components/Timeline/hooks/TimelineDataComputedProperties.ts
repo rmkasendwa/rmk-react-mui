@@ -1,7 +1,5 @@
 import { createDateWithoutTimezoneOffset } from '@infinite-debugger/rmk-utils/dates';
-import addDays from 'date-fns/addDays';
-import differenceInDays from 'date-fns/differenceInDays';
-import differenceInHours from 'date-fns/differenceInHours';
+import { addDays, differenceInDays, differenceInHours } from 'date-fns';
 import { result } from 'lodash';
 import { useMemo, useRef } from 'react';
 

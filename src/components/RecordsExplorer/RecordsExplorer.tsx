@@ -31,10 +31,10 @@ import hashIt from 'hash-it';
 import { omit, result } from 'lodash';
 import { singular } from 'pluralize';
 import {
-  RefObject,
   ReactElement,
   ReactNode,
   Ref,
+  RefObject,
   forwardRef,
   useEffect,
   useMemo,
@@ -42,7 +42,7 @@ import {
 } from 'react';
 import { mergeRefs } from 'react-merge-refs';
 import { Link as RouterLink, useLocation, useNavigate } from 'react-router-dom';
-import { ObjectShape } from 'yup/lib/object';
+import { ObjectShape } from 'yup';
 
 import { useAuth } from '../../contexts/AuthContext';
 import { LoadingContext, LoadingProvider } from '../../contexts/LoadingContext';

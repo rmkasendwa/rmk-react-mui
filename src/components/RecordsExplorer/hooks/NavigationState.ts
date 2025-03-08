@@ -4,7 +4,7 @@ import {
   useThemeProps,
 } from '@mui/material';
 import * as Yup from 'yup';
-import { ObjectShape } from 'yup/lib/object';
+import { ObjectShape } from 'yup';
 
 import {
   ParamStorage,

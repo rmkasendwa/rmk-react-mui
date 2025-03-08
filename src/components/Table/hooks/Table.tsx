@@ -235,8 +235,10 @@ export const useTable = <DataRow extends BaseDataRow>(
   onChangeCheckedRowIdsRef.current = onChangeCheckedRowIdsProp;
   const onChangeMinWidthRef = useRef(onChangeMinWidth);
   onChangeMinWidthRef.current = onChangeMinWidth;
-  const startStickyColumnDividerElementRef = useRef<HTMLDivElement | null>();
-  const endStickyColumnDividerElementRef = useRef<HTMLDivElement | null>();
+  const startStickyColumnDividerElementRef = useRef<HTMLDivElement | null>(
+    null
+  );
+  const endStickyColumnDividerElementRef = useRef<HTMLDivElement | null>(null);
   //#endregion
 
   const {

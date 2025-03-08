@@ -16,7 +16,7 @@ import {
   useThemeProps,
 } from '@mui/material';
 import clsx from 'clsx';
-import formatDate from 'date-fns/format';
+import { format as formatDate } from 'date-fns';
 import { result } from 'lodash';
 import { forwardRef, useEffect, useState } from 'react';
 import * as yup from 'yup';

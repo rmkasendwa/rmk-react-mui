@@ -17,7 +17,7 @@ import {
   useTheme,
   useThemeProps,
 } from '@mui/material';
-import { FC, RefObject, ReactNode, useMemo, useRef, useState } from 'react';
+import { FC, ReactNode, RefObject, useMemo, useRef, useState } from 'react';
 
 import TimelineIcon from '../../Icons/TimelineIcon';
 import ModalPopup from '../../ModalPopup';
@@ -208,7 +208,7 @@ export const useViewOptionsTool = <ViewType extends string = string>(
   const anchorRef = useRef<HTMLButtonElement>(null);
   const viewOptionsRef = useRef(viewOptions);
   viewOptionsRef.current = viewOptions;
-  const togglePopupFunctionRef = useRef<(open: boolean) => void>();
+  const togglePopupFunctionRef = useRef<(open: boolean) => void>(undefined);
   //#endregion
 
   const options = useMemo(() => {

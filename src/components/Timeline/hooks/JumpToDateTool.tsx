@@ -29,13 +29,14 @@ declare module '@mui/material/styles/components' {
 }
 //#endregion
 
-export interface JumpToDateToolProps
-  extends Partial<Pick<DatePickerProps, 'minDate' | 'maxDate' | 'onChange'>>,
-    Partial<Omit<PopupToolProps, 'onChange'>> {
-  selectedDate?: DatePickerProps['selected'];
-  selectedDateRef?: React.RefObject<DatePickerProps['selected']>;
-  wrapDatePickerNode?: (datePickerNode: ReactNode) => ReactNode;
-}
+export type JumpToDateToolProps = Partial<
+  Pick<DatePickerProps, 'minDate' | 'maxDate' | 'onChange'>
+> &
+  Partial<Omit<PopupToolProps, 'onChange'>> & {
+    selectedDate?: DatePickerProps['selected'];
+    selectedDateRef?: React.RefObject<DatePickerProps['selected']>;
+    wrapDatePickerNode?: (datePickerNode: ReactNode) => ReactNode;
+  };
 
 export const useJumpToDateTool = (inProps: JumpToDateToolProps = {}) => {
   const props = useThemeProps({ props: inProps, name: 'MuiJumpToDateTool' });

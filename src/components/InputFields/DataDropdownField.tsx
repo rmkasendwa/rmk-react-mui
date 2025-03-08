@@ -250,7 +250,8 @@ const BaseDataDropdownField = <Entity,>(
   const anchorRef = useRef<HTMLInputElement>(null);
   const searchFieldRef = useRef<HTMLInputElement>(null);
   const searchFieldContainerRef = useRef<HTMLInputElement>(null);
-  const asyncOptionPagesMapRef = useRef<Map<number, DropdownOption[]>>();
+  const asyncOptionPagesMapRef =
+    useRef<Map<number, DropdownOption[]>>(undefined);
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
 

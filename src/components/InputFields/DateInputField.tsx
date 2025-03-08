@@ -18,7 +18,7 @@ import IconButton from '@mui/material/IconButton';
 import useTheme from '@mui/material/styles/useTheme';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import clsx from 'clsx';
-import formatDate from 'date-fns/format';
+import { format as formatDate } from 'date-fns/format';
 import { omit } from 'lodash';
 import {
   forwardRef,
@@ -291,7 +291,7 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
             <DatePicker
               {...DatePickerPropsRest}
               selected={selectedDate}
-              onChange={(date) => {
+              onChange={(date: Date) => {
                 if (date) {
                   const selectedDate =
                     date &&

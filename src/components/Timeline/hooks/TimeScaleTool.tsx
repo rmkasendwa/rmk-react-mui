@@ -14,9 +14,9 @@ import {
   useTheme,
   useThemeProps,
 } from '@mui/material';
-import formatDate from 'date-fns/format';
+import { format as formatDate } from 'date-fns';
 import { omit } from 'lodash';
-import { RefObject, ReactNode, useEffect, useRef, useState } from 'react';
+import { ReactNode, RefObject, useEffect, useRef, useState } from 'react';
 
 import { PopupToolProps, usePopupTool } from '../../../hooks/Tools/PopupTool';
 import DatePicker from '../../DatePicker';

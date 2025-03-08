@@ -15,12 +15,14 @@ import {
 } from '@mui/material';
 import Box from '@mui/material/Box';
 import clsx from 'clsx';
-import addYears from 'date-fns/addYears';
-import differenceInHours from 'date-fns/differenceInHours';
-import formatDate from 'date-fns/format';
-import isAfter from 'date-fns/isAfter';
-import maxDate from 'date-fns/max';
-import minDate from 'date-fns/min';
+import {
+  addYears,
+  differenceInHours,
+  formatDate,
+  isAfter,
+  max as maxDate,
+  min as minDate,
+} from 'date-fns';
 import { Fragment, RefObject, forwardRef, useMemo } from 'react';
 
 import { useGlobalConfiguration } from '../../contexts/GlobalConfigurationContext';

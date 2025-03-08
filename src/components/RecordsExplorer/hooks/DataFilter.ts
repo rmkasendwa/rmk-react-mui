@@ -4,15 +4,17 @@ import {
   ComponentsVariants,
   useThemeProps,
 } from '@mui/material';
-import addDays from 'date-fns/addDays';
-import addMonths from 'date-fns/addMonths';
-import addWeeks from 'date-fns/addWeeks';
-import addYears from 'date-fns/addYears';
-import isAfter from 'date-fns/isAfter';
-import isBefore from 'date-fns/isBefore';
-import isSameDay from 'date-fns/isSameDay';
-import max from 'date-fns/max';
-import min from 'date-fns/min';
+import {
+  addDays,
+  addMonths,
+  addWeeks,
+  addYears,
+  isAfter,
+  isBefore,
+  isSameDay,
+  max,
+  min,
+} from 'date-fns';
 import { result } from 'lodash';
 import { useMemo, useRef } from 'react';
 
