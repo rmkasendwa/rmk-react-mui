@@ -12,30 +12,21 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material';
-import {
-  FC,
-  MutableRefObject,
-  ReactNode,
-  useCallback,
-  useRef,
-  useState,
-} from 'react';
+import { FC, RefObject, ReactNode, useCallback, useRef, useState } from 'react';
 
 import ModalPopup from '../../components/ModalPopup';
 import { ButtonTool } from '../../components/SearchSyncToolbar';
 
 //#region Popup Tool Popover
 export interface PopupToolPopoverProps {
-  anchorRef: React.MutableRefObject<HTMLButtonElement | null>;
+  anchorRef: React.RefObject<HTMLButtonElement | null>;
   wrapBodyContentInCard?: boolean;
   popupCardTitle?: ReactNode;
   BodyContentProps?: Partial<CardContentProps>;
   bodyContent?: ReactNode;
   getBodyContent?: () => ReactNode;
   footerContent?: ReactNode;
-  togglePopupFunctionRef: MutableRefObject<
-    ((open: boolean) => void) | undefined
-  >;
+  togglePopupFunctionRef: RefObject<((open: boolean) => void) | undefined>;
 }
 
 export const PopupToolPopover: FC<PopupToolPopoverProps> = ({

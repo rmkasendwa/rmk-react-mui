@@ -14,7 +14,7 @@ import {
 import Box from '@mui/material/Box';
 import clsx from 'clsx';
 import { omit } from 'lodash';
-import { MutableRefObject, forwardRef, useMemo, useState } from 'react';
+import { RefObject, forwardRef, useMemo, useState } from 'react';
 
 import { useLoadOnScrollToBottom } from '../../hooks/InfiniteScroller';
 import { TimeScaleRow } from './models';
@@ -75,9 +75,7 @@ export const timeScaleMeterClasses: TimeScaleMeterClasses =
 export interface TimeScaleMeterProps extends Partial<StackProps> {
   timeScaleRows: [TimeScaleRow[], TimeScaleRow[], TimeScaleRow[]];
   timeScaleWidth: number;
-  scrollingAncenstorElementRef?: MutableRefObject<
-    HTMLElement | null | undefined
-  >;
+  scrollingAncenstorElementRef?: RefObject<HTMLElement | null | undefined>;
   leftOffset?: number;
   variant?: 'default' | 'compact';
 }

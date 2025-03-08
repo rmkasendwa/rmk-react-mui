@@ -21,7 +21,7 @@ import formatDate from 'date-fns/format';
 import isAfter from 'date-fns/isAfter';
 import maxDate from 'date-fns/max';
 import minDate from 'date-fns/min';
-import { Fragment, MutableRefObject, forwardRef, useMemo } from 'react';
+import { Fragment, RefObject, forwardRef, useMemo } from 'react';
 
 import { useGlobalConfiguration } from '../../contexts/GlobalConfigurationContext';
 import { TimelineElement as TimelineElementType } from './models';
@@ -104,9 +104,7 @@ export interface TimelineRowDataContainerProps
   totalNumberOfHours: number;
   scaledTimeScaleWidth: number;
   timelineViewPortContainerWidth: number;
-  scrollingAncenstorElementRef?: MutableRefObject<
-    HTMLElement | null | undefined
-  >;
+  scrollingAncenstorElementRef?: RefObject<HTMLElement | null | undefined>;
   newTimelineElementIds?: string[];
   showNavigationButtons?: 'never' | 'always' | 'hover';
 }

@@ -17,14 +17,7 @@ import {
   useTheme,
   useThemeProps,
 } from '@mui/material';
-import {
-  FC,
-  MutableRefObject,
-  ReactNode,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { FC, RefObject, ReactNode, useMemo, useRef, useState } from 'react';
 
 import TimelineIcon from '../../Icons/TimelineIcon';
 import ModalPopup from '../../ModalPopup';
@@ -69,13 +62,11 @@ const DEFAULT_VIEW_OPTIONS_TYPES = defaultViewOptions.map(({ label }) => label);
 
 //#region View Options Tool Popover
 export interface ViewOptionsToolPopoverProps {
-  anchorRef: React.MutableRefObject<HTMLButtonElement | null>;
+  anchorRef: React.RefObject<HTMLButtonElement | null>;
   options: DropdownOption[];
   selectedOptions: DropdownOption[];
   onChangeViewType?: (viewType: ViewOptionType) => void;
-  togglePopupFunctionRef: MutableRefObject<
-    ((open: boolean) => void) | undefined
-  >;
+  togglePopupFunctionRef: RefObject<((open: boolean) => void) | undefined>;
 }
 
 export const ViewOptionsToolPopover: FC<ViewOptionsToolPopoverProps> = ({

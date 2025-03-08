@@ -10,7 +10,7 @@ import {
   useThemeProps,
 } from '@mui/material';
 import clsx from 'clsx';
-import { MutableRefObject, forwardRef, useState } from 'react';
+import { RefObject, forwardRef, useState } from 'react';
 
 import Tooltip, { TooltipProps } from './Tooltip';
 
@@ -68,8 +68,8 @@ export interface TooltipPopupButtonProps
   extends Omit<LoadingButtonProps, 'title'>,
     Pick<TooltipProps, 'title'> {
   TooltipProps?: Partial<TooltipProps>;
-  openTooltipRef?: MutableRefObject<(() => void) | undefined>;
-  closeTooltipRef?: MutableRefObject<(() => void) | undefined>;
+  openTooltipRef?: RefObject<(() => void) | undefined>;
+  closeTooltipRef?: RefObject<(() => void) | undefined>;
 }
 
 export const TooltipPopupButton = forwardRef<

@@ -27,8 +27,8 @@ import { omit } from 'lodash';
 import {
   Children,
   Fragment,
-  MutableRefObject,
   ReactNode,
+  RefObject,
   forwardRef,
   isValidElement,
   useEffect,
@@ -115,27 +115,25 @@ export interface BaseToolOptions {
   extraToolProps?: any;
 }
 
-export interface ButtonTool
-  extends Partial<Omit<ButtonProps, 'title' | 'type'>>,
-    BaseToolOptions {
-  label: ReactNode;
-  type: 'button';
-  title?: ReactNode;
-  icon?: ReactNode;
-  ref?: MutableRefObject<HTMLButtonElement | null>;
-  popupElement?: ReactNode;
-}
+export type ButtonTool = Partial<Omit<ButtonProps, 'title' | 'type'>> &
+  BaseToolOptions & {
+    label: ReactNode;
+    type: 'button';
+    title?: ReactNode;
+    icon?: ReactNode;
+    ref?: RefObject<HTMLButtonElement | null>;
+    popupElement?: ReactNode;
+  };
 
-export interface IconButtonTool
-  extends Partial<Omit<IconButtonProps, 'title' | 'type'>>,
-    BaseToolOptions {
-  label: ReactNode;
-  icon: ReactNode;
-  type: 'icon-button';
-  title?: ReactNode;
-  ref?: MutableRefObject<HTMLButtonElement | null>;
-  popupElement?: ReactNode;
-}
+export type IconButtonTool = Partial<Omit<IconButtonProps, 'title' | 'type'>> &
+  BaseToolOptions & {
+    label: ReactNode;
+    icon: ReactNode;
+    type: 'icon-button';
+    title?: ReactNode;
+    ref?: RefObject<HTMLButtonElement | null>;
+    popupElement?: ReactNode;
+  };
 
 export interface ElementTool extends BaseToolOptions {
   element: ReactNode;
@@ -144,9 +142,10 @@ export interface ElementTool extends BaseToolOptions {
   collapsedElementMaxWidth: number;
 }
 
-export interface DividerTool extends Partial<DividerProps>, BaseToolOptions {
-  type: 'divider';
-}
+export type DividerTool = Partial<DividerProps> &
+  BaseToolOptions & {
+    type: 'divider';
+  };
 
 export type Tool = ButtonTool | IconButtonTool | ElementTool | DividerTool;
 

@@ -27,7 +27,7 @@ import isAfter from 'date-fns/isAfter';
 import isBefore from 'date-fns/isBefore';
 import { omit, result } from 'lodash';
 import {
-  MutableRefObject,
+  RefObject,
   ReactElement,
   ReactNode,
   Ref,
@@ -300,9 +300,7 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
   showPlaceholderWhenStaticRowIsEmpty?: boolean;
 
   /** The HTMLElement or null that is the ancestor of the scrolling element. */
-  scrollingAncenstorElementRef?: MutableRefObject<
-    HTMLElement | null | undefined
-  >;
+  scrollingAncenstorElementRef?: RefObject<HTMLElement | null | undefined>;
 
   /** The date format to be used in the timeline. */
   dateFormat?: string;
@@ -316,31 +314,25 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
   /** Custom props for the useDragToScroll hook. */
   DragToScrollProps?: Partial<Pick<DragToScrollProps, 'enableDragToScroll'>>;
 
-  scrollToDateFunctionRef?: MutableRefObject<ScrollToDateFunction | undefined>;
-  selectTimeScaleFunctionRef?: MutableRefObject<
+  scrollToDateFunctionRef?: RefObject<ScrollToDateFunction | undefined>;
+  selectTimeScaleFunctionRef?: RefObject<
     SelectTimeScaleCallbackFunction | undefined
   >;
-  selectCustomDatesTimeScaleFunctionRef?: MutableRefObject<
+  selectCustomDatesTimeScaleFunctionRef?: RefObject<
     SelectCustomDatesTimeScaleCallbackFunction | undefined
   >;
-  jumpToOptimalTimeScaleFunctionRef?: MutableRefObject<
-    (() => void) | undefined
-  >;
-  jumpToPreviousUnitTimeScaleFunctionRef?: MutableRefObject<
-    (() => void) | undefined
-  >;
-  jumpToNextUnitTimeScaleFunctionRef?: MutableRefObject<
-    (() => void) | undefined
-  >;
+  jumpToOptimalTimeScaleFunctionRef?: RefObject<(() => void) | undefined>;
+  jumpToPreviousUnitTimeScaleFunctionRef?: RefObject<(() => void) | undefined>;
+  jumpToNextUnitTimeScaleFunctionRef?: RefObject<(() => void) | undefined>;
 
-  minCalendarDateRef?: MutableRefObject<Date | null>;
-  maxCalendarDateRef?: MutableRefObject<Date | null>;
+  minCalendarDateRef?: RefObject<Date | null>;
+  maxCalendarDateRef?: RefObject<Date | null>;
 
-  currentDateAtStartRef?: MutableRefObject<Date | null>;
-  currentDateAtCenterRef?: MutableRefObject<Date | null>;
-  currentDateAtEndRef?: MutableRefObject<Date | null>;
+  currentDateAtStartRef?: RefObject<Date | null>;
+  currentDateAtCenterRef?: RefObject<Date | null>;
+  currentDateAtEndRef?: RefObject<Date | null>;
 
-  defaultViewResetFunctionRef?: MutableRefObject<(() => void) | undefined>;
+  defaultViewResetFunctionRef?: RefObject<(() => void) | undefined>;
 
   blockCustomDateRangeRegion?: boolean;
 
@@ -372,7 +364,7 @@ export interface TimelineProps<RecordRow extends BaseDataRow = any>
    * Ref to track the ids of the timeline elements that have just been added and scrolled to. This is used to prevent
    * the timeline from scrolling to the same elements multiple times.
    */
-  lastNewTimelineElementIdsRef?: MutableRefObject<string[] | undefined>;
+  lastNewTimelineElementIdsRef?: RefObject<string[] | undefined>;
 
   setDynamicallySelectedTimeScaleFunctionRef?: SetDynamicallySelectedTimeScaleFunctionRef;
 

@@ -16,13 +16,7 @@ import {
 } from '@mui/material';
 import formatDate from 'date-fns/format';
 import { omit } from 'lodash';
-import {
-  MutableRefObject,
-  ReactNode,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import { RefObject, ReactNode, useEffect, useRef, useState } from 'react';
 
 import { PopupToolProps, usePopupTool } from '../../../hooks/Tools/PopupTool';
 import DatePicker from '../../DatePicker';
@@ -69,7 +63,7 @@ export type SelectCustomDatesTimeScaleCallbackFunction = (
   selectedCustomDates?: SelectCustomDates
 ) => void;
 
-export type SetDynamicallySelectedTimeScaleFunctionRef = MutableRefObject<
+export type SetDynamicallySelectedTimeScaleFunctionRef = RefObject<
   ((selectedTimeScale: TimeScaleOption) => void) | undefined
 >;
 
@@ -82,12 +76,12 @@ export interface TimeScaleToolProps {
   isCustomDatesTimeScaleSelected?: boolean;
 
   onSelectTimeScale?: SelectTimeScaleCallbackFunction;
-  onSelectTimeScaleFunctionRef?: MutableRefObject<
+  onSelectTimeScaleFunctionRef?: RefObject<
     SelectTimeScaleCallbackFunction | undefined
   >;
 
   onSelectCustomDatesTimeScale?: SelectCustomDatesTimeScaleCallbackFunction;
-  onSelectCustomDatesTimeScaleFunctionRef?: MutableRefObject<
+  onSelectCustomDatesTimeScaleFunctionRef?: RefObject<
     SelectCustomDatesTimeScaleCallbackFunction | undefined
   >;
 
@@ -95,8 +89,8 @@ export interface TimeScaleToolProps {
   DatePickerToolProps?: Partial<Omit<PopupToolProps, 'onChange'>>;
   minDate?: string | number | Date;
   maxDate?: string | number | Date;
-  startDateRef?: MutableRefObject<Date | null>;
-  endDateRef?: MutableRefObject<Date | null>;
+  startDateRef?: RefObject<Date | null>;
+  endDateRef?: RefObject<Date | null>;
   setDynamicallySelectedTimeScaleFunctionRef?: SetDynamicallySelectedTimeScaleFunctionRef;
 }
 

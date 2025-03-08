@@ -33,7 +33,7 @@ export interface JumpToDateToolProps
   extends Partial<Pick<DatePickerProps, 'minDate' | 'maxDate' | 'onChange'>>,
     Partial<Omit<PopupToolProps, 'onChange'>> {
   selectedDate?: DatePickerProps['selected'];
-  selectedDateRef?: React.MutableRefObject<DatePickerProps['selected']>;
+  selectedDateRef?: React.RefObject<DatePickerProps['selected']>;
   wrapDatePickerNode?: (datePickerNode: ReactNode) => ReactNode;
 }
 

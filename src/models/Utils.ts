@@ -1,5 +1,5 @@
 import { ButtonProps } from '@mui/material';
-import { ElementType, MutableRefObject, ReactNode } from 'react';
+import { ElementType, RefObject, ReactNode } from 'react';
 
 export interface RecordFinderRequestController {
   cancelRequest: () => void;
@@ -162,7 +162,7 @@ export interface DropdownOption<Entity = any>
   /**
    * The ref to be passed to the rendered option element.
    */
-  ref?: MutableRefObject<HTMLElement | null>;
+  ref?: RefObject<HTMLElement | null>;
 
   /**
    * The entity being represented by the option.

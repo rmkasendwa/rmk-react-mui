@@ -11,7 +11,7 @@ import {
 } from '@mui/material';
 import Box from '@mui/material/Box';
 import clsx from 'clsx';
-import { MutableRefObject, forwardRef, useEffect, useRef } from 'react';
+import { RefObject, forwardRef, useEffect, useRef } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { mergeRefs } from 'react-merge-refs';
 
@@ -70,9 +70,7 @@ export const timelineElementClasses: TimelineElementClasses =
   );
 
 export interface TimelineElementProps extends TimelineElementType {
-  scrollingAncenstorElementRef?: MutableRefObject<
-    HTMLElement | null | undefined
-  >;
+  scrollingAncenstorElementRef?: RefObject<HTMLElement | null | undefined>;
 }
 
 export const TimelineElement = forwardRef<HTMLDivElement, TimelineElementProps>(

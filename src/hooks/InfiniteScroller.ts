@@ -1,16 +1,10 @@
-import {
-  MutableRefObject,
-  ReactNode,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import { ReactNode, RefObject, useEffect, useRef, useState } from 'react';
 
 const LOAD_NEXT_BOUNDARY_THRESHOLD = 80;
 
 export interface UseLoadOnScrollToBottomOptions {
   element?: HTMLElement | null;
-  elementRef?: MutableRefObject<HTMLElement | null | undefined>;
+  elementRef?: RefObject<HTMLElement | null | undefined>;
   bottomThreshold?: number;
   load?: () => void;
   onChangeScrollLength?: (scrollLength: {
@@ -65,7 +59,7 @@ export const useLoadOnScrollToBottom = ({
 
   const onChangeScrollLengthRef = useRef(onChangeScrollLength);
   onChangeScrollLengthRef.current = onChangeScrollLength;
-  const changeEventCallbackTimeoutRef = useRef<NodeJS.Timeout>();
+  const changeEventCallbackTimeoutRef = useRef<NodeJS.Timeout>(undefined);
 
   const onChangeFocusedDataElementRef = useRef(onChangeFocusedDataElement);
   onChangeFocusedDataElementRef.current = onChangeFocusedDataElement;

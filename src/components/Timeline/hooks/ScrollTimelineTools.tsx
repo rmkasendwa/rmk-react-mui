@@ -13,7 +13,7 @@ import {
   useTheme,
   useThemeProps,
 } from '@mui/material';
-import { MutableRefObject } from 'react';
+import { RefObject } from 'react';
 
 import { ElementTool } from '../../SearchSyncToolbar';
 import Tooltip from '../../Tooltip';
@@ -42,30 +42,22 @@ export interface ScrollTimelineToolsProps {
   JumpToDateToolProps?: Partial<JumpToDateToolProps>;
 
   scrollToDate?: (date: Date) => void;
-  scrollToDateFunctionRef?: MutableRefObject<
-    ((date: Date) => void) | undefined
-  >;
+  scrollToDateFunctionRef?: RefObject<((date: Date) => void) | undefined>;
 
   showJumpToOptimalTimeScaleTool?: boolean;
 
   jumpToOptimalTimeScale?: () => void;
-  jumpToOptimalTimeScaleFunctionRef?: MutableRefObject<
-    (() => void) | undefined
-  >;
+  jumpToOptimalTimeScaleFunctionRef?: RefObject<(() => void) | undefined>;
 
   canJumpToPreviousUnitTimeScale?: boolean;
 
   jumpToPreviousUnitTimeScale?: () => void;
-  jumpToPreviousUnitTimeScaleFunctionRef?: MutableRefObject<
-    (() => void) | undefined
-  >;
+  jumpToPreviousUnitTimeScaleFunctionRef?: RefObject<(() => void) | undefined>;
 
   canJumpToNextUnitTimeScale?: boolean;
 
   jumpToNextUnitTimeScale?: () => void;
-  jumpToNextUnitTimeScaleFunctionRef?: MutableRefObject<
-    (() => void) | undefined
-  >;
+  jumpToNextUnitTimeScaleFunctionRef?: RefObject<(() => void) | undefined>;
 
   showNavigationTools?: boolean;
 }

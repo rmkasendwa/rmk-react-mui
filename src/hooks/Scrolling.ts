@@ -1,4 +1,4 @@
-import { MutableRefObject, useEffect, useRef } from 'react';
+import { RefObject, useEffect, useRef } from 'react';
 
 /**
  * Represents the properties for the useDragToScroll hook.
@@ -7,13 +7,13 @@ export interface DragToScrollProps {
   /**
    * The element to which the drag-to-scroll functionality is applied.
    */
-  targetElementRef?: MutableRefObject<HTMLElement | null | undefined>;
+  targetElementRef?: RefObject<HTMLElement | null | undefined>;
 
   /**
    * The scrollable element where the content should be scrolled.
    * If not provided, the targetElement will be used as the scrollable element.
    */
-  scrollableElementRef?: MutableRefObject<HTMLElement | null | undefined>;
+  scrollableElementRef?: RefObject<HTMLElement | null | undefined>;
 
   /**
    * Flag to enable or disable the drag-to-scroll functionality.
@@ -21,7 +21,7 @@ export interface DragToScrollProps {
    */
   enableDragToScroll?: boolean;
 
-  cancelMomentumTrackingRef?: MutableRefObject<(() => void) | undefined>;
+  cancelMomentumTrackingRef?: RefObject<(() => void) | undefined>;
 }
 
 /**

@@ -6,7 +6,7 @@ import differenceInHours from 'date-fns/differenceInHours';
 import formatDate from 'date-fns/format';
 import getDaysInMonth from 'date-fns/getDaysInMonth';
 import { uniqueId } from 'lodash';
-import { MutableRefObject, useEffect, useMemo, useState } from 'react';
+import { RefObject, useEffect, useMemo, useState } from 'react';
 
 import {
   TimeScaleConfiguration,
@@ -29,9 +29,7 @@ export interface TimeScaleConfigurationProps {
   timelineYears: number[];
   totalNumberOfDays: number;
   totalNumberOfHours: number;
-  scrollingAncenstorElementRef?: MutableRefObject<
-    HTMLElement | null | undefined
-  >;
+  scrollingAncenstorElementRef?: RefObject<HTMLElement | null | undefined>;
   timelineViewPortLeftOffset: number;
 }
 export const useTimeScaleMeterConfiguration = ({

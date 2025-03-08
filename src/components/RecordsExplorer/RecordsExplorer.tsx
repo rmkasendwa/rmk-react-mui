@@ -31,7 +31,7 @@ import hashIt from 'hash-it';
 import { omit, result } from 'lodash';
 import { singular } from 'pluralize';
 import {
-  MutableRefObject,
+  RefObject,
   ReactElement,
   ReactNode,
   Ref,
@@ -425,7 +425,7 @@ export interface RecordsExplorerProps<
     | ReactNode;
   description?: ReactNode;
   recordsFinder?: RecordsFinder<RecordRow>;
-  loadRecordsRef?: MutableRefObject<(() => void) | undefined>;
+  loadRecordsRef?: RefObject<(() => void) | undefined>;
   selectedRecordId?: string;
   recordDetailsFinder?: (
     selectedRecordId: string,
@@ -507,7 +507,7 @@ export interface RecordsExplorerProps<
   enableViewSelectedRecordModalPopup?: boolean;
   resetToDefaultView?: () => void;
   showModalForm?: boolean;
-  addSearchParamsToPathRef?: MutableRefObject<
+  addSearchParamsToPathRef?: RefObject<
     AddRecordsExplorerSearchParamsToPathFunction | undefined
   >;
   subHeaderElement?: ReactNode;

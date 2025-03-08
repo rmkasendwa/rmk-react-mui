@@ -15,13 +15,7 @@ import {
   useThemeProps,
 } from '@mui/material';
 import clsx from 'clsx';
-import {
-  MutableRefObject,
-  forwardRef,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import { RefObject, forwardRef, useEffect, useRef, useState } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { mergeRefs } from 'react-merge-refs';
 
@@ -95,11 +89,9 @@ export interface TimelineRowDataNavigationButtonsContainerProps
   extends Partial<GridProps> {
   timelineViewPortContainerWidth: number;
   timelineElements: TimelineElement[];
-  scrollingAncenstorElementRef?: MutableRefObject<
-    HTMLElement | null | undefined
-  >;
-  currentDateAtStartPositionLeftOffsetRef: MutableRefObject<number | undefined>;
-  currentDateAtEndPositionLeftOffsetRef: MutableRefObject<number | undefined>;
+  scrollingAncenstorElementRef?: RefObject<HTMLElement | null | undefined>;
+  currentDateAtStartPositionLeftOffsetRef: RefObject<number | undefined>;
+  currentDateAtEndPositionLeftOffsetRef: RefObject<number | undefined>;
   scrollToDate: ScrollToDateFunction;
 }
 
