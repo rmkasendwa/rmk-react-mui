@@ -1,0 +1,1 @@
+var r={},a;function n(){if(a)return r;a=1,Object.defineProperty(r,"__esModule",{value:!0}),r.formatBytes=void 0;var o=function(e){var t=Math.abs(e);return t<1024?"".concat(e," bytes"):t<1048576?"".concat((e/1024).toFixed(2)," KB"):t<1073741824?"".concat((e/1048576).toFixed(2)," MB"):"".concat((e/1073741824).toFixed(2)," GB")};return r.formatBytes=o,r}export{n as r};

@@ -27,7 +27,7 @@
     "prebuild": "rm -rf lib",
     "build": "npm run build:esm && npm run build:cjs",
     "postbuild": "node ./scripts/postbuild",
-    "build-storybook": "storybook build",
+    "build-storybook": "storybook build -o docs",
     "build:cjs": "tsc --project tsconfig-cjs.compile.json && copy-and-watch src/**/*.{png,jpg,css,scss,sass,json} lib",
     "build:esm": "tsc && copy-and-watch src/**/*.{png,jpg,css,scss,sass,json} lib",
     "eslint": "eslint --fix",
