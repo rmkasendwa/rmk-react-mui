@@ -22,8 +22,10 @@ const Template: StoryFn<typeof TextAreaField> = (props) => {
 export const Default = Template.bind({});
 Default.args = {
   required: true,
-  inputProps: {
-    maxLength: 200,
+  slotProps: {
+    htmlInput: {
+      maxLength: 200,
+    },
   },
   fullWidth: true,
 } as TextAreaFieldProps;
