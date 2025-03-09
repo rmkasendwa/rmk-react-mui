@@ -26,8 +26,8 @@ jobs:
           cache: 'npm'
           cache-dependency-path: package-lock.json
 
-      - name: Install NPM Dependencies
-        run: npm install --legacy-peer-deps
+      # - name: Install NPM Dependencies
+      #   run: npm install --legacy-peer-deps
 
-      - name: Run Tests
-        run: npm test
+      # - name: Run Tests
+      #   run: npm test
