@@ -32,7 +32,7 @@ import {
 import { useGlobalConfiguration } from '../../contexts/GlobalConfigurationContext';
 import { useLoadingContext } from '../../contexts/LoadingContext';
 import { isDescendant } from '../../utils/html';
-import DatePicker, { DatePickerProps } from '../DatePicker';
+import DatePicker from '../DatePicker';
 import FieldValueDisplay from '../FieldValueDisplay';
 import ModalPopup from '../ModalPopup';
 import Tooltip from '../Tooltip';
@@ -93,7 +93,6 @@ export interface DateInputFieldProps extends TextFieldProps {
   maxDate?: string;
   enableTimeSelector?: boolean;
   displayFormat?: string;
-  DatePickerProps?: DatePickerProps;
 }
 
 export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
@@ -113,7 +112,6 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
       disabled,
       sx,
       enableLoadingState = true,
-      DatePickerProps = {},
       ...rest
     } = omit(props, 'displayFormat');
 
@@ -130,8 +128,6 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
         }
       })()
     );
-
-    const { ...DatePickerPropsRest } = DatePickerProps;
 
     const anchorRef = useRef<HTMLInputElement>(null);
     const changedRef = useRef(false);
@@ -279,7 +275,6 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
         {(() => {
           const datePickerElement = (
             <DatePicker
-              {...DatePickerPropsRest}
               selected={selectedDate}
               onChange={(date) => {
                 if (date) {

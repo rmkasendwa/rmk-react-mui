@@ -154,7 +154,7 @@ export const useTimeScaleTool = (inProps: TimeScaleToolProps) => {
       selected={startDate}
       startDate={startDate}
       endDate={endDate}
-      selectsRange={true as any}
+      selectsRange
       onChange={(dates: any) => {
         const [startDate] = dates as [Date, Date | null];
         (
@@ -207,7 +207,7 @@ export const useTimeScaleTool = (inProps: TimeScaleToolProps) => {
       endDate={endDate}
       selectsRange
       onChange={(dates) => {
-        const [endDate] = dates as [Date, Date | null];
+        const [endDate] = dates;
         (
           onSelectCustomDatesTimeScale ||
           onSelectCustomDatesTimeScaleFunctionRef?.current

@@ -172,7 +172,7 @@ export const recordsExplorerClasses: RecordsExplorerClasses =
 export interface RecordsExplorerChildrenOptions<
   RecordRow extends BaseDataRow,
   View extends ViewOptionType = ViewOptionType,
-  InitialValues extends FormikValues = FormikValues,
+  InitialValues extends FormikValues = FormikValues
 > extends Partial<
     Omit<RecordsExplorerProps<RecordRow, View, InitialValues>, 'children'>
   > {
@@ -217,7 +217,7 @@ export type RecordsExplorerTools = Partial<
 export type RecordsExplorerToolsPreprocessorFunction<
   RecordRow extends BaseDataRow,
   View extends ViewOptionType = ViewOptionType,
-  InitialValues extends FormikValues = FormikValues,
+  InitialValues extends FormikValues = FormikValues
 > = (
   options: {
     tools: RecordsExplorerTools;
@@ -233,7 +233,7 @@ export interface RecordsExplorerFunctionChildren<State> {
 
 export type RecordsExplorerFunctionEditorForm<
   RecordRow extends BaseDataRow = BaseDataRow,
-  InitialValues extends FormikValues = FormikValues,
+  InitialValues extends FormikValues = FormikValues
 > = ModalFormFunctionChildren<
   InitialValues,
   {
@@ -257,7 +257,7 @@ export type RecordsFinder<RecordRow extends BaseDataRow = BaseDataRow> = (
 ) => Promise<PaginatedResponseData<RecordRow> | RecordRow[]>;
 
 export type RecordsExplorerDataPreset<
-  RecordRow extends BaseDataRow = BaseDataRow,
+  RecordRow extends BaseDataRow = BaseDataRow
 > = {
   title: ReactNode;
   key?: string;
@@ -267,7 +267,7 @@ export type RecordsExplorerDataPreset<
 export interface RecordsExplorerProps<
   RecordRow extends BaseDataRow = BaseDataRow,
   View extends ViewOptionType = ViewOptionType,
-  InitialValues extends FormikValues = FormikValues,
+  InitialValues extends FormikValues = FormikValues
 > extends Partial<Omit<PaperProps, 'title' | 'children'>>,
     Partial<Pick<FixedHeaderContentAreaProps, 'title'>>,
     Partial<
@@ -517,7 +517,7 @@ export interface RecordsExplorerProps<
 const BaseRecordsExplorer = <
   RecordRow extends BaseDataRow,
   View extends ViewOptionType,
-  InitialValues extends FormikValues,
+  InitialValues extends FormikValues
 >(
   inProps: RecordsExplorerProps<RecordRow, View, InitialValues>,
   ref: Ref<HTMLDivElement>
@@ -1077,13 +1077,10 @@ const BaseRecordsExplorer = <
 
   const serializedSortByProp = JSON.stringify(sortByProp);
   const selectedSortParams = useMemo(() => {
-    const sortByParams = sortableFields.reduce(
-      (accumulator, sortByParam) => {
-        accumulator[sortByParam.id] = sortByParam;
-        return accumulator;
-      },
-      {} as Record<keyof RecordRow, (typeof sortableFields)[number]>
-    );
+    const sortByParams = sortableFields.reduce((accumulator, sortByParam) => {
+      accumulator[sortByParam.id] = sortByParam;
+      return accumulator;
+    }, {} as Record<keyof RecordRow, (typeof sortableFields)[number]>);
 
     return ((): SortBy<RecordRow> => {
       if (
@@ -1555,24 +1552,24 @@ const BaseRecordsExplorer = <
   const { showSuccessMessage } = useMessagingContext();
 
   //#region Timeline view tools
-  const selectTimeScaleRef = useRef<SelectTimeScaleCallbackFunction>();
+  const selectTimeScaleRef = useRef<SelectTimeScaleCallbackFunction>(undefined);
   const selectCustomDatesTimeScaleRef =
-    useRef<SelectCustomDatesTimeScaleCallbackFunction>();
-  const scrollToDateRef = useRef<ScrollToDateFunction>();
-  const jumpToOptimalTimeScaleRef = useRef<() => void>();
-  const jumpToPreviousUnitTimeScaleRef = useRef<() => void>();
-  const jumpToNextUnitTimeScaleRef = useRef<() => void>();
-  const resetTimelineToDefaultViewRef = useRef<() => void>();
-  const selectedTimeScaleRef = useRef<TimeScaleOption>();
+    useRef<SelectCustomDatesTimeScaleCallbackFunction>(undefined);
+  const scrollToDateRef = useRef<ScrollToDateFunction>(undefined);
+  const jumpToOptimalTimeScaleRef = useRef<() => void>(undefined);
+  const jumpToPreviousUnitTimeScaleRef = useRef<() => void>(undefined);
+  const jumpToNextUnitTimeScaleRef = useRef<() => void>(undefined);
+  const resetTimelineToDefaultViewRef = useRef<() => void>(undefined);
+  const selectedTimeScaleRef = useRef<TimeScaleOption>(undefined);
   const timelineDateBoundsRef = useRef<{
     minDate: Date;
     maxDate: Date;
-  }>();
+  }>(undefined);
   const currentDateAtStartRef = useRef<Date | null>(null);
   const currentDateAtCenterRef = useRef<Date | null>(null);
   const currentDateAtEndRef = useRef<Date | null>(null);
   const setDynamicallySelectedTimeScaleFunctionRef: SetDynamicallySelectedTimeScaleFunctionRef =
-    useRef();
+    useRef(undefined);
 
   const timelineView = views?.find(({ type }) => type === 'Timeline') as
     | TimelineView<RecordRow>
@@ -2769,7 +2766,7 @@ const BaseRecordsExplorer = <
 export const RecordsExplorer = forwardRef(BaseRecordsExplorer) as <
   RecordRow extends BaseDataRow,
   View extends ViewOptionType,
-  InitialValues extends FormikValues,
+  InitialValues extends FormikValues
 >(
   p: RecordsExplorerProps<RecordRow, View, InitialValues> & {
     ref?: Ref<HTMLDivElement>;
