@@ -197,7 +197,7 @@ export const usePopupTool = ({
 } => {
   //#region Refs
   const anchorRef = useRef<HTMLButtonElement | null>(null);
-  const togglePopupFunctionRef = useRef<(open: boolean) => void>();
+  const togglePopupFunctionRef = useRef<(open: boolean) => void>(undefined);
   const togglePopupRef = useRef(onTogglePopup);
   togglePopupRef.current = onTogglePopup;
   //#endregion

@@ -36,17 +36,17 @@ export const useDragToScroll = ({
   cancelMomentumTrackingRef: cancelMomentumTrackingRefProp,
 }: DragToScrollProps) => {
   //#region Refs
-  const momentumIdRef = useRef<number>();
+  const momentumIdRef = useRef<number>(undefined);
   const isDownRef = useRef(false);
 
   const velXRef = useRef(0);
   const velYRef = useRef(0);
 
-  const startXRef = useRef<number>();
-  const startYRef = useRef<number>();
+  const startXRef = useRef<number>(undefined);
+  const startYRef = useRef<number>(undefined);
 
-  const scrollLeftRef = useRef<number>();
-  const scrollTopRef = useRef<number>();
+  const scrollLeftRef = useRef<number>(undefined);
+  const scrollTopRef = useRef<number>(undefined);
   //#endregion
 
   //#region Utility functions
