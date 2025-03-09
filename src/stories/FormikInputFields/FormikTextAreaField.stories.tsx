@@ -6,6 +6,7 @@ import { Form, Formik } from 'formik';
 import { LoremIpsum } from 'lorem-ipsum';
 
 import { FormikTextAreaField } from '../../components/FormikInputFields/FormikTextAreaField';
+import React from 'react';
 
 export default {
   title: 'Components/Formik Input Fields/Formik Text Area Field',

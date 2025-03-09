@@ -5,6 +5,7 @@ import { FC, useCallback, useState } from 'react';
 import PasswordField, {
   PasswordFieldProps,
 } from '../../components/InputFields/PasswordField';
+import React from 'react';
 
 export default {
   title: 'Components/Input Fields/Password Field',

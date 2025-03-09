@@ -3,6 +3,7 @@ import { Meta, StoryFn } from '@storybook/react';
 
 import FileUploader from '../components/FileUploader';
 import { FileDownloadFunction, FileUploadFunction } from '../interfaces/Utils';
+import React from 'react';
 
 export default {
   title: 'Components/File Uploader',
