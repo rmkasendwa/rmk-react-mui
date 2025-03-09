@@ -18,6 +18,12 @@ const preview: Preview = {
         date: /Date$/i,
       },
     },
+    docs: {
+      source: {
+        type: 'code',
+      },
+    },
+    layout: 'fullscreen',
   },
   decorators: [
     (Story) => {
@@ -38,21 +44,6 @@ const preview: Preview = {
       );
     },
   ],
-};
-
-export const parameters = {
-  controls: {
-    matchers: {
-      color: /(background|color)$/i,
-      date: /Date$/,
-    },
-  },
-  docs: {
-    source: {
-      type: 'code',
-    },
-  },
-  layout: 'fullscreen',
 };
 
 export default preview;

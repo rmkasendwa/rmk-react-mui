@@ -354,7 +354,6 @@ export const TableBodyColumn = forwardRef<any, TableBodyColumnProps<any>>(
                       editable,
                       editMode,
                       onFieldValueUpdated,
-                      editField,
                       validationRules,
                       noWrap,
                     }}
