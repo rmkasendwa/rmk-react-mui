@@ -170,9 +170,7 @@ export const PasswordField = forwardRef<HTMLDivElement, PasswordFieldProps>(
             </IconButton>
           ) : null
         }
-        sx={{
-          ...sx,
-        }}
+        sx={sx}
       />
     );
   }

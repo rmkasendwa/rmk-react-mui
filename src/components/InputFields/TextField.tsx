@@ -131,6 +131,7 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
       FieldValueDisplayProps = {},
       onClickClearButton,
       sx,
+      slotProps,
       ...rest
     } = props;
 
@@ -148,8 +149,6 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
 
     const { sx: WrapperPropsSx, ...WrapperPropsRest } = WrapperProps;
     const { ...FieldValueDisplayPropsRest } = FieldValueDisplayProps;
-
-    const { slotProps } = rest;
 
     // Refs
     const onChangeRef = useRef(onChange);
