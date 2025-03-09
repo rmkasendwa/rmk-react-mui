@@ -230,37 +230,39 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
                 )
               : ''
           }
-          InputProps={{
-            startAdornment: disabled ? (
-              selectDateIconButton
-            ) : (
-              <Tooltip title="Choose a date">{selectDateIconButton}</Tooltip>
-            ),
-            endAdornment: (() => {
-              if (showClearButton && selectedDate && !disabled) {
-                return (
-                  <Tooltip title="Clear">
-                    <IconButton
-                      className="date-input-clear-button"
-                      onClick={() => {
-                        setSelectedDate(null);
-                        triggerChangeEvent('');
-                      }}
-                      sx={{ p: 0.4 }}
-                    >
-                      <CloseIcon />
-                    </IconButton>
-                  </Tooltip>
-                );
-              }
-            })(),
-            onClick: () => {
-              if (!disabled) {
-                changedRef.current = false;
-                setOpen(true);
-              }
+          slotProps={{
+            input: {
+              startAdornment: disabled ? (
+                selectDateIconButton
+              ) : (
+                <Tooltip title="Choose a date">{selectDateIconButton}</Tooltip>
+              ),
+              endAdornment: (() => {
+                if (showClearButton && selectedDate && !disabled) {
+                  return (
+                    <Tooltip title="Clear">
+                      <IconButton
+                        className="date-input-clear-button"
+                        onClick={() => {
+                          setSelectedDate(null);
+                          triggerChangeEvent('');
+                        }}
+                        sx={{ p: 0.4 }}
+                      >
+                        <CloseIcon />
+                      </IconButton>
+                    </Tooltip>
+                  );
+                }
+              })(),
+              onClick: () => {
+                if (!disabled) {
+                  changedRef.current = false;
+                  setOpen(true);
+                }
+              },
+              ref: anchorRef,
             },
-            ref: anchorRef,
           }}
           sx={{
             '& .date-input-clear-button': {

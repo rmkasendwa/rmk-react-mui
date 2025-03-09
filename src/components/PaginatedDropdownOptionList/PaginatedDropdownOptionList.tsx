@@ -590,10 +590,12 @@ const BasePaginatedDropdownOptionList = <Entity,>(
                 onChangeSearchTerm={(searchTerm) => {
                   setSearchTerm(searchTerm);
                 }}
-                InputProps={{
-                  disableUnderline: true,
-                  autoFocus: true,
-                  ...SearchFieldPropsRest?.InputProps,
+                slotProps={{
+                  input: {
+                    disableUnderline: true,
+                    autoFocus: true,
+                    ...SearchFieldPropsRest?.InputProps,
+                  },
                 }}
                 fullWidth
                 sx={{

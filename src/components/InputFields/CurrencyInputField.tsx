@@ -113,7 +113,9 @@ export const CurrencyInputField = forwardRef<
       step={500}
       decimalPlaces={2}
       {...rest}
-      InputProps={{ ...inputProps, ...InputProps }}
+      slotProps={{
+        input: { ...inputProps, ...InputProps },
+      }}
     />
   );
 });

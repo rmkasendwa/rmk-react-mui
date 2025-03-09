@@ -118,17 +118,19 @@ export const SearchField = forwardRef<HTMLDivElement, SearchFieldProps>(
         placeholder="Search..."
         {...rest}
         className={clsx(classes.root)}
-        InputProps={{
-          startAdornment: (
-            <SearchIcon
-              color="inherit"
-              sx={{
-                mr: 0.5,
-              }}
-            />
-          ),
-          ...InputPropsRest,
-          sx: { fontSize: 'default', ...InputPropsSx },
+        slotProps={{
+          input: {
+            startAdornment: (
+              <SearchIcon
+                color="inherit"
+                sx={{
+                  mr: 0.5,
+                }}
+              />
+            ),
+            ...InputPropsRest,
+            sx: { fontSize: 'default', ...InputPropsSx },
+          },
         }}
         value={searchTerm}
         onChange={(event) => {

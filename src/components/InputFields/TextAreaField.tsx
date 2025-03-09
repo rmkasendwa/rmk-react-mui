@@ -129,43 +129,45 @@ export const TextAreaField = forwardRef<HTMLDivElement, TextAreaFieldProps>(
         })()}
         {...{ inputProps }}
         {...rest}
-        InputProps={{
-          ...InputPropsRest,
-          sx: {
-            alignItems: 'flex-end',
-            pb: 3,
-            ...InputPropsSx,
-          },
-          endAdornment: (() => {
-            if (showTextCount && inputValue.length > 0) {
-              return (
-                <Box
-                  sx={{
-                    pointerEvents: 'none',
-                    position: 'absolute',
-                    right: spacing(2),
-                    bottom: spacing(1),
-                  }}
-                >
-                  {(() => {
-                    if (maxLength) {
+        slotProps={{
+          input: {
+            ...InputPropsRest,
+            sx: {
+              alignItems: 'flex-end',
+              pb: 3,
+              ...InputPropsSx,
+            },
+            endAdornment: (() => {
+              if (showTextCount && inputValue.length > 0) {
+                return (
+                  <Box
+                    sx={{
+                      pointerEvents: 'none',
+                      position: 'absolute',
+                      right: spacing(2),
+                      bottom: spacing(1),
+                    }}
+                  >
+                    {(() => {
+                      if (maxLength) {
+                        return (
+                          <Typography component="div" variant="body2">
+                            {addThousandCommas(inputValue.length)}/
+                            {addThousandCommas(maxLength)}
+                          </Typography>
+                        );
+                      }
                       return (
                         <Typography component="div" variant="body2">
-                          {addThousandCommas(inputValue.length)}/
-                          {addThousandCommas(maxLength)}
+                          {addThousandCommas(inputValue.length)}
                         </Typography>
                       );
-                    }
-                    return (
-                      <Typography component="div" variant="body2">
-                        {addThousandCommas(inputValue.length)}
-                      </Typography>
-                    );
-                  })()}
-                </Box>
-              );
-            }
-          })(),
+                    })()}
+                  </Box>
+                );
+              }
+            })(),
+          },
         }}
         multiline
       />

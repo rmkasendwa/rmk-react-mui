@@ -848,12 +848,14 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                   onChangeSearchTerm,
                   searchVelocity,
                 }}
-                InputProps={{
-                  ...InputProps,
-                  disableUnderline: true,
-                  autoFocus: Boolean(
-                    (!searchTerm || searchTerm.length <= 0) && searchFieldOpen
-                  ),
+                slotProps={{
+                  input: {
+                    ...InputProps,
+                    disableUnderline: true,
+                    autoFocus: Boolean(
+                      (!searchTerm || searchTerm.length <= 0) && searchFieldOpen
+                    ),
+                  },
                 }}
                 size="small"
               />
@@ -960,12 +962,14 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                               variant="outlined"
                               fullWidth
                               {...SearchFieldPropsRest}
-                              InputProps={{
-                                ...InputProps,
-                                autoFocus: Boolean(
-                                  (!searchTerm || searchTerm.length <= 0) &&
-                                    searchFieldOpen
-                                ),
+                              slotProps={{
+                                input: {
+                                  ...InputProps,
+                                  autoFocus: Boolean(
+                                    (!searchTerm || searchTerm.length <= 0) &&
+                                      searchFieldOpen
+                                  ),
+                                },
                               }}
                               {...{
                                 searchTerm,

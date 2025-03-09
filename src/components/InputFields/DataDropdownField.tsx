@@ -936,60 +936,62 @@ const BaseDataDropdownField = <Entity,>(
                 addNewOption();
               }
             }}
-            InputProps={{
-              endAdornment,
-              ...InputPropsRest,
-              ...(() => {
-                const props: Partial<typeof InputProps> = {};
-                if (selectedOptions.length > 0) {
-                  props.placeholder = '';
-                }
-                return props;
-              })(),
-              readOnly: !searchable || isSmallScreenSize,
-              onClick: () => {
-                if (!disabled) {
-                  if (rest.multiline) {
-                    searchFieldRef.current?.focus();
-                  }
-                  setOpen(true);
-                }
-              },
-              ref: mergeRefs([anchorRef, observerRef]),
-              sx: {
+            slotProps={{
+              input: {
+                endAdornment,
+                ...InputPropsRest,
                 ...(() => {
-                  if (rest.multiline) {
-                    return {
-                      alignItems: 'start',
-                    };
+                  const props: Partial<typeof InputProps> = {};
+                  if (selectedOptions.length > 0) {
+                    props.placeholder = '';
                   }
+                  return props;
                 })(),
-                ...InputPropsSx,
-                ...(() => {
-                  if (
-                    searchable &&
-                    showRichTextValue &&
-                    !focused &&
-                    (selectedOptionDisplayString.length > 0 ||
-                      placeholderOption)
-                  ) {
-                    return {
-                      [`&>.${inputBaseClasses.input}`]: {
-                        color: 'transparent',
-                        WebkitTextFillColor: 'transparent',
-                      },
-                    };
+                readOnly: !searchable || isSmallScreenSize,
+                onClick: () => {
+                  if (!disabled) {
+                    if (rest.multiline) {
+                      searchFieldRef.current?.focus();
+                    }
+                    setOpen(true);
                   }
-                })(),
-                ...(() => {
-                  if (multilineSearchMode) {
-                    return {
-                      [`&>.${inputBaseClasses.input}`]: {
-                        visibility: 'hidden',
-                      },
-                    };
-                  }
-                })(),
+                },
+                ref: mergeRefs([anchorRef, observerRef]),
+                sx: {
+                  ...(() => {
+                    if (rest.multiline) {
+                      return {
+                        alignItems: 'start',
+                      };
+                    }
+                  })(),
+                  ...InputPropsSx,
+                  ...(() => {
+                    if (
+                      searchable &&
+                      showRichTextValue &&
+                      !focused &&
+                      (selectedOptionDisplayString.length > 0 ||
+                        placeholderOption)
+                    ) {
+                      return {
+                        [`&>.${inputBaseClasses.input}`]: {
+                          color: 'transparent',
+                          WebkitTextFillColor: 'transparent',
+                        },
+                      };
+                    }
+                  })(),
+                  ...(() => {
+                    if (multilineSearchMode) {
+                      return {
+                        [`&>.${inputBaseClasses.input}`]: {
+                          visibility: 'hidden',
+                        },
+                      };
+                    }
+                  })(),
+                },
               },
             }}
             inputProps={{
@@ -1184,10 +1186,12 @@ const BaseDataDropdownField = <Entity,>(
                               inputProps={{
                                 ref: searchFieldRef,
                               }}
-                              InputProps={{
-                                sx: {
-                                  '&:before': {
-                                    borderBottomColor: 'transparent',
+                              slotProps={{
+                                input: {
+                                  sx: {
+                                    '&:before': {
+                                      borderBottomColor: 'transparent',
+                                    },
                                   },
                                 },
                               }}

@@ -514,15 +514,17 @@ export const EmailAddressSelector = forwardRef<
             <Grid item xs>
               <TextField
                 variant="standard"
-                InputProps={{
-                  disableUnderline: true,
-                  sx: {
-                    input: {
-                      height: 32,
-                      p: 0,
+                slotProps={{
+                  input: {
+                    disableUnderline: true,
+                    sx: {
+                      input: {
+                        height: 32,
+                        p: 0,
+                      },
                     },
+                    ref: anchorRef,
                   },
-                  ref: anchorRef,
                 }}
                 inputProps={{
                   ref: searchFieldRef,

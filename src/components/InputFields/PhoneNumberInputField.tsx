@@ -347,103 +347,105 @@ export const PhoneNumberInputField = forwardRef<
       {...rest}
       className={clsx(classes.root)}
       {...{ name, id, placeholder, disabled, enableLoadingState }}
-      InputProps={{
-        ...InputProps,
-        startAdornment: displayPhoneNumberCountry ? (
-          <InputAdornment
-            position="start"
-            sx={{
-              maxWidth: 200,
-            }}
-          >
-            <Button
-              color="inherit"
-              ref={anchorRef}
-              {...{ disabled }}
-              onClick={() => {
-                setPhoneCountryListOpen((prevOpen) => !prevOpen);
-              }}
-              sx={{ gap: 0, pr: 0, pl: 2 }}
-            >
-              {(() => {
-                const flagElement = (
-                  <Box
-                    component="i"
-                    className={`fi fi-${(() => {
-                      if (selectedCountry) {
-                        return selectedCountry.regionalCode.toLowerCase();
-                      }
-                    })()}`}
-                    sx={{
-                      fontSize: 20,
-                      height: '1em',
-                      mr: `4px`,
-                      display: 'inline-block',
-                      bgcolor: palette.divider,
-                    }}
-                  />
-                );
-
-                if (selectedCountry) {
-                  return (
-                    <Tooltip
-                      title={`${selectedCountry.name} (+${selectedCountry.countryCode})`}
-                    >
-                      {flagElement}
-                    </Tooltip>
-                  );
-                }
-
-                return flagElement;
-              })()}
-              <ExpandMoreIcon />
-            </Button>
-            <Popper
-              open={phoneCountryListOpen}
-              anchorEl={anchorRef.current}
-              transition
-              placement="bottom-start"
+      slotProps={{
+        input: {
+          ...InputProps,
+          startAdornment: displayPhoneNumberCountry ? (
+            <InputAdornment
+              position="start"
               sx={{
-                zIndex: 9999,
+                maxWidth: 200,
               }}
             >
-              {({ TransitionProps }) => {
-                return (
-                  <Grow {...TransitionProps}>
-                    <Box>
-                      <ClickAwayListener
-                        onClickAway={handleClosePhoneCountryList}
+              <Button
+                color="inherit"
+                ref={anchorRef}
+                {...{ disabled }}
+                onClick={() => {
+                  setPhoneCountryListOpen((prevOpen) => !prevOpen);
+                }}
+                sx={{ gap: 0, pr: 0, pl: 2 }}
+              >
+                {(() => {
+                  const flagElement = (
+                    <Box
+                      component="i"
+                      className={`fi fi-${(() => {
+                        if (selectedCountry) {
+                          return selectedCountry.regionalCode.toLowerCase();
+                        }
+                      })()}`}
+                      sx={{
+                        fontSize: 20,
+                        height: '1em',
+                        mr: `4px`,
+                        display: 'inline-block',
+                        bgcolor: palette.divider,
+                      }}
+                    />
+                  );
+
+                  if (selectedCountry) {
+                    return (
+                      <Tooltip
+                        title={`${selectedCountry.name} (+${selectedCountry.countryCode})`}
                       >
-                        <PaginatedDropdownOptionList
-                          options={options}
-                          minWidth={
-                            anchorRef.current
-                              ? anchorRef.current.offsetWidth
-                              : undefined
-                          }
-                          keyboardFocusElement={anchorRef.current}
-                          onClose={handleClosePhoneCountryList}
-                          selectedOptions={selectedOptions}
-                          onChangeSelectedOptions={(options) => {
-                            setSelectedOptions(options);
-                          }}
-                          onSelectOption={({ value }) => {
-                            const selectedCountry = countries.find(
-                              ({ regionalCode }) => regionalCode === value
-                            );
-                            setSelectedCountry(selectedCountry);
-                            handleClosePhoneCountryList();
-                          }}
-                          searchable
-                        />
-                      </ClickAwayListener>
-                    </Box>
-                  </Grow>
-                );
-              }}
-            </Popper>
-          </InputAdornment>
-        ) : null,
+                        {flagElement}
+                      </Tooltip>
+                    );
+                  }
+
+                  return flagElement;
+                })()}
+                <ExpandMoreIcon />
+              </Button>
+              <Popper
+                open={phoneCountryListOpen}
+                anchorEl={anchorRef.current}
+                transition
+                placement="bottom-start"
+                sx={{
+                  zIndex: 9999,
+                }}
+              >
+                {({ TransitionProps }) => {
+                  return (
+                    <Grow {...TransitionProps}>
+                      <Box>
+                        <ClickAwayListener
+                          onClickAway={handleClosePhoneCountryList}
+                        >
+                          <PaginatedDropdownOptionList
+                            options={options}
+                            minWidth={
+                              anchorRef.current
+                                ? anchorRef.current.offsetWidth
+                                : undefined
+                            }
+                            keyboardFocusElement={anchorRef.current}
+                            onClose={handleClosePhoneCountryList}
+                            selectedOptions={selectedOptions}
+                            onChangeSelectedOptions={(options) => {
+                              setSelectedOptions(options);
+                            }}
+                            onSelectOption={({ value }) => {
+                              const selectedCountry = countries.find(
+                                ({ regionalCode }) => regionalCode === value
+                              );
+                              setSelectedCountry(selectedCountry);
+                              handleClosePhoneCountryList();
+                            }}
+                            searchable
+                          />
+                        </ClickAwayListener>
+                      </Box>
+                    </Grow>
+                  );
+                }}
+              </Popper>
+            </InputAdornment>
+          ) : null,
+        },
       }}
       sx={{
         '&>.MuiInputBase-formControl': {

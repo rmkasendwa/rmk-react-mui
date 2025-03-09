@@ -227,19 +227,21 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
               label={<Skeleton width={labelSkeletonWidth} />}
               value=""
               disabled
-              InputProps={{
-                endAdornment: (
-                  <Box>
-                    <CircularProgress size={18} color="inherit" />
-                  </Box>
-                ),
-                sx: {
-                  ...(() => {
-                    if (multiline && (minRows || rows)) {
-                      return { alignItems: 'start' };
-                    }
-                    return { alignItems: 'center' };
-                  })(),
+              slotProps={{
+                input: {
+                  endAdornment: (
+                    <Box>
+                      <CircularProgress size={18} color="inherit" />
+                    </Box>
+                  ),
+                  sx: {
+                    ...(() => {
+                      if (multiline && (minRows || rows)) {
+                        return { alignItems: 'start' };
+                      }
+                      return { alignItems: 'center' };
+                    })(),
+                  },
                 },
               }}
             />
@@ -301,34 +303,36 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
               }
               triggerChangeEvent(event.target.value);
             }}
-            InputProps={{
-              startAdornment,
-              endAdornment: endAdornment ?? (
-                <>
-                  {showClearButton &&
-                  (inputValue.length > 0 || showClearButton === 'always') &&
-                  !disabled ? (
-                    <Tooltip title="Clear" disableInteractive>
-                      <IconButton
-                        className="text-input-clear-button"
-                        onClick={(event) => {
-                          event.preventDefault();
-                          if (!onChangeRef.current || value == null) {
-                            setLocalInputValue('');
-                          }
-                          triggerChangeEvent('');
-                          onClickClearButton?.();
-                        }}
-                        sx={{ p: 0.4 }}
-                      >
-                        <CloseIcon />
-                      </IconButton>
-                    </Tooltip>
-                  ) : null}
-                  {endAdornmentProp ? endAdornmentProp : null}
-                </>
-              ),
-              ...restInputProps,
+            slotProps={{
+              input: {
+                startAdornment,
+                endAdornment: endAdornment ?? (
+                  <>
+                    {showClearButton &&
+                    (inputValue.length > 0 || showClearButton === 'always') &&
+                    !disabled ? (
+                      <Tooltip title="Clear" disableInteractive>
+                        <IconButton
+                          className="text-input-clear-button"
+                          onClick={(event) => {
+                            event.preventDefault();
+                            if (!onChangeRef.current || value == null) {
+                              setLocalInputValue('');
+                            }
+                            triggerChangeEvent('');
+                            onClickClearButton?.();
+                          }}
+                          sx={{ p: 0.4 }}
+                        >
+                          <CloseIcon />
+                        </IconButton>
+                      </Tooltip>
+                    ) : null}
+                    {endAdornmentProp ? endAdornmentProp : null}
+                  </>
+                ),
+                ...restInputProps,
+              },
             }}
             sx={{
               ...(() => {

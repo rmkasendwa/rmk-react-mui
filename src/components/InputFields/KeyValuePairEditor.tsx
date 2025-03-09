@@ -256,9 +256,11 @@ export const KeyValuePairEditor = forwardRef<any, KeyValuePairEditorProps>(
                           nextItems[index].key = event.target.value;
                           setItems(nextItems);
                         }}
-                        InputProps={{
-                          sx: {
-                            bgcolor: alpha(palette.primary.main, 0.05),
+                        slotProps={{
+                          input: {
+                            sx: {
+                              bgcolor: alpha(palette.primary.main, 0.05),
+                            },
                           },
                         }}
                       />
@@ -285,9 +287,11 @@ export const KeyValuePairEditor = forwardRef<any, KeyValuePairEditorProps>(
                                 nextItems[index].value = event.target.value;
                                 setItems(nextItems);
                               }}
-                              InputProps={{
-                                sx: {
-                                  bgcolor: alpha(palette.success.main, 0.05),
+                              slotProps={{
+                                input: {
+                                  sx: {
+                                    bgcolor: alpha(palette.success.main, 0.05),
+                                  },
                                 },
                               }}
                               minRows={1}
@@ -303,9 +307,11 @@ export const KeyValuePairEditor = forwardRef<any, KeyValuePairEditorProps>(
                               nextItems[index].value = event.target.value;
                               setItems(nextItems);
                             }}
-                            InputProps={{
-                              sx: {
-                                bgcolor: alpha(palette.success.main, 0.05),
+                            slotProps={{
+                              input: {
+                                sx: {
+                                  bgcolor: alpha(palette.success.main, 0.05),
+                                },
                               },
                             }}
                             minRows={1}
