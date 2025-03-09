@@ -304,6 +304,7 @@ export const PhoneNumberInputField = forwardRef<
         {...({} as any)}
         {...rest.FieldValueDisplayProps}
         {...{ label }}
+        fullWidth={props.fullWidth}
         value={(() => {
           if (inputValue) {
             return (
@@ -371,11 +372,11 @@ export const PhoneNumberInputField = forwardRef<
                     const flagElement = (
                       <Box
                         component="i"
-                        className={`fi fi-${(() => {
-                          if (selectedCountry) {
-                            return selectedCountry.regionalCode.toLowerCase();
-                          }
-                        })()}`}
+                        className={clsx(
+                          'fi',
+                          selectedCountry &&
+                            `fi-${selectedCountry.regionalCode.toLowerCase()}`
+                        )}
                         sx={{
                           fontSize: 20,
                           height: '1em',

@@ -382,6 +382,7 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
               }
             })(),
           }}
+          fullWidth={fullWidth}
           value={textField}
           enableLoadingState={false}
         />
