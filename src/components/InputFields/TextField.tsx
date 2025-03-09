@@ -32,6 +32,7 @@ import FieldValueDisplay, {
   FieldValueDisplayProps,
 } from '../FieldValueDisplay';
 import Tooltip from '../Tooltip';
+import { merge } from 'lodash';
 
 export interface TextFieldClasses {
   /** Styles applied to the root element. */
@@ -148,8 +149,7 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
     const { sx: WrapperPropsSx, ...WrapperPropsRest } = WrapperProps;
     const { ...FieldValueDisplayPropsRest } = FieldValueDisplayProps;
 
-    const { InputProps = {} } = rest;
-    const { endAdornment, ...restInputProps } = InputProps;
+    const { slotProps } = rest;
 
     // Refs
     const onChangeRef = useRef(onChange);
@@ -303,37 +303,41 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
               }
               triggerChangeEvent(event.target.value);
             }}
-            slotProps={{
-              input: {
-                startAdornment,
-                endAdornment: endAdornment ?? (
-                  <>
-                    {showClearButton &&
-                    (inputValue.length > 0 || showClearButton === 'always') &&
-                    !disabled ? (
-                      <Tooltip title="Clear" disableInteractive>
-                        <IconButton
-                          className="text-input-clear-button"
-                          onClick={(event) => {
-                            event.preventDefault();
-                            if (!onChangeRef.current || value == null) {
-                              setLocalInputValue('');
-                            }
-                            triggerChangeEvent('');
-                            onClickClearButton?.();
-                          }}
-                          sx={{ p: 0.4 }}
-                        >
-                          <CloseIcon />
-                        </IconButton>
-                      </Tooltip>
-                    ) : null}
-                    {endAdornmentProp ? endAdornmentProp : null}
-                  </>
-                ),
-                ...restInputProps,
+            slotProps={merge(
+              {
+                input: {
+                  startAdornment,
+                  endAdornment: (slotProps?.input &&
+                    'endAdornment' in slotProps.input &&
+                    slotProps.input.endAdornment) ?? (
+                    <>
+                      {showClearButton &&
+                      (inputValue.length > 0 || showClearButton === 'always') &&
+                      !disabled ? (
+                        <Tooltip title="Clear" disableInteractive>
+                          <IconButton
+                            className="text-input-clear-button"
+                            onClick={(event) => {
+                              event.preventDefault();
+                              if (!onChangeRef.current || value == null) {
+                                setLocalInputValue('');
+                              }
+                              triggerChangeEvent('');
+                              onClickClearButton?.();
+                            }}
+                            sx={{ p: 0.4 }}
+                          >
+                            <CloseIcon />
+                          </IconButton>
+                        </Tooltip>
+                      ) : null}
+                      {endAdornmentProp ? endAdornmentProp : null}
+                    </>
+                  ),
+                },
               },
-            }}
+              slotProps
+            )}
             sx={{
               ...(() => {
                 if (showClearButton !== 'always') {

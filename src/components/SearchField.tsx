@@ -12,6 +12,7 @@ import clsx from 'clsx';
 import { forwardRef, useEffect, useRef, useState } from 'react';
 
 import TextField, { TextFieldProps } from './InputFields/TextField';
+import { merge } from 'lodash';
 
 export interface SearchFieldClasses {
   /** Styles applied to the root element. */
@@ -80,7 +81,7 @@ export const SearchField = forwardRef<HTMLDivElement, SearchFieldProps>(
       onChange,
       onBlur,
       onKeyUp,
-      InputProps = {},
+      slotProps,
       ...rest
     } = props;
 
@@ -100,7 +101,6 @@ export const SearchField = forwardRef<HTMLDivElement, SearchFieldProps>(
     const searchTimeoutRef = useRef<NodeJS.Timeout>(undefined);
     //#endregion
 
-    const { sx: InputPropsSx, ...InputPropsRest } = InputProps;
     const [searchTerm, setSearchTerm] = useState(searchTermProp || '');
 
     useEffect(() => {
@@ -118,20 +118,22 @@ export const SearchField = forwardRef<HTMLDivElement, SearchFieldProps>(
         placeholder="Search..."
         {...rest}
         className={clsx(classes.root)}
-        slotProps={{
-          input: {
-            startAdornment: (
-              <SearchIcon
-                color="inherit"
-                sx={{
-                  mr: 0.5,
-                }}
-              />
-            ),
-            ...InputPropsRest,
-            sx: { fontSize: 'default', ...InputPropsSx },
+        slotProps={merge(
+          {
+            input: {
+              startAdornment: (
+                <SearchIcon
+                  color="inherit"
+                  sx={{
+                    mr: 0.5,
+                  }}
+                />
+              ),
+              sx: { fontSize: 'default' },
+            },
           },
-        }}
+          slotProps
+        )}
         value={searchTerm}
         onChange={(event) => {
           if (searchTermProp == null || !onChangeSearchTerm) {

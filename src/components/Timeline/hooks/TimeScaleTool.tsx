@@ -286,12 +286,14 @@ export const useTimeScaleTool = (inProps: TimeScaleToolProps) => {
       }
     },
     showClearButton: false,
-    InputProps: {
-      sx: {
-        height: 32,
-        pr: 0.5,
-        [`.${outlinedInputClasses.notchedOutline}`]: {
-          border: 'none',
+    slotProps: {
+      input: {
+        sx: {
+          height: 32,
+          pr: 0.5,
+          [`.${outlinedInputClasses.notchedOutline}`]: {
+            border: 'none',
+          },
         },
       },
     },
