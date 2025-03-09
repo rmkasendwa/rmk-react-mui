@@ -43,8 +43,10 @@ const Template: StoryFn<typeof FormikTextAreaField> = (props) => {
               <FormikTextAreaField
                 label="Formik Text Area Field"
                 name="field"
-                inputProps={{
-                  maxLength: 200,
+                slotProps={{
+                  htmlInput: {
+                    maxLength: 200,
+                  },
                 }}
                 {...props}
                 fullWidth

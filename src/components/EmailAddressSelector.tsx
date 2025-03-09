@@ -525,17 +525,17 @@ export const EmailAddressSelector = forwardRef<
                     },
                     ref: anchorRef,
                   },
-                }}
-                inputProps={{
-                  ref: searchFieldRef,
-                  onFocus: () => {
-                    setIsFocused(true);
-                  },
-                  onBlur: () => {
-                    setIsFocused(false);
-                  },
-                  sx: {
-                    minWidth: 80,
+                  htmlInput: {
+                    ref: searchFieldRef,
+                    onFocus: () => {
+                      setIsFocused(true);
+                    },
+                    onBlur: () => {
+                      setIsFocused(false);
+                    },
+                    sx: {
+                      minWidth: 80,
+                    },
                   },
                 }}
                 enableLoadingState={false}

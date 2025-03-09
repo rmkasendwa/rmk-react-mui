@@ -993,15 +993,15 @@ const BaseDataDropdownField = <Entity,>(
                   })(),
                 },
               },
-            }}
-            inputProps={{
-              ...(() => {
-                if (!multilineSearchMode) {
-                  return {
-                    ref: searchFieldRef,
-                  };
-                }
-              })(),
+              htmlInput: {
+                ...(() => {
+                  if (!multilineSearchMode) {
+                    return {
+                      ref: searchFieldRef,
+                    };
+                  }
+                })(),
+              },
             }}
             value={(() => {
               if (multilineSearchMode) {
@@ -1183,9 +1183,6 @@ const BaseDataDropdownField = <Entity,>(
                                   addNewOption();
                                 }
                               }}
-                              inputProps={{
-                                ref: searchFieldRef,
-                              }}
                               slotProps={{
                                 input: {
                                   sx: {
@@ -1193,6 +1190,9 @@ const BaseDataDropdownField = <Entity,>(
                                       borderBottomColor: 'transparent',
                                     },
                                   },
+                                },
+                                htmlInput: {
+                                  ref: searchFieldRef,
                                 },
                               }}
                               enableLoadingState={false}
