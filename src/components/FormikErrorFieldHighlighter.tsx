@@ -123,7 +123,7 @@ export const FormikErrorFieldHighlighter = forwardRef<
   );
 
   //#region Refs
-  const formElementsWrapperRef = useRef<HTMLDivElement>();
+  const formElementsWrapperRef = useRef<HTMLDivElement>(null);
   const ScrollIntoViewPropsRef = useRef(ScrollIntoViewProps);
   ScrollIntoViewPropsRef.current = ScrollIntoViewProps;
   //#endregion

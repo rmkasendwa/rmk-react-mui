@@ -1,5 +1,4 @@
 import SaveIcon from '@mui/icons-material/Save';
-import LoadingButton from '@mui/lab/LoadingButton';
 import {
   Button,
   ButtonProps,
@@ -93,7 +92,7 @@ export const formWrapperClasses: FormWrapperClasses = generateUtilityClasses(
 export interface FormWrapperProps<
   RecordRow = any,
   Values extends FormikValues = any,
-  LoadedRecord = RecordRow,
+  LoadedRecord = RecordRow
 > extends Partial<
       Omit<
         FormikFormProps<Values>,
@@ -320,7 +319,7 @@ const BaseFormWrapper = <RecordRow, Values extends FormikValues>(
                     }
                   })()}
                   <Grid item xs={smallScreen}>
-                    <LoadingButton
+                    <Button
                       color="success"
                       variant="contained"
                       startIcon={<SaveIcon />}
@@ -333,7 +332,7 @@ const BaseFormWrapper = <RecordRow, Values extends FormikValues>(
                       {...SubmitButtonPropsRest}
                     >
                       Save Changes
-                    </LoadingButton>
+                    </Button>
                   </Grid>
                 </Grid>
               </>
@@ -347,7 +346,7 @@ const BaseFormWrapper = <RecordRow, Values extends FormikValues>(
 
 export const FormWrapper = forwardRef(BaseFormWrapper) as <
   RecordRow,
-  Values extends FormikValues,
+  Values extends FormikValues
 >(
   p: FormWrapperProps<RecordRow, Values> & { ref?: Ref<HTMLDivElement> }
 ) => ReactElement;

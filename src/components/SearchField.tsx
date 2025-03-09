@@ -97,7 +97,7 @@ export const SearchField = forwardRef<HTMLDivElement, SearchFieldProps>(
     );
 
     //#region Refs
-    const searchTimeoutRef = useRef<NodeJS.Timeout>();
+    const searchTimeoutRef = useRef<NodeJS.Timeout>(undefined);
     //#endregion
 
     const { sx: InputPropsSx, ...InputPropsRest } = InputProps;

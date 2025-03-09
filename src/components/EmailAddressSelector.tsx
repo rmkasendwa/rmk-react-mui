@@ -173,8 +173,8 @@ export const EmailAddressSelector = forwardRef<
 
   // Refs
   const isInitialMountRef = useRef(true);
-  const anchorRef = useRef<HTMLDivElement | null>();
-  const searchFieldRef = useRef<HTMLInputElement | null>();
+  const anchorRef = useRef<HTMLDivElement | null>(null);
+  const searchFieldRef = useRef<HTMLInputElement | null>(null);
   const onChangeSelectedEmailAddressesRef = useRef(
     onChangeSelectedEmailAddresses
   );
@@ -243,12 +243,7 @@ export const EmailAddressSelector = forwardRef<
     if (isFocused && searchTerm.length > 0) {
       loadEmailAddressHolders();
     }
-  }, [
-    isFocused,
-    loadEmailAddressHolders,
-    resetEmailAddressHoldersState,
-    searchTerm.length,
-  ]);
+  }, [isFocused, loadEmailAddressHolders, resetEmailAddressHoldersState, searchTerm.length]);
 
   useEffect(() => {
     if (!isInitialMountRef.current) {

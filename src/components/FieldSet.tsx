@@ -91,7 +91,7 @@ export interface FieldSetProps
   FieldLabelProps?: Partial<FieldLabelProps>;
 }
 
-export const FieldSet = forwardRef<any, FieldSetProps>(
+export const FieldSet = forwardRef<HTMLFieldSetElement, FieldSetProps>(
   function FieldSet(inProps, ref) {
     const props = useThemeProps({ props: inProps, name: 'MuiFieldSet' });
     const {
@@ -137,7 +137,7 @@ export const FieldSet = forwardRef<any, FieldSetProps>(
           disabled && classes.disabled,
           className
         )}
-        component="fieldset"
+        component={'fieldset' as any}
         sx={{
           border: `1px solid ${palette.divider}`,
           borderRadius: 1,

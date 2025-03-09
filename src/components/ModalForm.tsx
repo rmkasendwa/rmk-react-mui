@@ -1,10 +1,10 @@
 import { diff } from '@infinite-debugger/rmk-utils/data';
 import CloseIcon from '@mui/icons-material/Close';
-import { LoadingButton, LoadingButtonProps } from '@mui/lab';
 import {
   Alert,
   Box,
   Button,
+  ButtonProps,
   Card,
   ComponentsOverrides,
   ComponentsProps,
@@ -99,7 +99,7 @@ export const modalFormClasses: ModalFormClasses = generateUtilityClasses(
 
 export type ModalFormFunctionChildren<
   Values extends FormikValues = any,
-  ExtraProps = Record<string, unknown>,
+  ExtraProps = Record<string, unknown>
 > = FormikFormFunctionChildren<Values, ExtraProps>;
 
 export interface ModalFormProps<Values extends FormikValues = any>
@@ -131,7 +131,7 @@ export interface ModalFormProps<Values extends FormikValues = any>
   lockSubmitIfFormInvalid?: boolean;
   onSubmitSuccess?: () => void;
   onClickEdit?: () => void;
-  SubmitButtonProps?: Partial<LoadingButtonProps>;
+  SubmitButtonProps?: Partial<ButtonProps>;
   editableFields?: (keyof Values)[];
   draftManager?: DraftsManager;
   draft?: Pick<Draft, 'id' | 'draftMessage' | 'draftUrl'>;
@@ -610,7 +610,7 @@ export const BaseModalForm = <Values extends FormikValues>(
                                 return (
                                   <>
                                     <Grid item>
-                                      <LoadingButton
+                                      <Button
                                         variant="contained"
                                         {...ActionButtonPropsRest}
                                         {...SubmitButtonPropsRest}
@@ -627,7 +627,7 @@ export const BaseModalForm = <Values extends FormikValues>(
                                         sx={ActionButtonPropsSx}
                                       >
                                         {submitButtonText}
-                                      </LoadingButton>
+                                      </Button>
                                     </Grid>
                                     {!loading ? (
                                       <Grid item>
@@ -795,7 +795,7 @@ export const BaseModalForm = <Values extends FormikValues>(
 };
 
 export const ModalForm = forwardRef(BaseModalForm) as <
-  Values extends FormikValues,
+  Values extends FormikValues
 >(
   p: ModalFormProps<Values> & { ref?: Ref<HTMLDivElement> }
 ) => ReactElement;
