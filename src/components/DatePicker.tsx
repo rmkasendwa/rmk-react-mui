@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import Box, { BoxProps } from '@mui/material/Box';
 import clsx from 'clsx';
-import { forwardRef } from 'react';
+import { forwardRef, KeyboardEvent, MouseEvent } from 'react';
 import ReactDatePicker, {
   DatePickerProps as ReactDatePickerProps,
 } from 'react-datepicker';
@@ -68,9 +68,13 @@ export const datePickerClasses: DatePickerClasses = generateUtilityClasses(
   Object.keys(slots) as DatePickerClassKey[]
 );
 
-export type DatePickerProps = Partial<Omit<ReactDatePickerProps, 'onChange'>> &
-  Pick<ReactDatePickerProps, 'onChange'> &
-  Partial<Pick<BoxProps, 'sx'>>;
+export type DatePickerProps = ReactDatePickerProps &
+  Partial<Pick<BoxProps, 'sx'>> & {
+    onChange: (
+      date: Date | null,
+      event?: MouseEvent<HTMLElement> | KeyboardEvent<HTMLElement>
+    ) => void;
+  };
 
 export const DatePicker = forwardRef<HTMLDivElement, DatePickerProps>(
   function DatePicker(inProps, ref) {

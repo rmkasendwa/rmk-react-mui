@@ -93,17 +93,7 @@ export interface DateInputFieldProps extends TextFieldProps {
   maxDate?: string;
   enableTimeSelector?: boolean;
   displayFormat?: string;
-  DatePickerProps?: Partial<
-    Omit<
-      DatePickerProps,
-      | 'onChange'
-      | 'selected'
-      | 'minDate'
-      | 'maxDate'
-      | 'showTimeSelect'
-      | 'showTimeInput'
-    >
-  >;
+  DatePickerProps?: DatePickerProps;
 }
 
 export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
@@ -184,10 +174,10 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
     const { minDate, maxDate } = useMemo(() => {
       const minDate = minDateProp
         ? createDateWithoutTimezoneOffset(minDateProp)
-        : null;
+        : undefined;
       const maxDate = maxDateProp
         ? createDateWithoutTimezoneOffset(maxDateProp)
-        : null;
+        : undefined;
       if (minDate) {
         minDate.setHours(0, 0, 0, 0);
       }
@@ -291,7 +281,7 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
             <DatePicker
               {...DatePickerPropsRest}
               selected={selectedDate}
-              onChange={(date: Date) => {
+              onChange={(date) => {
                 if (date) {
                   const selectedDate =
                     date &&
