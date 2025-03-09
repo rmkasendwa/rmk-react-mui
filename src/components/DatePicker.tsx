@@ -1,10 +1,10 @@
 import 'react-datepicker/dist/react-datepicker.css';
 
 import {
+  alpha,
   ComponentsOverrides,
   ComponentsProps,
   ComponentsVariants,
-  alpha,
   unstable_composeClasses as composeClasses,
   darken,
   generateUtilityClass,
@@ -68,14 +68,67 @@ export const datePickerClasses: DatePickerClasses = generateUtilityClasses(
   Object.keys(slots) as DatePickerClassKey[]
 );
 
-export type DatePickerProps = Partial<Omit<ReactDatePickerProps, 'onChange'>> &
-  Pick<ReactDatePickerProps, 'onChange'> &
-  Partial<Pick<BoxProps, 'sx'>>;
+export type DatePickerProps = Partial<Pick<BoxProps, 'sx' | 'className'>> &
+  Pick<
+    ReactDatePickerProps,
+    | 'selected'
+    | 'minDate'
+    | 'maxDate'
+    | 'startDate'
+    | 'endDate'
+    | 'showTimeSelect'
+    | 'showTimeInput'
+  > &
+  (
+    | {
+        selectsRange?: never;
+        selectsMultiple?: never;
+        onChange?: (
+          date: Date | null,
+          event?:
+            | React.MouseEvent<HTMLElement>
+            | React.KeyboardEvent<HTMLElement>
+        ) => void;
+      }
+    | {
+        selectsRange: true;
+        selectsMultiple?: never;
+        onChange?: (
+          date: [Date | null, Date | null],
+          event?:
+            | React.MouseEvent<HTMLElement>
+            | React.KeyboardEvent<HTMLElement>
+        ) => void;
+      }
+    | {
+        selectsRange?: never;
+        selectsMultiple: true;
+        onChange?: (
+          date: Date[] | null,
+          event?:
+            | React.MouseEvent<HTMLElement>
+            | React.KeyboardEvent<HTMLElement>
+        ) => void;
+      }
+  );
 
 export const DatePicker = forwardRef<HTMLDivElement, DatePickerProps>(
   function DatePicker(inProps, ref) {
     const props = useThemeProps({ props: inProps, name: 'MuiDatePicker' });
-    const { className, sx, ...rest } = props;
+    const {
+      className,
+      onChange,
+      selected,
+      minDate,
+      maxDate,
+      startDate,
+      endDate,
+      showTimeSelect,
+      showTimeInput,
+      selectsRange,
+      selectsMultiple,
+      sx,
+    } = props;
 
     const classes = composeClasses(
       slots,
@@ -183,14 +236,53 @@ export const DatePicker = forwardRef<HTMLDivElement, DatePickerProps>(
           },
         }}
       >
-        <ReactDatePicker
-          peekNextMonth
-          showMonthDropdown
-          showYearDropdown
-          dropdownMode="select"
-          {...rest}
-          inline
-        />
+        {(() => {
+          const datePickerProps: ReactDatePickerProps = {
+            peekNextMonth: true,
+            showMonthDropdown: true,
+            showYearDropdown: true,
+            dropdownMode: 'select',
+            inline: true,
+            selected,
+            minDate,
+            maxDate,
+            startDate,
+            endDate,
+            showTimeSelect,
+            showTimeInput,
+          };
+          if (selectsRange) {
+            return (
+              <ReactDatePicker
+                {...datePickerProps}
+                {...{
+                  selectsRange,
+                  onChange,
+                }}
+              />
+            );
+          }
+
+          if (selectsMultiple) {
+            return (
+              <ReactDatePicker
+                {...datePickerProps}
+                {...{
+                  selectsMultiple,
+                  onChange,
+                }}
+              />
+            );
+          }
+          return (
+            <ReactDatePicker
+              {...datePickerProps}
+              {...{
+                onChange,
+              }}
+            />
+          );
+        })()}
       </Box>
     );
   }

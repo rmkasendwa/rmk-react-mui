@@ -273,15 +273,7 @@ export const NumberInputField = forwardRef<
         });
       }
     }
-  }, [
-    decimalPlaces,
-    extractNumericValue,
-    focused,
-    max,
-    min,
-    value,
-    valueScaleFactor,
-  ]);
+  }, [decimalPlaces, extractNumericValue, focused, max, min, value, valueScaleFactor]);
 
   useEffect(() => {
     setInputValue((prevInputValue) => {
@@ -371,9 +363,11 @@ export const NumberInputField = forwardRef<
         setFocused(false);
         onBlur && onBlur(event);
       }}
-      inputProps={{
-        ref: (inputField: HTMLInputElement | null) => {
-          setInputField(inputField);
+      slotProps={{
+        htmlInput: {
+          ref: (inputField: HTMLInputElement | null) => {
+            setInputField(inputField);
+          },
         },
       }}
       endAdornment={

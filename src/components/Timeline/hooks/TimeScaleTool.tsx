@@ -154,7 +154,7 @@ export const useTimeScaleTool = (inProps: TimeScaleToolProps) => {
       selected={startDate}
       startDate={startDate}
       endDate={endDate}
-      selectsRange={true as any}
+      selectsRange
       onChange={(dates: any) => {
         const [startDate] = dates as [Date, Date | null];
         (
@@ -205,9 +205,9 @@ export const useTimeScaleTool = (inProps: TimeScaleToolProps) => {
       selected={endDate}
       startDate={startDate}
       endDate={endDate}
-      selectsRange={true as any}
-      onChange={(dates: any) => {
-        const [endDate] = dates as [Date, Date | null];
+      selectsRange
+      onChange={(dates) => {
+        const [endDate] = dates;
         (
           onSelectCustomDatesTimeScale ||
           onSelectCustomDatesTimeScaleFunctionRef?.current
@@ -286,12 +286,14 @@ export const useTimeScaleTool = (inProps: TimeScaleToolProps) => {
       }
     },
     showClearButton: false,
-    InputProps: {
-      sx: {
-        height: 32,
-        pr: 0.5,
-        [`.${outlinedInputClasses.notchedOutline}`]: {
-          border: 'none',
+    slotProps: {
+      input: {
+        sx: {
+          height: 32,
+          pr: 0.5,
+          [`.${outlinedInputClasses.notchedOutline}`]: {
+            border: 'none',
+          },
         },
       },
     },

@@ -7,6 +7,7 @@ import {
   ComponentsProps,
   ComponentsVariants,
   IconButton,
+  InputProps,
   Stack,
   Typography,
   alpha,
@@ -24,7 +25,7 @@ import ClickAwayListener from '@mui/material/ClickAwayListener';
 import Grow from '@mui/material/Grow';
 import Popper from '@mui/material/Popper';
 import clsx from 'clsx';
-import { pick } from 'lodash';
+import { merge, pick } from 'lodash';
 import {
   ReactElement,
   Ref,
@@ -170,7 +171,7 @@ const BaseDataDropdownField = <Entity,>(
     onChange,
     onFocus,
     onBlur,
-    InputProps = {},
+    slotProps,
     dropdownListMaxHeight,
     optionPaging = true,
     selectedOption,
@@ -232,7 +233,6 @@ const BaseDataDropdownField = <Entity,>(
   const { ...PaginatedDropdownOptionListPropsRest } =
     PaginatedDropdownOptionListProps;
   const { sx: WrapperPropsSx, ...WrapperPropsRest } = WrapperProps;
-  const { sx: InputPropsSx, ...InputPropsRest } = InputProps;
 
   const multiple = multipleProp || SelectProps?.multiple;
 
@@ -936,71 +936,74 @@ const BaseDataDropdownField = <Entity,>(
                 addNewOption();
               }
             }}
-            InputProps={{
-              endAdornment,
-              ...InputPropsRest,
-              ...(() => {
-                const props: Partial<typeof InputProps> = {};
-                if (selectedOptions.length > 0) {
-                  props.placeholder = '';
-                }
-                return props;
-              })(),
-              readOnly: !searchable || isSmallScreenSize,
-              onClick: () => {
-                if (!disabled) {
-                  if (rest.multiline) {
-                    searchFieldRef.current?.focus();
-                  }
-                  setOpen(true);
-                }
+            slotProps={merge(
+              {
+                input: {
+                  endAdornment,
+                  ...(() => {
+                    const props: InputProps = {};
+                    if (selectedOptions.length > 0) {
+                      props.placeholder = '';
+                    }
+                    return props;
+                  })(),
+                  readOnly: !searchable || isSmallScreenSize,
+                  onClick: () => {
+                    if (!disabled) {
+                      if (rest.multiline) {
+                        searchFieldRef.current?.focus();
+                      }
+                      setOpen(true);
+                    }
+                  },
+                  ref: mergeRefs([anchorRef, observerRef]),
+                  sx: {
+                    ...(() => {
+                      if (rest.multiline) {
+                        return {
+                          alignItems: 'start',
+                        };
+                      }
+                    })(),
+                    ...(() => {
+                      if (
+                        searchable &&
+                        showRichTextValue &&
+                        !focused &&
+                        (selectedOptionDisplayString.length > 0 ||
+                          placeholderOption)
+                      ) {
+                        return {
+                          [`&>.${inputBaseClasses.input}`]: {
+                            color: 'transparent',
+                            WebkitTextFillColor: 'transparent',
+                          },
+                        };
+                      }
+                    })(),
+                    ...(() => {
+                      if (multilineSearchMode) {
+                        return {
+                          [`&>.${inputBaseClasses.input}`]: {
+                            visibility: 'hidden',
+                          },
+                        };
+                      }
+                    })(),
+                  },
+                },
+                htmlInput: {
+                  ...(() => {
+                    if (!multilineSearchMode) {
+                      return {
+                        ref: searchFieldRef,
+                      };
+                    }
+                  })(),
+                },
               },
-              ref: mergeRefs([anchorRef, observerRef]),
-              sx: {
-                ...(() => {
-                  if (rest.multiline) {
-                    return {
-                      alignItems: 'start',
-                    };
-                  }
-                })(),
-                ...InputPropsSx,
-                ...(() => {
-                  if (
-                    searchable &&
-                    showRichTextValue &&
-                    !focused &&
-                    (selectedOptionDisplayString.length > 0 ||
-                      placeholderOption)
-                  ) {
-                    return {
-                      [`&>.${inputBaseClasses.input}`]: {
-                        color: 'transparent',
-                        WebkitTextFillColor: 'transparent',
-                      },
-                    };
-                  }
-                })(),
-                ...(() => {
-                  if (multilineSearchMode) {
-                    return {
-                      [`&>.${inputBaseClasses.input}`]: {
-                        visibility: 'hidden',
-                      },
-                    };
-                  }
-                })(),
-              },
-            }}
-            inputProps={{
-              ...(() => {
-                if (!multilineSearchMode) {
-                  return {
-                    ref: searchFieldRef,
-                  };
-                }
-              })(),
-            }}
+              slotProps
+            )}
             value={(() => {
               if (multilineSearchMode) {
                 return selectedOptionDisplayString;
@@ -1181,14 +1184,16 @@ const BaseDataDropdownField = <Entity,>(
                                   addNewOption();
                                 }
                               }}
-                              inputProps={{
-                                ref: searchFieldRef,
-                              }}
-                              InputProps={{
-                                sx: {
-                                  '&:before': {
-                                    borderBottomColor: 'transparent',
+                              slotProps={{
+                                input: {
+                                  sx: {
+                                    '&:before': {
+                                      borderBottomColor: 'transparent',
+                                    },
                                   },
+                                },
+                                htmlInput: {
+                                  ref: searchFieldRef,
                                 },
                               }}
                               enableLoadingState={false}

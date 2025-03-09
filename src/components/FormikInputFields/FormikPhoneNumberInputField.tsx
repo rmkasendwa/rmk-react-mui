@@ -9,13 +9,13 @@ import {
 } from '@mui/material';
 import clsx from 'clsx';
 import { forwardRef } from 'react';
-import * as Yup from 'yup';
 
 import { useAggregatedFormikContext } from '../../hooks/Formik';
 import { isValidPhoneNumber } from '../../utils/PhoneNumberUtil';
 import PhoneNumberInputField, {
   PhoneNumberInputFieldProps,
 } from '../InputFields/PhoneNumberInputField';
+import { addMethod, string } from 'yup';
 
 export interface FormikPhoneNumberInputFieldClasses {
   /** Styles applied to the root element. */
@@ -76,7 +76,7 @@ declare module 'yup' {
   }
 }
 
-Yup.addMethod(Yup.mixed, 'phoneNumber', function () {
+addMethod(string, 'phoneNumber', function () {
   return this.test(
     'phoneNumber',
     'Please enter a valid phone number',

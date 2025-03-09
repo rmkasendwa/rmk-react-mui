@@ -11,6 +11,20 @@ import { MessagingProvider } from '../src/contexts/MessagingContext';
 import { darkTheme, lightTheme } from '../src/theme';
 
 const preview: Preview = {
+  parameters: {
+    controls: {
+      matchers: {
+        color: /(background|color)$/i,
+        date: /Date$/i,
+      },
+    },
+    docs: {
+      source: {
+        type: 'code',
+      },
+    },
+    layout: 'fullscreen',
+  },
   decorators: [
     (Story) => {
       const darkMode = useDarkMode();
@@ -30,22 +44,6 @@ const preview: Preview = {
       );
     },
   ],
-};
-
-export const parameters = {
-  actions: { argTypesRegex: '^on[A-Z].*' },
-  controls: {
-    matchers: {
-      color: /(background|color)$/i,
-      date: /Date$/,
-    },
-  },
-  docs: {
-    source: {
-      type: 'code',
-    },
-  },
-  layout: 'fullscreen',
 };
 
 export default preview;

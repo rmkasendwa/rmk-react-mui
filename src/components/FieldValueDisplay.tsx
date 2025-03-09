@@ -20,6 +20,7 @@ import {
   useState,
 } from 'react';
 
+import { merge } from 'lodash';
 import FieldLabel, { FieldLabelProps } from './FieldLabel';
 import FieldValue, { FieldValueProps } from './FieldValue';
 
@@ -79,7 +80,7 @@ export const fieldValueDisplayClasses: FieldValueDisplayClasses =
   );
 
 export interface FieldValueDisplayProps<
-  FieldValue extends ReactNode = ReactNode,
+  FieldValue extends ReactNode = ReactNode
 > extends Partial<BoxProps>,
     Pick<FieldLabelProps, 'required' | 'labelSuffix' | 'helpTip' | 'disabled'>,
     Pick<
@@ -104,6 +105,7 @@ export interface FieldValueDisplayProps<
   FieldValueProps?: Partial<FieldValueProps>;
   enableLoadingState?: boolean;
   direction?: 'column' | 'row';
+  fullWidth?: boolean;
 }
 
 export const BaseFieldValueDisplay = <FieldValue extends ReactNode>(
@@ -136,6 +138,7 @@ export const BaseFieldValueDisplay = <FieldValue extends ReactNode>(
     disabled,
     sx,
     direction = 'column',
+    fullWidth,
     ...rest
   } = props;
 
@@ -284,21 +287,30 @@ export const BaseFieldValueDisplay = <FieldValue extends ReactNode>(
       ref={ref}
       className={clsx(classes.root, className)}
       {...rest}
-      sx={{
-        ...(components?.MuiFieldValueDisplay?.styleOverrides?.root as any),
-        ...sx,
-        ...(() => {
-          if (direction === 'row') {
-            return {
-              display: 'flex',
-              flexDirection: 'row',
-              gap: 1,
-              flexWrap: 'nowrap',
-              alignItems: 'start',
-            };
-          }
-        })(),
-      }}
+      sx={merge(
+        {
+          ...(() => {
+            if (direction === 'row') {
+              return {
+                display: 'flex',
+                flexDirection: 'row',
+                gap: 1,
+                flexWrap: 'nowrap',
+                alignItems: 'start',
+              };
+            }
+          })(),
+          ...(() => {
+            if (fullWidth) {
+              return {
+                width: '100%',
+              };
+            }
+          })(),
+        },
+        components?.MuiFieldValueDisplay?.styleOverrides?.root,
+        sx
+      )}
     >
       {labelNode}
       {descriptionNode}
@@ -308,7 +320,7 @@ export const BaseFieldValueDisplay = <FieldValue extends ReactNode>(
 };
 
 export const FieldValueDisplay = forwardRef(BaseFieldValueDisplay) as <
-  FieldValue extends ReactNode = ReactNode,
+  FieldValue extends ReactNode = ReactNode
 >(
   p: FieldValueDisplayProps<FieldValue> & { ref?: Ref<any> }
 ) => ReactElement;

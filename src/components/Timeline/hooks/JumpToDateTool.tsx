@@ -5,7 +5,7 @@ import {
   useThemeProps,
 } from '@mui/material';
 import { omit } from 'lodash';
-import { ReactNode } from 'react';
+import { ReactNode, RefObject } from 'react';
 
 import { PopupToolProps, usePopupTool } from '../../../hooks/Tools/PopupTool';
 import DatePicker, { DatePickerProps } from '../../DatePicker';
@@ -30,12 +30,13 @@ declare module '@mui/material/styles/components' {
 //#endregion
 
 export type JumpToDateToolProps = Partial<
-  Pick<DatePickerProps, 'minDate' | 'maxDate' | 'onChange'>
+  Pick<DatePickerProps, 'minDate' | 'maxDate'>
 > &
   Partial<Omit<PopupToolProps, 'onChange'>> & {
     selectedDate?: DatePickerProps['selected'];
-    selectedDateRef?: React.RefObject<DatePickerProps['selected']>;
+    selectedDateRef?: RefObject<DatePickerProps['selected']>;
     wrapDatePickerNode?: (datePickerNode: ReactNode) => ReactNode;
+    onChange?: (date: Date | null) => void;
   };
 
 export const useJumpToDateTool = (inProps: JumpToDateToolProps = {}) => {
@@ -59,8 +60,8 @@ export const useJumpToDateTool = (inProps: JumpToDateToolProps = {}) => {
         <DatePicker
           {...{ minDate, maxDate }}
           selected={selectedDate || selectedDateRef?.current}
-          onChange={(...args) => {
-            onChange?.(...args);
+          onChange={(date) => {
+            onChange?.(date);
           }}
         />
       );

@@ -1,4 +1,3 @@
-import { loadingButtonClasses } from '@mui/lab';
 import { Palette, alpha, createTheme } from '@mui/material';
 import { grey } from '@mui/material/colors';
 
@@ -23,9 +22,6 @@ export const getBaseTheme = (palette: Palette): any => {
             textTransform: 'none',
             '&.Mui-disabled': {
               color: alpha(palette.text.primary, 0.26),
-            },
-            [`.${loadingButtonClasses.loadingIndicator}`]: {
-              color: palette.text.disabled,
             },
           },
           contained: {

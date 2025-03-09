@@ -5,6 +5,7 @@ import { Meta, StoryFn } from '@storybook/react';
 import { Form, Formik } from 'formik';
 
 import { FormikImageSelector } from '../../components/FormikInputFields/FormikImageSelector';
+import React from 'react';
 
 export default {
   title: 'Components/Formik Input Fields/Formik Image Selector',

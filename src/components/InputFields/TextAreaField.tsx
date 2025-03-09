@@ -14,6 +14,7 @@ import Typography from '@mui/material/Typography';
 import clsx from 'clsx';
 import { forwardRef, useEffect, useState } from 'react';
 
+import { merge } from 'lodash';
 import TextField, { TextFieldProps } from './TextField';
 
 export interface TextAreaFieldClasses {
@@ -77,8 +78,7 @@ export const TextAreaField = forwardRef<HTMLDivElement, TextAreaFieldProps>(
       className,
       value,
       onChange,
-      inputProps,
-      InputProps = {},
+      slotProps,
       minRows = 4,
       maxRows,
       rows,
@@ -98,9 +98,7 @@ export const TextAreaField = forwardRef<HTMLDivElement, TextAreaFieldProps>(
       })()
     );
 
-    const { sx: InputPropsSx, ...InputPropsRest } = InputProps;
     const { spacing } = useTheme();
-    const { maxLength } = inputProps ?? {};
     const [inputValue, setInputValue] = useState('');
 
     useEffect(() => {
@@ -127,46 +125,51 @@ export const TextAreaField = forwardRef<HTMLDivElement, TextAreaFieldProps>(
             };
           }
         })()}
-        {...{ inputProps }}
         {...rest}
-        InputProps={{
-          ...InputPropsRest,
-          sx: {
-            alignItems: 'flex-end',
-            pb: 3,
-            ...InputPropsSx,
+        slotProps={merge(
+          {
+            input: {
+              sx: {
+                alignItems: 'flex-end',
+                pb: 3,
+              },
+              endAdornment: (() => {
+                if (showTextCount && inputValue.length > 0) {
+                  return (
+                    <Box
+                      sx={{
+                        pointerEvents: 'none',
+                        position: 'absolute',
+                        right: spacing(2),
+                        bottom: spacing(1),
+                      }}
+                    >
+                      {(() => {
+                        if (
+                          slotProps?.htmlInput &&
+                          'maxLength' in slotProps.htmlInput
+                        ) {
+                          return (
+                            <Typography component="div" variant="body2">
+                              {addThousandCommas(inputValue.length)}/
+                              {addThousandCommas(slotProps.htmlInput.maxLength)}
+                            </Typography>
+                          );
+                        }
+                        return (
+                          <Typography component="div" variant="body2">
+                            {addThousandCommas(inputValue.length)}
+                          </Typography>
+                        );
+                      })()}
+                    </Box>
+                  );
+                }
+              })(),
+            },
           },
-          endAdornment: (() => {
-            if (showTextCount && inputValue.length > 0) {
-              return (
-                <Box
-                  sx={{
-                    pointerEvents: 'none',
-                    position: 'absolute',
-                    right: spacing(2),
-                    bottom: spacing(1),
-                  }}
-                >
-                  {(() => {
-                    if (maxLength) {
-                      return (
-                        <Typography component="div" variant="body2">
-                          {addThousandCommas(inputValue.length)}/
-                          {addThousandCommas(maxLength)}
-                        </Typography>
-                      );
-                    }
-                    return (
-                      <Typography component="div" variant="body2">
-                        {addThousandCommas(inputValue.length)}
-                      </Typography>
-                    );
-                  })()}
-                </Box>
-              );
-            }
-          })(),
-        }}
+          slotProps
+        )}
         multiline
       />
     );

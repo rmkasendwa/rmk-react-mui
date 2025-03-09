@@ -6,6 +6,7 @@ import { Form, Formik } from 'formik';
 import { LoremIpsum } from 'lorem-ipsum';
 
 import { FormikTextAreaField } from '../../components/FormikInputFields/FormikTextAreaField';
+import React from 'react';
 
 export default {
   title: 'Components/Formik Input Fields/Formik Text Area Field',
@@ -42,8 +43,10 @@ const Template: StoryFn<typeof FormikTextAreaField> = (props) => {
               <FormikTextAreaField
                 label="Formik Text Area Field"
                 name="field"
-                inputProps={{
-                  maxLength: 200,
+                slotProps={{
+                  htmlInput: {
+                    maxLength: 200,
+                  },
                 }}
                 {...props}
                 fullWidth

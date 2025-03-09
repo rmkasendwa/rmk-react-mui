@@ -684,9 +684,12 @@ export const useImportTool = ({
                                             }
                                           }}
                                           fullWidth
-                                          InputProps={{
-                                            sx: {
-                                              bgcolor: palette.background.paper,
+                                          slotProps={{
+                                            input: {
+                                              sx: {
+                                                bgcolor:
+                                                  palette.background.paper,
+                                              },
                                             },
                                           }}
                                           showClearButton={false}

@@ -105,7 +105,7 @@ export interface FieldValueProps<T extends ReactNode = ReactNode>
   onCancelEdit?: () => void;
   onChangeEditMode?: (editMode: boolean) => void;
   type?: ExoticDataType;
-  validationRules?: Yup.BaseSchema;
+  validationRules?: Yup.AnySchema;
   editField?: ReactNode;
   editMode?: boolean;
   children?: T;

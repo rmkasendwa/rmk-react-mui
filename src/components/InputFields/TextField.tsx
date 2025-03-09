@@ -26,6 +26,7 @@ import {
   useState,
 } from 'react';
 
+import { merge } from 'lodash';
 import { useLoadingContext } from '../../contexts/LoadingContext';
 import ErrorSkeleton from '../ErrorSkeleton';
 import FieldValueDisplay, {
@@ -130,6 +131,7 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
       FieldValueDisplayProps = {},
       onClickClearButton,
       sx,
+      slotProps,
       ...rest
     } = props;
 
@@ -147,9 +149,6 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
 
     const { sx: WrapperPropsSx, ...WrapperPropsRest } = WrapperProps;
     const { ...FieldValueDisplayPropsRest } = FieldValueDisplayProps;
-
-    const { InputProps = {} } = rest;
-    const { endAdornment, ...restInputProps } = InputProps;
 
     // Refs
     const onChangeRef = useRef(onChange);
@@ -227,25 +226,58 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
               label={<Skeleton width={labelSkeletonWidth} />}
               value=""
               disabled
-              InputProps={{
-                endAdornment: (
-                  <Box>
-                    <CircularProgress size={18} color="inherit" />
-                  </Box>
-                ),
-                sx: {
-                  ...(() => {
-                    if (multiline && (minRows || rows)) {
-                      return { alignItems: 'start' };
-                    }
-                    return { alignItems: 'center' };
-                  })(),
+              slotProps={{
+                input: {
+                  endAdornment: (
+                    <Box>
+                      <CircularProgress size={18} color="inherit" />
+                    </Box>
+                  ),
+                  sx: {
+                    ...(() => {
+                      if (multiline && (minRows || rows)) {
+                        return { alignItems: 'start' };
+                      }
+                      return { alignItems: 'center' };
+                    })(),
+                  },
                 },
               }}
             />
           );
         }
       }
+
+      const endAdornment = (() => {
+        if (slotProps?.input && 'endAdornment' in slotProps.input) {
+          return slotProps.input.endAdornment;
+        }
+        return (
+          <>
+            {showClearButton &&
+            (inputValue.length > 0 || showClearButton === 'always') &&
+            !disabled ? (
+              <Tooltip title="Clear" disableInteractive>
+                <IconButton
+                  className="text-input-clear-button"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    if (!onChangeRef.current || value == null) {
+                      setLocalInputValue('');
+                    }
+                    triggerChangeEvent('');
+                    onClickClearButton?.();
+                  }}
+                  sx={{ p: 0.4 }}
+                >
+                  <CloseIcon />
+                </IconButton>
+              </Tooltip>
+            ) : null}
+            {endAdornmentProp ? endAdornmentProp : null}
+          </>
+        );
+      })();
 
       return (
         <Box
@@ -301,35 +333,15 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
               }
               triggerChangeEvent(event.target.value);
             }}
-            InputProps={{
-              startAdornment,
-              endAdornment: endAdornment ?? (
-                <>
-                  {showClearButton &&
-                  (inputValue.length > 0 || showClearButton === 'always') &&
-                  !disabled ? (
-                    <Tooltip title="Clear" disableInteractive>
-                      <IconButton
-                        className="text-input-clear-button"
-                        onClick={(event) => {
-                          event.preventDefault();
-                          if (!onChangeRef.current || value == null) {
-                            setLocalInputValue('');
-                          }
-                          triggerChangeEvent('');
-                          onClickClearButton?.();
-                        }}
-                        sx={{ p: 0.4 }}
-                      >
-                        <CloseIcon />
-                      </IconButton>
-                    </Tooltip>
-                  ) : null}
-                  {endAdornmentProp ? endAdornmentProp : null}
-                </>
-              ),
-              ...restInputProps,
-            }}
+            slotProps={merge(
+              {
+                input: {
+                  startAdornment,
+                  endAdornment,
+                },
+              },
+              slotProps
+            )}
             sx={{
               ...(() => {
                 if (showClearButton !== 'always') {
@@ -374,6 +386,7 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
               }
             })(),
           }}
+          fullWidth={fullWidth}
           value={textField}
           enableLoadingState={false}
         />

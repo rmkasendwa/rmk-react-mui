@@ -13,6 +13,7 @@ import clsx from 'clsx';
 import { forwardRef } from 'react';
 
 import NumberInputField, { NumberInputFieldProps } from './NumberInputField';
+import { merge } from 'lodash';
 
 export interface CurrencyInputFieldClasses {
   /** Styles applied to the root element. */
@@ -81,7 +82,7 @@ export const CurrencyInputField = forwardRef<
     className,
     showCurrency = false,
     currency,
-    InputProps,
+    slotProps,
     ...rest
   } = props;
 
@@ -113,7 +114,12 @@ export const CurrencyInputField = forwardRef<
       step={500}
       decimalPlaces={2}
       {...rest}
-      InputProps={{ ...inputProps, ...InputProps }}
+      slotProps={merge(
+        {
+          input: inputProps,
+        },
+        slotProps
+      )}
     />
   );
 });

@@ -16,6 +16,7 @@ export default {
 const Template: StoryFn<typeof SingleFieldCard> = ({ sx, ...rest }) => {
   return (
     <SingleFieldCard
+      label=""
       {...rest}
       sx={{
         width: 400,

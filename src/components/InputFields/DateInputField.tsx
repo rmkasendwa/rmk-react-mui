@@ -32,7 +32,7 @@ import {
 import { useGlobalConfiguration } from '../../contexts/GlobalConfigurationContext';
 import { useLoadingContext } from '../../contexts/LoadingContext';
 import { isDescendant } from '../../utils/html';
-import DatePicker, { DatePickerProps } from '../DatePicker';
+import DatePicker from '../DatePicker';
 import FieldValueDisplay from '../FieldValueDisplay';
 import ModalPopup from '../ModalPopup';
 import Tooltip from '../Tooltip';
@@ -93,17 +93,6 @@ export interface DateInputFieldProps extends TextFieldProps {
   maxDate?: string;
   enableTimeSelector?: boolean;
   displayFormat?: string;
-  DatePickerProps?: Partial<
-    Omit<
-      DatePickerProps,
-      | 'onChange'
-      | 'selected'
-      | 'minDate'
-      | 'maxDate'
-      | 'showTimeSelect'
-      | 'showTimeInput'
-    >
-  >;
 }
 
 export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
@@ -123,7 +112,6 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
       disabled,
       sx,
       enableLoadingState = true,
-      DatePickerProps = {},
       ...rest
     } = omit(props, 'displayFormat');
 
@@ -140,8 +128,6 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
         }
       })()
     );
-
-    const { ...DatePickerPropsRest } = DatePickerProps;
 
     const anchorRef = useRef<HTMLInputElement>(null);
     const changedRef = useRef(false);
@@ -184,10 +170,10 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
     const { minDate, maxDate } = useMemo(() => {
       const minDate = minDateProp
         ? createDateWithoutTimezoneOffset(minDateProp)
-        : null;
+        : undefined;
       const maxDate = maxDateProp
         ? createDateWithoutTimezoneOffset(maxDateProp)
-        : null;
+        : undefined;
       if (minDate) {
         minDate.setHours(0, 0, 0, 0);
       }
@@ -244,37 +230,39 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
                 )
               : ''
           }
-          InputProps={{
-            startAdornment: disabled ? (
-              selectDateIconButton
-            ) : (
-              <Tooltip title="Choose a date">{selectDateIconButton}</Tooltip>
-            ),
-            endAdornment: (() => {
-              if (showClearButton && selectedDate && !disabled) {
-                return (
-                  <Tooltip title="Clear">
-                    <IconButton
-                      className="date-input-clear-button"
-                      onClick={() => {
-                        setSelectedDate(null);
-                        triggerChangeEvent('');
-                      }}
-                      sx={{ p: 0.4 }}
-                    >
-                      <CloseIcon />
-                    </IconButton>
-                  </Tooltip>
-                );
-              }
-            })(),
-            onClick: () => {
-              if (!disabled) {
-                changedRef.current = false;
-                setOpen(true);
-              }
+          slotProps={{
+            input: {
+              startAdornment: disabled ? (
+                selectDateIconButton
+              ) : (
+                <Tooltip title="Choose a date">{selectDateIconButton}</Tooltip>
+              ),
+              endAdornment: (() => {
+                if (showClearButton && selectedDate && !disabled) {
+                  return (
+                    <Tooltip title="Clear">
+                      <IconButton
+                        className="date-input-clear-button"
+                        onClick={() => {
+                          setSelectedDate(null);
+                          triggerChangeEvent('');
+                        }}
+                        sx={{ p: 0.4 }}
+                      >
+                        <CloseIcon />
+                      </IconButton>
+                    </Tooltip>
+                  );
+                }
+              })(),
+              onClick: () => {
+                if (!disabled) {
+                  changedRef.current = false;
+                  setOpen(true);
+                }
+              },
+              ref: anchorRef,
             },
-            ref: anchorRef,
           }}
           sx={{
             '& .date-input-clear-button': {
@@ -289,9 +277,8 @@ export const DateInputField = forwardRef<HTMLDivElement, DateInputFieldProps>(
         {(() => {
           const datePickerElement = (
             <DatePicker
-              {...DatePickerPropsRest}
               selected={selectedDate}
-              onChange={(date: Date) => {
+              onChange={(date) => {
                 if (date) {
                   const selectedDate =
                     date &&

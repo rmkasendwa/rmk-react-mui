@@ -92,28 +92,27 @@ export const waveAnimation = keyframes`
   }
 `;
 
-export interface LoadingTypographyProps
-  extends Omit<TypographyProps, 'ref'>,
-    Pick<SkeletonProps, 'animation'> {
-  /**
-   * Whether to enable the loading state. If `true`, the loading state will be enabled.
-   *
-   * @default true
-   */
-  enableLoadingState?: boolean;
+export type LoadingTypographyProps = Omit<TypographyProps, 'ref'> &
+  Pick<SkeletonProps, 'animation'> & {
+    /**
+     * Whether to enable the loading state. If `true`, the loading state will be enabled.
+     *
+     * @default true
+     */
+    enableLoadingState?: boolean;
 
-  /**
-   * The html component tag used for the root node.
-   */
-  component?: string;
+    /**
+     * The html component tag used for the root node.
+     */
+    component?: string;
 
-  /**
-   * Whether to show the tooltip when the text overflows.
-   *
-   * @default true
-   */
-  showTooltipOnOverflow?: boolean;
-}
+    /**
+     * Whether to show the tooltip when the text overflows.
+     *
+     * @default true
+     */
+    showTooltipOnOverflow?: boolean;
+  };
 
 /**
  * A wrapper for the `Typography` component that adds a loading state.

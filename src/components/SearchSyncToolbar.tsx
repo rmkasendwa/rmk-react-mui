@@ -23,7 +23,7 @@ import {
 import buttonClasses from '@mui/material/Button/buttonClasses';
 import Grid from '@mui/material/Grid';
 import clsx from 'clsx';
-import { omit } from 'lodash';
+import { merge, omit } from 'lodash';
 import {
   Children,
   Fragment,
@@ -471,7 +471,7 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
     const tools = filterPointlessDividerTools(toolsProp);
     //#endregion
 
-    const { InputProps, ...SearchFieldPropsRest } = SearchFieldProps;
+    const { slotProps, ...SearchFieldPropsRest } = SearchFieldProps;
 
     //#region Refs
     const isInitialMountRef = useRef(true);
@@ -848,13 +848,18 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                   onChangeSearchTerm,
                   searchVelocity,
                 }}
-                InputProps={{
-                  ...InputProps,
-                  disableUnderline: true,
-                  autoFocus: Boolean(
-                    (!searchTerm || searchTerm.length <= 0) && searchFieldOpen
-                  ),
-                }}
+                slotProps={merge(
+                  {
+                    input: {
+                      disableUnderline: true,
+                      autoFocus: Boolean(
+                        (!searchTerm || searchTerm.length <= 0) &&
+                          searchFieldOpen
+                      ),
+                    },
+                  },
+                  slotProps
+                )}
                 size="small"
               />
             );
@@ -960,13 +965,17 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                               variant="outlined"
                               fullWidth
                               {...SearchFieldPropsRest}
-                              InputProps={{
-                                ...InputProps,
-                                autoFocus: Boolean(
-                                  (!searchTerm || searchTerm.length <= 0) &&
-                                    searchFieldOpen
-                                ),
-                              }}
+                              slotProps={merge(
+                                {
+                                  input: {
+                                    autoFocus: Boolean(
+                                      (!searchTerm || searchTerm.length <= 0) &&
+                                        searchFieldOpen
+                                    ),
+                                  },
+                                },
+                                slotProps
+                              )}
                               {...{
                                 searchTerm,
                                 onSearch,

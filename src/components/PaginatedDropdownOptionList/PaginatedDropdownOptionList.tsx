@@ -22,7 +22,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import useTheme from '@mui/material/styles/useTheme';
 import Typography from '@mui/material/Typography';
 import clsx from 'clsx';
-import { omit } from 'lodash';
+import { merge, omit } from 'lodash';
 import {
   Fragment,
   ReactElement,
@@ -590,11 +590,15 @@ const BasePaginatedDropdownOptionList = <Entity,>(
                 onChangeSearchTerm={(searchTerm) => {
                   setSearchTerm(searchTerm);
                 }}
-                InputProps={{
-                  disableUnderline: true,
-                  autoFocus: true,
-                  ...SearchFieldPropsRest?.InputProps,
-                }}
+                slotProps={merge(
+                  {
+                    input: {
+                      disableUnderline: true,
+                      autoFocus: true,
+                    },
+                  },
+                  SearchFieldPropsRest?.slotProps
+                )}
                 fullWidth
                 sx={{
                   [`.${inputBaseClasses.root}`]: {

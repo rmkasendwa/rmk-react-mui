@@ -1,5 +1,5 @@
 import { Meta, StoryFn } from '@storybook/react';
-import addSeconds from 'date-fns/addSeconds';
+import { addSeconds } from 'date-fns';
 import { LoremIpsum } from 'lorem-ipsum';
 import randomEmail from 'random-email';
 import React, { forwardRef } from 'react';
@@ -73,13 +73,14 @@ const sampleNotifications: Notification[] = [
           };
         }
       })(),
-      component: forwardRef<HTMLAnchorElement, any>(
-        function ParentLink(linkProps, ref) {
-          return (
-            <RouterLink ref={ref} to={INDEX_PAGE_ROUTE_PATH} {...linkProps} />
-          );
-        }
-      ),
+      component: forwardRef<HTMLAnchorElement, any>(function ParentLink(
+        linkProps,
+        ref
+      ) {
+        return (
+          <RouterLink ref={ref} to={INDEX_PAGE_ROUTE_PATH} {...linkProps} />
+        );
+      }),
     };
   });
 

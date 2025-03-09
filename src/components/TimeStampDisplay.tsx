@@ -11,10 +11,12 @@ import {
   useThemeProps,
 } from '@mui/material';
 import clsx from 'clsx';
-import differenceInHours from 'date-fns/differenceInHours';
-import formatDate from 'date-fns/format';
-import formatDistance from 'date-fns/formatDistance';
-import formatRelative from 'date-fns/formatRelative';
+import {
+  differenceInHours,
+  formatDate,
+  formatDistance,
+  formatRelative,
+} from 'date-fns';
 import { forwardRef, useEffect, useState } from 'react';
 
 import { useGlobalConfiguration } from '../contexts/GlobalConfigurationContext';

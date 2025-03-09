@@ -150,51 +150,53 @@ export const FileInputField = forwardRef<HTMLDivElement, FileInputFieldProps>(
             }
             onClick && onClick(event);
           }}
-          InputProps={{
-            startAdornment: !disabled ? (
-              <InputAdornment position="start">
-                <Button
-                  variant="contained"
-                  color="inherit"
-                  size="small"
-                  sx={{
-                    height: 24,
-                    fontWeight: 'normal',
-                  }}
-                >
-                  Choose File
-                </Button>
-              </InputAdornment>
-            ) : null,
-            endAdornment: (
-              <>
-                {showClearButton && selectedFileName && !disabled ? (
-                  <Tooltip title="Clear">
-                    <IconButton
-                      className="file-input-clear-button"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        if (inputFieldRef.current) {
-                          inputFieldRef.current.value = '';
-                          inputFieldRef.current.dispatchEvent(
-                            new Event('change', { bubbles: true })
-                          );
-                        }
-                      }}
-                      sx={{ p: 0.4 }}
-                    >
-                      <CloseIcon color="inherit" />
+          slotProps={{
+            input: {
+              startAdornment: !disabled ? (
+                <InputAdornment position="start">
+                  <Button
+                    variant="contained"
+                    color="inherit"
+                    size="small"
+                    sx={{
+                      height: 24,
+                      fontWeight: 'normal',
+                    }}
+                  >
+                    Choose File
+                  </Button>
+                </InputAdornment>
+              ) : null,
+              endAdornment: (
+                <>
+                  {showClearButton && selectedFileName && !disabled ? (
+                    <Tooltip title="Clear">
+                      <IconButton
+                        className="file-input-clear-button"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          if (inputFieldRef.current) {
+                            inputFieldRef.current.value = '';
+                            inputFieldRef.current.dispatchEvent(
+                              new Event('change', { bubbles: true })
+                            );
+                          }
+                        }}
+                        sx={{ p: 0.4 }}
+                      >
+                        <CloseIcon color="inherit" />
+                      </IconButton>
+                    </Tooltip>
+                  ) : null}
+                  <Tooltip title="Select a file">
+                    <IconButton sx={{ p: 0.4 }}>
+                      <CloudUploadIcon color="inherit" />
                     </IconButton>
                   </Tooltip>
-                ) : null}
-                <Tooltip title="Select a file">
-                  <IconButton sx={{ p: 0.4 }}>
-                    <CloudUploadIcon color="inherit" />
-                  </IconButton>
-                </Tooltip>
-              </>
-            ),
-            readOnly: true,
+                </>
+              ),
+              readOnly: true,
+            },
           }}
           sx={{
             '& .file-input-clear-button': {
