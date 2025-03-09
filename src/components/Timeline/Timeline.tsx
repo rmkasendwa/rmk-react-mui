@@ -971,8 +971,9 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     timelineContainerElement
       .querySelectorAll(`.${classes.customDateRangeBlocker}`)
       .forEach((customDateRangeBlockerElement) => {
-        (customDateRangeBlockerElement as HTMLDivElement).style.height =
-          `${dateCursorHeight}px`;
+        (
+          customDateRangeBlockerElement as HTMLDivElement
+        ).style.height = `${dateCursorHeight}px`;
       });
   };
   const caliberateDateCursorElementsRef = useRef(caliberateDateCursorElements);
@@ -1959,7 +1960,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
 };
 
 export const Timeline = forwardRef(BaseTimeline) as <
-  RecordRow extends BaseDataRow,
+  RecordRow extends BaseDataRow
 >(
   p: TimelineProps<RecordRow> & { ref?: Ref<HTMLDivElement> }
 ) => ReactElement;

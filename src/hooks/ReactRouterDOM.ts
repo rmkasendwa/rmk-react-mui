@@ -6,8 +6,13 @@ import hashIt from 'hash-it';
 import { pick } from 'lodash';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import * as Yup from 'yup';
-import { ObjectShape, ObjectSchema, TypeFromShape, AnyObject } from 'yup';
+import {
+  InferType,
+  object,
+  ObjectSchema,
+  ObjectShape,
+  TypeFromShape,
+} from 'yup';
 
 export type RouterMode = 'string' | 'json';
 
@@ -36,8 +41,8 @@ export type AddSearchParamsToPath<SearchParams = BaseSearchParams> = (
 
 export function useReactRouterDOMSearchParams<
   ValidationSpec extends ObjectShape,
-  SearchParamsObject = Yup.InferType<
-    ObjectSchema<ValidationSpec, AnyObject, TypeFromShape<ValidationSpec, any>>
+  SearchParamsObject = InferType<
+    ObjectSchema<TypeFromShape<ValidationSpec, unknown>>
   >
 >(options: {
   mode: 'json';
@@ -77,8 +82,8 @@ export function useReactRouterDOMSearchParams(): {
 
 export function useReactRouterDOMSearchParams<
   ValidationSpec extends ObjectShape,
-  SearchParamsObject = Yup.InferType<
-    ObjectSchema<ValidationSpec, AnyObject, TypeFromShape<ValidationSpec, any>>
+  SearchParamsObject = InferType<
+    ObjectSchema<TypeFromShape<ValidationSpec, unknown>>
   >
 >({
   mode = 'string',
@@ -175,7 +180,7 @@ export function useReactRouterDOMSearchParams<
                   } else {
                     try {
                       if (
-                        Yup.object({
+                        object({
                           [key]: specRef.current![key],
                         }).validateSync(pick(searchParams, key))
                       ) {
@@ -358,7 +363,7 @@ export function useReactRouterDOMSearchParams<
                       };
                       Object.assign(
                         accumulator,
-                        Yup.object({
+                        object({
                           [objectKey]: spec![objectKey],
                         }).validateSync(searchParamsObject)
                       );
