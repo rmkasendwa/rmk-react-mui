@@ -28,6 +28,7 @@ import {
   useState,
 } from 'react';
 
+import { merge } from 'lodash';
 import { useLoadingContext } from '../../contexts/LoadingContext';
 import { CountryCode } from '../../models/Countries';
 import PhoneNumberUtil, {
@@ -41,7 +42,6 @@ import PaginatedDropdownOptionList, {
 } from '../PaginatedDropdownOptionList';
 import Tooltip from '../Tooltip';
 import TextField, { TextFieldProps } from './TextField';
-import { merge } from 'lodash';
 
 export interface PhoneNumberInputFieldClasses {
   /** Styles applied to the root element. */
@@ -167,6 +167,7 @@ export const PhoneNumberInputField = forwardRef<
     regionalCode: regionalCodeProp,
     sx,
     enableLoadingState = true,
+    slotProps,
     ...rest
   } = props;
 
@@ -182,7 +183,6 @@ export const PhoneNumberInputField = forwardRef<
     })()
   );
 
-  const { slotProps } = rest;
   const initialRenderRef = useRef(true);
   const anchorRef = useRef<HTMLButtonElement>(null);
 

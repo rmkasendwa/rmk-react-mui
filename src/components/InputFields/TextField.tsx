@@ -121,7 +121,7 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
       value,
       required,
       labelWrapped = false,
-      startAdornment,
+      startAdornment: startAdornmentProp,
       endAdornment: endAdornmentProp,
       enableLoadingState = true,
       endChildren,
@@ -247,6 +247,13 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
           );
         }
       }
+
+      const startAdornment = (() => {
+        if (slotProps?.input && 'startAdornment' in slotProps.input) {
+          return slotProps.input.startAdornment;
+        }
+        return startAdornmentProp;
+      })();
 
       const endAdornment = (() => {
         if (slotProps?.input && 'endAdornment' in slotProps.input) {
