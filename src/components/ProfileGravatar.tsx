@@ -14,9 +14,9 @@ import {
 } from '@mui/material';
 import { BoxProps } from '@mui/material/Box';
 import clsx from 'clsx';
-import { MD5 } from 'crypto-js';
 import { forwardRef } from 'react';
 
+import { md5 } from 'js-md5';
 import { GRAVATAR_URL } from '../constants';
 import { useLoadingContext } from '../contexts/LoadingContext';
 import { parseNameAndEmailAddressCombination } from '../utils';
@@ -165,7 +165,7 @@ export const ProfileGravatar = forwardRef<HTMLDivElement, ProfileGravatarProps>(
             {...{ size, variant }}
             src={addSearchParams(
               getInterpolatedPath(GRAVATAR_URL, {
-                md5EmailHash: MD5(email).toString(),
+                md5EmailHash: md5(email).toString(),
               }),
               {
                 default: defaultGravatar,

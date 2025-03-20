@@ -1,3 +1,4 @@
+'use client';
 import {
   BoxProps,
   ComponentsOverrides,
@@ -70,7 +71,9 @@ export const underConstructionClasses: UnderConstructionClasses =
 export interface UnderConstructionProps extends Partial<BoxProps> {
   label?: ReactNode;
   showLabel?: boolean;
-  IconProps?: Partial<SvgIconProps>;
+  slotProps?: {
+    icon?: Partial<SvgIconProps>;
+  };
   Icon?: FC<any>;
 }
 
@@ -81,7 +84,7 @@ export const UnderConstruction = forwardRef<
   const props = useThemeProps({ props: inProps, name: 'MuiUnderConstruction' });
   const {
     className,
-    IconProps = {},
+    slotProps,
     label = 'This feature is still under development.',
     showLabel = true,
     Icon = TrafficConeIcon,
@@ -100,8 +103,6 @@ export const UnderConstruction = forwardRef<
       }
     })()
   );
-
-  const { sx: IconPropsSx, ...IconPropsRest } = IconProps;
 
   const { palette } = useTheme();
 
@@ -122,11 +123,11 @@ export const UnderConstruction = forwardRef<
       }}
     >
       <Icon
-        {...IconPropsRest}
+        {...slotProps?.icon}
         sx={{
           color: alpha(palette.text.primary, 0.15),
           fontSize: 128,
-          ...IconPropsSx,
+          ...slotProps?.icon?.sx,
         }}
       />
       {showLabel ? (
