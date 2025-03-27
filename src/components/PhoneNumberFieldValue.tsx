@@ -116,7 +116,7 @@ export const PhoneNumberFieldValue = forwardRef<
         color="inherit"
         noWrap
         {...LinkPropsRest}
-        href={`tel://${phoneNumber}`}
+        href={`tel://${phoneNumber.replace(/\s/g, '')}`}
         sx={{ display: 'block', maxWidth: '100%', ...LinkPropsSx }}
       >
         <CountryFieldValue
