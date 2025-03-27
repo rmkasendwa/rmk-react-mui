@@ -25,7 +25,7 @@ import ClickAwayListener from '@mui/material/ClickAwayListener';
 import Grow from '@mui/material/Grow';
 import Popper from '@mui/material/Popper';
 import clsx from 'clsx';
-import { merge, pick } from 'lodash';
+import { merge } from 'lodash';
 import {
   ReactElement,
   Ref,
@@ -112,7 +112,7 @@ export const dataDropdownFieldClasses: DataDropdownFieldClasses =
   );
 
 export interface DataDropdownFieldProps<Entity = any>
-  extends Omit<TextFieldProps, 'value' | 'variant'>,
+  extends Omit<TextFieldProps, 'value' | 'variant' | 'slotProps'>,
     Partial<
       Pick<
         PaginatedDropdownOptionListProps<Entity>,
@@ -146,12 +146,14 @@ export interface DataDropdownFieldProps<Entity = any>
   dropdownListMaxHeight?: number;
   optionPaging?: boolean;
   onChangeSearchTerm?: (searchTerm: string) => void;
-  SelectedOptionPillProps?: Partial<ChipProps>;
-  PaginatedDropdownOptionListProps?: Partial<PaginatedDropdownOptionListProps>;
   variant?: 'standard' | 'filled' | 'outlined' | 'text';
   showDropdownIcon?: boolean;
   showRichTextValue?: boolean;
   selectedOptionRevalidationKey?: string;
+  slotProps?: TextFieldProps['slotProps'] & {
+    paginatedDropdownOptionList?: Partial<PaginatedDropdownOptionListProps>;
+    selectedOptionPillProps?: Partial<ChipProps>;
+  };
 }
 
 const BaseDataDropdownField = <Entity,>(
@@ -161,7 +163,6 @@ const BaseDataDropdownField = <Entity,>(
   const props = useThemeProps({ props: inProps, name: 'MuiDataDropdownField' });
   const {
     className,
-    SelectProps,
     name,
     id,
     value,
@@ -178,9 +179,6 @@ const BaseDataDropdownField = <Entity,>(
     onChangeSearchTerm,
     optionVariant,
     sx,
-    SelectedOptionPillProps = {},
-    PaginatedDropdownOptionListProps = {},
-    WrapperProps = {},
     disabled,
     showClearButton = true,
     searchable = true,
@@ -229,12 +227,15 @@ const BaseDataDropdownField = <Entity,>(
   })();
 
   const { sx: SelectedOptionPillPropsSx, ...SelectedOptionPillPropsRest } =
-    SelectedOptionPillProps;
+    slotProps?.selectedOptionPillProps ?? {};
   const { ...PaginatedDropdownOptionListPropsRest } =
-    PaginatedDropdownOptionListProps;
-  const { sx: WrapperPropsSx, ...WrapperPropsRest } = WrapperProps;
+    slotProps?.paginatedDropdownOptionList ?? {};
 
-  const multiple = multipleProp || SelectProps?.multiple;
+  const multiple =
+    multipleProp ||
+    (slotProps?.select &&
+      'multiple' in slotProps.select &&
+      slotProps.select.multiple);
 
   const { palette, breakpoints } = useTheme();
 
@@ -766,30 +767,160 @@ const BaseDataDropdownField = <Entity,>(
   }
 
   const endAdornment = (
-    <Stack direction="row" sx={{ alignItems: 'center' }}>
-      {showClearButton &&
-      selectedOptions.length > 0 &&
-      !disabled &&
-      !focused ? (
-        <Tooltip title="Clear">
-          <IconButton
-            className="data-dropdown-input-clear-button"
-            onClick={(event) => {
-              event.stopPropagation();
-              setSearchTerm('');
-              const options: DropdownOption[] = [];
-              setSelectedOptions(options);
-              triggerChangeEvent(options);
-            }}
-            sx={{ p: 0.4 }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </Tooltip>
-      ) : null}
-      {showDropdownIcon ? <ExpandMoreIcon /> : null}
-      {endAdornmentProp}
-    </Stack>
+    <>
+      <Stack direction="row" sx={{ alignItems: 'center' }}>
+        {showClearButton &&
+        selectedOptions.length > 0 &&
+        !disabled &&
+        !focused ? (
+          <Tooltip title="Clear">
+            <IconButton
+              className="data-dropdown-input-clear-button"
+              onClick={(event) => {
+                event.stopPropagation();
+                setSearchTerm('');
+                const options: DropdownOption[] = [];
+                setSelectedOptions(options);
+                triggerChangeEvent(options);
+              }}
+              sx={{ p: 0.4 }}
+            >
+              <CloseIcon />
+            </IconButton>
+          </Tooltip>
+        ) : null}
+        {showDropdownIcon ? <ExpandMoreIcon /> : null}
+        {endAdornmentProp}
+      </Stack>
+      {(() => {
+        if (selectedOptionsElement && !isTextVariant) {
+          return (
+            <Box
+              className={classes.selectedOptionsWrapper}
+              ref={(element: HTMLDivElement) => {
+                setSelectedOptionsWrapperElement(element);
+              }}
+              sx={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                pointerEvents: 'none',
+                display: 'flex',
+                gap: 0.5,
+                ...(() => {
+                  if (rest.multiline) {
+                    return {
+                      flexWrap: 'wrap',
+                      py: '5px',
+                    };
+                  }
+                  return {
+                    height: '100%',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                  };
+                })(),
+                ...(() => {
+                  if (disabled) {
+                    return {
+                      opacity: 0.38,
+                    };
+                  }
+                })(),
+                ...(() => {
+                  if (variant === 'standard') {
+                    return {
+                      pb: '5px',
+                    };
+                  }
+                  if (variant === 'filled') {
+                    return {
+                      pb: '4px',
+                      pl: '12px',
+                      alignItems: 'end',
+                    };
+                  }
+                  return {
+                    pl: '14px',
+                    alignItems: 'center',
+                  };
+                })(),
+              }}
+            >
+              {selectedOptionsElement}
+              {(() => {
+                if (searchable && rest.multiline) {
+                  return (
+                    <Box
+                      ref={searchFieldContainerRef}
+                      sx={{
+                        flex: 1,
+                        minWidth: 100,
+                        maxWidth: 300,
+                        pointerEvents: 'auto',
+                      }}
+                    >
+                      <TextField
+                        variant="standard"
+                        fullWidth
+                        onFocus={(event) => {
+                          event.preventDefault();
+                          if (!isSmallScreenSize) {
+                            setOpen(true);
+                          }
+                          setFocused(true);
+                          onFocus?.(event);
+                        }}
+                        onBlur={() => {
+                          setFocused(false);
+                          if (onBlur) {
+                            const event: any = new Event('blur', {
+                              bubbles: true,
+                            });
+                            Object.defineProperty(event, 'target', {
+                              writable: false,
+                              value: {
+                                name,
+                                id,
+                                value: selectedOptionValue,
+                              },
+                            });
+                            onBlur(event);
+                          }
+                        }}
+                        value={searchTerm}
+                        onChange={(event) => {
+                          setSearchTerm(event.target.value);
+                          onChangeSearchTerm?.(event.target.value);
+                        }}
+                        onKeyDown={(event) => {
+                          if (event.key === 'Enter') {
+                            addNewOption();
+                          }
+                        }}
+                        slotProps={{
+                          input: {
+                            sx: {
+                              '&:before': {
+                                borderBottomColor: 'transparent',
+                              },
+                            },
+                          },
+                          htmlInput: {
+                            ref: searchFieldRef,
+                          },
+                        }}
+                        enableLoadingState={false}
+                      />
+                    </Box>
+                  );
+                }
+              })()}
+            </Box>
+          );
+        }
+      })()}
+    </>
   );
 
   const addNewOption = () => {
@@ -888,10 +1019,12 @@ const BaseDataDropdownField = <Entity,>(
                 </Stack>
               }
               enableLoadingState={enableLoadingState}
-              sx={{
-                ...pick(sx as any, 'width', 'minWidth', 'maxWidth'),
-                display: 'inline-block',
-              }}
+              sx={[
+                ...(Array.isArray(sx) ? sx : [sx]),
+                {
+                  display: 'inline-block',
+                },
+              ]}
             />
           );
         }
@@ -1042,205 +1175,36 @@ const BaseDataDropdownField = <Entity,>(
                 };
               }
             })()}
-            endChildren={(() => {
-              if (selectedOptionsElement) {
-                return (
-                  <Box
-                    className={classes.selectedOptionsWrapper}
-                    ref={(element: HTMLDivElement) => {
-                      setSelectedOptionsWrapperElement(element);
-                    }}
-                    sx={{
-                      position: 'absolute',
-                      left: 0,
-                      pointerEvents: 'none',
-                      display: 'flex',
-                      gap: 0.5,
-                      ...(() => {
-                        if (rest.multiline) {
-                          return {
-                            flexWrap: 'wrap',
-                          };
-                        }
-                        return {
-                          whiteSpace: 'nowrap',
-                          overflow: 'hidden',
-                        };
-                      })(),
-                      ...(() => {
-                        if (disabled) {
-                          return {
-                            opacity: 0.38,
-                          };
-                        }
-                      })(),
-                      ...(() => {
-                        if (rest.size === 'medium') {
-                          if (variant === 'standard') {
-                            if (!label) {
-                              return {
-                                top: 5,
-                              };
-                            }
-                            return {
-                              top: 21,
-                            };
-                          }
-                          if (variant === 'filled') {
-                            return {
-                              top: 25,
-                            };
-                          }
-                          return {
-                            top: 17,
-                          };
-                        }
-                        if (variant === 'standard') {
-                          if (!label) {
-                            return {
-                              top: 3,
-                            };
-                          }
-                          return {
-                            top: 19,
-                          };
-                        }
-                        if (variant === 'filled') {
-                          return {
-                            top: 21,
-                          };
-                        }
-                        return {
-                          top: 9,
-                        };
-                      })(),
-                      ...(() => {
-                        if (variant === 'standard') {
-                          return {
-                            pb: '5px',
-                          };
-                        }
-                        if (variant === 'filled') {
-                          return {
-                            pb: '4px',
-                            pl: '12px',
-                          };
-                        }
-                        return {
-                          pl: '14px',
-                          alignItems: 'center',
-                        };
-                      })(),
-                    }}
-                  >
-                    {selectedOptionsElement}
-                    {(() => {
-                      if (searchable && rest.multiline) {
-                        return (
-                          <Box
-                            ref={searchFieldContainerRef}
-                            sx={{
-                              flex: 1,
-                              minWidth: 100,
-                              maxWidth: 300,
-                              pointerEvents: 'auto',
-                            }}
-                          >
-                            <TextField
-                              variant="standard"
-                              fullWidth
-                              onFocus={(event) => {
-                                event.preventDefault();
-                                if (!isSmallScreenSize) {
-                                  setOpen(true);
-                                }
-                                setFocused(true);
-                                onFocus?.(event);
-                              }}
-                              onBlur={() => {
-                                setFocused(false);
-                                if (onBlur) {
-                                  const event: any = new Event('blur', {
-                                    bubbles: true,
-                                  });
-                                  Object.defineProperty(event, 'target', {
-                                    writable: false,
-                                    value: {
-                                      name,
-                                      id,
-                                      value: selectedOptionValue,
-                                    },
-                                  });
-                                  onBlur(event);
-                                }
-                              }}
-                              value={searchTerm}
-                              onChange={(event) => {
-                                setSearchTerm(event.target.value);
-                                onChangeSearchTerm?.(event.target.value);
-                              }}
-                              onKeyDown={(event) => {
-                                if (event.key === 'Enter') {
-                                  addNewOption();
-                                }
-                              }}
-                              slotProps={{
-                                input: {
-                                  sx: {
-                                    '&:before': {
-                                      borderBottomColor: 'transparent',
-                                    },
-                                  },
-                                },
-                                htmlInput: {
-                                  ref: searchFieldRef,
-                                },
-                              }}
-                              enableLoadingState={false}
-                            />
-                          </Box>
-                        );
-                      }
-                    })()}
-                  </Box>
-                );
-              }
-            })()}
-            WrapperProps={{
-              ...WrapperPropsRest,
-              sx: {
-                width: '100%',
-                ...WrapperPropsSx,
-                [`&>.${classes.selectedOptionsWrapper}`]: {
+            sx={[
+              {
+                '& .data-dropdown-input-clear-button': {
+                  visibility: 'hidden',
+                },
+                '&:hover .data-dropdown-input-clear-button': {
+                  visibility: 'visible',
+                },
+                [`& .${classes.selectedOptionsWrapper}`]: {
                   width: 'calc(100% - 40px)',
                 },
                 ...(() => {
                   if (showClearButton) {
                     if (rest.multiline) {
                       return {
-                        [`&>.${classes.selectedOptionsWrapper}`]: {
+                        [`& .${classes.selectedOptionsWrapper}`]: {
                           width: 'calc(100% - 72px)',
                         },
                       };
                     }
                     return {
-                      [`&:hover>.${classes.selectedOptionsWrapper}`]: {
+                      [`&:hover .${classes.selectedOptionsWrapper}`]: {
                         width: 'calc(100% - 72px)',
                       },
                     };
                   }
                 })(),
               },
-            }}
-            sx={{
-              '& .data-dropdown-input-clear-button': {
-                visibility: 'hidden',
-              },
-              '&:hover .data-dropdown-input-clear-button': {
-                visibility: 'visible',
-              },
-              ...sx,
-            }}
+              ...(Array.isArray(sx) ? sx : [sx]),
+            ]}
           />
         );
       })()}

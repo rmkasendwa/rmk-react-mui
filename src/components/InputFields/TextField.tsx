@@ -349,21 +349,23 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
               },
               slotProps
             )}
-            sx={{
-              ...(() => {
-                if (showClearButton !== 'always') {
-                  return {
-                    '& .text-input-clear-button': {
-                      display: 'none',
-                    },
-                    '&:hover .text-input-clear-button': {
-                      display: 'inline-flex',
-                    },
-                  };
-                }
-              })(),
-              ...sx,
-            }}
+            sx={[
+              {
+                ...(() => {
+                  if (showClearButton !== 'always') {
+                    return {
+                      '& .text-input-clear-button': {
+                        display: 'none',
+                      },
+                      '&:hover .text-input-clear-button': {
+                        display: 'inline-flex',
+                      },
+                    };
+                  }
+                })(),
+              },
+              ...(Array.isArray(sx) ? sx : [sx]),
+            ]}
           />
           {endChildren}
         </Box>
