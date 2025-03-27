@@ -1,3 +1,4 @@
+'use client';
 import {
   ComponentsOverrides,
   ComponentsProps,
@@ -109,7 +110,7 @@ export const ResourceNotFoundPage = forwardRef<
               wordBreak: 'break-all',
             }}
           >
-            {window.location.href}
+            {window?.location.href}
           </Typography>{' '}
           was not found on this server.
         </>

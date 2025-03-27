@@ -1,6 +1,7 @@
 import RefreshIcon from '@mui/icons-material/Refresh';
 import {
   Button,
+  ButtonProps,
   ComponentsOverrides,
   ComponentsProps,
   ComponentsVariants,
@@ -12,7 +13,6 @@ import {
 import clsx from 'clsx';
 import { forwardRef } from 'react';
 
-import { LOGOUT_PAGE_ROUTE_PATH } from '../../route-paths';
 import ErrorPage, { ErrorPageProps } from './ErrorPage';
 
 export interface InternalErrorPageClasses {
@@ -64,7 +64,12 @@ export const internalErrorPageClasses: InternalErrorPageClasses =
     Object.keys(slots) as InternalErrorPageClassKey[]
   );
 
-export interface InternalErrorPageProps extends Partial<ErrorPageProps> {}
+export interface InternalErrorPageProps
+  extends Partial<Omit<ErrorPageProps, 'slotProps'>> {
+  slotProps?: {
+    goAwayButton?: Partial<ButtonProps>;
+  };
+}
 
 export const InternalErrorPage = forwardRef<
   HTMLDivElement,
@@ -74,7 +79,7 @@ export const InternalErrorPage = forwardRef<
     props: inProps,
     name: 'MuiInternalErrorPage',
   });
-  const { className, ...rest } = props;
+  const { className, slotProps, ...rest } = props;
 
   const classes = composeClasses(
     slots,
@@ -96,7 +101,7 @@ export const InternalErrorPage = forwardRef<
       heading={<>We&rsquo;re sorry, something went wrong.</>}
       errorCode="500"
       tools={
-        <Button href={LOGOUT_PAGE_ROUTE_PATH} startIcon={<RefreshIcon />}>
+        <Button startIcon={<RefreshIcon />} {...slotProps?.goAwayButton}>
           Take me away from here
         </Button>
       }

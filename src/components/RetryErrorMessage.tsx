@@ -6,7 +6,6 @@ import {
   Stack,
   Typography,
   alpha,
-  useTheme,
   useThemeProps,
 } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
@@ -41,7 +40,6 @@ export interface RetryErrorMessageProps {
 export const RetryErrorMessage: FC<RetryErrorMessageProps> = (inProps) => {
   const props = useThemeProps({ props: inProps, name: 'MuiRetryErrorMessage' });
   const { message, retry } = props;
-  const { palette } = useTheme();
 
   const { shortMessage, longMessage } = ((): {
     shortMessage: string;
@@ -86,7 +84,7 @@ export const RetryErrorMessage: FC<RetryErrorMessageProps> = (inProps) => {
       </Typography>
       {longMessage && (
         <Box
-          sx={{
+          sx={({ palette }) => ({
             maxHeight: 200,
             overflow: 'auto',
             bgcolor: alpha(palette.error.main, 0.06),
@@ -94,7 +92,7 @@ export const RetryErrorMessage: FC<RetryErrorMessageProps> = (inProps) => {
             px: 1,
             borderRadius: 1,
             boxShadow: `rgba(0, 0, 0, 0.06) 0px 2px 4px 0px inset`,
-          }}
+          })}
         >
           <Typography component="div" variant="caption">
             {longMessage}

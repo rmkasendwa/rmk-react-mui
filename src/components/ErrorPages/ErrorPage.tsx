@@ -1,11 +1,13 @@
 import {
   Box,
+  BoxProps,
   Button,
+  ButtonProps,
   ComponentsOverrides,
   ComponentsProps,
   ComponentsVariants,
   Container,
-  Grid,
+  Grid2,
   Typography,
   alpha,
   unstable_composeClasses as composeClasses,
@@ -14,14 +16,8 @@ import {
   useTheme,
   useThemeProps,
 } from '@mui/material';
-import { BoxProps } from '@mui/material/Box';
 import clsx from 'clsx';
 import { Children, ReactNode, forwardRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-
-import { useAuth } from '../../contexts/AuthContext';
-import { INDEX_PAGE_ROUTE_PATH } from '../../route-paths';
-import HtmlHead from '../HtmlHead';
 
 export interface ErrorPageClasses {
   /** Styles applied to the root element. */
@@ -78,6 +74,12 @@ export interface ErrorPageProps extends Pick<BoxProps, 'className' | 'sx'> {
   description?: ReactNode;
   errorCode?: ReactNode;
   tools?: ReactNode | ReactNode[];
+  showGoBackButton?: boolean;
+  showGoHomeButton?: boolean;
+  slotProps?: {
+    goBackButton?: Partial<ButtonProps>;
+    goHomeButton?: Partial<ButtonProps>;
+  };
 }
 
 export const ErrorPage = forwardRef<HTMLDivElement, ErrorPageProps>(
@@ -94,6 +96,9 @@ export const ErrorPage = forwardRef<HTMLDivElement, ErrorPageProps>(
       description,
       errorCode,
       tools,
+      showGoBackButton = true,
+      showGoHomeButton = true,
+      slotProps,
       ...rest
     } = props;
 
@@ -110,12 +115,9 @@ export const ErrorPage = forwardRef<HTMLDivElement, ErrorPageProps>(
     );
 
     const { palette } = useTheme();
-    const navigate = useNavigate();
-    const { authenticated } = useAuth();
 
     return (
       <>
-        <HtmlHead {...{ title }} />
         <Box
           ref={ref}
           {...rest}
@@ -177,7 +179,7 @@ export const ErrorPage = forwardRef<HTMLDivElement, ErrorPageProps>(
               })()}
             </Box>
             {showDefaultPageLinks ? (
-              <Grid
+              <Grid2
                 container
                 spacing={3}
                 sx={{
@@ -189,45 +191,56 @@ export const ErrorPage = forwardRef<HTMLDivElement, ErrorPageProps>(
                   if (tools) {
                     return Children.toArray(tools).map((tool, index) => {
                       return (
-                        <Grid item key={index} sx={{ minWidth: 0 }}>
+                        <Grid2 key={index} sx={{ minWidth: 0 }}>
                           {tool}
-                        </Grid>
+                        </Grid2>
                       );
                     });
                   }
                   return (
                     <>
-                      <Grid item sm={6} xs={12}>
-                        <Button
-                          onClick={() => navigate(-1)}
-                          color="primary"
-                          fullWidth
-                          size="large"
+                      {showGoBackButton ? (
+                        <Grid2
+                          size={{
+                            sm: 6,
+                            xs: 12,
+                          }}
                         >
-                          <Typography variant="body2" noWrap>
-                            Go back to the previous page
-                          </Typography>
-                        </Button>
-                      </Grid>
-                      {authenticated ? (
-                        <Grid item sm={6} xs={12}>
                           <Button
-                            component={Link}
-                            to={INDEX_PAGE_ROUTE_PATH}
+                            color="primary"
+                            fullWidth
+                            size="large"
+                            {...slotProps?.goBackButton}
+                          >
+                            <Typography variant="body2" noWrap>
+                              Go back to the previous page
+                            </Typography>
+                          </Button>
+                        </Grid2>
+                      ) : null}
+                      {showGoHomeButton ? (
+                        <Grid2
+                          size={{
+                            sm: 6,
+                            xs: 12,
+                          }}
+                        >
+                          <Button
                             color="inherit"
                             fullWidth
                             size="large"
+                            {...slotProps?.goHomeButton}
                           >
                             <Typography variant="body2" noWrap>
                               Go to home page
                             </Typography>
                           </Button>
-                        </Grid>
+                        </Grid2>
                       ) : null}
                     </>
                   );
                 })()}
-              </Grid>
+              </Grid2>
             ) : null}
           </Container>
         </Box>

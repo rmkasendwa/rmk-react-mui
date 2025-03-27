@@ -96,15 +96,17 @@ export const ErrorAlert = forwardRef<HTMLDivElement, ErrorAlertProps>(
         })()}
         className={clsx(classes.root)}
         severity="error"
-        sx={{
-          width: '100%',
-          boxSizing: 'border-box',
-          whiteSpace: 'pre-wrap',
-          [`& .${alertClasses.message}`]: {
-            overflow: 'hidden',
+        sx={[
+          {
+            width: '100%',
+            boxSizing: 'border-box',
+            whiteSpace: 'pre-wrap',
+            [`& .${alertClasses.message}`]: {
+              overflow: 'hidden',
+            },
           },
-          ...sx,
-        }}
+          sx as any,
+        ]}
       >
         <RetryErrorMessage {...{ message, retry }} />
       </Alert>
