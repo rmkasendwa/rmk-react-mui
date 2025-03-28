@@ -158,50 +158,52 @@ export const DropdownOption = forwardRef<
         }
       }}
       fullWidth
-      sx={{
-        borderRadius: 0,
-        color: palette.text.primary,
-        minHeight: `${height}px !important`,
-        fontSize: 14,
-        lineHeight: `24px`,
-        p: 0,
-        display: 'flex',
-        justifyContent: 'start',
-        textAlign: 'left',
-        alignItems: 'center',
-        ...(() => {
-          if (selected) {
-            return {
-              bgcolor: alpha(palette.primary.main, 0.08),
-              ...(() => {
-                if (selectable) {
-                  return {
-                    '&:hover': {
-                      bgcolor: alpha(palette.primary.main, 0.12),
-                    },
-                  };
-                } else {
-                  return {
-                    cursor: 'inherit',
-                    '&:hover': {
-                      bgcolor: alpha(palette.primary.main, 0.08),
-                    },
-                  };
-                }
-              })(),
-            };
-          }
-        })(),
-        ...(() => {
-          if (selectable) {
-            return {
-              cursor: 'pointer',
-            };
-          }
-          return { cursor: 'inherit' };
-        })(),
-        ...sx,
-      }}
+      sx={[
+        {
+          borderRadius: 0,
+          color: palette.text.primary,
+          minHeight: `${height}px !important`,
+          fontSize: 14,
+          lineHeight: `24px`,
+          p: 0,
+          display: 'flex',
+          justifyContent: 'start',
+          textAlign: 'left',
+          alignItems: 'center',
+          ...(() => {
+            if (selected) {
+              return {
+                bgcolor: alpha(palette.primary.main, 0.08),
+                ...(() => {
+                  if (selectable) {
+                    return {
+                      '&:hover': {
+                        bgcolor: alpha(palette.primary.main, 0.12),
+                      },
+                    };
+                  } else {
+                    return {
+                      cursor: 'inherit',
+                      '&:hover': {
+                        bgcolor: alpha(palette.primary.main, 0.08),
+                      },
+                    };
+                  }
+                })(),
+              };
+            }
+          })(),
+          ...(() => {
+            if (selectable) {
+              return {
+                cursor: 'pointer',
+              };
+            }
+            return { cursor: 'inherit' };
+          })(),
+        },
+        ...(Array.isArray(sx) ? sx : [sx]),
+      ]}
       disableRipple={!selectable}
       disabled={!selectable}
     >

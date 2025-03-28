@@ -25,7 +25,7 @@ import ClickAwayListener from '@mui/material/ClickAwayListener';
 import Grow from '@mui/material/Grow';
 import Popper from '@mui/material/Popper';
 import clsx from 'clsx';
-import { merge } from 'lodash';
+import { merge, omit } from 'lodash';
 import {
   ReactElement,
   Ref,
@@ -1135,7 +1135,10 @@ const BaseDataDropdownField = <Entity,>(
                   })(),
                 },
               },
-              slotProps
+              omit(slotProps, [
+                'paginatedDropdownOptionList',
+                'selectedOptionPillProps',
+              ])
             )}
             value={(() => {
               if (multilineSearchMode) {
