@@ -1,3 +1,4 @@
+'use client';
 import CloseIcon from '@mui/icons-material/Close';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {
@@ -173,7 +174,7 @@ const BaseDataDropdownField = <Entity,>(
     enableLoadingState = true,
     showRichTextValue = true,
     placeholderOption,
-    onChangeSelectedOptions: onChangeSelectedOptionsProp,
+    onChangeSelectedOptions,
     onChangeSelectedOption,
     multiple: multipleProp,
     enableAddNewOption = false,
@@ -237,17 +238,18 @@ const BaseDataDropdownField = <Entity,>(
     useState<HTMLDivElement | null>(null);
 
   //#region Selected Options
-  const onChangeSelectedOptionsRef = useRef(onChangeSelectedOptionsProp);
-  onChangeSelectedOptionsRef.current = onChangeSelectedOptionsProp;
-  const onChangeSelectedOptionRef = useRef(onChangeSelectedOption);
-  onChangeSelectedOptionRef.current = onChangeSelectedOption;
-
   const [selectedOptionsValue, setSelectedOptionsValue] = useState(() => {
     if (value) {
       return Array.isArray(value) ? value : [value];
     }
     return [];
   });
+  const stringifiedValue = JSON.stringify(value);
+  useEffect(() => {
+    const value: DropdownOptionValue | DropdownOptionValue[] =
+      stringifiedValue != null ? JSON.parse(stringifiedValue) : [];
+    setSelectedOptionsValue(Array.isArray(value) ? value : [value]);
+  }, [stringifiedValue]);
 
   const allOptions = [...(defaultOptions ?? []), ...(options ?? [])];
 
@@ -277,7 +279,7 @@ const BaseDataDropdownField = <Entity,>(
       selectedOptionsValue.includes(value)
     );
     if (multiple) {
-      onChangeSelectedOptionsProp?.(selectedOptions);
+      onChangeSelectedOptions?.(selectedOptions);
     } else {
       onChangeSelectedOption?.(selectedOptions[0]);
     }
@@ -287,7 +289,6 @@ const BaseDataDropdownField = <Entity,>(
   const selectedOptions = allOptions.filter(({ value }) =>
     selectedOptionsValue.includes(value)
   );
-  //#endregion
 
   const selectedOptionDisplayString = selectedOptions
     .filter(({ label, searchableLabel }) => {
@@ -297,6 +298,7 @@ const BaseDataDropdownField = <Entity,>(
       return String(searchableLabel || label);
     })
     .join(', ');
+  //#endregion
 
   const multilineSearchMode = multiline && selectedOptionsValue.length > 0;
 
