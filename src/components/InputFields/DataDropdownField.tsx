@@ -731,7 +731,7 @@ const BaseDataDropdownField = <Entity,>(
                   endAdornment,
                   ...(() => {
                     const props: InputProps = {};
-                    if (selectedOptionsValue.length > 0) {
+                    if (selectedOptions.length > 0) {
                       props.placeholder = '';
                     }
                     return props;
