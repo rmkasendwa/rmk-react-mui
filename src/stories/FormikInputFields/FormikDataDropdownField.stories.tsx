@@ -1,8 +1,9 @@
 import { Meta, StoryFn } from '@storybook/react';
 import { Form, Formik } from 'formik';
 
-import { FormikDataDropdownField } from '../../components/FormikInputFields/FormikDataDropdownField';
 import React from 'react';
+import * as Yup from 'yup';
+import { FormikDataDropdownField } from '../../components/FormikInputFields/FormikDataDropdownField';
 
 export default {
   title: 'Components/Formik Input Fields/Formik Data Dropdown Field',
@@ -12,13 +13,18 @@ export default {
   },
 } as Meta<typeof FormikDataDropdownField>;
 
+const validationSchema = Yup.object({
+  field: Yup.string().required('This field is required'),
+});
+
 const initialValues = {
-  field: 'OPTION_TWO',
+  field: '',
 };
 
 const Template: StoryFn<typeof FormikDataDropdownField> = (props) => {
   return (
     <Formik
+      validationSchema={validationSchema}
       initialValues={initialValues}
       onSubmit={async (values) => {
         console.log({ values });

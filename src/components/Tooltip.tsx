@@ -115,23 +115,34 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(
         {...{ followCursor, enterDelay, enterNextDelay }}
         open={Boolean(open || openProp)}
         className={clsx(classes.root)}
-        PopperProps={{
-          ...(() => {
-            if (enterAtCursorPosition && !followCursor) {
-              return {
-                anchorEl: {
-                  getBoundingClientRect: () => {
-                    const { x, y } = mouseCoordinatesRef.current;
-                    return new DOMRect(x, y, 0, 0);
+        slotProps={{
+          popper: {
+            ...(() => {
+              if (enterAtCursorPosition && !followCursor) {
+                return {
+                  anchorEl: {
+                    getBoundingClientRect: () => {
+                      const { x, y } = mouseCoordinatesRef.current;
+                      return new DOMRect(x, y, 0, 0);
+                    },
                   },
-                },
-              };
-            }
-          })(),
-          ...rest.PopperProps,
-          sx: {
-            zIndex: 9999,
-            ...rest.PopperProps?.sx,
+                };
+              }
+            })(),
+            ...rest.slotProps?.popper,
+            sx: [
+              ({ zIndex }) => ({
+                zIndex: zIndex.tooltip,
+              }),
+              ...(() => {
+                if (rest.slotProps?.popper && 'sx' in rest.slotProps.popper) {
+                  return Array.isArray(rest.slotProps?.popper?.sx)
+                    ? rest.slotProps.popper.sx
+                    : [rest.slotProps?.popper?.sx];
+                }
+                return [];
+              })(),
+            ],
           },
         }}
         onOpen={(...args) => {
