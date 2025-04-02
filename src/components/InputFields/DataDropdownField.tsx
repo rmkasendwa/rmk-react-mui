@@ -30,9 +30,7 @@ import {
   ReactElement,
   Ref,
   forwardRef,
-  useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -148,7 +146,7 @@ const BaseDataDropdownField = <Entity,>(
     name,
     id,
     value,
-    options: optionsProp,
+    options,
     defaultOptions,
     sortOptions,
     onChange,
@@ -218,25 +216,11 @@ const BaseDataDropdownField = <Entity,>(
 
   const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
 
-  const [options, setOptions] = useState<DropdownOption[]>(() => {
-    return optionsProp || [];
-  });
   const [selectedOptionsRowSpan, setSelectedOptionsRowSpan] = useState(1);
 
   //#region Refs
   const anchorRef = useRef<HTMLInputElement>(null);
   const searchFieldContainerRef = useRef<HTMLInputElement>(null);
-
-  const asyncOptionPagesMapRef =
-    useRef<Map<number, DropdownOption[]>>(undefined);
-  const onChangeRef = useRef(onChange);
-  onChangeRef.current = onChange;
-
-  const optionsPropRef = useRef(optionsProp);
-  optionsPropRef.current = optionsProp;
-
-  const optionsRef = useRef(options);
-  optionsRef.current = options;
 
   const defaultOptionsRef = useRef(defaultOptions);
   defaultOptionsRef.current = defaultOptions;
@@ -247,13 +231,6 @@ const BaseDataDropdownField = <Entity,>(
   const valueRef = useRef(value);
   valueRef.current = value;
   //#endregion
-
-  const stringifiedValue = (() => {
-    if (value != null) {
-      return JSON.stringify(value);
-    }
-    return value;
-  })();
 
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -267,171 +244,64 @@ const BaseDataDropdownField = <Entity,>(
   const [selectedOptionsWrapperElement, setSelectedOptionsWrapperElement] =
     useState<HTMLDivElement | null>(null);
 
-  const [newOptions, setNewOptions] = useState<DropdownOption[]>([]);
-
   //#region Selected Options
   const onChangeSelectedOptionsRef = useRef(onChangeSelectedOptionsProp);
   onChangeSelectedOptionsRef.current = onChangeSelectedOptionsProp;
   const onChangeSelectedOptionRef = useRef(onChangeSelectedOption);
   onChangeSelectedOptionRef.current = onChangeSelectedOption;
 
-  const [selectedOptions, setSelectedOptions] = useState<DropdownOption[]>(
-    () => {
-      const selectedValue = value
-        ? Array.isArray(value)
-          ? value
-          : [value]
-        : [];
-      const allOptions = [...newOptions, ...(defaultOptions || []), ...options];
-      const selectedOptions = selectedValue
-        .map((value) => {
-          return allOptions.find(
-            ({ value: optionValue }) => value === optionValue
-          )!;
-        })
-        .filter(Boolean);
-
-      const selectedOptionsValues = selectedOptions.map(({ value }) => value);
-      if (
-        selectedValue.every((value) => selectedOptionsValues.includes(value))
-      ) {
-        return selectedOptions;
-      }
-
-      return [];
-    }
+  const [selectedOptionsValue, setSelectedOptionsValue] = useState<string[]>(
+    []
   );
 
-  const allOptions = useMemo(() => {
-    return [...newOptions, ...options];
-  }, [newOptions, options]);
+  const allOptions = [...(defaultOptions ?? []), ...(options ?? [])];
 
-  useEffect(() => {
+  const triggerChangeEvent = (selectedOptionsValue: string[]) => {
+    const event: any = new Event('blur', { bubbles: true });
+    Object.defineProperty(event, 'target', {
+      writable: false,
+      value: {
+        id,
+        name,
+        value: (() => {
+          if (multiple) {
+            return selectedOptionsValue;
+          }
+          return selectedOptionsValue[0];
+        })(),
+      },
+    });
+    onChange?.(event);
+  };
+
+  const updateSelectedOptionsValue = (selectedOptionsValue: string[]) => {
+    setSelectedOptionsValue(selectedOptionsValue);
+    const selectedOptions = allOptions.filter(({ value }) =>
+      selectedOptionsValue.includes(String(value))
+    );
     if (multiple) {
-      onChangeSelectedOptionsRef.current?.(selectedOptions);
+      onChangeSelectedOptionsProp?.(selectedOptions);
     } else {
-      onChangeSelectedOptionRef.current?.(selectedOptions[0]);
+      onChangeSelectedOption?.(selectedOptions[0]);
     }
-  }, [multiple, selectedOptions]);
+    triggerChangeEvent(selectedOptionsValue);
+  };
+
+  const selectedOptions = allOptions.filter(({ value }) =>
+    selectedOptionsValue.includes(String(value))
+  );
   //#endregion
 
-  const selectedOptionValue = useMemo(() => {
-    if (multiple) {
-      return selectedOptions.map(({ value }) => value);
-    }
-    return selectedOptions[0]?.value;
-  }, [multiple, selectedOptions]);
+  const selectedOptionDisplayString = selectedOptions
+    .filter(({ label, searchableLabel }) => {
+      return typeof label === 'string' || typeof searchableLabel === 'string';
+    })
+    .map(({ label, searchableLabel }) => {
+      return String(searchableLabel || label);
+    })
+    .join(', ');
 
-  const triggerChangeEvent = useCallback(
-    (selectedOptions: DropdownOption[]) => {
-      const selectedOptionValue = (() => {
-        if (multiple) {
-          return selectedOptions.map(({ value }) => value);
-        }
-        return selectedOptions[0]?.value;
-      })();
-      const event: any = new Event('blur', { bubbles: true });
-      Object.defineProperty(event, 'target', {
-        writable: false,
-        value: { id, name, value: selectedOptionValue },
-      });
-      onChangeRef.current?.(event);
-    },
-    [multiple, id, name]
-  );
-
-  const selectedOptionDisplayString = useMemo(() => {
-    return selectedOptions
-      .filter(({ label, searchableLabel }) => {
-        return typeof label === 'string' || typeof searchableLabel === 'string';
-      })
-      .map(({ label, searchableLabel }) => {
-        return String(searchableLabel || label);
-      })
-      .join(', ');
-  }, [selectedOptions]);
-
-  useEffect(() => {
-    if (optionsProp) {
-      setOptions((prevOptions) => {
-        const nextOptions = optionsProp;
-        if (
-          JSON.stringify(
-            prevOptions.map(({ value, label, searchableLabel }) => ({
-              value,
-              label: String(label),
-              searchableLabel,
-            }))
-          ) !==
-          JSON.stringify(
-            nextOptions.map(({ value, label, searchableLabel }) => ({
-              value,
-              label: String(label),
-              searchableLabel,
-            }))
-          )
-        ) {
-          return nextOptions;
-        }
-        return prevOptions;
-      });
-    }
-  }, [optionsProp, sortOptions]);
-
-  useEffect(() => {
-    setSelectedOptions((prevSelectedOptions) => {
-      const value: string | string[] =
-        stringifiedValue != null
-          ? JSON.parse(stringifiedValue)
-          : stringifiedValue;
-
-      const selectedValue = value
-        ? Array.isArray(value)
-          ? value
-          : [value]
-        : [];
-
-      if (selectedOption?.value && selectedOptionRef.current) {
-        const nextSelectedOptions = [selectedOptionRef.current];
-        const nextSelectedOptionsValues = nextSelectedOptions.map(
-          ({ value }) => value
-        );
-        if (
-          selectedValue.every((value) =>
-            nextSelectedOptionsValues.includes(value)
-          )
-        ) {
-          return nextSelectedOptions;
-        }
-      }
-
-      const allOptions = [
-        ...(defaultOptionsRef.current || []),
-        ...optionsRef.current,
-      ];
-      const nextSelectedOptions = selectedValue
-        .map((value) => {
-          return allOptions.find(
-            ({ value: optionValue }) => value === optionValue
-          )!;
-        })
-        .filter(Boolean);
-
-      const nextSelectedOptionsValues = nextSelectedOptions.map(
-        ({ value }) => value
-      );
-      if (
-        selectedValue.every((value) =>
-          nextSelectedOptionsValues.includes(value)
-        )
-      ) {
-        return nextSelectedOptions;
-      }
-      return prevSelectedOptions;
-    });
-  }, [selectedOption?.value, stringifiedValue]);
-
-  const multilineSearchMode = multiline && selectedOptions.length > 0;
+  const multilineSearchMode = multiline && selectedOptionsValue.length > 0;
 
   useEffect(() => {
     if (multilineSearchMode && focused) {
@@ -462,6 +332,8 @@ const BaseDataDropdownField = <Entity,>(
     }
   }, [selectedOptionsWrapperElement]);
 
+  const { locked } = useLoadingContext();
+
   const selectedOptionsElement = (() => {
     const optionsToDisplay = (() => {
       if (selectedOptions.length > 0) {
@@ -491,15 +363,11 @@ const BaseDataDropdownField = <Entity,>(
                       icon,
                     })}
                     onDelete={() => {
-                      setSelectedOptions((prevSelectedOptions) => {
-                        const nextSelectedOptions = prevSelectedOptions.filter(
-                          ({ value: optionValue }) => {
-                            return optionValue !== value;
-                          }
-                        );
-                        triggerChangeEvent(nextSelectedOptions);
-                        return nextSelectedOptions;
-                      });
+                      updateSelectedOptionsValue(
+                        selectedOptionsValue.filter((prevValue) => {
+                          return prevValue !== value;
+                        })
+                      );
                     }}
                     size="small"
                     sx={{
@@ -539,8 +407,6 @@ const BaseDataDropdownField = <Entity,>(
       );
     }
   })();
-
-  const { locked } = useLoadingContext();
 
   if (enableLoadingState && locked) {
     return (
@@ -583,7 +449,7 @@ const BaseDataDropdownField = <Entity,>(
     <>
       <Stack direction="row" sx={{ alignItems: 'center' }}>
         {showClearButton &&
-        selectedOptions.length > 0 &&
+        selectedOptionsValue.length > 0 &&
         !disabled &&
         !focused ? (
           <Tooltip title="Clear">
@@ -592,9 +458,7 @@ const BaseDataDropdownField = <Entity,>(
               onClick={(event) => {
                 event.stopPropagation();
                 setSearchTerm('');
-                const options: DropdownOption[] = [];
-                setSelectedOptions(options);
-                triggerChangeEvent(options);
+                updateSelectedOptionsValue([]);
               }}
               sx={{ p: 0.4 }}
             >
@@ -695,7 +559,12 @@ const BaseDataDropdownField = <Entity,>(
                               value: {
                                 name,
                                 id,
-                                value: selectedOptionValue,
+                                value: (() => {
+                                  if (multiple) {
+                                    return selectedOptionsValue;
+                                  }
+                                  return selectedOptionsValue[0];
+                                })(),
                               },
                             });
                             onBlur(event);
@@ -705,11 +574,6 @@ const BaseDataDropdownField = <Entity,>(
                         onChange={(event) => {
                           setSearchTerm(event.target.value);
                           onChangeSearchTerm?.(event.target.value);
-                        }}
-                        onKeyDown={(event) => {
-                          if (event.key === 'Enter') {
-                            addNewOption();
-                          }
                         }}
                         slotProps={{
                           input: {
@@ -735,26 +599,6 @@ const BaseDataDropdownField = <Entity,>(
       })()}
     </>
   );
-
-  const addNewOption = () => {
-    if (enableAddNewOption && searchTerm.length > 0) {
-      const newOption = {
-        label: searchTerm,
-        value: searchTerm,
-      };
-      setNewOptions((prevNewOptions) => {
-        return [newOption, ...prevNewOptions];
-      });
-
-      const nextSelectedOptions = multiple
-        ? [...selectedOptions, newOption]
-        : [newOption];
-      setSelectedOptions(nextSelectedOptions);
-      setSearchTerm('');
-      triggerChangeEvent(nextSelectedOptions);
-      onSelectOption?.(newOption);
-    }
-  };
 
   return (
     <>
@@ -864,7 +708,12 @@ const BaseDataDropdownField = <Entity,>(
                     value: {
                       name,
                       id,
-                      value: selectedOptionValue,
+                      value: (() => {
+                        if (multiple) {
+                          return selectedOptionsValue;
+                        }
+                        return selectedOptionsValue[0];
+                      })(),
                     },
                   });
                   onBlur(event);
@@ -877,18 +726,13 @@ const BaseDataDropdownField = <Entity,>(
                 onChangeSearchTerm?.(event.target.value);
               }
             }}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter') {
-                addNewOption();
-              }
-            }}
             slotProps={merge(
               {
                 input: {
                   endAdornment,
                   ...(() => {
                     const props: InputProps = {};
-                    if (selectedOptions.length > 0) {
+                    if (selectedOptionsValue.length > 0) {
                       props.placeholder = '';
                     }
                     return props;
@@ -1073,38 +917,19 @@ const BaseDataDropdownField = <Entity,>(
             minWidth={
               anchorRef.current ? anchorRef.current.offsetWidth : undefined
             }
-            onLoadOptions={(options) => {
-              setOptions(options);
-            }}
             onClose={() => {
               setOpen(false);
             }}
             onChangeSelectedOptions={(selectedOptions) => {
-              //#region Find New Options
-              const selectedNewOptions = selectedOptions.filter(
-                ({ value }) =>
-                  !allOptions.some(
-                    ({ value: optionValue }) => optionValue === value
-                  )
-              );
-              if (selectedNewOptions.length > 0) {
-                setNewOptions((prevNewOptions) => {
-                  return [...selectedNewOptions, ...prevNewOptions];
-                });
-              }
-              //#endregion
               setSearchTerm('');
-              setSelectedOptions(selectedOptions);
-              triggerChangeEvent(selectedOptions);
+              updateSelectedOptionsValue(
+                selectedOptions.map(({ value }) => String(value))
+              );
               if (multiline) {
                 multilineSearchInputElement?.focus();
               } else {
                 htmlInputElement?.blur();
               }
-            }}
-            asyncOptionPagesMap={asyncOptionPagesMapRef.current}
-            onChangeAsyncOptionPagesMap={(asyncOptionPagesMap) => {
-              asyncOptionPagesMapRef.current = asyncOptionPagesMap;
             }}
             enableAddNewOption={
               enableAddNewOption &&
