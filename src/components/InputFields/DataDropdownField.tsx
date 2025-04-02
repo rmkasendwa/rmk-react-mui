@@ -48,6 +48,7 @@ import PaginatedDropdownOptionList, {
 import { getDropdownOptionLabel } from '../PaginatedDropdownOptionList/DropdownOption';
 import Tooltip from '../Tooltip';
 import TextField, { TextFieldProps } from './TextField';
+import { DropdownOptionValue } from '../../models/Utils';
 
 export interface DataDropdownFieldClasses {
   /** Styles applied to the root element. */
@@ -121,7 +122,7 @@ export interface DataDropdownFieldProps<Entity = any>
     > {
   onChangeSelectedOption?: (selectedOption?: DropdownOption<Entity>) => void;
   disableEmptyOption?: boolean;
-  value?: string | string[];
+  value?: DropdownOptionValue | DropdownOptionValue[];
   selectedOption?: DropdownOption<Entity>;
   placeholderOption?: DropdownOption<Entity>;
   dropdownListMaxHeight?: number;
@@ -221,15 +222,6 @@ const BaseDataDropdownField = <Entity,>(
   //#region Refs
   const anchorRef = useRef<HTMLInputElement>(null);
   const searchFieldContainerRef = useRef<HTMLInputElement>(null);
-
-  const defaultOptionsRef = useRef(defaultOptions);
-  defaultOptionsRef.current = defaultOptions;
-
-  const selectedOptionRef = useRef(selectedOption);
-  selectedOptionRef.current = selectedOption;
-
-  const valueRef = useRef(value);
-  valueRef.current = value;
   //#endregion
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -250,13 +242,16 @@ const BaseDataDropdownField = <Entity,>(
   const onChangeSelectedOptionRef = useRef(onChangeSelectedOption);
   onChangeSelectedOptionRef.current = onChangeSelectedOption;
 
-  const [selectedOptionsValue, setSelectedOptionsValue] = useState<string[]>(
-    []
-  );
+  const [selectedOptionsValue, setSelectedOptionsValue] = useState(() => {
+    if (value) {
+      return Array.isArray(value) ? value : [value];
+    }
+    return [];
+  });
 
   const allOptions = [...(defaultOptions ?? []), ...(options ?? [])];
 
-  const triggerChangeEvent = (selectedOptionsValue: string[]) => {
+  const triggerChangeEvent = (selectedOptionsValue: DropdownOptionValue[]) => {
     const event: any = new Event('blur', { bubbles: true });
     Object.defineProperty(event, 'target', {
       writable: false,
@@ -274,10 +269,12 @@ const BaseDataDropdownField = <Entity,>(
     onChange?.(event);
   };
 
-  const updateSelectedOptionsValue = (selectedOptionsValue: string[]) => {
+  const updateSelectedOptionsValue = (
+    selectedOptionsValue: DropdownOptionValue[]
+  ) => {
     setSelectedOptionsValue(selectedOptionsValue);
     const selectedOptions = allOptions.filter(({ value }) =>
-      selectedOptionsValue.includes(String(value))
+      selectedOptionsValue.includes(value)
     );
     if (multiple) {
       onChangeSelectedOptionsProp?.(selectedOptions);
@@ -288,7 +285,7 @@ const BaseDataDropdownField = <Entity,>(
   };
 
   const selectedOptions = allOptions.filter(({ value }) =>
-    selectedOptionsValue.includes(String(value))
+    selectedOptionsValue.includes(value)
   );
   //#endregion
 
@@ -310,6 +307,7 @@ const BaseDataDropdownField = <Entity,>(
   }, [focused, multilineSearchMode]);
 
   const { ref: observerRef, inView: isVisible } = useInView();
+
   useEffect(() => {
     if (!isVisible) {
       setOpen(false);
@@ -411,7 +409,6 @@ const BaseDataDropdownField = <Entity,>(
   if (enableLoadingState && locked) {
     return (
       <FieldValueDisplay
-        {...({} as any)}
         {...rest.FieldValueDisplayProps}
         {...{ label }}
         value={(() => {
@@ -923,7 +920,7 @@ const BaseDataDropdownField = <Entity,>(
             onChangeSelectedOptions={(selectedOptions) => {
               setSearchTerm('');
               updateSelectedOptionsValue(
-                selectedOptions.map(({ value }) => String(value))
+                selectedOptions.map(({ value }) => value)
               );
               if (multiline) {
                 multilineSearchInputElement?.focus();
