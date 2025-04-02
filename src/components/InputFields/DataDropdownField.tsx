@@ -132,7 +132,6 @@ export interface DataDropdownFieldProps<Entity = any>
   variant?: 'standard' | 'filled' | 'outlined' | 'text';
   showDropdownIcon?: boolean;
   showRichTextValue?: boolean;
-  selectedOptionRevalidationKey?: string;
   slotProps?: TextFieldProps['slotProps'] & {
     paginatedDropdownOptionList?: Partial<PaginatedDropdownOptionListProps>;
     selectedOptionPillProps?: Partial<ChipProps>;
@@ -178,7 +177,6 @@ const BaseDataDropdownField = <Entity,>(
     onChangeSelectedOptions: onChangeSelectedOptionsProp,
     onChangeSelectedOption,
     multiple: multipleProp,
-    selectedOptionRevalidationKey,
     enableAddNewOption = false,
     showNoOptionsFoundMessage,
     filterOptionBySearchTerm,
@@ -223,7 +221,6 @@ const BaseDataDropdownField = <Entity,>(
   const [options, setOptions] = useState<DropdownOption[]>(() => {
     return optionsProp || [];
   });
-
   const [selectedOptionsRowSpan, setSelectedOptionsRowSpan] = useState(1);
 
   //#region Refs
@@ -281,16 +278,18 @@ const BaseDataDropdownField = <Entity,>(
   const [selectedOptions, setSelectedOptions] = useState<DropdownOption[]>(
     () => {
       const selectedValue = value
-        ? [...(Array.isArray(value) ? value : [value])]
+        ? Array.isArray(value)
+          ? value
+          : [value]
         : [];
-
+      const allOptions = [...newOptions, ...(defaultOptions || []), ...options];
       const selectedOptions = selectedValue
         .map((value) => {
-          return [...newOptions, ...(defaultOptions || []), ...options].find(
+          return allOptions.find(
             ({ value: optionValue }) => value === optionValue
           )!;
         })
-        .filter((option) => option);
+        .filter(Boolean);
 
       const selectedOptionsValues = selectedOptions.map(({ value }) => value);
       if (
@@ -380,16 +379,16 @@ const BaseDataDropdownField = <Entity,>(
   }, [optionsProp, sortOptions]);
 
   useEffect(() => {
-    selectedOptionRevalidationKey;
     setSelectedOptions((prevSelectedOptions) => {
-      const value = (() => {
-        if (stringifiedValue != null) {
-          return JSON.parse(stringifiedValue);
-        }
-        return stringifiedValue;
-      })();
+      const value: string | string[] =
+        stringifiedValue != null
+          ? JSON.parse(stringifiedValue)
+          : stringifiedValue;
+
       const selectedValue = value
-        ? [...(Array.isArray(value) ? value : [value])]
+        ? Array.isArray(value)
+          ? value
+          : [value]
         : [];
 
       if (selectedOption?.value && selectedOptionRef.current) {
@@ -406,19 +405,21 @@ const BaseDataDropdownField = <Entity,>(
         }
       }
 
+      const allOptions = [
+        ...(defaultOptionsRef.current || []),
+        ...optionsRef.current,
+      ];
       const nextSelectedOptions = selectedValue
         .map((value) => {
-          return [
-            ...(defaultOptionsRef.current || []),
-            ...optionsRef.current,
-          ].find(({ value: optionValue }) => value === optionValue)!;
+          return allOptions.find(
+            ({ value: optionValue }) => value === optionValue
+          )!;
         })
-        .filter((option) => option);
+        .filter(Boolean);
 
       const nextSelectedOptionsValues = nextSelectedOptions.map(
         ({ value }) => value
       );
-
       if (
         selectedValue.every((value) =>
           nextSelectedOptionsValues.includes(value)
@@ -428,10 +429,9 @@ const BaseDataDropdownField = <Entity,>(
       }
       return prevSelectedOptions;
     });
-  }, [selectedOption?.value, selectedOptionRevalidationKey, stringifiedValue]);
+  }, [selectedOption?.value, stringifiedValue]);
 
   const multilineSearchMode = multiline && selectedOptions.length > 0;
-  console.log({ multilineSearchMode });
 
   useEffect(() => {
     if (multilineSearchMode && focused) {
