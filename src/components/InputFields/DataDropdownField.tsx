@@ -39,15 +39,7 @@ import {
 import { useInView } from 'react-intersection-observer';
 import { mergeRefs } from 'react-merge-refs';
 
-import {
-  LoadingProvider,
-  useLoadingContext,
-} from '../../contexts/LoadingContext';
-import {
-  CacheableDataFinderOptions,
-  useCacheableData,
-} from '../../hooks/DataFetching';
-import { PaginatedResponseData } from '../../models/Utils';
+import { useLoadingContext } from '../../contexts/LoadingContext';
 import { isDescendant } from '../../utils/html';
 import FieldValueDisplay from '../FieldValueDisplay';
 import ModalPopup from '../ModalPopup';
@@ -56,7 +48,6 @@ import PaginatedDropdownOptionList, {
   PaginatedDropdownOptionListProps,
 } from '../PaginatedDropdownOptionList';
 import { getDropdownOptionLabel } from '../PaginatedDropdownOptionList/DropdownOption';
-import RetryErrorMessage from '../RetryErrorMessage';
 import Tooltip from '../Tooltip';
 import TextField, { TextFieldProps } from './TextField';
 
@@ -119,7 +110,6 @@ export interface DataDropdownFieldProps<Entity = any>
         | 'optionVariant'
         | 'onSelectOption'
         | 'searchable'
-        | 'getDropdownOptions'
         | 'revalidationKey'
         | 'noOptionsText'
         | 'externallyPaginated'
@@ -139,10 +129,6 @@ export interface DataDropdownFieldProps<Entity = any>
   value?: string | string[];
   selectedOption?: DropdownOption<Entity>;
   placeholderOption?: DropdownOption<Entity>;
-  getSelectedOptions?: (
-    selectedValue: string[],
-    options: CacheableDataFinderOptions
-  ) => Promise<DropdownOption<Entity>[]>;
   dropdownListMaxHeight?: number;
   optionPaging?: boolean;
   onChangeSearchTerm?: (searchTerm: string) => void;
@@ -182,7 +168,6 @@ const BaseDataDropdownField = <Entity,>(
     disabled,
     showClearButton = true,
     searchable = true,
-    getDropdownOptions,
     revalidationKey,
     noOptionsText,
     onSelectOption,
@@ -190,7 +175,6 @@ const BaseDataDropdownField = <Entity,>(
     label,
     limit,
     externallyPaginated,
-    getSelectedOptions,
     startAdornment,
     endAdornment: endAdornmentProp,
     showDropdownIcon = true,
@@ -247,7 +231,7 @@ const BaseDataDropdownField = <Entity,>(
 
   const [selectedOptionsRowSpan, setSelectedOptionsRowSpan] = useState(1);
 
-  // Refs
+  //#region Refs
   const anchorRef = useRef<HTMLInputElement>(null);
   const searchFieldRef = useRef<HTMLInputElement>(null);
   const searchFieldContainerRef = useRef<HTMLInputElement>(null);
@@ -267,11 +251,11 @@ const BaseDataDropdownField = <Entity,>(
 
   const selectedOptionRef = useRef(selectedOption);
   selectedOptionRef.current = selectedOption;
-  const getSelectedOptionsRef = useRef(getSelectedOptions);
-  getSelectedOptionsRef.current = getSelectedOptions;
 
   const valueRef = useRef(value);
   valueRef.current = value;
+  //#endregion
+
   const stringifiedValue = (() => {
     if (value != null) {
       return JSON.stringify(value);
@@ -338,101 +322,6 @@ const BaseDataDropdownField = <Entity,>(
     return selectedOptions[0]?.value;
   }, [multiple, selectedOptions]);
 
-  const canLoadAsyncSelectedOptions = Boolean(
-    getSelectedOptions || getDropdownOptions
-  );
-
-  const {
-    load: loadAsyncSelectedOptions,
-    loading: loadingAsyncSelectedOptions,
-    loaded: loadedAsyncSelectedOptions,
-    errorMessage: asyncSelectedOptionsErrorMessage,
-    reset: resetAsyncSelectedOptionsState,
-  } = useCacheableData(
-    async ({ getRequestController }) => {
-      const selectedValue = value
-        ? [...(Array.isArray(value) ? value : [value])]
-        : [];
-      const asyncSelectedOptions = await (async () => {
-        if (getSelectedOptions && selectedValue.length > 0) {
-          return getSelectedOptions(selectedValue, {
-            getRequestController,
-            getStaleWhileRevalidate: (asyncSelectedOptions) => {
-              setSelectedOptions(
-                asyncSelectedOptions.sort(
-                  (
-                    { value: aValue }: DropdownOption,
-                    { value: bValue }: DropdownOption
-                  ) => {
-                    return (
-                      selectedValue.indexOf(String(aValue)) -
-                      selectedValue.indexOf(String(bValue))
-                    );
-                  }
-                )
-              );
-            },
-          });
-        }
-        if (getDropdownOptions && selectedValue.length > 0) {
-          const processOptionsResponse = (
-            dropdownOptionsResponse:
-              | DropdownOption<Entity>[]
-              | PaginatedResponseData<DropdownOption<Entity>>
-          ) => {
-            const options = Array.isArray(dropdownOptionsResponse)
-              ? dropdownOptionsResponse
-              : dropdownOptionsResponse.records;
-            return [
-              ...newOptions,
-              ...(defaultOptions || []),
-              ...options,
-            ].filter(({ value }) => {
-              return selectedValue.includes(String(value));
-            });
-          };
-          const dropdownOptionsResponse = await getDropdownOptions({
-            getStaleWhileRevalidate: (dropdownOptionsResponse) => {
-              setSelectedOptions(
-                processOptionsResponse(dropdownOptionsResponse).sort(
-                  (
-                    { value: aValue }: DropdownOption,
-                    { value: bValue }: DropdownOption
-                  ) => {
-                    return (
-                      selectedValue.indexOf(String(aValue)) -
-                      selectedValue.indexOf(String(bValue))
-                    );
-                  }
-                )
-              );
-            },
-          });
-          return processOptionsResponse(dropdownOptionsResponse);
-        }
-        return [];
-      })();
-      setSelectedOptions(
-        asyncSelectedOptions.sort(
-          (
-            { value: aValue }: DropdownOption,
-            { value: bValue }: DropdownOption
-          ) => {
-            return (
-              selectedValue.indexOf(String(aValue)) -
-              selectedValue.indexOf(String(bValue))
-            );
-          }
-        )
-      );
-      return asyncSelectedOptions;
-    },
-    {
-      autoSync: false,
-      loadOnMount: false,
-    }
-  );
-
   const triggerChangeEvent = useCallback(
     (selectedOptions: DropdownOption[]) => {
       const selectedOptionValue = (() => {
@@ -490,49 +379,23 @@ const BaseDataDropdownField = <Entity,>(
   }, [optionsProp, sortOptions]);
 
   useEffect(() => {
-    if (!loadingAsyncSelectedOptions && !asyncSelectedOptionsErrorMessage) {
-      selectedOptionRevalidationKey;
-      setSelectedOptions((prevSelectedOptions) => {
-        const value = (() => {
-          if (stringifiedValue != null) {
-            return JSON.parse(stringifiedValue);
-          }
-          return stringifiedValue;
-        })();
-        const selectedValue = value
-          ? [...(Array.isArray(value) ? value : [value])]
-          : [];
-        const prevSelectedOptionsValues = prevSelectedOptions.map(
-          ({ value }) => value
-        );
-
-        if (selectedOption?.value && selectedOptionRef.current) {
-          const nextSelectedOptions = [selectedOptionRef.current];
-          const nextSelectedOptionsValues = nextSelectedOptions.map(
-            ({ value }) => value
-          );
-          if (
-            selectedValue.every((value) =>
-              nextSelectedOptionsValues.includes(value)
-            )
-          ) {
-            return nextSelectedOptions;
-          }
+    selectedOptionRevalidationKey;
+    setSelectedOptions((prevSelectedOptions) => {
+      const value = (() => {
+        if (stringifiedValue != null) {
+          return JSON.parse(stringifiedValue);
         }
+        return stringifiedValue;
+      })();
+      const selectedValue = value
+        ? [...(Array.isArray(value) ? value : [value])]
+        : [];
 
-        const nextSelectedOptions = selectedValue
-          .map((value) => {
-            return [
-              ...(defaultOptionsRef.current || []),
-              ...optionsRef.current,
-            ].find(({ value: optionValue }) => value === optionValue)!;
-          })
-          .filter((option) => option);
-
+      if (selectedOption?.value && selectedOptionRef.current) {
+        const nextSelectedOptions = [selectedOptionRef.current];
         const nextSelectedOptionsValues = nextSelectedOptions.map(
           ({ value }) => value
         );
-
         if (
           selectedValue.every((value) =>
             nextSelectedOptionsValues.includes(value)
@@ -540,38 +403,31 @@ const BaseDataDropdownField = <Entity,>(
         ) {
           return nextSelectedOptions;
         }
+      }
 
-        if (
-          !selectedValue.every((value) =>
-            prevSelectedOptionsValues.includes(value)
-          ) &&
-          canLoadAsyncSelectedOptions &&
-          selectedValue.length > 0
-        ) {
-          loadAsyncSelectedOptions();
-        }
-        return prevSelectedOptions;
-      });
-    }
-  }, [
-    asyncSelectedOptionsErrorMessage,
-    canLoadAsyncSelectedOptions,
-    loadAsyncSelectedOptions,
-    loadingAsyncSelectedOptions,
-    selectedOption?.value,
-    selectedOptionRevalidationKey,
-    stringifiedValue,
-  ]);
+      const nextSelectedOptions = selectedValue
+        .map((value) => {
+          return [
+            ...(defaultOptionsRef.current || []),
+            ...optionsRef.current,
+          ].find(({ value: optionValue }) => value === optionValue)!;
+        })
+        .filter((option) => option);
 
-  useEffect(() => {
-    if (stringifiedValue && loadedAsyncSelectedOptions) {
-      resetAsyncSelectedOptionsState();
-    }
-  }, [
-    loadedAsyncSelectedOptions,
-    resetAsyncSelectedOptionsState,
-    stringifiedValue,
-  ]);
+      const nextSelectedOptionsValues = nextSelectedOptions.map(
+        ({ value }) => value
+      );
+
+      if (
+        selectedValue.every((value) =>
+          nextSelectedOptionsValues.includes(value)
+        )
+      ) {
+        return nextSelectedOptions;
+      }
+      return prevSelectedOptions;
+    });
+  }, [selectedOption?.value, selectedOptionRevalidationKey, stringifiedValue]);
 
   const multilineSearchMode = rest.multiline && selectedOptions.length > 0;
 
@@ -723,45 +579,6 @@ const BaseDataDropdownField = <Entity,>(
           }
           return selectedOptionDisplayString;
         })()}
-      />
-    );
-  }
-
-  if (
-    (value && loadingAsyncSelectedOptions) ||
-    asyncSelectedOptionsErrorMessage
-  ) {
-    return (
-      <LoadingProvider
-        value={{
-          loading: loadingAsyncSelectedOptions,
-          errorMessage: asyncSelectedOptionsErrorMessage,
-        }}
-      >
-        {(() => {
-          if (isTextVariant) {
-            return <FieldValueDisplay {...{ label }} />;
-          }
-          return (
-            <TextField
-              {...rest}
-              {...{ label, variant, enableLoadingState, sx }}
-            />
-          );
-        })()}
-      </LoadingProvider>
-    );
-  }
-
-  const errorProps: Pick<TextFieldProps, 'error' | 'helperText'> = {};
-  if (asyncSelectedOptionsErrorMessage) {
-    errorProps.error = true;
-    errorProps.helperText = (
-      <RetryErrorMessage
-        message={asyncSelectedOptionsErrorMessage}
-        retry={() => {
-          loadAsyncSelectedOptions();
-        }}
       />
     );
   }
@@ -1244,7 +1061,6 @@ const BaseDataDropdownField = <Entity,>(
               options: allOptions,
               defaultOptions,
               selectedOptions,
-              getDropdownOptions,
               revalidationKey,
               noOptionsText,
               externallyPaginated,
