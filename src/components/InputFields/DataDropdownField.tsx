@@ -110,10 +110,7 @@ export interface DataDropdownFieldProps<Entity = any>
         | 'optionVariant'
         | 'onSelectOption'
         | 'searchable'
-        | 'revalidationKey'
         | 'noOptionsText'
-        | 'externallyPaginated'
-        | 'limit'
         | 'sortOptions'
         | 'options'
         | 'defaultOptions'
@@ -168,13 +165,10 @@ const BaseDataDropdownField = <Entity,>(
     disabled,
     showClearButton = true,
     searchable = true,
-    revalidationKey,
     noOptionsText,
     onSelectOption,
     variant: variantProp,
     label,
-    limit,
-    externallyPaginated,
     startAdornment,
     endAdornment: endAdornmentProp,
     showDropdownIcon = true,
@@ -188,6 +182,7 @@ const BaseDataDropdownField = <Entity,>(
     enableAddNewOption = false,
     showNoOptionsFoundMessage,
     filterOptionBySearchTerm,
+    multiline,
     ...rest
   } = props;
 
@@ -233,8 +228,8 @@ const BaseDataDropdownField = <Entity,>(
 
   //#region Refs
   const anchorRef = useRef<HTMLInputElement>(null);
-  const searchFieldRef = useRef<HTMLInputElement>(null);
   const searchFieldContainerRef = useRef<HTMLInputElement>(null);
+
   const asyncOptionPagesMapRef =
     useRef<Map<number, DropdownOption[]>>(undefined);
   const onChangeRef = useRef(onChange);
@@ -267,8 +262,14 @@ const BaseDataDropdownField = <Entity,>(
 
   const [open, setOpen] = useState(false);
   const [focused, setFocused] = useState(false);
+
+  const [htmlInputElement, setHtmlInputElement] =
+    useState<HTMLInputElement | null>(null);
+  const [multilineSearchInputElement, setMultilineSearchInputElement] =
+    useState<HTMLInputElement | null>(null);
   const [selectedOptionsWrapperElement, setSelectedOptionsWrapperElement] =
     useState<HTMLDivElement | null>(null);
+
   const [newOptions, setNewOptions] = useState<DropdownOption[]>([]);
 
   //#region Selected Options
@@ -429,19 +430,14 @@ const BaseDataDropdownField = <Entity,>(
     });
   }, [selectedOption?.value, selectedOptionRevalidationKey, stringifiedValue]);
 
-  const multilineSearchMode = rest.multiline && selectedOptions.length > 0;
+  const multilineSearchMode = multiline && selectedOptions.length > 0;
+  console.log({ multilineSearchMode });
 
   useEffect(() => {
     if (multilineSearchMode && focused) {
-      searchFieldRef.current?.focus();
+      multilineSearchInputElement?.focus();
     }
   }, [focused, multilineSearchMode]);
-
-  useEffect(() => {
-    if (revalidationKey) {
-      setOptions(optionsPropRef.current || []);
-    }
-  }, [revalidationKey]);
 
   const { ref: observerRef, inView: isVisible } = useInView();
   useEffect(() => {
@@ -561,7 +557,7 @@ const BaseDataDropdownField = <Entity,>(
                   display: 'flex',
                   gap: 0.5,
                   ...(() => {
-                    if (rest.multiline) {
+                    if (multiline) {
                       return {
                         flexWrap: 'wrap',
                       };
@@ -625,7 +621,7 @@ const BaseDataDropdownField = <Entity,>(
                 display: 'flex',
                 gap: 0.5,
                 ...(() => {
-                  if (rest.multiline) {
+                  if (multiline) {
                     return {
                       flexWrap: 'wrap',
                       py: '5px',
@@ -666,7 +662,7 @@ const BaseDataDropdownField = <Entity,>(
             >
               {selectedOptionsElement}
               {(() => {
-                if (searchable && rest.multiline) {
+                if (searchable && multiline) {
                   return (
                     <Box
                       ref={searchFieldContainerRef}
@@ -724,7 +720,7 @@ const BaseDataDropdownField = <Entity,>(
                             },
                           },
                           htmlInput: {
-                            ref: searchFieldRef,
+                            ref: setMultilineSearchInputElement,
                           },
                         }}
                         enableLoadingState={false}
@@ -804,7 +800,7 @@ const BaseDataDropdownField = <Entity,>(
                             display: 'flex',
                             gap: 0.5,
                             ...(() => {
-                              if (rest.multiline) {
+                              if (multiline) {
                                 return {
                                   flexWrap: 'wrap',
                                 };
@@ -900,8 +896,8 @@ const BaseDataDropdownField = <Entity,>(
                   readOnly: !searchable || isSmallScreenSize,
                   onClick: () => {
                     if (!disabled) {
-                      if (rest.multiline) {
-                        searchFieldRef.current?.focus();
+                      if (multiline) {
+                        multilineSearchInputElement?.focus();
                       }
                       setOpen(true);
                     }
@@ -909,7 +905,7 @@ const BaseDataDropdownField = <Entity,>(
                   ref: mergeRefs([anchorRef, observerRef]),
                   sx: {
                     ...(() => {
-                      if (rest.multiline) {
+                      if (multiline) {
                         return {
                           alignItems: 'start',
                         };
@@ -943,13 +939,19 @@ const BaseDataDropdownField = <Entity,>(
                   },
                 },
                 htmlInput: {
-                  ...(() => {
-                    if (!multilineSearchMode) {
-                      return {
-                        ref: searchFieldRef,
-                      };
-                    }
-                  })(),
+                  ...slotProps?.htmlInput,
+                  ref: mergeRefs([
+                    setHtmlInputElement,
+                    (() => {
+                      if (
+                        slotProps?.htmlInput &&
+                        'ref' in slotProps?.htmlInput
+                      ) {
+                        return slotProps?.htmlInput?.ref;
+                      }
+                      return undefined;
+                    })(),
+                  ]),
                 },
               },
               omit(slotProps, [
@@ -989,10 +991,8 @@ const BaseDataDropdownField = <Entity,>(
             showClearButton={!focused}
             {...rest}
             {...(() => {
-              if (rest.multiline) {
-                return {
-                  rows: selectedOptionsRowSpan,
-                };
+              if (multiline) {
+                return { multiline, rows: selectedOptionsRowSpan };
               }
             })()}
             sx={[
@@ -1008,7 +1008,7 @@ const BaseDataDropdownField = <Entity,>(
                 },
                 ...(() => {
                   if (showClearButton) {
-                    if (rest.multiline) {
+                    if (multiline) {
                       return {
                         [`& .${classes.selectedOptionsWrapper}`]: {
                           width: 'calc(100% - 72px)',
@@ -1061,15 +1061,12 @@ const BaseDataDropdownField = <Entity,>(
               options: allOptions,
               defaultOptions,
               selectedOptions,
-              revalidationKey,
               noOptionsText,
-              externallyPaginated,
               showNoOptionsFoundMessage,
-              limit,
               sortOptions,
               filterOptionBySearchTerm,
             }}
-            keyboardFocusElement={searchFieldRef.current}
+            keyboardFocusElement={htmlInputElement}
             onChangeSearchTerm={(searchTerm) => {
               setSearchTerm(searchTerm);
             }}
@@ -1099,10 +1096,10 @@ const BaseDataDropdownField = <Entity,>(
               setSearchTerm('');
               setSelectedOptions(selectedOptions);
               triggerChangeEvent(selectedOptions);
-              if (rest.multiline) {
-                searchFieldRef.current?.focus();
+              if (multiline) {
+                multilineSearchInputElement?.focus();
               } else {
-                searchFieldRef.current?.blur();
+                htmlInputElement?.blur();
               }
             }}
             asyncOptionPagesMap={asyncOptionPagesMapRef.current}
