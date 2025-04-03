@@ -88,7 +88,7 @@ export const phoneNumberInputFieldClasses: PhoneNumberInputFieldClasses =
   );
 
 export interface Country {
-  regionalCode: string;
+  regionalCode: CountryCode;
   name: string;
   countryCode: number;
 }
@@ -96,7 +96,7 @@ export interface Country {
 export const countries = Object.keys(countriesMap).map((key) => {
   const countryCode = PhoneNumberUtil.getCountryCodeForRegion(key);
   return {
-    regionalCode: key,
+    regionalCode: key as CountryCode,
     name: countriesMap[key as CountryCode].name,
     countryCode,
   };
@@ -131,8 +131,11 @@ const flags = countries.reduce(
 export interface PhoneNumberInputFieldProps extends TextFieldProps {
   value?: string;
   displayPhoneNumberCountry?: boolean;
+  enablePhoneNumberCountrySelection?: boolean;
   displayRegionalCodeOnEmptyFocus?: boolean;
   regionalCode?: CountryCode;
+  includedCountries?: CountryCode[];
+  excludedCountries?: CountryCode[];
 }
 
 export const PhoneNumberInputField = forwardRef<
@@ -146,6 +149,7 @@ export const PhoneNumberInputField = forwardRef<
   const {
     className,
     displayPhoneNumberCountry = true,
+    enablePhoneNumberCountrySelection = true,
     displayRegionalCodeOnEmptyFocus = true,
     label,
     placeholder,
@@ -159,6 +163,8 @@ export const PhoneNumberInputField = forwardRef<
     regionalCode: regionalCodeProp,
     sx,
     enableLoadingState = true,
+    includedCountries,
+    excludedCountries,
     slotProps,
     ...rest
   } = props;
@@ -252,7 +258,18 @@ export const PhoneNumberInputField = forwardRef<
 
   //#endregion
 
-  const options = countries.map((country) => getCountryOption(country));
+  const options = countries
+    .filter((country) => {
+      return (
+        !regionalCode ||
+        regionalCode === country.regionalCode ||
+        ((!includedCountries ||
+          includedCountries.includes(country.regionalCode)) &&
+          (!excludedCountries ||
+            !excludedCountries.includes(country.regionalCode)))
+      );
+    })
+    .map((country) => getCountryOption(country));
 
   useEffect(() => {
     if (selectedCountry) {
@@ -362,16 +379,8 @@ export const PhoneNumberInputField = forwardRef<
                     maxWidth: 200,
                   }}
                 >
-                  <Button
-                    color="inherit"
-                    ref={anchorRef}
-                    {...{ disabled }}
-                    onClick={() => {
-                      setPhoneCountryListOpen((prevOpen) => !prevOpen);
-                    }}
-                    sx={{ gap: 0, pr: 0, pl: 2 }}
-                  >
-                    {(() => {
+                  {(() => {
+                    const countryElement = (() => {
                       const flagElement = (
                         <Box
                           component="i"
@@ -389,7 +398,6 @@ export const PhoneNumberInputField = forwardRef<
                           }}
                         />
                       );
-
                       if (selectedCountry) {
                         return (
                           <Tooltip
@@ -399,55 +407,79 @@ export const PhoneNumberInputField = forwardRef<
                           </Tooltip>
                         );
                       }
-
                       return flagElement;
-                    })()}
-                    <ExpandMoreIcon />
-                  </Button>
-                  <Popper
-                    open={phoneCountryListOpen}
-                    anchorEl={anchorRef.current}
-                    transition
-                    placement="bottom-start"
-                    sx={{
-                      zIndex: 9999,
-                    }}
-                  >
-                    {({ TransitionProps }) => {
+                    })();
+
+                    if (enablePhoneNumberCountrySelection) {
                       return (
-                        <Grow {...TransitionProps}>
-                          <Box>
-                            <ClickAwayListener
-                              onClickAway={handleClosePhoneCountryList}
-                            >
-                              <PaginatedDropdownOptionList
-                                options={options}
-                                minWidth={
-                                  anchorRef.current
-                                    ? anchorRef.current.offsetWidth
-                                    : undefined
-                                }
-                                keyboardFocusElement={anchorRef.current}
-                                onClose={handleClosePhoneCountryList}
-                                selectedOptions={selectedOptions}
-                                onChangeSelectedOptions={(options) => {
-                                  setSelectedOptions(options);
-                                }}
-                                onSelectOption={({ value }) => {
-                                  const selectedCountry = countries.find(
-                                    ({ regionalCode }) => regionalCode === value
-                                  );
-                                  setSelectedCountry(selectedCountry);
-                                  handleClosePhoneCountryList();
-                                }}
-                                searchable
-                              />
-                            </ClickAwayListener>
-                          </Box>
-                        </Grow>
+                        <>
+                          <Button
+                            color="inherit"
+                            ref={anchorRef}
+                            {...{ disabled }}
+                            onClick={() => {
+                              setPhoneCountryListOpen((prevOpen) => !prevOpen);
+                            }}
+                            sx={{ gap: 0, pr: 0, pl: 2 }}
+                          >
+                            {countryElement}
+                            <ExpandMoreIcon />
+                          </Button>
+                          <Popper
+                            open={phoneCountryListOpen}
+                            anchorEl={anchorRef.current}
+                            transition
+                            placement="bottom-start"
+                            sx={{
+                              zIndex: 9999,
+                            }}
+                          >
+                            {({ TransitionProps }) => {
+                              return (
+                                <Grow {...TransitionProps}>
+                                  <Box>
+                                    <ClickAwayListener
+                                      onClickAway={handleClosePhoneCountryList}
+                                    >
+                                      <PaginatedDropdownOptionList
+                                        options={options}
+                                        minWidth={
+                                          anchorRef.current
+                                            ? anchorRef.current.offsetWidth
+                                            : undefined
+                                        }
+                                        keyboardFocusElement={anchorRef.current}
+                                        onClose={handleClosePhoneCountryList}
+                                        selectedOptions={selectedOptions}
+                                        onChangeSelectedOptions={(options) => {
+                                          setSelectedOptions(options);
+                                        }}
+                                        onSelectOption={({ value }) => {
+                                          const selectedCountry =
+                                            countries.find(
+                                              ({ regionalCode }) =>
+                                                regionalCode === value
+                                            );
+                                          setSelectedCountry(selectedCountry);
+                                          handleClosePhoneCountryList();
+                                        }}
+                                        searchable
+                                      />
+                                    </ClickAwayListener>
+                                  </Box>
+                                </Grow>
+                              );
+                            }}
+                          </Popper>
+                        </>
                       );
-                    }}
-                  </Popper>
+                    }
+                    return (
+                      <Box sx={{ py: 0.5, pl: 2, display: 'flex' }}>
+                        {countryElement}
+                      </Box>
+                    );
+                  })()}
                 </InputAdornment>
               ) : null}
             </>
