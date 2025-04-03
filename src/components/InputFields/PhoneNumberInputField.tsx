@@ -129,12 +129,46 @@ const flags = countries.reduce(
 );
 
 export interface PhoneNumberInputFieldProps extends TextFieldProps {
+  /**
+   * The value of the input field.
+   */
   value?: string;
+
+  /**
+   * Whether to display the phone number country or not.
+   *
+   * @default true
+   */
   displayPhoneNumberCountry?: boolean;
+
+  /**
+   * Whether to allow users to selected their phone number country of choice.
+   *
+   * @default true
+   */
   enablePhoneNumberCountrySelection?: boolean;
+
+  /**
+   * Whether to display the country phone number code when the fiel is empty
+   * and focused.
+   *
+   * @default true
+   */
   displayRegionalCodeOnEmptyFocus?: boolean;
+
+  /**
+   * The default regional code used to validate and format input phone numbers.
+   */
   regionalCode?: CountryCode;
+
+  /**
+   * The countries to include in the countries selector dropdown list.
+   */
   includedCountries?: CountryCode[];
+
+  /**
+   * The countries to exclude from the countries selector dropdown list.
+   */
   excludedCountries?: CountryCode[];
 }
 
@@ -284,7 +318,7 @@ export const PhoneNumberInputField = forwardRef<
   };
 
   const triggerChangeEvent = useCallback(() => {
-    const event: any = new Event('change', { bubbles: true });
+    const event = new Event('change', { bubbles: true });
     Object.defineProperty(event, 'target', {
       writable: false,
       value: {
@@ -293,7 +327,7 @@ export const PhoneNumberInputField = forwardRef<
         value: inputValue.replace(/^\+|\s/g, ''),
       },
     });
-    onChangeRef.current?.(event);
+    onChangeRef.current?.(event as any);
   }, [id, inputValue, name]);
 
   useEffect(() => {
