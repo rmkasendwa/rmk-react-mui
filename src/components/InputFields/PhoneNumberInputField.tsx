@@ -259,10 +259,10 @@ export const PhoneNumberInputField = forwardRef<
       value: {
         name,
         id,
-        value: inputValue,
+        value: inputValue.replace(/^\+|\s/g, ''),
       },
     });
-    onChange && onChange(event);
+    onChange?.(event);
   }, [id, inputValue, name, onChange]);
 
   useEffect(() => {
@@ -332,7 +332,7 @@ export const PhoneNumberInputField = forwardRef<
         ) {
           setInputValue(`+${selectedCountry.countryCode}`);
         }
-        onFocus && onFocus(event);
+        onFocus?.(event);
       }}
       onBlur={(event) => {
         if (
@@ -341,7 +341,7 @@ export const PhoneNumberInputField = forwardRef<
         ) {
           setInputValue('');
         }
-        onBlur && onBlur(event);
+        onBlur?.(event);
       }}
       onChange={(event) => {
         setSanitizedInputValueRef.current(event.target.value);

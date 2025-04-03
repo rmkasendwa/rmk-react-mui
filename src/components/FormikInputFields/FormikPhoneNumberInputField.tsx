@@ -1,3 +1,4 @@
+'use client';
 import {
   ComponentsOverrides,
   ComponentsProps,
@@ -10,12 +11,13 @@ import {
 import clsx from 'clsx';
 import { forwardRef } from 'react';
 
+import { addMethod, string } from 'yup';
 import { useAggregatedFormikContext } from '../../hooks/Formik';
+import { CountryCode } from '../../models/Countries';
 import { isValidPhoneNumber } from '../../utils/PhoneNumberUtil';
 import PhoneNumberInputField, {
   PhoneNumberInputFieldProps,
 } from '../InputFields/PhoneNumberInputField';
-import { addMethod, string } from 'yup';
 
 export interface FormikPhoneNumberInputFieldClasses {
   /** Styles applied to the root element. */
@@ -70,25 +72,34 @@ export const formikPhoneNumberInputFieldClasses: FormikPhoneNumberInputFieldClas
     Object.keys(slots) as FormikPhoneNumberInputFieldClassKey[]
   );
 
+export type YupPhoneNumberValidationOptions = {
+  message?: string;
+  regionalCode?: CountryCode;
+};
+
 declare module 'yup' {
   interface StringSchema {
-    phoneNumber(): StringSchema;
+    phoneNumber(options?: YupPhoneNumberValidationOptions): StringSchema;
   }
 }
 
-addMethod(string, 'phoneNumber', function () {
-  return this.test(
-    'phoneNumber',
-    'Please enter a valid phone number',
-    function (value) {
+addMethod(
+  string,
+  'phoneNumber',
+  function ({
+    message = 'Please enter a valid phone number',
+    regionalCode,
+  }: YupPhoneNumberValidationOptions = {}) {
+    return this.test('phoneNumber', message, function (value) {
       return (
         value == null ||
         String(value).trim() == '' ||
-        (typeof value === 'string' && Boolean(isValidPhoneNumber(value)))
+        (typeof value === 'string' &&
+          Boolean(isValidPhoneNumber(value, regionalCode)))
       );
-    }
-  );
-});
+    });
+  }
+);
 
 export interface FormikPhoneNumberInputFieldProps
   extends PhoneNumberInputFieldProps {}
