@@ -19,16 +19,8 @@ import InputAdornment from '@mui/material/InputAdornment';
 import Popper from '@mui/material/Popper';
 import clsx from 'clsx';
 import { countries as countriesMap } from 'countries-list';
-import {
-  forwardRef,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { forwardRef, useCallback, useEffect, useRef, useState } from 'react';
 
-import { merge } from 'lodash';
 import { useLoadingContext } from '../../contexts/LoadingContext';
 import { CountryCode } from '../../models/Countries';
 import PhoneNumberUtil, {
@@ -183,29 +175,84 @@ export const PhoneNumberInputField = forwardRef<
     })()
   );
 
+  const { palette } = useTheme();
+  const { locked } = useLoadingContext();
+
+  //#region Refs
   const initialRenderRef = useRef(true);
   const anchorRef = useRef<HTMLButtonElement>(null);
 
-  const { palette } = useTheme();
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
+  //#endregion
 
-  const { locked } = useLoadingContext();
-
+  //#region Regional code state
   const [regionalCode, setRegionalCode] = useState<CountryCode | undefined>(
     regionalCodeProp
   );
+  useEffect(() => {
+    if (regionalCode) {
+      setSelectedCountry(flags[regionalCode]);
+    }
+  }, [regionalCode]);
+  useEffect(() => {
+    regionalCodeProp && setRegionalCode(regionalCodeProp);
+  }, [regionalCodeProp]);
+  //#endregion
+
   const [selectedCountry, setSelectedCountry] = useState<Country | undefined>(
     regionalCodeProp ? flags[regionalCodeProp] : undefined
   );
-  const [selectedOptions, setSelectedOptions] = useState<DropdownOption[]>(
+  const [selectedOptions, setSelectedOptions] = useState<DropdownOption[]>(() =>
     selectedCountry ? [getCountryOption(selectedCountry)] : []
   );
 
   const [phoneCountryListOpen, setPhoneCountryListOpen] = useState(false);
-  const [inputValue, setInputValue] = useState('');
 
-  const options = useMemo(() => {
-    return countries.map((country) => getCountryOption(country));
-  }, []);
+  //#region Input value state
+  const getSanitizedInputValue = useCallback(
+    (value: string) => {
+      const validCharacterMatch = value.match(/^\+|[\d-\s]/g);
+      if (validCharacterMatch) {
+        const validCharacters = validCharacterMatch.join('');
+        const phoneNumber = isValidPhoneNumber(value, regionalCodeProp);
+        const { localRegionalCode, phoneNumberValid } = (() => {
+          if (phoneNumber) {
+            return {
+              localRegionalCode: PhoneNumberUtil.getRegionCodeForCountryCode(
+                phoneNumber.getCountryCode()!
+              ) as CountryCode,
+              phoneNumberValid: true,
+            };
+          }
+          return { localRegionalCode: regionalCode, phoneNumberValid: false };
+        })();
+        if (phoneNumberValid) {
+          if (localRegionalCode !== regionalCode) {
+            setRegionalCode(localRegionalCode);
+          }
+          return systemStandardPhoneNumberFormat(
+            validCharacters,
+            localRegionalCode
+          );
+        } else {
+          return validCharacters;
+        }
+      } else {
+        return '';
+      }
+    },
+    [regionalCode, regionalCodeProp]
+  );
+
+  const [inputValue, setInputValue] = useState('');
+  useEffect(() => {
+    setInputValue(getSanitizedInputValue(value || ''));
+  }, [getSanitizedInputValue, value]);
+
+  //#endregion
+
+  const options = countries.map((country) => getCountryOption(country));
 
   useEffect(() => {
     if (selectedCountry) {
@@ -219,39 +266,6 @@ export const PhoneNumberInputField = forwardRef<
     setPhoneCountryListOpen(false);
   };
 
-  const setSanitizedInputValueRef = useRef((value: string) => {
-    const validCharacterMatch = value.match(/^\+|[\d-\s]/g);
-    if (validCharacterMatch) {
-      const validCharacters = validCharacterMatch.join('');
-      const phoneNumber = isValidPhoneNumber(value);
-      const { localRegionalCode, phoneNumberValid } = (() => {
-        if (phoneNumber) {
-          return {
-            localRegionalCode: PhoneNumberUtil.getRegionCodeForCountryCode(
-              phoneNumber.getCountryCode()!
-            ) as CountryCode,
-            phoneNumberValid: true,
-          };
-        }
-        return { localRegionalCode: regionalCode, phoneNumberValid: false };
-      })();
-      if (phoneNumberValid) {
-        const sanitizedValue = systemStandardPhoneNumberFormat(
-          validCharacters,
-          localRegionalCode
-        );
-        if (localRegionalCode !== regionalCode) {
-          setRegionalCode(localRegionalCode);
-        }
-        setInputValue(sanitizedValue);
-      } else {
-        setInputValue(validCharacters);
-      }
-    } else {
-      setInputValue('');
-    }
-  });
-
   const triggerChangeEvent = useCallback(() => {
     const event: any = new Event('change', { bubbles: true });
     Object.defineProperty(event, 'target', {
@@ -262,28 +276,8 @@ export const PhoneNumberInputField = forwardRef<
         value: inputValue.replace(/^\+|\s/g, ''),
       },
     });
-    onChange?.(event);
-  }, [id, inputValue, name, onChange]);
-
-  useEffect(() => {
-    if (value) {
-      setSanitizedInputValueRef.current(value);
-    } else {
-      setSanitizedInputValueRef.current('');
-    }
-  }, [value]);
-
-  useEffect(() => {
-    if (regionalCodeProp) {
-      setRegionalCode(regionalCodeProp);
-    }
-  }, [regionalCodeProp]);
-
-  useEffect(() => {
-    if (regionalCode) {
-      setSelectedCountry(flags[regionalCode]);
-    }
-  }, [regionalCode]);
+    onChangeRef.current?.(event);
+  }, [id, inputValue, name]);
 
   useEffect(() => {
     if (!initialRenderRef.current) {
@@ -291,17 +285,18 @@ export const PhoneNumberInputField = forwardRef<
     }
   }, [triggerChangeEvent]);
 
+  //#region Ref updates
   useEffect(() => {
     initialRenderRef.current = false;
     return () => {
       initialRenderRef.current = true;
     };
   }, []);
+  //#endregion
 
   if (enableLoadingState && locked) {
     return (
       <FieldValueDisplay
-        {...({} as any)}
         {...rest.FieldValueDisplayProps}
         {...{ label }}
         fullWidth={props.fullWidth}
@@ -344,113 +339,121 @@ export const PhoneNumberInputField = forwardRef<
         onBlur?.(event);
       }}
       onChange={(event) => {
-        setSanitizedInputValueRef.current(event.target.value);
+        setInputValue(getSanitizedInputValue(event.target.value));
       }}
       {...rest}
       className={clsx(classes.root)}
       {...{ name, id, placeholder, disabled, enableLoadingState }}
-      slotProps={merge(
-        {
-          input: {
-            startAdornment: displayPhoneNumberCountry ? (
-              <InputAdornment
-                position="start"
-                sx={{
-                  maxWidth: 200,
-                }}
-              >
-                <Button
-                  color="inherit"
-                  ref={anchorRef}
-                  {...{ disabled }}
-                  onClick={() => {
-                    setPhoneCountryListOpen((prevOpen) => !prevOpen);
-                  }}
-                  sx={{ gap: 0, pr: 0, pl: 2 }}
-                >
-                  {(() => {
-                    const flagElement = (
-                      <Box
-                        component="i"
-                        className={clsx(
-                          'fi',
-                          selectedCountry &&
-                            `fi-${selectedCountry.regionalCode.toLowerCase()}`
-                        )}
-                        sx={{
-                          fontSize: 20,
-                          height: '1em',
-                          mr: `4px`,
-                          display: 'inline-block',
-                          bgcolor: palette.divider,
-                        }}
-                      />
-                    );
-
-                    if (selectedCountry) {
-                      return (
-                        <Tooltip
-                          title={`${selectedCountry.name} (+${selectedCountry.countryCode})`}
-                        >
-                          {flagElement}
-                        </Tooltip>
-                      );
-                    }
-
-                    return flagElement;
-                  })()}
-                  <ExpandMoreIcon />
-                </Button>
-                <Popper
-                  open={phoneCountryListOpen}
-                  anchorEl={anchorRef.current}
-                  transition
-                  placement="bottom-start"
+      slotProps={{
+        ...slotProps,
+        input: {
+          ...slotProps?.input,
+          startAdornment: (
+            <>
+              {(() => {
+                if (slotProps?.input && 'startAdornment' in slotProps.input) {
+                  return slotProps.input.startAdornment;
+                }
+              })()}
+              {displayPhoneNumberCountry ? (
+                <InputAdornment
+                  position="start"
                   sx={{
-                    zIndex: 9999,
+                    maxWidth: 200,
                   }}
                 >
-                  {({ TransitionProps }) => {
-                    return (
-                      <Grow {...TransitionProps}>
-                        <Box>
-                          <ClickAwayListener
-                            onClickAway={handleClosePhoneCountryList}
+                  <Button
+                    color="inherit"
+                    ref={anchorRef}
+                    {...{ disabled }}
+                    onClick={() => {
+                      setPhoneCountryListOpen((prevOpen) => !prevOpen);
+                    }}
+                    sx={{ gap: 0, pr: 0, pl: 2 }}
+                  >
+                    {(() => {
+                      const flagElement = (
+                        <Box
+                          component="i"
+                          className={clsx(
+                            'fi',
+                            selectedCountry &&
+                              `fi-${selectedCountry.regionalCode.toLowerCase()}`
+                          )}
+                          sx={{
+                            fontSize: 20,
+                            height: '1em',
+                            mr: `4px`,
+                            display: 'inline-block',
+                            bgcolor: palette.divider,
+                          }}
+                        />
+                      );
+
+                      if (selectedCountry) {
+                        return (
+                          <Tooltip
+                            title={`${selectedCountry.name} (+${selectedCountry.countryCode})`}
                           >
-                            <PaginatedDropdownOptionList
-                              options={options}
-                              minWidth={
-                                anchorRef.current
-                                  ? anchorRef.current.offsetWidth
-                                  : undefined
-                              }
-                              keyboardFocusElement={anchorRef.current}
-                              onClose={handleClosePhoneCountryList}
-                              selectedOptions={selectedOptions}
-                              onChangeSelectedOptions={(options) => {
-                                setSelectedOptions(options);
-                              }}
-                              onSelectOption={({ value }) => {
-                                const selectedCountry = countries.find(
-                                  ({ regionalCode }) => regionalCode === value
-                                );
-                                setSelectedCountry(selectedCountry);
-                                handleClosePhoneCountryList();
-                              }}
-                              searchable
-                            />
-                          </ClickAwayListener>
-                        </Box>
-                      </Grow>
-                    );
-                  }}
-                </Popper>
-              </InputAdornment>
-            ) : null,
-          },
+                            {flagElement}
+                          </Tooltip>
+                        );
+                      }
+
+                      return flagElement;
+                    })()}
+                    <ExpandMoreIcon />
+                  </Button>
+                  <Popper
+                    open={phoneCountryListOpen}
+                    anchorEl={anchorRef.current}
+                    transition
+                    placement="bottom-start"
+                    sx={{
+                      zIndex: 9999,
+                    }}
+                  >
+                    {({ TransitionProps }) => {
+                      return (
+                        <Grow {...TransitionProps}>
+                          <Box>
+                            <ClickAwayListener
+                              onClickAway={handleClosePhoneCountryList}
+                            >
+                              <PaginatedDropdownOptionList
+                                options={options}
+                                minWidth={
+                                  anchorRef.current
+                                    ? anchorRef.current.offsetWidth
+                                    : undefined
+                                }
+                                keyboardFocusElement={anchorRef.current}
+                                onClose={handleClosePhoneCountryList}
+                                selectedOptions={selectedOptions}
+                                onChangeSelectedOptions={(options) => {
+                                  setSelectedOptions(options);
+                                }}
+                                onSelectOption={({ value }) => {
+                                  const selectedCountry = countries.find(
+                                    ({ regionalCode }) => regionalCode === value
+                                  );
+                                  setSelectedCountry(selectedCountry);
+                                  handleClosePhoneCountryList();
+                                }}
+                                searchable
+                              />
+                            </ClickAwayListener>
+                          </Box>
+                        </Grow>
+                      );
+                    }}
+                  </Popper>
+                </InputAdornment>
+              ) : null}
+            </>
+          ),
         },
-        slotProps
-      )}
+      }}
       sx={{
         '&>.MuiInputBase-formControl': {
           pl: 0,
