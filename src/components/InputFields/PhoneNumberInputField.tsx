@@ -319,16 +319,19 @@ export const PhoneNumberInputField = forwardRef<
 
   const triggerChangeEvent = useCallback(() => {
     const event = new Event('change', { bubbles: true });
+    const value = isValidPhoneNumber(inputValue, regionalCodeProp)
+      ? inputValue.replace(/^\+|\s/g, '')
+      : inputValue;
     Object.defineProperty(event, 'target', {
       writable: false,
       value: {
         name,
         id,
-        value: inputValue.replace(/^\+|\s/g, ''),
+        value,
       },
     });
     onChangeRef.current?.(event as any);
-  }, [id, inputValue, name]);
+  }, [id, inputValue, name, regionalCodeProp]);
 
   useEffect(() => {
     if (!initialRenderRef.current) {
@@ -383,7 +386,7 @@ export const PhoneNumberInputField = forwardRef<
       onBlur={(event) => {
         if (
           selectedCountry &&
-          inputValue === `+${selectedCountry.countryCode}`
+          new RegExp(`^\\+?${selectedCountry.countryCode}$`).test(inputValue)
         ) {
           setInputValue('');
         }
