@@ -75,6 +75,7 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(
       enterDelay = 1000,
       enterNextDelay = 500,
       open: openProp,
+      slotProps,
       ...rest
     } = props;
 
@@ -116,6 +117,7 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(
         open={Boolean(open || openProp)}
         className={clsx(classes.root)}
         slotProps={{
+          ...slotProps,
           popper: {
             ...(() => {
               if (enterAtCursorPosition && !followCursor) {
@@ -129,16 +131,16 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(
                 };
               }
             })(),
-            ...rest.slotProps?.popper,
+            ...slotProps?.popper,
             sx: [
               ({ zIndex }) => ({
                 zIndex: zIndex.tooltip,
               }),
               ...(() => {
-                if (rest.slotProps?.popper && 'sx' in rest.slotProps.popper) {
-                  return Array.isArray(rest.slotProps?.popper?.sx)
-                    ? rest.slotProps.popper.sx
-                    : [rest.slotProps?.popper?.sx];
+                if (slotProps?.popper && 'sx' in slotProps.popper) {
+                  return Array.isArray(slotProps?.popper?.sx)
+                    ? slotProps.popper.sx
+                    : [slotProps?.popper?.sx];
                 }
                 return [];
               })(),
