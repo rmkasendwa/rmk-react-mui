@@ -1,3 +1,4 @@
+import '@infinite-debugger/rmk-js-extensions/RegExp';
 import AddIcon from '@mui/icons-material/Add';
 import ErrorIcon from '@mui/icons-material/Error';
 import RefreshIcon from '@mui/icons-material/Refresh';

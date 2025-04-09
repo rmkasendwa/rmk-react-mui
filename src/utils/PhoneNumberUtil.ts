@@ -31,8 +31,8 @@ export const getRegionalCode = (
         ) as CountryCode;
       }
     }
-  } catch (exception) {
-    // TODO: Log the error
+  } catch (err) {
+    err;
   }
 };
 
@@ -53,8 +53,8 @@ export const isValidPhoneNumber = (
       if (PhoneNumberUtil.isValidNumber(parsedPhoneNumber)) {
         return parsedPhoneNumber;
       }
-    } catch (exception) {
-      // TODO: Log the error
+    } catch (err) {
+      err;
     }
     return false;
   })();
@@ -68,20 +68,21 @@ export const isValidPhoneNumber = (
   return phoneNummberValid;
 };
 
-export const systemStandardPhoneNumberFormat = (
-  phoneNumberString: string,
-  regionalCode?: CountryCode
-): string => {
+export const systemStandardPhoneNumberFormat = ({
+  phoneNumberString,
+  regionalCode,
+  format = PhoneNumberFormat.INTERNATIONAL,
+}: {
+  phoneNumberString: string;
+  regionalCode?: CountryCode;
+  format?: PhoneNumberFormat;
+}) => {
   const phoneNumber = isValidPhoneNumber(
     phoneNumberString,
     regionalCode
   ) as PhoneNumber;
   if (phoneNumber) {
-    const formattedPhoneNumber = PhoneNumberUtil.format(
-      phoneNumber,
-      PhoneNumberFormat.INTERNATIONAL
-    );
-    return formattedPhoneNumber;
+    return PhoneNumberUtil.format(phoneNumber, format);
   }
   return phoneNumberString;
 };

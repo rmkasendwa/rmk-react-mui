@@ -12,6 +12,7 @@ import {
 import clsx from 'clsx';
 import { forwardRef } from 'react';
 
+import { PhoneNumberFormat } from 'google-libphonenumber';
 import { CountryCode } from '../models/Countries';
 import PhoneNumberUtil, {
   isValidPhoneNumber,
@@ -74,7 +75,16 @@ export const phoneNumberFieldValueClasses: PhoneNumberFieldValueClasses =
 export interface PhoneNumberFieldValueProps
   extends Partial<Omit<CountryFieldValueProps, 'countryLabel'>> {
   phoneNumber: string;
-  LinkProps?: Partial<LinkProps>;
+  slotProps?: {
+    link?: Partial<LinkProps>;
+  };
+
+  /**
+   * The format to use when formatting the phone number.
+   *
+   * @default PhoneNumberFormat.INTERNATIONAL
+   */
+  format?: PhoneNumberFormat;
 }
 
 export const PhoneNumberFieldValue = forwardRef<
@@ -89,7 +99,8 @@ export const PhoneNumberFieldValue = forwardRef<
     className,
     phoneNumber,
     countryCode,
-    LinkProps = {},
+    slotProps,
+    format = PhoneNumberFormat.INTERNATIONAL,
     ...rest
   } = props;
 
@@ -105,7 +116,7 @@ export const PhoneNumberFieldValue = forwardRef<
     })()
   );
 
-  const { sx: LinkPropsSx, ...LinkPropsRest } = LinkProps;
+  const { sx: LinkPropsSx, ...LinkPropsRest } = slotProps?.link || {};
 
   const parsedPhoneNumber = isValidPhoneNumber(phoneNumber, countryCode);
 
@@ -128,10 +139,11 @@ export const PhoneNumberFieldValue = forwardRef<
               parsedPhoneNumber.getCountryCode()!
             ) as CountryCode
           }
-          countryLabel={systemStandardPhoneNumberFormat(
-            phoneNumber,
-            countryCode
-          )}
+          countryLabel={systemStandardPhoneNumberFormat({
+            phoneNumberString: phoneNumber,
+            regionalCode: countryCode,
+            format,
+          })}
         />
       </Link>
     );

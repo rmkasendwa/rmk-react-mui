@@ -21,6 +21,7 @@ import clsx from 'clsx';
 import { countries as countriesMap } from 'countries-list';
 import { forwardRef, useCallback, useEffect, useRef, useState } from 'react';
 
+import { PhoneNumberFormat } from 'google-libphonenumber';
 import { useLoadingContext } from '../../contexts/LoadingContext';
 import { CountryCode } from '../../models/Countries';
 import PhoneNumberUtil, {
@@ -170,6 +171,13 @@ export interface PhoneNumberInputFieldProps extends TextFieldProps {
    * The countries to exclude from the countries selector dropdown list.
    */
   excludedCountries?: CountryCode[];
+
+  /**
+   * The format to use when formatting the phone number.
+   *
+   * @default PhoneNumberFormat.INTERNATIONAL
+   */
+  format?: PhoneNumberFormat;
 }
 
 export const PhoneNumberInputField = forwardRef<
@@ -200,6 +208,7 @@ export const PhoneNumberInputField = forwardRef<
     includedCountries,
     excludedCountries,
     slotProps,
+    format = PhoneNumberFormat.INTERNATIONAL,
     ...rest
   } = props;
 
@@ -271,10 +280,11 @@ export const PhoneNumberInputField = forwardRef<
           if (localRegionalCode !== regionalCode) {
             setRegionalCode(localRegionalCode);
           }
-          return systemStandardPhoneNumberFormat(
-            validCharacters,
-            localRegionalCode
-          );
+          return systemStandardPhoneNumberFormat({
+            phoneNumberString: validCharacters,
+            regionalCode: localRegionalCode,
+            format,
+          });
         } else {
           return validCharacters;
         }
@@ -282,7 +292,7 @@ export const PhoneNumberInputField = forwardRef<
         return '';
       }
     },
-    [regionalCode, regionalCodeProp]
+    [format, regionalCode, regionalCodeProp]
   );
 
   const [inputValue, setInputValue] = useState('');
@@ -375,6 +385,7 @@ export const PhoneNumberInputField = forwardRef<
       value={inputValue}
       onFocus={(event) => {
         if (
+          format === PhoneNumberFormat.INTERNATIONAL &&
           displayRegionalCodeOnEmptyFocus &&
           selectedCountry &&
           inputValue.length === 0
@@ -385,6 +396,7 @@ export const PhoneNumberInputField = forwardRef<
       }}
       onBlur={(event) => {
         if (
+          format === PhoneNumberFormat.INTERNATIONAL &&
           selectedCountry &&
           new RegExp(`^\\+?${selectedCountry.countryCode}$`).test(inputValue)
         ) {

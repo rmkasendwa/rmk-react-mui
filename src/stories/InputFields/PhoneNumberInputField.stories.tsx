@@ -5,6 +5,7 @@ import {
   PhoneNumberInputField,
   PhoneNumberInputFieldProps,
 } from '../../components/InputFields/PhoneNumberInputField';
+import { PhoneNumberFormat } from 'google-libphonenumber';
 
 export default {
   title: 'Components/Input Fields/Phone Number Input Field',
@@ -38,6 +39,12 @@ export const WithUnformattedValue = Template.bind({});
 WithUnformattedValue.args = {
   regionalCode: 'UG',
   value: '0701234567',
+} as PhoneNumberInputFieldProps;
+
+export const WithNationalPhoneNumberFormat = Template.bind({});
+WithNationalPhoneNumberFormat.args = {
+  regionalCode: 'UG',
+  format: PhoneNumberFormat.NATIONAL,
 } as PhoneNumberInputFieldProps;
 
 export const WithIncludedCountries = Template.bind({});
