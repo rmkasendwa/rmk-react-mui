@@ -64,13 +64,15 @@ export const internalErrorPageClasses: InternalErrorPageClasses =
     Object.keys(slots) as InternalErrorPageClassKey[]
   );
 
-export interface InternalErrorPageProps
-  extends Partial<Omit<ErrorPageProps, 'slotProps'>> {
+export type InternalErrorPageProps = Pick<
+  ErrorPageProps,
+  'className' | 'description'
+> & {
   showGoAwayButton?: boolean;
   slotProps?: {
     goAwayButton?: Partial<ButtonProps>;
   };
-}
+};
 
 export const InternalErrorPage = forwardRef<
   HTMLDivElement,
@@ -80,7 +82,7 @@ export const InternalErrorPage = forwardRef<
     props: inProps,
     name: 'MuiInternalErrorPage',
   });
-  const { className, showGoAwayButton = true, slotProps, ...rest } = props;
+  const { className, description, showGoAwayButton = true, slotProps } = props;
 
   const classes = composeClasses(
     slots,
@@ -98,7 +100,6 @@ export const InternalErrorPage = forwardRef<
     <ErrorPage
       ref={ref}
       className={clsx(classes.root)}
-      title="Error 500 (Internal Server Error)!!1"
       heading={<>We&rsquo;re sorry, something went wrong.</>}
       errorCode="500"
       tools={
@@ -108,7 +109,8 @@ export const InternalErrorPage = forwardRef<
           </Button>
         ) : null
       }
-      {...rest}
+      description={description}
+      showDefaultPageLinks={showGoAwayButton}
     />
   );
 });

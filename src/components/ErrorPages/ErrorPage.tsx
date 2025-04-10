@@ -67,9 +67,8 @@ export const errorPageClasses: ErrorPageClasses = generateUtilityClasses(
   Object.keys(slots) as ErrorPageClassKey[]
 );
 
-export interface ErrorPageProps extends Pick<BoxProps, 'className' | 'sx'> {
+export type ErrorPageProps = Pick<BoxProps, 'className' | 'sx'> & {
   showDefaultPageLinks?: boolean;
-  title: string;
   heading: ReactNode;
   description?: ReactNode;
   errorCode?: ReactNode;
@@ -80,7 +79,7 @@ export interface ErrorPageProps extends Pick<BoxProps, 'className' | 'sx'> {
     goBackButton?: Partial<ButtonProps>;
     goHomeButton?: Partial<ButtonProps>;
   };
-}
+};
 
 export const ErrorPage = forwardRef<HTMLDivElement, ErrorPageProps>(
   function ErrorPage(inProps, ref) {

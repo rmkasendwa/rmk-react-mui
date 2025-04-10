@@ -67,7 +67,7 @@ export const resourceNotFoundPageClasses: ResourceNotFoundPageClasses =
     Object.keys(slots) as ResourceNotFoundPageClassKey[]
   );
 
-export interface ResourceNotFoundPageProps extends Partial<ErrorPageProps> {}
+export type ResourceNotFoundPageProps = Partial<ErrorPageProps>;
 
 export const ResourceNotFoundPage = forwardRef<
   HTMLDivElement,
@@ -97,7 +97,6 @@ export const ResourceNotFoundPage = forwardRef<
     <ErrorPage
       ref={ref}
       className={clsx(classes.root)}
-      title="Error 404 (Not Found)!!1"
       heading={<>Sorry, this page is not available</>}
       description={
         <>

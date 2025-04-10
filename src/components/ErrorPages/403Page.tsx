@@ -62,7 +62,7 @@ export const accessDeniedPageClasses: AccessDeniedPageClasses =
     Object.keys(slots) as AccessDeniedPageClassKey[]
   );
 
-export interface AccessDeniedPageProps extends Partial<ErrorPageProps> {}
+export type AccessDeniedPageProps = Partial<ErrorPageProps>;
 
 export const AccessDeniedPage = forwardRef<
   HTMLDivElement,
@@ -90,7 +90,6 @@ export const AccessDeniedPage = forwardRef<
     <ErrorPage
       ref={ref}
       className={clsx(classes.root)}
-      title="Error 403 (Forbidden)!!1"
       heading={<>We&rsquo;re sorry, but you do not have access to this page.</>}
       errorCode={
         <ReportIcon
