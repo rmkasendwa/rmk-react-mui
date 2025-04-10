@@ -91,7 +91,6 @@ export const ErrorPage = forwardRef<HTMLDivElement, ErrorPageProps>(
     const {
       className,
       showDefaultPageLinks = true,
-      title,
       heading,
       description,
       errorCode,
@@ -167,7 +166,7 @@ export const ErrorPage = forwardRef<HTMLDivElement, ErrorPageProps>(
                       <Typography
                         sx={{
                           fontSize: 120,
-                          fontWeight: 'bold',
+                          fontWeight: 500,
                         }}
                       >
                         {errorCode}

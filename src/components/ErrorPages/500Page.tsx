@@ -66,6 +66,7 @@ export const internalErrorPageClasses: InternalErrorPageClasses =
 
 export interface InternalErrorPageProps
   extends Partial<Omit<ErrorPageProps, 'slotProps'>> {
+  showGoAwayButton?: boolean;
   slotProps?: {
     goAwayButton?: Partial<ButtonProps>;
   };
@@ -79,7 +80,7 @@ export const InternalErrorPage = forwardRef<
     props: inProps,
     name: 'MuiInternalErrorPage',
   });
-  const { className, slotProps, ...rest } = props;
+  const { className, showGoAwayButton = true, slotProps, ...rest } = props;
 
   const classes = composeClasses(
     slots,
@@ -101,9 +102,11 @@ export const InternalErrorPage = forwardRef<
       heading={<>We&rsquo;re sorry, something went wrong.</>}
       errorCode="500"
       tools={
-        <Button startIcon={<RefreshIcon />} {...slotProps?.goAwayButton}>
-          Take me away from here
-        </Button>
+        showGoAwayButton ? (
+          <Button startIcon={<RefreshIcon />} {...slotProps?.goAwayButton}>
+            Take me away from here
+          </Button>
+        ) : null
       }
       {...rest}
     />
