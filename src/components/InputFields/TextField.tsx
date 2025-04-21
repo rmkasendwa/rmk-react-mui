@@ -267,6 +267,7 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
               <Tooltip title="Clear" disableInteractive>
                 <IconButton
                   className="text-input-clear-button"
+                  tabIndex={-1}
                   onClick={(event) => {
                     event.preventDefault();
                     if (!onChangeRef.current || value == null) {

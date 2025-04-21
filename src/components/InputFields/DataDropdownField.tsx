@@ -157,7 +157,6 @@ const BaseDataDropdownField = <Entity,>(
     slotProps,
     dropdownListMaxHeight,
     optionPaging = true,
-    selectedOption,
     onChangeSearchTerm,
     optionVariant,
     sx,
@@ -306,7 +305,7 @@ const BaseDataDropdownField = <Entity,>(
     if (multilineSearchMode && focused) {
       multilineSearchInputElement?.focus();
     }
-  }, [focused, multilineSearchMode]);
+  }, [focused, multilineSearchInputElement, multilineSearchMode]);
 
   const { ref: observerRef, inView: isVisible } = useInView();
 
@@ -454,6 +453,7 @@ const BaseDataDropdownField = <Entity,>(
           <Tooltip title="Clear">
             <IconButton
               className="data-dropdown-input-clear-button"
+              tabIndex={-1}
               onClick={(event) => {
                 event.stopPropagation();
                 setSearchTerm('');
