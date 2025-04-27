@@ -167,59 +167,61 @@ export const LoadingTypography = forwardRef<
       component="div"
       {...rest}
       className={clsx(classes.root)}
-      sx={{
-        ...sx,
-        ...(() => {
-          if (enableLoadingState && (loading || errorMessage)) {
-            return {
-              borderRadius: '4px',
-              '&,*': {
-                color: 'transparent !important',
-              },
-              ...(() => {
-                switch (animation) {
-                  case 'pulse':
-                    return {
-                      display: 'inline',
-                      bgcolor: alpha(palette.text.disabled, 0.05),
-                      ...(() => {
-                        if (loading) {
-                          return {
-                            animation: `1.5s ease-in-out 0.5s infinite normal none running ${pulseAnimation}`,
-                          };
-                        }
-                      })(),
-                    };
-                  case 'wave':
-                    return {
-                      position: 'relative',
-                      overflow: 'hidden',
-                      '&:after': {
-                        content: '""',
-                        position: 'absolute',
-                        transform: 'translateX(-100%)',
-                        inset: 0,
-                        background: `linear-gradient(90deg, transparent, ${alpha(
-                          palette.text.disabled,
-                          0.08
-                        )}, transparent)`,
+      sx={[
+        ...(Array.isArray(sx) ? sx : [sx]),
+        {
+          ...(() => {
+            if (enableLoadingState && (loading || errorMessage)) {
+              return {
+                borderRadius: '4px',
+                '&,*': {
+                  color: 'transparent !important',
+                },
+                ...(() => {
+                  switch (animation) {
+                    case 'pulse':
+                      return {
+                        display: 'inline',
+                        bgcolor: alpha(palette.text.disabled, 0.05),
                         ...(() => {
                           if (loading) {
                             return {
-                              animation: `1.6s linear 0.5s infinite normal none running ${waveAnimation}`,
+                              animation: `1.5s ease-in-out 0.5s infinite normal none running ${pulseAnimation}`,
                             };
                           }
                         })(),
-                      },
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                    };
-                }
-              })(),
-            };
-          }
-        })(),
-      }}
+                      };
+                    case 'wave':
+                      return {
+                        position: 'relative',
+                        overflow: 'hidden',
+                        '&:after': {
+                          content: '""',
+                          position: 'absolute',
+                          transform: 'translateX(-100%)',
+                          inset: 0,
+                          background: `linear-gradient(90deg, transparent, ${alpha(
+                            palette.text.disabled,
+                            0.08
+                          )}, transparent)`,
+                          ...(() => {
+                            if (loading) {
+                              return {
+                                animation: `1.6s linear 0.5s infinite normal none running ${waveAnimation}`,
+                              };
+                            }
+                          })(),
+                        },
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                      };
+                  }
+                })(),
+              };
+            }
+          })(),
+        },
+      ]}
     >
       {(() => {
         if (enableLoadingState && (loading || errorMessage)) {

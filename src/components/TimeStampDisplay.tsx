@@ -164,10 +164,12 @@ export const TimeStampDisplay = forwardRef<HTMLElement, TimeStampDisplayProps>(
         {...{ component: 'span' as any }}
         variant="inherit"
         {...rest}
-        sx={{
-          cursor: 'default',
-          ...sx,
-        }}
+        sx={[
+          {
+            cursor: 'default',
+          },
+          ...(Array.isArray(sx) ? sx : [sx]),
+        ]}
       >
         {sentenceCase
           ? formattedTimestamp.toSentenceCase()
