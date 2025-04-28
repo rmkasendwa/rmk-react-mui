@@ -164,12 +164,14 @@ export const FormikErrorFieldHighlighter = forwardRef<
       ref={mergeRefs([ref, formElementsWrapperRef])}
       {...rest}
       className={clsx(classes.root)}
-      sx={{
-        ...sx,
-        [`.${classes.flicker}`]: {
-          animation: `0.1s linear 0s infinite normal none running ${flickerAnimation}`,
+      sx={[
+        ...(Array.isArray(sx) ? sx : [sx]),
+        {
+          [`.${classes.flicker}`]: {
+            animation: `0.1s linear 0s infinite normal none running ${flickerAnimation}`,
+          },
         },
-      }}
+      ]}
     >
       {typeof children === 'function'
         ? children({ scrollToErrorFields })
