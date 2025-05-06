@@ -117,6 +117,7 @@ export const CountryFieldValue = forwardRef<
       IconContainerProps={{
         sx: {
           alignItems: 'center',
+          height: 'auto',
         },
       }}
       className={clsx(classes.root)}
