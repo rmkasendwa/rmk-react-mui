@@ -73,11 +73,11 @@ export const phoneNumberFieldValueClasses: PhoneNumberFieldValueClasses =
   );
 
 export interface PhoneNumberFieldValueProps
-  extends Partial<Omit<CountryFieldValueProps, 'countryLabel'>> {
+  extends Partial<Omit<CountryFieldValueProps, 'countryLabel' | 'slotProps'>> {
   phoneNumber: string;
   slotProps?: {
     link?: Partial<LinkProps>;
-  };
+  } & CountryFieldValueProps['slotProps'];
 
   /**
    * The format to use when formatting the phone number.
@@ -134,6 +134,7 @@ export const PhoneNumberFieldValue = forwardRef<
           ref={ref}
           {...rest}
           className={clsx(classes.root)}
+          slotProps={slotProps}
           countryCode={
             PhoneNumberUtil.getRegionCodeForCountryCode(
               parsedPhoneNumber.getCountryCode()!
@@ -153,6 +154,7 @@ export const PhoneNumberFieldValue = forwardRef<
     <CountryFieldValue
       ref={ref}
       {...rest}
+      slotProps={slotProps}
       className={clsx(classes.root)}
       countryLabel={phoneNumber}
     />

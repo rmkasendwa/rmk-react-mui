@@ -69,10 +69,12 @@ export const countryFieldValueClasses: CountryFieldValueClasses =
   );
 
 export interface CountryFieldValueProps
-  extends Partial<Omit<FieldValueProps, 'icon' | 'children'>> {
+  extends Partial<Omit<FieldValueProps, 'icon' | 'children' | 'slotProps'>> {
   countryCode?: CountryCode;
   countryLabel?: string;
-  FlagIconProps?: Partial<BoxProps>;
+  slotProps?: {
+    flagIcon?: Partial<BoxProps>;
+  } & FieldValueProps['slotProps'];
 }
 
 export const CountryFieldValue = forwardRef<
@@ -80,14 +82,12 @@ export const CountryFieldValue = forwardRef<
   CountryFieldValueProps
 >(function CountryFieldValue(inProps, ref) {
   const props = useThemeProps({ props: inProps, name: 'MuiCountryFieldValue' });
-  const {
-    className,
-    countryCode,
-    FlagIconProps = {},
-    sx,
-    ...rest
-  } = omit(props, 'countryLabel');
+  const { className, countryCode, slotProps, sx, ...rest } = omit(
+    props,
+    'countryLabel'
+  );
 
+  const { flagIcon: FlagIconProps = {} } = slotProps ?? {};
   let { countryLabel } = props;
 
   const classes = composeClasses(
@@ -111,6 +111,9 @@ export const CountryFieldValue = forwardRef<
     <FieldValue
       ref={ref}
       {...rest}
+      slotProps={{
+        ...slotProps,
+      }}
       IconContainerProps={{
         sx: {
           alignItems: 'center',

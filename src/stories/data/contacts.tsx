@@ -111,9 +111,11 @@ export const tableColumns: TableColumn<Contact>[] = [
           }
           variant="inherit"
           noWrap
-          ContainerGridProps={{
-            sx: {
-              alignItems: 'center',
+          slotProps={{
+            containerGrid: {
+              sx: {
+                alignItems: 'center',
+              },
             },
           }}
         >

@@ -97,7 +97,6 @@ export interface FieldValueProps<T extends ReactNode = ReactNode>
   endIcon?: ReactNode;
   IconContainerProps?: Partial<GridProps>;
   EndIconContainerProps?: Partial<GridProps>;
-  ContainerGridProps?: Partial<GridProps>;
   editable?: boolean;
   editableValue?: string | boolean | number;
   fieldValueEditor?: (value: T) => any;
@@ -111,6 +110,9 @@ export interface FieldValueProps<T extends ReactNode = ReactNode>
   children?: T;
   enableLoadingState?: boolean;
   showDefaultValue?: boolean;
+  slotProps?: {
+    containerGrid?: Partial<GridProps>;
+  };
 }
 
 export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
@@ -121,7 +123,7 @@ export const FieldValue = forwardRef<HTMLElement, FieldValueProps>(
       endIcon,
       IconContainerProps = {},
       EndIconContainerProps = {},
-      ContainerGridProps = {},
+      slotProps: { containerGrid: ContainerGridProps = {} } = {},
       className,
       children: valueProp,
       fieldValueEditor,

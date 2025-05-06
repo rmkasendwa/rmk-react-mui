@@ -169,7 +169,7 @@ export const BaseFieldValueDisplay = <FieldValue extends ReactNode>(
   const {
     className: ValuePropsClassName,
     sx: FieldValuePropsSx,
-    ContainerGridProps: FieldValuePropsContainerGripProps = {},
+    slotProps: { containerGrid: FieldValuePropsContainerGripProps = {} } = {},
     ...FieldValuePropsRest
   } = FieldValueProps;
   const {

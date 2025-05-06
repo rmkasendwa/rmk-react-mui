@@ -39,6 +39,7 @@ import { useInView } from 'react-intersection-observer';
 import { mergeRefs } from 'react-merge-refs';
 
 import { useLoadingContext } from '../../contexts/LoadingContext';
+import { DropdownOptionValue } from '../../models/Utils';
 import { isDescendant } from '../../utils/html';
 import FieldValueDisplay from '../FieldValueDisplay';
 import ModalPopup from '../ModalPopup';
@@ -49,7 +50,6 @@ import PaginatedDropdownOptionList, {
 import { getDropdownOptionLabel } from '../PaginatedDropdownOptionList/DropdownOption';
 import Tooltip from '../Tooltip';
 import TextField, { TextFieldProps } from './TextField';
-import { DropdownOptionValue } from '../../models/Utils';
 
 export interface DataDropdownFieldClasses {
   /** Styles applied to the root element. */
@@ -610,9 +610,11 @@ const BaseDataDropdownField = <Entity,>(
               FieldValueProps={{
                 variant: 'inherit',
                 noWrap: true,
-                ContainerGridProps: {
-                  sx: {
-                    mt: 0,
+                slotProps: {
+                  containerGrid: {
+                    sx: {
+                      mt: 0,
+                    },
                   },
                 },
                 onClick: () => {

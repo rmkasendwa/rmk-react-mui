@@ -258,8 +258,10 @@ export const WorldMap = forwardRef<SVGSVGElement, WorldMapProps>(
               <CountryFieldValue
                 countryCode={countryCode as any}
                 countryLabel={countryName}
-                ContainerGridProps={{
-                  alignItems: 'center',
+                slotProps={{
+                  containerGrid: {
+                    alignItems: 'center',
+                  },
                 }}
                 sx={{
                   fontSize: 24,
