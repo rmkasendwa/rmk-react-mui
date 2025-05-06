@@ -101,8 +101,10 @@ export const SingleFieldCard = forwardRef<HTMLDivElement, SingleFieldCardProps>(
       >
         <FieldLabel
           align="center"
-          ContainerGridProps={{
-            justifyContent: 'center',
+          slotProps={{
+            containerGrid: {
+              justifyContent: 'center',
+            },
           }}
         >
           {label}

@@ -73,7 +73,9 @@ export interface FieldLabelProps extends LoadingTypographyProps {
   labelSuffix?: ReactNode;
   helpTip?: ReactNode;
   disabled?: boolean;
-  ContainerGridProps?: Partial<GridProps>;
+  slotProps?: {
+    containerGrid?: Partial<GridProps>;
+  };
 }
 
 export const FieldLabel = forwardRef<HTMLElement, FieldLabelProps>(
@@ -88,7 +90,7 @@ export const FieldLabel = forwardRef<HTMLElement, FieldLabelProps>(
       helpTip,
       disabled,
       sx,
-      ContainerGridProps = {},
+      slotProps: { containerGrid: ContainerGridProps = {} } = {},
       ...rest
     } = props;
 

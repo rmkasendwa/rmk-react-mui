@@ -193,7 +193,6 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
     if (enableLoadingState && locked) {
       return (
         <FieldValueDisplay
-          {...({} as any)}
           {...FieldValueDisplayPropsRest}
           {...{ label, value, disabled }}
         />
@@ -383,13 +382,15 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
             ...(() => {
               if (!variant || variant === 'outlined' || variant === 'filled') {
                 return {
-                  ContainerGridProps: {
-                    ...FieldValueDisplayPropsRest.LabelProps
-                      ?.ContainerGridProps,
-                    sx: {
-                      ...FieldValueDisplayPropsRest.LabelProps
-                        ?.ContainerGridProps?.sx,
-                      mb: 0.5,
+                  slotProps: {
+                    containerGrid: {
+                      ...FieldValueDisplayPropsRest.LabelProps?.slotProps
+                        ?.containerGrid,
+                      sx: {
+                        ...FieldValueDisplayPropsRest.LabelProps?.slotProps
+                          ?.containerGrid?.sx,
+                        mb: 0.5,
+                      },
                     },
                   },
                 };

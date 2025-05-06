@@ -209,10 +209,12 @@ export const BaseFieldValueDisplay = <FieldValue extends ReactNode>(
           {...(() => {
             if (direction === 'row') {
               return {
-                ContainerGridProps: {
-                  sx: {
-                    display: 'inline-flex',
-                    width: 'auto',
+                slotProps: {
+                  containerGrid: {
+                    sx: {
+                      display: 'inline-flex',
+                      width: 'auto',
+                    },
                   },
                 },
               };
@@ -251,9 +253,8 @@ export const BaseFieldValueDisplay = <FieldValue extends ReactNode>(
   const valueNode = (
     <FieldValue
       className={clsx(classes.value, ValuePropsClassName)}
-      {...({ enableLoadingState } as any)}
       {...FieldValuePropsRest}
-      {...{
+      {...({
         editable,
         onCancelEdit,
         type,
@@ -263,14 +264,17 @@ export const BaseFieldValueDisplay = <FieldValue extends ReactNode>(
         editableValue,
         fieldValueEditor,
         onFieldValueUpdated,
-      }}
+        enableLoadingState,
+      } as any)}
       onChangeEditMode={(editMode) => {
         setEditMode(editMode);
       }}
-      ContainerGridProps={{
-        ...FieldValuePropsContainerGripPropsRest,
-        sx: {
-          ...FieldValuePropsContainerGripPropsSx,
+      slotProps={{
+        containerGrid: {
+          ...FieldValuePropsContainerGripPropsRest,
+          sx: {
+            ...FieldValuePropsContainerGripPropsSx,
+          },
         },
       }}
       sx={{
