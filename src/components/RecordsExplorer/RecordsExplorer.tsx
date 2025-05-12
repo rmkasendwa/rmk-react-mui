@@ -505,6 +505,7 @@ export interface RecordsExplorerProps<
   >;
   subHeaderElement?: ReactNode;
   navigationStateExtension?: ObjectShape;
+  showToolbarHeader?: boolean;
 }
 
 const BaseRecordsExplorer = <
@@ -619,6 +620,7 @@ const BaseRecordsExplorer = <
     subHeaderElement,
     navigationStateExtension,
     getToolbarElement,
+    showToolbarHeader = true,
     ...rest
   } = omit(
     props,
@@ -2417,21 +2419,23 @@ const BaseRecordsExplorer = <
         })(),
       }}
     >
-      <Paper
-        elevation={0}
-        {...HeaderPropsRest}
-        ref={headerElementRef}
-        className={clsx(classes.header, HeaderPropsRest.className)}
-        component="header"
-        sx={{ position: 'sticky', top: 0, zIndex: 100, ...HeaderPropsSx }}
-      >
-        {getToolbarElement
-          ? getToolbarElement({
-              ...state,
-              baseToolbarElement: toolbarElement,
-            })
-          : toolbarElement}
-      </Paper>
+      {showToolbarHeader ? (
+        <Paper
+          elevation={0}
+          {...HeaderPropsRest}
+          ref={headerElementRef}
+          className={clsx(classes.header, HeaderPropsRest.className)}
+          component="header"
+          sx={{ position: 'sticky', top: 0, zIndex: 100, ...HeaderPropsSx }}
+        >
+          {getToolbarElement
+            ? getToolbarElement({
+                ...state,
+                baseToolbarElement: toolbarElement,
+              })
+            : toolbarElement}
+        </Paper>
+      ) : null}
       {subHeaderElement}
       <Box
         {...BodyPropsRest}
