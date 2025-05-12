@@ -6,7 +6,7 @@ import {
 import * as Yup from 'yup';
 import { ObjectShape } from 'yup';
 
-import { ParamStorage, useParamStorage } from '../../../hooks/ParamStorage';
+import { useParamStorage } from '../../../hooks/ParamStorage';
 import { SortDirection, sortDirections } from '../../../models/Sort';
 import { BaseDataRow, tableSearchParamValidationSpec } from '../../Table';
 import { timelineSearchParamValidationSpec } from '../../Timeline';
@@ -40,7 +40,6 @@ export interface RecordsExplorerNavigationStateProps<
   ValidationSpec extends ObjectShape = any
 > {
   id?: string;
-  paramStorage?: ParamStorage;
   clearSearchStateOnUnmount?: boolean;
   ignoreUnspecifiedParams?: boolean;
   spec?: ValidationSpec;
@@ -56,13 +55,7 @@ export const useRecordsExplorerNavigationState = <
     props: inProps,
     name: 'MuiRecordsExplorerNavigationState',
   });
-  const {
-    id,
-    paramStorage,
-    clearSearchStateOnUnmount = false,
-    ignoreUnspecifiedParams,
-    spec,
-  } = props;
+  const { id, clearSearchStateOnUnmount = false, spec } = props;
 
   const baseSpec = {
     ...timelineSearchParamValidationSpec,
@@ -107,15 +100,12 @@ export const useRecordsExplorerNavigationState = <
   } as const;
 
   return useParamStorage({
-    mode: 'json',
     spec: {
       ...baseSpec,
       ...spec,
     } as typeof baseSpec & ValidationSpec,
     id,
-    paramStorage,
     clearSearchStateOnUnmount,
-    ignoreUnspecifiedParams,
   });
 };
 

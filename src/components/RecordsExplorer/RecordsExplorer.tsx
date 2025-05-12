@@ -55,7 +55,6 @@ import {
   usePaginatedRecords,
   useUpdate,
 } from '../../hooks/DataFetching';
-import { ParamStorage } from '../../hooks/ParamStorage';
 import { SelectedSortOption, SortBy, SortableFields } from '../../models/Sort';
 import { PermissionCode } from '../../models/Users';
 import { CrudMode, PaginatedResponseData } from '../../models/Utils';
@@ -480,7 +479,6 @@ export interface RecordsExplorerProps<
   showSortTool?: boolean;
   showFilterTool?: boolean;
   showResetTool?: boolean;
-  stateStorage?: ParamStorage;
   PaginatedRecordsOptions?: Partial<PaginatedRecordsProps<RecordRow>>;
   dataPresets?: RecordsExplorerDataPreset<RecordRow>[];
   selectedDataPresetId?: string | number;
@@ -593,7 +591,6 @@ const BaseRecordsExplorer = <
     showSortTool = true,
     showFilterTool = true,
     showResetTool = true,
-    stateStorage,
     getCreateFunction,
     getPathToAddNewRecord,
     getViewFunction,
@@ -743,7 +740,6 @@ const BaseRecordsExplorer = <
   const { searchParams, setSearchParams, addSearchParamsToPath } =
     useRecordsExplorerNavigationState<RecordRow>({
       id,
-      paramStorage: stateStorage,
       clearSearchStateOnUnmount,
       spec: navigationStateExtension,
     });
@@ -783,48 +779,6 @@ const BaseRecordsExplorer = <
   const getHashedSearchParamKey = (key: string) => {
     return hashIt(key).toString(36).slice(0, 3);
   };
-
-  const updateChangedSearchParamKeys = (...args: string[]) => {
-    const changedSearchParamKeys = [
-      ...new Set([
-        ...(modifiedStateKeys || []),
-        ...[...Object.keys(searchParams), ...args]
-          .filter((key) => {
-            return !unTrackableSearchParams.includes(key);
-          })
-          .map((key) => {
-            return getHashedSearchParamKey(key);
-          }),
-      ]),
-    ];
-    if (
-      JSON.stringify(changedSearchParamKeys) !==
-      JSON.stringify(modifiedStateKeys)
-    ) {
-      setSearchParams(
-        {
-          modifiedKeys:
-            changedSearchParamKeys.length > 0 ? changedSearchParamKeys : null,
-        },
-        {
-          replace: true,
-        }
-      );
-    }
-  };
-  const updateChangedSearchParamKeysRef = useRef(updateChangedSearchParamKeys);
-  updateChangedSearchParamKeysRef.current = updateChangedSearchParamKeys;
-
-  const stringifiedSearchParams = JSON.stringify(
-    Object.keys(searchParams).filter((key) => {
-      return !unTrackableSearchParams.includes(key);
-    })
-  );
-  useEffect(() => {
-    if (stringifiedSearchParams) {
-      updateChangedSearchParamKeysRef.current();
-    }
-  }, [stringifiedSearchParams]);
 
   const createNewRecord = Boolean(searchParamCreateNewRecord);
 
@@ -1110,7 +1064,6 @@ const BaseRecordsExplorer = <
         },
         { replace: true }
       );
-      updateChangedSearchParamKeys('filterBy');
     };
 
   //#region Filtering data
@@ -1412,7 +1365,6 @@ const BaseRecordsExplorer = <
                         replace: true,
                       }
                     );
-                    updateChangedSearchParamKeys('expandedGroups');
                   },
                 },
               } as RecordRow);
@@ -1618,7 +1570,6 @@ const BaseRecordsExplorer = <
           replace: true,
         }
       );
-      updateChangedSearchParamKeys('search');
     }
     onChangeSearchTerm && onChangeSearchTerm(searchTerm);
   };
@@ -1671,7 +1622,6 @@ const BaseRecordsExplorer = <
                     replace: true,
                   }
                 );
-                updateChangedSearchParamKeys('expandedGroups');
               },
             },
           } as Pick<TableProps, 'isGroupedTable' | 'TableGroupingProps'>;
@@ -1830,7 +1780,6 @@ const BaseRecordsExplorer = <
                       replace: true,
                     }
                   );
-                  updateChangedSearchParamKeys('sortBy');
                 }
               },
             };
@@ -1974,7 +1923,6 @@ const BaseRecordsExplorer = <
                 replace: true,
               }
             );
-            updateChangedSearchParamKeys('selectedDataPreset');
           }}
           showClearButton={false}
           searchable={dataPresets.length > 10}
@@ -2009,7 +1957,6 @@ const BaseRecordsExplorer = <
           replace: true,
         }
       );
-      updateChangedSearchParamKeys('view');
     },
   });
 
@@ -2033,7 +1980,6 @@ const BaseRecordsExplorer = <
           replace: true,
         }
       );
-      updateChangedSearchParamKeys('groupBy');
     },
   });
 
@@ -2057,7 +2003,6 @@ const BaseRecordsExplorer = <
           replace: true,
         }
       );
-      updateChangedSearchParamKeys('sortBy');
     },
   });
 
