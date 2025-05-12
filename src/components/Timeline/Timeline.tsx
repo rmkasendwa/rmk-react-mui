@@ -575,7 +575,6 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
     },
     setSearchParams,
   } = useParamStorage({
-    mode: 'json',
     spec: {
       ...timelineSearchParamValidationSpec,
       timeScale: Yup.mixed<TimeScaleOption>().oneOf([...supportedTimeScales]),

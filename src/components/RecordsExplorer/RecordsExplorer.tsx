@@ -1,5 +1,5 @@
+'use client';
 import '@infinite-debugger/rmk-js-extensions/JSON';
-
 import AddIcon from '@mui/icons-material/Add';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import EditIcon from '@mui/icons-material/Edit';

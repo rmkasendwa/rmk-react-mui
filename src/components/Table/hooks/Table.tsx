@@ -245,7 +245,6 @@ export const useTable = <DataRow extends BaseDataRow>(
     searchParams: { selectedColumns: searchParamSelectedColumns },
     setSearchParams,
   } = useParamStorage({
-    mode: 'json',
     spec: tableSearchParamValidationSpec,
     id,
     clearSearchStateOnUnmount,
