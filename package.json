@@ -115,7 +115,6 @@
     "react-file-icon": "^1.6.0",
     "react-intersection-observer": "^9.16.0",
     "react-merge-refs": "^2.1.1",
-    "react-router-dom": "^7.3.0",
     "react-side-effect": "^2.1.2",
     "react-smooth-dnd": "^0.11.1",
     "sass-loader": "^16.0.5",

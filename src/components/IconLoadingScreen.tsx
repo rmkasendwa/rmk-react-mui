@@ -17,7 +17,6 @@ import clsx from 'clsx';
 import { omit } from 'lodash';
 import { singular } from 'pluralize';
 import { FC, ReactNode, forwardRef } from 'react';
-import { Link } from 'react-router-dom';
 
 import ErrorAlert from './ErrorAlert';
 
@@ -215,12 +214,7 @@ export const IconLoadingScreen = forwardRef<any, IconLoadingScreenProps>(
                   >
                     {noRecordsStatement}
                   </Typography>
-                  <Button
-                    variant="contained"
-                    component={Link}
-                    to={pathToAddNew}
-                    size="small"
-                  >
+                  <Button variant="contained" href={pathToAddNew} size="small">
                     {addNewButtonLabel}
                   </Button>
                 </>

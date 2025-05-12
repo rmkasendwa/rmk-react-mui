@@ -2,8 +2,7 @@ import { Meta, StoryFn } from '@storybook/react';
 import { addSeconds } from 'date-fns';
 import { LoremIpsum } from 'lorem-ipsum';
 import randomEmail from 'random-email';
-import React, { forwardRef } from 'react';
-import { Link as RouterLink } from 'react-router-dom';
+import React from 'react';
 import { names, uniqueNamesGenerator } from 'unique-names-generator';
 
 import NotificationsList, {
@@ -73,14 +72,7 @@ const sampleNotifications: Notification[] = [
           };
         }
       })(),
-      component: forwardRef<HTMLAnchorElement, any>(function ParentLink(
-        linkProps,
-        ref
-      ) {
-        return (
-          <RouterLink ref={ref} to={INDEX_PAGE_ROUTE_PATH} {...linkProps} />
-        );
-      }),
+      href: INDEX_PAGE_ROUTE_PATH,
     };
   });
 

@@ -15,7 +15,6 @@ import clsx from 'clsx';
 import { omit } from 'lodash';
 import { forwardRef, useEffect, useRef, useState } from 'react';
 import { mergeRefs } from 'react-merge-refs';
-import { Link as RouterLink } from 'react-router-dom';
 
 import {
   CacheableDataFinderOptions,
@@ -210,8 +209,7 @@ export const CountCard = forwardRef<HTMLDivElement, CountCardProps>(
               <Link
                 color="primary"
                 {...CountPropsRest}
-                component={RouterLink}
-                to={pathToViewCountedRecords}
+                href={pathToViewCountedRecords}
                 underline="none"
                 noWrap
                 align="center"

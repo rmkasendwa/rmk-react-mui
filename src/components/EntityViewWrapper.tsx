@@ -10,7 +10,6 @@ import {
 } from '@mui/material';
 import clsx from 'clsx';
 import { forwardRef } from 'react';
-import { Link as RouterLink } from 'react-router-dom';
 
 import FixedHeaderContentArea, {
   FixedHeaderContentAreaProps,
@@ -101,13 +100,7 @@ export const EntityViewWrapper = forwardRef<
                 type: 'icon-button',
                 icon: <EditIcon />,
                 label: 'Edit',
-                component: forwardRef<HTMLAnchorElement, any>(
-                  function ParentLink(linkProps, ref) {
-                    return (
-                      <RouterLink ref={ref} to={pathToEdit} {...linkProps} />
-                    );
-                  }
-                ),
+                href: pathToEdit,
               },
             ];
           }

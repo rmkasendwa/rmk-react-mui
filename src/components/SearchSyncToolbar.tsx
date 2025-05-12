@@ -133,6 +133,7 @@ export type IconButtonTool = Partial<Omit<IconButtonProps, 'title' | 'type'>> &
     title?: ReactNode;
     ref?: RefObject<HTMLButtonElement | null>;
     popupElement?: ReactNode;
+    href?: string;
   };
 
 export interface ElementTool extends BaseToolOptions {
