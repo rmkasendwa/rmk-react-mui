@@ -41,7 +41,6 @@ import {
   useRef,
 } from 'react';
 import { mergeRefs } from 'react-merge-refs';
-import { Link as RouterLink, useLocation, useNavigate } from 'react-router-dom';
 import { ObjectShape } from 'yup';
 
 import { useAuth } from '../../contexts/AuthContext';
@@ -439,7 +438,6 @@ export interface RecordsExplorerProps<
   recordDeletor?: (record: RecordRow) => any;
   initialValues?: InitialValues;
   editValidationSchema?: any | (() => any);
-  defaultPath?: string;
   getTableDataReloadFunction?: (reloadFunction: () => void) => void;
   getCreateFunction?: (createFunction: () => void) => void;
   getPathToAddNewRecord?: (pathToAddNewRecord: string) => void;
@@ -455,8 +453,6 @@ export interface RecordsExplorerProps<
 
   // View Path
   templatePathToView?: string;
-  pathToView?: string;
-  getPathToView?: (record: RecordRow) => string;
   getViewFormTitle?: (record: RecordRow) => ReactNode;
   getViewFormTools?: (record: RecordRow) => ReactNode[];
   getEditFormTitle?: (record: RecordRow) => ReactNode;
@@ -547,7 +543,6 @@ const BaseRecordsExplorer = <
     filterBy: filterByProp,
     views,
     selectedView: viewProp,
-    pathToAddNew,
     permissionToAddNew,
     hideAddNewButtonOnNoFilteredData = false,
     children,
@@ -573,7 +568,6 @@ const BaseRecordsExplorer = <
     ViewModalFormProps = {},
     description,
     autoSync = true,
-    defaultPath,
     recordDetailsFinder,
     recordEditor,
     editableFields,
@@ -591,8 +585,6 @@ const BaseRecordsExplorer = <
     getRecordTools,
     recordCreateSuccessMessage,
     recordEditSuccessMessage,
-    pathToView,
-    getPathToView,
     searchTerm: searchTermProp,
     isSearchable: isSearchableProp = true,
     controlledSearchTerm,
@@ -722,28 +714,8 @@ const BaseRecordsExplorer = <
   const ListViewPropsRef = useRef(ListViewProps);
   ListViewPropsRef.current = ListViewProps;
 
-  const viewFunctionRef = useRef((record: RecordRow) => {
-    const { id } = record;
-    const pathToViewRecord = (() => {
-      if (pathToView) {
-        return pathToView;
-      }
-      if (getPathToView) {
-        return getPathToView(record);
-      }
-      return addSearchParamsToPath(pathname, {
-        selectedRecord: id,
-      });
-    })();
-    navigate(pathToViewRecord);
-  });
-  useEffect(() => {
-    getViewFunctionRef.current?.(viewFunctionRef.current);
-  }, []);
   //#endregion
 
-  const navigate = useNavigate();
-  const { pathname } = useLocation();
   const { palette, breakpoints } = useTheme();
   const isSmallScreenSize = useMediaQuery(breakpoints.down('sm'));
 
@@ -854,9 +826,7 @@ const BaseRecordsExplorer = <
     }
   }, [stringifiedSearchParams]);
 
-  const createNewRecord = Boolean(
-    searchParamCreateNewRecord || (pathToAddNew && pathname === pathToAddNew)
-  );
+  const createNewRecord = Boolean(searchParamCreateNewRecord);
 
   const selectedViewType = (() => {
     if (searchParamView) {
@@ -1241,30 +1211,6 @@ const BaseRecordsExplorer = <
     }, [filteredData, selectedGroupParams]) || groupedDataProp;
   //#endregion
 
-  const pathToAddNewRecord = (() => {
-    if (pathToAddNew) {
-      return pathToAddNew;
-    }
-    if (recordCreator) {
-      return addSearchParamsToPath(pathname, {
-        createNewRecord: true,
-      });
-    }
-  })();
-
-  useEffect(() => {
-    getCreateFunctionRef.current?.(() => {
-      if (pathToAddNewRecord) {
-        navigate(pathToAddNewRecord);
-      }
-    });
-  }, [navigate, pathToAddNewRecord]);
-
-  useEffect(() => {
-    pathToAddNewRecord &&
-      getPathToAddNewRecordRef.current?.(pathToAddNewRecord);
-  }, [pathToAddNewRecord]);
-
   const resetToDefaultView = () => {
     setSearchParams(
       {
@@ -1521,24 +1467,10 @@ const BaseRecordsExplorer = <
 
   const editFunctionRef = useRef((record: RecordRow) => {
     resetSelectedRecordState();
-    if (pathToEdit || getPathToEdit) {
-      navigate(
-        (() => {
-          if (pathToEdit) {
-            return pathToEdit;
-          }
-          if (getPathToEdit) {
-            return getPathToEdit(record);
-          }
-          return pathname;
-        })()
-      );
-    } else {
-      setSearchParams({
-        selectedRecord: record.id,
-        editRecord: true,
-      });
-    }
+    setSearchParams({
+      selectedRecord: record.id,
+      editRecord: true,
+    });
   });
 
   const deleteFunctionRef = useRef((record: RecordRow) => {
@@ -1857,13 +1789,7 @@ const BaseRecordsExplorer = <
                   getEllipsisMenuToolProps,
                 };
               })(),
-              onClickRow:
-                onClickRow ??
-                (() => {
-                  if (editorForm || getPathToView) {
-                    return viewFunctionRef.current;
-                  }
-                })(),
+              onClickRow,
             };
             const tableControlProps: Partial<typeof viewProps> = {
               sortable: true,
@@ -1983,14 +1909,7 @@ const BaseRecordsExplorer = <
                 }
                 jumpToNextUnitTimeScaleFunctionRef={jumpToNextUnitTimeScaleRef}
                 showToolBar={!mergeTools}
-                onClickRow={
-                  onClickRow ??
-                  (() => {
-                    if (editorForm || getPathToView) {
-                      return viewFunctionRef.current;
-                    }
-                  })()
-                }
+                onClickRow={onClickRow}
               />
             );
           }
@@ -2178,7 +2097,6 @@ const BaseRecordsExplorer = <
   }
 
   if (
-    pathToAddNewRecord &&
     (!hideAddNewButtonOnNoFilteredData || filteredData.length > 0) &&
     (!permissionToAddNew || loggedInUserHasPermission(permissionToAddNew))
   ) {
@@ -2189,12 +2107,6 @@ const BaseRecordsExplorer = <
           type: 'icon-button',
           label: addNewButtonLabel,
           alwaysShowOn: 'All Screens',
-          ...(() => {
-            return {
-              component: RouterLink,
-              to: pathToAddNewRecord,
-            };
-          })(),
           sx: {
             '&,&:hover': {
               bgcolor: palette.primary.main,
@@ -2210,12 +2122,6 @@ const BaseRecordsExplorer = <
         label: addNewButtonLabel,
         size: 'small',
         variant: 'contained',
-        ...(() => {
-          return {
-            component: RouterLink,
-            to: pathToAddNewRecord,
-          };
-        })(),
       };
     }
   }
@@ -2350,17 +2256,6 @@ const BaseRecordsExplorer = <
                   }
                 }
                 resetCreation();
-                if (defaultPath) {
-                  navigate(
-                    addSearchParamsToPath(defaultPath, {
-                      createNewRecord: null,
-                    })
-                  );
-                } else {
-                  setSearchParams({
-                    createNewRecord: null,
-                  });
-                }
               }}
               submitted={created}
             >
@@ -2452,19 +2347,6 @@ const BaseRecordsExplorer = <
                       }
                       resetUpdate();
                       resetSelectedRecordState();
-                      if (defaultPath) {
-                        navigate(
-                          addSearchParamsToPath(defaultPath, {
-                            selectedRecord: null,
-                            editRecord: null,
-                          })
-                        );
-                      } else {
-                        setSearchParams({
-                          selectedRecord: null,
-                          editRecord: null,
-                        });
-                      }
                     }}
                     submitted={updated}
                     editMode={Boolean(editRecord)}
@@ -2474,20 +2356,6 @@ const BaseRecordsExplorer = <
                       loading: loadingRecordDetails,
                       errorMessage: loadingRecordDetailsErrorMessage,
                       hasSyncTool: Boolean(recordDetailsFinder),
-                    }}
-                    onClickEdit={() => {
-                      const pathToEditRecord = (() => {
-                        if (pathToEdit) {
-                          return pathToEdit;
-                        }
-                        if (getPathToEdit && selectedRecord) {
-                          return getPathToEdit(selectedRecord);
-                        }
-                        return addSearchParamsToPath(pathname, {
-                          editRecord: true,
-                        });
-                      })();
-                      navigate(pathToEditRecord);
                     }}
                     viewModeTools={[
                       ...(viewModalProps.viewModeTools || []),
@@ -2654,7 +2522,6 @@ const BaseRecordsExplorer = <
                   addNewButtonLabel,
                 }}
                 {...IconLoadingScreenProps}
-                pathToAddNew={pathToAddNewRecord}
                 load={loadProp ?? load}
                 loading={loadingProp ?? loading}
                 errorMessage={errorMessageProp ?? errorMessage}
@@ -2716,10 +2583,8 @@ const BaseRecordsExplorer = <
           );
         }
       })()}
-      {pathToAddNewRecord && fillContentArea && isSmallScreenSize ? (
+      {fillContentArea && isSmallScreenSize ? (
         <Button
-          component={RouterLink}
-          to={pathToAddNewRecord}
           color="primary"
           variant="contained"
           sx={{
