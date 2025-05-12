@@ -2,7 +2,6 @@ import { CssBaseline } from '@mui/material';
 import { ThemeProvider } from '@mui/material/styles';
 import { Preview } from '@storybook/react';
 import React from 'react';
-import { BrowserRouter } from 'react-router-dom';
 import { useDarkMode } from 'storybook-dark-mode';
 
 import { APIProvider } from '../src/contexts/APIContext';
@@ -29,18 +28,16 @@ const preview: Preview = {
     (Story) => {
       const darkMode = useDarkMode();
       return (
-        <BrowserRouter>
-          <GlobalConfigurationProvider>
-            <APIProvider>
-              <ThemeProvider theme={darkMode ? darkTheme : lightTheme}>
-                <CssBaseline />
-                <MessagingProvider>
-                  <Story />
-                </MessagingProvider>
-              </ThemeProvider>
-            </APIProvider>
-          </GlobalConfigurationProvider>
-        </BrowserRouter>
+        <GlobalConfigurationProvider>
+          <APIProvider>
+            <ThemeProvider theme={darkMode ? darkTheme : lightTheme}>
+              <CssBaseline />
+              <MessagingProvider>
+                <Story />
+              </MessagingProvider>
+            </ThemeProvider>
+          </APIProvider>
+        </GlobalConfigurationProvider>
       );
     },
   ],

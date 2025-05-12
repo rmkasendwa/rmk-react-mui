@@ -12,7 +12,6 @@ import {
   ComponentsProps,
   ComponentsVariants,
   Divider,
-  Grid,
   Paper,
   PaperProps,
   unstable_composeClasses as composeClasses,
@@ -719,8 +718,7 @@ const BaseRecordsExplorer = <
   const descriptionElement = (() => {
     if (description) {
       return (
-        <Grid
-          item
+        <Box
           sx={{
             display: 'flex',
           }}
@@ -732,7 +730,7 @@ const BaseRecordsExplorer = <
               }}
             />
           </Tooltip>
-        </Grid>
+        </Box>
       );
     }
   })();
@@ -2163,16 +2161,16 @@ const BaseRecordsExplorer = <
             <ModalForm
               lockSubmitIfNoChange={false}
               title={
-                <Grid
-                  container
+                <Box
                   sx={{
+                    display: 'flex',
                     alignItems: 'center',
                     gap: 1,
                   }}
                 >
-                  <Grid item>Add New {recordLabelSingular}</Grid>
+                  <Box>Add New {recordLabelSingular}</Box>
                   {descriptionElement}
-                </Grid>
+                </Box>
               }
               submitButtonText={`Add ${recordLabelSingular}`}
               {...modalFormProps}
@@ -2242,14 +2240,14 @@ const BaseRecordsExplorer = <
                   <ModalForm
                     showEditButton={Boolean(recordEditor)}
                     title={
-                      <Grid
-                        container
+                      <Box
                         sx={{
+                          display: 'flex',
                           alignItems: 'center',
                           gap: 1,
                         }}
                       >
-                        <Grid item>
+                        <Box>
                           {(() => {
                             if (editRecord) {
                               if (getEditFormTitle && selectedRecord) {
@@ -2262,9 +2260,9 @@ const BaseRecordsExplorer = <
                             }
                             return recordLabelSingular;
                           })()}
-                        </Grid>
+                        </Box>
                         {descriptionElement}
-                      </Grid>
+                      </Box>
                     }
                     submitButtonText={`Update ${recordLabelSingular}`}
                     {...viewModalProps}
