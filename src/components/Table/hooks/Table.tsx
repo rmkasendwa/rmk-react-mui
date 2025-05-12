@@ -29,7 +29,7 @@ import { Ref, useEffect, useMemo, useRef, useState } from 'react';
 import { mergeRefs } from 'react-merge-refs';
 
 import { useGlobalConfiguration } from '../../../contexts/GlobalConfigurationContext';
-import { useReactRouterDOMSearchParams } from '../../../hooks/ReactRouterDOM';
+import { useParamStorage } from '../../../hooks/ParamStorage';
 import { SortDirection, SortOptions } from '../../../models/Sort';
 import { BLACK_COLOR } from '../../../theme';
 import { sort } from '../../../utils/Sort';
@@ -244,7 +244,7 @@ export const useTable = <DataRow extends BaseDataRow>(
   const {
     searchParams: { selectedColumns: searchParamSelectedColumns },
     setSearchParams,
-  } = useReactRouterDOMSearchParams({
+  } = useParamStorage({
     mode: 'json',
     spec: tableSearchParamValidationSpec,
     id,
@@ -1028,8 +1028,8 @@ export const useTable = <DataRow extends BaseDataRow>(
                       pr: columnSortable
                         ? 3
                         : index < displayingColumns.length - 1
-                          ? 1.5
-                          : 3,
+                        ? 1.5
+                        : 3,
                       py: 1.5,
                       ...(() => {
                         if (enableColumnDisplayToggle && isLastColumn) {

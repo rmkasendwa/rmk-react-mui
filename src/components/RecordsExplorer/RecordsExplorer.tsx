@@ -55,7 +55,7 @@ import {
   usePaginatedRecords,
   useUpdate,
 } from '../../hooks/DataFetching';
-import { ParamStorage } from '../../hooks/ReactRouterDOM';
+import { ParamStorage } from '../../hooks/ParamStorage';
 import { SelectedSortOption, SortBy, SortableFields } from '../../models/Sort';
 import { PermissionCode } from '../../models/Users';
 import { CrudMode, PaginatedResponseData } from '../../models/Utils';

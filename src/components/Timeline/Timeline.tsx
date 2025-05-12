@@ -44,7 +44,7 @@ import scrollIntoView from 'scroll-into-view-if-needed';
 import * as Yup from 'yup';
 
 import { useGlobalConfiguration } from '../../contexts/GlobalConfigurationContext';
-import { useReactRouterDOMSearchParams } from '../../hooks/ReactRouterDOM';
+import { useParamStorage } from '../../hooks/ParamStorage';
 import { DragToScrollProps, useDragToScroll } from '../../hooks/Scrolling';
 import { BLACK_COLOR } from '../../theme';
 import { BaseDataRow, Table, TableColumn, TableProps } from '../Table';
@@ -574,7 +574,7 @@ export const BaseTimeline = <RecordRow extends BaseDataRow>(
       customDateRange,
     },
     setSearchParams,
-  } = useReactRouterDOMSearchParams({
+  } = useParamStorage({
     mode: 'json',
     spec: {
       ...timelineSearchParamValidationSpec,

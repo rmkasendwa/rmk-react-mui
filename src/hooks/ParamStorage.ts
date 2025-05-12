@@ -39,7 +39,7 @@ export type AddSearchParamsToPath<SearchParams = BaseSearchParams> = (
   options?: AddSearchParamsToPathOptions
 ) => string;
 
-export function useReactRouterDOMSearchParams<
+export function useParamStorage<
   ValidationSpec extends ObjectShape,
   SearchParamsObject = InferType<
     ObjectSchema<TypeFromShape<ValidationSpec, unknown>>
@@ -65,7 +65,7 @@ export function useReactRouterDOMSearchParams<
   >;
 };
 
-export function useReactRouterDOMSearchParams(options: {
+export function useParamStorage(options: {
   mode?: 'string';
   paramStorage?: ParamStorage;
 }): {
@@ -74,13 +74,13 @@ export function useReactRouterDOMSearchParams(options: {
   addSearchParamsToPath: AddSearchParamsToPath;
 };
 
-export function useReactRouterDOMSearchParams(): {
+export function useParamStorage(): {
   searchParams: URLSearchParams;
   setSearchParams: SetSearchParams;
   addSearchParamsToPath: AddSearchParamsToPath;
 };
 
-export function useReactRouterDOMSearchParams<
+export function useParamStorage<
   ValidationSpec extends ObjectShape,
   SearchParamsObject = InferType<
     ObjectSchema<TypeFromShape<ValidationSpec, unknown>>
@@ -191,7 +191,7 @@ export function useReactRouterDOMSearchParams<
                     } catch (err: any) {
                       if (err.name === 'ValidationError') {
                         console.error(
-                          `useReactRouterDOMSearchParams: search param getter `,
+                          `useParamStorage: search param getter `,
                           err,
                           {
                             err,
@@ -370,7 +370,7 @@ export function useReactRouterDOMSearchParams<
                     } catch (err: any) {
                       if (err.name === 'ValidationError') {
                         console.error(
-                          `useReactRouterDOMSearchParams: search param getter `,
+                          `useParamStorage: search param getter `,
                           err,
                           {
                             err,
