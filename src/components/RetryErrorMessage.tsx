@@ -57,11 +57,7 @@ export const RetryErrorMessage: FC<RetryErrorMessageProps> = (inProps) => {
   })();
 
   return (
-    <Stack
-      sx={{
-        maxWidth: 400,
-      }}
-    >
+    <Stack>
       <Typography component="div" variant="inherit">
         {shortMessage}
         {retry && (
