@@ -103,6 +103,7 @@ export const ErrorAlert = forwardRef<HTMLDivElement, ErrorAlertProps>(
             whiteSpace: 'pre-wrap',
             [`& .${alertClasses.message}`]: {
               overflow: 'hidden',
+              flex: 1,
             },
           },
           sx as any,

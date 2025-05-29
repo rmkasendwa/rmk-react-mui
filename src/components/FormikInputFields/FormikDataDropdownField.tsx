@@ -68,8 +68,8 @@ export const formikDataDropdownFieldClasses: FormikDataDropdownFieldClasses =
     Object.keys(slots) as FormikDataDropdownFieldClassKey[]
   );
 
-export interface FormikDataDropdownFieldProps<Entity = any>
-  extends DataDropdownFieldProps<Entity> {}
+export type FormikDataDropdownFieldProps<Entity = any> =
+  DataDropdownFieldProps<Entity>;
 
 export const BaseFormikDataDropdownField = <Entity,>(
   inProps: FormikDataDropdownFieldProps<Entity>,
