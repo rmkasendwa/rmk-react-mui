@@ -26,7 +26,6 @@ import {
   useState,
 } from 'react';
 
-import { merge } from 'lodash';
 import { useLoadingContext } from '../../contexts/LoadingContext';
 import ErrorSkeleton from '../ErrorSkeleton';
 import FieldValueDisplay, {
@@ -340,15 +339,14 @@ export const TextField = forwardRef<HTMLDivElement, TextFieldProps>(
               }
               triggerChangeEvent(event.target.value);
             }}
-            slotProps={merge(
-              {
-                input: {
-                  startAdornment,
-                  endAdornment,
-                },
+            slotProps={{
+              ...slotProps,
+              input: {
+                startAdornment,
+                endAdornment,
+                ...slotProps?.input,
               },
-              slotProps
-            )}
+            }}
             sx={[
               {
                 ...(() => {

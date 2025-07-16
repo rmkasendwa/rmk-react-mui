@@ -26,7 +26,7 @@ import ClickAwayListener from '@mui/material/ClickAwayListener';
 import Grow from '@mui/material/Grow';
 import Popper from '@mui/material/Popper';
 import clsx from 'clsx';
-import { merge, omit } from 'lodash';
+import { omit } from 'lodash';
 import {
   ReactElement,
   Ref,
@@ -727,83 +727,79 @@ const BaseDataDropdownField = <Entity,>(
                 onChangeSearchTerm?.(event.target.value);
               }
             }}
-            slotProps={merge(
-              {
-                input: {
-                  endAdornment,
-                  ...(() => {
-                    const props: InputProps = {};
-                    if (selectedOptions.length > 0) {
-                      props.placeholder = '';
-                    }
-                    return props;
-                  })(),
-                  readOnly: !searchable || isSmallScreenSize,
-                  onClick: () => {
-                    if (!disabled) {
-                      if (multiline) {
-                        multilineSearchInputElement?.focus();
-                      }
-                      setOpen(true);
-                    }
-                  },
-                  ref: mergeRefs([anchorRef, observerRef]),
-                  sx: {
-                    ...(() => {
-                      if (multiline) {
-                        return {
-                          alignItems: 'start',
-                        };
-                      }
-                    })(),
-                    ...(() => {
-                      if (
-                        searchable &&
-                        showRichTextValue &&
-                        !focused &&
-                        (selectedOptionDisplayString.length > 0 ||
-                          placeholderOption)
-                      ) {
-                        return {
-                          [`&>.${inputBaseClasses.input}`]: {
-                            color: 'transparent',
-                            WebkitTextFillColor: 'transparent',
-                          },
-                        };
-                      }
-                    })(),
-                    ...(() => {
-                      if (multilineSearchMode) {
-                        return {
-                          [`&>.${inputBaseClasses.input}`]: {
-                            visibility: 'hidden',
-                          },
-                        };
-                      }
-                    })(),
-                  },
-                },
-                htmlInput: {
-                  ...slotProps?.htmlInput,
-                  ref: mergeRefs([
-                    setHtmlInputElement,
-                    (() => {
-                      if (
-                        slotProps?.htmlInput &&
-                        'ref' in slotProps?.htmlInput
-                      ) {
-                        return slotProps?.htmlInput?.ref;
-                      }
-                      return undefined;
-                    })(),
-                  ]),
-                },
-              },
-              omit(slotProps, [
+            slotProps={{
+              ...omit(slotProps, [
                 'paginatedDropdownOptionList',
                 'selectedOptionPillProps',
-              ])
-            )}
+              ]),
+              input: {
+                ...slotProps?.input,
+                endAdornment,
+                ...(() => {
+                  const props: InputProps = {};
+                  if (selectedOptions.length > 0) {
+                    props.placeholder = '';
+                  }
+                  return props;
+                })(),
+                readOnly: !searchable || isSmallScreenSize,
+                onClick: () => {
+                  if (!disabled) {
+                    if (multiline) {
+                      multilineSearchInputElement?.focus();
+                    }
+                    setOpen(true);
+                  }
+                },
+                ref: mergeRefs([anchorRef, observerRef]),
+                sx: {
+                  ...(() => {
+                    if (multiline) {
+                      return {
+                        alignItems: 'start',
+                      };
+                    }
+                  })(),
+                  ...(() => {
+                    if (
+                      searchable &&
+                      showRichTextValue &&
+                      !focused &&
+                      (selectedOptionDisplayString.length > 0 ||
+                        placeholderOption)
+                    ) {
+                      return {
+                        [`&>.${inputBaseClasses.input}`]: {
+                          color: 'transparent',
+                          WebkitTextFillColor: 'transparent',
+                        },
+                      };
+                    }
+                  })(),
+                  ...(() => {
+                    if (multilineSearchMode) {
+                      return {
+                        [`&>.${inputBaseClasses.input}`]: {
+                          visibility: 'hidden',
+                        },
+                      };
+                    }
+                  })(),
+                },
+              },
+              htmlInput: {
+                ...slotProps?.htmlInput,
+                ref: mergeRefs([
+                  setHtmlInputElement,
+                  (() => {
+                    if (slotProps?.htmlInput && 'ref' in slotProps?.htmlInput) {
+                      return slotProps?.htmlInput?.ref;
+                    }
+                    return undefined;
+                  })(),
+                ]),
+              },
+            }}
             value={(() => {
               if (multilineSearchMode) {
                 return selectedOptionDisplayString;

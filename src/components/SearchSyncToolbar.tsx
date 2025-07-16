@@ -23,7 +23,7 @@ import {
 import buttonClasses from '@mui/material/Button/buttonClasses';
 import Grid from '@mui/material/Grid';
 import clsx from 'clsx';
-import { merge, omit } from 'lodash';
+import { omit } from 'lodash';
 import {
   Children,
   Fragment,
@@ -849,18 +849,16 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                   onChangeSearchTerm,
                   searchVelocity,
                 }}
-                slotProps={merge(
-                  {
-                    input: {
-                      disableUnderline: true,
-                      autoFocus: Boolean(
-                        (!searchTerm || searchTerm.length <= 0) &&
-                          searchFieldOpen
-                      ),
-                    },
+                slotProps={{
+                  ...slotProps,
+                  input: {
+                    disableUnderline: true,
+                    autoFocus: Boolean(
+                      (!searchTerm || searchTerm.length <= 0) && searchFieldOpen
+                    ),
+                    ...slotProps?.input,
                   },
-                  slotProps
-                )}
+                }}
                 size="small"
               />
             );
@@ -966,17 +964,16 @@ export const SearchSyncToolbar = forwardRef<any, SearchSyncToolbarProps>(
                               variant="outlined"
                               fullWidth
                               {...SearchFieldPropsRest}
-                              slotProps={merge(
-                                {
-                                  input: {
-                                    autoFocus: Boolean(
-                                      (!searchTerm || searchTerm.length <= 0) &&
-                                        searchFieldOpen
-                                    ),
-                                  },
+                              slotProps={{
+                                ...slotProps,
+                                input: {
+                                  autoFocus: Boolean(
+                                    (!searchTerm || searchTerm.length <= 0) &&
+                                      searchFieldOpen
+                                  ),
                                 },
-                                slotProps
-                              )}
+                                ...slotProps?.input,
+                              }}
                               {...{
                                 searchTerm,
                                 onSearch,

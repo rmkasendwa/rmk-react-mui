@@ -20,7 +20,6 @@ import {
   useState,
 } from 'react';
 
-import { merge } from 'lodash';
 import FieldLabel, { FieldLabelProps } from './FieldLabel';
 import FieldValue, { FieldValueProps } from './FieldValue';
 
@@ -291,7 +290,7 @@ export const BaseFieldValueDisplay = <FieldValue extends ReactNode>(
       ref={ref}
       className={clsx(classes.root, className)}
       {...rest}
-      sx={merge(
+      sx={[
         {
           ...(() => {
             if (direction === 'row') {
@@ -312,9 +311,9 @@ export const BaseFieldValueDisplay = <FieldValue extends ReactNode>(
             }
           })(),
         },
-        components?.MuiFieldValueDisplay?.styleOverrides?.root,
-        sx
-      )}
+        components?.MuiFieldValueDisplay?.styleOverrides,
+        ...(Array.isArray(sx) ? sx : [sx]),
+      ]}
     >
       {labelNode}
       {descriptionNode}
