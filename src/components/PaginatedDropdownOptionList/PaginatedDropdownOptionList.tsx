@@ -632,6 +632,12 @@ const BasePaginatedDropdownOptionList = <Entity,>(
                   onAddNewOption?.({
                     label: newOptionLabel,
                   });
+                  const newOption = {
+                    label: newOptionLabel,
+                    value: newOptionLabel,
+                  };
+                  triggerChangeEvent(newOption);
+                  onSelectOption?.(newOption);
                 }}
                 height={optionHeight}
                 icon={<AddIcon />}
