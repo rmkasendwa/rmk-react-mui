@@ -85,6 +85,14 @@ export interface PhoneNumberFieldValueProps
    * @default PhoneNumberFormat.INTERNATIONAL
    */
   format?: PhoneNumberFormat;
+
+  /**
+   * If true, the phone number will be rendered as a clickable link.
+   * If false, it will be rendered as plain text.
+   *
+   * @default true
+   */
+  isLink?: boolean;
 }
 
 export const PhoneNumberFieldValue = forwardRef<
@@ -101,6 +109,7 @@ export const PhoneNumberFieldValue = forwardRef<
     countryCode,
     slotProps,
     format = PhoneNumberFormat.INTERNATIONAL,
+    isLink = true,
     ...rest
   } = props;
 
@@ -121,6 +130,29 @@ export const PhoneNumberFieldValue = forwardRef<
   const parsedPhoneNumber = isValidPhoneNumber(phoneNumber, countryCode);
 
   if (parsedPhoneNumber) {
+    const fieldValueElement = (
+      <CountryFieldValue
+        ref={ref}
+        {...rest}
+        className={clsx(classes.root)}
+        slotProps={slotProps}
+        countryCode={
+          PhoneNumberUtil.getRegionCodeForCountryCode(
+            parsedPhoneNumber.getCountryCode()!
+          ) as CountryCode
+        }
+        countryLabel={systemStandardPhoneNumberFormat({
+          phoneNumberString: phoneNumber,
+          regionalCode: countryCode,
+          format,
+        })}
+      />
+    );
+
+    if (!isLink) {
+      return fieldValueElement;
+    }
+
     return (
       <Link
         underline="none"
@@ -130,22 +162,7 @@ export const PhoneNumberFieldValue = forwardRef<
         href={`tel://${phoneNumber.replace(/\s/g, '')}`}
         sx={{ display: 'block', maxWidth: '100%', ...LinkPropsSx }}
       >
-        <CountryFieldValue
-          ref={ref}
-          {...rest}
-          className={clsx(classes.root)}
-          slotProps={slotProps}
-          countryCode={
-            PhoneNumberUtil.getRegionCodeForCountryCode(
-              parsedPhoneNumber.getCountryCode()!
-            ) as CountryCode
-          }
-          countryLabel={systemStandardPhoneNumberFormat({
-            phoneNumberString: phoneNumber,
-            regionalCode: countryCode,
-            format,
-          })}
-        />
+        {fieldValueElement}
       </Link>
     );
   }
