@@ -118,6 +118,7 @@ export interface DataDropdownFieldProps<Entity = any>
         | 'showNoOptionsFoundMessage'
         | 'multiple'
         | 'enableAddNewOption'
+        | 'onAddNewOption'
         | 'filterOptionBySearchTerm'
       >
     > {
@@ -177,6 +178,7 @@ const BaseDataDropdownField = <Entity,>(
     onChangeSelectedOption,
     multiple: multipleProp,
     enableAddNewOption = false,
+    onAddNewOption,
     showNoOptionsFoundMessage,
     filterOptionBySearchTerm,
     multiline,
@@ -906,6 +908,7 @@ const BaseDataDropdownField = <Entity,>(
               showNoOptionsFoundMessage,
               sortOptions,
               filterOptionBySearchTerm,
+              onAddNewOption,
             }}
             keyboardFocusElement={htmlInputElement}
             onChangeSearchTerm={(searchTerm) => {

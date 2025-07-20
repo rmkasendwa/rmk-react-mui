@@ -155,6 +155,7 @@ export interface PaginatedDropdownOptionListProps<Entity = any>
   revalidationKey?: string;
   noOptionsText?: ReactNode;
   enableAddNewOption?: boolean;
+  onAddNewOption?: (newOption: { label: string }) => void;
   newOptionLabel?: string;
   footerContent?: ReactNode;
   filterOptionBySearchTerm?: (
@@ -201,6 +202,7 @@ const BasePaginatedDropdownOptionList = <Entity,>(
     revalidationKey,
     noOptionsText = 'No options found',
     enableAddNewOption,
+    onAddNewOption,
     newOptionLabel,
     footerContent,
     filterOptionBySearchTerm,
@@ -627,12 +629,9 @@ const BasePaginatedDropdownOptionList = <Entity,>(
             dataElements.push(
               <DropdownOption
                 onClick={() => {
-                  const newOption = {
+                  onAddNewOption?.({
                     label: newOptionLabel,
-                    value: newOptionLabel,
-                  };
-                  triggerChangeEvent(newOption);
-                  onSelectOption?.(newOption);
+                  });
                 }}
                 height={optionHeight}
                 icon={<AddIcon />}

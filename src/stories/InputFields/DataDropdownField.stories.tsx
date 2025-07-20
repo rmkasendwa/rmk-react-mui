@@ -223,3 +223,15 @@ WithCustomDropdownOptionFilter.args = {
     );
   },
 } as DataDropdownFieldProps;
+
+export const WithEnableAddNewOption = Template.bind({});
+WithEnableAddNewOption.args = {
+  label: 'Dropdown With Options',
+  required: true,
+  options: ['One', 'Two', 'Three'].map((value) => ({ label: value, value })),
+  enableAddNewOption: true,
+  newOptionLabel: 'Add New Option',
+  onAddNewOption: (newOption) => {
+    console.log('New option added:', newOption);
+  },
+} as DataDropdownFieldProps;
